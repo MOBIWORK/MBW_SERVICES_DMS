@@ -1,0 +1,18 @@
+include MANIFEST.in
+include requirements.txt
+include *.json
+include *.md
+include *.py
+include *.txt
+recursive-include mbw_dms *.css
+recursive-include mbw_dms *.csv
+recursive-include mbw_dms *.html
+recursive-include mbw_dms *.ico
+recursive-include mbw_dms *.js
+recursive-include mbw_dms *.json
+recursive-include mbw_dms *.md
+recursive-include mbw_dms *.png
+recursive-include mbw_dms *.py
+recursive-include mbw_dms *.svg
+recursive-include mbw_dms *.txt
+recursive-exclude mbw_dms *.pyc
