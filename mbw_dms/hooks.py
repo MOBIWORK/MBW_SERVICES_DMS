@@ -215,3 +215,10 @@ app_license = "MIT"
 # auth_hooks = [
 #	"mbw_dms.auth.validate"
 # ]
+
+fixtures = [
+    {
+        "doctype": "Custom Field",
+        "filters": [["module", "in", ("MBW DMS")]]
+    },
+]
