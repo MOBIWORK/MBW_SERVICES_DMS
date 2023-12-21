@@ -35,10 +35,11 @@ def list_product(**kwargs):
             my_filter["item_group"] = ['like', f'%{item_group}%']
         items = frappe.db.get_list("Item",
                                    filters= my_filter,
-                                   fields=["name", "item_code", "item_name", "item_group", "stock_uom", "description", "brand", "country_of_origin", "image", "custom_industry"])
+                                   fields=["name", "item_code", "item_name", "item_group", "stock_uom","min_order_qty", "description", "brand", "country_of_origin", "image", "custom_industry"])
+
         for item in items:
-            print("abc", item.get('name'))
             item['detail'] = frappe.db.get_value('Item Price', {"item_code" : item.get('item_code')}, ['uom', 'price_list_rate', 'valid_from', 'currency'],as_dict=1)
+            item['unit'] = frappe.db.get_all("UOM Conversion Detail", {"parent" : item.get('name')}, ['uom', 'conversion_factor'])
         return gen_response(200, 'Thành công', items)
     except Exception as e:
         return exception_handel(e)
