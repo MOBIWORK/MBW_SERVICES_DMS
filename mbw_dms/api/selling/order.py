@@ -12,7 +12,7 @@ from mbw_dms.config_translate import i18n
 
 
 @frappe.whitelist(methods='GET')
-def get_list_order(**filters):
+def get_list_sales_order(**filters):
     try:
         status = filters.get('status') if filters.get('status') else False
         from_date = float(filters.get('from_date')) if filters.get('from_date') else False
