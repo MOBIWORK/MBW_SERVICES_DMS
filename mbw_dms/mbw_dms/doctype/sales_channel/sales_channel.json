@@ -1,0 +1,118 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2024-01-05 16:39:18.524262",
+ "default_view": "List",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "tb_1",
+  "channel_code",
+  "team_sale",
+  "travel_date",
+  "cb_1",
+  "channel_name",
+  "employee",
+  "status",
+  "tb_2",
+  "customers",
+  "is_deleted"
+ ],
+ "fields": [
+  {
+   "fieldname": "tb_1",
+   "fieldtype": "Tab Break",
+   "label": "Th\u00f4ng tin chung"
+  },
+  {
+   "fieldname": "channel_code",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "M\u00e3 tuy\u1ebfn",
+   "read_only_depends_on": "eval:doc.is_group",
+   "reqd": 1
+  },
+  {
+   "fieldname": "team_sale",
+   "fieldtype": "Link",
+   "label": "Team sale",
+   "options": "Sales Person"
+  },
+  {
+   "fieldname": "travel_date",
+   "fieldtype": "Date",
+   "label": "Ng\u00e0y \u0111i tuy\u1ebfn"
+  },
+  {
+   "fieldname": "cb_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "channel_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "T\u00ean tuy\u1ebfn",
+   "reqd": 1
+  },
+  {
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Nh\u00e2n vi\u00ean",
+   "options": "Employee",
+   "reqd": 1
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Tr\u1ea1ng th\u00e1i",
+   "options": "Active\nLock",
+   "reqd": 1
+  },
+  {
+   "fieldname": "tb_2",
+   "fieldtype": "Tab Break",
+   "label": "Kh\u00e1ch h\u00e0ng"
+  },
+  {
+   "fieldname": "customers",
+   "fieldtype": "Table",
+   "label": "Danh s\u00e1ch kh\u00e1ch h\u00e0ng",
+   "options": "Customer Channel",
+   "reqd": 1
+  },
+  {
+   "default": "False",
+   "fieldname": "is_deleted",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Tr\u1ea1ng th\u00e1i x\u00f3a"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2024-01-05 16:39:18.524262",
+ "modified_by": "Administrator",
+ "module": "MBW DMS",
+ "name": "Sales Channel",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

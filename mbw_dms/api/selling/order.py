@@ -34,7 +34,6 @@ def get_list_sales_order(**filters):
                                        start=page_size*(page_number-1), page_length=page_size,
                                         )
         for sale_order in sale_orders :
-            print("sale_order",sale_order)
             sale_order['po_date'] = datetime.combine(sale_order['po_date'], datetime.min.time()).timestamp()
             sale_order['delivery_date'] = datetime.combine(sale_order['delivery_date'], datetime.min.time()).timestamp()
             sale_order['custom_id'] = frappe.db.get_value("Customer",filters={'name': sale_order['customer']},fieldname=['customer_id'])
@@ -47,5 +46,24 @@ def get_list_sales_order(**filters):
             "page_number":page_number
         })
         return 
+    except Exception as e: 
+        exception_handel(e)
+
+
+@frappe.whitelist(methods='GET')
+def get_sale_order(name):
+    try:
+        detail_sales_order = dict(frappe.get_doc("Sales Order",name))
+        field_detail_sales = ['customer','customer_name','po_no',"address_display",'total','total_taxes_and_charges']
+        field_detail_items = ['customer','customer_name','po_no',"address_display"]
+        info_sales_order = {}
+        if detail_sales_order: 
+            item_list = detail_sales_order.get('items')
+            discount = detail_sales_order.get('payment_schedule')
+            for key,value in detail_sales_order.items():
+                if key in field_detail_sales:
+                    info_sales_order[key] = value
+        gen_response(200,'',frappe.get_doc("Sales Order",name))
+        return
     except Exception as e: 
         exception_handel(e)
