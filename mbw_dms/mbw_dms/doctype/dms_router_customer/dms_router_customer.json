@@ -61,7 +61,7 @@
  "modified": "2024-01-05 16:51:35.305150",
  "modified_by": "Administrator",
  "module": "MBW DMS",
- "name": "Customer Channel",
+ "name": "DMS Router Customer",
  "owner": "Administrator",
  "permissions": [],
  "sort_field": "modified",

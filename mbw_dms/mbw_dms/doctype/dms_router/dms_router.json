@@ -65,7 +65,7 @@
   },
   {
    "fieldname": "status",
-   "fieldtype": "Data",
+   "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Tr\u1ea1ng th\u00e1i",
    "options": "Active\nLock",
@@ -80,7 +80,7 @@
    "fieldname": "customers",
    "fieldtype": "Table",
    "label": "Danh s\u00e1ch kh\u00e1ch h\u00e0ng",
-   "options": "Customer Channel",
+   "options": "DMS Router Customer",
    "reqd": 1
   },
   {
@@ -88,15 +88,16 @@
    "fieldname": "is_deleted",
    "fieldtype": "Check",
    "hidden": 1,
-   "label": "Tr\u1ea1ng th\u00e1i x\u00f3a"
+   "label": "Tr\u1ea1ng th\u00e1i x\u00f3a",
+   "reqd": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-01-05 16:39:18.524262",
+ "modified": "2024-01-06 09:53:21.802559",
  "modified_by": "Administrator",
  "module": "MBW DMS",
- "name": "Sales Channel",
+ "name": "DMS Router",
  "owner": "Administrator",
  "permissions": [
   {
@@ -108,6 +109,46 @@
    "read": 1,
    "report": 1,
    "role": "System Manager",
+   "select": 1,
+   "set_user_permissions": 1,
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Employee MBW",
+   "set_user_permissions": 1,
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts User",
+   "set_user_permissions": 1,
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "ADMIN MBW",
    "share": 1,
    "write": 1
   }

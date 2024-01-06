@@ -18,7 +18,7 @@ def get_list_sales_order(**filters):
         from_date = float(filters.get('from_date')) if filters.get('from_date') else False
         to_date = float(filters.get('to_date') )if filters.get('to_date') else False
         page_size =  float(filters.get('page_size')) if filters.get('page_size') else 20
-        page_number = float(filters.get('page_number') )if filters.get('page_number') or filters.get('page_number') <= 0 else 1
+        page_number = float(filters.get('page_number') )if filters.get('page_number') and filters.get('page_number') <= 0 else 1
         if not from_date or not to_date:
             gen_response(406,"from_date or to_date not found",{})
             return
@@ -54,16 +54,16 @@ def get_list_sales_order(**filters):
 def get_sale_order(name):
     try:
         detail_sales_order = dict(frappe.get_doc("Sales Order",name))
-        field_detail_sales = ['customer','customer_name','po_no',"address_display",'total','total_taxes_and_charges']
-        field_detail_items = ['customer','customer_name','po_no',"address_display"]
-        info_sales_order = {}
-        if detail_sales_order: 
-            item_list = detail_sales_order.get('items')
-            discount = detail_sales_order.get('payment_schedule')
-            for key,value in detail_sales_order.items():
-                if key in field_detail_sales:
-                    info_sales_order[key] = value
-        gen_response(200,'',frappe.get_doc("Sales Order",name))
+        # field_detail_sales = ['customer','customer_name','po_no',"address_display",'total','total_taxes_and_charges']
+        # field_detail_items = ['customer','customer_name','po_no',"address_display"]
+        # info_sales_order = {}
+        # if detail_sales_order: 
+        #     item_list = detail_sales_order.get('items')
+        #     discount = detail_sales_order.get('payment_schedule')
+        #     for key,value in detail_sales_order.items():
+        #         if key in field_detail_sales:
+        #             info_sales_order[key] = value
+        gen_response(200,'',detail_sales_order)
         return
     except Exception as e: 
         exception_handel(e)

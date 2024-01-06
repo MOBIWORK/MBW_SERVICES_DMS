@@ -5,5 +5,5 @@
 from frappe.tests.utils import FrappeTestCase
 
 
-class TestSalesChannel(FrappeTestCase):
+class TestDMSRouter(FrappeTestCase):
 	pass
