@@ -1,15 +1,16 @@
 import {AuthProvider} from '@/auth'
-// import Router from './routes/sections'
+import { useFrappeGetDocList } from 'frappe-react-sdk';
+import Router from './routes/sections'
 import { useEffect } from 'react'
 function App() {
-  useEffect(()=>{
-    (async() => {
-    })()
-  },[])
+  const { data, error, isValidating, mutate } = useFrappeGetDocList("DMS Router")
+  if(data) {
+    console.log("data",data);
+    
+  }
   return (
     <AuthProvider>
-      Conment {window.csrf_token}
-      {/* <Router /> */}
+      <Router />
     </AuthProvider>
   )
 }

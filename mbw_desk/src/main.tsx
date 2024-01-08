@@ -6,13 +6,14 @@ import { HelmetProvider } from 'react-helmet-async';
 import ReactDOM from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
+import { BASE_URL } from './routes/path.ts';
 
 const root = ReactDOM.createRoot(document.getElementById('root')!)
 
 root.render(
   <HelmetProvider>
-    <FrappeProvider>
-    <BrowserRouter>
+    <FrappeProvider socketPort={import.meta.env.VITE_SOCKET_PORT ?? ''}>
+    <BrowserRouter basename={BASE_URL}>
       <Suspense>
         <App />
       </Suspense>

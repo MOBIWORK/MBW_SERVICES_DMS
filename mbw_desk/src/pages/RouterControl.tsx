@@ -9,7 +9,7 @@ export default function Page() {
   return (
     <>
       <Helmet>
-        <title> Dashboard: Five</title>
+        <title> RouterControll</title>
       </Helmet>
 
       <RouterControl />
