@@ -1,9 +1,18 @@
-
+import { useFrappeAuth } from 'frappe-react-sdk';
 
 export default function useCookie() {
-    let {sid} = decodeURIComponent(document.cookie)
-    console.log('isd',sid,document.cookie);
+    const {
+        currentUser,
+        isValidating,
+        isLoading,
+        login,
+        logout,
+        error,
+        updateCurrentUser,
+        getUserCookie,
+      } = useFrappeAuth();
+    return {
+        isLoading,currentUser
+    }
     
-    if(sid) return true
-    return false
 }

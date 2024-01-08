@@ -1,10 +1,14 @@
 import {AuthProvider} from '@/auth'
-import Router from './routes/sections'
+// import Router from './routes/sections'
+import { useEffect } from 'react'
 function App() {
-
+  useEffect(()=>{
+    (async() => {
+    })()
+  },[])
   return (
     <AuthProvider>
-      Conment
+      Conment {window.csrf_token}
       {/* <Router /> */}
     </AuthProvider>
   )
