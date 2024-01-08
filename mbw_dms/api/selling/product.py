@@ -44,12 +44,17 @@ def list_product(**kwargs):
                                    fields=["name", "item_code", "item_name", "item_group", "stock_uom","min_order_qty", "description", "brand", "country_of_origin", "image", "custom_industry"],
                                    start=page_size*(page_number-1), 
                                    page_length=page_size)
-
+        count = len( frappe.db.get_list("Item",filters= my_filter,))
         for item in items:
             item['image'] = validate_image(item.get("image"))
             item['detail'] = frappe.db.get_value('Item Price', {"item_code" : item.get('item_code')}, ['uom', 'price_list_rate', 'valid_from', 'currency'],as_dict=1)
             item['unit'] = frappe.db.get_all("UOM Conversion Detail", {"parent" : item.get('name')}, ['uom', 'conversion_factor'])
-        return gen_response(200, 'Thành công', items)
+        return gen_response(200, 'Thành công', {
+            "data": items,
+            "total": count,
+            "page_size": page_size,
+            "page_number": page_number
+        })
     except Exception as e:
         return exception_handel(e)
     
