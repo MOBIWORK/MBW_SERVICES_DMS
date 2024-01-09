@@ -71,7 +71,7 @@ def list_brand():
 @frappe.whitelist(methods="GET")
 def list_industry():
     try:
-        industry = frappe.db.get_list('Industry Type', fields=["name", "industry"])
+        industry = frappe.db.get_list('Industry Type', fields=["name", "industry"],ignore_permissions=True)
         gen_response(200, "Thành công", industry)
     except Exception as e:
         return exception_handel(e)
