@@ -7,6 +7,13 @@ app_description = "API MBW DMS"
 app_email = "dev@mbw.vn"
 app_license = "MIT"
 
+website_route_rules = [
+	{
+		"from_route": "/mbw_desk/<path:app_path>",
+		"to_route": "mbw_desk",
+	},
+]
+
 # Includes in <head>
 # ------------------
 
