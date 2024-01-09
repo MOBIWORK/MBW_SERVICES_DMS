@@ -12,6 +12,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "antd": "^5.12.8",
     "frappe-react-sdk": "^1.3.10",
     "node-sass": "^9.0.0",
     "nprogress": "^0.2.0",

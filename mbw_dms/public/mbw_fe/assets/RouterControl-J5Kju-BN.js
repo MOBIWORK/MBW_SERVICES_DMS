@@ -1,1 +1,0 @@
-import{j as r,L as t,H as e}from"./index-MGEYVxrT.js";function n(){return r.jsxs(r.Fragment,{children:["RouterControl",r.jsx(t,{to:"/router-control",children:"Click"})]})}function l(){return r.jsxs(r.Fragment,{children:[r.jsx(e,{children:r.jsx("title",{children:" RouterControll"})}),r.jsx(n,{})]})}export{l as default};
