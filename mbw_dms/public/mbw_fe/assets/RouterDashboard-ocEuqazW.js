@@ -1,0 +1,1 @@
+import{j as r,H as e}from"./index-CmUgR7-0.js";function t(){return r.jsx("div",{children:"RouterDashboard"})}function o(){return r.jsxs(r.Fragment,{children:[r.jsx(e,{children:r.jsx("title",{children:" RouterControll"})}),r.jsx(t,{})]})}export{o as default};
