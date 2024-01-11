@@ -13,3 +13,4 @@ export default function RowCustom({children,className}:Props) {
     <Row gutter={32} className={"mt-3 "+ className}>{children}</Row>
   )
 }
+

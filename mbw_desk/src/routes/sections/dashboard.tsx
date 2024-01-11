@@ -3,7 +3,7 @@ import { ROOTS } from "../path";
 import React from "react";
 import { Outlet } from "react-router-dom";
 import DashboardLayout from '@/layouts/dashboard'
-import LoadingScreen from '@/components/loading-screen'
+import {LoadingScreen} from '@/components'
 
 
 const RouterControl = lazy(()=> import('@/pages/RouterControl'))

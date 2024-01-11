@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import RowCustom from "./styled";
 import { Button, Col, Input, Radio, Row, Select } from "antd";
 import { FormItemCustom } from "../../components/form-item";
@@ -6,8 +6,12 @@ import { addCustomerOption } from "./data";
 import { List, ThunderIcon } from "../../icons";
 import { SearchOutlined } from "@ant-design/icons";
 import { Map } from "../../icons/map";
+import CustomerList from "./customer-list";
+import CustomerMap from "./customer-map";
+import { CustomerType } from "./type";
 export default function Customer() {
-  
+  const [viewMode,setViewMode] = useState('list')
+  const [customerList,setCustomerList] = useState<CustomerType[] | false>(false)
   return (
     <>
       <RowCustom className={"justify-between"}>
@@ -20,7 +24,7 @@ export default function Customer() {
             </Col>
             <Col span={7}>
               <Button
-                className="w-full flex items-center text-[#1677ff] "
+                className="w-full flex items-center text-[#1677ff] bg-[#1877f214] "
                 icon={<ThunderIcon />}
               >
                 Tối ưu tuyến
@@ -38,12 +42,15 @@ export default function Customer() {
         </Col>
         <Col>
           {" "}
-          <Radio.Group defaultValue="list" >
+          <Radio.Group defaultValue={viewMode} onChange={(e:any)=> setViewMode(e.target.value)} >
             <Radio.Button value="list"><List size={28}/></Radio.Button>
             <Radio.Button value="map"><Map size={28}/></Radio.Button>
           </Radio.Group>
         </Col>
       </RowCustom>
+      <div>
+        {viewMode == 'list' ? <CustomerList data={customerList} handleData={setCustomerList}/> : <CustomerMap data={customerList}/>}
+      </div>
     </>
   );
 }
