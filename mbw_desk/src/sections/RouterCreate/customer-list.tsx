@@ -1,28 +1,26 @@
 import React from 'react'
 import { CustomerType } from './type'
-import { ColumnType } from 'antd/es/table'
-import { baseCustomers, commonTable, optionsFrequency } from './data'
+import type { ColumnsType } from 'antd/es/table'
+import { baseCustomers, commonColumnCustomer, commonTable, optionsFrequency } from './data'
 import { TableCustom } from '../../components'
 import {DeleteOutlined} from '@ant-design/icons'
-import { Select } from 'antd'
+import { Select, Table } from 'antd'
 
 type Props = {
-    data?: CustomerType[] | false,
+    data?: CustomerType[],
     handleData: any
 }
 
-const columnsCustomer = [
+const columnsCustomer:ColumnsType<CustomerType> = [
+    {
+        title: "Stt",
+        dataIndex: "stt",
+        key: "stt",
+        render: (_,record,index) => index +1
+    }, 
     ...commonTable,
-    {
-        title: "Địa chỉ",
-        dataIndex: "display_address",
-        key: "display_address"
-    },
-    {
-        title: "Số điện thoại",
-        dataIndex: "phone_number",
-        key: "phone_number"
-    },{
+    ...commonColumnCustomer
+    ,{
         title: "Tần suất",
         dataIndex: "frequency",
         key: "frequency",
@@ -47,14 +45,13 @@ const columnsCustomer = [
 ] 
 export default function CustomerList({data,handleData}:Props) {
   return (
-    <>
+    <div className='p-4'>
     <TableCustom 
         columns={columnsCustomer}
-        dataSource={baseCustomers}
+        dataSource={data}
         pagination={false}
     />
-
-    </>
+    </div>
   )
 }
  

@@ -3,6 +3,10 @@ import styled from "styled-components";
 
 
 export const TableCustom = styled(Table)`
+& .ant-table-container .ant-table-cell{
+  font-size: 14px!important;
+}
+
 .ant-table-container {
     table {
       border: 1px solid #ebebeb;
@@ -11,10 +15,9 @@ export const TableCustom = styled(Table)`
 
     .ant-table-thead {
       .ant-table-cell {
-        background: "#8094ae";
+        background: #fff;
         font-size: 12px;
-        font-weight: 700;
-        text-transform: uppercase;
+        font-weight: 500;
         letter-spacing: 0.12em;
         color: #8094ae;
       }

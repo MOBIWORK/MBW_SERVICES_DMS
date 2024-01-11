@@ -32,6 +32,17 @@ export const FormItemCustom = styled(Form.Item)<{ disabled?: boolean }>`
 & input:empty, & .ant-select-selector {
   background-color: #F5F7FA!important;
 }
+
+& .ant-input-affix-wrapper {
+  height: 37px;
+}
+& :where(.css-dev-only-do-not-override-dkbvqv).ant-select-single {
+  height: 36px!important;
+}
+
+& .ant-picker {
+  height: 36px;
+}
 .ant-form-item-control {
   gap: 4px;
 }

@@ -6,7 +6,7 @@ import { statusOption } from './data';
 
 export default function GeneralInformation() {
     return (
-        <>
+        <div className='p-4 pt-[43px] pb-[58px]'>
             <RowCustom >
                 <Col span={12}>
                     <FormItemCustom label="Mã tuyến" name="channel_code">
@@ -43,6 +43,6 @@ export default function GeneralInformation() {
                     </FormItemCustom>
                 </Col>
             </RowCustom>
-        </>
+        </div>
     )
 }

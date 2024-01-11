@@ -9,7 +9,7 @@ export default function DashboardLayout({children}:Props) {
   return (
     <div className='bg-[#F5F7FA] w-screen h-screen'>
     <Header/>
-    <div className='max-w-full w-[80%] mx-auto'><div  className="p-4 bg-white rounded-md">{children}</div></div>
+    <div className='max-w-full w-[80%] mx-auto'><div  className="rounded-md">{children}</div></div>
     </div>
   )
 }

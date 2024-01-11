@@ -3,23 +3,29 @@ import { CustomerType } from './type'
 import { Col, Row } from 'antd'
 import { TableCustom } from '../../components'
 import { baseCustomers, commonTable } from './data'
+import {  Mapcustom } from '../../components/map/map'
 
 type Props = {
     data?: CustomerType[] | false
 }
 export default function CustomerMap({data}:Props) {
   return (
-    <Row>
-      <Col>
+    <Row className='h-[500px]'>
+      <Col span={8}>
       <TableCustom 
-        bordered={false}
-        columns={commonTable}
+        columns={[{
+          title: "Stt",
+          dataIndex: "stt",
+          key: "stt",
+          render: (_,record,index) => index +1
+      },...commonTable]
+    }
         dataSource={baseCustomers}
         pagination={false}
     />
       </Col>
-      <Col>
-        Map
+      <Col span={16}>
+        <Mapcustom/>
       </Col>
     </Row>
   )

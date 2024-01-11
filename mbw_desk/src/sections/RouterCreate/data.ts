@@ -1,3 +1,7 @@
+import type {  ColumnsType } from 'antd/es/table'
+import { CustomerType } from './type'
+import { Filter } from '../../../../../../archived/apps/helpdesk-2023-12-01/desk/src/types';
+
 type Options = {
     label: string,
     value: any
@@ -21,22 +25,17 @@ export const addCustomerOption:Options[] = [
     },
     {
         label: "Chọn khách hàng",
-        value: 1
+        value: "Choose"
     },
     {
         label: "Import khách hàng",
-        value: 2
+        value: "Import"
     }
 ]
 
 
-export const  commonTable = [
-    {
-        title: "Stt",
-        dataIndex: "stt",
-        key: "stt",
-        render: (_,record,index) => index +1
-    },
+export const  commonTable: ColumnsType<CustomerType>= [
+   
     {
         title: "Mã khách hàng",
         dataIndex: "customer_id",
@@ -50,7 +49,20 @@ export const  commonTable = [
 
 ]
 
-export const baseCustomers = [
+export const commonColumnCustomer: ColumnsType<CustomerType>= [
+    {
+        title: "Địa chỉ",
+        dataIndex: "display_address",
+        key: "display_address"
+    },
+    {
+        title: "Số điện thoại",
+        dataIndex: "phone_number",
+        key: "phone_number"
+    }
+]
+
+export const baseCustomers:CustomerType[] = [
     {
         customer_id: "431456",
         customer_name: "Chu Văn A",
@@ -91,3 +103,12 @@ export const optionsFrequency = [
         value: "5"
     },
 ]
+
+
+export const FilterForm = {
+    customer_type: "Loại khách hàng",
+    customer_group: "Nhóm khách hàng",
+    city: "Tỉnh/Thành phố",
+    district: "Quận/huyện",
+    ward: "Phường/xã",
+}
