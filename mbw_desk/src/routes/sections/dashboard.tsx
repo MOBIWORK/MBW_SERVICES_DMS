@@ -11,6 +11,7 @@ const RouterCreate = lazy(()=> import('@/pages/RouterCreate'))
 const RouterDashboard = lazy(()=> import('@/pages/RouterDashboard'))
 const RouterDetail = lazy(()=> import('@/pages/RouterDetail'))
 const RouterEmployee = lazy(()=> import('@/pages/RouterEmployee'))
+const SettingDMS = lazy(()=> import('@/pages/SettingDMS'))
 export const dashboardRoutes = [
     {
         path: '/',
@@ -37,6 +38,9 @@ export const dashboardRoutes = [
             },
             {
                 path: 'router-detail/:id',element: <RouterDetail/>
+            },
+            {
+                path: 'setting-dms',element: <SettingDMS/>
             }
         ]
     }

@@ -7,6 +7,8 @@ import { PiSortAscendingBold } from "react-icons/pi";
 import { Table, Button, Input, Select } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import React, { useState } from "react";
+import { FormItemCustom } from "../../components/form-item";
+import { TableCustom } from '../../components'
 
 interface DataType {
   key: React.Key;
@@ -20,7 +22,8 @@ interface DataType {
   userupdated: string;
 }
 
-const columns: ColumnsType<DataType> = [
+const columns= [
+  
   {
     title: "Mã tuyến",
     dataIndex: "codeRouter",
@@ -112,34 +115,35 @@ export default function RouterDashboard() {
       <div className="border-b-2 h-10"></div>
 
       <div className="bg-[#f9fafa]">
-        <div className="mx-36 pt-5">
-          <div className="flex justify-between">
+        <div className="mx-2 pt-5 pb-10 sm:mx-36 ">
+          <div className="flex flex-wrap justify-between">
             <div className="flex justify-center items-center">
               <span className="mr-2">
-                <IoIosMenu style={{ fontSize: "32px" }} />
+                <IoIosMenu style={{ fontSize: "24px" }} />
               </span>
-              <h1 className="text-2xl font-semibold">Quản lý tuyến</h1>
+              <h1 className="text-2xl font-semibold leading-[21px]">
+                Quản lý tuyến
+              </h1>
             </div>
-
-            <div className="flex justify-center items-center">
+            <div className="flex mb-2">
               <Button
-                className="text-nowrap"
+                className="flex items-center !text-[13px] !leading-[21px] !font-normal !text-[#212B36] !h-9"
                 size={"large"}
-                icon={<LiaDownloadSolid />}
+                icon={<LiaDownloadSolid style={{ fontSize: "20px" }} />}
               >
                 Xuất excel
               </Button>
               <Button
-                className="text-nowrap ml-4"
+                className="flex items-center !text-[13px] !leading-[21px] !font-normal !text-[#212B36] ml-3 !h-9"
                 size={"large"}
-                icon={<LuUploadCloud />}
+                icon={<LuUploadCloud style={{ fontSize: "20px" }} />}
               >
                 Nhập excel
               </Button>
               <Button
-                className="bg-[#1877F2] ml-4 text-nowrap text-white"
+                className="bg-[#1877F2] ml-3 text-white flex items-center !text-[13px] !leading-[21px] !font-medium !h-9"
                 size={"large"}
-                icon={<VscAdd />}
+                icon={<VscAdd style={{ fontSize: "20px" }} />}
               >
                 Thêm mới
               </Button>
@@ -147,24 +151,31 @@ export default function RouterDashboard() {
           </div>
 
           <div className="pt-5">
-            <div className="h-auto bg-white py-7 px-4">
-              <div className="flex justify-between">
-                <div className="flex justify-center items-center">
-                  <Input className="w-[200px] mr-3" placeholder="Tuyến" />
+            <div className="h-auto bg-white py-7 px-4 rounded-lg">
+              <div className="flex flex-wrap justify-between items-center">
+                <div className="flex flex-wrap items-center">
                   <Input
-                    className="w-[200px] mr-3"
+                    className="w-[200px] mr-3 bg-[#F4F6F8] placeholder:text-[#212B36]"
+                    placeholder="Tuyến"
+                  />
+                  <Input
+                    className="w-[200px] mr-3 bg-[#F4F6F8] placeholder:text-[#212B36]"
                     placeholder="Nhân viên bán hàng"
                   />
 
+                  <FormItemCustom className="w-[150px]">
                   <Select
-                    className="w-[150px]"
-                    showSearch
-                    placeholder="Trạng thái"
+                    className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
                     optionFilterProp="children"
                     onChange={onChange}
                     onSearch={onSearch}
                     filterOption={filterOption}
+                    defaultValue=""
                     options={[
+                      {
+                        value: "",
+                        label: "Trạng thái",
+                      },
                       {
                         value: "A",
                         label: "Hoạt động",
@@ -175,36 +186,35 @@ export default function RouterDashboard() {
                       },
                     ]}
                   />
+                  </FormItemCustom>
                 </div>
 
-                <div className="flex justify-center items-center">
-                  <div className="flex justify-center items-center rounded-lg w-full h-9 p-5 bg-white border-2 text-[21px] cursor-pointer">
-                    <div className="flex justify-center items-center border-r-2 pr-2">
-                      <span>
-                        <LuFilter />
-                      </span>
-                      <p className="mx-1 whitespace-nowrap">Filter</p>
-                    </div>
-                    <div className="ml-3">
-                      <span>
-                        <LuFilterX />
-                      </span>
-                    </div>
+                <div className="flex flex-wrap items-center">
+                  <div className="flex justify-center items-center mr-2 border-2 rounded-md">
+                    <Button
+                      className="flex items-center text-nowrap !text-[13px] !leading-[21px] !font-normal border-x-0 border-y-0 border-r-[0.1px] rounded-none"
+                      icon={<LuFilter style={{ fontSize: "20px" }} />}
+                    >
+                      Filter
+                    </Button>
+                    <Button className="border-x-0 border-y-0 border-l-[0.1px] rounded-none">
+                      <LuFilterX style={{ fontSize: "20px" }} />
+                    </Button>
                   </div>
-                  <div className="flex justify-center items-center rounded-lg w-full h-9 p-5 bg-white border-2 text-[21px] ml-4 cursor-pointer">
-                    <span className="mr-2">
-                      <PiSortAscendingBold />
-                    </span>
-                    <p className="mx-1 pl-2 whitespace-nowrap border-l-2">
+                  <div className="flex justify-center items-center  border-2 rounded-md">
+                    <Button className="border-x-0 border-y-0 border-r-[0.1px] rounded-none">
+                      <PiSortAscendingBold style={{ fontSize: "20px" }} />
+                    </Button>
+                    <Button className="border-x-0 border-y-0 border-l-[0.1px] rounded-none">
                       Last update on
-                    </p>
+                    </Button>
                   </div>
                 </div>
               </div>
 
               <div className="pt-5">
                 <div>
-                  <Table
+                  <TableCustom
                     rowSelection={rowSelection}
                     columns={columns}
                     dataSource={data}
