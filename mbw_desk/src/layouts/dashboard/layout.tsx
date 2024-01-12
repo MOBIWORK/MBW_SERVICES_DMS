@@ -7,7 +7,7 @@ type Props = {
 }
 export default function DashboardLayout({children}:Props) {
   return (
-    <div className='bg-[#F5F7FA] w-screen h-screen'>
+    <div className='bg-[#F5F7FA] w-screen min-h-screen'>
     <Header/>
     <div className='max-w-full w-[80%] mx-auto'><div  className="rounded-md">{children}</div></div>
     </div>

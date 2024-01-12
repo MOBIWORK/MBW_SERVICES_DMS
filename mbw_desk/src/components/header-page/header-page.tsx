@@ -9,7 +9,6 @@ type button = {
   label: string;
   size?: string;
   icon?: React.ReactNode;
-  className?: string;
   action?: any;
   type?: string;
   className?: string;

@@ -8,7 +8,7 @@ import { Table, Button, Input, Select } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import React, { useState } from "react";
 import { FormItemCustom } from "../../components/form-item";
-import { TableCustom } from '../../components'
+import { HeaderPage, TableCustom } from "../../components";
 
 interface DataType {
   key: React.Key;
@@ -22,8 +22,7 @@ interface DataType {
   userupdated: string;
 }
 
-const columns= [
-  
+const columns = [
   {
     title: "Mã tuyến",
     dataIndex: "codeRouter",
@@ -83,8 +82,6 @@ const data: DataType[] = [
   },
 ];
 
-
-
 export default function RouterDashboard() {
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
 
@@ -112,11 +109,34 @@ export default function RouterDashboard() {
   ) => (option?.label ?? "").toLowerCase().includes(input.toLowerCase());
   return (
     <>
-      <div className="border-b-2 h-10"></div>
+      <HeaderPage
+        title="Quản lý tuyến"
+        buttons={[
+          {
+            label: "Xuất excel",
+            icon: <LiaDownloadSolid className="text-xl" />,
+            size: "20px",
+            className: "flex items-center mr-2",
+          },
+          {
+            label: "Nhập excel",
+            icon: <LuUploadCloud className="text-xl" />,
+            size: "20px",
+            className: "flex items-center mr-2",
+          },
+          {
+            label: "Thêm mới",
+            type: "primary",
+            icon: <VscAdd className="text-xl" />,
+            size: "20px",
+            className: "flex items-center",
+          },
+        ]}
+      />
 
       <div className="bg-[#f9fafa]">
-        <div className="mx-2 pt-5 pb-10 sm:mx-36 ">
-          <div className="flex flex-wrap justify-between">
+        <div className="mx-2 pt-5 pb-10">
+          {/* <div className="flex flex-wrap justify-between">
             <div className="flex justify-center items-center">
               <span className="mr-2">
                 <IoIosMenu style={{ fontSize: "24px" }} />
@@ -148,7 +168,7 @@ export default function RouterDashboard() {
                 Thêm mới
               </Button>
             </div>
-          </div>
+          </div> */}
 
           <div className="pt-5">
             <div className="h-auto bg-white py-7 px-4 rounded-lg">
@@ -164,48 +184,48 @@ export default function RouterDashboard() {
                   />
 
                   <FormItemCustom className="w-[150px]">
-                  <Select
-                    className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
-                    optionFilterProp="children"
-                    onChange={onChange}
-                    onSearch={onSearch}
-                    filterOption={filterOption}
-                    defaultValue=""
-                    options={[
-                      {
-                        value: "",
-                        label: "Trạng thái",
-                      },
-                      {
-                        value: "A",
-                        label: "Hoạt động",
-                      },
-                      {
-                        value: "B",
-                        label: "Khóa",
-                      },
-                    ]}
-                  />
+                    <Select
+                      className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
+                      optionFilterProp="children"
+                      onChange={onChange}
+                      onSearch={onSearch}
+                      filterOption={filterOption}
+                      defaultValue=""
+                      options={[
+                        {
+                          value: "",
+                          label: "Trạng thái",
+                        },
+                        {
+                          value: "A",
+                          label: "Hoạt động",
+                        },
+                        {
+                          value: "B",
+                          label: "Khóa",
+                        },
+                      ]}
+                    />
                   </FormItemCustom>
                 </div>
 
                 <div className="flex flex-wrap items-center">
-                  <div className="flex justify-center items-center mr-2 border-2 rounded-md">
+                  <div className="flex justify-center items-center mr-4">
                     <Button
-                      className="flex items-center text-nowrap !text-[13px] !leading-[21px] !font-normal border-x-0 border-y-0 border-r-[0.1px] rounded-none"
+                      className="flex items-center text-nowrap !text-[13px] !leading-[21px] !font-normal  border-r-[0.1px] rounded-r-none h-[32px]"
                       icon={<LuFilter style={{ fontSize: "20px" }} />}
                     >
                       Filter
                     </Button>
-                    <Button className="border-x-0 border-y-0 border-l-[0.1px] rounded-none">
+                    <Button className="border-l-[0.1px] rounded-l-none h-[32px]">
                       <LuFilterX style={{ fontSize: "20px" }} />
                     </Button>
                   </div>
-                  <div className="flex justify-center items-center  border-2 rounded-md">
-                    <Button className="border-x-0 border-y-0 border-r-[0.1px] rounded-none">
+                  <div className="flex justify-center items-center rounded-md">
+                    <Button className="border-r-[0.1px] rounded-r-none">
                       <PiSortAscendingBold style={{ fontSize: "20px" }} />
                     </Button>
-                    <Button className="border-x-0 border-y-0 border-l-[0.1px] rounded-none">
+                    <Button className="border-l-[0.1px] rounded-l-none">
                       Last update on
                     </Button>
                   </div>
@@ -226,5 +246,5 @@ export default function RouterDashboard() {
         </div>
       </div>
     </>
-  )
+  );
 }
