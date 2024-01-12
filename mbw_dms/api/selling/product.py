@@ -49,6 +49,7 @@ def list_product(**kwargs):
             item['image'] = validate_image(item.get("image"))
             item['detail'] = frappe.db.get_value('Item Price', {"item_code" : item.get('item_code')}, ['uom', 'price_list_rate', 'valid_from', 'currency'],as_dict=1)
             item['unit'] = frappe.db.get_all("UOM Conversion Detail", {"parent" : item.get('name')}, ['uom', 'conversion_factor'])
+            item['stock'] = frappe.db.get_all("Stock Entry Detail", {"item_code" : item.get('item_code')}, ['t_warehouse', 'qty'])
         return gen_response(200, 'Thành công', {
             "data": items,
             "total": count,

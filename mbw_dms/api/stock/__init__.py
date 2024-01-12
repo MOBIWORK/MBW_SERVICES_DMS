@@ -7,7 +7,8 @@ from pypika import  Order, CustomFunction
 from mbw_dms.api.common import (
     exception_handel,
     gen_response,
-    validate_image
+    validate_image,
+    get_report_doc
 )
 from mbw_dms.config_translate import i18n
 
@@ -16,9 +17,12 @@ from mbw_dms.config_translate import i18n
 def list_stock_entry(**kwargs):
     kwargs=frappe._dict(kwargs)
 
-    stock_entry = frappe.db.get_list("Stock Entry",
-                                   fields=["name"],
-                                )
-    return gen_response(200, 'Thành công', {
-            "data": stock_entry,
-    })
+    StockEntry = frappe.qb.DocType('Stock Entry')
+    StockEntryDetail = frappe.qb.DocType('Stock Entry Detail')
+
+    stocks = (frappe.qb.from_(StockEntry)
+            .inner_join(StockEntryDetail)
+            .on(StockEntry.name == StockEntryDetail.parent)
+            .select("*").run(as_dict=True))
+
+    return gen_response(200, 'Thành công', stocks)

@@ -121,3 +121,27 @@ def convert_timestamp(timestamp, timezone_str="Asia/Ho_Chi_Minh", is_datetime=Tr
     
 def get_datetime_now():
     return datetime.now(pytz.timezone('Asia/Ho_Chi_Minh')).replace(tzinfo=None)
+
+# Get employee reports
+def get_report_doc(report_name):
+    doc = frappe.get_doc("Report", report_name)
+    doc.custom_columns = []
+    doc.custom_filters = []
+
+    if doc.report_type == "Custom Report":
+        custom_report_doc = doc
+        doc = get_reference_report(doc)
+        doc.custom_report = report_name
+        if custom_report_doc.json:
+            data = json.loads(custom_report_doc.json)
+            if data:
+                doc.custom_columns = data.get("columns")
+                doc.custom_filters = data.get("filters")
+        doc.is_custom_report = True
+
+    if not doc.is_permitted():
+        gen_response(403, "You don't have access to Report " + report_name, [])
+
+    if not frappe.has_permission(doc.ref_doctype, "report"):
+        gen_response(403, "You don't have permission", [])
+    return doc
