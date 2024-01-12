@@ -1,0 +1,141 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2024-01-11 16:17:15.049642",
+ "default_view": "List",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "config_name",
+  "vt_ngoaituyen",
+  "kb_vitringoaisaiso",
+  "khaibao_section",
+  "saiso_chophep_kb_vitringoaisaiso",
+  "checkout_ngoaisaiso",
+  "checkout_section",
+  "saiso_chophep_checkout_ngoaisaiso",
+  "tgcheckin_toithieu",
+  "batbuoc_kiemton",
+  "batbuoc_chupanh",
+  "chupanhsection",
+  "soluong_album",
+  "soluong_anh",
+  "batbuoc_ghichu"
+ ],
+ "fields": [
+  {
+   "default": "0",
+   "fieldname": "vt_ngoaituyen",
+   "fieldtype": "Check",
+   "label": "Vi\u1ebfng th\u0103m ngo\u1ea1i tuy\u1ebfn"
+  },
+  {
+   "default": "0",
+   "fieldname": "kb_vitringoaisaiso",
+   "fieldtype": "Check",
+   "label": "Khai b\u00e1o v\u1ecb tr\u00ed ngo\u00e0i sai s\u1ed1"
+  },
+  {
+   "default": "0",
+   "fieldname": "checkout_ngoaisaiso",
+   "fieldtype": "Check",
+   "label": "Checkout ngo\u00e0i sai s\u1ed1"
+  },
+  {
+   "default": "0",
+   "fieldname": "tgcheckin_toithieu",
+   "fieldtype": "Check",
+   "label": "Th\u1eddi gian checkin t\u1ed1i thi\u1ec3u"
+  },
+  {
+   "default": "0",
+   "fieldname": "batbuoc_kiemton",
+   "fieldtype": "Check",
+   "label": "B\u1eaft bu\u1ed9c ki\u1ec3m t\u1ed3n"
+  },
+  {
+   "default": "0",
+   "fieldname": "batbuoc_chupanh",
+   "fieldtype": "Check",
+   "label": "B\u1eaft bu\u1ed9c ch\u1ee5p \u1ea3nh"
+  },
+  {
+   "default": "0",
+   "fieldname": "batbuoc_ghichu",
+   "fieldtype": "Check",
+   "label": "B\u1eaft bu\u1ed9c ghi ch\u00fa"
+  },
+  {
+   "depends_on": "eval:doc.batbuoc_chupanh == 1",
+   "fieldname": "soluong_album",
+   "fieldtype": "Int",
+   "label": "S\u1ed1 l\u01b0\u1ee3ng album"
+  },
+  {
+   "depends_on": "eval:doc.batbuoc_chupanh == 1",
+   "fieldname": "soluong_anh",
+   "fieldtype": "Int",
+   "label": "S\u1ed1 l\u01b0\u1ee3ng \u1ea3nh"
+  },
+  {
+   "collapsible": 1,
+   "collapsible_depends_on": "eval:doc.kb_vitringoaisaiso",
+   "fieldname": "khaibao_section",
+   "fieldtype": "Section Break"
+  },
+  {
+   "collapsible": 1,
+   "collapsible_depends_on": "eval:doc.batbuoc_chupanh",
+   "fieldname": "chupanhsection",
+   "fieldtype": "Section Break"
+  },
+  {
+   "depends_on": "eval:doc.kb_vitringoaisaiso",
+   "fieldname": "saiso_chophep_kb_vitringoaisaiso",
+   "fieldtype": "Float",
+   "label": "Sai s\u1ed1 cho ph\u00e9p"
+  },
+  {
+   "collapsible": 1,
+   "collapsible_depends_on": "eval:doc.checkout_ngoaisaiso",
+   "fieldname": "checkout_section",
+   "fieldtype": "Section Break"
+  },
+  {
+   "depends_on": "eval:doc.checkout_ngoaisaiso",
+   "fieldname": "saiso_chophep_checkout_ngoaisaiso",
+   "fieldtype": "Float",
+   "label": "Sai s\u1ed1 cho ph\u00e9p"
+  },
+  {
+   "fieldname": "config_name",
+   "fieldtype": "Data",
+   "label": "T\u00ean c\u1ea5u h\u00ecnh"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2024-01-12 10:19:36.890060",
+ "modified_by": "Administrator",
+ "module": "MBW DMS",
+ "name": "DMS Config Mobile",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
