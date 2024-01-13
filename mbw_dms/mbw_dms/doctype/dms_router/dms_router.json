@@ -42,8 +42,9 @@
   },
   {
    "fieldname": "travel_date",
-   "fieldtype": "Date",
-   "label": "Ng\u00e0y \u0111i tuy\u1ebfn"
+   "fieldtype": "Select",
+   "label": "Ng\u00e0y \u0111i tuy\u1ebfn",
+   "options": "Th\u1ee9 2\nTh\u1ee9 3\nTh\u1ee9 5\nTh\u1ee9 6\nTh\u1ee9 7"
   },
   {
    "fieldname": "cb_1",
@@ -95,7 +96,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-01-09 15:30:25.187428",
+ "modified": "2024-01-13 09:16:40.795256",
  "modified_by": "Administrator",
  "module": "MBW DMS",
  "name": "DMS Router",
