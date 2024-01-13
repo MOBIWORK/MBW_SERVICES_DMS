@@ -173,17 +173,17 @@ export default function RouterDashboard() {
           <div className="pt-5">
             <div className="h-auto bg-white py-7 px-4 rounded-lg">
               <div className="flex flex-wrap justify-between items-center">
-                <div className="flex flex-wrap items-center">
+                <div className="flex justify-center flex-wrap items-center">
                   <Input
-                    className="w-[200px] mr-3 bg-[#F4F6F8] placeholder:text-[#212B36]"
+                    className="w-[200px] mr-3 bg-[#F4F6F8] placeholder:text-[#212B36] border-none"
                     placeholder="Tuyến"
                   />
                   <Input
-                    className="w-[200px] mr-3 bg-[#F4F6F8] placeholder:text-[#212B36]"
+                    className="w-[200px] mr-3 bg-[#F4F6F8] placeholder:text-[#212B36] border-none"
                     placeholder="Nhân viên bán hàng"
                   />
 
-                  <FormItemCustom className="w-[150px]">
+                  <FormItemCustom className="w-[150px] border-none">
                     <Select
                       className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
                       optionFilterProp="children"

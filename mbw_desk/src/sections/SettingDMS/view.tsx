@@ -35,7 +35,7 @@ export default function SettingDMS() {
             Viếng thăm ngoại tuyến
           </p>
         </div>
-        <div className="pt-10 flex items-center">
+        <div className="pt-5 flex items-center">
           <Switch defaultChecked={isSwitchOn} onChange={handleSwitchChange} />
           <p className="ml-2 font-medium text-base leading-[21px] text-[#212B36]">
             Khai báo ví trị ngoài sai số
@@ -83,14 +83,14 @@ export default function SettingDMS() {
             Thời gian checkin tối thiểu
           </p>
         </div>
-        <div className="pt-5 flex items-center">
+        <div className="flex items-center">
           <Switch defaultChecked={false} onChange={onChange} />
           <p className="ml-2 font-medium text-base leading-[21px] text-[#212B36]">
             Bắt buộc kiểm tồn
           </p>
         </div>
 
-        <div className="pt-10 flex items-center">
+        <div className="pt-5 flex items-center">
           <Switch defaultChecked={isSwitchOn2} onChange={handleSwitchChange2} />
           <p className="ml-2 font-medium text-base leading-[21px] text-[#212B36]">
             Bắt buộc chụp ảnh
