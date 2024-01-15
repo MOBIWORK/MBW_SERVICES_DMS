@@ -100,3 +100,46 @@ def get_customer_router(**data):
         })
     except Exception as e :
         exception_handel(e)
+
+@frappe.whitelist(methods="POST")
+def create_router(**body):
+    try:
+        body = dict(body)
+        if body['cmd'] :
+            del body['cmd']
+        field_validate= ["travel_date","status", "customers", "channel_code", "team_sale","channel_name","employee"]
+        field_customers_validate = ["customer_id","customer_name","display_address","phone_number","customer","frequency"]
+        # check_validate fields
+        for key_router,value in body.items():
+            if isinstance(body[key_router], list):
+                for customer in body[key_router]:
+                    for key_cs in customer:
+                        if key_cs not in field_customers_validate or (key_cs in field_customers_validate and not customer[key_cs]) :
+                            gen_response(406,f"Field {key_cs} not validate",None)
+                            return 
+            else:
+                 if key_router not in field_validate or ( key_router in field_validate and not body[key_router] ) :
+                        gen_response(406,f"Field {key_router} not validate",None)
+                        return
+        body['doctype'] = "DMS Router"
+        doc = frappe.get_doc(body)
+        doc.save()
+        gen_response(201,"",doc)
+    except Exception as e:
+        exception_handel(e)
+
+@frappe.whitelist(methods="GET")
+def get_team_sale():
+    try:
+        data = frappe.db.get_list("Sales Person",{"is_group":1}, pluck='name')
+        gen_response(200,"",data)
+    except Exception as e:
+        exception_handel(e)
+
+@frappe.whitelist(methods="GET")
+def get_customer():
+    try:
+        data = frappe.db.get_list("Customer",{},["name",'customer_id',"customer_name",'UNIX_TIMESTAMP(custom_birthday) as custom_birthday',"location","customer_type","customer_name","customer_primary_address as display_address","mobile_no as phone_number"])
+        gen_response(200,"",data)
+    except Exception as e:
+        exception_handel(e)
