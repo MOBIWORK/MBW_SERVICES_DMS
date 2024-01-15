@@ -137,9 +137,21 @@ def get_team_sale():
         exception_handel(e)
 
 @frappe.whitelist(methods="GET")
-def get_customer():
+def get_customer(**filters):
     try:
-        data = frappe.db.get_list("Customer",{},["name",'customer_id',"customer_name",'UNIX_TIMESTAMP(custom_birthday) as custom_birthday',"location","customer_type","customer_name","customer_primary_address as display_address","mobile_no as phone_number"])
+        page_size =  int(filters.get('page_size')) if filters.get('page_size') else 20
+        page_number = int(filters.get('page_number') )if filters.get('page_number') and int(filters.get('page_number')) <= 0 else 1
+        customer_group = data.get('customer_group') if data.get('customer_group') else False
+        customer_type = data.get('customer_type') if data.get('customer_type') else False 
+        customer_name = data.get('customer_name') if data.get('customer_name') else False 
+        queryFilters = {}
+        if customer_type:
+            queryFilters['customer_type'] = customer_type
+        if customer_group:
+            queryFilters['customer_group'] = customer_group
+        if customer_name:
+            queryFilters['customer_name'] = ['like',f"%{customer_name}%"]
+        data = frappe.db.get_list("Customer",queryFilters,["name",'customer_id',"customer_name",'UNIX_TIMESTAMP(custom_birthday) as custom_birthday',"location","customer_type","customer_name","customer_primary_address as display_address","mobile_no as phone_number"],start=page_size*(page_number-1), page_length=page_size)
         gen_response(200,"",data)
     except Exception as e:
         exception_handel(e)
