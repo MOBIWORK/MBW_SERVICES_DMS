@@ -90,7 +90,7 @@ def get_customer_router(**data):
             FiltersCustomer['customer_group'] =customer_group
         if customer_type:
             FiltersCustomer['customer_type'] =customer_group
-        detail_customer = frappe.db.get_list('Customer',filters= FiltersCustomer,fields=['*'],start=page_size*(page_number-1), page_length=page_size)
+        detail_customer = frappe.db.get_list('Customer',filters= FiltersCustomer,fields=['*','UNIX_TIMESTAMP(custom_birthday) as birthday'],start=page_size*(page_number-1), page_length=page_size)
         total_customer= len(frappe.db.get_list('Customer',filters= FiltersCustomer))
         gen_response(200,"", {
             "data": detail_customer,
