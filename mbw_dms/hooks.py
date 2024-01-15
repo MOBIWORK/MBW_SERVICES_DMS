@@ -228,4 +228,9 @@ fixtures = [
         "doctype": "Custom Field",
         "filters": [["module", "in", ("MBW DMS")]]
     },
+    {
+        "doctype": "Client Script",
+        "filters": [["module", "in", ("MBW DMS")]]
+    },
+
 ]

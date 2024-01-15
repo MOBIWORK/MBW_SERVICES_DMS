@@ -1,0 +1,13 @@
+[
+ {
+  "docstatus": 0,
+  "doctype": "Client Script",
+  "dt": "Customer",
+  "enabled": 1,
+  "modified": "2024-01-15 15:43:40.288748",
+  "module": "MBW DMS",
+  "name": "Auto Location Customer",
+  "script": "\n\nfunction setDefaultViewMap(frm) {\n  // set view map\n  let map = frm.get_field(\"map\").map;\n  let longitude = frm.doc.longitude || 109.358;\n  let latitude = frm.doc.latitude || 15.961;\n  map.setView([latitude, longitude], 5);\n}\n\nfunction setFieldValue(frm, latitude = 0, longitude = 0, address) {\n  frm.set_value(\"location\", JSON.stringify({longitude,latitude}));\n  frm.set_value(\"address\", address);\n}\n\nfrappe.ui.form.on(\"Customer\", {\n  refresh: function (frm) {\n     \n  },\n    onload:async function(frm) {\n        let list_address = []\n     frm.doc.__onload.addr_list.forEach((address)=> {\n         list_address =[...list_address,address.address_title]\n     })\n     await frappe.call({\n        type: \"GET\",\n        method: \"mbw_service_v2.api.ess.geolocation.get_coordinates_location\",\n        args: {\n          address: list_address,\n        },\n        callback: function (r) {\n          let rs = r.result.results;\n          if (rs) {\n            let json_address = []\n            let json_location = []\n            for(let detail_address of rs) {\n                let {formatted_address,geometry: {location: {lat,lng}}} = detail_address\n                json_address.push({formatted_address,lng,lat})\n                json_location.push({\n                  type: \"Feature\",\n                  properties: {},\n                  geometry: {\n                    type: \"Point\",\n                    coordinates: [lng, lat],\n                  },\n                },)\n            }\n            frm.set_value(\"location\",JSON.stringify(json_address))\n            frm.set_value(\"on_map\",JSON.stringify(json_location))\n          }\n        },\n      });\n        console.log(\"address\",JSON.stringify(list_address) )\n    }\n});\n\n",
+  "view": "Form"
+ }
+]
