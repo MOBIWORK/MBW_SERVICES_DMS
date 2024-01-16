@@ -59,12 +59,12 @@ def list_customer(**kwargs):
             customer['address'] = frappe.db.get_value('Address', {"name" : customer.get('customer_primary_address')}, ['address_line1', 'phone'],as_dict=1)
             customer['cre_limid'] = frappe.db.get_all("Customer Credit Limit", {"parent" : customer.get('name')}, ['credit_limit'])
         
-        return {
+        return gen_response(200, "ok", {
             "data": customers,
             "page_number": page_number,
             "page_size": page_size,
             "total": record
-        }
+        })
     except Exception as e:
         return exception_handel(e)
     
