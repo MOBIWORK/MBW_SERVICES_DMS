@@ -19,12 +19,11 @@ def get_list_sales_order(**filters):
         to_date = float(filters.get('to_date') )if filters.get('to_date') else False
         page_size =  float(filters.get('page_size')) if filters.get('page_size') else 20
         page_number = float(filters.get('page_number') )if filters.get('page_number') and filters.get('page_number') <= 0 else 1
-        if not from_date or not to_date:
-            gen_response(406,"from_date or to_date not found",{})
-            return
-        from_date = datetime.fromtimestamp(from_date)
-        to_date = datetime.fromtimestamp(to_date)
-        query = {"delivery_date": ["between",[from_date,to_date]]}
+        query = {}
+        if  from_date and  to_date:
+            from_date = datetime.fromtimestamp(from_date)
+            to_date = datetime.fromtimestamp(to_date)
+            query["delivery_date"] = ["between",[from_date,to_date]]
         if status:
             query['status'] = status
         sale_orders =frappe.db.get_list('Sales Order', 
