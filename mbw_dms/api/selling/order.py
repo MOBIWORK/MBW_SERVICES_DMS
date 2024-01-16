@@ -7,6 +7,7 @@ from pypika import  Order, CustomFunction
 from mbw_dms.api.common import (
     exception_handel,
     gen_response,
+    convert_timestamp
 )
 from mbw_dms.config_translate import i18n
 
@@ -64,3 +65,24 @@ def get_sale_order(name):
         return
     except Exception as e: 
         exception_handel(e)
+
+@frappe.whitelist(methods='POST')
+def create_sale_order(**args):
+    try:
+        args = frappe._dict(args)
+        new_order = frappe.new_doc('Sales Order')
+        new_order.customer = args.customer
+        new_order.delivery_date = convert_timestamp(float(args.delivery_date), is_datetime=False)
+        new_order.append('items', {
+            'item_code': args.item_code,
+            'warehouse': args.warehouse,
+            'qty': args.qty,
+            'uom': args.uom,
+        })
+
+        new_order.insert(ignore_permissions=True)
+        # frappe.db.commit()
+
+        gen_response(200, 'Thành công',  {"name": new_order.name})
+    except Exception as e:
+        return exception_handel(e)

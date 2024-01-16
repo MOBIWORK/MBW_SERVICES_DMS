@@ -52,8 +52,8 @@ def list_customer(**kwargs):
         record = frappe.db.count('Customer', filters= my_filter)
 
         for customer in customers:
-            
-            customer['custom_birthday'] = datetime.combine(customer['custom_birthday'], datetime.min.time()).timestamp()
+            if customer['custom_birthday'] is not None:
+                customer['custom_birthday'] = datetime.combine(customer['custom_birthday'], datetime.min.time()).timestamp()
             customer['image'] = validate_image(customer.get("image"))
             customer['contact'] = frappe.db.get_value('Contact', {"name" : customer.get('customer_primary_contact')}, ['first_name'],as_dict=1)
             customer['address'] = frappe.db.get_value('Address', {"name" : customer.get('customer_primary_address')}, ['address_line1', 'phone'],as_dict=1)

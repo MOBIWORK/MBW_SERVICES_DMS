@@ -7,7 +7,8 @@ from pypika import  Order, CustomFunction
 from mbw_dms.api.common import (
     exception_handel,
     gen_response,
-    validate_image
+    validate_image,
+    get_datetime_now
 )
 from mbw_dms.config_translate import i18n
 
@@ -50,6 +51,7 @@ def list_product(**kwargs):
             item['detail'] = frappe.db.get_value('Item Price', {"item_code" : item.get('item_code')}, ['uom', 'price_list_rate', 'valid_from', 'currency'],as_dict=1)
             item['unit'] = frappe.db.get_all("UOM Conversion Detail", {"parent" : item.get('name')}, ['uom', 'conversion_factor'])
             item['stock'] = frappe.db.get_all("Stock Entry Detail", {"item_code" : item.get('item_code')}, ['t_warehouse', 'qty'])
+            item['discount_percentage'] = frappe.db.get_all("Pricing Rule", {"item_code": item.get('item_code')}, ['discount_percentage'])
         return gen_response(200, 'Thành công', {
             "data": items,
             "total": count,
@@ -83,5 +85,34 @@ def list_item_group():
     try:
         item_group = frappe.db.get_list('Item Group', fields=["name", "item_group_name", "parent_item_group"])
         gen_response(200, "Thành công", item_group)
+    except Exception as e:
+        return exception_handel(e)
+    
+# List UOM
+@frappe.whitelist(methods='GET')
+def list_uom(**kwargs):
+    try:
+        kwargs=frappe._dict(kwargs)
+        uom_filter = {}
+        name = kwargs.get('name')
+        if name:
+            uom_filter["name"] = ['like', f'%{name}%']
+        list_uom = frappe.db.get_list('UOM', filters=uom_filter, fields=["uom_name"])
+        gen_response(200, "Thành công", list_uom)
+    except Exception as e:
+        return exception_handel(e)
+    
+@frappe.whitelist(methods='PUT')
+def update_item(name, item_code, **kwargs):
+    try:
+        sales_order = frappe.get_doc('Sales Order', name)
+
+        # Update items
+        item_row = sales_order.get("items", {"item_code": item_code})
+        for item in item_row:
+            item.qty = kwargs.get("qty")
+            item.uom = kwargs.get("uom")
+        sales_order.save()
+        gen_response(200, 'Thành công')
     except Exception as e:
         return exception_handel(e)

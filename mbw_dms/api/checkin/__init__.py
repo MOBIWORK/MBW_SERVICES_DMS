@@ -1,7 +1,8 @@
 import frappe
 from datetime import datetime
 from frappe.utils.data import get_time
-from mbw_dms.api.common import exception_handel, gen_response, convert_timestamp
+from mbw_dms.api.common import exception_handel, gen_response, convert_timestamp, get_language
+from mbw_dms.config_translate import i18n
 
 @frappe.whitelist(methods='POST')
 def create_checkin(**kwargs):
@@ -25,6 +26,10 @@ def create_checkin(**kwargs):
             elif key in date_keys:
                 created_date = convert_timestamp(float(value), is_datetime=True)
                 new_checkin.set(key, created_date)
+            elif key == 'cmd':
+                continue
+            else:
+                return gen_response(400, i18n.t('translate.invalid_field', locale=get_language()), {"key": key})
         
         new_checkin.insert()
         frappe.db.commit()

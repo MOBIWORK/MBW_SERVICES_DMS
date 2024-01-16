@@ -26,3 +26,12 @@ def list_stock_entry(**kwargs):
             .select("*").run(as_dict=True))
 
     return gen_response(200, 'Thành công', stocks)
+
+# List warehouse
+@frappe.whitelist(methods='GET')
+def list_warehouse(**kwargs):
+    try:
+        list_warehouses = frappe.db.get_list('Warehouse', fields=["*"])
+        gen_response(200, 'Thành công', list_warehouses)
+    except Exception as e:
+        return exception_handel(e)

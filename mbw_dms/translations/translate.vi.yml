@@ -50,3 +50,4 @@ vi:
   not_found_setting_map: Vui lòng định cấu hình map trong tài liệu MBW Employee Settings
   not_found_setting_face: Vui lòng định cấu hình face trong tài liệu MBW Employee Settings
   not_found_setting_face_s3: Vui lòng định cấu hình face và s3 trong tài liệu MBW Employee Settings
+  invalid_field: Xuất hiện trường nằm ngoài danh sách các trường trong Doctype
