@@ -34,7 +34,7 @@ def get_list_sales_order(**filters):
                                         )
         for sale_order in sale_orders :
             sale_order['custom_id'] = frappe.db.get_value("Customer",filters={'name': sale_order['customer']},fieldname=['customer_id'])
-        total_order = frappe.db.count("Sales Order", filters= query)
+        total_order = len(frappe.db.get_list('Sales Order', filters=query))
 
         gen_response(200,'',{
             "data": sale_orders,
@@ -50,7 +50,7 @@ def get_list_sales_order(**filters):
 @frappe.whitelist(methods='GET')
 def get_sale_order(name):
     try:
-        detail_sales_order = dict(frappe.get_doc("Sales Order",name))
+        detail_sales_order = frappe.get_doc("Sales Order",name)
         # field_detail_sales = ['customer','customer_name','po_no',"address_display",'total','total_taxes_and_charges']
         # field_detail_items = ['customer','customer_name','po_no',"address_display"]
         # info_sales_order = {}
