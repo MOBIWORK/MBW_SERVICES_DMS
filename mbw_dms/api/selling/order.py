@@ -11,7 +11,7 @@ from mbw_dms.api.common import (
 from mbw_dms.config_translate import i18n
 
 
-@frappe.whitelist(methods='GET')
+@frappe.whitelist(allow_guest=True,methods='GET')
 def get_list_sales_order(**filters):
     try:
         status = filters.get('status') if filters.get('status') else False
@@ -20,7 +20,7 @@ def get_list_sales_order(**filters):
         page_size =  float(filters.get('page_size')) if filters.get('page_size') else 20
         page_number = float(filters.get('page_number') )if filters.get('page_number') and filters.get('page_number') <= 0 else 1
         query = {}
-        if  from_date and  to_date:
+        if  from_date and to_date:
             from_date = datetime.fromtimestamp(from_date)
             to_date = datetime.fromtimestamp(to_date)
             query["delivery_date"] = ["between",[from_date,to_date]]
@@ -28,13 +28,11 @@ def get_list_sales_order(**filters):
             query['status'] = status
         sale_orders =frappe.db.get_list('Sales Order', 
                                        filters=query, 
-                                       fields=['customer', 'name','address_display','po_date','delivery_date','status'], 
+                                       fields=['customer', 'name','address_display','UNIX_TIMESTAMP(po_date) as po_date','UNIX_TIMESTAMP(delivery_date) as delivery_date','status'], 
                                        order_by='delivery_date desc', 
                                        start=page_size*(page_number-1), page_length=page_size,
                                         )
         for sale_order in sale_orders :
-            sale_order['po_date'] = datetime.combine(sale_order['po_date'], datetime.min.time()).timestamp()
-            sale_order['delivery_date'] = datetime.combine(sale_order['delivery_date'], datetime.min.time()).timestamp()
             sale_order['custom_id'] = frappe.db.get_value("Customer",filters={'name': sale_order['customer']},fieldname=['customer_id'])
         total_order = frappe.db.count("Sales Order", filters= query)
 
