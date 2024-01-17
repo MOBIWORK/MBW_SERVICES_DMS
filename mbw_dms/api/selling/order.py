@@ -3,7 +3,7 @@ from frappe import _
 import json
 from datetime import datetime
 from pypika import  Order, CustomFunction
-
+UNIX_TIMESTAMP = CustomFunction('UNIX_TIMESTAMP', ['day'])
 from mbw_dms.api.common import (
     exception_handel,
     gen_response,
@@ -74,7 +74,7 @@ def get_sale_order(**data):
                     .on(SalesOrder.name == SalesOrderItem.parent)
                     .where(SalesOrder.name == data.get('name'))
                     .select(
-                        SalesOrder.customer,SalesOrder.customer_name,SalesOrder.address_display,SalesOrder.delivery_date,SalesOrder.set_warehouse
+                        SalesOrder.customer,SalesOrder.customer_name,SalesOrder.address_display,UNIX_TIMESTAMP(SalesOrder.delivery_date).as_('delivery_date'),SalesOrder.set_warehouse
                         ,SalesOrder.taxes_and_charges,SalesOrder.total_taxes_and_charges, SalesOrder.apply_discount_on, SalesOrder.additional_discount_percentage,SalesOrder.discount_amount,SalesOrder.contact_person,SalesOrder.rounded_total
                         , SalesOrderItem.item_name,SalesOrderItem.item_code,SalesOrderItem.qty, SalesOrderItem.uom,SalesOrderItem.amount,SalesOrderItem.discount_amount,SalesOrderItem.discount_percentage
                     )
