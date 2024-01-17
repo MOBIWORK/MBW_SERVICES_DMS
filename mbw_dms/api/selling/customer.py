@@ -45,7 +45,7 @@ def list_customer(**kwargs):
             my_filter["custom_birthday"] = ['between', [from_date, to_date]]
         customers = frappe.db.get_list("Customer",
                                 filters= my_filter,
-                                fields=["name", "customer_name","customer_type", "customer_group", "territory", "industry", "image", "customer_primary_contact", "customer_primary_address", "custom_birthday", "customer_details"],
+                                fields=["name", "customer_name","customer_id","customer_type", "customer_group", "territory", "industry", "image", "customer_primary_contact", "customer_primary_address", "custom_birthday", "customer_details"],
                                 start=page_size*(page_number-1), 
                                 page_length=page_size)
                                 
@@ -87,3 +87,16 @@ def delete_customer(name):
         gen_response(200, "ok",[])
     except Exception as e:
         exception_handel(e)
+
+#create customer
+@frappe.whitelist(methods="POST")
+def create_customer(**kwargs):
+    args = frappe._dict(kwargs)
+    new_customer = frappe.new_doc('Customer')
+    new_customer.customer_id = kwargs.customer_id
+    new_customer.customer_name = kwargs.customer_name
+    new_customer.customer_type = kwargs.customer_type
+    new_customer.customer_group = kwargs.customer_group
+    new_customer.territory = kwargs.territory
+    new_customer.custom_birthday = kwargs.custom_birthday
+    return new_customer
