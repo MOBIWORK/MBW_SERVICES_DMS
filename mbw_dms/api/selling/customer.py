@@ -55,7 +55,7 @@ def list_customer(**kwargs):
             if customer['custom_birthday'] is not None:
                 customer['custom_birthday'] = datetime.combine(customer['custom_birthday'], datetime.min.time()).timestamp()
             customer['image'] = validate_image(customer.get("image"))
-            customer['contact'] = frappe.db.get_value('Contact', {"name" : customer.get('customer_primary_contact')}, ['first_name'],as_dict=1)
+            customer['contact'] = frappe.db.get_value('Contact', {"name" : customer.get('customer_primary_contact')}, ['first_name', "phone"],as_dict=1)
             customer['address'] = frappe.db.get_value('Address', {"name" : customer.get('customer_primary_address')}, ['address_line1', 'phone'],as_dict=1)
             customer['cre_limid'] = frappe.db.get_all("Customer Credit Limit", {"parent" : customer.get('name')}, ['credit_limit'])
         
@@ -77,3 +77,13 @@ def list_customer_type():
         gen_response(200, "Thành công", brand)
     except Exception as e:
         return exception_handel(e)
+    
+#delete customer
+@frappe.whitelist(methods="DELETE")
+def delete_customer(name):
+    try:
+
+        frappe.delete_doc('Customer',name)
+        gen_response(200, "ok",[])
+    except Exception as e:
+        exception_handel(e)
