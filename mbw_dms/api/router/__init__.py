@@ -114,11 +114,13 @@ def create_router(**body):
             if isinstance(body[key_router], list):
                 for customer in body[key_router]:
                     for key_cs in customer:
-                        if key_cs not in field_customers_validate or (key_cs in field_customers_validate and not customer[key_cs]) :
+                        # if key_cs not in field_customers_validate or (key_cs in field_customers_validate and not customer[key_cs]) :
+                        if key_cs not in field_customers_validate  :
                             gen_response(406,f"Field {key_cs} not validate",None)
                             return 
             else:
-                 if key_router not in field_validate or ( key_router in field_validate and not body[key_router] ) :
+                #  if key_router not in field_validate or ( key_router in field_validate and not body[key_router] ) :
+                 if key_router not in field_validate :
                         gen_response(406,f"Field {key_router} not validate",None)
                         return
         body['doctype'] = "DMS Router"
@@ -141,9 +143,9 @@ def get_customer(**filters):
     try:
         page_size =  int(filters.get('page_size')) if filters.get('page_size') else 20
         page_number = int(filters.get('page_number') )if filters.get('page_number') and int(filters.get('page_number')) <= 0 else 1
-        customer_group = data.get('customer_group') if data.get('customer_group') else False
-        customer_type = data.get('customer_type') if data.get('customer_type') else False 
-        customer_name = data.get('customer_name') if data.get('customer_name') else False 
+        customer_group = filters.get('customer_group') if filters.get('customer_group') else False
+        customer_type = filters.get('customer_type') if filters.get('customer_type') else False 
+        customer_name = filters.get('customer_name') if filters.get('customer_name') else False 
         queryFilters = {}
         if customer_type:
             queryFilters['customer_type'] = customer_type
@@ -151,7 +153,22 @@ def get_customer(**filters):
             queryFilters['customer_group'] = customer_group
         if customer_name:
             queryFilters['customer_name'] = ['like',f"%{customer_name}%"]
-        data = frappe.db.get_list("Customer",queryFilters,["name",'customer_id',"customer_name",'UNIX_TIMESTAMP(custom_birthday) as custom_birthday',"location","customer_type","customer_name","customer_primary_address as display_address","mobile_no as phone_number"],start=page_size*(page_number-1), page_length=page_size)
-        gen_response(200,"",data)
+        data = frappe.db.get_list(
+            "Customer",
+            queryFilters,
+            ["name",'customer_id',"customer_name",'UNIX_TIMESTAMP(custom_birthday) as custom_birthday',
+             "location","customer_type","customer_name",
+             "customer_primary_address as display_address","mobile_no as phone_number"],
+            start=page_size*(page_number-1), 
+            page_length=page_size)
+        total = len(frappe.db.get_list(
+            "Customer",
+            queryFilters))
+        gen_response(200,"",{
+            "data":data,
+            "total": total,
+            "page_size": page_size,
+            "page_number": page_number
+        })
     except Exception as e:
         exception_handel(e)

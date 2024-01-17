@@ -112,3 +112,34 @@ export const FilterForm = {
     district: "Quận/huyện",
     ward: "Phường/xã",
 }
+
+export const optionsTravel_date = [
+    {
+        label: "Thứ 2",
+        value: "Thứ 2"
+    },
+    {
+        label: "Thứ 3",
+        value: "Thứ 3"
+    },
+    {
+        label: "Thứ 4",
+        value: "Thứ 4"
+    },
+    {
+        label: "Thứ 5",
+        value: "Thứ 5"
+    },
+    {
+        label: "Thứ 6",
+        value: "Thứ 6"
+    },
+    {
+        label: "Thứ 7",
+        value: "Thứ 7"
+    },
+    {
+        label: "Chủ nhật",
+        value: "Chủ nhật"
+    },
+]

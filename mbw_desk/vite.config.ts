@@ -21,4 +21,10 @@ export default defineConfig({
   optimizeDeps: {
     include: ['feather-icons', 'showdown',"tailwind.config.js"],
   },
+  server: {
+    port: 8001
+  },
+  preview: {
+    port: 8080
+  }
 })

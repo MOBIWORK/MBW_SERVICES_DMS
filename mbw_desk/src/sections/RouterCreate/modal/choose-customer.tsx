@@ -1,5 +1,5 @@
-import { Button, Col, Input, Modal, Row } from "antd";
-import React, { useState } from "react";
+import { Button, Col, Input, Modal, Pagination, Row } from "antd";
+import React, { useEffect, useState } from "react";
 import { FormItemCustom, TableCustom, TagCustom } from "@/components";
 import { CloseOutlined, SearchOutlined } from "@ant-design/icons";
 import { LuFilter, LuFilterX } from "react-icons/lu";
@@ -13,6 +13,7 @@ import {
 } from "../data";
 import FilterCustomer from "./filter";
 import { useForm } from "antd/es/form/Form";
+import { AxiosService } from "../../../services/server";
 
 const columnSelectCustomer: ColumnsType<CustomerType> = [
   ...commonTable,
@@ -43,14 +44,24 @@ const handleFilter = (filters: any): Array<any> => {
   return arrayFilter;
 };
 
-export function ChooseCustomer() {
+type Props = {
+  selected : any[],
+  handleAdd: any,
+  closeModal:() => void
+}
+
+export function ChooseCustomer({selected,handleAdd,closeModal}:Props) {
   const [form] = useForm();
   const [customerChoose, setCustomerChoose] = useState<CustomerType[]>([]);
   const [customerList, setCustomerList] =
     useState<CustomerType[]>(baseCustomers);
   const [filter, setFilter] = useState<{}>({});
   const [openFilter, setOpenFilter] = useState<boolean>(false);
+  const PAGE_SIZE=20
+  const [page_number,setPageNumber] = useState<number>(1)
+  const [total_Customer,setTotalNumber] = useState<number>(40)
   const rowSelection = {
+    selectedRowKeys: customerChoose && customerChoose.map(value => value.name) ,
     onChange: (selectedRowKeys: React.Key[], selectedRows: CustomerType[]) => {
       setCustomerChoose(selectedRows);
     },
@@ -72,12 +83,36 @@ export function ChooseCustomer() {
         })
         
     }else {
-        console.log('hể');
-        
         form.resetFields()
         setFilter({})
     }
   }
+  useEffect(()=> {
+    (async() => {
+      const rsCustomer = await AxiosService.get('/api/method/mbw_dms.api.router.get_customer',{
+        params: {
+          ...filter,
+          page_size: PAGE_SIZE,
+          page_number
+        }
+      })
+      setCustomerList(rsCustomer?.result?.data)
+      setTotalNumber(rsCustomer.result?.total)
+      console.log("rsCustomer",rsCustomer);
+      
+    })()
+  },[filter,page_number])
+
+  const handleAddCustomer =() => {
+    if(customerChoose.length >0) {
+      handleAdd(customerChoose)
+    }
+    closeModal()
+  }
+
+  useEffect(() => {
+    setCustomerChoose(selected)
+  },[selected])
   return (
     <>
       <Row className="justify-between">
@@ -106,9 +141,9 @@ export function ChooseCustomer() {
         </Col>
         <Col className="inline-flex items-center">
           <span className="mr-4">
-            Đã chọn {customerChoose.length} khách hàng
+            Đã chọn {customerChoose.length || 0} khách hàng
           </span>
-          <Button type="primary">Thêm</Button>
+          <Button type="primary" onClick={handleAddCustomer}>Thêm</Button>
         </Col>
       </Row>
       <div className="py-5 px-4">
@@ -133,10 +168,16 @@ export function ChooseCustomer() {
         }}
         columns={columnSelectCustomer}
         dataSource={customerList.map((value: CustomerType) => ({
-          key: value.customer_id,
+          key: value.name,
           ...value,
         }))}
+        pagination={false}
       />
+      <Row className="justify-end mt-2">
+        <Pagination defaultCurrent={page_number} pageSize={PAGE_SIZE}  total={total_Customer} onChange={(page,pageSize) => {
+          setPageNumber(page);          
+        }}/>
+      </Row>
       <Modal
         width={451}
         title="Bộ lọc"

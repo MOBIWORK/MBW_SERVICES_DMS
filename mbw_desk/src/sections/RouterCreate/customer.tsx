@@ -10,9 +10,14 @@ import CustomerList from "./customer-list";
 import CustomerMap from "./customer-map";
 import { CustomerType } from "./type";
 import { ChooseCustomer, ImportCustomer } from "./modal";
-export default function Customer() {
+
+type Props = {
+  listCustomer: any[],
+  handleCustomer: any
+}
+
+export default function Customer({listCustomer,handleCustomer}:Props) {
   const [viewMode,setViewMode] = useState('list')
-  const [customerList,setCustomerList] = useState<CustomerType[]>([])
   const [openChoose,setOpenChoose] = useState<boolean>(false)
   const [openImport,setOpenImport] = useState<boolean>(false)
   const handeClose = (type:'Choose'| 'Import' | null) => {
@@ -39,10 +44,7 @@ export default function Customer() {
       default: 
     }
   }
-  useEffect(()=> {
-    setCustomerList(baseCustomers)
 
-  },[])
   return (
     <>
       <Row gutter={16} className={"justify-between p-4 pb-5 pt-10 mt-0"}>
@@ -80,10 +82,10 @@ export default function Customer() {
         </Col>
       </Row>
       <div>
-        {viewMode == 'list' ? <CustomerList data={customerList} handleData={setCustomerList}/> : <CustomerMap data={customerList}/>}
+        {viewMode == 'list' ? <CustomerList data={listCustomer} handleData={handleCustomer}/> : <CustomerMap data={listCustomer}/>}
       </div>
       <Modal width={1240} open={openChoose} onCancel={handeClose.bind(null,'Choose')} title={<strong className="text-xl">Chọn khách hàng</strong>} footer={false}> 
-        <ChooseCustomer/>
+        <ChooseCustomer selected={listCustomer} handleAdd={handleCustomer} closeModal={setOpenChoose.bind(null,false)}/>
       </Modal>
       <Modal width={777}   open={openImport} onCancel={handeClose.bind(null,'Import')} okText='Tiếp tục' cancelText='Hủy' title={<strong className="text-xl">Nhập dữ liệu khách hàng</strong>}>
         <ImportCustomer />

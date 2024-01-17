@@ -1,4 +1,5 @@
 export type CustomerType = {
+    name?:string,
     customer?: string,
     customer_id?: string,
     customer_name?: string,

@@ -8,7 +8,12 @@ export const FormItemCustom = styled(Form.Item)<{ disabled?: boolean }>`
   line-height: normal;
 }
 
-
+& label.ant-form-item-required{
+  &::before {
+    display: none!important;
+  }
+    
+}
 
 & .ant-form-item-label {
   & > label {
