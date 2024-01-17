@@ -88,7 +88,7 @@ def get_sale_order(**data):
                         ,SalesOrderTaxes.tax_amount,SalesOrderTaxes.rate,SalesOrderTaxes.account_head,SalesOrderTaxes.charge_type,
                     )
                     ).run(as_dict =1)
-            detail_order = {"list_items": [],'taxes': []}
+            detail_order = {"list_items": []}
             taxes = []
             for item in detail :
                 items_list = {}
