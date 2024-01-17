@@ -11,6 +11,14 @@ from mbw_dms.api.common import (
 )
 from mbw_dms.config_translate import i18n
 
+from pypika import Query, Table, Field
+
+from mbw_dms.api.common import (
+    exception_handel,
+    gen_response,
+)
+from mbw_dms.config_translate import i18n
+
 
 @frappe.whitelist(allow_guest=True,methods='GET')
 def get_list_sales_order(**filters):
@@ -29,7 +37,7 @@ def get_list_sales_order(**filters):
             query['status'] = status
         sale_orders =frappe.db.get_list('Sales Order', 
                                        filters=query, 
-                                       fields=['customer', 'name','address_display','UNIX_TIMESTAMP(po_date) as po_date','UNIX_TIMESTAMP(delivery_date) as delivery_date','status'], 
+                                       fields=['customer', 'name','address_display','UNIX_TIMESTAMP(po_date) as po_date','UNIX_TIMESTAMP(delivery_date) as delivery_date','grand_total','rounding_adjustment','rounded_total','status'], 
                                        order_by='delivery_date desc', 
                                        start=page_size*(page_number-1), page_length=page_size,
                                         )
@@ -49,19 +57,34 @@ def get_list_sales_order(**filters):
 
 
 @frappe.whitelist(methods='GET')
-def get_sale_order(name):
+def get_sale_order(**data):
     try:
-        detail_sales_order = frappe.get_doc("Sales Order",name)
-        # field_detail_sales = ['customer','customer_name','po_no',"address_display",'total','total_taxes_and_charges']
-        # field_detail_items = ['customer','customer_name','po_no',"address_display"]
-        # info_sales_order = {}
-        # if detail_sales_order: 
-        #     item_list = detail_sales_order.get('items')
-        #     discount = detail_sales_order.get('payment_schedule')
-        #     for key,value in detail_sales_order.items():
-        #         if key in field_detail_sales:
-        #             info_sales_order[key] = value
-        gen_response(200,'',detail_sales_order)
+        detail_sales_order = frappe.db.get_value("Sales Order",data.get("name"),['*'],as_dict=1)
+        SalesOrder = frappe.qb.DocType("Sales Order")
+        SalesOrderItem = frappe.qb.DocType("Sales Order Item")
+        field_detail_sales = ['customer','customer_name','address_display',"delivery_date",'set_warehouse','taxes_and_charges','total_taxes_and_charges','apply_discount_on','additional_discount_percentage','discount_amount','contact_person','rounded_total']
+        field_detail_items = ['item_name','item_code','qty',"uom",'amount','discount_amount','discount_percentage']
+        detail = (frappe.qb.from_(SalesOrder)
+                  .inner_join(SalesOrderItem)
+                  .on(SalesOrder.name == SalesOrderItem.parent)
+                  .where(SalesOrder.name == data.get('name'))
+                  .select(
+                      SalesOrder.customer,SalesOrder.customer_name,SalesOrder.address_display,SalesOrder.delivery_date,SalesOrder.set_warehouse
+                      ,SalesOrder.taxes_and_charges,SalesOrder.total_taxes_and_charges, SalesOrder.apply_discount_on, SalesOrder.additional_discount_percentage,SalesOrder.discount_amount,SalesOrder.contact_person,SalesOrder.rounded_total
+                      , SalesOrderItem.item_name,SalesOrderItem.item_code,SalesOrderItem.qty, SalesOrderItem.uom,SalesOrderItem.amount,SalesOrderItem.discount_amount,SalesOrderItem.discount_percentage
+                  )
+                  ).run(as_dict =1)
+        detail_order = {"list_items": []}
+        for item in detail :
+            items_list = {}
+            for key_item, value in item.items() :
+                if key_item in field_detail_sales:                    
+                    detail_order.setdefault(key_item,value)
+                elif key_item in field_detail_items:
+                    items_list[key_item] = value
+            detail_order['list_items'].append(items_list)
+
+        gen_response(200,'',detail_order)
         return
     except Exception as e: 
         exception_handel(e)
