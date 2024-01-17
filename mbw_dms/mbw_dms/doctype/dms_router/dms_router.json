@@ -44,7 +44,7 @@
    "fieldname": "travel_date",
    "fieldtype": "Select",
    "label": "Ng\u00e0y \u0111i tuy\u1ebfn",
-   "options": "Kh\u00f4ng gi\u1edbi h\u1ea1n\nTh\u1ee9 2\nTh\u1ee9 3\nTh\u1ee9 4\nTh\u1ee9 5\nTh\u1ee9 6\nTh\u1ee9 7"
+   "options": "Kh\u00f4ng gi\u1edbi h\u1ea1n\nTh\u1ee9 2\nTh\u1ee9 3\nTh\u1ee9 4\nTh\u1ee9 5\nTh\u1ee9 6\nTh\u1ee9 7\nCh\u1ee7 nh\u1eadt"
   },
   {
    "fieldname": "cb_1",
@@ -96,7 +96,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-01-17 14:58:37.288384",
+ "modified": "2024-01-17 15:00:06.194037",
  "modified_by": "Administrator",
  "module": "MBW DMS",
  "name": "DMS Router",
