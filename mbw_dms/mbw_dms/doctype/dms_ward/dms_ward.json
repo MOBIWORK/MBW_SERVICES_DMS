@@ -1,0 +1,57 @@
+{
+ "actions": [],
+ "allow_import": 1,
+ "allow_rename": 1,
+ "creation": "2024-01-16 16:35:03.570143",
+ "default_view": "List",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "ma_xa",
+  "ten_xa",
+  "ma_quan_huyen"
+ ],
+ "fields": [
+  {
+   "fieldname": "ma_xa",
+   "fieldtype": "Data",
+   "label": "M\u00e3 ph\u01b0\u1eddng/x\u00e3"
+  },
+  {
+   "fieldname": "ten_xa",
+   "fieldtype": "Data",
+   "label": "T\u00ean ph\u01b0\u1eddng/x\u00e3"
+  },
+  {
+   "fieldname": "ma_quan_huyen",
+   "fieldtype": "Link",
+   "label": "M\u00e3 qu\u1eadn/huy\u1ec7n",
+   "options": "DMS District"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2024-01-17 13:59:50.593363",
+ "modified_by": "Administrator",
+ "module": "MBW DMS",
+ "name": "DMS Ward",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
