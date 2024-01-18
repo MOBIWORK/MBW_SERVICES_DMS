@@ -145,3 +145,17 @@ def get_report_doc(report_name):
     if not frappe.has_permission(doc.ref_doctype, "report"):
         gen_response(403, "You don't have permission", [])
     return doc
+
+def post_image(name_image, faceimage, doc_type, doc_name):
+    # save file and insert Doctype File
+    file_name = name_image + "_" + str(datetime.now()) + "_.png"
+    imgdata = base64.b64decode(faceimage)
+
+    doc_file = save_file(file_name, imgdata, doc_type, doc_name,
+                         folder=None, decode=False, is_private=0, df=None)
+
+    # delete image copy
+    path_file = "/files/" + file_name
+    delete_file(path_file)
+    file_url = BASE_URL + doc_file.get('file_url')
+    return file_url

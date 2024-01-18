@@ -8,7 +8,8 @@ from mbw_dms.api.common import (
     exception_handel,
     gen_response,
     validate_image,
-    convert_timestamp
+    convert_timestamp,
+    post_image
 )
 from mbw_dms.config_translate import i18n
 
@@ -95,14 +96,16 @@ def create_customer(**kwargs):
     try:
         # Tạo mới khách hàng
         new_customer = frappe.new_doc('Customer')
-        normal_fields = ['customer_id', 'customer_name', 'customer_type', 'customer_group', 'territory', 'customer_details']
+        normal_fields = ['customer_id', 'customer_name', 'customer_type', 'customer_group', 'territory', 'customer_details', 'website']
         date_fields = ['custom_birthday']
         for key, value in kwargs.items():
             if key in normal_fields:
                 new_customer.set(key, value)
             elif key in date_fields:
-                custom_birthday = convert_timestamp(float(value), is_datetime=True)
+                custom_birthday = convert_timestamp(float(value), is_datetime=False)
                 new_customer.set(key, custom_birthday)
+        new_customer.device_id = json.dumps({"longitude": kwargs.get(
+                "longitude"), "latitude": kwargs.get("latitude")})
 
         new_customer.append('credit_limits', {
             'company': kwargs.get('company'),
@@ -128,7 +131,7 @@ def create_customer(**kwargs):
 
         # Tạo mới contact khách hàng
         new_contact = frappe.new_doc('Contact')
-        contact_fields = ['first_name', 'mobile_no', "address_contact"]
+        contact_fields = ['first_name', "address_contact"]
         for key, value in kwargs.items():
             if key in contact_fields:
                 new_contact.set(key, value)
@@ -136,6 +139,9 @@ def create_customer(**kwargs):
         new_contact.append('links', {
             'link_doctype': new_customer.doctype,
             'link_name': new_customer.name,
+        })
+        new_contact.append('phone_nos', {
+            'phone': kwargs.get('phone')
         })
 
         new_address_contact = frappe.new_doc('Address')
@@ -156,7 +162,18 @@ def create_customer(**kwargs):
 
         new_customer.customer_primary_contact = new_contact.name
         new_customer.customer_primary_address = new_address_cus.name
+        new_customer.image = post_image(name_image=kwargs.get('name_image'), faceimage=kwargs.get('faceimage'), doc_type='Customer', doc_name=new_customer.name)
         new_customer.save()
+
+        router = frappe.get_doc('DMS Router', kwargs.get('router_name'))
+        router.append('customers', {
+            'customer': new_customer.name,
+            'customer_id': new_customer.customer_id,
+            'customer_name': new_customer.customer_name,
+            'display_address': new_customer.customer_primary_address,
+            'frequency': kwargs.get('frequency')
+        })
+        router.save()
 
         frappe.db.commit()
         return gen_response(200, 'Thành công', {"name": new_customer.name})
