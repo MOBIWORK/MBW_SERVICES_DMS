@@ -36,10 +36,7 @@ export default function FilterCustomer({ form, filter, setFilter }: Props) {
       );
 
       let rsCities:rsData<any[]>  = await  AxiosService.get("/api/method/mbw_dms.api.location.list_province")
-      SetCities(rsCities.result.map(city => ({
-        label: city.ten_tinh,
-        value: city.ma_tinh
-      })))
+      SetCities(rsCities.result)
 
       let { results } = rsEmployee;
       setCustomerGroup(
@@ -52,29 +49,32 @@ export default function FilterCustomer({ form, filter, setFilter }: Props) {
   }, []);
 
   const handleSetListDistrict = async (value:string) => {
-    let rsDistrict = await AxiosService.get('/api/method/mbw_dms.api.location.list_district', {
-      params: {
-        ma_tinh_thanh: Number.parseInt(value)
-      }
-    })
+    let ma_tinh_thanh = listCities.find(city => city.ten_tinh == value)?.ma_tinh
+    
+    if (ma_tinh_thanh) {
+      let rsDistrict = await AxiosService.get('/api/method/mbw_dms.api.location.list_district', {
+        params: {
+          ma_tinh_thanh: Number.parseInt(ma_tinh_thanh)
+        }
+      })
+  
+      SetDistrict(rsDistrict.result)
 
-    SetDistrict(rsDistrict.result.map(district => ({
-      label: district.ten_huyen,
-      value: district.ma_huyen
-    })))
+    }
 
   }
   const handleSetListWard = async (value:string) => {
-    let rsWard = await AxiosService.get('/api/method/mbw_dms.api.location.list_ward', {
-      params: {
-        ma_quan_huyen: value
-      }
-    })
+    let ma_huyen = listDistrict.find(district => district.ten_huyen == value)?.ma_huyen
+    if(ma_huyen) {
+      let rsWard = await AxiosService.get('/api/method/mbw_dms.api.location.list_ward', {
+        params: {
+          ma_quan_huyen: ma_huyen
+        }
+      })
+      Setward(rsWard.result)
 
-    Setward(rsWard.result.map(ward => ({
-      label: ward.ten_xa,
-      value: ward.ma_xa
-    })))
+    }
+
 
   }
   return (
@@ -102,13 +102,22 @@ export default function FilterCustomer({ form, filter, setFilter }: Props) {
       </FormItemCustom>
       <p className="font-medium text-sm">Địa chỉ</p>
       <FormItemCustom label={"Tỉnh/Thành phố"} name="city">
-        <Select options={listCities} onChange={handleSetListDistrict}/>
+        <Select options={listCities.map(city => ({
+        label: city.ten_tinh,
+        value: city.ten_tinh
+      }))} onChange={handleSetListDistrict}/>
       </FormItemCustom>
       <FormItemCustom label={"Quận/huyện"} name="district" >
-        <Select options={listDistrict} disabled={!!(listDistrict.length == 0)}  onChange={handleSetListWard}/>
+        <Select options={listDistrict.map(district => ({
+        label: district.ten_huyen,
+        value: district.ten_huyen
+      }))} disabled={!!(listDistrict.length == 0)}  onChange={handleSetListWard}/>
       </FormItemCustom>
       <FormItemCustom label={"Phường/xã"} name="ward" >
-        <Select options={listward} disabled={!!(listward.length == 0)}/>
+        <Select options={listward.map(ward => ({
+        label: ward.ten_xa,
+        value: ward.ten_xa
+      }))} disabled={!!(listward.length == 0)} />
       </FormItemCustom>
     </Form>
   );

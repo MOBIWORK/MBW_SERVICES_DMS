@@ -146,6 +146,10 @@ def get_customer(**filters):
         customer_group = filters.get('customer_group') if filters.get('customer_group') else False
         customer_type = filters.get('customer_type') if filters.get('customer_type') else False 
         customer_name = filters.get('customer_name') if filters.get('customer_name') else False 
+
+        city = filters.get('city') if filters.get('city') else False 
+        district = filters.get('district') if filters.get('district') else False 
+        ward = filters.get('ward') if filters.get('ward') else False 
         queryFilters = {}
         if customer_type:
             queryFilters['customer_type'] = customer_type
@@ -153,6 +157,29 @@ def get_customer(**filters):
             queryFilters['customer_group'] = customer_group
         if customer_name:
             queryFilters['customer_name'] = ['like',f"%{customer_name}%"]
+
+        if city or district or ward:
+            Address = frappe.qb.DocType("Address")
+            DynamicLink = frappe.qb.DocType("Dynamic Link")  
+            queryAddress = DynamicLink.link_doctype == "Customer"   
+            list_customer = []     
+            if city:
+                queryAddress = (Address.city == city)
+            if district :
+                queryAddress = queryAddress & (Address.county == district)
+            if ward:
+                queryAddress = queryAddress & (Address.address_line2 == ward)
+            listCustomer = (frappe.qb.from_(Address)
+                            .inner_join(DynamicLink)
+                            .on(DynamicLink.parent == Address.name)
+                            .where(queryAddress )
+                            .select(DynamicLink.link_name)
+                            ).run()
+            for customers in listCustomer:
+                list_customer += customers
+            print('list_customer',list_customer)
+            queryFilters['name'] = ['in',list_customer]
+
         data = frappe.db.get_list(
             "Customer",
             queryFilters,
@@ -172,3 +199,25 @@ def get_customer(**filters):
         })
     except Exception as e:
         exception_handel(e)
+
+@frappe.whitelist(allow_guest=True)
+def test_address(**filters) :
+    city = filters.get('city') if filters.get('city') else False 
+    district = filters.get('district') if filters.get('district') else False 
+    ward = filters.get('ward') if filters.get('ward') else False 
+    Address = frappe.qb.DocType("Address")
+    DynamicLink = frappe.qb.DocType("Dynamic Link")  
+    queryAddress = DynamicLink.link_doctype == "Customer"     
+    if city:
+        queryAddress = (Address.city == city)
+    if district :
+        queryAddress = queryAddress & (Address.county == district)
+    if ward:
+        queryAddress = queryAddress & (Address.address_line2 == ward)
+    listCustomer = (frappe.qb.from_(Address)
+                    .inner_join(DynamicLink)
+                    .on(DynamicLink.parent == Address.name)
+                    .where(queryAddress)
+                    .select(DynamicLink.link_name)
+                    ).run()
+    return listCustomer
