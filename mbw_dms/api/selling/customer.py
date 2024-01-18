@@ -7,7 +7,8 @@ from pypika import  Order, CustomFunction
 from mbw_dms.api.common import (
     exception_handel,
     gen_response,
-    validate_image
+    validate_image,
+    convert_timestamp
 )
 from mbw_dms.config_translate import i18n
 
@@ -91,12 +92,73 @@ def delete_customer(name):
 #create customer
 @frappe.whitelist(methods="POST")
 def create_customer(**kwargs):
-    args = frappe._dict(kwargs)
-    new_customer = frappe.new_doc('Customer')
-    new_customer.customer_id = kwargs.customer_id
-    new_customer.customer_name = kwargs.customer_name
-    new_customer.customer_type = kwargs.customer_type
-    new_customer.customer_group = kwargs.customer_group
-    new_customer.territory = kwargs.territory
-    new_customer.custom_birthday = kwargs.custom_birthday
-    return new_customer
+    try:
+        # Tạo mới khách hàng
+        new_customer = frappe.new_doc('Customer')
+        normal_fields = ['customer_id', 'customer_name', 'customer_type', 'customer_group', 'territory', 'customer_details']
+        date_fields = ['custom_birthday']
+        for key, value in kwargs.items():
+            if key in normal_fields:
+                new_customer.set(key, value)
+            elif key in date_fields:
+                custom_birthday = convert_timestamp(float(value), is_datetime=True)
+                new_customer.set(key, custom_birthday)
+
+        new_customer.append('credit_limits', {
+            'company': kwargs.get('company'),
+            'credit_limit': kwargs.get('credit_limit')
+        })
+        new_customer.insert()
+
+        # Tạo mới địa chỉ khách hàng
+        new_address_cus = frappe.new_doc('Address')
+        new_address_cus.address_title = kwargs.get('address_title_cus')
+        new_address_cus.address_type = kwargs.get('address_type_cus')
+        new_address_cus.address_line1 = kwargs.get('detail_address_cus')
+        new_address_cus.address_line2 = kwargs.get('ward_cus')
+        new_address_cus.city = kwargs.get('district_cus')
+        new_address_cus.state = kwargs.get('province_cus')
+        new_address_cus.is_shipping_address = kwargs.get('is_shipping_address')
+        new_address_cus.is_primary_address = kwargs.get('is_primary_address')
+        new_address_cus.append('links', {
+            'link_doctype': new_customer.doctype,
+            'link_name': new_customer.name,
+        })
+        new_address_cus.insert()
+
+        # Tạo mới contact khách hàng
+        new_contact = frappe.new_doc('Contact')
+        contact_fields = ['first_name', 'mobile_no', "address_contact"]
+        for key, value in kwargs.items():
+            if key in contact_fields:
+                new_contact.set(key, value)
+
+        new_contact.append('links', {
+            'link_doctype': new_customer.doctype,
+            'link_name': new_customer.name,
+        })
+
+        new_address_contact = frappe.new_doc('Address')
+        new_address_contact.address_title = kwargs.get('adr_title_contact')
+        new_address_contact.address_type = kwargs.get('adr_type_contact')
+        new_address_contact.address_line1 = kwargs.get('detail_adr_contact')
+        new_address_contact.address_line2 = kwargs.get('ward_contact')
+        new_address_contact.city = kwargs.get('district_contact')
+        new_address_contact.state = kwargs.get('province_contact')
+        new_address_contact.append('links', {
+            'link_doctype': new_customer.doctype,
+            'link_name': new_customer.name,
+        })
+        new_address_contact.insert()
+
+        new_contact.address = new_address_contact.name
+        new_contact.insert()
+
+        new_customer.customer_primary_contact = new_contact.name
+        new_customer.customer_primary_address = new_address_cus.name
+        new_customer.save()
+
+        frappe.db.commit()
+        return gen_response(200, 'Thành công', {"name": new_customer.name})
+    except Exception as e:
+        return exception_handel(e)
