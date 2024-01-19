@@ -1,0 +1,51 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2024-01-19 15:24:35.656062",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "item_code",
+  "item_unit",
+  "quanity",
+  "exp_time"
+ ],
+ "fields": [
+  {
+   "fieldname": "item_code",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "M\u00e3 S\u1ea3n Ph\u1ea9m"
+  },
+  {
+   "fieldname": "item_unit",
+   "fieldtype": "Data",
+   "label": "\u0110\u01a1n v\u1ecb t\u00ednh"
+  },
+  {
+   "fieldname": "quanity",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "S\u1ed1 L\u01b0\u1ee3ng"
+  },
+  {
+   "fieldname": "exp_time",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "H\u1ea1n S\u1eed D\u1ee5ng"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2024-01-19 15:26:18.642267",
+ "modified_by": "Administrator",
+ "module": "MBW DMS",
+ "name": "DMS Inventory Items",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
