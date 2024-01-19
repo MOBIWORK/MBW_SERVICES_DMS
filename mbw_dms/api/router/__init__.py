@@ -96,7 +96,18 @@ def get_customer_router(**data):
             FiltersCustomer['customer_group'] =customer_group
         if customer_type:
             FiltersCustomer['customer_type'] =customer_group
-        detail_customer = frappe.db.get_list('Customer',filters= FiltersCustomer,fields=['*','UNIX_TIMESTAMP(custom_birthday) as birthday'],start=page_size*(page_number-1), page_length=page_size)
+        fields_customer = [
+            'name','customer_primary_address'
+            ,'customer_id','customer_location_primary','mobile_no'
+            ,'customer_name'
+            ,'UNIX_TIMESTAMP(custom_birthday) as birthday'
+            ]
+        detail_customer = frappe.db.get_list('Customer',filters= FiltersCustomer,fields=fields_customer,start=page_size*(page_number-1), page_length=page_size)
+        for customer in detail_customer:
+            customer['is_checkin'] = False
+            checkin = frappe.db.get_value("DMS Checkin",customer.get('customer_id'))
+            if checkin != None:
+                customer['is_checkin'] = True
         total_customer= len(frappe.db.get_list('Customer',filters= FiltersCustomer))
         gen_response(200,"", {
             "data": detail_customer,
