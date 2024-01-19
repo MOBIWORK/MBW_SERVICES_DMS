@@ -34,6 +34,6 @@ def create_checkin(**kwargs):
         
         new_checkin.insert()
         frappe.db.commit()
-        return gen_response(200, "Thành công", {"name": new_checkin.name})
+        return gen_response(200, "Thành công", {"name": new_checkin.kh_ma})
     except Exception as e:
         return exception_handel(e)
