@@ -190,3 +190,13 @@ def create_customer(**kwargs):
         return gen_response(200, 'Thành công', {"name": new_customer.name})
     except Exception as e:
         return exception_handel(e)
+    
+
+#list 
+@frappe.whitelist(methods="GET")
+def list_territory():
+    try:
+        territory = frappe.db.get_list('Territory', fields=["name", "territory_name"])
+        gen_response(200, "Thành công", territory)
+    except Exception as e:
+        return exception_handel(e)

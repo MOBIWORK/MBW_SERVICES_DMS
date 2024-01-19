@@ -1,0 +1,87 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2024-01-19 11:26:19.851323",
+ "default_view": "List",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "ma_van_de",
+  "loai_van_de",
+  "noi_dung",
+  "trang_thai",
+  "ma_khach_hang",
+  "ten_khach_hang",
+  "dia_chi",
+  "so_dien_thoai"
+ ],
+ "fields": [
+  {
+   "fieldname": "ma_van_de",
+   "fieldtype": "Data",
+   "label": "M\u00e3 v\u1ea5n \u0111\u1ec1"
+  },
+  {
+   "fieldname": "loai_van_de",
+   "fieldtype": "Data",
+   "label": "Lo\u1ea1i v\u1ea5n \u0111\u1ec1",
+   "unique": 1
+  },
+  {
+   "fieldname": "noi_dung",
+   "fieldtype": "Data",
+   "label": "N\u1ed9i dung"
+  },
+  {
+   "fieldname": "trang_thai",
+   "fieldtype": "Select",
+   "label": "Tr\u1ea1ng th\u00e1i",
+   "options": "Ch\u01b0a ph\u1ea3n h\u1ed3i\n\u0110\u00e3 ph\u1ea3n h\u1ed3i"
+  },
+  {
+   "fieldname": "ma_khach_hang",
+   "fieldtype": "Data",
+   "label": "M\u00e3 kh\u00e1ch h\u00e0ng"
+  },
+  {
+   "fieldname": "ten_khach_hang",
+   "fieldtype": "Data",
+   "label": "T\u00ean kh\u00e1ch h\u00e0ng"
+  },
+  {
+   "fieldname": "dia_chi",
+   "fieldtype": "Data",
+   "label": "\u0110\u1ecba ch\u1ec9"
+  },
+  {
+   "fieldname": "so_dien_thoai",
+   "fieldtype": "Data",
+   "label": "S\u1ed1 \u0111i\u1ec7n tho\u1ea1i"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2024-01-19 15:16:14.430674",
+ "modified_by": "Administrator",
+ "module": "MBW DMS",
+ "name": "DMS Problem Monitor",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
