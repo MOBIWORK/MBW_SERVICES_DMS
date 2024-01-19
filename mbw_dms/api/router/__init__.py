@@ -7,6 +7,7 @@ from pypika import  Order, CustomFunction
 from mbw_dms.api.common import (
     exception_handel,
     gen_response,
+    this_week
 )
 from mbw_dms.config_translate import i18n
 UNIX_TIMESTAMP = CustomFunction('UNIX_TIMESTAMP', ['day'])
@@ -14,6 +15,7 @@ UNIX_TIMESTAMP = CustomFunction('UNIX_TIMESTAMP', ['day'])
 @frappe.whitelist(methods='GET')
 def get_list_router(**filters):
     try:
+
         status = filters.get('status') if filters.get('status') else False
         employee = filters.get('employee') if filters.get('employee') else False
         page_size =  int(filters.get('page_size')) if filters.get('page_size') else 20
@@ -68,7 +70,7 @@ def get_customer_router(**data):
         customer_type = data.get('customer_type') if data.get('customer_type') else False
         queryFilters = {"is_deleted": False}
         if router:
-            queryFilters['name'] = router
+            queryFilters['name'] = ["in",router]
         if status: 
             queryFilters['status'] = status
         list_router = frappe.db.get_list('DMS Router',filters=queryFilters, pluck='name')
@@ -200,6 +202,8 @@ def get_customer(**filters):
     except Exception as e:
         exception_handel(e)
 
+
+# api test handle filter address
 @frappe.whitelist(allow_guest=True)
 def test_address(**filters) :
     city = filters.get('city') if filters.get('city') else False 
@@ -221,3 +225,13 @@ def test_address(**filters) :
                     .select(DynamicLink.link_name)
                     ).run()
     return listCustomer
+
+# get list router by frequency
+@frappe.whitelist(methods='GET')
+def get_all_router():
+    try:
+        list_router = frappe.db.get_list('DMS Router',fields=['name','channel_name'])
+        gen_response(200,'',list_router)
+        return 
+    except Exception as e: 
+        exception_handel(e)

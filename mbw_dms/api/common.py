@@ -23,6 +23,14 @@ import pytz
 
 BASE_URL = frappe.utils.get_request_site_address()
 
+def this_week() :
+    today = datetime.now()
+    # Lấy số tuần trong năm
+    week_number = int(today.strftime("%U")) +1
+    week  = week_number % 5 if week_number % 5 != 0 or week_number % 5 != 1 else 1
+    return week
+
+
 
 # return definition
 def gen_response(status, message, result=[]):
