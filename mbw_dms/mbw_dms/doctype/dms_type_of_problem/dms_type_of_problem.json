@@ -1,41 +1,34 @@
 {
  "actions": [],
- "allow_import": 1,
  "allow_rename": 1,
- "creation": "2024-01-16 16:30:32.452018",
+ "creation": "2024-01-19 11:47:49.820079",
  "default_view": "List",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "ma_huyen",
-  "ten_huyen",
-  "ma_tinh_thanh"
+  "ma_loai_van_de",
+  "ten_loai_van_de"
  ],
  "fields": [
   {
-   "fieldname": "ma_huyen",
+   "fieldname": "ma_loai_van_de",
    "fieldtype": "Data",
-   "label": "M\u00e3 qu\u1eadn/huy\u1ec7n"
+   "label": "M\u00e3 lo\u1ea1i v\u1ea5n \u0111\u1ec1"
   },
   {
-   "fieldname": "ten_huyen",
+   "fieldname": "ten_loai_van_de",
    "fieldtype": "Data",
-   "label": "T\u00ean qu\u1eadn/huy\u1ec7n"
-  },
-  {
-   "fieldname": "ma_tinh_thanh",
-   "fieldtype": "Link",
-   "label": "M\u00e3 t\u1ec9nh th\u00e0nh",
-   "options": "DMS Province"
+   "label": "T\u00ean lo\u1ea1i v\u1ea5n \u0111\u1ec1",
+   "unique": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-01-18 11:49:19.798374",
+ "modified": "2024-01-19 13:46:19.291432",
  "modified_by": "Administrator",
  "module": "MBW DMS",
- "name": "DMS District",
+ "name": "DMS Type of problem",
  "owner": "Administrator",
  "permissions": [
   {
@@ -51,9 +44,7 @@
    "write": 1
   }
  ],
- "show_title_field_in_link": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": [],
- "title_field": "ten_huyen"
+ "states": []
 }

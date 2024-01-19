@@ -4,3 +4,7 @@ customer_type = {
     'Proprietorship': 'Proprietorship',
     'Partnership': 'Partnership'
 }
+status_type = {
+    'Chưa phản hồi': 'Chưa phản hồi',
+    'Đã phản hồi' : 'Đã phản hồi'
+}
