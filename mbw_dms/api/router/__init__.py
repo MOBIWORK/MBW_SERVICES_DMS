@@ -7,7 +7,11 @@ from pypika import  Order, CustomFunction
 from mbw_dms.api.common import (
     exception_handel,
     gen_response,
-    this_week
+    this_week,
+)
+
+from mbw_dms.api.validators import (
+    validate_filter
 )
 from mbw_dms.config_translate import i18n
 UNIX_TIMESTAMP = CustomFunction('UNIX_TIMESTAMP', ['day'])
@@ -58,14 +62,14 @@ def get_customer_router(**data):
         page_size =  int(data.get('page_size')) if data.get('page_size') else 20
         page_number = int(data.get('page_number') )if data.get('page_number') and int(data.get('page_number')) <= 0 else 1
         #bo loc tuyen
-        router = data.get('router') if data.get('router') else False
+        router = validate_filter(type_check='type',type=list,value=data.get('router'))  if data.get('router') else False
         status = data.get('status') if data.get('status') else False
         #bo loc khach hang
         # tam bo qua bo loc khoang cach
         # distance = data.get('distance') if data.get('distance') else False
         order_by = data.get('order_by') if data.get('order_by') else False
-        birthday_from = data.get('birthday_from') if data.get('birthday_from') else False
-        birthday_to = data.get('birthday_to') if data.get('birthday_to') else False
+        birthday_from = validate_filter(type_check='timestamp',type='start',value=data.get('birthday_from')) if data.get('birthday_from') else False
+        birthday_to =validate_filter(type_check='timestamp',type='end',value=data.get('birthday_to'))  if data.get('birthday_to') else False
         customer_group = data.get('customer_group') if data.get('customer_group') else False
         customer_type = data.get('customer_type') if data.get('customer_type') else False
         queryFilters = {"is_deleted": False}
@@ -85,8 +89,8 @@ def get_customer_router(**data):
             list_customer_name.append(customer.get('customer'))
         FiltersCustomer = {"name": ["in",list_customer_name]}
         if birthday_from and birthday_to:
-            birthday_from = datetime.fromtimestamp(int(birthday_from))
-            birthday_to = datetime.fromtimestamp(int(birthday_to))
+            # birthday_from = datetime.fromtimestamp(int(birthday_from))
+            # birthday_to = datetime.fromtimestamp(int(birthday_to))
             FiltersCustomer["birthday"] =["between",[birthday_from,birthday_to]]
         if customer_group:
             FiltersCustomer['customer_group'] =customer_group

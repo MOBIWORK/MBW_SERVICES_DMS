@@ -121,3 +121,28 @@ def validate_filter_timestamp(type=None):
             else:
                 raise Exception('Vui lòng điền đúng định dạng timestamp')
     return validate
+
+
+# Kiểm tra định dạng kiểu dữ liệu
+def validate_type(type_value=None):
+    def validate(value):
+        if isinstance(value,type_value):
+            return value
+        else:
+            raise Exception(f"{value} ont type : {type_value}")
+    return validate
+def validate_filter(type_check,type=None,value=None):
+    validate = {
+        "email": validate_email,
+        "phone_number" :validate_phone_number,
+        "require": validate_not_none,
+        "date": validate_date,
+        "datetime":validate_datetime,
+        "length":validate_length(type),
+        "choice":validate_choice,
+        "boolean": validate_int_bool,
+        "timestamp": validate_filter_timestamp(type),
+        "type": validate_type(type)
+    }
+
+    return validate[type_check](value)
