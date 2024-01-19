@@ -107,25 +107,6 @@ def validate_image(user_image):
     if user_image and "http" not in user_image:
         user_image = BASE_URL + user_image
     return user_image
-
-# Convert timstamp to date/datetime
-def convert_timestamp(timestamp, timezone_str="Asia/Ho_Chi_Minh", is_datetime=True):
-    try:
-        date_time_utc = datetime.utcfromtimestamp(timestamp).replace(tzinfo=pytz.utc)
-        timezone = pytz.timezone(timezone_str)
-        date_time_local = date_time_utc.astimezone(timezone)
-        
-        formatted_datetime = ''
-        # format type datetime
-        if is_datetime == True:
-            formatted_datetime = date_time_local.strftime("%Y-%m-%d %H:%M:%S")
-        # format type date
-        if is_datetime == False:
-            formatted_datetime = date_time_local.strftime("%Y-%m-%d")
-        return formatted_datetime
-    except Exception as e:
-        print(f"Error converting timestamp to datetime: {str(e)}")
-        return None
     
 def get_datetime_now():
     return datetime.now(pytz.timezone('Asia/Ho_Chi_Minh')).replace(tzinfo=None)

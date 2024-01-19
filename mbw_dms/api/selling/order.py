@@ -7,7 +7,6 @@ UNIX_TIMESTAMP = CustomFunction('UNIX_TIMESTAMP', ['day'])
 from mbw_dms.api.common import (
     exception_handel,
     gen_response,
-    convert_timestamp,
     get_language,
 
 )
@@ -23,15 +22,13 @@ from mbw_dms.config_translate import i18n
 def get_list_sales_order(**filters):
     try:
         status = filters.get('status') if filters.get('status') else False
-        from_date = float(filters.get('from_date')) if filters.get('from_date') else False
-        to_date = float(filters.get('to_date') )if filters.get('to_date') else False
+        from_date = validate_filter_timestamp('start')(filters.get('from_date')) if filters.get('from_date') else False
+        to_date = validate_filter_timestamp('end')(filters.get('to_date')) if filters.get('to_date') else False
         page_size =  int(filters.get('page_size')) if filters.get('page_size') else 20
         page_number = int(filters.get('page_number')) if filters.get('page_number') and int(filters.get('page_number')) > 0 else 1
         print(page_size,page_number)
         query = {}
         if  from_date and to_date:
-            from_date = datetime.fromtimestamp(from_date)
-            to_date = datetime.fromtimestamp(to_date)
             query["delivery_date"] = ["between",[from_date,to_date]]
         if status:
             query['status'] = status

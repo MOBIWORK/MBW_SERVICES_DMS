@@ -8,9 +8,10 @@ from mbw_dms.api.common import (
     exception_handel,
     gen_response,
     validate_image,
-    convert_timestamp,
     post_image
 )
+from mbw_dms.api.validators import validate_date, validate_phone_number, validate_choice
+from mbw_dms.api.selling import configs
 from mbw_dms.config_translate import i18n
 
 #list customer
@@ -94,16 +95,23 @@ def delete_customer(name):
 @frappe.whitelist(methods="POST")
 def create_customer(**kwargs):
     try:
+        # Check dữ liệu đầu vào
+        phone_number = validate_phone_number(kwargs.get('phone'))
+
         # Tạo mới khách hàng
         new_customer = frappe.new_doc('Customer')
-        normal_fields = ['customer_id', 'customer_name', 'customer_type', 'customer_group', 'territory', 'customer_details', 'website']
+        normal_fields = ['customer_id', 'customer_name', 'customer_group', 'territory', 'customer_details', 'website']
         date_fields = ['custom_birthday']
+        choice_fields = ['customer_type']
         for key, value in kwargs.items():
             if key in normal_fields:
                 new_customer.set(key, value)
             elif key in date_fields:
-                custom_birthday = convert_timestamp(float(value), is_datetime=False)
+                custom_birthday = validate_date(value)
                 new_customer.set(key, custom_birthday)
+            elif key in choice_fields:
+                customer_type = validate_choice(configs.customer_type)(value)
+                new_customer.set(key, customer_type)
         new_customer.device_id = json.dumps({"longitude": kwargs.get(
                 "longitude"), "latitude": kwargs.get("latitude")})
 
@@ -141,9 +149,10 @@ def create_customer(**kwargs):
             'link_name': new_customer.name,
         })
         new_contact.append('phone_nos', {
-            'phone': kwargs.get('phone')
+            'phone': phone_number
         })
 
+        # Tạo mới địa chỉ contact
         new_address_contact = frappe.new_doc('Address')
         new_address_contact.address_title = kwargs.get('adr_title_contact')
         new_address_contact.address_type = kwargs.get('adr_type_contact')
@@ -160,11 +169,13 @@ def create_customer(**kwargs):
         new_contact.address = new_address_contact.name
         new_contact.insert()
 
+        # Thêm primary_contact, primary_address và cập nhật ảnh đại diện của khách hàng
         new_customer.customer_primary_contact = new_contact.name
         new_customer.customer_primary_address = new_address_cus.name
         new_customer.image = post_image(name_image=kwargs.get('name_image'), faceimage=kwargs.get('faceimage'), doc_type='Customer', doc_name=new_customer.name)
         new_customer.save()
 
+        # Thêm tuyến khách hàng
         router = frappe.get_doc('DMS Router', kwargs.get('router_name'))
         router.append('customers', {
             'customer': new_customer.name,
