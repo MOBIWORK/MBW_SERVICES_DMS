@@ -20,11 +20,7 @@ def list_province(**kwargs):
 @frappe.whitelist(methods='GET')
 def list_district(ma_tinh):
     try:
-        list_districts = ''
-        if ma_tinh:
-            list_districts = frappe.db.get_list('DMS District', filters={'ma_tinh_thanh': ma_tinh}, fields=['ma_huyen', 'ten_huyen', 'ma_tinh_thanh'], order_by='ma_huyen asc')
-        else:
-            list_districts = frappe.db.get_list('DMS District', fields=['ma_huyen', 'ten_huyen', 'ma_tinh_thanh'], order_by='ma_huyen asc')
+        list_districts = frappe.db.get_list('DMS District', filters={'ma_tinh_thanh': ma_tinh}, fields=['ma_huyen', 'ten_huyen', 'ma_tinh_thanh'], order_by='ma_huyen asc')
         gen_response(200, 'Thành công', list_districts)
     except Exception as e:
         return exception_handel(e)
@@ -34,11 +30,7 @@ def list_district(ma_tinh):
 @frappe.whitelist(methods='GET')
 def list_ward(ma_quan_huyen):
     try:
-        list_wards = {}
-        if ma_quan_huyen:
-            list_wards = frappe.db.get_list('DMS Ward', filters={'ma_quan_huyen': ma_quan_huyen}, fields=['ma_xa', 'ten_xa', 'ma_quan_huyen'], order_by='ma_xa asc')
-        else:
-            list_wards = frappe.db.get_list('DMS Ward', fields=['ma_xa', 'ten_xa', 'ma_quan_huyen'], order_by='ma_xa asc')
+        list_wards = frappe.db.get_list('DMS Ward', filters={'ma_quan_huyen': ma_quan_huyen}, fields=['ma_xa', 'ten_xa', 'ma_quan_huyen'], order_by='ma_xa asc')
         gen_response(200, 'Thành công', list_wards)
     except Exception as e:
         return exception_handel(e)
