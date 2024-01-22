@@ -58,7 +58,6 @@ def create_checkin_inventory(**body):
         body['create_by'] = user.get('name')
         body['inventory_items'] = items
         doc = frappe.get_doc(body)
-        print(doc)
         doc.save()
         frappe.db.commit()
         return gen_response(200, "Thành công", {"name": doc.name})
