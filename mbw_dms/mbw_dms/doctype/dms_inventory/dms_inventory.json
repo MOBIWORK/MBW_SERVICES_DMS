@@ -7,55 +7,62 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "inventory_cus_id",
-  "inventory_customer_name",
-  "inventory_cus_address",
-  "inventory_create_time",
-  "inventory_creater",
-  "inventory_items"
+  "customer_code",
+  "customer_id",
+  "customer_name",
+  "customer_address",
+  "create_time",
+  "creater_by",
+  "items"
  ],
  "fields": [
   {
-   "fieldname": "inventory_cus_id",
-   "fieldtype": "Data",
-   "label": "M\u00e3 kh\u00e1ch h\u00e0ng"
-  },
-  {
-   "fieldname": "inventory_customer_name",
+   "fieldname": "customer_name",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "T\u00ean kh\u00e1ch h\u00e0ng",
-   "reqd": 1
-  },
-  {
-   "fieldname": "inventory_cus_address",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "label": "\u0110\u1ecba Ch\u1ec9",
+   "label": "T\u00ean Kh\u00e1ch H\u00e0ng",
    "reqd": 1
   },
   {
    "default": "now",
-   "fieldname": "inventory_create_time",
+   "fieldname": "create_time",
    "fieldtype": "Datetime",
-   "label": "Th\u1eddi gian t\u1ea1o",
+   "label": "Th\u1eddi Gian T\u1ea1o",
    "reqd": 1
   },
   {
-   "fieldname": "inventory_creater",
+   "fieldname": "creater_by",
    "fieldtype": "Data",
-   "label": "Ng\u01b0\u1eddi t\u1ea1o"
+   "label": "Ng\u01b0\u1eddi T\u1ea1o"
   },
   {
-   "fieldname": "inventory_items",
+   "fieldname": "items",
    "fieldtype": "Table",
    "label": "Danh S\u00e1ch S\u1ea3n Ph\u1ea9m",
    "options": "DMS Inventory Items"
+  },
+  {
+   "fieldname": "customer_code",
+   "fieldtype": "Data",
+   "label": "Id Kh\u00e1ch H\u00e0ng",
+   "reqd": 1
+  },
+  {
+   "fieldname": "customer_id",
+   "fieldtype": "Data",
+   "label": "M\u00e3 Kh\u00e1ch H\u00e0ng"
+  },
+  {
+   "fieldname": "customer_address",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "\u0110\u1ecba Ch\u1ec9",
+   "reqd": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-01-19 16:06:50.539819",
+ "modified": "2024-01-22 09:30:42.882347",
  "modified_by": "Administrator",
  "module": "MBW DMS",
  "name": "DMS Inventory",

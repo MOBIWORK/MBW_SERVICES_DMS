@@ -1,7 +1,7 @@
 import frappe
 from datetime import datetime
 from frappe.utils.data import get_time
-from mbw_dms.api.common import exception_handel, gen_response, get_language
+from mbw_dms.api.common import exception_handel, gen_response, get_language ,get_user_id
 from mbw_dms.api.validators import (validate_datetime,validate_filter)
 from mbw_dms.config_translate import i18n
 
@@ -42,6 +42,8 @@ def create_checkin(**kwargs):
 @frappe.whitelist(methods='POST')
 def create_checkin_inventory(**body):
     try:
+        user = get_user_id()
+        return user
         normal_keys = [
             "inventory_cus_name", "inventory_cus_id", "inventory_customer_name"
             , "inventory_cus_address", "inventory_items"
