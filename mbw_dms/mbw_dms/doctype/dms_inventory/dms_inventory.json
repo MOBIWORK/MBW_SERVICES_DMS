@@ -12,7 +12,7 @@
   "customer_name",
   "customer_address",
   "create_time",
-  "creater_by",
+  "create_by",
   "items"
  ],
  "fields": [
@@ -29,11 +29,6 @@
    "fieldtype": "Datetime",
    "label": "Th\u1eddi Gian T\u1ea1o",
    "reqd": 1
-  },
-  {
-   "fieldname": "creater_by",
-   "fieldtype": "Data",
-   "label": "Ng\u01b0\u1eddi T\u1ea1o"
   },
   {
    "fieldname": "items",
@@ -58,11 +53,17 @@
    "in_list_view": 1,
    "label": "\u0110\u1ecba Ch\u1ec9",
    "reqd": 1
+  },
+  {
+   "fieldname": "create_by",
+   "fieldtype": "Data",
+   "label": "Ng\u01b0\u1eddi T\u1ea1o",
+   "reqd": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-01-22 09:30:42.882347",
+ "modified": "2024-01-22 09:49:47.380915",
  "modified_by": "Administrator",
  "module": "MBW DMS",
  "name": "DMS Inventory",

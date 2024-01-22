@@ -43,7 +43,6 @@ def create_checkin(**kwargs):
 def create_checkin_inventory(**body):
     try:
         user = get_user_id()
-        return user
         normal_keys = [
             "inventory_cus_name", "inventory_cus_id", "inventory_customer_name"
             , "inventory_cus_address", "inventory_items"
@@ -56,6 +55,7 @@ def create_checkin_inventory(**body):
         for item in items:
             item['exp_time'] = validate_filter(type_check='date',value=item['exp_time'])
         body['doctype'] = "DMS Inventory"
+        body['create_by'] = user.get('name')
         body['inventory_items'] = items
         doc = frappe.get_doc(body)
         print(doc)

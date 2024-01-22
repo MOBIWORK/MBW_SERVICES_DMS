@@ -6,7 +6,6 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "item_id",
   "item_code",
   "item_unit",
   "quanity",
@@ -35,18 +34,12 @@
    "fieldtype": "Date",
    "in_list_view": 1,
    "label": "H\u1ea1n S\u1eed D\u1ee5ng"
-  },
-  {
-   "fieldname": "item_id",
-   "fieldtype": "Data",
-   "label": "Id S\u1ea3n Ph\u1ea9m",
-   "reqd": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-01-22 09:26:55.507992",
+ "modified": "2024-01-22 09:47:51.372151",
  "modified_by": "Administrator",
  "module": "MBW DMS",
  "name": "DMS Inventory Items",
