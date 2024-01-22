@@ -96,7 +96,8 @@
   {
    "fieldname": "checkin_hinhanh",
    "fieldtype": "Data",
-   "label": "Checkin h\u00ecnh \u1ea3nh"
+   "label": "Checkin h\u00ecnh \u1ea3nh",
+   "length": 500
   },
   {
    "fieldname": "checkin_long",
@@ -151,7 +152,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-01-11 11:21:43.145608",
+ "modified": "2024-01-19 11:29:19.230867",
  "modified_by": "Administrator",
  "module": "MBW DMS",
  "name": "DMS Checkin",

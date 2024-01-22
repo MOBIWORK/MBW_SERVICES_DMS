@@ -1,16 +1,11 @@
 import frappe
 from frappe import _
-import json
-from datetime import datetime
-from pypika import  Order, CustomFunction
 
 from mbw_dms.api.common import (
     exception_handel,
     gen_response,
     validate_image,
-    get_datetime_now
 )
-from mbw_dms.config_translate import i18n
 
 #list product
 @frappe.whitelist(methods='GET')
@@ -99,6 +94,36 @@ def list_uom(**kwargs):
             uom_filter["name"] = ['like', f'%{name}%']
         list_uom = frappe.db.get_list('UOM', filters=uom_filter, fields=["uom_name"])
         gen_response(200, "Thành công", list_uom)
+    except Exception as e:
+        return exception_handel(e)
+    
+# List warehouse
+@frappe.whitelist(methods='GET')
+def list_warehouse(**kwargs):
+    try:
+        kwargs = frappe._dict(kwargs)
+        warehouse_filter = {}
+        name = kwargs.get('name')
+        if name:
+            warehouse_filter['name'] = ['like', f'%{name}%']
+        list_warehouse = frappe.db.get_list('Warehouse', filters=warehouse_filter, fields=['warehouse_name'])
+        gen_response(200, 'Thành công', list_warehouse)
+    except Exception as e:
+        return exception_handel(e)
+    
+# List VAT
+@frappe.whitelist(methods='GET')
+def list_vat(**kwargs):
+    try:
+        kwargs = frappe._dict(kwargs)
+        vat_filter = {}
+        title = kwargs.get('title')
+        if title:
+            vat_filter['title'] = ['like', f'%{title}%']
+        list_vat = frappe.db.get_list('Sales Taxes and Charges Template', filters=vat_filter, fields=['name', 'title'])
+        for i in list_vat:
+            i['taxes'] = frappe.db.get_all('Sales Taxes and Charges', {"parent" : i.get('name')}, ['account_head', 'rate'])
+        gen_response(200, 'Thành công', list_vat)
     except Exception as e:
         return exception_handel(e)
     

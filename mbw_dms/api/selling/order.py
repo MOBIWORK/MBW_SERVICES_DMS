@@ -11,9 +11,12 @@ from mbw_dms.api.common import (
 
 )
 from mbw_dms.api.validators import (
-    validate_filter_timestamp
+    validate_filter_timestamp,
+    validate_date,
+    validate_choice,
+    validate_not_none
 )
-from mbw_dms.config_translate import i18n
+from mbw_dms.api.selling import configs
 from pypika import Query, Table, Field
 from mbw_dms.config_translate import i18n
 
@@ -108,27 +111,92 @@ def get_sale_order(**data):
         else:
             gen_response(404,i18n.t('translate.not_found', locale=get_language()),[])
             return 
-        return
     except Exception as e: 
         exception_handel(e)
 
 @frappe.whitelist(methods='POST')
-def create_sale_order(**args):
+def create_sale_order(**kwargs):
     try:
-        args = frappe._dict(args)
+        kwargs = frappe._dict(kwargs)
         new_order = frappe.new_doc('Sales Order')
-        new_order.customer = args.customer
-        new_order.delivery_date = convert_timestamp(float(args.delivery_date), is_datetime=False)
+
+        # Dữ liệu bắn lên để tạo sale order mới
+        discount_percent = float(kwargs.get('additional_discount_percentage'))
+        discount_amount = float(kwargs.get('discount_amount'))
+        rate_taxes = float(kwargs.get('rate_taxes'))
+        rate = float(kwargs.get('rate'))
+        qty = float(kwargs.get('qty'))
+        apply_discount_on = kwargs.get('apply_discount_on')
+        discount_percentage = float(kwargs.get('discount_percentage'))
+        taxes_and_charges = kwargs.get('taxes_and_charges') 
+
+        new_order.customer = validate_not_none(kwargs.customer)                                         
+        new_order.delivery_date = validate_date(kwargs.delivery_date)                                   # Ngày giao
+        new_order.set_warehouse = validate_not_none(kwargs.get('set_warehouse'))                        # Kho hàng
+        new_order.apply_discount_on = validate_choice(configs.discount_type)(apply_discount_on)         # Loại Chiết khấu
+        new_order.additional_discount_percentage = discount_percent                                     # Phần trăm chiết khấu
+        new_order.taxes_and_charges = taxes_and_charges                                                 # Tax
         new_order.append('items', {
-            'item_code': args.item_code,
-            'warehouse': args.warehouse,
-            'qty': args.qty,
-            'uom': args.uom,
+            'item_code': kwargs.get('item_code'),
+            'qty': qty,
+            'uom': kwargs.get('uom'),
+            'discount_percentage': discount_percentage
         })
+        new_order.append('taxes', get_taxes_and_charges('Sales Taxes and Charges Template', taxes_and_charges)[0])
 
-        new_order.insert(ignore_permissions=True)
-        # frappe.db.commit()
+        # Check dữ liệu mobile bắn lên
+        grand_total = 0     # Tổng tiền đơn hàng
+        total_vat = 0       # Giá vat (VAT)
+        amount = (rate - rate * discount_percentage /100) * qty   # Giá tổng sản phầm (X)
 
-        gen_response(200, 'Thành công',  {"name": new_order.name})
+        # Nếu loại chiết khấu là Grand total
+        if apply_discount_on == 'Grand Total':
+            total_vat = rate_taxes * amount / 100          # VAT = %VAT * X
+            if discount_percent != 0:
+                discount_amount = discount_percent * (amount + total_vat) / 100     # CK = %CK * (VAT + X)
+                grand_total = amount + total_vat - discount_amount         # total = X + VAT - Ck
+            if discount_percent == 0:
+                grand_total = amount + total_vat - discount_amount
+
+        # Nếu loại chiết khấu là Net total
+        if apply_discount_on == 'Net Total':
+            if discount_percent != 0:
+                discount_amount = discount_percent * amount / 100
+                total_vat = rate_taxes * (amount - discount_amount) / 100
+                grand_total = amount + total_vat - discount_amount
+            if discount_percent == 0:
+                total_vat = rate_taxes * (amount - discount_amount) / 100
+                grand_total = amount + total_vat - discount_amount
+        
+        # So sánh với giá bên mobile tính toán
+        if grand_total == float(kwargs.get('grand_total')):
+            new_order.insert()
+            frappe.db.commit()
+            gen_response(200, 'Thành công',  {"name": new_order.name})
+        else:
+            return gen_response(400, i18n.t('translate.invalid_grand_total', locale=get_language()), {"grand_total": grand_total})
     except Exception as e:
         return exception_handel(e)
+
+
+# Lấy thông tin taxes
+@frappe.whitelist()
+def get_taxes_and_charges(master_doctype, master_name):
+	if not master_name:
+		return
+	from frappe.model import child_table_fields, default_fields
+
+	tax_master = frappe.get_doc(master_doctype, master_name)
+
+	taxes_and_charges = []
+	for i, tax in enumerate(tax_master.get("taxes")):
+		tax = tax.as_dict()
+
+		for fieldname in default_fields + child_table_fields:
+			if fieldname in tax:
+				del tax[fieldname]
+
+		taxes_and_charges.append(tax)
+
+	return taxes_and_charges
+

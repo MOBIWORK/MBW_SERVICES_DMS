@@ -10,7 +10,12 @@ from mbw_dms.api.common import (
     validate_image,
     post_image
 )
-from mbw_dms.api.validators import validate_date, validate_phone_number, validate_choice
+from mbw_dms.api.validators import (
+    validate_date, 
+    validate_phone_number, 
+    validate_choice,
+    validate_not_none
+)
 from mbw_dms.api.selling import configs
 from mbw_dms.config_translate import i18n
 
@@ -100,12 +105,16 @@ def create_customer(**kwargs):
 
         # Tạo mới khách hàng
         new_customer = frappe.new_doc('Customer')
-        normal_fields = ['customer_id', 'customer_name', 'customer_group', 'territory', 'customer_details', 'website']
+        required_fields = ['customer_name', 'customer_id', 'customer_group', 'territory']
+        normal_fields = ['customer_details', 'website']
         date_fields = ['custom_birthday']
         choice_fields = ['customer_type']
         for key, value in kwargs.items():
             if key in normal_fields:
                 new_customer.set(key, value)
+            elif key in required_fields:
+                required = validate_not_none(value)
+                new_customer.set(key, required)
             elif key in date_fields:
                 custom_birthday = validate_date(value)
                 new_customer.set(key, custom_birthday)
