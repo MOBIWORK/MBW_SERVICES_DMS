@@ -25,14 +25,13 @@
   },
   {
    "fieldname": "ma_quan_huyen",
-   "fieldtype": "Link",
-   "label": "M\u00e3 qu\u1eadn/huy\u1ec7n",
-   "options": "DMS District"
+   "fieldtype": "Data",
+   "label": "M\u00e3 qu\u1eadn/huy\u1ec7n"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-01-17 15:17:22.370026",
+ "modified": "2024-01-22 13:51:44.435352",
  "modified_by": "Administrator",
  "module": "MBW DMS",
  "name": "DMS Ward",
@@ -51,7 +50,10 @@
    "write": 1
   }
  ],
+ "show_title_field_in_link": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": []
+ "states": [],
+ "title_field": "ten_xa",
+ "translated_doctype": 1
 }

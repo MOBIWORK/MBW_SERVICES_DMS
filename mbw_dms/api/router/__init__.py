@@ -104,10 +104,8 @@ def get_customer_router(**data):
             ]
         detail_customer = frappe.db.get_list('Customer',filters= FiltersCustomer,fields=fields_customer,start=page_size*(page_number-1), page_length=page_size)
         for customer in detail_customer:
-            print("id",customer.get('customer_id'))
             customer['is_checkin'] = False
             checkin = frappe.db.get_value("DMS Checkin",{"kh_ma":customer.get('customer_id')})
-            print('check',checkin)
             if checkin != None:
                 customer['is_checkin'] = True
         total_customer= len(frappe.db.get_list('Customer',filters= FiltersCustomer))
