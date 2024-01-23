@@ -244,7 +244,7 @@ def get_contact(customer_name):
     contact = frappe.get_all(
         "Contact",
         filters={"link_name": customer_name},
-        fields=['first_name', "phone", "is_primary_contact", "is_billing_contact"]
+        fields=['name','first_name', "phone", "is_primary_contact", "is_billing_contact"]
     )
 
     return contact
