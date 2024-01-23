@@ -2,3 +2,8 @@
 
 
 python-i18n
+
+numpy
+scipy
+minio
+geopy

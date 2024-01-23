@@ -1,7 +1,7 @@
 import frappe
 from datetime import datetime
 from frappe.utils.data import get_time
-from mbw_dms.api.common import exception_handel, gen_response, get_language ,get_user_id
+from mbw_dms.api.common import exception_handel, gen_response, get_language ,get_user_id,upload_image_s3
 from mbw_dms.api.validators import (validate_datetime,validate_filter)
 from mbw_dms.config_translate import i18n
 
@@ -63,4 +63,31 @@ def create_checkin_inventory(**body):
         return gen_response(200, "Thành công", {"name": doc.name})
     except Exception as e:
         return exception_handel(e)
-    
+
+
+@frappe.whitelist(methods='POST')
+def create_checkin_image(**body):
+    try:
+        user = get_user_id()
+        image =body.get('image')
+        customer_name = body.get('customer_name')
+        address = body.get('address')
+        long = body.get('long')
+        lat = body.get('lat')
+        create_by =  user.get('name')
+        create_time = datetime.now()
+        description = ''
+        if customer_name:
+            description += customer_name + '\\n'
+        if address:
+            description += address + '\\n'
+        if long and lat:
+            description += f"long:{long} lat:{lat}\\n"
+        if create_by:
+            description += f"create: {create_by}\\n"
+        if create_time:
+            description += f"create: {create_time}\\n"
+        rsUpload = upload_image_s3(image=image,folder_s3='checkin',description=None)
+        return rsUpload
+    except Exception as e:
+        exception_handel(e)

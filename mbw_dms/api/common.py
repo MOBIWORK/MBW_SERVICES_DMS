@@ -1,5 +1,6 @@
 from math import sin, cos, sqrt, atan2
 import json
+import io
 import frappe
 from bs4 import BeautifulSoup
 from frappe import _
@@ -12,6 +13,13 @@ from frappe.core.doctype.file.utils import delete_file
 from frappe.utils.file_manager import (
     save_file
 )
+
+from mbw_dms.api.file import (
+    my_minio
+)
+from PIL import Image
+from PIL import ImageDraw
+from PIL import ImageFont
 from frappe.desk.query_report import (
     normalize_result, get_report_result, get_reference_report)
 from frappe.core.utils import ljust_list
@@ -148,3 +156,77 @@ def post_image(name_image, faceimage, doc_type, doc_name):
     delete_file(path_file)
     file_url = BASE_URL + doc_file.get('file_url')
     return file_url
+
+def add_text_to_image(file_name, imgdata, description):
+    ## add text to image
+    # save image
+    doc_file = save_file(file_name, imgdata, "", "",
+                     folder=None, decode=False, is_private=0, df=None)
+    # Open an Image
+    path_file = frappe.get_site_path('public') + doc_file.file_url                
+    img = Image.open(path_file)
+    # Call draw Method to add 2D graphics in an image
+    I1 = ImageDraw.Draw(img)
+    # Custom font style and font size
+    myFont = ImageFont.truetype('FreeMono.ttf', 65)
+    # Add Text to an image
+    lines = []
+    position = (10, 10)
+    x, y = position
+    max_width = img.width - 2 * (x + y)
+    font_color = (255, 0, 0)
+    for line in description.split("\\n"):
+        # Split line into words
+        words = line.split()
+        current_line = words[0]
+        for word in words[1:]:
+            # Check if adding the next word exceeds max_width
+            if I1.textbbox(xy=(x,y),text=current_line + " " + word, font=myFont)[0] <= max_width:
+                current_line += " " + word
+            else:
+                lines.append(current_line)
+                current_line = word
+        
+        lines.append(current_line)
+    print("lines",lines)
+    for line in lines:
+        I1.text((x, y), line, font=myFont, fill=font_color)
+        y += myFont.getsize(line)[1]
+    # get image base64
+    buffered = io.BytesIO()
+    img.save(buffered, format="PNG")
+    image_base64_new = base64.b64decode(base64.b64encode(buffered.getvalue()))
+    
+    # delete file
+    frappe.delete_doc('File', doc_file.name)
+    path_file = "/files/" + file_name
+    delete_file(path_file)
+    ##
+    return image_base64_new
+
+def upload_image_s3(image,description,folder_s3):
+    settings = frappe.get_doc("MBW Employee Settings").as_dict()
+    bucket_name_s3 = settings.get('bucket_name_s3')
+    endpoint_s3 = settings.get('endpoint_s3')
+    imgdata = base64.b64decode(image)
+    bucket_domain =frappe.local.site.replace('.','-')
+    file_name = "checkin_" + \
+        "_" + str(datetime.now()) + ".png"
+
+    if description:
+        imgdata_new = add_text_to_image(file_name, imgdata, description)
+    else:
+        imgdata_new = imgdata
+    
+    # save file image s3
+    object_name = f"{bucket_domain}/{folder_s3}/{file_name}"
+    if not my_minio.bucket_exists(bucket_domain):
+        my_minio.make_bucket(bucket_domain)
+    my_minio.put_object(bucket_name=bucket_domain,
+                        object_name=folder_s3, data=io.BytesIO(imgdata_new))
+
+    # data response
+    data = {}
+    data["file_url"] = f"https://{endpoint_s3}/{bucket_name_s3}/{object_name}"
+    data['status'] = True
+    return data
