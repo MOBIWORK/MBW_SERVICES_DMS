@@ -124,10 +124,7 @@ def create_sale_order(**kwargs):
         discount_percent = float(kwargs.get('additional_discount_percentage'))
         discount_amount = float(kwargs.get('discount_amount'))
         rate_taxes = float(kwargs.get('rate_taxes'))
-        rate = float(kwargs.get('rate'))
-        qty = float(kwargs.get('qty'))
         apply_discount_on = kwargs.get('apply_discount_on')
-        discount_percentage = float(kwargs.get('discount_percentage'))
         taxes_and_charges = kwargs.get('taxes_and_charges') 
 
         new_order.customer = validate_not_none(kwargs.customer)                                         
@@ -136,18 +133,23 @@ def create_sale_order(**kwargs):
         new_order.apply_discount_on = validate_choice(configs.discount_type)(apply_discount_on)         # Loại Chiết khấu
         new_order.additional_discount_percentage = discount_percent                                     # Phần trăm chiết khấu
         new_order.taxes_and_charges = taxes_and_charges                                                 # Tax
-        new_order.append('items', {
-            'item_code': kwargs.get('item_code'),
-            'qty': qty,
-            'uom': kwargs.get('uom'),
-            'discount_percentage': discount_percentage
-        })
         new_order.append('taxes', get_taxes_and_charges('Sales Taxes and Charges Template', taxes_and_charges)[0])
+        items = kwargs.get('items')
+        amount = 0
+        for item_data in items:
+            rate = float(item_data.get('rate'))
+            discount_percentage = float(item_data.get('discount_percentage'))
+            new_order.append('items', {
+                'item_code': item_data.get('item_code'),
+                'qty': item_data.get('qty'),
+                'uom': item_data.get('uom'),
+                'discount_percentage': discount_percentage,
+            })
+            amount += (rate - rate * discount_percentage /100) * float(item_data.get('qty'))   # Giá tổng sản phầm (X)
 
         # Check dữ liệu mobile bắn lên
         grand_total = 0     # Tổng tiền đơn hàng
         total_vat = 0       # Giá vat (VAT)
-        amount = (rate - rate * discount_percentage /100) * qty   # Giá tổng sản phầm (X)
 
         # Nếu loại chiết khấu là Grand total
         if apply_discount_on == 'Grand Total':
@@ -156,6 +158,7 @@ def create_sale_order(**kwargs):
                 discount_amount = discount_percent * (amount + total_vat) / 100     # CK = %CK * (VAT + X)
                 grand_total = amount + total_vat - discount_amount         # total = X + VAT - Ck
             if discount_percent == 0:
+                new_order.discount_amount = discount_amount
                 grand_total = amount + total_vat - discount_amount
 
         # Nếu loại chiết khấu là Net total
@@ -165,6 +168,7 @@ def create_sale_order(**kwargs):
                 total_vat = rate_taxes * (amount - discount_amount) / 100
                 grand_total = amount + total_vat - discount_amount
             if discount_percent == 0:
+                new_order.discount_amount = discount_amount
                 total_vat = rate_taxes * (amount - discount_amount) / 100
                 grand_total = amount + total_vat - discount_amount
         
