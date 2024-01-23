@@ -209,3 +209,22 @@ def list_territory():
         gen_response(200, "Thành công", territory)
     except Exception as e:
         return exception_handel(e)
+    
+#update
+@frappe.whitelist(methods="PUT")
+def update_customer(name, **kwargs):
+    try:
+        if frappe.db.exists("Customer", name, cache=True):
+            customers = frappe.get_doc('Customer', name)
+            fieldAccess = ['']
+            # print('========================= value: ', customers, flush=True)
+
+            for field, value in dict(kwargs).items():
+                setattr(customers, field, value)
+
+            customers.save()
+            gen_response(200, 'Cập nhật thành công')
+        else:
+            return gen_response(406, f"Không tồn tại {name}")
+    except Exception as e:
+        return exception_handel(e)
