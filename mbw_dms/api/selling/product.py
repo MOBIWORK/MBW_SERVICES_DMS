@@ -92,7 +92,7 @@ def list_uom(**kwargs):
         name = kwargs.get('name')
         if name:
             uom_filter["name"] = ['like', f'%{name}%']
-        list_uom = frappe.db.get_list('UOM', filters=uom_filter, fields=["uom_name"])
+        list_uom = frappe.db.get_list('UOM', filters=uom_filter, fields=['name', 'uom_name'])
         gen_response(200, "Thành công", list_uom)
     except Exception as e:
         return exception_handel(e)
