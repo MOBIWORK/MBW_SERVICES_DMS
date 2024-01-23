@@ -53,7 +53,7 @@ def list_customer(**kwargs):
             my_filter["custom_birthday"] = ['between', [from_date, to_date]]
         customers = frappe.db.get_list("Customer",
                                 filters= my_filter,
-                                fields=["name", "customer_name","customer_id","customer_type", "customer_group", "territory", "industry", "image", "customer_primary_contact", "customer_primary_address", "custom_birthday", "customer_details"],
+                                fields=["name", "customer_name","customer_id","customer_type", "customer_group", "territory", "industry", "image","website", "customer_primary_contact", "customer_primary_address", "custom_birthday","customer_location_primary", "customer_details"],
                                 start=page_size*(page_number-1), 
                                 page_length=page_size)
                                 
@@ -63,10 +63,9 @@ def list_customer(**kwargs):
             if customer['custom_birthday'] is not None:
                 customer['custom_birthday'] = datetime.combine(customer['custom_birthday'], datetime.min.time()).timestamp()
             customer['image'] = validate_image(customer.get("image"))
-            customer['contact'] = frappe.db.get_value('Contact', {"name" : customer.get('customer_primary_contact')}, ['first_name', "phone"],as_dict=1)
-            customer['address'] = frappe.db.get_value('Address', {"name" : customer.get('customer_primary_address')}, ['address_line1', 'phone'],as_dict=1)
+            customer['contact'] = get_contact(customer.get("name"))
+            customer['address'] = get_customer_addresses(customer.get("name"))
             customer['cre_limid'] = frappe.db.get_all("Customer Credit Limit", {"parent" : customer.get('name')}, ['credit_limit'])
-        
         return gen_response(200, "ok", {
             "data": customers,
             "page_number": page_number,
@@ -121,7 +120,7 @@ def create_customer(**kwargs):
             elif key in choice_fields:
                 customer_type = validate_choice(configs.customer_type)(value)
                 new_customer.set(key, customer_type)
-        new_customer.device_id = json.dumps({"longitude": kwargs.get(
+        new_customer.customer_location_primary = json.dumps({"longitude": kwargs.get(
                 "longitude"), "latitude": kwargs.get("latitude")})
 
         new_customer.append('credit_limits', {
@@ -228,3 +227,54 @@ def update_customer(name, **kwargs):
             return gen_response(406, f"Không tồn tại {name}")
     except Exception as e:
         return exception_handel(e)
+    
+@frappe.whitelist(methods="GET")
+def get_customer_addresses(customer_name):
+    addresses = frappe.get_all(
+        "Address",
+        filters={"link_name": customer_name},
+        fields=["name", "address_line1", "address_line2", "city", "state", "is_primary_address", "is_shipping_address", "county"]
+    )
+
+    return addresses
+
+    
+@frappe.whitelist(methods="GET")
+def get_contact(customer_name):
+    contact = frappe.get_all(
+        "Contact",
+        filters={"link_name": customer_name},
+        fields=['first_name', "phone", "is_primary_contact", "is_billing_contact"]
+    )
+
+    return contact
+
+@frappe.whitelist(methods='GET')
+def list_router(customer_name):
+    try:
+        list_router = frappe.db.get_list('DMS Router', filters={'customer_name': customer_name}, fields=['*'])
+        for i in list_router:
+            i['customers'] = get_customer('DMS Router', i['name'])
+        return gen_response(200, '', list_router)
+    except Exception as e:
+        return exception_handel(e)
+    
+@frappe.whitelist()
+def get_customer(master_doctype, master_name):
+	if not master_name:
+		return
+	from frappe.model import child_table_fields, default_fields
+
+	router_master = frappe.get_doc(master_doctype, master_name)
+
+	cus = []
+	for i, customer in enumerate(router_master.get("customers")):
+		customer = customer.as_dict()
+
+		for fieldname in default_fields + child_table_fields:
+			if fieldname in customer:
+				del customer[fieldname]
+
+		cus.append(customer)
+
+	return cus
