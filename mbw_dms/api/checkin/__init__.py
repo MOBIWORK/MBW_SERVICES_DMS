@@ -87,7 +87,8 @@ def create_checkin_image(**body):
             description += f"create: {create_by}\\n"
         if create_time:
             description += f"create: {create_time}\\n"
-        rsUpload = upload_image_s3(image=image,folder_s3='checkin',description=None)
+        description= description.rstrip('\\n')
+        rsUpload = upload_image_s3(image=image,description=description)
         return rsUpload
     except Exception as e:
         exception_handel(e)

@@ -96,7 +96,7 @@ def create_my_minio():
         access_key=settings.get("access_key_s3"),
         secret_key=settings.get("key_secret_s3"),
         region="auto",
-        secure=0
+        secure=False
     )
     
 my_minio = create_my_minio()

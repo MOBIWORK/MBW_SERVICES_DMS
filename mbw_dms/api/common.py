@@ -168,11 +168,12 @@ def add_text_to_image(file_name, imgdata, description):
     # Call draw Method to add 2D graphics in an image
     I1 = ImageDraw.Draw(img)
     # Custom font style and font size
-    myFont = ImageFont.truetype('FreeMono.ttf', 65)
+    myFont = ImageFont.truetype('FreeMono.ttf', 15)
     # Add Text to an image
     lines = []
     position = (10, 10)
     x, y = position
+    image_width, image_height = img.size
     max_width = img.width - 2 * (x + y)
     font_color = (255, 0, 0)
     for line in description.split("\\n"):
@@ -188,7 +189,6 @@ def add_text_to_image(file_name, imgdata, description):
                 current_line = word
         
         lines.append(current_line)
-    print("lines",lines)
     for line in lines:
         I1.text((x, y), line, font=myFont, fill=font_color)
         y += myFont.getsize(line)[1]
@@ -204,9 +204,10 @@ def add_text_to_image(file_name, imgdata, description):
     ##
     return image_base64_new
 
-def upload_image_s3(image,description,folder_s3):
+def upload_image_s3(image,description):
     settings = frappe.get_doc("MBW Employee Settings").as_dict()
-    bucket_name_s3 = settings.get('bucket_name_s3')
+    # bucket_name_s3 = settings.get('bucket_name_s3')
+    bucket_name_s3 = "mbw-dms"
     endpoint_s3 = settings.get('endpoint_s3')
     imgdata = base64.b64decode(image)
     bucket_domain =frappe.local.site.replace('.','-')
@@ -219,11 +220,11 @@ def upload_image_s3(image,description,folder_s3):
         imgdata_new = imgdata
     
     # save file image s3
-    object_name = f"{bucket_domain}/{folder_s3}/{file_name}"
-    if not my_minio.bucket_exists(bucket_domain):
-        my_minio.make_bucket(bucket_domain)
-    my_minio.put_object(bucket_name=bucket_domain,
-                        object_name=folder_s3, data=io.BytesIO(imgdata_new))
+    object_name = f"{bucket_name_s3}/{bucket_domain}/{file_name}"
+    # if not my_minio.bucket_exists(bucket_domain):
+    #     my_minio.make_bucket(bucket_domain)
+    my_minio.put_object(bucket_name=bucket_name_s3,
+                        object_name=f"{bucket_domain}", data=io.BytesIO(imgdata_new))
 
     # data response
     data = {}
