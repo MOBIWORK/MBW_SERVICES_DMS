@@ -1,0 +1,62 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2024-01-22 11:34:59.111133",
+ "default_view": "List",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "ma_album",
+  "ten_album",
+  "so_anh_toi_thieu",
+  "trang_thai"
+ ],
+ "fields": [
+  {
+   "fieldname": "ma_album",
+   "fieldtype": "Data",
+   "label": "M\u00e3 Album"
+  },
+  {
+   "fieldname": "ten_album",
+   "fieldtype": "Data",
+   "label": "T\u00ean Album"
+  },
+  {
+   "fieldname": "so_anh_toi_thieu",
+   "fieldtype": "Data",
+   "label": "S\u1ed1 \u1ea3nh t\u1ed1i thi\u1ec3u"
+  },
+  {
+   "fieldname": "trang_thai",
+   "fieldtype": "Select",
+   "label": "Tr\u1ea1ng th\u00e1i",
+   "options": "Ho\u1ea1t \u0111\u1ed9ng\nKh\u00f4ng ho\u1ea1t \u0111\u1ed9ng"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2024-01-22 11:35:44.306361",
+ "modified_by": "Administrator",
+ "module": "MBW DMS",
+ "name": "DMS Album",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

@@ -136,84 +136,6 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Danh m\u1ee5c kh\u00e1c",
-   "link_count": 7,
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Lo\u1ea1i ghi ch\u00fa",
-   "link_count": 0,
-   "link_to": "Employee",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Lo\u1ea1i th\u00f4ng b\u00e1o",
-   "link_count": 0,
-   "link_to": "Employee",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Album \u1ea3nh",
-   "link_count": 0,
-   "link_to": "Employee",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "L\u00fd do th\u00f4ng b\u00e1o v\u1ecb tr\u00ed",
-   "link_count": 0,
-   "link_to": "Employee",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "T\u1ec9nh th\u00e0nh",
-   "link_count": 0,
-   "link_to": "DMS Province",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Qu\u1eadn huy\u1ec7n",
-   "link_count": 0,
-   "link_to": "DMS District",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Ph\u01b0\u1eddng x\u00e3",
-   "link_count": 0,
-   "link_to": "DMS Ward",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
    "label": "B\u00e1o c\u00e1o k\u1ebft qu\u1ea3 \u0111i tuy\u1ebfn",
    "link_count": 3,
    "onboard": 0,
@@ -372,9 +294,87 @@
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Danh m\u1ee5c kh\u00e1c",
+   "link_count": 7,
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Lo\u1ea1i ghi ch\u00fa",
+   "link_count": 0,
+   "link_to": "Employee",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Lo\u1ea1i th\u00f4ng b\u00e1o",
+   "link_count": 0,
+   "link_to": "Employee",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Album \u1ea3nh",
+   "link_count": 0,
+   "link_to": "DMS Album Image",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "L\u00fd do th\u00f4ng b\u00e1o v\u1ecb tr\u00ed",
+   "link_count": 0,
+   "link_to": "Employee",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "T\u1ec9nh th\u00e0nh",
+   "link_count": 0,
+   "link_to": "DMS Province",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Qu\u1eadn huy\u1ec7n",
+   "link_count": 0,
+   "link_to": "DMS District",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Ph\u01b0\u1eddng x\u00e3",
+   "link_count": 0,
+   "link_to": "DMS Ward",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
   }
  ],
- "modified": "2024-01-19 10:42:56.594828",
+ "modified": "2024-01-23 09:53:41.300188",
  "modified_by": "Administrator",
  "module": "MBW DMS",
  "name": "DMS",
