@@ -8,7 +8,8 @@ from mbw_dms.api.common import (
     exception_handel,
     gen_response,
     validate_image,
-    post_image
+    post_image,
+    get_value_child_doctype
 )
 from mbw_dms.api.validators import (
     validate_date, 
@@ -254,27 +255,7 @@ def list_router(customer_name):
     try:
         list_router = frappe.db.get_list('DMS Router', filters={'customer_name': customer_name}, fields=['*'])
         for i in list_router:
-            i['customers'] = get_customer('DMS Router', i['name'])
+            i['customers'] = get_value_child_doctype('DMS Router', i['name'], 'customers')
         return gen_response(200, '', list_router)
     except Exception as e:
         return exception_handel(e)
-    
-@frappe.whitelist()
-def get_customer(master_doctype, master_name):
-	if not master_name:
-		return
-	from frappe.model import child_table_fields, default_fields
-
-	router_master = frappe.get_doc(master_doctype, master_name)
-
-	cus = []
-	for i, customer in enumerate(router_master.get("customers")):
-		customer = customer.as_dict()
-
-		for fieldname in default_fields + child_table_fields:
-			if fieldname in customer:
-				del customer[fieldname]
-
-		cus.append(customer)
-
-	return cus

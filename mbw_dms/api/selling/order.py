@@ -1,14 +1,12 @@
 import frappe
 from frappe import _
-import json
-from datetime import datetime
 from pypika import  Order, CustomFunction
 UNIX_TIMESTAMP = CustomFunction('UNIX_TIMESTAMP', ['day'])
 from mbw_dms.api.common import (
     exception_handel,
     gen_response,
     get_language,
-
+    get_value_child_doctype
 )
 from mbw_dms.api.validators import (
     validate_filter_timestamp,
@@ -17,7 +15,6 @@ from mbw_dms.api.validators import (
     validate_not_none
 )
 from mbw_dms.api.selling import configs
-from pypika import Query, Table, Field
 from mbw_dms.config_translate import i18n
 
 
@@ -133,7 +130,7 @@ def create_sale_order(**kwargs):
         new_order.apply_discount_on = validate_choice(configs.discount_type)(apply_discount_on)         # Loại Chiết khấu
         new_order.additional_discount_percentage = discount_percent                                     # Phần trăm chiết khấu
         new_order.taxes_and_charges = taxes_and_charges                                                 # Tax
-        new_order.append('taxes', get_taxes_and_charges('Sales Taxes and Charges Template', taxes_and_charges)[0])
+        new_order.append('taxes', get_value_child_doctype('Sales Taxes and Charges Template', taxes_and_charges, 'taxes')[0])
         items = kwargs.get('items')
         amount = 0
         for item_data in items:
@@ -181,26 +178,4 @@ def create_sale_order(**kwargs):
             return gen_response(400, i18n.t('translate.invalid_grand_total', locale=get_language()), {"grand_total": grand_total})
     except Exception as e:
         return exception_handel(e)
-
-
-# Lấy thông tin taxes
-@frappe.whitelist()
-def get_taxes_and_charges(master_doctype, master_name):
-	if not master_name:
-		return
-	from frappe.model import child_table_fields, default_fields
-
-	tax_master = frappe.get_doc(master_doctype, master_name)
-
-	taxes_and_charges = []
-	for i, tax in enumerate(tax_master.get("taxes")):
-		tax = tax.as_dict()
-
-		for fieldname in default_fields + child_table_fields:
-			if fieldname in tax:
-				del tax[fieldname]
-
-		taxes_and_charges.append(tax)
-
-	return taxes_and_charges
 

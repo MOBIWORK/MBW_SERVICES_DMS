@@ -231,3 +231,24 @@ def upload_image_s3(image,description):
     data["file_url"] = f"https://{endpoint_s3}/{bucket_name_s3}/{object_name}"
     data['status'] = True
     return data
+
+# Lấy ra các field của doctype con
+def get_value_child_doctype(master_doctype, master_name, name_field):
+	if not master_name:
+		return
+	from frappe.model import child_table_fields, default_fields
+
+	filed_master = frappe.get_doc(master_doctype, master_name)
+
+	field_child = []
+	for i, child in enumerate(filed_master.get(name_field)):
+		child = child.as_dict()
+
+        # Xóa các trường không cần thiết
+		for fieldname in default_fields + child_table_fields:
+			if fieldname in child:
+				del child[fieldname]
+
+		field_child.append(child)
+
+	return field_child
