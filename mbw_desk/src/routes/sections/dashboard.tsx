@@ -12,6 +12,7 @@ const RouterDashboard = lazy(()=> import('@/pages/RouterDashboard'))
 const RouterDetail = lazy(()=> import('@/pages/RouterDetail'))
 const RouterEmployee = lazy(()=> import('@/pages/RouterEmployee'))
 const SettingDMS = lazy(()=> import('@/pages/SettingDMS'))
+const MonitorAlbum = lazy(()=> import('@/pages/MonitorAlbum'))
 export const dashboardRoutes = [
     {
         path: '/',
@@ -41,7 +42,10 @@ export const dashboardRoutes = [
             },
             {
                 path: 'setting-dms',element: <SettingDMS/>
-            }
+            },
+            {
+                path: 'monitor-album',element: <MonitorAlbum/>
+            },
         ]
     }
 ]
