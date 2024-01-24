@@ -101,7 +101,7 @@ def update_address_customer(**body):
         customer = validate_filter(type_check='require',value=body.get('customer'))
         city = validate_filter(type_check='require',value=body.get('city'))
         county = validate_filter(type_check='require',value=body.get('county'))
-        country = validate_filter(type_check='require',value=body.get('country'))
+        # country = validate_filter(type_check='require',value=body.get('country'))
         state = validate_filter(type_check='require',value=body.get('state'))
         address_line1 = validate_filter(type_check='require',value=body.get('address_line1'))
         long = validate_filter(type_check='require',value=body.get('long'))
@@ -118,7 +118,7 @@ def update_address_customer(**body):
             ward_info = frappe.db.get_value(doctype="DMS Ward",filters={"ten_xa": ["like",f"%{state}%"]},fieldname=['name'])
             new_address = {
                     
-                    "address_title": f"{address_line1}, {state}, {county}, {city}, {country}",
+                    "address_title": f"{address_line1}, {state}, {county}, {city}",
                     "address_line1":address_line1,                    
                     "state": ward_info,
                     "county": district_info,
