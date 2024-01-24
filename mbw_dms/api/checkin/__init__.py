@@ -92,3 +92,10 @@ def create_checkin_image(**body):
         gen_response(200,'',rsUpload) 
     except Exception as e:
         exception_handel(e)
+
+@frappe.whitelist(methods='PATCH')
+def update_address_customer():
+    try:
+        print('address')
+    except Exception as e:
+        exception_handel(e)
