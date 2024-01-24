@@ -111,6 +111,7 @@ def update_address_customer(**body):
         customer_info = frappe.db.get_value(doctype="Customer",filters= {"name": customer},fieldname=['name','customer_primary_address',"customer_name"],as_dict=1)
         doc_customer = frappe.get_doc("Customer",body.get('customer'))
         doc_customer.customer_location_primary = address_location
+        doc_customer.primary_address = f"{address_line1}<br>{address_line1}<br>\n{county}\n<br>{city}<br>\n"
         doc_customer.save()
         if customer_info:
             city_info = frappe.db.get_value(doctype="DMS Province",filters={"ten_tinh": ["like",f"%{city}%"]},fieldname=['ma_tinh'])

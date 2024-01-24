@@ -151,7 +151,7 @@
  "icon": "fa fa-map-marker",
  "idx": 5,
  "links": [],
- "modified": "2024-01-22 11:27:54.782247",
+ "modified": "2024-01-24 15:19:20.203616",
  "modified_by": "Administrator",
  "module": "MBW DMS",
  "name": "Address",
@@ -222,7 +222,9 @@
   }
  ],
  "search_fields": "country, state",
+ "show_title_field_in_link": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": []
+ "states": [],
+ "title_field": "address_title"
 }
