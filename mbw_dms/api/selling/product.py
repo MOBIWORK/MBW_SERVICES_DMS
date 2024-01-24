@@ -124,7 +124,7 @@ def list_vat(**kwargs):
                             .inner_join(TaxesCharges)
                             .on(Taxes.name == TaxesCharges.parent)
                             .where(Taxes.name.like(f"%{title}%"))
-                            .select(Taxes.title, TaxesCharges.account_head, TaxesCharges.rate, TaxesCharges.charge_type)
+                            .select(Taxes.name, Taxes.title, TaxesCharges.account_head, TaxesCharges.rate, TaxesCharges.charge_type)
                             ).run(as_dict =1)
         gen_response(200, 'Thành công', detail_taxes)
     except Exception as e:
