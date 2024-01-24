@@ -64,7 +64,7 @@ def get_sale_order(**data):
             SalesOrderTaxes = frappe.qb.DocType("Sales Taxes and Charges")
             field_detail_sales = ['total','grand_total','customer','customer_name','address_display',"delivery_date",'set_warehouse','taxes_and_charges','total_taxes_and_charges','apply_discount_on','additional_discount_percentage','discount_amount','contact_person','rounded_total']
             # field_detail_taxe  = ['tax_amount','rate','account_head','charge_type']
-            field_detail_items = ['item_name','item_code','qty',"uom",'amount','discount_amount','discount_percentage']
+            field_detail_items = ['name', 'item_name','item_code','qty',"uom",'amount','discount_amount','discount_percentage']
             detail = (frappe.qb.from_(SalesOrder)
                     .inner_join(SalesOrderItem)
                     .on(SalesOrder.name == SalesOrderItem.parent)
@@ -76,7 +76,7 @@ def get_sale_order(**data):
                         Customer.customer_id
                         ,SalesOrder.customer,SalesOrder.customer_name,SalesOrder.address_display,UNIX_TIMESTAMP(SalesOrder.delivery_date).as_('delivery_date'),SalesOrder.set_warehouse,SalesOrder.total,SalesOrder.grand_total
                         ,SalesOrder.taxes_and_charges,SalesOrder.total_taxes_and_charges, SalesOrder.apply_discount_on, SalesOrder.additional_discount_percentage,SalesOrder.discount_amount,SalesOrder.contact_person,SalesOrder.rounded_total
-                        , SalesOrderItem.item_name,SalesOrderItem.item_code,SalesOrderItem.qty, SalesOrderItem.uom,SalesOrderItem.amount,SalesOrderItem.discount_amount,SalesOrderItem.discount_percentage                        
+                        ,SalesOrderItem.name, SalesOrderItem.item_name,SalesOrderItem.item_code,SalesOrderItem.qty, SalesOrderItem.uom,SalesOrderItem.amount,SalesOrderItem.discount_amount,SalesOrderItem.discount_percentage                        
                     )
                     ).run(as_dict =1)
             
