@@ -99,7 +99,7 @@ def get_customer_router(**data):
             FiltersCustomer['customer_type'] =customer_group
         fields_customer = [
             'name','customer_primary_address'
-            ,'customer_id','customer_location_primary','mobile_no'
+            ,'customer_code','customer_location_primary','mobile_no'
             ,'customer_name'
             ,'UNIX_TIMESTAMP(custom_birthday) as birthday'
             ]
@@ -109,7 +109,7 @@ def get_customer_router(**data):
             detail_customer = frappe.db.get_list('Customer',filters= FiltersCustomer,fields=fields_customer)        
         for customer in detail_customer:
             customer['is_checkin'] = False
-            checkin = frappe.db.get_value("DMS Checkin",{"kh_ma":customer.get('customer_id')})
+            checkin = frappe.db.get_value("DMS Checkin",{"kh_ma":customer.get('customer_code')})
             if checkin != None:
                 customer['is_checkin'] = True
         total_customer= len(frappe.db.get_list('Customer',filters= FiltersCustomer))
@@ -129,7 +129,7 @@ def create_router(**body):
         if body['cmd'] :
             del body['cmd']
         field_validate= ["travel_date","status", "customers", "channel_code", "team_sale","channel_name","employee"]
-        field_customers_validate = ["customer_id","customer_name","display_address","phone_number","customer","frequency"]
+        field_customers_validate = ["customer_code","customer_name","display_address","phone_number","customer","frequency"]
         # check_validate fields
         for key_router,value in body.items():
             if isinstance(body[key_router], list):
@@ -204,7 +204,7 @@ def get_customer(**filters):
         data = frappe.db.get_list(
             "Customer",
             queryFilters,
-            ["name",'customer_id',"customer_name",'UNIX_TIMESTAMP(custom_birthday) as custom_birthday',
+            ["name",'customer_code',"customer_name",'UNIX_TIMESTAMP(custom_birthday) as custom_birthday',
              "location","customer_type","customer_name",
              "customer_primary_address as display_address","mobile_no as phone_number"],
             start=page_size*(page_number-1), 

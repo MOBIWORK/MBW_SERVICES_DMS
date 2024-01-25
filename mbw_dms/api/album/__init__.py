@@ -23,7 +23,7 @@ def create_album_image(**kwargs):
         new_album_image.album_id = validate_not_none(kwargs.get('album_id'))
         new_album_image.album_name = validate_not_none(kwargs.get('album_name'))
         new_album_image.checkin_id = validate_not_none(kwargs.get('checkin_id'))
-        new_album_image.customer_id = validate_not_none(kwargs.get('customer_id'))
+        new_album_image.customer_code = validate_not_none(kwargs.get('customer_code'))
         new_album_image.customer_name = validate_not_none(kwargs.get('customer_name'))
         new_album_image.customer_code = validate_not_none(kwargs.get('customer_code'))
         new_album_image.customer_long = validate_not_none(kwargs.get('customer_long'))
