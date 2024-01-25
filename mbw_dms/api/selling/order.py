@@ -179,3 +179,20 @@ def create_sale_order(**kwargs):
     except Exception as e:
         return exception_handel(e)
 
+@frappe.whitelist()
+def pricing_rule(**kwargs):
+    try:
+        from erpnext.accounts.doctype.pricing_rule.pricing_rule import apply_pricing_rule
+        pricing_rule = apply_pricing_rule(args=kwargs, doc=None)
+        gen_response(200, 'Thành công', pricing_rule)
+    except Exception as e:
+        return exception_handel(e)
+    
+@frappe.whitelist()
+def price_list(**kwargs):
+    try:
+        from erpnext.stock.get_item_details import apply_price_list
+        price_list = apply_price_list(args=kwargs, as_doc=False)
+        gen_response(200, 'Thành công', price_list)
+    except Exception as e:
+        return exception_handel(e)

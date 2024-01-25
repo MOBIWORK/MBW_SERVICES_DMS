@@ -47,7 +47,7 @@ def list_product(**kwargs):
             item['detail'] = frappe.db.get_value('Item Price', {"item_code" : item.get('item_code')}, ['uom', 'price_list_rate', 'valid_from', 'currency'],as_dict=1)
             item['unit'] = frappe.db.get_all("UOM Conversion Detail", {"parent" : item.get('name')}, ['uom', 'conversion_factor'])
             item['stock'] = frappe.db.get_all("Stock Entry Detail", {"item_code" : item.get('item_code')}, ['t_warehouse', 'qty'])
-            item['discount_percentage'] = frappe.db.get_all("Pricing Rule", {"item_code": item.get('item_code')}, ['priority', 'discount_percentage'])
+            # item['discount_percentage'] = frappe.db.get_all("Pricing Rule", {"item_code": item.get('item_code')}, ['priority', 'discount_percentage'])
         return gen_response(200, 'Thành công', {
             "data": items,
             "total": count,
@@ -152,16 +152,3 @@ def delete_item(name_order, name):
         gen_response(200, "ok",[])
     except Exception as e:
         exception_handel(e)
-
-@frappe.whitelist(methods='GET')
-def list_promotional_products(**kwargs):
-    try:
-        # promotional_products = frappe.db.get_list('Pricing Rule', fields=['name', 'title', 'apply_on', 'price_or_product_discount', 'warehouse', 'selling', 'buying', 'min_qty', 'max_qty', 'min_amt', 'max_amt', 'valid_from', 
-        #                                                                   'company', 'currency', 'rate_or_discount', 'apply_discount_on', 'rate', 'discount_percentage', 'discount_amount'])
-        promotional_products = frappe.db.get_list('Pricing Rule', fields=['*'])
-        for i in promotional_products:
-            i['items'] = get_value_child_doctype('Pricing Rule', i['name'], 'items')
-        return gen_response(200, 'Thành công', promotional_products)
-    except Exception as e:
-        return exception_handel(e)
-        
