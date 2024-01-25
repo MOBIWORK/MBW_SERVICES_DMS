@@ -30,8 +30,17 @@ def create_album_image(**kwargs):
         new_album_image.customer_lat = validate_not_none(kwargs.get('customer_lat'))
         new_album_image.image_url = kwargs.get('image_url')
 
-
+        new_album_image.insert(ignore_permissions=True)
         return gen_response(201, "Tạo thành công", {"name": new_album_image.name})
        
+    except Exception as e:
+        return exception_handel(e)
+    
+#list 
+@frappe.whitelist(methods="GET")
+def list_album_image():
+    try:
+        album_image = frappe.db.get_list('DMS Album Image', fields=["*"])
+        gen_response(200, "Thành công", album_image)
     except Exception as e:
         return exception_handel(e)
