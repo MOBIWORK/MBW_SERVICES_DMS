@@ -131,6 +131,14 @@ def validate_type(type_value=None):
         else:
             raise Exception(f"{value} ont type : {type_value}")
     return validate
+# Kiểm tra định dạng enum
+def validate_enum(type_value=None):
+    def validate(value):
+        if value in type_value:
+            return value
+        else:
+            raise Exception(f"{value} invalid")
+    return validate
 def validate_filter(type_check,type=None,value=None):
     validate = {
         "email": validate_email,
@@ -142,7 +150,8 @@ def validate_filter(type_check,type=None,value=None):
         "choice":validate_choice,
         "boolean": validate_int_bool,
         "timestamp": validate_filter_timestamp(type),
-        "type": validate_type(type)
+        "type": validate_type(type),
+        "enum": validate_enum(type)
     }
 
     return validate[type_check](value)

@@ -58,6 +58,7 @@ def get_list_router(**filters):
 @frappe.whitelist(methods="GET")
 def get_customer_router(**data):
     try:
+        view_mode = validate_filter(value=data.get('view_mode'),type=['list','map'],type_check='enum') if data.get('view_mode') else 'list'
         # phan trang
         page_size =  int(data.get('page_size')) if data.get('page_size') else 20
         page_number = int(data.get('page_number') )if data.get('page_number') and int(data.get('page_number')) <= 0 else 1
@@ -102,7 +103,10 @@ def get_customer_router(**data):
             ,'customer_name'
             ,'UNIX_TIMESTAMP(custom_birthday) as birthday'
             ]
-        detail_customer = frappe.db.get_list('Customer',filters= FiltersCustomer,fields=fields_customer,start=page_size*(page_number-1), page_length=page_size)
+        if(view_mode == 'list'):
+            detail_customer = frappe.db.get_list('Customer',filters= FiltersCustomer,fields=fields_customer,start=page_size*(page_number-1), page_length=page_size)
+        else:
+            detail_customer = frappe.db.get_list('Customer',filters= FiltersCustomer,fields=fields_customer)        
         for customer in detail_customer:
             customer['is_checkin'] = False
             checkin = frappe.db.get_value("DMS Checkin",{"kh_ma":customer.get('customer_id')})
