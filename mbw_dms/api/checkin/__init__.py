@@ -70,11 +70,16 @@ def create_checkin_inventory(**body):
 def create_checkin_image(**body):
     try:
         user = get_user_id()
-        image =body.get('image')
-        customer_name = body.get('customer_name')
+        image = validate_filter(value=body.get('image'),type_check='require')
+        album_id = validate_filter(value = body.get('album_id'),type_check='require')
+        album_name = validate_filter(type_check='require',value=body.get('album_name'))
+        checkin_id = validate_filter(type_check='require',value=body.get('checkin_id'))
+        customer_id = validate_filter(type_check='require',value=body.get('customer_id'))
+        customer_code = validate_filter(type_check='require',value=body.get('customer_code'))
+        customer_name = validate_filter(type_check='require',value=body.get('customer_name'))
         address = body.get('address')
-        long = body.get('long')
-        lat = body.get('lat')
+        long = validate_filter(type_check='require',value=body.get('long'))
+        lat = validate_filter(type_check='require',value=body.get('lat'))
         create_by =  user.get('name')
         create_time = datetime.now()
         description = ''
@@ -89,8 +94,32 @@ def create_checkin_image(**body):
         if create_time:
             description += f"create: {create_time}\\n"
         description= description.rstrip('\\n')
-        rsUpload = upload_image_s3(image=image,description=description)
-        gen_response(200,'',rsUpload) 
+        try:
+            rsUpload = upload_image_s3(image=image,description=description)
+            image_push = {
+                "doctype": 'DMS Album Image',
+                "album_id":album_id,
+                "album_name": album_name,
+                "checkin_id": checkin_id,
+                "customer_id": customer_id,
+                "customer_name":customer_name,
+                "customer_code" : customer_code,
+                "customer_long":long,
+                "customer_lat":lat,
+                "image_url":rsUpload.get("file_url"),
+
+            }
+            new_album_image = frappe.get_doc(image_push)
+            new_album_image.save()
+            frappe.db.commit()
+            gen_response(200,'',rsUpload) 
+            return 
+        except :
+            gen_response(200,"", {
+                "status": False,
+                "file_url" : None
+            })
+            return
     except Exception as e:
         exception_handel(e)
 
