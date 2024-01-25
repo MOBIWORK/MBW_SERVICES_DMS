@@ -12,6 +12,10 @@ export default function MonitorAlbum() {
     setIsModalOpen(true);
   };
 
+  const handleCancel = () => {
+    setIsModalOpen(false);
+  };
+
   const onChange = (value: string) => {
     console.log(`selected ${value}`);
   };
@@ -321,7 +325,8 @@ export default function MonitorAlbum() {
             width={1064}
             title="Hình ảnh khách hàng"
             open={isModalOpen}
-            footer={false}
+            onCancel={handleCancel}
+            footer={null}
           >
             <Row className="pt-4" gutter={[8, 8]}>
               <Col span={12}> 1</Col>
