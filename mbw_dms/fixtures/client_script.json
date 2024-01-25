@@ -4,10 +4,21 @@
   "doctype": "Client Script",
   "dt": "Customer",
   "enabled": 1,
-  "modified": "2024-01-22 10:53:06.689361",
+  "modified": "2024-01-24 16:54:36.029772",
+  "module": "MBW DMS",
+  "name": "Auto Location Customer",
+  "script": "\n\nfunction setDefaultViewMap(frm) {\n  // set view map\n  let map = frm.get_field(\"map\").map;\n  let longitude = frm.doc.longitude || 109.358;\n  let latitude = frm.doc.latitude || 15.961;\n  map.setView([latitude, longitude], 5);\n}\n\nfunction setFieldValue(frm, latitude = 0, longitude = 0, address) {\n  frm.set_value(\"location\", JSON.stringify({longitude,latitude}));\n  frm.set_value(\"address\", address);\n}\n\nfrappe.ui.form.on(\"Customer\", {\n  refresh: function (frm) {\n     \n  },\n    onload:async function(frm) {\n     \n     let customer_primary_address = frm.doc?.customer_primary_address\n     if(customer_primary_address) {\n      let adr_location = frm.doc.__onload.addr_list.find((address)=> {\n        return address.name == customer_primary_address\n     })?.address_location\n         frm.set_value(\"customer_location_primary\",adr_location)\n    \n     }\n       \n    }\n});\n\n",
+  "view": "Form"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Client Script",
+  "dt": "Customer",
+  "enabled": 1,
+  "modified": "2024-01-25 09:18:53.049669",
   "module": "MBW DMS",
   "name": "Customer Location Script",
-  "script": "frappe.ui.form.on(\"Customer\", {\n  refresh: function (frm) {\n     \n  },\nonload:async function(frm) {\n    console.log('list_address',frm.doc.__onload.addr_list)\n    let primaryAddressObj = frm.doc.__onload.addr_list.find(address => address.is_primary_address == 1)\n    if(primaryAddressObj) {\n        frm.set_value('customer_location_primary',primaryAddressObj.address_location)\n        frm.doc.save()\n    }\n\n},\n\n});",
+  "script": "frappe.ui.form.on(\"Customer\", {\n  refresh: function (frm) {\n     \n  },\ncustomer_primary_address:async function(frm) {\n    let primaryAddressObj = frm.doc.__onload.addr_list.find(address => {\n        return address.name == frm.doc.customer_primary_address\n    })\n    if(primaryAddressObj) {\n        frm.set_value('customer_location_primary',primaryAddressObj.address_location)\n    }\n\n},\n\n});",
   "view": "Form"
  },
  {
