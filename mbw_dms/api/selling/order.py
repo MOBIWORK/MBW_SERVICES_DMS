@@ -39,7 +39,7 @@ def get_list_sales_order(**filters):
                                        start=page_size*(page_number-1)*page_size, page_length=page_size,
                                         )
         for sale_order in sale_orders :
-            sale_order['customer_code'] = frappe.db.get_value("Customer",filters={'name': sale_order['customer']},fieldname=['customer_code'])
+            sale_order['custom_id'] = frappe.db.get_value("Customer",filters={'name': sale_order['customer']},fieldname=['customer_id'])
         total_order = len(frappe.db.get_list('Sales Order', filters=query))
 
         gen_response(200,'',{
@@ -73,7 +73,7 @@ def get_sale_order(**data):
                     .on(Customer.name == SalesOrder.customer)
                     .where(SalesOrder.name == data.get('name'))
                     .select(
-                        Customer.customer_code
+                        Customer.customer_id
                         ,SalesOrder.customer,SalesOrder.customer_name,SalesOrder.address_display,UNIX_TIMESTAMP(SalesOrder.delivery_date).as_('delivery_date'),SalesOrder.set_warehouse,SalesOrder.total,SalesOrder.grand_total
                         ,SalesOrder.taxes_and_charges,SalesOrder.total_taxes_and_charges, SalesOrder.apply_discount_on, SalesOrder.additional_discount_percentage,SalesOrder.discount_amount,SalesOrder.contact_person,SalesOrder.rounded_total
                         ,SalesOrderItem.name, SalesOrderItem.item_name,SalesOrderItem.item_code,SalesOrderItem.qty, SalesOrderItem.uom,SalesOrderItem.amount,SalesOrderItem.discount_amount,SalesOrderItem.discount_percentage                        
@@ -193,6 +193,9 @@ def price_list(**kwargs):
     try:
         from erpnext.stock.get_item_details import apply_price_list
         price_list = apply_price_list(args=kwargs, as_doc=False)
+        for i, child in enumerate(price_list["children"]):
+            if "item_code" not in child and i < len(kwargs["items"]):
+                child["item_code"] = kwargs["items"][i]["item_code"]
         gen_response(200, 'Thành công', price_list)
     except Exception as e:
         return exception_handel(e)
