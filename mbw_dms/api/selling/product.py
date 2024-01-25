@@ -38,7 +38,7 @@ def list_product(**kwargs):
             my_filter["item_group"] = ['like', f'%{item_group}%']
         items = frappe.db.get_list("Item",
                                    filters= my_filter,
-                                   fields=["name", "item_code", "item_name", "item_group", "stock_uom","min_order_qty", "description", "brand", "country_of_origin", "image", "custom_industry"],
+                                   fields=["name", "item_code", "item_name", "item_group", "stock_uom","min_order_qty", "description", "brand", "country_of_origin", "image", "custom_industry", "end_of_life"],
                                    start=page_size*(page_number-1), 
                                    page_length=page_size)
         count = len( frappe.db.get_list("Item",filters= my_filter,))
