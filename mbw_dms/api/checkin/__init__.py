@@ -74,7 +74,7 @@ def create_checkin_image(**body):
         album_id = validate_filter(value = body.get('album_id'),type_check='require')
         album_name = validate_filter(type_check='require',value=body.get('album_name'))
         checkin_id = validate_filter(type_check='require',value=body.get('checkin_id'))
-        customer_code = validate_filter(type_check='require',value=body.get('customer_code'))
+        customer_id = validate_filter(type_check='require',value=body.get('customer_id'))
         customer_code = validate_filter(type_check='require',value=body.get('customer_code'))
         customer_name = validate_filter(type_check='require',value=body.get('customer_name'))
         address = body.get('address')
@@ -101,7 +101,7 @@ def create_checkin_image(**body):
                 "album_id":album_id,
                 "album_name": album_name,
                 "checkin_id": checkin_id,
-                "customer_code": customer_code,
+                "customer_id": customer_id,
                 "customer_name":customer_name,
                 "customer_code" : customer_code,
                 "customer_long":long,

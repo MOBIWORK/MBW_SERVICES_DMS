@@ -54,7 +54,7 @@ def list_customer(**kwargs):
             my_filter["custom_birthday"] = ['between', [from_date, to_date]]
         customers = frappe.db.get_list("Customer",
                                 filters= my_filter,
-                                fields=["name", "customer_name","customer_id","customer_type", "customer_group", "territory", "industry", "image","website", "customer_primary_contact", "customer_primary_address", "custom_birthday","customer_location_primary", "customer_details"],
+                                fields=["name", "customer_name","customer_code","customer_type", "customer_group", "territory", "industry", "image","website", "customer_primary_contact", "customer_primary_address", "custom_birthday","customer_location_primary", "customer_details"],
                                 start=page_size*(page_number-1), 
                                 page_length=page_size)
                                 
@@ -105,7 +105,7 @@ def create_customer(**kwargs):
 
         # Tạo mới khách hàng
         new_customer = frappe.new_doc('Customer')
-        required_fields = ['customer_name', 'customer_id', 'customer_group', 'territory']
+        required_fields = ['customer_name', 'customer_code', 'customer_group', 'territory']
         normal_fields = ['customer_details', 'website']
         date_fields = ['custom_birthday']
         choice_fields = ['customer_type']
@@ -188,7 +188,7 @@ def create_customer(**kwargs):
         router = frappe.get_doc('DMS Router', kwargs.get('router_name'))
         router.append('customers', {
             'customer': new_customer.name,
-            'customer_id': new_customer.customer_id,
+            'customer_code': new_customer.customer_code,
             'customer_name': new_customer.customer_name,
             'display_address': new_customer.customer_primary_address,
             'frequency': kwargs.get('frequency')
