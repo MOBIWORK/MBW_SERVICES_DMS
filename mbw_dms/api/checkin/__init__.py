@@ -1,7 +1,7 @@
 import frappe
 from datetime import datetime
 from frappe.utils.data import get_time
-from mbw_dms.api.common import exception_handel, gen_response, get_language ,get_user_id,upload_image_s3
+from mbw_dms.api.common import exception_handel, gen_response, get_language ,get_user_id,upload_image_s3, post_image
 from mbw_dms.api.validators import (validate_datetime,validate_filter)
 from mbw_dms.config_translate import i18n
 import json
@@ -14,11 +14,11 @@ def create_checkin(**kwargs):
         normal_keys = [
             "kh_ma", "kh_ten", "kh_diachi", "kh_long", "kh_lat",
             "checkin_khoangcach", "checkin_trangthaicuahang", "checkin_donhang",
-            "checkin_hinhanh", "checkin_long", "checkin_lat", "checkin_dochinhxac",
+            "checkin_long", "checkin_lat", "checkin_dochinhxac", "checkin_pinvao", "checkin_pinra",
             "checkout_khoangcach", "checkinvalidate_khoangcachcheckin",
             "checkinvalidate_khoangcachcheckout", "createdbyemail", "createbyname", 
         ]
-        datetime_keys = ["checkin_giovao", "checkin_giora", "checkin_pinvao", "checkin_pinra", "checkin_timegps"]
+        datetime_keys = ["checkin_giovao", "checkin_giora", "checkin_timegps"]
         date_keys = ["createddate", ]
         for key, value in kwargs.items():
             if key in normal_keys:
@@ -28,12 +28,9 @@ def create_checkin(**kwargs):
             elif key in date_keys:
                 created_date = validate_datetime(value)
                 new_checkin.set(key, created_date)
-            elif key == 'cmd':
-                continue
-            else:
-                return gen_response(400, i18n.t('translate.invalid_field', locale=get_language()), {"key": key})
-        
         new_checkin.insert()
+        new_checkin.checkin_hinhanh = post_image(name_image=kwargs.get('name_image'), faceimage=kwargs.get('faceimage'), doc_type='DMS Checkin', doc_name=new_checkin.name)
+        new_checkin.save()
         frappe.db.commit()
         return gen_response(200, "Thành công", {"name": new_checkin.kh_ma})
     except Exception as e:

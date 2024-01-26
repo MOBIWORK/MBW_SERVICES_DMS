@@ -69,13 +69,15 @@
   },
   {
    "fieldname": "checkin_pinvao",
-   "fieldtype": "Time",
-   "label": "Checkin pin v\u00e0o"
+   "fieldtype": "Int",
+   "label": "Checkin pin v\u00e0o",
+   "length": 22
   },
   {
    "fieldname": "checkin_pinra",
-   "fieldtype": "Time",
-   "label": "Checkin pin ra"
+   "fieldtype": "Int",
+   "label": "Checkin pin ra",
+   "length": 22
   },
   {
    "fieldname": "checkin_khoangcach",
@@ -152,7 +154,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-01-19 11:29:19.230867",
+ "modified": "2024-01-26 09:35:43.014519",
  "modified_by": "Administrator",
  "module": "MBW DMS",
  "name": "DMS Checkin",

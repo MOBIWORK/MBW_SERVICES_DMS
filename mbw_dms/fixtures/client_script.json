@@ -4,32 +4,10 @@
   "doctype": "Client Script",
   "dt": "Customer",
   "enabled": 1,
-  "modified": "2024-01-24 16:54:36.029772",
-  "module": "MBW DMS",
-  "name": "Auto Location Customer",
-  "script": "\n\nfunction setDefaultViewMap(frm) {\n  // set view map\n  let map = frm.get_field(\"map\").map;\n  let longitude = frm.doc.longitude || 109.358;\n  let latitude = frm.doc.latitude || 15.961;\n  map.setView([latitude, longitude], 5);\n}\n\nfunction setFieldValue(frm, latitude = 0, longitude = 0, address) {\n  frm.set_value(\"location\", JSON.stringify({longitude,latitude}));\n  frm.set_value(\"address\", address);\n}\n\nfrappe.ui.form.on(\"Customer\", {\n  refresh: function (frm) {\n     \n  },\n    onload:async function(frm) {\n     \n     let customer_primary_address = frm.doc?.customer_primary_address\n     if(customer_primary_address) {\n      let adr_location = frm.doc.__onload.addr_list.find((address)=> {\n        return address.name == customer_primary_address\n     })?.address_location\n         frm.set_value(\"customer_location_primary\",adr_location)\n    \n     }\n       \n    }\n});\n\n",
-  "view": "Form"
- },
- {
-  "docstatus": 0,
-  "doctype": "Client Script",
-  "dt": "Customer",
-  "enabled": 1,
-  "modified": "2024-01-25 09:18:53.049669",
+  "modified": "2024-01-22 10:53:06.689361",
   "module": "MBW DMS",
   "name": "Customer Location Script",
-  "script": "frappe.ui.form.on(\"Customer\", {\n  refresh: function (frm) {\n     \n  },\ncustomer_primary_address:async function(frm) {\n    let primaryAddressObj = frm.doc.__onload.addr_list.find(address => {\n        return address.name == frm.doc.customer_primary_address\n    })\n    if(primaryAddressObj) {\n        frm.set_value('customer_location_primary',primaryAddressObj.address_location)\n    }\n\n},\n\n});",
-  "view": "Form"
- },
- {
-  "docstatus": 0,
-  "doctype": "Client Script",
-  "dt": "Address",
-  "enabled": 1,
-  "modified": "2024-01-24 09:49:11.651578",
-  "module": "MBW DMS",
-  "name": "Address Location Script",
-  "script": "\nfunction setLocation(frm, lat = 0, long = 0, address) {\n  frm.set_value(\"address_location\", JSON.stringify({long,lat}));\n}\nasync function setTitle(frm) {\n    let country = frm.doc.country\n    let city = frm.doc.city || \"\"\n    let county = frm.doc.county || \"\"\n    let state = frm.doc.state  || \"\"\n    let address_line1 = frm.doc.address_line1 || \"\"\n    //get name city\n    if(city){\n\t    let cityRs=await frm.call({\n\t        type: \"GET\",\n\t\t  method: \"mbw_dms.api.helpers.address.get_name_city\",\n\t\t  args: {\n\t\t\tname: frm.doc.city\n\t\t  }\n\t\t})\n\t\tcity = cityRs.result\n    }\n    \n    \n    //get name district\n    if(county){\n\t\tlet countyRs= await frm.call({\n\t        type: \"GET\",\n\t\t  method: \"mbw_dms.api.helpers.address.get_name_district\",\n\t\t  args: {\n\t\t\tname: frm.doc.county\n\t\t  }\n\t\t})\n\t\tcounty = countyRs.result\n    }\n    //get name ward\n    if(state) {\n       let stateRs = await frm.call({\n\t        type: \"GET\",\n\t\t  method: \"mbw_dms.api.helpers.address.get_name_ward\",\n\t\t  args: {\n\t\t\tname: frm.doc.state\n\t\t  }\n\t\t})\n\t\tstate = stateRs.result\n    }\n    \n    \n    \n    frm.set_value(\"address_title\", `${address_line1}, ${state}, ${county}, ${city}, ${country}`);\n}\nfrappe.ui.form.on('Address', {\n    address_title: async (frm) => {\n        let country = frm.doc.country\n        let city = frm.doc.city || \"\"\n        let county = frm.doc.county || \"\"\n        let state = frm.doc.state  || \"\"\n        let address_line1 = frm.doc.address_line1 || \"\"\n        if (country && city&& county && state && address_line1) {\n            let address = frm.doc.address_title\n            await frappe.call({\n\t\t\t\ttype: \"GET\",\n\t\t\t\tmethod: \"mbw_service_v2.api.ess.geolocation.get_coordinates_location\",\n\t\t\t\targs: {\n\t\t\t\t\t\"address\": address\n\t\t\t\t},\n\t\t\t\tcallback: function (r) {\n\t\t\t\t\tlet rs = r.result.results;\n\t\t\t\t\tif(rs) {\n\t\t\t\t\t\tlet {geometry: {location}} = rs[0]\n\t\t\t\t\t\tconsole.log(\"location\",location);\n\t\t\t\t\t\tfrm.set_value('custom_address_on_map',JSON.stringify(\n\t\t\t\t\t\t\t[{\"type\":\"Feature\",\"properties\":{},\"geometry\":{\"type\":\"Point\",\"coordinates\":[location.lng,location.lat]}}]\n\t\t\t\t\t\t\t))\n\t\t\t\t\t\tfrm.set_value('address_location',JSON.stringify({long: location.lng,lat:location.lat}))\n\t\t\t\t\t}\n\t\t\t\t  },\n\t\t\t})\n\t\t\tconsole.log(frm.doc)\n        }\n    },\n    onload: function(frm) {\n\t\t\n\t\t\n\t},\n\trefresh(frm) {\n\t\t// your code here\n\t},\n\tcounty: async (frm)=> {\n\t   await setTitle(frm)\n\t    frm.set_query('state',() =>{ \n\t\treturn {\n\t\t\tfilters: {\n\t\t\t\tma_quan_huyen:frm.doc.county\n\t\t\t}\n\t\t}\n\t\t})\n\t\t\n\t},\n\taddress_line1: (frm)=> {\n\t    setTitle(frm)\n\t},\n\tcity: async (frm)=> {\n\t    await setTitle(frm)\n\t    \n\t    frm.set_query('county',() =>{ \n\t\t\treturn {\n\t\t\t\tfilters: {\n\t\t\t\t\tma_tinh_thanh: Number.parseInt( frm.doc.city)\n\t\t\t\t}\n\t\t\t}\n\t\t})\n\t\n\t},\n\tcountry: (frm)=> {\n\t    setTitle(frm)\n\t},\n\tstate: async (frm)=> {\n\t    await setTitle(frm)\n\t    let name_district\n\t\t\n\t}\n})",
+  "script": "frappe.ui.form.on(\"Customer\", {\n  refresh: function (frm) {\n     \n  },\nonload:async function(frm) {\n    console.log('list_address',frm.doc.__onload.addr_list)\n    let primaryAddressObj = frm.doc.__onload.addr_list.find(address => address.is_primary_address == 1)\n    if(primaryAddressObj) {\n        frm.set_value('customer_location_primary',primaryAddressObj.address_location)\n        frm.doc.save()\n    }\n\n},\n\n});",
   "view": "Form"
  }
 ]

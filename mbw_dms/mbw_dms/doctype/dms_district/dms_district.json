@@ -27,13 +27,14 @@
   },
   {
    "fieldname": "ma_tinh_thanh",
-   "fieldtype": "Data",
-   "label": "M\u00e3 t\u1ec9nh th\u00e0nh"
+   "fieldtype": "Link",
+   "label": "T\u1ec9nh th\u00e0nh",
+   "options": "DMS Province"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-01-22 13:52:19.449181",
+ "modified": "2024-01-26 11:22:17.845388",
  "modified_by": "Administrator",
  "module": "MBW DMS",
  "name": "DMS District",
