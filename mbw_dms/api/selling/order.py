@@ -114,6 +114,7 @@ def get_sale_order(**data):
 @frappe.whitelist(methods='POST')
 def create_sale_order(**kwargs):
     try:
+        from erpnext.accounts.party import get_party_details
         kwargs = frappe._dict(kwargs)
         new_order = frappe.new_doc('Sales Order')
 
@@ -132,6 +133,10 @@ def create_sale_order(**kwargs):
         new_order.taxes_and_charges = taxes_and_charges                                                 # Tax
         new_order.append('taxes', get_value_child_doctype('Sales Taxes and Charges Template', taxes_and_charges, 'taxes')[0])
         new_order.checkin_id = kwargs.get('checkin_id')
+        sales_team = get_party_details(party=kwargs.get('customer'), party_type='Customer', price_list='Standard Selling', posting_date=kwargs.get('delivery_date'), fetch_payment_terms_template=1, currency='VND',
+                              company=kwargs.get('company'), doctype='Sales Order')
+        if sales_team.get('sales_team') != []:
+            new_order.append('sales_team', sales_team['sales_team'][0])
         items = kwargs.get('items')
         amount = 0
         for item_data in items:
