@@ -11,7 +11,8 @@
  "field_order": [
   "ma_huyen",
   "ten_huyen",
-  "ma_tinh_thanh"
+  "ma_tinh_thanh",
+  "ten_thanh_pho"
  ],
  "fields": [
   {
@@ -29,11 +30,17 @@
    "fieldname": "ma_tinh_thanh",
    "fieldtype": "Data",
    "label": "M\u00e3 t\u1ec9nh th\u00e0nh"
+  },
+  {
+   "fieldname": "ten_thanh_pho",
+   "fieldtype": "Link",
+   "label": "T\u00ean th\u00e0nh ph\u1ed1",
+   "options": "DMS Province"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-01-22 13:52:19.449181",
+ "modified": "2024-01-26 10:13:11.673583",
  "modified_by": "Administrator",
  "module": "MBW DMS",
  "name": "DMS District",
