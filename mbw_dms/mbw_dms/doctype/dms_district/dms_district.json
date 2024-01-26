@@ -24,7 +24,7 @@
    "fieldname": "ten_huyen",
    "fieldtype": "Data",
    "label": "T\u00ean qu\u1eadn/huy\u1ec7n",
-   "unique": 1
+   "unique": 0
   },
   {
    "fieldname": "ma_tinh_thanh",
