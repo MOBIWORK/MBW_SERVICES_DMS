@@ -185,3 +185,19 @@ def update_address_customer(**body):
         
     except Exception as e:
         exception_handel(e)
+
+# cancel checkout
+@frappe.whitelist(methods="DELETE")
+def cancel_checkout(**data):
+    try:
+        gen_response(200,i18n.t("translate.successfully",locale=get_language()),[])
+        checkin_id = data.get('checkin_id')
+        #xoa don hang
+        frappe.db.delete("Sales Order",{"checkin_id":checkin_id})
+        #xoa tra hang
+        frappe.db.delete("Sales Invoice",{"checkin_id":checkin_id})
+        #xoa album anh
+        frappe.db.delete("DMS Album Image",{"checkin_id":checkin_id})
+        return
+    except Exception as e :
+        exception_handel(e)

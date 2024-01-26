@@ -22,28 +22,38 @@ def get_list_router(**filters):
 
         status = filters.get('status') if filters.get('status') else False
         employee = filters.get('employee') if filters.get('employee') else False
+        modified_by = filters.get('modified_by') if filters.get('modified_by') else False
+        modified = validate_filter(value=filters.get('modified'), type_check="timestamp") if filters.get('modified') else False
+        owner = filters.get('owner') if filters.get('owner') else False
+        creation = validate_filter(value=filters.get('creation'), type_check='timestamp') if filters.get('creation') else False
+        router = validate_filter(value=filters.get('router'), type=list,type_check="type") if filters.get('router') else False
         page_size =  int(filters.get('page_size')) if filters.get('page_size') else 20
         page_number = int(filters.get('page_number') )if filters.get('page_number') and int(filters.get('page_number')) <= 0 else 1
-        DmsRouter = frappe.qb.DocType('DMS Router')
+        orderby_array = ['modified',"name","owner","idx", "channel_code","channel_name", "employee"]
+        order_by = validate_filter(value=filters.get('order_by'),type=orderby_array,type_check='enum') if filters.get('order_by') else False
+        sort = validate_filter(value=filters.get('sort'),type=['desc','asc'], type_check="enum") if filters.get('sort') else False
         queryFilters = {"is_deleted": 0}
-        queryDoctype = DmsRouter.is_deleted == 0
         if status:
             queryFilters['status'] = status
-            queryDoctype =queryDoctype & DmsRouter.status == status
+        if modified_by:
+            queryFilters['modified_by'] = modified_by
+        if modified:
+            queryFilters['modified'] = modified
+        if owner:
+            queryFilters['owner'] = owner
+        if creation:
+            queryFilters['creation'] = creation
+        if router:
+            queryFilters['router'] = ["in",router]
         if employee:
             queryFilters['employee'] = employee
-            queryDoctype =queryDoctype & DmsRouter.employee == employee
+        order_string = 'travel_date desc'
+        if order_by and sort:
+            order_string = f"{order_by} {sort}"
         list_router = frappe.db.get_list('DMS Router',filters=queryFilters,fields=['*', 'UNIX_TIMESTAMP(travel_date) as travel_date'], 
-                                       order_by='travel_date desc', 
+                                       order_by=order_string, 
                                        start=page_size*(page_number-1), page_length=page_size)
-        # list_router = (
-        #     frappe.qb.from_(DmsRouter)
-        #     .offset(page_size*(page_number-1))
-        #     .limit(page_size)
-        #     .where(queryDoctype)
-        #     .select('*',UNIX_TIMESTAMP(DmsRouter.travel_date).as_("travel_date") ,)
-        #     .run(as_dict = 1)
-        # )
+        
         total = len(frappe.db.get_list('DMS Router',filters=queryFilters))
         gen_response(200,'',{
             "data": list_router,
