@@ -48,7 +48,7 @@
   align-items: center;
 }
 
-.custom-dot {
+/* .custom-dot {
   width: 20px;
   height: 20px;
   margin: 0 5px;
@@ -70,4 +70,23 @@
 
 .slick-dots {
   display: flex!important;
+} */
+
+
+.slick-dots.slick-thumb {
+  position: absolute;
+  height: 80px;
+  bottom: -80px;
+
+}
+
+.slick-dots.slick-thumb img {
+  object-fit: cover;
+  width: 100%;
+  height: 100%;
+}
+
+.slick-dots.slick-thumb li {
+  height: 60px;
+  width: 60px;
 }

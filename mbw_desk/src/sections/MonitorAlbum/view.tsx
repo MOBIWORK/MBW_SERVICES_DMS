@@ -18,15 +18,15 @@ const CustomArrow = ({ direction, onClick, isHovered }: any) => (
   </div>
 );
 
-const CustomDot = ({ onClick, index, isActive }: any) => (
-  <div className={`custom-dot ${isActive ? "active" : ""}`} onClick={onClick}>
-    <img
-      src={`https://s3.amazonaws.com/static.neostack.com/img/react-slick/abstract0${
-        index + 1
-      }.jpg`}
-    />
-  </div>
-);
+// const CustomDot = ({ onClick, index, isActive }: any) => (
+//   <div className={`custom-dot ${isActive ? "active" : ""}`} onClick={onClick}>
+//     <img
+//       src={`https://s3.amazonaws.com/static.neostack.com/img/react-slick/abstract0${
+//         index + 1
+//       }.jpg`}
+//     />
+//   </div>
+// );
 
 export default function MonitorAlbum() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -54,9 +54,9 @@ export default function MonitorAlbum() {
     option?: { label: string; value: string }
   ) => (option?.label ?? "").toLowerCase().includes(input.toLowerCase());
 
-  const handleDotClick = (index: any) => {
-    setCurrentSlide(index);
-  };
+  // const handleDotClick = (index: any) => {
+  //   setCurrentSlide(index);
+  // };
 
   const handlePrevArrowClick = () => {
     const newIndex =
@@ -70,32 +70,32 @@ export default function MonitorAlbum() {
   };
 
   const settings = {
-    // customPaging: function (i: number) {
-    //   return (
-    //     <a>
-    //       <img
-    //         src={`https://s3.amazonaws.com/static.neostack.com/img/react-slick/abstract0${
-    //           i + 1
-    //         }.jpg`}
-    //       />
-    //     </a>
-    //   );
-    // }
-    // ),
-    dots: true,
-    appendDots: (dots: any) => (
-      <div className="custom-dots-container">
-        {dots.map((dot: any, index: any) => (
-          <CustomDot
-            key={index}
-            {...dot}
-            index={index}
-            onClick={() => handleDotClick(index)}
-            isActive={index === currentSlide}
+    customPaging: function (i: number) {
+      return (
+        <a>
+          <img
+            src={`https://s3.amazonaws.com/static.neostack.com/img/react-slick/abstract0${
+              i + 1
+            }.jpg`}
           />
-        ))}
-      </div>
-    ),
+        </a>
+      );
+    },
+    dots: true,
+    dotsClass: "slick-dots slick-thumb",
+    // appendDots: (dots: any) => (
+    //   <div className="custom-dots-container">
+    //     {dots.map((dot: any, index: any) => (
+    //       <CustomDot
+    //         key={index}
+    //         {...dot}
+    //         index={index}
+    //         onClick={() => handleDotClick(index)}
+    //         isActive={index === currentSlide}
+    //       />
+    //     ))}
+    //   </div>
+    // ),
     infinite: true,
     speed: 500,
     slidesToShow: 1,
@@ -418,6 +418,13 @@ export default function MonitorAlbum() {
             <Row className="pt-4" gutter={32}>
               <Col span={12}>
                 <div
+                style={{
+                  maxWidth: '500px',
+                  overflow: 'hidden',
+                  position:"relative",
+                  margin: '0 auto',
+                  paddingBottom: '100px'
+                }}
                   className={`custom-slider-container !pb-16 ${
                     isHovered ? "hovered" : ""
                   }`}
