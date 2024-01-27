@@ -105,7 +105,7 @@ def create_customer(**kwargs):
 
         # Tạo mới khách hàng
         new_customer = frappe.new_doc('Customer')
-        required_fields = ['customer_name', 'customer_code', 'customer_group', 'territory']
+        required_fields = ['customer_code', 'customer_name', 'customer_group', 'territory']
         normal_fields = ['customer_details', 'website']
         date_fields = ['custom_birthday']
         choice_fields = ['customer_type']
@@ -135,9 +135,9 @@ def create_customer(**kwargs):
         new_address_cus.address_title = kwargs.get('address_title_cus')
         new_address_cus.address_type = kwargs.get('address_type_cus')
         new_address_cus.address_line1 = kwargs.get('detail_address_cus')
-        new_address_cus.address_line2 = kwargs.get('ward_cus')
-        new_address_cus.city = kwargs.get('district_cus')
-        new_address_cus.state = kwargs.get('province_cus')
+        new_address_cus.city = kwargs.get('province_cus')
+        new_address_cus.county = kwargs.get('district_cus')
+        new_address_cus.state = kwargs.get('ward_cus')
         new_address_cus.is_shipping_address = kwargs.get('is_shipping_address')
         new_address_cus.is_primary_address = kwargs.get('is_primary_address')
         new_address_cus.append('links', {
@@ -152,6 +152,8 @@ def create_customer(**kwargs):
         for key, value in kwargs.items():
             if key in contact_fields:
                 new_contact.set(key, value)
+        new_contact.is_primary_contact = 1
+        new_contact.is_billing_contact = 1
 
         new_contact.append('links', {
             'link_doctype': new_customer.doctype,
@@ -166,9 +168,9 @@ def create_customer(**kwargs):
         new_address_contact.address_title = kwargs.get('adr_title_contact')
         new_address_contact.address_type = kwargs.get('adr_type_contact')
         new_address_contact.address_line1 = kwargs.get('detail_adr_contact')
-        new_address_contact.address_line2 = kwargs.get('ward_contact')
-        new_address_contact.city = kwargs.get('district_contact')
-        new_address_contact.state = kwargs.get('province_contact')
+        new_address_contact.city = kwargs.get('province_contact')
+        new_address_contact.county = kwargs.get('district_contact')
+        new_address_contact.state = kwargs.get('ward_contact')
         new_address_contact.append('links', {
             'link_doctype': new_customer.doctype,
             'link_name': new_customer.name,
@@ -216,12 +218,8 @@ def update_customer(name, **kwargs):
     try:
         if frappe.db.exists("Customer", name, cache=True):
             customers = frappe.get_doc('Customer', name)
-            fieldAccess = ['']
-            # print('========================= value: ', customers, flush=True)
-
             for field, value in dict(kwargs).items():
                 setattr(customers, field, value)
-
             customers.save()
             gen_response(200, 'Cập nhật thành công')
         else:

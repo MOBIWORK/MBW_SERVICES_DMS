@@ -111,6 +111,7 @@ def get_sale_order(**data):
     except Exception as e: 
         exception_handel(e)
 
+# Tạo mới đơn hàng
 @frappe.whitelist(methods='POST')
 def create_sale_order(**kwargs):
     try:
@@ -185,6 +186,7 @@ def create_sale_order(**kwargs):
     except Exception as e:
         return exception_handel(e)
 
+# Áp dụng quy tắc đặt giá
 @frappe.whitelist()
 def pricing_rule(**kwargs):
     try:
@@ -196,7 +198,8 @@ def pricing_rule(**kwargs):
         gen_response(200, 'Thành công', pricing_rule)
     except Exception as e:
         return exception_handel(e)
-    
+
+# Áp dụng bảng giá
 @frappe.whitelist()
 def price_list(**kwargs):
     try:
@@ -208,3 +211,143 @@ def price_list(**kwargs):
         gen_response(200, 'Thành công', price_list)
     except Exception as e:
         return exception_handel(e)
+
+# Tạo mới phiếu trả hàng
+@frappe.whitelist(methods='POST')
+def create_return_order(**kwargs):
+    try:
+        from erpnext.accounts.party import get_party_details
+        kwargs = frappe._dict(kwargs)
+        new_order = frappe.new_doc('Sales Invoice')
+
+        # Dữ liệu bắn lên để tạo sale order mới
+        discount_percent = float(kwargs.get('additional_discount_percentage'))
+        discount_amount = float(kwargs.get('discount_amount'))
+        rate_taxes = float(kwargs.get('rate_taxes'))
+        apply_discount_on = kwargs.get('apply_discount_on')
+        taxes_and_charges = kwargs.get('taxes_and_charges') 
+
+        new_order.customer = validate_not_none(kwargs.customer)                                         
+        new_order.delivery_date = validate_date(kwargs.delivery_date)                                   # Ngày giao
+        new_order.set_warehouse = validate_not_none(kwargs.get('set_warehouse'))                        # Kho hàng
+        new_order.apply_discount_on = validate_choice(configs.discount_type)(apply_discount_on)         # Loại Chiết khấu
+        new_order.additional_discount_percentage = discount_percent                                     # Phần trăm chiết khấu
+        new_order.taxes_and_charges = taxes_and_charges                                                 # Tax
+        new_order.append('taxes', get_value_child_doctype('Sales Taxes and Charges Template', taxes_and_charges, 'taxes')[0])
+        new_order.checkin_id = kwargs.get('checkin_id')
+        new_order.is_return = kwargs.get('is_return')
+        new_order.update_billed_amount_in_delivery_note = kwargs.get('update_billed_amount_in_delivery_note')
+        sales_team = get_party_details(party=kwargs.get('customer'), party_type='Customer', price_list='Standard Selling', posting_date=kwargs.get('delivery_date'), fetch_payment_terms_template=1, currency='VND',
+                              company=kwargs.get('company'), doctype='Sales Order')
+        if sales_team.get('sales_team') != []:
+            new_order.append('sales_team', sales_team['sales_team'][0])
+        items = kwargs.get('items')
+        amount = 0
+        for item_data in items:
+            rate = float(item_data.get('rate'))
+            discount_percentage = float(item_data.get('discount_percentage'))
+            new_order.append('items', {
+                'item_code': item_data.get('item_code'),
+                'qty': -item_data.get('qty'),
+                'uom': item_data.get('uom'),
+                'discount_percentage': discount_percentage,
+            })
+            amount += (rate - rate * discount_percentage /100) * float(-item_data.get('qty'))  # Giá tổng sản phầm (X)
+
+        # Check dữ liệu mobile bắn lên
+        grand_total = 0     # Tổng tiền đơn hàng
+        total_vat = 0       # Giá vat (VAT)
+
+        # Nếu loại chiết khấu là Grand total
+        if apply_discount_on == 'Grand Total':
+            total_vat = rate_taxes * amount / 100          # VAT = %VAT * X
+            if discount_percent != 0:
+                discount_amount = discount_percent * (amount + total_vat) / 100     # CK = %CK * (VAT + X)
+                grand_total = amount + total_vat - discount_amount         # total = X + VAT - Ck
+            if discount_percent == 0:
+                new_order.discount_amount = discount_amount
+                grand_total = amount + total_vat - discount_amount
+
+        # Nếu loại chiết khấu là Net total
+        if apply_discount_on == 'Net Total':
+            if discount_percent != 0:
+                discount_amount = discount_percent * amount / 100
+                total_vat = rate_taxes * (amount - discount_amount) / 100
+                grand_total = amount + total_vat - discount_amount
+            if discount_percent == 0:
+                new_order.discount_amount = discount_amount
+                total_vat = rate_taxes * (amount - discount_amount) / 100
+                grand_total = amount + total_vat - discount_amount
+        
+        # So sánh với giá bên mobile tính toán
+        if grand_total == float(kwargs.get('grand_total')):
+            new_order.insert()
+            frappe.db.commit()
+            gen_response(200, 'Thành công',  {"name": new_order.name})
+        else:
+            return gen_response(400, i18n.t('translate.invalid_grand_total', locale=get_language()), {"grand_total": grand_total})
+    except Exception as e:
+        return exception_handel(e)
+
+# Chỉnh sửa phiếu trả hàng
+@frappe.whitelist(methods='PUT')
+def edit_return_order(name, **kwargs):
+    try:
+        if frappe.db.exists("Sales Invoice", name, cache=True):
+            order = frappe.get_doc('Sales Invoice', name)
+            taxes_and_charges = kwargs.get('taxes_and_charges')
+            discount_percent = kwargs.get('additional_discount_percentage')
+            discount_amount = kwargs.get('discount_amount')
+            items = kwargs.get('items')
+            if items:
+                for item_data in items:
+                    discount_percentage = float(item_data.get('discount_percentage')) if item_data.get('discount_percentage') is not None else None
+                    qty = int(item_data.get('qty')) if item_data.get('qty') is not None else 1
+                    if qty == 0:
+                        return gen_response(400, 'Số lượng không thể bằng 0')
+                    existing_item = next((item for item in order.items if item.item_code == item_data.get('item_code')), None)
+                    if existing_item:
+                        if qty is not None:
+                            existing_item.qty = -qty
+                        existing_item.uom = item_data.get('uom')
+                        if discount_percentage is not None:
+                            existing_item.discount_percentage = discount_percentage
+                        existing_item.rate = item_data.get('rate')
+                    else:
+                        order.append('items', {
+                            'item_code': item_data.get('item_code'),
+                            'qty': -qty if qty is not None else 1,
+                            'uom': item_data.get('uom'),
+                            'rate': item_data.get('rate'),
+                            'discount_percentage': discount_percentage if discount_percentage is not None else 0.0
+                        })
+            if taxes_and_charges:
+                order.set('taxes', [])
+                order.taxes_and_charges = taxes_and_charges  
+                order.append('taxes', get_value_child_doctype('Sales Taxes and Charges Template', taxes_and_charges, 'taxes')[0])
+            if discount_percent:
+                order.set('additional_discount_percentage', float(discount_percent))
+            if discount_amount:
+                order.set('discount_amount', float(discount_amount))
+            order.save()
+            gen_response(200, 'Cập nhật thành công')
+        else:
+            return gen_response(406, f"Không tồn tại {name}")
+    except Exception as e:
+        return exception_handel(e)
+
+# Xóa phiếu trả hàng
+@frappe.whitelist(methods='DELETE')
+def delete_return_order(name, **kwargs):
+    try:
+        if frappe.db.exists("Sales Invoice", name, cache=True):
+            return_order = frappe.get_doc('Sales Invoice',name)
+            if return_order.status == 'Draft':
+                frappe.delete_doc('Sales Invoice', name)
+                gen_response(200, "Thành công", [])
+            else:
+                return gen_response(400, i18n.t('translate.invalid_delete_return_order', locale=get_language()))
+        else:
+            return gen_response(406, f"Không tồn tại {name}")
+    except Exception as e:
+        exception_handel(e)
