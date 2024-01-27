@@ -109,7 +109,7 @@ def validate_filter_timestamp(type=None):
             else:
                 time = datetime.fromtimestamp(value)
 
-            return str(time)
+            return time
         except ValueError as e:
             if value:
                 raise Exception('%s không đúng định dạng timestamp' % value)

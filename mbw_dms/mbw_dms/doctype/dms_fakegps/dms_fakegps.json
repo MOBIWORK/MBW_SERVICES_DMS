@@ -12,7 +12,7 @@
   "date_fake",
   "time_fake",
   "location_fake",
-  "device_list"
+  "list_app"
  ],
  "fields": [
   {
@@ -41,15 +41,14 @@
    "label": "V\u1ecb tr\u00ed Fake"
   },
   {
-   "fieldname": "device_list",
-   "fieldtype": "Table",
-   "label": "Danh s\u00e1ch \u1ee9ng d\u1ee5ng",
-   "options": "DMS FakeGPS Devices"
+   "fieldname": "list_app",
+   "fieldtype": "Data",
+   "label": "Danh s\u00e1ch \u1ee9ng d\u1ee5ng"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-01-27 09:57:58.735374",
+ "modified": "2024-01-27 10:36:48.844758",
  "modified_by": "Administrator",
  "module": "MBW DMS",
  "name": "DMS FakeGPS",
