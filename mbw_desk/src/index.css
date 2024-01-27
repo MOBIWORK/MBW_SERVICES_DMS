@@ -95,4 +95,10 @@
 .slick-dots.slick-thumb li {
   height: 60px;
   width: 60px;
+  opacity: 0.5;
+  transition: opacity 0.3s ease;
+}
+
+.slick-dots.slick-thumb li.slick-active  {
+  opacity: 1.2;
 }
