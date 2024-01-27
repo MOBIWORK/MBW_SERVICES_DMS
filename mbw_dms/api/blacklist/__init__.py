@@ -8,6 +8,7 @@ from mbw_dms.api.common import (
     exception_handel,
     gen_response,
     this_week,
+    get_employee_info
 )
 
 from mbw_dms.api.validators import (
@@ -19,14 +20,18 @@ UNIX_TIMESTAMP = CustomFunction('UNIX_TIMESTAMP', ['day'])
 @frappe.whitelist(methods='POST')
 def insert_fake_gps(**body):
     try:
-        id_user = validate_filter(value=body.get('id_user'),type_check="require")
-        user_code = validate_filter(value=body.get('user_code'),type_check="require")
+        employee = get_employee_info()
+        id_user = employee.get('user_id')
+        user_code = employee.get('name')
         datetime_fake = validate_filter(value=body.get('datetime_fake'),type_check="require")
         location_fake = validate_filter(value=body.get('location_fake'),type_check="require")
         list_app = validate_filter(value=body.get('list_app'),type_check="require")
         datetime_fake = validate_filter(value=datetime_fake,type_check="timestamp")
-        field_valid = ["id_user","user_code","datetime_fake","location_fake","list_app"]
-        convert_body = {}
+        field_valid = ["datetime_fake","location_fake","list_app"]
+        convert_body = {
+            "id_user":id_user,
+            "user_code":user_code
+        }
         for key,value in body.items():
             if key in field_valid :
                 if key == "datetime_fake":

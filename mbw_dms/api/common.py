@@ -110,7 +110,17 @@ def get_employee_id():
         return get_employee_by_user(user_id).get("name")
     except:
         return ""
-    
+
+def get_employee_info():
+    try:
+        user_id = get_user_id()
+        return get_employee_by_user(user_id.get('email'),["name","user_id"])
+    except:
+        return ""
+
+
+
+
 def validate_image(user_image):
     if user_image and "http" not in user_image:
         user_image = BASE_URL + user_image
