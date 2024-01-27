@@ -1,0 +1,74 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2024-01-27 09:57:58.735374",
+ "default_view": "List",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "id_user",
+  "user_code",
+  "date_fake",
+  "time_fake",
+  "location_fake",
+  "device_list"
+ ],
+ "fields": [
+  {
+   "fieldname": "id_user",
+   "fieldtype": "Data",
+   "label": "ID USER"
+  },
+  {
+   "fieldname": "user_code",
+   "fieldtype": "Data",
+   "label": "M\u00e3 User"
+  },
+  {
+   "fieldname": "date_fake",
+   "fieldtype": "Date",
+   "label": "Ng\u00e0y FakeGPS"
+  },
+  {
+   "fieldname": "time_fake",
+   "fieldtype": "Time",
+   "label": "Th\u1eddi gian Fake"
+  },
+  {
+   "fieldname": "location_fake",
+   "fieldtype": "JSON",
+   "label": "V\u1ecb tr\u00ed Fake"
+  },
+  {
+   "fieldname": "device_list",
+   "fieldtype": "Table",
+   "label": "Danh s\u00e1ch \u1ee9ng d\u1ee5ng",
+   "options": "DMS FakeGPS Devices"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2024-01-27 09:57:58.735374",
+ "modified_by": "Administrator",
+ "module": "MBW DMS",
+ "name": "DMS FakeGPS",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
