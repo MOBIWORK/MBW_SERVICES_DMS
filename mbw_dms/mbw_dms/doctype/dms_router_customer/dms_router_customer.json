@@ -57,7 +57,7 @@
    "label": "T\u00ean kh\u00e1ch h\u00e0ng"
   },
   {
-   "fetch_from": "customer.customer_id",
+   "fetch_from": "customer.customer_code",
    "fieldname": "customer_code",
    "fieldtype": "Data",
    "label": "M\u00e3 kh\u00e1ch h\u00e0ng"
@@ -66,7 +66,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-01-26 15:04:23.686280",
+ "modified": "2024-01-29 14:35:08.823697",
  "modified_by": "Administrator",
  "module": "MBW DMS",
  "name": "DMS Router Customer",
