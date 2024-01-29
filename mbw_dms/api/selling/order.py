@@ -228,7 +228,6 @@ def create_return_order(**kwargs):
         taxes_and_charges = kwargs.get('taxes_and_charges') 
 
         new_order.customer = validate_not_none(kwargs.customer)                                         
-        new_order.delivery_date = validate_date(kwargs.delivery_date)                                   # Ngày giao
         new_order.set_warehouse = validate_not_none(kwargs.get('set_warehouse'))                        # Kho hàng
         new_order.apply_discount_on = validate_choice(configs.discount_type)(apply_discount_on)         # Loại Chiết khấu
         new_order.additional_discount_percentage = discount_percent                                     # Phần trăm chiết khấu
@@ -316,10 +315,10 @@ def edit_return_order(name, **kwargs):
                     else:
                         order.append('items', {
                             'item_code': item_data.get('item_code'),
-                            'qty': -qty if qty is not None else 1,
+                            'qty': -qty,
                             'uom': item_data.get('uom'),
                             'rate': item_data.get('rate'),
-                            'discount_percentage': discount_percentage if discount_percentage is not None else 0.0
+                            'discount_percentage': discount_percentage if discount_percentage is not None else 0
                         })
             if taxes_and_charges:
                 order.set('taxes', [])
