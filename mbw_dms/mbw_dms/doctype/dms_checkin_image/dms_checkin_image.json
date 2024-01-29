@@ -1,0 +1,30 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2024-01-29 14:57:49.457735",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "url_image"
+ ],
+ "fields": [
+  {
+   "fieldname": "url_image",
+   "fieldtype": "Data",
+   "label": "Url image"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2024-01-29 15:11:49.431980",
+ "modified_by": "Administrator",
+ "module": "MBW DMS",
+ "name": "DMS Checkin Image",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

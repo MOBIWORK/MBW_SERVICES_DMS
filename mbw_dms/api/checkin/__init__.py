@@ -12,7 +12,7 @@ def create_checkin(**kwargs):
         new_checkin = frappe.new_doc('DMS Checkin')
 
         normal_keys = [
-            "kh_ma", "kh_ten", "kh_diachi", "kh_long", "kh_lat", "checkin_id",
+            "kh_ma", "kh_ten", "kh_diachi", "kh_long", "kh_lat",
             "checkin_khoangcach", "checkin_trangthaicuahang", "checkin_donhang",
             "checkin_long", "checkin_lat", "checkin_dochinhxac", "checkin_pinvao", "checkin_pinra",
             "checkout_khoangcach", "checkinvalidate_khoangcachcheckin",
@@ -29,13 +29,26 @@ def create_checkin(**kwargs):
                 created_date = validate_datetime(value)
                 new_checkin.set(key, created_date)
         new_checkin.insert()
-        # new_checkin.checkin_hinhanh = post_image(name_image=kwargs.get('name_image'), faceimage=kwargs.get('faceimage'), doc_type='DMS Checkin', doc_name=new_checkin.name)
-        new_checkin.save()
         frappe.db.commit()
-        return gen_response(200, "Successful", {"name": new_checkin.kh_ma})
+        return gen_response(200, "Successful", {"name": new_checkin.name})
     except Exception as e:
         return exception_handel(e)
     
+@frappe.whitelist(methods='PUT')
+def add_checkin_image(name_checkin, **kwargs):
+    try:
+        if frappe.db.exists('DMS Checkin', name_checkin, cache=True):
+            checkin = frappe.get_doc('DMS Checkin', name_checkin)
+            checkin.append('checkin_hinhanh', {
+                'url_image': post_image(name_image=kwargs.get('name_image'), faceimage=kwargs.get('faceimage'), doc_type='DMS Checkin', doc_name=name_checkin)
+            })
+            checkin.checkin_id = name_checkin
+            checkin.save()
+            return gen_response(200, 'Successful', [])
+        else:
+            return gen_response(406, f"Không tồn tại check in {name_checkin}")
+    except Exception as e:
+        return exception_handel(e)
 
 @frappe.whitelist(methods='POST')
 def create_checkin_inventory(**body):
