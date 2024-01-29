@@ -294,42 +294,45 @@ def edit_return_order(name, **kwargs):
     try:
         if frappe.db.exists("Sales Invoice", name, cache=True):
             order = frappe.get_doc('Sales Invoice', name)
-            taxes_and_charges = kwargs.get('taxes_and_charges')
-            discount_percent = kwargs.get('additional_discount_percentage')
-            discount_amount = kwargs.get('discount_amount')
-            items = kwargs.get('items')
-            if items:
-                for item_data in items:
-                    discount_percentage = float(item_data.get('discount_percentage')) if item_data.get('discount_percentage') is not None else None
-                    qty = int(item_data.get('qty')) if item_data.get('qty') is not None else 1
-                    if qty == 0:
-                        return gen_response(400, 'Số lượng không thể bằng 0')
-                    existing_item = next((item for item in order.items if item.item_code == item_data.get('item_code')), None)
-                    if existing_item:
-                        if qty is not None:
-                            existing_item.qty = -qty
-                        existing_item.uom = item_data.get('uom')
-                        if discount_percentage is not None:
-                            existing_item.discount_percentage = discount_percentage
-                        existing_item.rate = item_data.get('rate')
-                    else:
-                        order.append('items', {
-                            'item_code': item_data.get('item_code'),
-                            'qty': -qty,
-                            'uom': item_data.get('uom'),
-                            'rate': item_data.get('rate'),
-                            'discount_percentage': discount_percentage if discount_percentage is not None else 0
-                        })
-            if taxes_and_charges:
-                order.set('taxes', [])
-                order.taxes_and_charges = taxes_and_charges  
-                order.append('taxes', get_value_child_doctype('Sales Taxes and Charges Template', taxes_and_charges, 'taxes')[0])
-            if discount_percent:
-                order.set('additional_discount_percentage', float(discount_percent))
-            if discount_amount:
-                order.set('discount_amount', float(discount_amount))
-            order.save()
-            gen_response(200, 'Cập nhật thành công')
+            if order.docstatus == 0:
+                taxes_and_charges = kwargs.get('taxes_and_charges')
+                discount_percent = kwargs.get('additional_discount_percentage')
+                discount_amount = kwargs.get('discount_amount')
+                items = kwargs.get('items')
+                if items:
+                    for item_data in items:
+                        discount_percentage = float(item_data.get('discount_percentage')) if item_data.get('discount_percentage') is not None else None
+                        qty = int(item_data.get('qty')) if item_data.get('qty') is not None else 1
+                        if qty == 0:
+                            return gen_response(400, 'Số lượng không thể bằng 0')
+                        existing_item = next((item for item in order.items if item.item_code == item_data.get('item_code')), None)
+                        if existing_item:
+                            if qty is not None:
+                                existing_item.qty = -qty
+                            existing_item.uom = item_data.get('uom')
+                            if discount_percentage is not None:
+                                existing_item.discount_percentage = discount_percentage
+                            existing_item.rate = item_data.get('rate')
+                        else:
+                            order.append('items', {
+                                'item_code': item_data.get('item_code'),
+                                'qty': -qty,
+                                'uom': item_data.get('uom'),
+                                'rate': item_data.get('rate'),
+                                'discount_percentage': discount_percentage if discount_percentage is not None else 0
+                            })
+                if taxes_and_charges:
+                    order.set('taxes', [])
+                    order.taxes_and_charges = taxes_and_charges  
+                    order.append('taxes', get_value_child_doctype('Sales Taxes and Charges Template', taxes_and_charges, 'taxes')[0])
+                if discount_percent:
+                    order.set('additional_discount_percentage', float(discount_percent))
+                if discount_amount:
+                    order.set('discount_amount', float(discount_amount))
+                order.save()
+                gen_response(200, 'Cập nhật thành công')
+            else:
+                return gen_response(400, i18n.t('translate.invalid_edit_return_order', locale=get_language()))
         else:
             return gen_response(406, f"Không tồn tại {name}")
     except Exception as e:
@@ -341,12 +344,40 @@ def delete_return_order(name, **kwargs):
     try:
         if frappe.db.exists("Sales Invoice", name, cache=True):
             return_order = frappe.get_doc('Sales Invoice',name)
-            if return_order.status == 'Draft':
+            if return_order.docstatus == 0:
                 frappe.delete_doc('Sales Invoice', name)
                 gen_response(200, "Thành công", [])
             else:
                 return gen_response(400, i18n.t('translate.invalid_delete_return_order', locale=get_language()))
         else:
             return gen_response(406, f"Không tồn tại {name}")
+    except Exception as e:
+        exception_handel(e)
+
+
+@frappe.whitelist(methods='DELETE')
+def delete_item(name_return_order, item_code):
+    try:
+        # Kiểm tra xem đơn hàng có tồn tại không
+        if frappe.db.exists("Sales Invoice", name_return_order, cache=True):
+            
+            # Lấy đối tượng đơn hàng
+            return_order = frappe.get_doc('Sales Invoice',name_return_order)
+
+            # Kiểm tra xem đơn hàng có ở trạng thái "Draft" không
+            if return_order.docstatus == 0:
+
+                # Kiểm tra xem sản phẩm cần xóa có tồn tại không
+                if not any(item.get("item_code") == item_code for item in return_order.items):
+                    return gen_response(406, f"Sản phẩm {item_code} không tồn tại trong đơn hàng")
+                
+                # Xóa sản phẩm từ danh sách items
+                return_order.items = [item for item in return_order.items if item.get("item_code") != item_code]
+                return_order.save()
+                return gen_response(200, 'Thành công', [])
+            else:
+                return gen_response(400, i18n.t('translate.invalid_edit_return_order', locale=get_language()))
+        else:
+            return gen_response(406, f"Không tồn tại phiếu trả hàng {name_return_order}")
     except Exception as e:
         exception_handel(e)

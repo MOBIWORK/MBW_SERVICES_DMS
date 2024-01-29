@@ -5,7 +5,6 @@ from mbw_dms.api.common import (
     exception_handel,
     gen_response,
     validate_image,
-    get_value_child_doctype
 )
 
 #list product
@@ -130,25 +129,3 @@ def list_vat(**kwargs):
     except Exception as e:
         return exception_handel(e)
     
-@frappe.whitelist(methods='PUT')
-def update_item(name, item_code, **kwargs):
-    try:
-        sales_order = frappe.get_doc('Sales Order', name)
-
-        # Update items
-        item_row = sales_order.get("items", {"item_code": item_code})
-        for item in item_row:
-            item.qty = kwargs.get("qty")
-            item.uom = kwargs.get("uom")
-        sales_order.save()
-        gen_response(200, 'Thành công')
-    except Exception as e:
-        return exception_handel(e)
-    
-@frappe.whitelist(methods='DELETE')
-def delete_item(name_order, name):
-    try:
-        frappe.delete_doc('Sales Order Item',name)
-        gen_response(200, "ok",[])
-    except Exception as e:
-        exception_handel(e)

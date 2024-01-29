@@ -53,3 +53,4 @@ vi:
   invalid_field: Xuất hiện trường nằm ngoài danh sách các trường trong Doctype
   invalid_grand_total: Tổng giá tiền không khớp so với tính toán
   invalid_delete_return_order: Chỉ có thể xóa các đơn hàng ở trạng thái Nháp(Draft)
+  invalid_edit_return_order: Chỉ có thể Chỉnh sửa các đơn hàng ở trạng thái Nháp(Draft)
