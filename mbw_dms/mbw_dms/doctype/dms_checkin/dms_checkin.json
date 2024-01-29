@@ -29,7 +29,8 @@
   "checkinvalidate_khoangcachcheckout",
   "createddate",
   "createdbyemail",
-  "createbyname"
+  "createbyname",
+  "checkin_id"
  ],
  "fields": [
   {
@@ -150,11 +151,16 @@
    "fieldname": "createbyname",
    "fieldtype": "Data",
    "label": "Ng\u01b0\u1eddi t\u1ea1o"
+  },
+  {
+   "fieldname": "checkin_id",
+   "fieldtype": "Data",
+   "label": "Checkin id"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-01-27 09:02:48.336765",
+ "modified": "2024-01-29 14:46:57.206000",
  "modified_by": "Administrator",
  "module": "MBW DMS",
  "name": "DMS Checkin",
