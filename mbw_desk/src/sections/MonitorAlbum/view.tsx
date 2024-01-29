@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { FormItemCustom, HeaderPage } from "../../components";
 import { Col, Row, Select, Modal } from "antd";
 import { CardCustom } from "../../components/card/card";
@@ -6,6 +6,7 @@ import { UserIcon } from "../../icons/user";
 import { PictureIcon } from "../../icons/picture";
 import { SlickCustom } from "../../components/slick/slick";
 import { LeftOutlined, RightOutlined } from "@ant-design/icons";
+import Slider from "react-slick";
 
 const CustomArrow = ({ direction, onClick, isHovered }: any) => (
   <div
@@ -18,20 +19,15 @@ const CustomArrow = ({ direction, onClick, isHovered }: any) => (
   </div>
 );
 
-// const CustomDot = ({ onClick, index, isActive }: any) => (
-//   <div className={`custom-dot ${isActive ? "active" : ""}`} onClick={onClick}>
-//     <img
-//       src={`https://s3.amazonaws.com/static.neostack.com/img/react-slick/abstract0${
-//         index + 1
-//       }.jpg`}
-//     />
-//   </div>
-// );
-
 export default function MonitorAlbum() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
+
+  const [nav1, setNav1] = useState<Slider | null>(null);
+  const [nav2, setNav2] = useState<Slider | null>(null);
+  const slider1 = useRef<Slider | null>(null);
+  const slider2 = useRef<Slider | null>(null);
 
   const showModal = () => {
     setIsModalOpen(true);
@@ -83,19 +79,6 @@ export default function MonitorAlbum() {
     },
     dots: true,
     dotsClass: "slick-dots slick-thumb",
-    // appendDots: (dots: any) => (
-    //   <div className="custom-dots-container">
-    //     {dots.map((dot: any, index: any) => (
-    //       <CustomDot
-    //         key={index}
-    //         {...dot}
-    //         index={index}
-    //         onClick={() => handleDotClick(index)}
-    //         isActive={index === currentSlide}
-    //       />
-    //     ))}
-    //   </div>
-    // ),
     infinite: true,
     speed: 500,
     slidesToShow: 1,
@@ -116,6 +99,11 @@ export default function MonitorAlbum() {
     ),
     beforeChange: (oldIndex: any, newIndex: any) => setCurrentSlide(newIndex),
   };
+
+  useEffect(() => {
+    setNav1(slider1);
+    setNav2(slider2);
+  }, []);
   return (
     <>
       <HeaderPage title="Giám sát chụp ảnh khách hàng" />
@@ -273,139 +261,7 @@ export default function MonitorAlbum() {
                 </div>
               </CardCustom>
             </Col>
-            <Col
-              className="flex justify-center items-center px-4 pt-4 rounded-lg"
-              span={4}
-            >
-              <CardCustom
-                cover={
-                  <img
-                    alt="example"
-                    src="https://os.alipayobjects.com/rmsportal/QBnOOoLaAfKPirc.png"
-                  />
-                }
-              >
-                <div className="flex items-center h-3">
-                  <UserIcon />
-                  <p>Boo trần</p>
-                </div>
-                <div className="flex items-center pt-2 h-5">
-                  <UserIcon />
-                  <p>Album 001</p>
-                </div>
-              </CardCustom>
-            </Col>
-            <Col
-              className="flex justify-center items-center px-4 pt-4 rounded-lg"
-              span={4}
-            >
-              <CardCustom
-                cover={
-                  <img
-                    alt="example"
-                    src="https://os.alipayobjects.com/rmsportal/QBnOOoLaAfKPirc.png"
-                  />
-                }
-              >
-                <div className="flex items-center h-3">
-                  <UserIcon />
-                  <p>Boo trần</p>
-                </div>
-                <div className="flex items-center pt-2 h-5">
-                  <UserIcon />
-                  <p>Album 001</p>
-                </div>
-              </CardCustom>
-            </Col>
-            <Col
-              className="flex justify-center items-center px-4 pt-4 rounded-lg"
-              span={4}
-            >
-              <CardCustom
-                cover={
-                  <img
-                    alt="example"
-                    src="https://os.alipayobjects.com/rmsportal/QBnOOoLaAfKPirc.png"
-                  />
-                }
-              >
-                <div className="flex items-center h-3">
-                  <UserIcon />
-                  <p>Boo trần</p>
-                </div>
-                <div className="flex items-center pt-2 h-5">
-                  <UserIcon />
-                  <p>Album 001</p>
-                </div>
-              </CardCustom>
-            </Col>
-            <Col
-              className="flex justify-center items-center px-4 pt-4 rounded-lg"
-              span={4}
-            >
-              <CardCustom
-                cover={
-                  <img
-                    alt="example"
-                    src="https://os.alipayobjects.com/rmsportal/QBnOOoLaAfKPirc.png"
-                  />
-                }
-              >
-                <div className="flex items-center h-3">
-                  <UserIcon />
-                  <p>Boo trần</p>
-                </div>
-                <div className="flex items-center pt-2 h-5">
-                  <UserIcon />
-                  <p>Album 001</p>
-                </div>
-              </CardCustom>
-            </Col>
-            <Col
-              className="flex justify-center items-center px-4 pt-4 rounded-lg"
-              span={4}
-            >
-              <CardCustom
-                cover={
-                  <img
-                    alt="example"
-                    src="https://os.alipayobjects.com/rmsportal/QBnOOoLaAfKPirc.png"
-                  />
-                }
-              >
-                <div className="flex items-center h-3">
-                  <UserIcon />
-                  <p>Boo trần</p>
-                </div>
-                <div className="flex items-center pt-2 h-5">
-                  <UserIcon />
-                  <p>Album 001</p>
-                </div>
-              </CardCustom>
-            </Col>
-
-            <Col
-              className="flex justify-center items-center px-4 pt-4 rounded-lg"
-              span={4}
-            >
-              <CardCustom
-                cover={
-                  <img
-                    alt="example"
-                    src="https://os.alipayobjects.com/rmsportal/QBnOOoLaAfKPirc.png"
-                  />
-                }
-              >
-                <div className="flex items-center h-3">
-                  <UserIcon />
-                  <p>Boo trần</p>
-                </div>
-                <div className="flex items-center pt-2 h-5">
-                  <UserIcon />
-                  <p>Album 001</p>
-                </div>
-              </CardCustom>
-            </Col>
+            
           </Row>
 
           <Modal
@@ -418,20 +274,27 @@ export default function MonitorAlbum() {
             <Row className="pt-4" gutter={32}>
               <Col span={12}>
                 <div
-                style={{
-                  maxWidth: '500px',
-                  overflow: 'hidden',
-                  position:"relative",
-                  margin: '0 auto',
-                  paddingBottom: '100px'
-                }}
-                  className={`custom-slider-container !pb-16 ${
-                    isHovered ? "hovered" : ""
-                  }`}
                   onMouseEnter={() => setIsHovered(true)}
                   onMouseLeave={() => setIsHovered(false)}
                 >
-                  <SlickCustom {...settings}>
+                  <Slider
+                    asNavFor={nav2 && nav2.current}
+                    ref={slider1}
+                    prevArrow={
+                      <CustomArrow
+                        direction="prev"
+                        isHovered={isHovered}
+                        onClick={handlePrevArrowClick}
+                      />
+                    }
+                    nextArrow={
+                      <CustomArrow
+                        direction="next"
+                        isHovered={isHovered}
+                        onClick={handleNextArrowClick}
+                      />
+                    }
+                  >
                     <div className="">
                       <img
                         className="w-full rounded-lg"
@@ -459,8 +322,61 @@ export default function MonitorAlbum() {
                         }
                       />
                     </div>
-                    
-                  </SlickCustom>
+                    <div className="">
+                      <img
+                        className="w-full rounded-lg"
+                        src={
+                          "https://s3.amazonaws.com/static.neostack.com/img/react-slick" +
+                          "/abstract01.jpg"
+                        }
+                      />
+                    </div>
+                  </Slider>
+                  <Slider
+                    className="custom-slider"
+                    asNavFor={nav1 && nav1.current}
+                    ref={slider2}
+                    slidesToShow={4}
+                    swipeToSlide={true}
+                    focusOnSelect={true}
+                  >
+                    <div className="">
+                      <img
+                        className="w-full rounded-lg"
+                        src={
+                          "https://s3.amazonaws.com/static.neostack.com/img/react-slick" +
+                          "/abstract01.jpg"
+                        }
+                      />
+                    </div>
+                    <div className="">
+                      <img
+                        className="w-full rounded-lg"
+                        src={
+                          "https://s3.amazonaws.com/static.neostack.com/img/react-slick" +
+                          "/abstract02.jpg"
+                        }
+                      />
+                    </div>
+                    <div className="">
+                      <img
+                        className="w-full rounded-lg"
+                        src={
+                          "https://s3.amazonaws.com/static.neostack.com/img/react-slick" +
+                          "/abstract03.jpg"
+                        }
+                      />
+                    </div>
+                    <div className="">
+                      <img
+                        className="w-full rounded-lg"
+                        src={
+                          "https://s3.amazonaws.com/static.neostack.com/img/react-slick" +
+                          "/abstract01.jpg"
+                        }
+                      />
+                    </div>
+                  </Slider>
                 </div>
               </Col>
               <Col span={12}>
