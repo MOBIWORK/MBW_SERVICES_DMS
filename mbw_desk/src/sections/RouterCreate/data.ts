@@ -38,8 +38,8 @@ export const  commonTable: ColumnsType<CustomerType>= [
    
     {
         title: "Mã khách hàng",
-        dataIndex: "customer_id",
-        key: "customerid"
+        dataIndex: "customer_code",
+        key: "customercode"
     },
     {
         title: "Tên khách hàng",

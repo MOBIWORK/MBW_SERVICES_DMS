@@ -1,7 +1,7 @@
 // @mui
 
 import React, { useCallback, useEffect, useState } from "react";
-import {Tabs, Form,notification } from "antd";
+import {Tabs, Form,notification, message } from "antd";
 import GeneralInformation from "./general-information";
 import Customer from "./customer";
 import { HeaderPage } from "../../components";
@@ -10,17 +10,23 @@ import { useNavigate } from "react-router-dom";
 import type { NotificationArgsProps } from 'antd';
 // ----------------------------------------------------------------------
 
-type NotificationPlacement = NotificationArgsProps['placement'];
 export default function RouterCreate() {
   const [form] = Form.useForm();
   const navigate = useNavigate()
-  const [api, contextHolder] = notification.useNotification();
   const [customerRouter,setCustomerRouter] = useState<any[]>([])
-  const openNotification = (placement: NotificationPlacement,text:string) => {
-    api.info({
-      message: `Notification ${placement}`,
-      description: <p>{text}</p>,
-      placement,
+  const [messageApi, contextHolder] = message.useMessage();
+
+  const success = () => {
+    messageApi.open({
+      type: 'success',
+      content: 'Success!!',
+    });
+  };
+
+  const error = () => {
+    messageApi.open({
+      type: 'error',
+      content: 'Something was wrong',
     });
   };
   const handleCreateRouter = useCallback(async(value:any) => {
@@ -35,11 +41,11 @@ export default function RouterCreate() {
     })}
     try {
       await AxiosService.post("/api/method/mbw_dms.api.router.create_router",value)
-      openNotification('topRight',"Success")
+      success()
       navigate('/')
-    } catch (error) {
-      openNotification('topRight',"Failure!!!")
-      console.log("error create",error);
+    } catch (err) {
+      error()
+      console.log("error create",err);
 
       
     }
@@ -47,6 +53,7 @@ export default function RouterCreate() {
   
   return (
     <>
+    {contextHolder}
       <HeaderPage
         title="Thêm tuyến"
         buttons={[
