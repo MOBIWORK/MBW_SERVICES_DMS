@@ -1,0 +1,75 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2024-01-30 14:26:46.656091",
+ "default_view": "List",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "t\u1ed5ng_doanh_thu",
+  "ng\u00e0y_vi\u1ebfng_th\u0103m",
+  "m\u00e3_nh\u00e2n_vi\u00ean",
+  "t\u00ean_nh\u00e2n_vi\u00ean",
+  "non_checkins",
+  "checkin"
+ ],
+ "fields": [
+  {
+   "fieldname": "t\u1ed5ng_doanh_thu",
+   "fieldtype": "Data",
+   "label": "T\u1ed5ng doanh thu"
+  },
+  {
+   "fieldname": "ng\u00e0y_vi\u1ebfng_th\u0103m",
+   "fieldtype": "Date",
+   "label": "Ng\u00e0y vi\u1ebfng th\u0103m"
+  },
+  {
+   "fieldname": "m\u00e3_nh\u00e2n_vi\u00ean",
+   "fieldtype": "Data",
+   "label": "M\u00e3 nh\u00e2n vi\u00ean"
+  },
+  {
+   "fieldname": "t\u00ean_nh\u00e2n_vi\u00ean",
+   "fieldtype": "Data",
+   "label": "T\u00ean nh\u00e2n vi\u00ean"
+  },
+  {
+   "fieldname": "non_checkins",
+   "fieldtype": "Table",
+   "label": "Ch\u01b0a Vi\u1ebfng Th\u0103m",
+   "options": "DMS KPI Checkin Customer"
+  },
+  {
+   "fieldname": "checkin",
+   "fieldtype": "Table",
+   "label": "\u0110\u00e3 Vi\u1ebfng Th\u0103m",
+   "options": "DMS KPI Checkin Customer"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2024-01-30 14:50:24.521847",
+ "modified_by": "Administrator",
+ "module": "MBW DMS",
+ "name": "DMS KPI Checkin",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
