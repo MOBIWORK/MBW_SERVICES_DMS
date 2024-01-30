@@ -8,9 +8,9 @@ from mbw_dms.api.common import (
     exception_handel,
     gen_response,
     validate_image,
-    post_image
+    post_image,
 )
-from mbw_dms.api.validators import validate_not_none
+from mbw_dms.api.validators import validate_not_none, validate_choice
 from mbw_dms.api.selling import configs
 from mbw_dms.config_translate import i18n
 
@@ -41,6 +41,31 @@ def create_album_image(**kwargs):
 def list_album_image():
     try:
         album_image = frappe.db.get_list('DMS Album Image', fields=["*"])
+        gen_response(200, "Thành công", album_image)
+    except Exception as e:
+        return exception_handel(e)
+    
+#create Album
+@frappe.whitelist(methods="POST")
+def create_album(**kwargs):
+    try:
+        new_album = frappe.new_doc('DMS Album')
+        new_album.ma_album = kwargs.get('ma_album')
+        new_album.ten_album = validate_not_none(kwargs.get('ten_album'))
+        new_album.so_anh_toi_thieu = validate_not_none(kwargs.get('so_anh_toi_thieu'))
+        new_album.trang_thai = validate_choice(configs.status_type)(kwargs.get('trang_thai'))
+
+        new_album.insert(ignore_permissions=True)
+        return gen_response(201, "Tạo thành công", {"name": new_album.name})
+       
+    except Exception as e:
+        return exception_handel(e)
+    
+#list 
+@frappe.whitelist(methods="GET")
+def list_album():
+    try:
+        album_image = frappe.db.get_list('DMS Album', fields=["name", "ma_album", "ten_album", "so_anh_toi_thieu", "trang_thai"])
         gen_response(200, "Thành công", album_image)
     except Exception as e:
         return exception_handel(e)
