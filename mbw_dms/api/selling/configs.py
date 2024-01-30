@@ -6,7 +6,9 @@ customer_type = {
 }
 status_type = {
     'Chưa phản hồi': 'Chưa phản hồi',
-    'Đã phản hồi' : 'Đã phản hồi'
+    'Đã phản hồi' : 'Đã phản hồi',
+    'Hoạt động': 'Hoạt động',
+    'Không hoạt động': 'Không hoạt động'
 }
 
 discount_type = {
