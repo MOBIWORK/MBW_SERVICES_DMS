@@ -81,3 +81,12 @@ def list_email(**kwargs):
         })
     except Exception as e:
         return exception_handel(e) 
+    
+#list note
+@frappe.whitelist(methods="GET")
+def list_note():
+    try:
+        list_note = frappe.db.get_list('Note', fields=["*"])
+        gen_response(200, "Thành công", list_note)
+    except Exception as e:
+        return exception_handel(e)
