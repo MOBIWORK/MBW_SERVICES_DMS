@@ -51,3 +51,33 @@ def create_proble_monitor(**kwargs):
         return gen_response(201, "Tạo thành công", {"name": new_proble_monitor.name})
     except Exception as e:
         return exception_handel(e)
+    
+@frappe.whitelist(methods="POST")
+def create_note(**kwargs):
+    try:
+        new_note = frappe.new_doc('Note')
+        new_note.title = kwargs.get('title')
+        new_note.content = validate_not_none(kwargs.get('content'))
+        for email in kwargs.get("email"):
+            new_note.append("seen_by", {
+                "user": email
+            })
+        new_note.insert() 
+        return gen_response(201, "Tạo mới thành công", {"name": new_note.name})
+    except Exception as e:
+        return exception_handel(e)    
+    
+@frappe.whitelist(methods="GET")
+def list_email(**kwargs):
+    try:
+        employee = frappe.db.get_all("Employee",
+                                filters= {},
+                                fields=["name", "first_name", "image", "user_id", "designation"],
+                                )
+        for employees in employee:
+            employees['image'] = validate_image(employees.get("image"))
+        return gen_response(200, "Thành công", {
+            "data": employee
+        })
+    except Exception as e:
+        return exception_handel(e) 
