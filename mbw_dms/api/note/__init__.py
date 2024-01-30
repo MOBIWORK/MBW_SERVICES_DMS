@@ -63,6 +63,7 @@ def create_note(**kwargs):
                 "user": email
             })
         new_note.custom_checkin_id = validate_not_none(kwargs.get('custom_checkin_id'))
+        new_note.public = 1
         new_note.insert() 
         return gen_response(201, "Tạo mới thành công", {"name": new_note.name})
     except Exception as e:
