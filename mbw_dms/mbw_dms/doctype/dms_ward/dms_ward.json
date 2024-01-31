@@ -2,6 +2,7 @@
  "actions": [],
  "allow_import": 1,
  "allow_rename": 1,
+ "autoname": "field:ma_xa",
  "creation": "2024-01-16 16:35:03.570143",
  "default_view": "List",
  "doctype": "DocType",
@@ -16,7 +17,8 @@
   {
    "fieldname": "ma_xa",
    "fieldtype": "Data",
-   "label": "M\u00e3 ph\u01b0\u1eddng/x\u00e3"
+   "label": "M\u00e3 ph\u01b0\u1eddng/x\u00e3",
+   "unique": 1
   },
   {
    "fieldname": "ten_xa",
@@ -32,10 +34,11 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-01-26 10:57:44.998088",
+ "modified": "2024-01-30 08:23:25.887637",
  "modified_by": "Administrator",
  "module": "MBW DMS",
  "name": "DMS Ward",
+ "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [
   {
