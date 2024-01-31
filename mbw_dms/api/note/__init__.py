@@ -79,9 +79,7 @@ def list_email(**kwargs):
                                 )
         for employees in employee:
             employees['image'] = validate_image(employees.get("image"))
-        return gen_response(200, "Thành công", {
-            "data": employee
-        })
+        return gen_response(200, "Thành công", employee)
     except Exception as e:
         return exception_handel(e) 
     
