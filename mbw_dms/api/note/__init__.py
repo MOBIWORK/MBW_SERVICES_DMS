@@ -77,7 +77,8 @@ def list_email(**kwargs):
         employee = frappe.db.get_all("Employee",
                                 filters= {},
                                 fields=["name", "first_name", "image", "user_id", "designation"],
-                                )
+                                start=page_size * (page_number - 1),
+                                page_length=page_size)
         for employees in employee:
             employees['image'] = validate_image(employees.get("image"))
         count = len(frappe.db.get_all("Employee", filters={},))
