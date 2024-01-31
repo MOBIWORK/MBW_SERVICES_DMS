@@ -72,14 +72,21 @@ def create_note(**kwargs):
 @frappe.whitelist(methods="GET")
 def list_email(**kwargs):
     try:
-        
+        page_size = 20 if not kwargs.get('page_size') else int(kwargs.get('page_size'))
+        page_number = 1 if not kwargs.get('page') or int(kwargs.get('page')) <= 0 else int(kwargs.get('page'))
         employee = frappe.db.get_all("Employee",
                                 filters= {},
                                 fields=["name", "first_name", "image", "user_id", "designation"],
                                 )
         for employees in employee:
             employees['image'] = validate_image(employees.get("image"))
-        return gen_response(200, "Thành công", employee)
+        count = len(frappe.db.get_all("Employee", filters={},))
+        return gen_response(200, "Thành công", {
+            "data" :employee,
+            "total": count,
+            "page_size": page_size,
+            "page_number": page_number
+            })
     except Exception as e:
         return exception_handel(e) 
     
