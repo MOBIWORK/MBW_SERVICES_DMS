@@ -75,7 +75,7 @@ def list_email(**kwargs):
         
         employee = frappe.db.get_all("Employee",
                                 filters= {},
-                                fields=["name", "first_name", "image", "user_id", "designation", "custom_checkin_id"],
+                                fields=["name", "first_name", "image", "user_id", "designation"],
                                 )
         for employees in employee:
             employees['image'] = validate_image(employees.get("image"))
