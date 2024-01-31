@@ -72,12 +72,9 @@ def create_note(**kwargs):
 @frappe.whitelist(methods="GET")
 def list_email(**kwargs):
     try:
-        my_filter = {}
-        custom_checkin_id = kwargs.get('custom_checkin_id')
-        if custom_checkin_id:
-            my_filter["custom_checkin_id"] = ['like', f'%{custom_checkin_id}%']
+        
         employee = frappe.db.get_all("Employee",
-                                filters= my_filter,
+                                filters= {},
                                 fields=["name", "first_name", "image", "user_id", "designation", "custom_checkin_id"],
                                 )
         for employees in employee:
@@ -90,9 +87,13 @@ def list_email(**kwargs):
     
 #list note
 @frappe.whitelist(methods="GET")
-def list_note():
+def list_note(**kwargs):
     try:
-        list_note = frappe.db.get_list('Note', fields=["name", "title", "content", "creation","custom_checkin_id"])
+        my_filter = {}
+        custom_checkin_id = kwargs.get('custom_checkin_id')
+        if custom_checkin_id:
+            my_filter["custom_checkin_id"] = ['like', f'%{custom_checkin_id}%']
+        list_note = frappe.db.get_list('Note',filters= my_filter ,fields=["name", "title", "content", "creation","custom_checkin_id"])
         gen_response(200, "Thành công", list_note)
     except Exception as e:
         return exception_handel(e)
