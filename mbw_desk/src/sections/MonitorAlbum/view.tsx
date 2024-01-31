@@ -27,6 +27,7 @@ export default function MonitorAlbum() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [listCustomerGroup, setCustomerGroup] = useState<any[]>([]);
   const [listEmployee, setListEmployee] = useState<any[]>([]);
+  const [dataAlbum, setDataAlbum] = useState([])
 
   const [nav1, setNav1] = useState<Slider | null>(null);
   const [nav2, setNav2] = useState<Slider | null>(null);
@@ -158,6 +159,16 @@ export default function MonitorAlbum() {
       );
     })();
   }, []);
+
+  useEffect(()=> {
+    (async() => {
+      const rsAlbum = await AxiosService.get('/api/method/mbw_dms.api.album.list_album_image')
+      
+      console.log("data: ", rsAlbum.result);
+      setDataAlbum(rsAlbum.result)
+      
+    })()
+  },[])
 
   return (
     <>
