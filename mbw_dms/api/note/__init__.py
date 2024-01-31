@@ -103,3 +103,13 @@ def list_note(**kwargs):
         gen_response(200, "Thành công", list_note)
     except Exception as e:
         return exception_handel(e)
+    
+#list note type
+@frappe.whitelist(methods="GET")
+def list_note_type(**kwargs):
+    try:
+        my_filter = {}
+        list_note_type = frappe.db.get_list('DMS Note Type',filters= my_filter ,fields=["name", "ma_ghi_chu", "loai_ghi_chu"])
+        gen_response(200, "Thành công", list_note_type)
+    except Exception as e:
+        return exception_handel(e)
