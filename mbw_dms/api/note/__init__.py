@@ -96,7 +96,10 @@ def list_email(**kwargs):
 def list_note(**kwargs):
     try:
         my_filter = {}
+        name = kwargs.get('name')
         custom_checkin_id = kwargs.get('custom_checkin_id')
+        if name:
+            my_filter["name"] = ['like', f'%{name}%']
         if custom_checkin_id:
             my_filter["custom_checkin_id"] = ['like', f'%{custom_checkin_id}%']
         list_note = frappe.db.get_list('Note',filters= my_filter ,fields=["name", "title", "content", "creation","custom_checkin_id"])
