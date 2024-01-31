@@ -1,0 +1,74 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2024-01-30 16:49:39.398508",
+ "default_view": "List",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "date",
+  "type",
+  "total_sales",
+  "total_checkins",
+  "average_sale_per_checkin",
+  "total_new_customers"
+ ],
+ "fields": [
+  {
+   "fieldname": "total_sales",
+   "fieldtype": "Float",
+   "label": "T\u1ed5ng doanh thu trong ng\u00e0y"
+  },
+  {
+   "fieldname": "total_checkins",
+   "fieldtype": "Int",
+   "label": "T\u1ed5ng s\u1ed1 l\u1ea7n vi\u1ebfng th\u0103m trong ng\u00e0y"
+  },
+  {
+   "fieldname": "average_sale_per_checkin",
+   "fieldtype": "Float",
+   "label": "Doanh s\u1ed1 trung b\u00ecnh m\u1ed7i l\u1ea7n checkin"
+  },
+  {
+   "fieldname": "date",
+   "fieldtype": "Date",
+   "label": "Ng\u00e0y"
+  },
+  {
+   "fieldname": "type",
+   "fieldtype": "Select",
+   "label": "Lo\u1ea1i",
+   "options": "Vi\u1ebfng th\u0103m\nKh\u00e1ch h\u00e0ng"
+  },
+  {
+   "fieldname": "total_new_customers",
+   "fieldtype": "Int",
+   "label": "S\u1ed1 l\u01b0\u1ee3ng kh\u00e1ch h\u00e0ng m\u1edf m\u1edbi"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2024-01-31 14:05:47.976139",
+ "modified_by": "Administrator",
+ "module": "MBW DMS",
+ "name": "DMS Summary KPI Daily",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

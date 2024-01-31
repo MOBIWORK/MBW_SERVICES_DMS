@@ -164,7 +164,6 @@ def create_sale_order(**kwargs):
             if discount_percent == 0:
                 new_order.discount_amount = discount_amount
                 grand_total = amount + total_vat - discount_amount
-
         # Nếu loại chiết khấu là Net total
         if apply_discount_on == 'Net Total':
             if discount_percent != 0:
@@ -380,4 +379,57 @@ def delete_item(name_return_order, item_code):
         else:
             return gen_response(406, f"Không tồn tại phiếu trả hàng {name_return_order}")
     except Exception as e:
+        exception_handel(e)
+
+# Chi tiết đơn hàng theo checkin_id
+@frappe.whitelist(methods='GET')
+def get_sale_order_by_checkin_id(checkin_id):
+    try:
+        detail_sales_order = frappe.get_doc("Sales Order", checkin_id)
+        if detail_sales_order:
+            SalesOrder = frappe.qb.DocType("Sales Order")
+            Customer = frappe.qb.DocType("Customer")
+            SalesOrderItem = frappe.qb.DocType("Sales Order Item")
+            SalesOrderTaxes = frappe.qb.DocType("Sales Taxes and Charges")
+            field_detail_sales = ['total','grand_total','customer','customer_name','address_display',"delivery_date",'set_warehouse','taxes_and_charges','total_taxes_and_charges','apply_discount_on','additional_discount_percentage','discount_amount','contact_person','rounded_total']
+            field_detail_items = ['name', 'item_name','item_code','qty',"uom",'amount','discount_amount','discount_percentage']
+            detail = (frappe.qb.from_(SalesOrder)
+                    .inner_join(SalesOrderItem)
+                    .on(SalesOrder.name == SalesOrderItem.parent)
+                    
+                    .inner_join(Customer)
+                    .on(Customer.name == SalesOrder.customer)
+                    .where(SalesOrder.name == detail_sales_order.name)
+                    .select(
+                        Customer.customer_id
+                        ,SalesOrder.customer,SalesOrder.customer_name,SalesOrder.address_display,UNIX_TIMESTAMP(SalesOrder.delivery_date).as_('delivery_date'),SalesOrder.set_warehouse,SalesOrder.total,SalesOrder.grand_total
+                        ,SalesOrder.taxes_and_charges,SalesOrder.total_taxes_and_charges, SalesOrder.apply_discount_on, SalesOrder.additional_discount_percentage,SalesOrder.discount_amount,SalesOrder.contact_person,SalesOrder.rounded_total
+                        ,SalesOrderItem.name, SalesOrderItem.item_name,SalesOrderItem.item_code,SalesOrderItem.qty, SalesOrderItem.uom,SalesOrderItem.amount,SalesOrderItem.discount_amount,SalesOrderItem.discount_percentage                        
+                    )
+                    ).run(as_dict =1)
+            
+            detail_taxes = (frappe.qb.from_(SalesOrder)
+                            .inner_join(SalesOrderTaxes)
+                            .on(SalesOrder.name == SalesOrderTaxes.parent)
+                            .where(SalesOrder.name == detail_sales_order.name)
+                            .select(SalesOrderTaxes.tax_amount,SalesOrderTaxes.rate,SalesOrderTaxes.account_head,SalesOrderTaxes.charge_type,)
+                            ).run(as_dict =1)
+            detail_order = {"list_items": []}
+            for item in detail :
+                items_list = {}
+                for key_item, value in item.items() :
+                    if key_item in field_detail_sales:                    
+                        detail_order.setdefault(key_item,value)
+                    elif key_item in field_detail_items:
+                        items_list[key_item] = value
+                detail_order['list_items'].append(items_list)
+            if len(detail_taxes) > 0 :
+                detail_order = {**detail_order,**detail_taxes[0]}
+
+            gen_response(200,'',detail_order)
+            return 
+        else:
+            gen_response(404,i18n.t('translate.not_found', locale=get_language()),[])
+            return 
+    except Exception as e: 
         exception_handel(e)
