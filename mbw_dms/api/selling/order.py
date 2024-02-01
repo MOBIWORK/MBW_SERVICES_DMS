@@ -17,7 +17,6 @@ from mbw_dms.api.validators import (
 from mbw_dms.api.selling import configs
 from mbw_dms.config_translate import i18n
 
-
 @frappe.whitelist(allow_guest=True,methods='GET')
 def get_list_sales_order(**filters):
     try:
@@ -120,19 +119,20 @@ def create_sale_order(**kwargs):
         new_order = frappe.new_doc('Sales Order')
 
         # Dữ liệu bắn lên để tạo sale order mới
-        discount_percent = float(kwargs.get('additional_discount_percentage'))
-        discount_amount = float(kwargs.get('discount_amount'))
-        rate_taxes = float(kwargs.get('rate_taxes'))
+        discount_percent = float(kwargs.get('additional_discount_percentage', 0))
+        discount_amount = float(kwargs.get('discount_amount', 0))
+        rate_taxes = float(kwargs.get('rate_taxes', 0))
         apply_discount_on = kwargs.get('apply_discount_on')
-        taxes_and_charges = kwargs.get('taxes_and_charges') 
+        taxes_and_charges = kwargs.get('taxes_and_charges') if kwargs.get('taxes_and_charges') else None
 
         new_order.customer = validate_not_none(kwargs.customer)                                         
         new_order.delivery_date = validate_date(kwargs.delivery_date)                                   # Ngày giao
         new_order.set_warehouse = validate_not_none(kwargs.get('set_warehouse'))                        # Kho hàng
         new_order.apply_discount_on = validate_choice(configs.discount_type)(apply_discount_on)         # Loại Chiết khấu
         new_order.additional_discount_percentage = discount_percent                                     # Phần trăm chiết khấu
-        new_order.taxes_and_charges = taxes_and_charges                                                 # Tax
-        new_order.append('taxes', get_value_child_doctype('Sales Taxes and Charges Template', taxes_and_charges, 'taxes')[0])
+        if taxes_and_charges is not None:
+            new_order.taxes_and_charges = taxes_and_charges                                                 # Tax
+            new_order.append('taxes', get_value_child_doctype('Sales Taxes and Charges Template', taxes_and_charges, 'taxes')[0])
         new_order.checkin_id = kwargs.get('checkin_id')
         sales_team = get_party_details(party=kwargs.get('customer'), party_type='Customer', price_list='Standard Selling', posting_date=kwargs.get('delivery_date'), fetch_payment_terms_template=1, currency='VND',
                               company=kwargs.get('company'), doctype='Sales Order')
@@ -141,8 +141,9 @@ def create_sale_order(**kwargs):
         items = kwargs.get('items')
         amount = 0
         for item_data in items:
-            rate = float(item_data.get('rate'))
-            discount_percentage = float(item_data.get('discount_percentage'))
+            rate = float(item_data.get('rate', 0))
+            discount_percentage = float(item_data.get('discount_percentage', 0))
+
             new_order.append('items', {
                 'item_code': item_data.get('item_code'),
                 'qty': item_data.get('qty'),
