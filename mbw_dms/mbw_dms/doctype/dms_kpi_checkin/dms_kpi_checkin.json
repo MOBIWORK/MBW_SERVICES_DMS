@@ -29,7 +29,7 @@
   },
   {
    "fieldname": "total_sale",
-   "fieldtype": "Data",
+   "fieldtype": "Float",
    "label": "T\u1ed5ng doanh thu"
   },
   {
@@ -50,7 +50,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-01-30 15:50:52.384171",
+ "modified": "2024-01-31 16:11:20.065878",
  "modified_by": "Administrator",
  "module": "MBW DMS",
  "name": "DMS KPI Checkin",
