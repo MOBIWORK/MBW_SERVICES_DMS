@@ -62,7 +62,6 @@ def get_sale_order(**data):
             SalesOrderItem = frappe.qb.DocType("Sales Order Item")
             SalesOrderTaxes = frappe.qb.DocType("Sales Taxes and Charges")
             field_detail_sales = ['total','grand_total','customer','customer_name','address_display',"delivery_date",'set_warehouse','taxes_and_charges','total_taxes_and_charges','apply_discount_on','additional_discount_percentage','discount_amount','contact_person','rounded_total']
-            # field_detail_taxe  = ['tax_amount','rate','account_head','charge_type']
             field_detail_items = ['name', 'item_name','item_code','qty',"uom",'amount','discount_amount','discount_percentage']
             detail = (frappe.qb.from_(SalesOrder)
                     .inner_join(SalesOrderItem)
@@ -86,19 +85,14 @@ def get_sale_order(**data):
                             .select(SalesOrderTaxes.tax_amount,SalesOrderTaxes.rate,SalesOrderTaxes.account_head,SalesOrderTaxes.charge_type,)
                             ).run(as_dict =1)
             detail_order = {"list_items": []}
-            taxes = []
             for item in detail :
                 items_list = {}
-                taxes_list = {}
                 for key_item, value in item.items() :
                     if key_item in field_detail_sales:                    
                         detail_order.setdefault(key_item,value)
                     elif key_item in field_detail_items:
                         items_list[key_item] = value
-                    # elif key_item in field_detail_taxe:
-                    #     taxes_list[key_item] = value
                 detail_order['list_items'].append(items_list)
-                # taxes.append(taxes_list)
             if len(detail_taxes) > 0 :
                 detail_order = {**detail_order,**detail_taxes[0]}
 
@@ -384,9 +378,10 @@ def delete_item(name_return_order, item_code):
 
 # Chi tiết đơn hàng theo checkin_id
 @frappe.whitelist(methods='GET')
-def get_sale_order_by_checkin_id(checkin_id):
+def get_sale_order_by_checkin_id(**data):
     try:
-        detail_sales_order = frappe.get_doc("Sales Order", checkin_id)
+        checkin_id = data.get('checkin_id')
+        detail_sales_order = frappe.db.get_list("Sales Order", filters={"checkin_id": checkin_id}, fields=['name'])
         if detail_sales_order:
             SalesOrder = frappe.qb.DocType("Sales Order")
             Customer = frappe.qb.DocType("Customer")
@@ -400,7 +395,7 @@ def get_sale_order_by_checkin_id(checkin_id):
                     
                     .inner_join(Customer)
                     .on(Customer.name == SalesOrder.customer)
-                    .where(SalesOrder.name == detail_sales_order.name)
+                    .where(SalesOrder.name == detail_sales_order[0].get('name'))
                     .select(
                         Customer.customer_id
                         ,SalesOrder.customer,SalesOrder.customer_name,SalesOrder.address_display,UNIX_TIMESTAMP(SalesOrder.delivery_date).as_('delivery_date'),SalesOrder.set_warehouse,SalesOrder.total,SalesOrder.grand_total
@@ -412,7 +407,7 @@ def get_sale_order_by_checkin_id(checkin_id):
             detail_taxes = (frappe.qb.from_(SalesOrder)
                             .inner_join(SalesOrderTaxes)
                             .on(SalesOrder.name == SalesOrderTaxes.parent)
-                            .where(SalesOrder.name == detail_sales_order.name)
+                            .where(SalesOrder.name == detail_sales_order[0].get('name'))
                             .select(SalesOrderTaxes.tax_amount,SalesOrderTaxes.rate,SalesOrderTaxes.account_head,SalesOrderTaxes.charge_type,)
                             ).run(as_dict =1)
             detail_order = {"list_items": []}
