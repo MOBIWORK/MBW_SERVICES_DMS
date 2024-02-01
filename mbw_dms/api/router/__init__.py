@@ -26,7 +26,7 @@ def get_list_router(**filters):
         modified = validate_filter(value=filters.get('modified'), type_check="timestamp") if filters.get('modified') else False
         owner = filters.get('owner') if filters.get('owner') else False
         creation = validate_filter(value=filters.get('creation'), type_check='timestamp') if filters.get('creation') else False
-        router = validate_filter(value=filters.get('router'), type=list,type_check="type") if filters.get('router') else False
+        router = filters.get('router') if filters.get('router') else False
         page_size =  int(filters.get('page_size')) if filters.get('page_size') else 20
         page_number = int(filters.get('page_number') )if filters.get('page_number') and int(filters.get('page_number')) <= 0 else 1
         orderby_array = ['modified',"name","owner","idx", "channel_code","channel_name", "employee"]
@@ -44,12 +44,14 @@ def get_list_router(**filters):
         if creation:
             queryFilters['creation'] = creation
         if router:
-            queryFilters['router'] = ["in",router]
+            router = router.split(';')
+            queryFilters['name'] = ["in",router]
         if employee:
             queryFilters['employee'] = employee
         order_string = 'travel_date desc'
         if order_by and sort:
             order_string = f"{order_by} {sort}"
+        print(queryFilters)
         list_router = frappe.db.get_list('DMS Router',filters=queryFilters,fields=['*', 'UNIX_TIMESTAMP(travel_date) as travel_date'], 
                                        order_by=order_string, 
                                        start=page_size*(page_number-1), page_length=page_size)
