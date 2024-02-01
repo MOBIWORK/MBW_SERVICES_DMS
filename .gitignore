@@ -6,4 +6,4 @@ tags
 mbw_dms/docs/current
 node_modules/
 
-mbw_desk.zip
+mbw_desk/.env.development
