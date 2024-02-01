@@ -257,3 +257,17 @@ def list_router(customer_name):
         return gen_response(200, '', list_router)
     except Exception as e:
         return exception_handel(e)
+    
+#list sales person
+@frappe.whitelist(methods='GET')
+def list_sale_person():
+    try:
+        sale_person = frappe.get_list(
+        "Sales Person",
+        filters={"is_group": 1, "enabled": 1},
+        fields=['name','sales_person_name']
+        )
+
+        return gen_response(200, '' ,sale_person)
+    except Exception as e:
+        return exception_handel(e)

@@ -1,0 +1,52 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:loai_ghi_chu",
+ "creation": "2024-01-31 15:09:09.549531",
+ "default_view": "List",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "ma_ghi_chu",
+  "loai_ghi_chu"
+ ],
+ "fields": [
+  {
+   "fieldname": "ma_ghi_chu",
+   "fieldtype": "Data",
+   "label": "M\u00e3 ghi ch\u00fa"
+  },
+  {
+   "fieldname": "loai_ghi_chu",
+   "fieldtype": "Data",
+   "label": "Lo\u1ea1i ghi ch\u00fa",
+   "unique": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2024-01-31 15:09:09.549531",
+ "modified_by": "Administrator",
+ "module": "MBW DMS",
+ "name": "DMS Note Type",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

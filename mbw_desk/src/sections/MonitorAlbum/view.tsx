@@ -7,6 +7,8 @@ import { PictureIcon } from "../../icons/picture";
 import { SlickCustom } from "../../components/slick/slick";
 import { LeftOutlined, RightOutlined } from "@ant-design/icons";
 import Slider from "react-slick";
+import { rsDataFrappe } from "../../types/response";
+import { AxiosService } from "../../services/server";
 
 const CustomArrow = ({ direction, onClick, isHovered }: any) => (
   <div
@@ -23,6 +25,9 @@ export default function MonitorAlbum() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [listCustomerGroup, setCustomerGroup] = useState<any[]>([]);
+  const [listEmployee, setListEmployee] = useState<any[]>([]);
+  const [dataAlbum, setDataAlbum] = useState([])
 
   const [nav1, setNav1] = useState<Slider | null>(null);
   const [nav2, setNav2] = useState<Slider | null>(null);
@@ -104,6 +109,67 @@ export default function MonitorAlbum() {
     setNav1(slider1);
     setNav2(slider2);
   }, []);
+
+  useEffect(() => {
+    (async () => {
+      let rsCustomer: rsDataFrappe<any[]> = await AxiosService.get(
+        "/api/method/frappe.desk.search.search_link",
+        {
+          params: {
+            txt: "",
+            doctype: "Customer Group",
+            ignore_user_permissions: 0,
+            reference_doctype: "Customer",
+          },
+        }
+      );
+
+      let { results } = rsCustomer;
+      
+      setCustomerGroup(
+        results.map((customer_group) => ({
+          label: customer_group.value,
+          value: customer_group.value,
+        }))
+      );
+    })();
+  }, []);
+
+  useEffect(() => {
+    (async () => {
+      let rsEmployee: rsDataFrappe<any[]> = await AxiosService.get(
+        "/api/method/frappe.desk.search.search_link",
+        {
+          params: {
+            txt: "",
+            doctype: "Employee",
+            ignore_user_permissions: 0,
+            reference_doctype: "",
+          },
+        }
+      );
+
+      let { results } = rsEmployee;
+      
+      setListEmployee(
+        results.map((employee) => ({
+          label: employee.description,
+          value: employee.value,
+        }))
+      );
+    })();
+  }, []);
+
+  useEffect(()=> {
+    (async() => {
+      const rsAlbum = await AxiosService.get('/api/method/mbw_dms.api.album.list_album_image')
+      
+      console.log("data: ", rsAlbum.result);
+      setDataAlbum(rsAlbum.result)
+      
+    })()
+  },[])
+
   return (
     <>
       <HeaderPage title="Giám sát chụp ảnh khách hàng" />
@@ -137,75 +203,36 @@ export default function MonitorAlbum() {
           <FormItemCustom className="w-[200px] border-none mr-2">
             <Select
               className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
-              optionFilterProp="children"
-              onChange={onChange}
-              onSearch={onSearch}
-              filterOption={filterOption}
-              defaultValue=""
+              placeholder={"Nhân viên"}
+              options={listEmployee}
+            />
+          </FormItemCustom>
+
+          <FormItemCustom
+            className="w-[200px] border-none mr-2"
+            name="customer_type"
+          >
+            <Select
+              className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
+              placeholder={"Loại khách hàng"}
               options={[
                 {
-                  value: "",
-                  label: "Nhân viên",
+                  label: "Company",
+                  value: "Company",
                 },
                 {
-                  value: "A",
-                  label: "Hoạt động",
-                },
-                {
-                  value: "B",
-                  label: "Khóa",
+                  label: "Individual",
+                  value: "Individual",
                 },
               ]}
             />
           </FormItemCustom>
 
-          <FormItemCustom className="w-[200px] border-none mr-2">
+          <FormItemCustom className="w-[200px] border-none mr-2" name="customer_group">
             <Select
+              placeholder={"Nhóm khách hàng"}
               className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
-              optionFilterProp="children"
-              onChange={onChange}
-              onSearch={onSearch}
-              filterOption={filterOption}
-              defaultValue=""
-              options={[
-                {
-                  value: "",
-                  label: "Loại khách hàng",
-                },
-                {
-                  value: "A",
-                  label: "Hoạt động",
-                },
-                {
-                  value: "B",
-                  label: "Khóa",
-                },
-              ]}
-            />
-          </FormItemCustom>
-
-          <FormItemCustom className="w-[200px] border-none mr-2">
-            <Select
-              className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
-              optionFilterProp="children"
-              onChange={onChange}
-              onSearch={onSearch}
-              filterOption={filterOption}
-              defaultValue=""
-              options={[
-                {
-                  value: "",
-                  label: "Nhóm khách hàng",
-                },
-                {
-                  value: "A",
-                  label: "Hoạt động",
-                },
-                {
-                  value: "B",
-                  label: "Khóa",
-                },
-              ]}
+              options={listCustomerGroup}
             />
           </FormItemCustom>
 
@@ -261,7 +288,6 @@ export default function MonitorAlbum() {
                 </div>
               </CardCustom>
             </Col>
-            
           </Row>
 
           <Modal
