@@ -1,11 +1,15 @@
 {
  "charts": [],
- "content": "[{\"id\":\"mYHVz0JM0I\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Ti\u1ec7n \u00edch</b></span>\",\"col\":12}},{\"id\":\"zLmT081ZNb\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"S\u1ea3n ph\u1ea9m\",\"col\":3}},{\"id\":\"glOkerV_XQ\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Kh\u00e1ch h\u00e0ng\",\"col\":3}},{\"id\":\"_409ngzn8Y\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Dashboard\",\"col\":3}},{\"id\":\"6-1P-1qhI7\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">DMS</span>\",\"col\":12}},{\"id\":\"ZaUaIb2pPS\",\"type\":\"custom_block\",\"data\":{\"custom_block_name\":\"DMS Router Web\",\"col\":12}},{\"id\":\"hYR0ky4g-d\",\"type\":\"paragraph\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Danh m\u1ee5c</b></span>\",\"col\":12}},{\"id\":\"isse5DkoKx\",\"type\":\"card\",\"data\":{\"card_name\":\"Ph\u00e2n quy\u1ec1n, ch\u1ec9 ti\u00eau\",\"col\":4}},{\"id\":\"P-HfPUJDak\",\"type\":\"card\",\"data\":{\"card_name\":\"Gi\u00e1m s\u00e1t\",\"col\":4}},{\"id\":\"vyCSUREpYv\",\"type\":\"card\",\"data\":{\"card_name\":\"Danh m\u1ee5c kh\u00e1c\",\"col\":4}},{\"id\":\"5DocUF_33J\",\"type\":\"paragraph\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>B\u00e1o c\u00e1o</b></span>\",\"col\":12}},{\"id\":\"bOhDAMxKj3\",\"type\":\"card\",\"data\":{\"card_name\":\"B\u00e1o c\u00e1o k\u1ebft qu\u1ea3 \u0111i tuy\u1ebfn\",\"col\":4}},{\"id\":\"oWUTOVWcRw\",\"type\":\"card\",\"data\":{\"card_name\":\"B\u00e1o c\u00e1o k\u1ebft qu\u1ea3 b\u00e1n h\u00e0ng\",\"col\":4}},{\"id\":\"2zJLw8jYDW\",\"type\":\"card\",\"data\":{\"card_name\":\"B\u00e1o c\u00e1o c\u00f4ng n\u1ee3 kh\u00e1ch h\u00e0ng\",\"col\":4}},{\"id\":\"GNKMuGUJfJ\",\"type\":\"paragraph\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Ch\u1ee9c n\u0103ng</b></span>\",\"col\":12}},{\"id\":\"EZF6APKUc1\",\"type\":\"card\",\"data\":{\"card_name\":\"Ch\u1ee9c n\u0103ng\",\"col\":4}},{\"id\":\"H9VnYdktuN\",\"type\":\"paragraph\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Tr\u1ee3 gi\u00fap</b></span>\",\"col\":12}},{\"id\":\"Zq3QfRsf6m\",\"type\":\"card\",\"data\":{\"card_name\":\"Tr\u1ee3 gi\u00fap\",\"col\":4}}]",
+ "content": "[{\"id\":\"mYHVz0JM0I\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Ti\u1ec7n \u00edch</b></span>\",\"col\":12}},{\"id\":\"zLmT081ZNb\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"S\u1ea3n ph\u1ea9m\",\"col\":3}},{\"id\":\"glOkerV_XQ\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Kh\u00e1ch h\u00e0ng\",\"col\":3}},{\"id\":\"_409ngzn8Y\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Dashboard\",\"col\":3}},{\"id\":\"6-1P-1qhI7\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">DMS</span>\",\"col\":12}},{\"id\":\"ZaUaIb2pPS\",\"type\":\"custom_block\",\"data\":{\"custom_block_name\":\"DMS Router Web\",\"col\":12}},{\"id\":\"hYR0ky4g-d\",\"type\":\"paragraph\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Danh m\u1ee5c</b></span>\",\"col\":12}},{\"id\":\"isse5DkoKx\",\"type\":\"card\",\"data\":{\"card_name\":\"Ph\u00e2n quy\u1ec1n, ch\u1ec9 ti\u00eau\",\"col\":4}},{\"id\":\"P-HfPUJDak\",\"type\":\"card\",\"data\":{\"card_name\":\"Gi\u00e1m s\u00e1t\",\"col\":4}},{\"id\":\"vyCSUREpYv\",\"type\":\"card\",\"data\":{\"card_name\":\"Danh m\u1ee5c kh\u00e1c\",\"col\":4}},{\"id\":\"5DocUF_33J\",\"type\":\"paragraph\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>B\u00e1o c\u00e1o</b></span>\",\"col\":12}},{\"id\":\"bOhDAMxKj3\",\"type\":\"card\",\"data\":{\"card_name\":\"B\u00e1o c\u00e1o k\u1ebft qu\u1ea3 \u0111i tuy\u1ebfn\",\"col\":4}},{\"id\":\"oWUTOVWcRw\",\"type\":\"card\",\"data\":{\"card_name\":\"B\u00e1o c\u00e1o k\u1ebft qu\u1ea3 b\u00e1n h\u00e0ng\",\"col\":4}},{\"id\":\"2zJLw8jYDW\",\"type\":\"card\",\"data\":{\"card_name\":\"B\u00e1o c\u00e1o c\u00f4ng n\u1ee3 kh\u00e1ch h\u00e0ng\",\"col\":4}},{\"id\":\"lQbBN1JDhr\",\"type\":\"paragraph\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Ch\u1ee9c n\u0103ng</b></span>\",\"col\":12}},{\"id\":\"nb3xa-I0Pi\",\"type\":\"custom_block\",\"data\":{\"custom_block_name\":\"DMS\",\"col\":12}},{\"id\":\"H9VnYdktuN\",\"type\":\"paragraph\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Tr\u1ee3 gi\u00fap</b></span>\",\"col\":12}},{\"id\":\"Zq3QfRsf6m\",\"type\":\"card\",\"data\":{\"card_name\":\"Tr\u1ee3 gi\u00fap\",\"col\":4}}]",
  "creation": "2024-01-17 15:59:37.570600",
  "custom_blocks": [
   {
    "custom_block_name": "DMS Router Web",
    "label": "DMS Router Web"
+  },
+  {
+   "custom_block_name": "DMS",
+   "label": "DMS"
   }
  ],
  "docstatus": 0,
@@ -324,6 +328,7 @@
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
+<<<<<<< HEAD
   },
   {
    "hidden": 0,
@@ -393,6 +398,11 @@
   }
  ],
  "modified": "2024-01-31 11:24:08.954392",
+=======
+  }
+ ],
+ "modified": "2024-01-31 16:51:01.083715",
+>>>>>>> 10c098ec6e2f7e9a46d88436d35d5aa535f6d557
  "modified_by": "Administrator",
  "module": "MBW DMS",
  "name": "DMS",
