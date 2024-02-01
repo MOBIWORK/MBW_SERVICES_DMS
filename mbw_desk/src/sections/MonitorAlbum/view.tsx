@@ -4,111 +4,33 @@ import { Col, Row, Select, Modal } from "antd";
 import { CardCustom } from "../../components/card/card";
 import { UserIcon } from "../../icons/user";
 import { PictureIcon } from "../../icons/picture";
-import { SlickCustom } from "../../components/slick/slick";
-import { LeftOutlined, RightOutlined } from "@ant-design/icons";
-import Slider from "react-slick";
 import { rsDataFrappe } from "../../types/response";
 import { AxiosService } from "../../services/server";
-
-const CustomArrow = ({ direction, onClick, isHovered }: any) => (
-  <div
-    className={`custom-arrow rounded-lg bg-black bg-opacity-15 !h-14 ${direction} ${
-      isHovered ? "visible" : ""
-    }`}
-    onClick={onClick}
-  >
-    {direction === "prev" ? <LeftOutlined /> : <RightOutlined />}
-  </div>
-);
+import DetailModal from "./modal/detail";
+import useDebounce from "../../hooks/useDebount";
 
 export default function MonitorAlbum() {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isHovered, setIsHovered] = useState(false);
-  const [currentSlide, setCurrentSlide] = useState(0);
   const [listCustomerGroup, setCustomerGroup] = useState<any[]>([]);
   const [listEmployee, setListEmployee] = useState<any[]>([]);
-  const [dataAlbum, setDataAlbum] = useState([])
-
-  const [nav1, setNav1] = useState<Slider | null>(null);
-  const [nav2, setNav2] = useState<Slider | null>(null);
-  const slider1 = useRef<Slider | null>(null);
-  const slider2 = useRef<Slider | null>(null);
-
-  const showModal = () => {
-    setIsModalOpen(true);
+  const [dataAlbum, setDataAlbum] = useState([]);
+  const [dataFilterAlbum, setDataFilterAlbum] = useState([]);
+  const [dataPerson, setDataPerson] = useState([]);
+  const [album, setAlbum] = useState<string>()
+  const [keyS, setKeyS] = useState("");
+  const [modal, setModal] = useState<{
+    open: boolean;
+    id: any;
+  }>({
+    open: false,
+    id: null,
+  });
+  let keySearch = useDebounce(keyS, 300);
+  const closeModal = () => {
+    setModal({
+      open: false,
+      id: null,
+    });
   };
-
-  const handleCancel = () => {
-    setIsModalOpen(false);
-  };
-
-  const onChange = (value: string) => {
-    console.log(`selected ${value}`);
-  };
-
-  const onSearch = (value: string) => {
-    console.log("search:", value);
-  };
-
-  const filterOption = (
-    input: string,
-    option?: { label: string; value: string }
-  ) => (option?.label ?? "").toLowerCase().includes(input.toLowerCase());
-
-  // const handleDotClick = (index: any) => {
-  //   setCurrentSlide(index);
-  // };
-
-  const handlePrevArrowClick = () => {
-    const newIndex =
-      (currentSlide - 1 + settings.slidesToShow) % settings.slidesToShow;
-    setCurrentSlide(newIndex);
-  };
-
-  const handleNextArrowClick = () => {
-    const newIndex = (currentSlide + 1) % settings.slidesToShow;
-    setCurrentSlide(newIndex);
-  };
-
-  const settings = {
-    customPaging: function (i: number) {
-      return (
-        <a>
-          <img
-            src={`https://s3.amazonaws.com/static.neostack.com/img/react-slick/abstract0${
-              i + 1
-            }.jpg`}
-          />
-        </a>
-      );
-    },
-    dots: true,
-    dotsClass: "slick-dots slick-thumb",
-    infinite: true,
-    speed: 500,
-    slidesToShow: 1,
-    slidesToScroll: 1,
-    prevArrow: (
-      <CustomArrow
-        direction="prev"
-        isHovered={isHovered}
-        onClick={handlePrevArrowClick}
-      />
-    ),
-    nextArrow: (
-      <CustomArrow
-        direction="next"
-        isHovered={isHovered}
-        onClick={handleNextArrowClick}
-      />
-    ),
-    beforeChange: (oldIndex: any, newIndex: any) => setCurrentSlide(newIndex),
-  };
-
-  useEffect(() => {
-    setNav1(slider1);
-    setNav2(slider2);
-  }, []);
 
   useEffect(() => {
     (async () => {
@@ -125,7 +47,7 @@ export default function MonitorAlbum() {
       );
 
       let { results } = rsCustomer;
-      
+
       setCustomerGroup(
         results.map((customer_group) => ({
           label: customer_group.value,
@@ -150,7 +72,7 @@ export default function MonitorAlbum() {
       );
 
       let { results } = rsEmployee;
-      
+
       setListEmployee(
         results.map((employee) => ({
           label: employee.description,
@@ -160,50 +82,77 @@ export default function MonitorAlbum() {
     })();
   }, []);
 
-  useEffect(()=> {
-    (async() => {
-      const rsAlbum = await AxiosService.get('/api/method/mbw_dms.api.album.list_album_image')
-      
-      console.log("data: ", rsAlbum.result);
-      setDataAlbum(rsAlbum.result)
-      
-    })()
-  },[])
+  useEffect(() => {
+    (async () => {
+      const rsAlbum = await AxiosService.get(
+        "/api/method/mbw_dms.api.album.list_album_image"
+      );
+
+      setDataFilterAlbum(rsAlbum.result);
+    })();
+  }, []);
+
+  useEffect(() => {
+    (async () => {
+      const rsAlbum = await AxiosService.get(
+        "/api/method/mbw_dms.api.album.list_album_image", {
+        params: {
+          album
+        }
+      }
+      );
+
+      const rsPerson = await AxiosService.get(
+        "/api/method/mbw_dms.api.selling.customer.list_sale_person"
+      );
+
+      // console.log("=---", rsPerson);
+
+      setDataAlbum(rsAlbum.result);
+      setDataPerson(rsPerson.result)
+    })();
+  }, [album]);
 
   return (
     <>
       <HeaderPage title="Giám sát chụp ảnh khách hàng" />
       <div className="bg-white rounded-md py-7 px-4">
         <div className="flex justify-start items-center">
+          <FormItemCustom
+            className="w-[200px] border-none mr-2"
+            label={"Nhóm bán hàng"}
+          ></FormItemCustom>
+          <FormItemCustom
+            className="w-[200px] border-none mr-2"
+            label={"Nhân viên"}
+          ></FormItemCustom>
+          <FormItemCustom
+            className="w-[200px] border-none mr-2"
+            label={"Loại khách hàng"}
+          ></FormItemCustom>
+          <FormItemCustom
+            className="w-[200px] border-none mr-2"
+            label={"Nhóm khách hàng"}
+          ></FormItemCustom>
+          <FormItemCustom
+            className="w-[200px] border-none mr-2"
+            label={"Album"}
+          ></FormItemCustom>
+        </div>
+        <div className="flex justify-start items-center">
           <FormItemCustom className="w-[200px] border-none mr-2">
             <Select
               className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
-              optionFilterProp="children"
-              onChange={onChange}
-              onSearch={onSearch}
-              filterOption={filterOption}
-              defaultValue=""
-              options={[
-                {
-                  value: "",
-                  label: "Nhóm bán hàng",
-                },
-                {
-                  value: "A",
-                  label: "Hoạt động",
-                },
-                {
-                  value: "B",
-                  label: "Khóa",
-                },
-              ]}
+              options={dataPerson.map((person: any) => ({
+                label: person.sales_person_name,
+                value: person.sales_person_name,
+              }))}
             />
           </FormItemCustom>
 
           <FormItemCustom className="w-[200px] border-none mr-2">
             <Select
               className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
-              placeholder={"Nhân viên"}
               options={listEmployee}
             />
           </FormItemCustom>
@@ -214,7 +163,6 @@ export default function MonitorAlbum() {
           >
             <Select
               className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
-              placeholder={"Loại khách hàng"}
               options={[
                 {
                   label: "Company",
@@ -228,9 +176,11 @@ export default function MonitorAlbum() {
             />
           </FormItemCustom>
 
-          <FormItemCustom className="w-[200px] border-none mr-2" name="customer_group">
+          <FormItemCustom
+            className="w-[200px] border-none mr-2"
+            name="customer_group"
+          >
             <Select
-              placeholder={"Nhóm khách hàng"}
               className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
               options={listCustomerGroup}
             />
@@ -239,215 +189,56 @@ export default function MonitorAlbum() {
           <FormItemCustom className="w-[200px] border-none mr-2">
             <Select
               className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
-              optionFilterProp="children"
-              onChange={onChange}
-              onSearch={onSearch}
-              filterOption={filterOption}
-              defaultValue=""
-              options={[
-                {
-                  value: "",
-                  label: "Ablum",
-                },
-                {
-                  value: "A",
-                  label: "Hoạt động",
-                },
-                {
-                  value: "B",
-                  label: "Khóa",
-                },
-              ]}
+              showSearch
+              notFoundContent={null}
+              options={dataFilterAlbum.map((album: any) => ({
+                label: album.album_name,
+                value: album.name,
+              }))}
+              onSearch={(value: string) => setKeyS(value)}
+              onChange={(value) => {
+                setAlbum(value)
+              }}
             />
           </FormItemCustom>
         </div>
 
         <div className="pt-5">
           <Row gutter={[16, 8]}>
-            <Col
-              className="flex justify-center items-center px-4 pt-4 rounded-lg"
-              span={4}
-            >
-              <CardCustom
-                hoverable
-                onClick={showModal}
-                cover={
-                  <img
-                    alt="example"
-                    src="https://os.alipayobjects.com/rmsportal/QBnOOoLaAfKPirc.png"
-                  />
-                }
-              >
-                <div className="flex items-center h-3">
-                  <UserIcon />
-                  <p>Boo trần</p>
-                </div>
-                <div className="flex items-center pt-2 h-5">
-                  <PictureIcon />
-                  <p>Album 001</p>
-                </div>
-              </CardCustom>
-            </Col>
+            {dataAlbum.length > 0 &&
+              dataAlbum.map((data: any) => (
+                <Col
+                  key={data?.name}
+                  className="flex justify-center items-center px-4 pt-4 rounded-lg"
+                  span={4}
+                >
+                  <CardCustom
+                    hoverable
+                    // setModal({ open: true, id: data?.name })
+                    onClick={() => setModal({ open: true, id: data })}
+                    cover={<img alt={data?.image_url} src={data?.image_url} />}
+                  >
+                    <div className="flex items-center h-3">
+                      <UserIcon />
+                      <p>{data?.detail_employee[0].first_name}</p>
+                    </div>
+                    <div className="flex items-center pt-2 h-5">
+                      <PictureIcon />
+                      <p>{data?.album_name}</p>
+                    </div>
+                  </CardCustom>
+                </Col>
+              ))}
           </Row>
 
           <Modal
             width={1064}
             title="Hình ảnh khách hàng"
-            open={isModalOpen}
-            onCancel={handleCancel}
+            open={modal.open}
+            onCancel={closeModal}
             footer={null}
           >
-            <Row className="pt-4" gutter={32}>
-              <Col span={12}>
-                <div
-                  onMouseEnter={() => setIsHovered(true)}
-                  onMouseLeave={() => setIsHovered(false)}
-                >
-                  <Slider
-                    asNavFor={nav2 && nav2.current}
-                    ref={slider1}
-                    prevArrow={
-                      <CustomArrow
-                        direction="prev"
-                        isHovered={isHovered}
-                        onClick={handlePrevArrowClick}
-                      />
-                    }
-                    nextArrow={
-                      <CustomArrow
-                        direction="next"
-                        isHovered={isHovered}
-                        onClick={handleNextArrowClick}
-                      />
-                    }
-                  >
-                    <div className="">
-                      <img
-                        className="w-full rounded-lg"
-                        src={
-                          "https://s3.amazonaws.com/static.neostack.com/img/react-slick" +
-                          "/abstract01.jpg"
-                        }
-                      />
-                    </div>
-                    <div className="">
-                      <img
-                        className="w-full rounded-lg"
-                        src={
-                          "https://s3.amazonaws.com/static.neostack.com/img/react-slick" +
-                          "/abstract02.jpg"
-                        }
-                      />
-                    </div>
-                    <div className="">
-                      <img
-                        className="w-full rounded-lg"
-                        src={
-                          "https://s3.amazonaws.com/static.neostack.com/img/react-slick" +
-                          "/abstract03.jpg"
-                        }
-                      />
-                    </div>
-                    <div className="">
-                      <img
-                        className="w-full rounded-lg"
-                        src={
-                          "https://s3.amazonaws.com/static.neostack.com/img/react-slick" +
-                          "/abstract01.jpg"
-                        }
-                      />
-                    </div>
-                  </Slider>
-                  <Slider
-                    className="custom-slider"
-                    asNavFor={nav1 && nav1.current}
-                    ref={slider2}
-                    slidesToShow={4}
-                    swipeToSlide={true}
-                    focusOnSelect={true}
-                  >
-                    <div className="">
-                      <img
-                        className="w-full rounded-lg"
-                        src={
-                          "https://s3.amazonaws.com/static.neostack.com/img/react-slick" +
-                          "/abstract01.jpg"
-                        }
-                      />
-                    </div>
-                    <div className="">
-                      <img
-                        className="w-full rounded-lg"
-                        src={
-                          "https://s3.amazonaws.com/static.neostack.com/img/react-slick" +
-                          "/abstract02.jpg"
-                        }
-                      />
-                    </div>
-                    <div className="">
-                      <img
-                        className="w-full rounded-lg"
-                        src={
-                          "https://s3.amazonaws.com/static.neostack.com/img/react-slick" +
-                          "/abstract03.jpg"
-                        }
-                      />
-                    </div>
-                    <div className="">
-                      <img
-                        className="w-full rounded-lg"
-                        src={
-                          "https://s3.amazonaws.com/static.neostack.com/img/react-slick" +
-                          "/abstract01.jpg"
-                        }
-                      />
-                    </div>
-                  </Slider>
-                </div>
-              </Col>
-              <Col span={12}>
-                <div className="flex items-center h-6">
-                  <p className="w-[32%] text-base leading-5 font-normal text-[#637381]">
-                    Nhóm bán hàng
-                  </p>
-                  <p className="text-base leading-5 font-medium text-[#212B36]">
-                    Nhóm bán hàng ABC
-                  </p>
-                </div>
-                <div className="flex items-center pt-2 h-6">
-                  <p className="w-[32%] text-base leading-5 font-normal text-[#637381]">
-                    Nhân viên
-                  </p>
-                  <p className="text-base leading-5 font-medium text-[#212B36]">
-                    Chu Quỳnh Anh
-                  </p>
-                </div>
-                <div className="flex items-center pt-2 h-6">
-                  <p className="w-[32%] text-base leading-5 font-normal text-[#637381]">
-                    Loại khách hàng
-                  </p>
-                  <p className="text-base leading-5 font-medium text-[#212B36]">
-                    Cá nhân
-                  </p>
-                </div>
-                <div className="flex items-center pt-2 h-6">
-                  <p className="w-[32%] text-base leading-5 font-normal text-[#637381]">
-                    Nhóm khách hàng
-                  </p>
-                  <p className="text-base leading-5 font-medium text-[#212B36]">
-                    Thân thiết
-                  </p>
-                </div>
-                <div className="flex items-center pt-2 h-6">
-                  <p className="w-[32%] text-base leading-5 font-normal text-[#637381]">
-                    Album
-                  </p>
-                  <p className="text-base leading-5 font-medium text-[#212B36]">
-                    Album ảnh thăm khách
-                  </p>
-                </div>
-              </Col>
-            </Row>
+            <DetailModal data={modal.id} />
           </Modal>
         </div>
       </div>

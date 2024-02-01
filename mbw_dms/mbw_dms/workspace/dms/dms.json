@@ -328,7 +328,6 @@
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
-<<<<<<< HEAD
   },
   {
    "hidden": 0,
@@ -398,11 +397,7 @@
   }
  ],
  "modified": "2024-01-31 11:24:08.954392",
-=======
-  }
- ],
  "modified": "2024-01-31 16:51:01.083715",
->>>>>>> 10c098ec6e2f7e9a46d88436d35d5aa535f6d557
  "modified_by": "Administrator",
  "module": "MBW DMS",
  "name": "DMS",
