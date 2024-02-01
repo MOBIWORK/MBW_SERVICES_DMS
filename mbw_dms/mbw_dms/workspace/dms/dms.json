@@ -20,54 +20,6 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Ph\u00e2n quy\u1ec1n, ch\u1ec9 ti\u00eau",
-   "link_count": 4,
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Qu\u1ea3n l\u00fd tuy\u1ebfn",
-   "link_count": 0,
-   "link_to": "DMS Router",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Quy\u1ec1n b\u00e1n s\u1ea3n ph\u1ea9m",
-   "link_count": 0,
-   "link_to": "User",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Ch\u1ec9 ti\u00eau KPI",
-   "link_count": 0,
-   "link_to": "DMS KPI",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Ch\u1ec9 ti\u00eau kh\u00e1ch h\u00e0ng",
-   "link_count": 0,
-   "link_to": "Employee",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
    "label": "Gi\u00e1m s\u00e1t",
    "link_count": 6,
    "onboard": 0,
@@ -400,9 +352,47 @@
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Ph\u00e2n quy\u1ec1n, ch\u1ec9 ti\u00eau",
+   "link_count": 3,
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Quy\u1ec1n b\u00e1n s\u1ea3n ph\u1ea9m",
+   "link_count": 0,
+   "link_to": "User",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Ch\u1ec9 ti\u00eau KPI",
+   "link_count": 0,
+   "link_to": "DMS KPI",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Ch\u1ec9 ti\u00eau kh\u00e1ch h\u00e0ng",
+   "link_count": 0,
+   "link_to": "Employee",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
   }
  ],
- "modified": "2024-01-31 09:42:45.901224",
+ "modified": "2024-01-31 11:24:08.954392",
  "modified_by": "Administrator",
  "module": "MBW DMS",
  "name": "DMS",
