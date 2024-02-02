@@ -44,16 +44,8 @@ def list_product(**kwargs):
         count = len(frappe.db.get_list("Item", filters=my_filter,))
         for item in items:
             item['image'] = validate_image(item.get("image"))
-            item['details'] = []
-            # Lặp qua tất cả các uom để lấy giá tương ứng
-            for uom_detail in frappe.get_all("Item Price", filters={"item_code": item.get('item_code')}, fields=['uom', 'price_list_rate', 'valid_from', 'currency']):
-                item['details'].append({
-                    'uom': uom_detail.uom,
-                    'price': uom_detail.price_list_rate,
-                    'valid_from': uom_detail.valid_from,
-                    'currency': uom_detail.currency
-                })
-
+            item['details'] = frappe.get_all("Item Price", filters={"item_code": item.get('item_code')}, fields=['uom', 'price_list_rate', 'valid_from', 'currency'])
+            item['unit'] = frappe.db.get_all("UOM Conversion Detail", {"parent" : item.get('name')}, ['uom', 'conversion_factor'])
             item['stock'] = frappe.db.get_all("Stock Entry Detail", {"item_code": item.get('item_code')}, ['t_warehouse', 'qty'])
 
         return gen_response(200, 'Thành công', {
