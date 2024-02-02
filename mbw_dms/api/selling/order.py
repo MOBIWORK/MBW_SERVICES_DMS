@@ -132,6 +132,11 @@ def create_sale_order(**kwargs):
                               company=kwargs.get('company'), doctype='Sales Order')
         if sales_team.get('sales_team') != []:
             new_order.append('sales_team', sales_team['sales_team'][0])
+        if sales_team.get('sales_team') == []:
+            new_order.append('sales_team', {
+                'sales_person': kwargs.get('sale_persons'),
+                'allocated_percentage': float(kwargs.get('allocated_percentage'))
+            })
         items = kwargs.get('items')
         amount = 0
         for item_data in items:
@@ -234,6 +239,11 @@ def create_return_order(**kwargs):
                               company=kwargs.get('company'), doctype='Sales Order')
         if sales_team.get('sales_team') != []:
             new_order.append('sales_team', sales_team['sales_team'][0])
+        if sales_team.get('sales_team') == []:
+            new_order.append('sales_team', {
+                'sales_person': kwargs.get('sale_persons'),
+                'allocated_percentage': float(kwargs.get('allocated_percentage'))
+            })
         items = kwargs.get('items')
         amount = 0
         for item_data in items:
