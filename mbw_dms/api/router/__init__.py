@@ -8,6 +8,7 @@ from mbw_dms.api.common import (
     exception_handel,
     gen_response,
     this_week,
+    get_value_child_doctype
 )
 
 from mbw_dms.api.validators import (
@@ -134,6 +135,7 @@ def get_customer_router(**data):
     except Exception as e :
         exception_handel(e)
 
+#them tuyen
 @frappe.whitelist(methods="POST")
 def create_router(**body):
     try:
@@ -162,6 +164,46 @@ def create_router(**body):
         gen_response(201,"",doc)
     except Exception as e:
         exception_handel(e)
+
+#cap nhat tuyen
+@frappe.whitelist(methods="PATCH")
+def update_router(**body):
+    try:
+        body = dict(body)
+        name = validate_filter(type_check='require',value=body.get('name'))
+        if body['cmd'] :
+            del body['cmd']
+        field_validate= ["name","travel_date","status", "customers", "channel_code", "team_sale","channel_name","employee"]
+        field_customers_validate = ["customer_code","customer_name","display_address","phone_number","customer","frequency"]
+        # check_validate fields
+        for key_router,value in body.items():
+            if isinstance(body[key_router], list):
+                for customer in body[key_router]:
+                    for key_cs in customer:
+                        # if key_cs not in field_customers_validate or (key_cs in field_customers_validate and not customer[key_cs]) :
+                        if key_cs not in field_customers_validate  :
+                            gen_response(406,f"Field {key_cs} not validate",None)
+                            return 
+            else:
+                #  if key_router not in field_validate or ( key_router in field_validate and not body[key_router] ) :
+                 if key_router not in field_validate :
+                        gen_response(406,f"Field {key_router} not validate",None)
+                        return
+        # body['doctype'] = "DMS Router"
+        doc = frappe.get_doc("DMS Router",name)
+        for item,value in body.items():
+            if(item == 'customers'):
+                doc.set("customers", value)
+            else :
+                doc.set(item, value)
+        doc.save(ignore_version=True)
+        frappe.db.commit()
+        gen_response(201,"",doc)
+    except Exception as e:
+        exception_handel(e)
+
+
+
 
 @frappe.whitelist(methods="GET")
 def get_team_sale():
