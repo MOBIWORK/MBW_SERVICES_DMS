@@ -35,7 +35,7 @@ export const dashboardRoutes = [
                 path: 'router-employee ',element: <RouterEmployee/>
             },
             {
-                path: 'router-create',element: <RouterCreate/>
+                path: 'dms-router/:type',element: <RouterCreate/>
             },
             {
                 path: 'router-detail/:id',element: <RouterDetail/>

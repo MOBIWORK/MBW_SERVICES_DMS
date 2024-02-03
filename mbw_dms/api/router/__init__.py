@@ -16,7 +16,7 @@ from mbw_dms.api.validators import (
 )
 from mbw_dms.config_translate import i18n
 UNIX_TIMESTAMP = CustomFunction('UNIX_TIMESTAMP', ['day'])
-
+# danh sach tuyen
 @frappe.whitelist(methods='GET')
 def get_list_router(**filters):
     try:
@@ -68,6 +68,37 @@ def get_list_router(**filters):
     except Exception as e: 
         exception_handel(e)
 
+
+# chi tiet tuyen
+@frappe.whitelist(methods='GET')
+def get_router(id):
+    try:
+
+        name = validate_filter(type_check='require',value=id)
+        
+        queryFilters = {"is_deleted": 0,"name": name}
+        
+        routers = frappe.db.get_list(doctype='DMS Router',filters=queryFilters,fields=['*','customers', 'UNIX_TIMESTAMP(travel_date) as travel_date'])
+        router = None
+        if len(routers) > 0 :
+            Router = frappe.qb.DocType("DMS Router")
+            RouterCustomer = frappe.qb.DocType("DMS Router Customer")
+            customer = (frappe.qb.from_(Router)
+                      .inner_join(RouterCustomer)
+                      .on(Router.name == RouterCustomer.parent)
+                      .where(Router.name == name)
+                      .select(RouterCustomer.customer,RouterCustomer.customer_code,RouterCustomer.customer_name,RouterCustomer.display_address,
+                              RouterCustomer.phone_number,RouterCustomer.frequency,RouterCustomer.longitude,RouterCustomer.latitude
+                              )
+                      ).run(as_dict = 1)
+            router = routers[0]
+            router['customers'] = customer
+        gen_response(200,'',router)
+        return 
+    except Exception as e: 
+        exception_handel(e)
+
+# danh sach khach hang cham soc
 @frappe.whitelist(methods="GET")
 def get_customer_router(**data):
     try:

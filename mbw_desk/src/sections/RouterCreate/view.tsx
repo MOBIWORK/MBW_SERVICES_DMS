@@ -6,16 +6,18 @@ import GeneralInformation from "./general-information";
 import Customer from "./customer";
 import { HeaderPage } from "../../components";
 import { AxiosService } from "../../services/server";
-import { useNavigate } from "react-router-dom";
-import type { NotificationArgsProps } from 'antd';
+import { useNavigate, useParams } from "react-router-dom";
+import { customer, router } from "../../types/router";
+import { rsData } from "../../types/response";
 // ----------------------------------------------------------------------
 
 export default function RouterCreate() {
   const [form] = Form.useForm();
   const navigate = useNavigate()
+  const { type } = useParams();
   const [customerRouter,setCustomerRouter] = useState<any[]>([])
   const [messageApi, contextHolder] = message.useMessage();
-
+  const [detailRouter,setDetailRouter] = useState<router>()
   const success = () => {
     messageApi.open({
       type: 'success',
@@ -50,25 +52,65 @@ export default function RouterCreate() {
       
     }
   },[customerRouter])
-  
+
+  const handleUpdateRouter = useCallback(async(value:any) => {
+    value = {...value,customers: customerRouter.map((customer)=> {
+      let key_push = ["customer_id","customer_name","display_address","phone_number","customer","frequency"]
+      for (let key in customer) {
+        if(!key_push.includes(key)) {
+          delete customer[key]
+        }
+      }
+      return customer
+    })}
+    try {
+      await AxiosService.post("/api/method/mbw_dms.api.router.update_router",{name:type,...value})
+      success()
+      navigate('/')
+    } catch (err) {
+      error()
+      console.log("error create",err);
+
+      
+    }
+  },[customerRouter])
+  useEffect(()=> {
+    if(type !== 'create-dms-router') {
+      (async() => {
+        const rsRouter:rsData<router> = await AxiosService.get(`/api/method/mbw_dms.api.router.get_router`, {
+          params: {
+            id: type
+          }
+        })
+        setDetailRouter(rsRouter.result)
+        if(rsRouter.result)
+          form.setFieldsValue(rsRouter.result)
+      })()
+    }
+  },[type])
   return (
     <>
     {contextHolder}
       <HeaderPage
         title="Thêm tuyến"
         buttons={[
+          detailRouter ?
           {
+            label: "Lưu",
+            action: form.submit,
+            type: "primary",
+          }: {
             label: "Thêm",
             action: form.submit,
             type: "primary",
-          },
+          }
         ]}
       />
       <div className="bg-white rounded-md">
         <Form
           layout="vertical"
           form={form}
-          onFinish={handleCreateRouter}
+          onFinish={detailRouter ? handleUpdateRouter: handleCreateRouter}
         >
           <Tabs
             defaultActiveKey="1"

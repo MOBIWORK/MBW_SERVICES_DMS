@@ -15,7 +15,7 @@ import { rsDataFrappe } from "../../types/response";
 import { employee } from "../../types/employeeFilter";
 import { AxiosService } from "../../services/server";
 import useDebounce from "../../hooks/useDebount";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 // ----------------------------------------------------------------------
 interface DataType {
   key: React.Key;
@@ -72,30 +72,7 @@ const columns = [
   },
 ];
 
-const data: DataType[] = [
-  {
-    key: "1",
-    codeRouter: "John",
-    nameRouter: "Brown",
-    nvbh: "unasd",
-    status: "New York No. 1 Lake Park",
-    created: "222",
-    usercreated: "12313",
-    updated: "123",
-    userupdated: "123123",
-  },
-  {
-    key: "2",
-    codeRouter: "John",
-    nameRouter: "Brown",
-    nvbh: "unasd",
-    status: "New York No. 1 Lake Park",
-    created: "222",
-    usercreated: "12313",
-    updated: "123",
-    userupdated: "123123",
-  },
-];
+
 
 export default function RouterControl() {
   const navigate = useNavigate();
@@ -234,7 +211,7 @@ export default function RouterControl() {
             icon: <VscAdd className="text-xl" />,
             size: "20px",
             className: "flex items-center",
-            action: () => navigate('/router-create')
+            action: () => navigate('/dms-router/create-dms-router')
           },
         ]}
       />
@@ -243,6 +220,7 @@ export default function RouterControl() {
         <div className="mx-2 pt-5 pb-10">
           <div className="pt-5">
             <div className="h-auto bg-white py-7 px-4 rounded-lg">
+              {/* header  */}
               <Row className="justify-between w-full">
                 <Col span={14}>
                   <Row gutter={8}>
@@ -345,12 +323,16 @@ export default function RouterControl() {
                   </div>
                 </Col>
               </Row>
-
+              {/* hien thi table  */}
               <div className="pt-5">
                 <div>
                   <TableCustom
                     rowSelection={rowSelection}
-                    columns={columns}
+                    columns={columns.map(column => {
+                      if(column.dataIndex == 'channel_code')
+                      return ({...column,render: (text, record, index) => <Link className="!text-slate-900" to={`/dms-router/${record?.name}`}>{text}</Link>})
+                      else return column
+                    })}
                     dataSource={routersTable?.map(router => ({key: router.channel_code,...router}))}
                     pagination={{
                       defaultPageSize:PAGE_SIZE,
