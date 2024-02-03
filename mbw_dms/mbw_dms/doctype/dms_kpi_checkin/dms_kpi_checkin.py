@@ -54,8 +54,8 @@ def create_daily_summary(date_str):
 
 def update_monthly_summary(date_str):
 	# Lấy thông tin tháng và năm từ ngày hiện tại
-    month = date_str.split('-')[1]
-    year = date_str.split('-')[0]
+    month = int(date_str.split('-')[1])
+    year = int(date_str.split('-')[0])
 	
     start_date_str = f'{year:04d}-{month:02d}-01'
 
@@ -71,7 +71,7 @@ def update_monthly_summary(date_str):
         filters={
             'date': ['between', [start_date, end_date]]
         },
-        fields=['name']
+        fields=['*']
     )
 	
 	# Tính tổng total_sales từ tất cả các ngày trong tháng
