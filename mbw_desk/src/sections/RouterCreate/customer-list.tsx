@@ -51,7 +51,7 @@ export default function CustomerList({data,handleData}:Props) {
             render: (_:any,customer:CustomerType) => {
                 return <div className='flex justify-center' onClick={() => {
                     handleData((prev:any[]) => {
-                        return [...prev.filter((cs) => cs.customer_id != customer.customer_id )]
+                        return [...prev.filter((cs) => cs.customer_code != customer.customer_code )]
                     })
                 }}><DeleteOutlined /></div>
             }

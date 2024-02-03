@@ -115,6 +115,10 @@ export const FilterForm = {
 
 export const optionsTravel_date = [
     {
+        label: "Không giới hạn ",
+        value: null
+    },
+    {
         label: "Thứ 2",
         value: "Thứ 2"
     },

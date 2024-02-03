@@ -98,14 +98,21 @@ export function ChooseCustomer({selected,handleAdd,closeModal}:Props) {
       })
       setCustomerList(rsCustomer?.result?.data)
       setTotalNumber(rsCustomer.result?.total)
-      console.log("rsCustomer",rsCustomer);
       
     })()
   },[filter,page_number])
 
   const handleAddCustomer =() => {
     if(customerChoose.length >0) {
-      handleAdd(customerChoose)
+      
+      handleAdd((prev:CustomerType[]) => {
+        let arrNameSelect = selected.map((cs:CustomerType) =>cs.name )
+      customerChoose.forEach((cs:CustomerType) => {
+        if (!arrNameSelect.includes(cs.name))
+          prev = [cs,...prev]
+      })
+      return [...prev]
+      })
     }
     closeModal()
   }

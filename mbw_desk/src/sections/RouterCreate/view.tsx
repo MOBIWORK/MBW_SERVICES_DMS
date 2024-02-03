@@ -64,7 +64,7 @@ export default function RouterCreate() {
       return customer
     })}
     try {
-      await AxiosService.post("/api/method/mbw_dms.api.router.update_router",{name:type,...value})
+      await AxiosService.patch("/api/method/mbw_dms.api.router.update_router",{name:type,...value})
       success()
       navigate('/')
     } catch (err) {
