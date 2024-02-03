@@ -85,6 +85,7 @@ export default function RouterCreate() {
         setDetailRouter(rsRouter.result)
         if(rsRouter.result)
           form.setFieldsValue(rsRouter.result)
+          setCustomerRouter(rsRouter.result?.customers || [])
       })()
     }
   },[type])
