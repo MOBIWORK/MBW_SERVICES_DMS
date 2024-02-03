@@ -101,7 +101,9 @@ def delete_customer(name):
 def create_customer(**kwargs):
     try:
         # Check dữ liệu đầu vào
-        phone_number = validate_phone_number(kwargs.get('phone'))
+        phone_number = ''
+        if kwargs.get('phone'):
+            phone_number = validate_phone_number(kwargs.get('phone'))
 
         # Tạo mới khách hàng
         new_customer = frappe.new_doc('Customer')
@@ -131,78 +133,82 @@ def create_customer(**kwargs):
         new_customer.insert()
 
         # Tạo mới địa chỉ khách hàng
-        new_address_cus = frappe.new_doc('Address')
-        new_address_cus.address_title = kwargs.get('address_title_cus')
-        new_address_cus.address_type = kwargs.get('address_type_cus')
-        new_address_cus.address_line1 = kwargs.get('detail_address_cus')
-        new_address_cus.city = kwargs.get('province_cus')
-        new_address_cus.county = kwargs.get('district_cus')
-        new_address_cus.state = kwargs.get('ward_cus')
-        new_address_cus.is_shipping_address = kwargs.get('is_shipping_address')
-        new_address_cus.is_primary_address = kwargs.get('is_primary_address')
-        new_address_cus.append('links', {
-            'link_doctype': new_customer.doctype,
-            'link_name': new_customer.name,
-        })
-        new_address_cus.insert()
+        if kwargs.get('address_title_cus'):
+            new_address_cus = frappe.new_doc('Address')
+            new_address_cus.address_title = kwargs.get('address_title_cus')
+            new_address_cus.address_type = kwargs.get('address_type_cus')
+            new_address_cus.address_line1 = kwargs.get('detail_address_cus')
+            new_address_cus.city = kwargs.get('province_cus')
+            new_address_cus.county = kwargs.get('district_cus')
+            new_address_cus.state = kwargs.get('ward_cus')
+            new_address_cus.is_shipping_address = kwargs.get('is_shipping_address')
+            new_address_cus.is_primary_address = kwargs.get('is_primary_address')
+            new_address_cus.append('links', {
+                'link_doctype': new_customer.doctype,
+                'link_name': new_customer.name,
+            })
+            new_address_cus.insert()
+            new_customer.customer_primary_address = new_address_cus.name
+            new_customer.save()
 
         # Tạo mới contact khách hàng
-        new_contact = frappe.new_doc('Contact')
-        contact_fields = ['first_name', "address_contact"]
-        for key, value in kwargs.items():
-            if key in contact_fields:
-                new_contact.set(key, value)
-        new_contact.is_primary_contact = 1
-        new_contact.is_billing_contact = 1
+        if kwargs.get('first_name'):
+            new_contact = frappe.new_doc('Contact')
+            contact_fields = ['first_name', "address_contact"]
+            for key, value in kwargs.items():
+                if key in contact_fields:
+                    new_contact.set(key, value)
+            new_contact.is_primary_contact = 1
+            new_contact.is_billing_contact = 1
 
-        new_contact.append('links', {
-            'link_doctype': new_customer.doctype,
-            'link_name': new_customer.name,
-        })
-        new_contact.append('phone_nos', {
-            'phone': phone_number
-        })
+            new_contact.append('links', {
+                'link_doctype': new_customer.doctype,
+                'link_name': new_customer.name,
+            })
+            new_contact.append('phone_nos', {
+                'phone': phone_number
+            })
 
-        # Tạo mới địa chỉ contact
-        new_address_contact = frappe.new_doc('Address')
-        new_address_contact.address_title = kwargs.get('adr_title_contact')
-        new_address_contact.address_type = kwargs.get('adr_type_contact')
-        new_address_contact.address_line1 = kwargs.get('detail_adr_contact')
-        new_address_contact.city = kwargs.get('province_contact')
-        new_address_contact.county = kwargs.get('district_contact')
-        new_address_contact.state = kwargs.get('ward_contact')
-        new_address_contact.append('links', {
-            'link_doctype': new_customer.doctype,
-            'link_name': new_customer.name,
-        })
-        new_address_contact.insert()
+            # Tạo mới địa chỉ contact
+            new_address_contact = frappe.new_doc('Address')
+            new_address_contact.address_title = kwargs.get('adr_title_contact')
+            new_address_contact.address_type = kwargs.get('adr_type_contact')
+            new_address_contact.address_line1 = kwargs.get('detail_adr_contact')
+            new_address_contact.city = kwargs.get('province_contact')
+            new_address_contact.county = kwargs.get('district_contact')
+            new_address_contact.state = kwargs.get('ward_contact')
+            new_address_contact.append('links', {
+                'link_doctype': new_customer.doctype,
+                'link_name': new_customer.name,
+            })
+            new_address_contact.insert()
 
-        new_contact.address = new_address_contact.name
-        new_contact.insert()
+            new_contact.address = new_address_contact.name
+            new_contact.insert()
+            new_customer.customer_primary_contact = new_contact.name
+            new_customer.save()
 
-        # Thêm primary_contact, primary_address và cập nhật ảnh đại diện của khách hàng
-        new_customer.customer_primary_contact = new_contact.name
-        new_customer.customer_primary_address = new_address_cus.name
-        new_customer.image = post_image(name_image=kwargs.get('name_image'), faceimage=kwargs.get('faceimage'), doc_type='Customer', doc_name=new_customer.name)
-        new_customer.save()
+        if kwargs.get('faceimage'):
+            new_customer.image = post_image(name_image='', faceimage=kwargs.get('faceimage'), doc_type='Customer', doc_name=new_customer.name)
+            new_customer.save()
 
         # Thêm tuyến khách hàng
-        router = frappe.get_doc('DMS Router', kwargs.get('router_name'))
-        router.append('customers', {
-            'customer': new_customer.name,
-            'customer_code': new_customer.customer_code,
-            'customer_name': new_customer.customer_name,
-            'display_address': new_customer.customer_primary_address,
-            'frequency': kwargs.get('frequency')
-        })
-        router.save()
+        if kwargs.get('router_name'):
+            router = frappe.get_doc('DMS Router', kwargs.get('router_name'))
+            router.append('customers', {
+                'customer': new_customer.name,
+                'customer_code': new_customer.customer_code,
+                'customer_name': new_customer.customer_name,
+                'display_address': new_customer.customer_primary_address,
+                'frequency': kwargs.get('frequency')
+            })
+            router.save()
 
         frappe.db.commit()
         return gen_response(200, 'Thành công', {"name": new_customer.name})
     except Exception as e:
         return exception_handel(e)
     
-
 #list 
 @frappe.whitelist(methods="GET")
 def list_territory():

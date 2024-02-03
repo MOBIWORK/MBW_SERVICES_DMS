@@ -3,7 +3,9 @@
 
 import frappe
 from frappe.model.document import Document
-from frappe.utils import nowdate, add_months
+from frappe.utils import nowdate
+from dateutil.relativedelta import relativedelta
+import calendar
 
 class DMSKPICheckin(Document):
 	def after_insert(doc):
@@ -55,14 +57,23 @@ def update_monthly_summary(date_str):
     month = date_str.split('-')[1]
     year = date_str.split('-')[0]
 	
-	# Lấy tất cả các bản ghi DMS Summary KPI Daily trong tháng và năm hiện tại
+    start_date_str = f'{year:04d}-{month:02d}-01'
+
+    last_day_of_month = calendar.monthrange(year, month)[1]
+
+    end_date_str = f'{year:04d}-{month:02d}-{last_day_of_month:02d}'
+
+    start_date = frappe.utils.getdate(start_date_str)
+    end_date = frappe.utils.getdate(end_date_str)
+    # Lấy tất cả các bản ghi DMS Summary KPI Daily trong tháng và năm hiện tại
     daily_summaries = frappe.get_all(
         'DMS Summary KPI Daily',
         filters={
-            'date': ['between', f'01-{month}-{year}', f'31-{month}-{year}']
+            'date': ['between', [start_date, end_date]]
         },
-        fields=['*']
+        fields=['name']
     )
+	
 	# Tính tổng total_sales từ tất cả các ngày trong tháng
     total_checkins_in_month = sum([d['total_checkins'] for d in daily_summaries]) if 'total_checkins' in daily_summaries[0] else 0
     total_sales_in_month = sum([d['total_sales'] for d in daily_summaries]) if 'total_sales' in daily_summaries[0] else 0
