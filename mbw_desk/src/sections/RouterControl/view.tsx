@@ -130,7 +130,7 @@ export default function RouterControl() {
           },
         }
       );
-      let { results } = rsEmployee;
+      let {message:results} = rsEmployee;
 
       setListEmployees(
         results.map((employee_filter: employee) => ({
@@ -155,8 +155,7 @@ export default function RouterControl() {
           },
         }
       );
-      let { results } = rsRouter;
-        console.log(results);
+      let {message:results}= rsRouter;
         
       setListRouter(
         results.map((router: employee) => ({
@@ -263,7 +262,7 @@ export default function RouterControl() {
                           // filterOption={false}
                           notFoundContent={null}
                           onSearch={(value: string) => setKeyS(value)}
-                          options={listEmployees}
+                          options={[{label : "Tất cả nhân viên",value: ""},...listEmployees]}
                           onChange ={(value)=> {
                             setEmployee(value)
                             

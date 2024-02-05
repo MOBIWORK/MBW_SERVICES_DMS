@@ -4,19 +4,21 @@ import { Col, Row, Select, Modal } from "antd";
 import { CardCustom } from "../../components/card/card";
 import { UserIcon } from "../../icons/user";
 import { PictureIcon } from "../../icons/picture";
-import { rsDataFrappe } from "../../types/response";
 import { AxiosService } from "../../services/server";
 import DetailModal from "./modal/detail";
 import useDebounce from "../../hooks/useDebount";
-
 export default function MonitorAlbum() {
   const [listCustomerGroup, setCustomerGroup] = useState<any[]>([]);
   const [listEmployee, setListEmployee] = useState<any[]>([]);
   const [dataAlbum, setDataAlbum] = useState([]);
   const [dataFilterAlbum, setDataFilterAlbum] = useState([]);
   const [dataPerson, setDataPerson] = useState([]);
-  const [album, setAlbum] = useState<string>()
+  const [album, setAlbum] = useState<string>();
+  const [customer_name, setCustomer_name] = useState<string>();
+  const [owner, setOwner] = useState<string>();
   const [keyS, setKeyS] = useState("");
+  const [keyS1, setKeyS1] = useState("");
+  const [keyS2, setKeyS2] = useState("");
   const [modal, setModal] = useState<{
     open: boolean;
     id: any;
@@ -25,6 +27,8 @@ export default function MonitorAlbum() {
     id: null,
   });
   let keySearch = useDebounce(keyS, 300);
+  let keySearch1 = useDebounce(keyS1, 300);
+  let keySearch2 = useDebounce(keyS2, 300);
   const closeModal = () => {
     setModal({
       open: false,
@@ -34,49 +38,36 @@ export default function MonitorAlbum() {
 
   useEffect(() => {
     (async () => {
-      let rsCustomer: rsDataFrappe<any[]> = await AxiosService.get(
-        "/api/method/frappe.desk.search.search_link",
-        {
-          params: {
-            txt: "",
-            doctype: "Customer Group",
-            ignore_user_permissions: 0,
-            reference_doctype: "Customer",
-          },
-        }
-      );
+      const rsCustomer = await AxiosService.get(
+        "/api/method/mbw_dms.api.selling.customer.list_customer");
 
-      let { results } = rsCustomer;
+      let { result } = rsCustomer;
+
+      console.log("====", rsCustomer);
+      
 
       setCustomerGroup(
-        results.map((customer_group) => ({
-          label: customer_group.value,
-          value: customer_group.value,
+        result.data.map((customer: any) => ({
+          label: customer.customer_name,
+          value: customer.customer_name,
         }))
       );
     })();
   }, []);
 
+
   useEffect(() => {
     (async () => {
-      let rsEmployee: rsDataFrappe<any[]> = await AxiosService.get(
-        "/api/method/frappe.desk.search.search_link",
-        {
-          params: {
-            txt: "",
-            doctype: "Employee",
-            ignore_user_permissions: 0,
-            reference_doctype: "",
-          },
-        }
+      const rsEmployee = await AxiosService.get(
+        "/api/method/mbw_dms.api.note.list_email"
       );
 
-      let { results } = rsEmployee;
-
+      console.log("aaa", rsEmployee);
+      let { result } = rsEmployee;
       setListEmployee(
-        results.map((employee) => ({
-          label: employee.description,
-          value: employee.value,
+        result.data.map((employee: any) => ({
+          label: employee.first_name,
+          value: employee.user_id,
         }))
       );
     })();
@@ -95,11 +86,14 @@ export default function MonitorAlbum() {
   useEffect(() => {
     (async () => {
       const rsAlbum = await AxiosService.get(
-        "/api/method/mbw_dms.api.album.list_album_image", {
-        params: {
-          album
+        "/api/method/mbw_dms.api.album.list_album_image",
+        {
+          params: {
+            album,
+            customer_name,
+            owner
+          },
         }
-      }
       );
 
       const rsPerson = await AxiosService.get(
@@ -109,9 +103,9 @@ export default function MonitorAlbum() {
       // console.log("=---", rsPerson);
 
       setDataAlbum(rsAlbum.result);
-      setDataPerson(rsPerson.result)
+      setDataPerson(rsPerson.result);
     })();
-  }, [album]);
+  }, [album, customer_name, owner]);
 
   return (
     <>
@@ -128,11 +122,7 @@ export default function MonitorAlbum() {
           ></FormItemCustom>
           <FormItemCustom
             className="w-[200px] border-none mr-2"
-            label={"Loại khách hàng"}
-          ></FormItemCustom>
-          <FormItemCustom
-            className="w-[200px] border-none mr-2"
-            label={"Nhóm khách hàng"}
+            label={"Khách hàng"}
           ></FormItemCustom>
           <FormItemCustom
             className="w-[200px] border-none mr-2"
@@ -153,51 +143,51 @@ export default function MonitorAlbum() {
           <FormItemCustom className="w-[200px] border-none mr-2">
             <Select
               className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
-              options={listEmployee}
+              options={[{label : "Tất cả nhân viên",value: ""},...listEmployee]}
+              showSearch
+              defaultValue={""}
+              notFoundContent={null}
+              onSearch={(value: string) => setKeyS2(value)}
+              onChange={(value) => {
+                setOwner(value);
+              }}
             />
           </FormItemCustom>
 
-          <FormItemCustom
-            className="w-[200px] border-none mr-2"
-            name="customer_type"
-          >
-            <Select
-              className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
-              options={[
-                {
-                  label: "Company",
-                  value: "Company",
-                },
-                {
-                  label: "Individual",
-                  value: "Individual",
-                },
-              ]}
-            />
-          </FormItemCustom>
+         
 
           <FormItemCustom
             className="w-[200px] border-none mr-2"
-            name="customer_group"
+            name="customer"
           >
             <Select
               className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
-              options={listCustomerGroup}
+              defaultValue={""}
+              options={[{label : "Tất cả khách hàng",value: ""},...listCustomerGroup]}
+              showSearch
+              notFoundContent={null}
+              onSearch={(value: string) => setKeyS1(value)}
+              onChange={(value) => {
+                setCustomer_name(value);
+              }}
             />
+              {/* <Select.Option value="">Chọn giá trị</Select.Option>
+            </Select> */}
           </FormItemCustom>
 
           <FormItemCustom className="w-[200px] border-none mr-2">
             <Select
               className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
               showSearch
+              defaultValue={""}
               notFoundContent={null}
-              options={dataFilterAlbum.map((album: any) => ({
+              options={[{label : "Tất cả Album",value: ""} ,...dataFilterAlbum.map((album: any) => ({
                 label: album.album_name,
                 value: album.name,
-              }))}
+              }))]}
               onSearch={(value: string) => setKeyS(value)}
               onChange={(value) => {
-                setAlbum(value)
+                setAlbum(value);
               }}
             />
           </FormItemCustom>

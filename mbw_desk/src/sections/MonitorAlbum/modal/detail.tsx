@@ -6,7 +6,7 @@ export default function DetailModal(data: any) {
   return (
     <>
       <Row className="pt-4" gutter={32}>
-        <Col span={12}>
+        <Col span={12} className="text-center">
           <Image
             className="rounded-xl"
             preview={false}

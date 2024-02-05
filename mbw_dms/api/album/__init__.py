@@ -41,15 +41,26 @@ def create_album_image(**kwargs):
 def list_album_image(**kwargs):
     try:
         my_filter = {}
+        
         name = kwargs.get('album')
+        customer_name = kwargs.get('customer_name')
+        owner = kwargs.get('owner')
+        sales_person_name = kwargs.get('sales_person_name')
         if name:
             my_filter["name"] = ['like', f'%{name}%']
+        if customer_name:
+            my_filter["customer_name"] = ['like', f'%{customer_name}%']
+        if owner:
+            my_filter["owner"] = ['like', f'%{owner}%']
+        if sales_person_name:
+            my_filter1["sales_person_name"] = ['like', f'%{sales_person_name}%']
         album_image = frappe.db.get_list('DMS Album Image',filters=my_filter, fields=["name","creation", "owner", "album_id", "album_name", "checkin_id", "customer_id", "customer_name", "customer_code", "customer_long", "customer_lat", "image_url"])
         for albums in album_image:
             albums['detail_employee'] = frappe.db.get_all("Employee", {"user_id": albums.get('owner')}, ['name', 'first_name'])
             albums['info_customer'] = frappe.db.get_all("Customer", {"customer_code": albums.get('customer_code')}, ['customer_name','customer_type', 'customer_group'])
             albums['creation'] = (albums.get('creation')).strftime('%H:%M, %d-%m-%Y')
-            albums['person'] = frappe.db.get_all("Sales Person", {"employee": albums['detail_employee'][0].name , "is_group": 1}, ["sales_person_name"])
+            my_filter1 = {"employee": albums['detail_employee'][0].name , "is_group": 1}
+            albums['person'] = frappe.db.get_all("Sales Person", filters=my_filter1, fields=["sales_person_name"])
         gen_response(200, "Thành công", album_image)
     except Exception as e:
         return exception_handel(e)

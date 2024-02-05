@@ -40,7 +40,6 @@ export default function GeneralInformation() {
       let rsSales: rsData<listSale[]> = await AxiosService.get(
         "/api/method/mbw_dms.api.router.get_team_sale"
       );
-      
       setListSales(rsSales.result.map((team_sale:listSale) => ({
         label: team_sale,
         value: team_sale
