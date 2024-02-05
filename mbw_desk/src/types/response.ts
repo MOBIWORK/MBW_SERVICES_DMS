@@ -4,6 +4,6 @@ export type rsData<T> = {
 }
 
 export type rsDataFrappe<T> = {
-    message: string,
-    results: T,
+    message: T,
+    results?: T,
 }

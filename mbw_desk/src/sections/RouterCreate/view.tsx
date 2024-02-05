@@ -66,7 +66,7 @@ export default function RouterCreate() {
     try {
       await AxiosService.patch("/api/method/mbw_dms.api.router.update_router",{name:type,...value})
       success()
-      navigate('/')
+      navigate('/router-control')
     } catch (err) {
       error()
       console.log("error create",err);

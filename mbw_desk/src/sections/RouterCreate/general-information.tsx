@@ -59,15 +59,13 @@ export default function GeneralInformation() {
         }
         }
           );
-     let {results} = rsEmployee  
-
+     let {message:results} = rsEmployee  
       setListEmployees(results.map((employee_filter:employee) => ({
         value: employee_filter.value,
         label: employee_filter.description
       })))
     })()
   },[keySearch])
-  console.log("listEmployees",listEmployees);
   
   const handleSearch = (newValue: string) => {
     fetch(newValue,setKeySearch)
@@ -96,7 +94,7 @@ export default function GeneralInformation() {
           <FormItemCustom label="Nhân viên" name="employee" required>
             <Select 
             showSearch 
-            // filterOption={false}
+            filterOption={false}
             notFoundContent={null}
             onSearch={handleSearch}
             options={listEmployees}
