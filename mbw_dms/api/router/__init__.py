@@ -11,6 +11,8 @@ from mbw_dms.api.common import (
     get_value_child_doctype
 )
 
+from frappe.desk.treeview import _get_children
+
 from mbw_dms.api.validators import (
     validate_filter
 )
@@ -49,7 +51,7 @@ def get_list_router(**filters):
             queryFilters['name'] = ["in",router]
         if employee:
             queryFilters['employee'] = employee
-        order_string = 'travel_date desc'
+        order_string = 'modified desc'
         if order_by and sort:
             order_string = f"{order_by} {sort}"
         print(queryFilters)
@@ -90,6 +92,7 @@ def get_router(id):
                       .select(RouterCustomer.customer,RouterCustomer.customer_code,RouterCustomer.customer_name,RouterCustomer.display_address,
                               RouterCustomer.phone_number,RouterCustomer.frequency,RouterCustomer.longitude,RouterCustomer.latitude
                               )
+                        
                       ).run(as_dict = 1)
             router = routers[0]
             router['customers'] = customer
@@ -235,7 +238,7 @@ def update_router(**body):
 
 
 
-
+# nhom ban hang
 @frappe.whitelist(methods="GET")
 def get_team_sale():
     try:
@@ -243,6 +246,41 @@ def get_team_sale():
         gen_response(200,"",data)
     except Exception as e:
         exception_handel(e)
+
+@frappe.whitelist(methods="GET")
+def get_sale_person(**data):
+    try:
+        from frappe.desk.reportview import (compress,execute)
+
+        filters =  [['Sales Person', 'is_group', '=', 0]]
+        team_sale = data.get('team_sale')
+        if team_sale:
+            filters.append(['Sales Person', 'parent_sales_person', '=', team_sale])
+        print(filters)
+        args = {'doctype': 'Sales Person'
+                , 'fields': ['`tabSales Person`.`employee`','`tabSales Person`.`name`']
+                , 'filters':filters
+                , 'order_by': '`tabSales Person`.`modified` ASC'
+                , 'start': '0'
+                , 'page_length': '20'
+                , 'group_by': '`tabSales Person`.`name`'
+                , 'with_comment_count': 1
+                , 'save_user_settings': True
+                , 'strict': None}
+        data = compress(execute(**args), args=args)
+        employees = []
+        if bool(data):
+            for sales in data["values"] :
+                if sales[0] :
+                    employee = frappe.db.get_value("Employee",sales[0],['employee_name'])
+                    employees.append({
+                        "employee_code":sales[0],
+                        "employee_name": employee 
+                    })
+        return employees
+    except Exception as e:
+        exception_handel(e)
+
 
 @frappe.whitelist(methods="GET")
 def get_customer(**filters):

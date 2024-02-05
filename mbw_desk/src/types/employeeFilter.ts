@@ -1,1 +1,1 @@
-export type employee = {value: string,description: string}
+export type employee = {employee_code: string,employee_name: string}

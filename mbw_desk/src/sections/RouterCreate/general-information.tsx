@@ -31,10 +31,12 @@ const fetch = (value: string, callback: Function) => {
     callback("");
   }
 };
-export default function GeneralInformation() {
+export default function GeneralInformation(form: any) {
   const [keySearch, setKeySearch] = useState("");
   const [listSales, setListSales] = useState<any[]>([]);
   const [listEmployees, setListEmployees] = useState<any[]>([]);
+  const [teamSale,setTeamSale] = useState<string>()
+  const [saleEmp,setSaleEmp] = useState<string>()
   useEffect(() => {
     (async () => {
       let rsSales: rsData<listSale[]> = await AxiosService.get(
@@ -48,23 +50,20 @@ export default function GeneralInformation() {
   }, []);
   useEffect(() => {
     (async() => {
-        let rsEmployee: rsDataFrappe<employee[]> = await AxiosService.get("/api/method/frappe.desk.search.search_link",{
+        let rsEmployee: rsDataFrappe<employee[]> = await AxiosService.get("/api/method/mbw_dms.api.router.get_sale_person",{
         params: {
-          txt: keySearch,
-          doctype: "Employee",
-          ignore_user_permissions: 0,
-          reference_doctype: "Attendance",
-          query: "erpnext.controllers.queries.employee_query",
+          team_sale:teamSale
         }
         }
           );
      let {message:results} = rsEmployee  
       setListEmployees(results.map((employee_filter:employee) => ({
-        value: employee_filter.value,
-        label: employee_filter.description
+        value: employee_filter.employee_code,
+        label: employee_filter.employee_name || employee_filter.employee_code
       })))
     })()
-  },[keySearch])
+  },[teamSale])
+  console.log("saleEmp:::::::::::::",saleEmp);
   
   const handleSearch = (newValue: string) => {
     fetch(newValue,setKeySearch)
@@ -86,17 +85,20 @@ export default function GeneralInformation() {
       <RowCustom>
         <Col span={12}>
           <FormItemCustom label="Team sale" name="team_sale" required>
-            <Select showSearch options={listSales} defaultActiveFirstOption={false}/>
+            <Select showSearch options={listSales} defaultActiveFirstOption={false} onChange={(value:string) => {
+              setSaleEmp(undefined)
+              setTeamSale(value)
+              form.setFieldsValue({"employee":undefined})
+            }}/>
           </FormItemCustom>
         </Col>
         <Col span={12}>
           <FormItemCustom label="Nhân viên" name="employee" required>
             <Select 
-            showSearch 
-            filterOption={false}
-            notFoundContent={null}
             onSearch={handleSearch}
             options={listEmployees}
+            // onChange={setSaleEmp}
+            // value={saleEmp}
             />
           </FormItemCustom>
         </Col>

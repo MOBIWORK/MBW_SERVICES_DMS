@@ -119,7 +119,7 @@ export default function RouterCreate() {
               {
                 label: <p className="px-4 mb-0"> Thông tin chung</p>,
                 key: "1",
-                children: <GeneralInformation />,
+                children: <GeneralInformation form={form}/>,
               },
               {
                 label: <p className="px-4 mb-0">Khách hàng</p>,
