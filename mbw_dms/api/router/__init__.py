@@ -254,9 +254,13 @@ def get_sale_person(**data):
 
         filters =  [['Sales Person', 'is_group', '=', 0]]
         team_sale = data.get('team_sale')
+        key_search = data.get('key_search')
         if team_sale:
             filters.append(['Sales Person', 'parent_sales_person', '=', team_sale])
-        print(filters)
+        if key_search:
+            employees = frappe.db.get_list("Employee", filters=["employee_name", ["like", f"%{key_search}%"]],pluck ="name")
+            if len(employees) > 0 :
+                filters.append(['Sales Person', 'employee', 'in', employees])
         args = {'doctype': 'Sales Person'
                 , 'fields': ['`tabSales Person`.`employee`','`tabSales Person`.`name`']
                 , 'filters':filters

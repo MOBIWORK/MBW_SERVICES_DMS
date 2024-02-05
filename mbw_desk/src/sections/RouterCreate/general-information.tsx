@@ -7,7 +7,7 @@ import { rsData, rsDataFrappe } from "../../types/response";
 import { listSale } from "../../types/listSale";
 import { AxiosService } from "../../services/server";
 import { employee } from "../../types/employeeFilter";
-
+import useDebounce from "../../hooks/useDebount"
 
 let timeout: ReturnType<typeof setTimeout> | null;
 let currentValue: string;
@@ -31,8 +31,12 @@ const fetch = (value: string, callback: Function) => {
     callback("");
   }
 };
-export default function GeneralInformation(form: any) {
+export default function GeneralInformation({form}) {
+  console.log(form);
+  
+  // const { getFieldDecorator, setFieldsValue } = form;
   const [keySearch, setKeySearch] = useState("");
+  let seachbykey = useDebounce(keySearch)
   const [listSales, setListSales] = useState<any[]>([]);
   const [listEmployees, setListEmployees] = useState<any[]>([]);
   const [teamSale,setTeamSale] = useState<string>()
@@ -52,7 +56,8 @@ export default function GeneralInformation(form: any) {
     (async() => {
         let rsEmployee: rsDataFrappe<employee[]> = await AxiosService.get("/api/method/mbw_dms.api.router.get_sale_person",{
         params: {
-          team_sale:teamSale
+          team_sale:teamSale,
+          key_search: seachbykey
         }
         }
           );
@@ -62,8 +67,7 @@ export default function GeneralInformation(form: any) {
         label: employee_filter.employee_name || employee_filter.employee_code
       })))
     })()
-  },[teamSale])
-  console.log("saleEmp:::::::::::::",saleEmp);
+  },[teamSale,seachbykey])
   
   const handleSearch = (newValue: string) => {
     fetch(newValue,setKeySearch)
@@ -86,8 +90,8 @@ export default function GeneralInformation(form: any) {
         <Col span={12}>
           <FormItemCustom label="Team sale" name="team_sale" required>
             <Select showSearch options={listSales} defaultActiveFirstOption={false} onChange={(value:string) => {
-              setSaleEmp(undefined)
               setTeamSale(value)
+              setSaleEmp(undefined)
               form.setFieldsValue({"employee":undefined})
             }}/>
           </FormItemCustom>
@@ -95,10 +99,12 @@ export default function GeneralInformation(form: any) {
         <Col span={12}>
           <FormItemCustom label="Nhân viên" name="employee" required>
             <Select 
+            showSearch
             onSearch={handleSearch}
             options={listEmployees}
-            // onChange={setSaleEmp}
-            // value={saleEmp}
+            allowClear
+            onChange={setSaleEmp}
+            value={saleEmp}
             />
           </FormItemCustom>
         </Col>
