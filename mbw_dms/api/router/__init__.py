@@ -78,7 +78,7 @@ def get_router(id):
         
         queryFilters = {"is_deleted": 0,"name": name}
         
-        routers = frappe.db.get_list(doctype='DMS Router',filters=queryFilters,fields=['*','customers', 'UNIX_TIMESTAMP(travel_date) as travel_date'])
+        routers = frappe.db.get_list(doctype='DMS Router',filters=queryFilters,fields=['*','customers'])
         router = None
         if len(routers) > 0 :
             Router = frappe.qb.DocType("DMS Router")
