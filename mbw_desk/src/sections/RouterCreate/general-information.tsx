@@ -68,10 +68,6 @@ export default function GeneralInformation({form}) {
       })))
     })()
   },[teamSale,seachbykey])
-  
-  const handleSearch = (newValue: string) => {
-    fetch(newValue,setKeySearch)
-  };
   return (
     <div className="p-4 pt-[43px] pb-[58px]">
       <RowCustom>
@@ -91,7 +87,6 @@ export default function GeneralInformation({form}) {
           <FormItemCustom label="Team sale" name="team_sale" required>
             <Select showSearch options={listSales} defaultActiveFirstOption={false} onChange={(value:string) => {
               setTeamSale(value)
-              setSaleEmp(undefined)
               form.setFieldsValue({"employee":undefined})
             }}/>
           </FormItemCustom>
@@ -100,11 +95,9 @@ export default function GeneralInformation({form}) {
           <FormItemCustom label="Nhân viên" name="employee" required>
             <Select 
             showSearch
-            onSearch={handleSearch}
+            onSearch={setKeySearch}
             options={listEmployees}
             allowClear
-            onChange={setSaleEmp}
-            value={saleEmp}
             />
           </FormItemCustom>
         </Col>

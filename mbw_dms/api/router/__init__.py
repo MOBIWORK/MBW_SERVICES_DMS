@@ -258,7 +258,7 @@ def get_sale_person(**data):
         if team_sale:
             filters.append(['Sales Person', 'parent_sales_person', '=', team_sale])
         if key_search:
-            employees = frappe.db.get_list("Employee", filters=["employee_name", ["like", f"%{key_search}%"]],pluck ="name")
+            employees = frappe.db.get_list("Employee", filters={"employee_name": ["like", f"%{key_search}%"]},pluck ="name")
             if len(employees) > 0 :
                 filters.append(['Sales Person', 'employee', 'in', employees])
         args = {'doctype': 'Sales Person'
