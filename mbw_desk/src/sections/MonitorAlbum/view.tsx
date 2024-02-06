@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import { FormItemCustom, HeaderPage } from "../../components";
-import { Col, Row, Select, Modal } from "antd";
+import { Col, Row, Select, Modal, DatePicker, DatePickerProps } from "antd";
 import { CardCustom } from "../../components/card/card";
 import { UserIcon } from "../../icons/user";
 import { PictureIcon } from "../../icons/picture";
 import { AxiosService } from "../../services/server";
 import DetailModal from "./modal/detail";
 import useDebounce from "../../hooks/useDebount";
+import dayjs from 'dayjs';
 export default function MonitorAlbum() {
   const [listCustomerGroup, setCustomerGroup] = useState<any[]>([]);
   const [listEmployee, setListEmployee] = useState<any[]>([]);
@@ -16,6 +17,7 @@ export default function MonitorAlbum() {
   const [album, setAlbum] = useState<string>();
   const [customer_name, setCustomer_name] = useState<string>();
   const [owner, setOwner] = useState<string>();
+  const [creation, setCreation] = useState<string>();
   const [keyS, setKeyS] = useState("");
   const [keyS1, setKeyS1] = useState("");
   const [keyS2, setKeyS2] = useState("");
@@ -35,16 +37,16 @@ export default function MonitorAlbum() {
       id: null,
     });
   };
-
+  const date = new Date().toJSON().slice(0, 10);
   useEffect(() => {
     (async () => {
       const rsCustomer = await AxiosService.get(
-        "/api/method/mbw_dms.api.selling.customer.list_customer");
+        "/api/method/mbw_dms.api.selling.customer.list_customer"
+      );
 
       let { result } = rsCustomer;
 
       console.log("====", rsCustomer);
-      
 
       setCustomerGroup(
         result.data.map((customer: any) => ({
@@ -54,7 +56,6 @@ export default function MonitorAlbum() {
       );
     })();
   }, []);
-
 
   useEffect(() => {
     (async () => {
@@ -91,27 +92,40 @@ export default function MonitorAlbum() {
           params: {
             album,
             customer_name,
-            owner
+            owner,
+            creation,
           },
         }
       );
-
+      
       const rsPerson = await AxiosService.get(
         "/api/method/mbw_dms.api.selling.customer.list_sale_person"
       );
 
-      // console.log("=---", rsPerson);
-
+      console.log("abc", creation);
+      
+      if(creation === null || creation === undefined || creation === "") {
+        setCreation(date)
+      }
       setDataAlbum(rsAlbum.result);
       setDataPerson(rsPerson.result);
+      
     })();
-  }, [album, customer_name, owner]);
+  }, [album, customer_name, owner, creation]);
 
+
+  const onChange: DatePickerProps["onChange"] = (dateString) => {
+      setCreation(dateString?.format("YYYY-MM-DD"));
+  };
   return (
     <>
       <HeaderPage title="Giám sát chụp ảnh khách hàng" />
       <div className="bg-white rounded-md py-7 px-4">
         <div className="flex justify-start items-center">
+          <FormItemCustom
+            className="w-[200px] border-none mr-2"
+            label={"Ngày chụp"}
+          ></FormItemCustom>
           <FormItemCustom
             className="w-[200px] border-none mr-2"
             label={"Nhóm bán hàng"}
@@ -131,19 +145,34 @@ export default function MonitorAlbum() {
         </div>
         <div className="flex justify-start items-center">
           <FormItemCustom className="w-[200px] border-none mr-2">
+            <DatePicker
+              format={"DD-MM-YYYY"}
+              className="!bg-[#F4F6F8]"
+              defaultValue={dayjs(creation)}
+              onChange={onChange}
+            />
+          </FormItemCustom>
+          <FormItemCustom className="w-[200px] border-none mr-2">
             <Select
               className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
-              options={dataPerson.map((person: any) => ({
-                label: person.sales_person_name,
-                value: person.sales_person_name,
-              }))}
+              defaultValue={""}
+              options={[
+                { label: "Tất cả nhóm bán hàng", value: "" },
+                ...dataPerson.map((person: any) => ({
+                  label: person.sales_person_name,
+                  value: person.sales_person_name,
+                })),
+              ]}
             />
           </FormItemCustom>
 
           <FormItemCustom className="w-[200px] border-none mr-2">
             <Select
               className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
-              options={[{label : "Tất cả nhân viên",value: ""},...listEmployee]}
+              options={[
+                { label: "Tất cả nhân viên", value: "" },
+                ...listEmployee,
+              ]}
               showSearch
               defaultValue={""}
               notFoundContent={null}
@@ -154,8 +183,6 @@ export default function MonitorAlbum() {
             />
           </FormItemCustom>
 
-         
-
           <FormItemCustom
             className="w-[200px] border-none mr-2"
             name="customer"
@@ -163,7 +190,10 @@ export default function MonitorAlbum() {
             <Select
               className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
               defaultValue={""}
-              options={[{label : "Tất cả khách hàng",value: ""},...listCustomerGroup]}
+              options={[
+                { label: "Tất cả khách hàng", value: "" },
+                ...listCustomerGroup,
+              ]}
               showSearch
               notFoundContent={null}
               onSearch={(value: string) => setKeyS1(value)}
@@ -171,8 +201,6 @@ export default function MonitorAlbum() {
                 setCustomer_name(value);
               }}
             />
-              {/* <Select.Option value="">Chọn giá trị</Select.Option>
-            </Select> */}
           </FormItemCustom>
 
           <FormItemCustom className="w-[200px] border-none mr-2">
@@ -181,10 +209,13 @@ export default function MonitorAlbum() {
               showSearch
               defaultValue={""}
               notFoundContent={null}
-              options={[{label : "Tất cả Album",value: ""} ,...dataFilterAlbum.map((album: any) => ({
-                label: album.album_name,
-                value: album.name,
-              }))]}
+              options={[
+                { label: "Tất cả Album", value: "" },
+                ...dataFilterAlbum.map((album: any) => ({
+                  label: album.album_name,
+                  value: album.name,
+                })),
+              ]}
               onSearch={(value: string) => setKeyS(value)}
               onChange={(value) => {
                 setAlbum(value);
