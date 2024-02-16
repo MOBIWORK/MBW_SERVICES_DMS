@@ -1,18 +1,13 @@
-from math import sin, cos, sqrt, atan2
 import json
 import io
 import frappe
 from bs4 import BeautifulSoup
 from frappe import _
 from frappe.utils import cstr
-import urllib.parse
-import http.cookies
-from datetime import datetime, timedelta
+from datetime import datetime
 import base64
 from frappe.core.doctype.file.utils import delete_file
-from frappe.utils.file_manager import (
-    save_file
-)
+from frappe.utils.file_manager import save_file
 
 from mbw_dms.api.file import (
     my_minio
@@ -20,13 +15,8 @@ from mbw_dms.api.file import (
 from PIL import Image
 from PIL import ImageDraw
 from PIL import ImageFont
-from frappe.desk.query_report import (
-    normalize_result, get_report_result, get_reference_report)
-from frappe.core.utils import ljust_list
-from pypika import Query, Table, Field, Order
-import array
-from frappe.client import validate_link
-from datetime import datetime, timezone
+from frappe.desk.query_report import get_reference_report 
+from datetime import datetime
 import pytz
 
 BASE_URL = frappe.utils.get_request_site_address()
