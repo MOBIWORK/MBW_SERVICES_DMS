@@ -14,9 +14,9 @@ from frappe.utils.file_manager import (
     save_file
 )
 
-# from mbw_dms.api.file import (
-#     my_minio
-# )
+from mbw_dms.api.file import (
+    my_minio
+)
 from PIL import Image
 from PIL import ImageDraw
 from PIL import ImageFont
@@ -178,7 +178,8 @@ def add_text_to_image(file_name, imgdata, description):
     # Call draw Method to add 2D graphics in an image
     I1 = ImageDraw.Draw(img)
     # Custom font style and font size
-    myFont = ImageFont.truetype('FreeMono.ttf', 15)
+    font_size = 15
+    myFont = ImageFont.truetype('FreeMono.ttf', font_size)
     # Add Text to an image
     lines = []
     position = (10, 10)
@@ -201,7 +202,7 @@ def add_text_to_image(file_name, imgdata, description):
         lines.append(current_line)
     for line in lines:
         I1.text((x, y), line, font=myFont, fill=font_color)
-        y += myFont.getsize(line)[1]
+        y += font_size
     # get image base64
     buffered = io.BytesIO()
     img.save(buffered, format="PNG")
@@ -216,14 +217,13 @@ def add_text_to_image(file_name, imgdata, description):
 
 def upload_image_s3(image,description):
     settings = frappe.get_doc("MBW Employee Settings").as_dict()
-    # bucket_name_s3 = settings.get('bucket_name_s3')
-    bucket_name_s3 = "mbw-dms"
+    bucket_name_s3 = settings.get('bucket_name_s3')
+    # bucket_name_s3 = "mbw-dms"
     endpoint_s3 = settings.get('endpoint_s3')
     imgdata = base64.b64decode(image)
     bucket_domain =frappe.local.site.replace('.','-')
     file_name = "checkin_" + \
         "_" + str(datetime.now()) + ".png"
-
     if description:
         imgdata_new = add_text_to_image(file_name, imgdata, description)
     else:
@@ -233,12 +233,13 @@ def upload_image_s3(image,description):
     object_name = f"{bucket_name_s3}/{bucket_domain}/{file_name}"
     # if not my_minio.bucket_exists(bucket_domain):
     #     my_minio.make_bucket(bucket_domain)
-    my_minio.put_object(bucket_name=bucket_name_s3,
-                        object_name=f"{bucket_domain}", data=io.BytesIO(imgdata_new))
-
+    try:    
+        my_minio.put_object(bucket_name=bucket_name_s3, object_name=f"{bucket_domain}/{file_name}", data=io.BytesIO(imgdata_new))
+    except Exception as e:
+        print(e)
     # data response
     data = {}
-    data["file_url"] = f"https://{endpoint_s3}/{bucket_name_s3}/{object_name}"
+    data["file_url"] = f"https://{endpoint_s3}/{object_name}"
     data['status'] = True
     return data
 

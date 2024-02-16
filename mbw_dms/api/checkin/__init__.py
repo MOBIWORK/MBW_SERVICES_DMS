@@ -32,6 +32,7 @@ def create_checkin(**kwargs):
         frappe.db.commit()
         return gen_response(200, "Successful", {"name": new_checkin.name})
     except Exception as e:
+        print("error",e)
         return exception_handel(e)
     
 @frappe.whitelist(methods='PUT')
@@ -100,9 +101,9 @@ def create_checkin_image(**body):
         if long and lat:
             description += f"long:{long} lat:{lat}\\n"
         if create_by:
-            description += f"create: {create_by}\\n"
+            description += f"create by: {create_by}\\n"
         if create_time:
-            description += f"create: {create_time}\\n"
+            description += f"create at: {create_time}\\n"
         description= description.rstrip('\\n')
         try:
             rsUpload = upload_image_s3(image=image,description=description)

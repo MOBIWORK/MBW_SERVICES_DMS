@@ -3,7 +3,7 @@ import {dashboardRoutes} from './dashboard'
 import { BASE_URL, paths } from '../path';
 import path from 'path';
 import RouterControl from '../../sections/RouterControl/view';
-
+import Progress ftom '../../pages/Progress'
 // ----------------------------------------------------------------------
 
 export default function Router() {
@@ -13,6 +13,10 @@ export default function Router() {
       element: <Navigate to={paths.dashboard.root} replace />,
     },
     //dashboard router
-    ...dashboardRoutes
+    ...dashboardRoutes,
+     {
+      path: '*',
+      element: <Progress />
+     }
 ])
 }

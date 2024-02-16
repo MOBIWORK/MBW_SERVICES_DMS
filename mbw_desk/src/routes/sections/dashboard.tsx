@@ -13,6 +13,7 @@ const RouterDetail = lazy(()=> import('@/pages/RouterDetail'))
 const RouterEmployee = lazy(()=> import('@/pages/RouterEmployee'))
 const SettingDMS = lazy(()=> import('@/pages/SettingDMS'))
 const MonitorAlbum = lazy(()=> import('@/pages/MonitorAlbum'))
+const Progress = lazy(()=> import('@/pages/Progress'))
 export const dashboardRoutes = [
     {
         path: '/',
@@ -25,20 +26,19 @@ export const dashboardRoutes = [
         ),
         children: [
             {
-                index: true,element: <RouterDashboard/>
+                index: true,element: <Progress/>
             },
             {
                 path: 'router-control',element: <RouterControl/>
             },
-            
             {
-                path: 'router-employee ',element: <RouterEmployee/>
+                path: 'router-employee ',element: <Progress/>
             },
             {
                 path: 'dms-router/:type',element: <RouterCreate/>
             },
             {
-                path: 'router-detail/:id',element: <RouterDetail/>
+                path: 'router-detail/:id',element: <Progress/>
             },
             {
                 path: 'setting-dms',element: <SettingDMS/>
