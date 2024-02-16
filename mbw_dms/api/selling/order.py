@@ -1,6 +1,6 @@
 import frappe
 from frappe import _
-from pypika import  Order, CustomFunction
+from pypika import CustomFunction
 UNIX_TIMESTAMP = CustomFunction('UNIX_TIMESTAMP', ['day'])
 from mbw_dms.api.common import (
     exception_handel,
@@ -14,9 +14,10 @@ from mbw_dms.api.validators import (
     validate_choice,
     validate_not_none
 )
-from mbw_dms.api.selling import configs
+from mbw_dms.api import configs
 from mbw_dms.config_translate import i18n
 
+# Lấy danh sách sales order
 @frappe.whitelist(allow_guest=True,methods='GET')
 def get_list_sales_order(**filters):
     try:
@@ -25,7 +26,6 @@ def get_list_sales_order(**filters):
         to_date = validate_filter_timestamp('end')(filters.get('to_date')) if filters.get('to_date') else False
         page_size =  int(filters.get('page_size')) if filters.get('page_size') else 20
         page_number = int(filters.get('page_number')) if filters.get('page_number') and int(filters.get('page_number')) > 0 else 1
-        print(page_size,page_number)
         query = {}
         if  from_date and to_date:
             query["delivery_date"] = ["between",[from_date,to_date]]
@@ -52,6 +52,7 @@ def get_list_sales_order(**filters):
         exception_handel(e)
 
 
+# Chi tiết sales order
 @frappe.whitelist(methods='GET')
 def get_sale_order(**data):
     try:
@@ -122,12 +123,17 @@ def create_sale_order(**kwargs):
         new_order.customer = validate_not_none(kwargs.customer)                                         
         new_order.delivery_date = validate_date(kwargs.delivery_date)                                   # Ngày giao
         new_order.set_warehouse = validate_not_none(kwargs.get('set_warehouse'))                        # Kho hàng
-        new_order.apply_discount_on = validate_choice(configs.discount_type)(apply_discount_on)         # Loại Chiết khấu
-        new_order.additional_discount_percentage = discount_percent                                     # Phần trăm chiết khấu
+
+        if apply_discount_on is not None:
+            new_order.apply_discount_on = validate_choice(configs.discount_type)(apply_discount_on)         # Loại Chiết khấu
+            new_order.additional_discount_percentage = discount_percent                                     # Phần trăm chiết khấu
+
         if taxes_and_charges is not None:
             new_order.taxes_and_charges = taxes_and_charges                                                 # Tax
             new_order.append('taxes', get_value_child_doctype('Sales Taxes and Charges Template', taxes_and_charges, 'taxes')[0])
         new_order.checkin_id = kwargs.get('checkin_id')
+
+        # Thêm mới sales team
         sales_team = get_party_details(party=kwargs.get('customer'), party_type='Customer', price_list='Standard Selling', posting_date=kwargs.get('delivery_date'), fetch_payment_terms_template=1, currency='VND',
                               company=kwargs.get('company'), doctype='Sales Order')
         if sales_team.get('sales_team') != []:
@@ -137,6 +143,8 @@ def create_sale_order(**kwargs):
                 'sales_person': kwargs.get('sale_persons'),
                 'allocated_percentage': float(kwargs.get('allocated_percentage'))
             })
+
+        # Thêm mới items trong đơn hàng
         items = kwargs.get('items')
         amount = 0
         for item_data in items:
@@ -154,6 +162,7 @@ def create_sale_order(**kwargs):
         # Check dữ liệu mobile bắn lên
         grand_total = 0     # Tổng tiền đơn hàng
         total_vat = 0       # Giá vat (VAT)
+        discount_amount = 0
 
         # Nếu loại chiết khấu là Grand total
         if apply_discount_on == 'Grand Total':
@@ -164,6 +173,7 @@ def create_sale_order(**kwargs):
             if discount_percent == 0:
                 new_order.discount_amount = discount_amount
                 grand_total = amount + total_vat - discount_amount
+
         # Nếu loại chiết khấu là Net total
         if apply_discount_on == 'Net Total':
             if discount_percent != 0:
@@ -174,6 +184,10 @@ def create_sale_order(**kwargs):
                 new_order.discount_amount = discount_amount
                 total_vat = rate_taxes * (amount - discount_amount) / 100
                 grand_total = amount + total_vat - discount_amount
+
+        if apply_discount_on is None:
+            total_vat = rate_taxes * amount / 100          # VAT = %VAT * X
+            grand_total = amount + total_vat
         
         # So sánh với giá bên mobile tính toán
         if grand_total == float(kwargs.get('grand_total')):
@@ -184,6 +198,7 @@ def create_sale_order(**kwargs):
             return gen_response(400, i18n.t('translate.invalid_grand_total', locale=get_language()), {"grand_total": grand_total})
     except Exception as e:
         return exception_handel(e)
+
 
 # Áp dụng quy tắc đặt giá
 @frappe.whitelist()
@@ -198,6 +213,7 @@ def pricing_rule(**kwargs):
     except Exception as e:
         return exception_handel(e)
 
+
 # Áp dụng bảng giá
 @frappe.whitelist()
 def price_list(**kwargs):
@@ -211,6 +227,7 @@ def price_list(**kwargs):
     except Exception as e:
         return exception_handel(e)
 
+
 # Tạo mới phiếu trả hàng
 @frappe.whitelist(methods='POST')
 def create_return_order(**kwargs):
@@ -218,23 +235,31 @@ def create_return_order(**kwargs):
         from erpnext.accounts.party import get_party_details
         kwargs = frappe._dict(kwargs)
         new_order = frappe.new_doc('Sales Invoice')
+        is_return = 1
+        update_billed_amount_in_delivery_note = 1
 
         # Dữ liệu bắn lên để tạo sale order mới
-        discount_percent = float(kwargs.get('additional_discount_percentage'))
-        discount_amount = float(kwargs.get('discount_amount'))
-        rate_taxes = float(kwargs.get('rate_taxes'))
-        apply_discount_on = kwargs.get('apply_discount_on')
-        taxes_and_charges = kwargs.get('taxes_and_charges') 
+        discount_percent = float(kwargs.get('additional_discount_percentage', 0))  # Chiết khấu theo % của đơn hàng
+        discount_amount = float(kwargs.get('discount_amount', 0))                  # Tổng tiền chiết khấu của đơn hàng
+        rate_taxes = float(kwargs.get('rate_taxes', 0))                            # Phần trăm thuế
+        apply_discount_on = kwargs.get('apply_discount_on')                     # Loại chiết khấu
+        taxes_and_charges = kwargs.get('taxes_and_charges')                     # Loại thuế
 
         new_order.customer = validate_not_none(kwargs.customer)                                         
         new_order.set_warehouse = validate_not_none(kwargs.get('set_warehouse'))                        # Kho hàng
-        new_order.apply_discount_on = validate_choice(configs.discount_type)(apply_discount_on)         # Loại Chiết khấu
-        new_order.additional_discount_percentage = discount_percent                                     # Phần trăm chiết khấu
-        new_order.taxes_and_charges = taxes_and_charges                                                 # Tax
-        new_order.append('taxes', get_value_child_doctype('Sales Taxes and Charges Template', taxes_and_charges, 'taxes')[0])
+        if apply_discount_on is not None:
+            new_order.apply_discount_on = validate_choice(configs.discount_type)(apply_discount_on)         # Loại Chiết khấu
+            new_order.additional_discount_percentage = discount_percent                                     # Phần trăm chiết khấu
+
+        if taxes_and_charges is not None:
+            new_order.taxes_and_charges = taxes_and_charges                                                 # Tax
+            new_order.append('taxes', get_value_child_doctype('Sales Taxes and Charges Template', taxes_and_charges, 'taxes')[0])
+
         new_order.checkin_id = kwargs.get('checkin_id')
-        new_order.is_return = kwargs.get('is_return')
-        new_order.update_billed_amount_in_delivery_note = kwargs.get('update_billed_amount_in_delivery_note')
+        new_order.is_return = is_return
+        new_order.update_billed_amount_in_delivery_note = update_billed_amount_in_delivery_note
+
+        # Thêm mới sales team
         sales_team = get_party_details(party=kwargs.get('customer'), party_type='Customer', price_list='Standard Selling', posting_date=kwargs.get('delivery_date'), fetch_payment_terms_template=1, currency='VND',
                               company=kwargs.get('company'), doctype='Sales Order')
         if sales_team.get('sales_team') != []:
@@ -244,11 +269,13 @@ def create_return_order(**kwargs):
                 'sales_person': kwargs.get('sale_persons'),
                 'allocated_percentage': float(kwargs.get('allocated_percentage'))
             })
+
+        # Thêm mới items trong đơn hàng
         items = kwargs.get('items')
         amount = 0
         for item_data in items:
-            rate = float(item_data.get('rate'))
-            discount_percentage = float(item_data.get('discount_percentage'))
+            rate = float(item_data.get('rate'))   # Giá item
+            discount_percentage = float(item_data.get('discount_percentage'))  # Phần trăn chiết khấu của item
             new_order.append('items', {
                 'item_code': item_data.get('item_code'),
                 'qty': -item_data.get('qty'),
@@ -260,6 +287,7 @@ def create_return_order(**kwargs):
         # Check dữ liệu mobile bắn lên
         grand_total = 0     # Tổng tiền đơn hàng
         total_vat = 0       # Giá vat (VAT)
+        discount_amount = 0
 
         # Nếu loại chiết khấu là Grand total
         if apply_discount_on == 'Grand Total':
@@ -281,6 +309,10 @@ def create_return_order(**kwargs):
                 new_order.discount_amount = discount_amount
                 total_vat = rate_taxes * (amount - discount_amount) / 100
                 grand_total = amount + total_vat - discount_amount
+
+        if apply_discount_on is None:
+            total_vat = rate_taxes * amount / 100          # VAT = %VAT * X
+            grand_total = amount + total_vat
         
         # So sánh với giá bên mobile tính toán
         if grand_total == float(kwargs.get('grand_total')):
@@ -298,6 +330,7 @@ def edit_return_order(name, **kwargs):
     try:
         if frappe.db.exists("Sales Invoice", name, cache=True):
             order = frappe.get_doc('Sales Invoice', name)
+            # Kiểm tra trạng thái của phiếu trả hàng có phải draft không
             if order.docstatus == 0:
                 taxes_and_charges = kwargs.get('taxes_and_charges')
                 discount_percent = kwargs.get('additional_discount_percentage')
@@ -306,9 +339,13 @@ def edit_return_order(name, **kwargs):
                 if items:
                     for item_data in items:
                         discount_percentage = float(item_data.get('discount_percentage')) if item_data.get('discount_percentage') is not None else None
+
+                        # Số lượng sản phẩm không thể sửa về 0
                         qty = int(item_data.get('qty')) if item_data.get('qty') is not None else 1
                         if qty == 0:
                             return gen_response(400, 'Số lượng không thể bằng 0')
+                        
+                        # Kiểm tra xem sản phẩm đã tồn tại chưa, nếu chưa thì thêm mới
                         existing_item = next((item for item in order.items if item.item_code == item_data.get('item_code')), None)
                         if existing_item:
                             if qty is not None:
@@ -325,14 +362,21 @@ def edit_return_order(name, **kwargs):
                                 'rate': item_data.get('rate'),
                                 'discount_percentage': discount_percentage if discount_percentage is not None else 0
                             })
+
+                # Trường hợp chỉnh sửa taxes
                 if taxes_and_charges:
                     order.set('taxes', [])
                     order.taxes_and_charges = taxes_and_charges  
                     order.append('taxes', get_value_child_doctype('Sales Taxes and Charges Template', taxes_and_charges, 'taxes')[0])
+
+                # Trường hợp chỉnh sửa chiết khấu theo % 
                 if discount_percent:
                     order.set('additional_discount_percentage', float(discount_percent))
+
+                # Trường hợp chỉnh sửa chiết khấu theo giá
                 if discount_amount:
                     order.set('discount_amount', float(discount_amount))
+
                 order.save()
                 gen_response(200, 'Cập nhật thành công')
             else:
@@ -358,7 +402,7 @@ def delete_return_order(name, **kwargs):
     except Exception as e:
         exception_handel(e)
 
-
+# Xóa items trong phiếu trả hàng
 @frappe.whitelist(methods='DELETE')
 def delete_item(name_return_order, item_code):
     try:

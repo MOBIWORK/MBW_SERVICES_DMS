@@ -50,13 +50,15 @@
   },
   {
    "fieldname": "customer_type",
-   "fieldtype": "Data",
-   "label": "Lo\u1ea1i kh\u00e1ch h\u00e0ng"
+   "fieldtype": "Select",
+   "label": "Lo\u1ea1i kh\u00e1ch h\u00e0ng",
+   "options": "Company\nIndividual\nProprietorship\nPartnership"
   },
   {
    "fieldname": "customer_group",
-   "fieldtype": "Data",
-   "label": "Nh\u00f3m kh\u00e1ch h\u00e0ng"
+   "fieldtype": "Link",
+   "label": "Nh\u00f3m kh\u00e1ch h\u00e0ng",
+   "options": "Customer Group"
   },
   {
    "fieldname": "router",
@@ -96,7 +98,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-01-30 13:55:44.366423",
+ "modified": "2024-02-16 11:39:30.030648",
  "modified_by": "Administrator",
  "module": "MBW DMS",
  "name": "DMS KPI New Customer",

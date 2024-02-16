@@ -64,7 +64,7 @@ def list_product(**kwargs):
 def list_brand():
     try:
         brand = frappe.db.get_list('Brand', fields=["name", "brand", "description"])
-        gen_response(200, "Thành công", brand)
+        return gen_response(200, "Thành công", brand)
     except Exception as e:
         return exception_handel(e)
     
@@ -73,7 +73,7 @@ def list_brand():
 def list_industry():
     try:
         industry = frappe.db.get_list('Industry Type', fields=["name", "industry"],ignore_permissions=True)
-        gen_response(200, "Thành công", industry)
+        return gen_response(200, "Thành công", industry)
     except Exception as e:
         return exception_handel(e)
     
@@ -82,7 +82,7 @@ def list_industry():
 def list_item_group():
     try:
         item_group = frappe.db.get_list('Item Group', fields=["name", "item_group_name", "parent_item_group"])
-        gen_response(200, "Thành công", item_group)
+        return gen_response(200, "Thành công", item_group)
     except Exception as e:
         return exception_handel(e)
     
@@ -96,7 +96,7 @@ def list_uom(**kwargs):
         if name:
             uom_filter["name"] = ['like', f'%{name}%']
         list_uom = frappe.db.get_list('UOM', filters=uom_filter, fields=['name', 'uom_name'])
-        gen_response(200, "Thành công", list_uom)
+        return gen_response(200, "Thành công", list_uom)
     except Exception as e:
         return exception_handel(e)
     
@@ -110,7 +110,7 @@ def list_warehouse(**kwargs):
         if name:
             warehouse_filter['name'] = ['like', f'%{name}%']
         list_warehouse = frappe.db.get_list('Warehouse', filters=warehouse_filter, fields=['name', 'warehouse_name'])
-        gen_response(200, 'Thành công', list_warehouse)
+        return gen_response(200, 'Thành công', list_warehouse)
     except Exception as e:
         return exception_handel(e)
     
@@ -128,7 +128,7 @@ def list_vat(**kwargs):
                             .where(Taxes.name.like(f"%{title}%"))
                             .select(Taxes.name, Taxes.title, TaxesCharges.account_head, TaxesCharges.rate, TaxesCharges.charge_type)
                             ).run(as_dict =1)
-        gen_response(200, 'Thành công', detail_taxes)
+        return gen_response(200, 'Thành công', detail_taxes)
     except Exception as e:
         return exception_handel(e)
     

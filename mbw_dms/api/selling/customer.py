@@ -2,7 +2,6 @@ import frappe
 from frappe import _
 import json
 from datetime import datetime
-from pypika import  Order, CustomFunction
 
 from mbw_dms.api.common import (
     exception_handel,
@@ -17,14 +16,12 @@ from mbw_dms.api.validators import (
     validate_choice,
     validate_not_none
 )
-from mbw_dms.api.selling import configs
-from mbw_dms.config_translate import i18n
+from mbw_dms.api import configs
 
 #list customer
 @frappe.whitelist(methods='GET')
 def list_customer(**kwargs):
     try:
-        date_format = '%Y/%m/%d'
         kwargs = frappe._dict(kwargs)
         name = kwargs.get('name')
         customer_name = kwargs.get('customer_name')
@@ -82,7 +79,7 @@ def list_customer(**kwargs):
 def list_customer_type():
     try:
         brand = frappe.db.get_list('Customer Group', fields=["name", "customer_group_name"])
-        gen_response(200, "Thành công", brand)
+        return gen_response(200, "Thành công", brand)
     except Exception as e:
         return exception_handel(e)
     
@@ -92,7 +89,7 @@ def delete_customer(name):
     try:
 
         frappe.delete_doc('Customer',name)
-        gen_response(200, "ok",[])
+        return gen_response(200, "Thành công", [])
     except Exception as e:
         exception_handel(e)
 
@@ -214,7 +211,7 @@ def create_customer(**kwargs):
 def list_territory():
     try:
         territory = frappe.db.get_list('Territory', fields=["name", "territory_name"])
-        gen_response(200, "Thành công", territory)
+        return gen_response(200, 'Thành công', territory)
     except Exception as e:
         return exception_handel(e)
     
@@ -241,7 +238,7 @@ def get_customer_addresses(customer_name):
         fields=["name", "address_line1", "address_line2", "city", "state", "is_primary_address", "is_shipping_address", "county"]
     )
 
-    return addresses
+    return gen_response(200, 'Thành công', addresses)
 
     
 @frappe.whitelist(methods="GET")
@@ -252,7 +249,7 @@ def get_contact(customer_name):
         fields=['name','first_name', "phone", "is_primary_contact", "is_billing_contact"]
     )
 
-    return contact
+    return gen_response(200, 'Thành công', contact)
 
 @frappe.whitelist(methods='GET')
 def list_router(customer_name):
@@ -274,6 +271,6 @@ def list_sale_person():
         fields=['name','sales_person_name']
         )
 
-        return gen_response(200, '' ,sale_person)
+        return gen_response(200, 'Thành công' ,sale_person)
     except Exception as e:
         return exception_handel(e)
