@@ -71,7 +71,11 @@ def list_album_image(**kwargs):
         return exception_handel(e)
 #backup
 @frappe.whitelist(methods="GET")
+<<<<<<< HEAD
 def list_test(**kwargs):
+=======
+def list_monitor_album(**kwargs):
+>>>>>>> 35106f31 (fix bug album)
     try:
         from pypika import Query, Table, functions as fn 
         name = kwargs.get('album')
@@ -86,12 +90,22 @@ def list_test(**kwargs):
         query_code = (SalesPerson.enabled == 1) & (SalesPerson.is_group == 0)
         if creation:
             query_code = query_code & (fn.Date(DMSAlbumImage.creation) == datetime.fromtimestamp(int(creation)).date())
+<<<<<<< HEAD
+=======
+            # datetime.fromtimestamp(int(creation)).date()
+>>>>>>> 35106f31 (fix bug album)
         if parent_sales_person:
             query_code = query_code & (SalesPerson.parent_sales_person == parent_sales_person)
         if customer_name:
             query_code = query_code & (Customer.customer_name == customer_name)
         if name:
+<<<<<<< HEAD
             query_code = query_code & (DMSAlbumImage.album_name == name)
+=======
+            query_code = query_code & (DMSAlbumImage.name == name)
+        if owner:
+            query_code = query_code & (DMSAlbumImage.owner == owner)
+>>>>>>> 35106f31 (fix bug album)
         print('========================= value: ',query_code)
         data = ( frappe.qb.from_(DMSAlbumImage)
                 .inner_join(Employee)

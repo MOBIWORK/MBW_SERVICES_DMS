@@ -17,10 +17,19 @@ export default function MonitorAlbum() {
   const [album, setAlbum] = useState<string>();
   const [customer_name, setCustomer_name] = useState<string>();
   const [owner, setOwner] = useState<string>();
+<<<<<<< HEAD
   const [creation, setCreation] = useState<string>();
   const [keyS, setKeyS] = useState("");
   const [keyS1, setKeyS1] = useState("");
   const [keyS2, setKeyS2] = useState("");
+=======
+  const [parent_sales_person, setPerson] = useState<string>();
+  const [creation, setCreation] = useState<any>();
+  const [keyS, setKeyS] = useState("");
+  const [keyS1, setKeyS1] = useState("");
+  const [keyS2, setKeyS2] = useState("");
+  const [keyS3, setKeyS3] = useState("");
+>>>>>>> 35106f31 (fix bug album)
   const [modal, setModal] = useState<{
     open: boolean;
     id: any;
@@ -31,13 +40,26 @@ export default function MonitorAlbum() {
   let keySearch = useDebounce(keyS, 300);
   let keySearch1 = useDebounce(keyS1, 300);
   let keySearch2 = useDebounce(keyS2, 300);
+<<<<<<< HEAD
+=======
+  let keySearch3 = useDebounce(keyS3, 300);
+>>>>>>> 35106f31 (fix bug album)
   const closeModal = () => {
     setModal({
       open: false,
       id: null,
     });
   };
+<<<<<<< HEAD
   const date = new Date().toJSON().slice(0, 10);
+=======
+
+  const dateNow = new Date().toJSON().slice(0, 10);
+  const now = Date.parse(dateNow as string) / 1000;
+  console.log("dateNow", now);
+  
+
+>>>>>>> 35106f31 (fix bug album)
   useEffect(() => {
     (async () => {
       const rsCustomer = await AxiosService.get(
@@ -61,6 +83,7 @@ export default function MonitorAlbum() {
     (async () => {
       const rsEmployee = await AxiosService.get(
         "/api/method/mbw_dms.api.note.list_email"
+<<<<<<< HEAD
       );
 
       console.log("aaa", rsEmployee);
@@ -97,10 +120,49 @@ export default function MonitorAlbum() {
           },
         }
       );
+=======
+      );
+
+      console.log("aaa", rsEmployee);
+      let { result } = rsEmployee;
+      setListEmployee(
+        result.data.map((employee: any) => ({
+          label: employee.first_name,
+          value: employee.user_id,
+        }))
+      );
+    })();
+  }, []);
+
+  useEffect(() => {
+    (async () => {
+      const rsAlbum = await AxiosService.get(
+        "/api/method/mbw_dms.api.album.list_monitor_album"
+      );
+      setDataFilterAlbum(rsAlbum.message);
+    })();
+  }, []);
+
+  useEffect(() => {
+    (async () => {
+      const rsAlbum = await AxiosService.get(
+        "/api/method/mbw_dms.api.album.list_monitor_album",
+        {
+          params: {
+            album,
+            customer_name,
+            owner,
+            creation,
+            parent_sales_person
+          },
+        }
+      );
+>>>>>>> 35106f31 (fix bug album)
       
       const rsPerson = await AxiosService.get(
         "/api/method/mbw_dms.api.selling.customer.list_sale_person"
       );
+<<<<<<< HEAD
 
       console.log("abc", creation);
       
@@ -116,6 +178,25 @@ export default function MonitorAlbum() {
 
   const onChange: DatePickerProps["onChange"] = (dateString) => {
       setCreation(dateString?.format("YYYY-MM-DD"));
+=======
+      
+      if(creation === null || creation === undefined || creation === "") {
+        setCreation(now)
+      }
+      
+      setDataAlbum(rsAlbum.message);
+      setDataPerson(rsPerson.result);
+      
+    })();
+  }, [album, customer_name, owner, creation, parent_sales_person]);
+
+
+  const onChange: DatePickerProps["onChange"] = (dateString) => {
+      const dateS = dateString?.format("YYYY-MM-DD")
+      const timestamp = Date.parse(dateS as string) / 1000;
+
+      setCreation(timestamp);
+>>>>>>> 35106f31 (fix bug album)
   };
   return (
     <>
@@ -163,6 +244,15 @@ export default function MonitorAlbum() {
                   value: person.sales_person_name,
                 })),
               ]}
+<<<<<<< HEAD
+=======
+              showSearch
+              notFoundContent={null}
+              onSearch={(value: string) => setKeyS3(value)}
+              onChange={(value) => {
+                setPerson(value);
+              }}
+>>>>>>> 35106f31 (fix bug album)
             />
           </FormItemCustom>
 
@@ -213,11 +303,20 @@ export default function MonitorAlbum() {
                 { label: "Tất cả Album", value: "" },
                 ...dataFilterAlbum.map((album: any) => ({
                   label: album.album_name,
+<<<<<<< HEAD
                   value: album.name,
+=======
+                  value: album.DMS_ID,
+>>>>>>> 35106f31 (fix bug album)
                 })),
               ]}
               onSearch={(value: string) => setKeyS(value)}
               onChange={(value) => {
+<<<<<<< HEAD
+=======
+                // console.log(value);
+                
+>>>>>>> 35106f31 (fix bug album)
                 setAlbum(value);
               }}
             />
@@ -229,7 +328,7 @@ export default function MonitorAlbum() {
             {dataAlbum.length > 0 &&
               dataAlbum.map((data: any) => (
                 <Col
-                  key={data?.name}
+                  key={data?.DMS_ID}
                   className="flex justify-center items-center px-4 pt-4 rounded-lg"
                   span={4}
                 >
@@ -241,7 +340,7 @@ export default function MonitorAlbum() {
                   >
                     <div className="flex items-center h-3">
                       <UserIcon />
-                      <p>{data?.detail_employee[0].first_name}</p>
+                      <p>{data?.first_name}</p>
                     </div>
                     <div className="flex items-center pt-2 h-5">
                       <PictureIcon />
