@@ -3,7 +3,7 @@ import { Col, Image, Row } from "antd";
 export default function DetailModal(data: any) {
   console.log("====data", data);
   console.log("====data111", data.creation);
-
+  
 
   return (
     <>
@@ -21,7 +21,7 @@ export default function DetailModal(data: any) {
               Thời gian chụp
             </p>
             <p className="text-base leading-5 font-medium text-[#212B36]">
-              {data?.data?.creation}
+                {data?.data?.creation}
             </p>
           </div>
           <div className="flex items-center pt-2 h-6">
@@ -37,7 +37,7 @@ export default function DetailModal(data: any) {
               Nhóm bán hàng
             </p>
             <p className="text-base leading-5 font-medium text-[#212B36]">
-              {data?.data?.parent_sales_person}
+            {data?.data?.parent_sales_person}
             </p>
           </div>
           <div className="flex items-center pt-2 h-6">
