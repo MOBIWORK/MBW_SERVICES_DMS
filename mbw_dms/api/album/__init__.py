@@ -11,3 +11,15 @@ def create_album_image(**kwargs):
 def list_monitor_album(**kwargs):
     from mbw_dms.mbw_dms.doctype.dms_album.dms_album import list_monitor_album
     return list_monitor_album(kwargs=kwargs)
+
+# create Album
+@frappe.whitelist()
+def create_album(kwargs):
+    from mbw_dms.mbw_dms.doctype.dms_album.dms_album import create_album
+    return create_album(kwargs=kwargs)
+
+#list 
+@frappe.whitelist()
+def list_album():
+    from mbw_dms.mbw_dms.doctype.dms_album.dms_album import list_album
+    return list_album()

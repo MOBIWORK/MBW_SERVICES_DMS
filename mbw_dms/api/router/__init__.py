@@ -62,4 +62,4 @@ def get_all_router():
 @frappe.whitelist()
 def router_query(doctype, txt, searchfield, start, page_len, filters):
     from mbw_dms.mbw_dms.doctype.dms_router.dms_router import router_query
-    return get_all_router(doctype=doctype, txt=txt, searchfield=searchfield, start=start, page_len=page_len, filters=filters)
+    return router_query(doctype=doctype, txt=txt, searchfield=searchfield, start=start, page_len=page_len, filters=filters)

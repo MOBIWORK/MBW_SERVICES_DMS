@@ -197,7 +197,7 @@ def create_router(body):
 
 #cap nhat tuyen
 @frappe.whitelist(methods="PATCH")
-def update_router(**body):
+def update_router(body):
     try:
         body = dict(body)
         name = validate_filter(type_check='require',value=body.get('name'))
