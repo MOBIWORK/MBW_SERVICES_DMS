@@ -19,7 +19,7 @@ class DMSNoteType(Document):
 
 #create type of problem
 @frappe.whitelist(methods="POST")
-def create_type_of_problem(**kwargs):
+def create_type_of_problem(kwargs):
     try:
         new_type_of_problem = frappe.new_doc('DMS Type of problem')
         new_type_of_problem.ma_loai_van_de = validate_not_none(kwargs.get('ma_loai_van_de'))
@@ -35,7 +35,7 @@ def create_type_of_problem(**kwargs):
 
 #create Problem Monitor
 @frappe.whitelist(methods="POST")
-def create_proble_monitor(**kwargs):
+def create_proble_monitor(kwargs):
     try:
         new_proble_monitor = frappe.new_doc('DMS Problem Monitor')
         
@@ -56,7 +56,7 @@ def create_proble_monitor(**kwargs):
         return exception_handel(e)
     
 @frappe.whitelist(methods="POST")
-def create_note(**kwargs):
+def create_note(kwargs):
     try:
         new_note = frappe.new_doc('Note')
         new_note.title = kwargs.get('title')
@@ -73,7 +73,7 @@ def create_note(**kwargs):
         return exception_handel(e)    
     
 @frappe.whitelist(methods="GET")
-def list_email(**kwargs):
+def list_email(kwargs):
     try:
         page_size = 20 if not kwargs.get('page_size') else int(kwargs.get('page_size'))
         page_number = 1 if not kwargs.get('page') or int(kwargs.get('page')) <= 0 else int(kwargs.get('page'))
@@ -96,7 +96,7 @@ def list_email(**kwargs):
     
 #list note
 @frappe.whitelist(methods="GET")
-def list_note(**kwargs):
+def list_note(kwargs):
     try:
         my_filter = {}
         name = kwargs.get('name')
@@ -112,7 +112,7 @@ def list_note(**kwargs):
     
 #list note type
 @frappe.whitelist(methods="GET")
-def list_note_type(**kwargs):
+def list_note_type():
     try:
         my_filter = {}
         list_note_type = frappe.db.get_list('DMS Note Type',filters= my_filter ,fields=["name", "ma_ghi_chu", "loai_ghi_chu"])

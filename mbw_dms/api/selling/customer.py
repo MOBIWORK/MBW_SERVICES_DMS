@@ -14,7 +14,8 @@ from mbw_dms.api.validators import (
     validate_date, 
     validate_phone_number, 
     validate_choice,
-    validate_not_none
+    validate_not_none,
+    validate_filter_timestamp
 )
 from mbw_dms.api import configs
 
@@ -27,15 +28,12 @@ def list_customer(**kwargs):
         customer_name = kwargs.get('customer_name')
         customer_type = kwargs.get('customer_type')
         customer_group = kwargs.get('customer_group')
-        from_date = kwargs.get('from_date')
-        to_date = kwargs.get('to_date')
+        from_date = validate_filter_timestamp('start')(kwargs.get('from_date')) if kwargs.get('from_date') else None
+        to_date = validate_filter_timestamp('end')(kwargs.get('to_date')) if kwargs.get('to_date') else None
         my_filter = {}
 
-        page_size = 20 if not kwargs.get(
-            'page_size') else int(kwargs.get('page_size'))
-
-        page_number = 1 if not kwargs.get('page') or int(
-            kwargs.get('page')) <= 0 else int(kwargs.get('page'))
+        page_size = int(kwargs.get('page_size', 20))
+        page_number = 1 if not kwargs.get('page') or int(kwargs.get('page')) <= 0 else int(kwargs.get('page'))
         # custom_birthday = int(kwargs.get('custom_birthday'))
         if name:
             my_filter["name"] = ['like', f'%{name}%']
@@ -46,8 +44,6 @@ def list_customer(**kwargs):
         if customer_group:
             my_filter["customer_group"] = ['like', f'%{customer_group}%']
         if from_date and to_date:
-            from_date = datetime.fromtimestamp(int(from_date))
-            to_date = datetime.fromtimestamp(int(to_date))
             my_filter["custom_birthday"] = ['between', [from_date, to_date]]
         customers = frappe.db.get_list("Customer",
                                 filters= my_filter,
@@ -83,17 +79,16 @@ def list_customer_type():
     except Exception as e:
         return exception_handel(e)
     
-#delete customer
+# delete customer
 @frappe.whitelist(methods="DELETE")
 def delete_customer(name):
     try:
-
         frappe.delete_doc('Customer',name)
         return gen_response(200, "Thành công", [])
     except Exception as e:
         exception_handel(e)
 
-#create customer
+# create customer
 @frappe.whitelist(methods="POST")
 def create_customer(**kwargs):
     try:
@@ -206,7 +201,7 @@ def create_customer(**kwargs):
     except Exception as e:
         return exception_handel(e)
     
-#list 
+# list 
 @frappe.whitelist(methods="GET")
 def list_territory():
     try:
@@ -215,7 +210,7 @@ def list_territory():
     except Exception as e:
         return exception_handel(e)
     
-#update
+# update
 @frappe.whitelist(methods="PUT")
 def update_customer(name, **kwargs):
     try:
@@ -237,7 +232,6 @@ def get_customer_addresses(customer_name):
         filters={"link_name": customer_name},
         fields=["name", "address_line1", "address_line2", "city", "state", "is_primary_address", "is_shipping_address", "county"]
     )
-
     return gen_response(200, 'Thành công', addresses)
 
     
@@ -248,7 +242,6 @@ def get_contact(customer_name):
         filters={"link_name": customer_name},
         fields=['name','first_name', "phone", "is_primary_contact", "is_billing_contact"]
     )
-
     return gen_response(200, 'Thành công', contact)
 
 @frappe.whitelist(methods='GET')
@@ -257,7 +250,7 @@ def list_router(customer_name):
         list_router = frappe.db.get_list('DMS Router', filters={'customer_name': customer_name}, fields=['*'])
         for i in list_router:
             i['customers'] = get_value_child_doctype('DMS Router', i['name'], 'customers')
-        return gen_response(200, '', list_router)
+        return gen_response(200, 'Thành công', list_router)
     except Exception as e:
         return exception_handel(e)
     
@@ -270,7 +263,6 @@ def list_sale_person():
         filters={"is_group": 1, "enabled": 1},
         fields=['name','sales_person_name']
         )
-
-        return gen_response(200, 'Thành công' ,sale_person)
+        return gen_response(200, 'Thành công', sale_person)
     except Exception as e:
         return exception_handel(e)

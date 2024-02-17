@@ -23,7 +23,7 @@ class DMSFakeGPS(Document):
 
 
 @frappe.whitelist(methods='POST')
-def insert_fake_gps(**body):
+def insert_fake_gps(body):
     try:
         employee = get_employee_info()
         id_user = employee.get('user_id')

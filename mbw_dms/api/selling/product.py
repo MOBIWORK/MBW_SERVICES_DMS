@@ -21,7 +21,7 @@ def list_product(**kwargs):
         brand = kwargs.get('brand')
         custom_industry = kwargs.get("industry")
         item_group = kwargs.get("item_group")
-        page_size = 20 if not kwargs.get('page_size') else int(kwargs.get('page_size'))
+        page_size = kwargs.get('page_size', 20)
         page_number = 1 if not kwargs.get('page') or int(kwargs.get('page')) <= 0 else int(kwargs.get('page'))
 
         if name:
@@ -41,7 +41,7 @@ def list_product(**kwargs):
                                    start=page_size * (page_number - 1),
                                    page_length=page_size)
 
-        count = len(frappe.db.get_list("Item", filters=my_filter,))
+        count = frappe.db.count('Item', filters= my_filter)
         for item in items:
             item['image'] = validate_image(item.get("image"))
             item['details'] = frappe.get_all("Item Price", filters={"item_code": item.get('item_code')}, fields=['uom', 'price_list_rate', 'valid_from', 'currency'])
