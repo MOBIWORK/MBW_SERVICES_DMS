@@ -13,9 +13,9 @@ import json
 class DMSCheckin(Document):
 	pass
 
-
+# Tạo mới checkin
 @frappe.whitelist(methods='POST')
-def create_checkin(**kwargs):
+def create_checkin(kwargs):
     try:
         new_checkin = frappe.new_doc('DMS Checkin')
 
@@ -38,17 +38,19 @@ def create_checkin(**kwargs):
                 new_checkin.set(key, created_date)
         new_checkin.insert()
         frappe.db.commit()
-        return gen_response(200, "Successful", {"name": new_checkin.name})
+        return gen_response(200, "Thành công", {"name": new_checkin.name})
     except Exception as e:
         return exception_handel(e)
     
+    
+# Thêm ảnh checkin
 @frappe.whitelist(methods='PUT')
-def add_checkin_image(name_checkin, **kwargs):
+def add_checkin_image(name_checkin, kwargs):
     try:
         if frappe.db.exists('DMS Checkin', name_checkin, cache=True):
             checkin = frappe.get_doc('DMS Checkin', name_checkin)
             checkin.append('checkin_hinhanh', {
-                'url_image': post_image(name_image=kwargs.get('name_image'), faceimage=kwargs.get('faceimage'), doc_type='DMS Checkin', doc_name=name_checkin)
+                'url_image': post_image(name_image='', faceimage=kwargs.get('faceimage'), doc_type='DMS Checkin', doc_name=name_checkin)
             })
             checkin.checkin_id = name_checkin
             checkin.save()
@@ -58,8 +60,9 @@ def add_checkin_image(name_checkin, **kwargs):
     except Exception as e:
         return exception_handel(e)
 
+# Tạo mới checkin tồn kho
 @frappe.whitelist(methods='POST')
-def create_checkin_inventory(**body):
+def create_checkin_inventory(body):
     try:
         user = get_user_id()
         normal_keys = [
@@ -85,7 +88,7 @@ def create_checkin_inventory(**body):
 
 
 @frappe.whitelist(methods='POST')
-def create_checkin_image(**body):
+def create_checkin_image(body):
     try:
         user = get_user_id()
         image = validate_filter(value=body.get('image'),type_check='require')
@@ -137,18 +140,17 @@ def create_checkin_image(**body):
                 "status": False,
                 "file_url" : None
             })
-            return
+        return
     except Exception as e:
         exception_handel(e)
 
-# from frappe.model.naming import make_autoname
+# Cập nhật địa chỉ khách hàng
 @frappe.whitelist(methods='PATCH')
-def update_address_customer(**body):
+def update_address_customer(body):
     try:
         customer = validate_filter(type_check='require',value=body.get('customer'))
         city = validate_filter(type_check='require',value=body.get('city'))
         county = validate_filter(type_check='require',value=body.get('county'))
-        # country = validate_filter(type_check='require',value=body.get('country'))
         state = validate_filter(type_check='require',value=body.get('state'))
         address_line1 = validate_filter(type_check='require',value=body.get('address_line1'))
         long = validate_filter(type_check='require',value=body.get('long'))
@@ -165,7 +167,6 @@ def update_address_customer(**body):
             district_info = frappe.db.get_value(doctype="DMS District",filters={"ten_huyen": ["like",f"%{county}%"]},fieldname=['ma_huyen'])
             ward_info = frappe.db.get_value(doctype="DMS Ward",filters={"ten_xa": ["like",f"%{state}%"]},fieldname=['name'])
             new_address = {
-                    
                     "address_title": f"{address_line1}, {state}, {county}, {city}",
                     "address_line1":address_line1,                    
                     "state": ward_info,
@@ -206,7 +207,7 @@ def update_address_customer(**body):
 
 # cancel checkout
 @frappe.whitelist(methods="DELETE")
-def cancel_checkout(**data):
+def cancel_checkout(data):
     try:
         gen_response(200,i18n.t("translate.successfully",locale=get_language()),[])
         checkin_id = data.get('checkin_id')

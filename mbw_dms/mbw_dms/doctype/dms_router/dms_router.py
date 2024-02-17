@@ -17,7 +17,7 @@ class DMSRouter(Document):
 
 # danh sach tuyen
 @frappe.whitelist(methods='GET')
-def get_list_router(**filters):
+def get_list_router(filters):
     try:
 
         status = filters.get('status') if filters.get('status') else False
@@ -99,7 +99,7 @@ def get_router(id):
 
 # danh sach khach hang cham soc
 @frappe.whitelist(methods="GET")
-def get_customer_router(**data):
+def get_customer_router(data):
     try:
         view_mode = validate_filter(value=data.get('view_mode'),type=['list','map'],type_check='enum') if data.get('view_mode') else 'list'
         # phan trang
@@ -167,7 +167,7 @@ def get_customer_router(**data):
 
 #them tuyen
 @frappe.whitelist(methods="POST")
-def create_router(**body):
+def create_router(body):
     try:
         body = dict(body)
         if body['cmd'] :
@@ -244,7 +244,7 @@ def get_team_sale():
         exception_handel(e)
 
 @frappe.whitelist(methods="GET")
-def get_sale_person(**data):
+def get_sale_person(data):
     try:
         from frappe.desk.reportview import (compress,execute)
 
@@ -283,7 +283,7 @@ def get_sale_person(**data):
 
 
 @frappe.whitelist(methods="GET")
-def get_customer(**filters):
+def get_customer(filters):
     try:
         page_size =  int(filters.get('page_size')) if filters.get('page_size') else 20
         page_number = int(filters.get('page_number') )if filters.get('page_number') and int(filters.get('page_number')) <= 0 else 1
@@ -347,7 +347,7 @@ def get_customer(**filters):
 
 # api test handle filter address
 @frappe.whitelist(allow_guest=True)
-def test_address(**filters) :
+def test_address(filters):
     city = filters.get('city') if filters.get('city') else False 
     district = filters.get('district') if filters.get('district') else False 
     ward = filters.get('ward') if filters.get('ward') else False 

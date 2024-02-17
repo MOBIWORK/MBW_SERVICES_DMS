@@ -15,7 +15,7 @@ class DMSProvince(Document):
 
 # Danh sánh tỉnh/thành phố
 @frappe.whitelist(methods='GET')
-def list_province(**kwargs):
+def list_province():
     try:
         list_provinces = frappe.db.get_list('DMS Province', fields=['name', 'ma_tinh', 'ten_tinh'], order_by='ma_tinh asc')
         return gen_response(200, 'Thành công', list_provinces)

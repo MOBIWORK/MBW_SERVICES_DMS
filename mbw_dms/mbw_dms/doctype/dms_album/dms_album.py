@@ -17,7 +17,7 @@ class DMSAlbum(Document):
 
 #create Album Image
 @frappe.whitelist(methods="POST")
-def create_album_image(**kwargs):
+def create_album_image(kwargs):
     try:
         new_album_image = frappe.new_doc('DMS Album Image')
         new_album_image.id = kwargs.get('id')
@@ -39,7 +39,7 @@ def create_album_image(**kwargs):
 
 #list album Image
 @frappe.whitelist(methods="GET")
-def list_monitor_album(**kwargs):
+def list_monitor_album(kwargs):
     try:
         name = kwargs.get('album')
         customer_name = kwargs.get('customer_name')
@@ -70,7 +70,7 @@ def list_monitor_album(**kwargs):
 
 #create Album
 @frappe.whitelist(methods="POST")
-def create_album(**kwargs):
+def create_album(kwargs):
     try:
         new_album = frappe.new_doc('DMS Album')
         new_album.ma_album = kwargs.get('ma_album')
