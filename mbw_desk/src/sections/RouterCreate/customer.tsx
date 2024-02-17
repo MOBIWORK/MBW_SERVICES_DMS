@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import RowCustom from "./styled";
 import { Button, Col, Input, Modal, Radio, Row, Select } from "antd";
 import { FormItemCustom } from "../../components/form-item";
+import {SelectCommon} from '@/components'
 import { addCustomerOption, baseCustomers } from "./data";
 import { List, ThunderIcon } from "../../icons";
 import { SearchOutlined } from "@ant-design/icons";
@@ -52,7 +53,7 @@ export default function Customer({listCustomer,handleCustomer}:Props) {
           <Row gutter={8}>
             <Col span={9} className="text-[#1677ff]">
               <FormItemCustom>
-                <Select defaultValue={"add"} options={addCustomerOption} onSelect={handeOpen} />
+                <SelectCommon defaultValue={"add"} options={addCustomerOption} onSelect={handeOpen} />
               </FormItemCustom>
             </Col>
             <Col span={7}>

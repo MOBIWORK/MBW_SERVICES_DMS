@@ -15,7 +15,7 @@ export default function Progress() {
       <Result
         status="500"
         title="500"
-        subTitle="Sorry, Page is progressing"
+        subTitle="Trang đang tiến hành."
         // extra={<Button type="primary">Back Home</Button>}
     />
     </>
