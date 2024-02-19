@@ -67,6 +67,8 @@ export default function MonitorAlbum() {
       const rsEmployee = await AxiosService.get(
         "/api/method/mbw_dms.api.note.list_email"
       );
+      console.log("aaaád", rsEmployee);
+      
       let { result } = rsEmployee;
       setListEmployee(
         result.data.map((employee: any) => ({

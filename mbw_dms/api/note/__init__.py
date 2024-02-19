@@ -18,13 +18,13 @@ def create_note(**kwargs):
     return create_note(kwargs=kwargs)
 
 @frappe.whitelist()
-def list_email(kwargs):
+def list_email(**kwargs):
     from mbw_dms.mbw_dms.doctype.dms_note_type.dms_note_type import list_email
     return list_email(kwargs=kwargs)
 
 #list note
 @frappe.whitelist()
-def list_note(kwargs):
+def list_note(**kwargs):
     from mbw_dms.mbw_dms.doctype.dms_note_type.dms_note_type import list_note
     return list_note(kwargs=kwargs)
 
