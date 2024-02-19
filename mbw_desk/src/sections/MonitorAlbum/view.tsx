@@ -85,6 +85,7 @@ export default function MonitorAlbum() {
         "/api/method/mbw_dms.api.album.list_monitor_album"
       );
       setDataFilterAlbum(rsAlbum.result);
+      setCreation(dateNow);
     })();
   }, []);
 
@@ -107,9 +108,9 @@ export default function MonitorAlbum() {
         "/api/method/mbw_dms.api.selling.customer.list_sale_person"
       );
 
-      if (creation === null || creation === undefined || creation === "") {
-        setCreation(dateNow);
-      }
+      // if (creation === null || creation === undefined || creation === "") {
+      //   setCreation(dateNow);
+      // }
 
       setDataAlbum(rsAlbum.result);
       setDataPerson(rsPerson.result);
