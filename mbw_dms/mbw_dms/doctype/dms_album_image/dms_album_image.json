@@ -16,7 +16,9 @@
   "customer_code",
   "customer_long",
   "customer_lat",
-  "image_url"
+  "image_url",
+  "team_sale",
+  "employee"
  ],
  "fields": [
   {
@@ -68,11 +70,23 @@
    "fieldname": "image_url",
    "fieldtype": "Data",
    "label": "Image URL"
+  },
+  {
+   "fieldname": "team_sale",
+   "fieldtype": "Link",
+   "label": "Team sale",
+   "options": "Sales Person"
+  },
+  {
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "label": "Nh\u00e2n vi\u00ean",
+   "options": "Employee"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-01-23 09:46:46.698461",
+ "modified": "2024-02-19 09:28:15.790089",
  "modified_by": "Administrator",
  "module": "MBW DMS",
  "name": "DMS Album Image",
