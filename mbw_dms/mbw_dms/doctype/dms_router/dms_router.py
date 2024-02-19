@@ -20,15 +20,15 @@ class DMSRouter(Document):
 def get_list_router(filters):
     try:
 
-        status = filters.get('status') if filters.get('status') else False
-        employee = filters.get('employee') if filters.get('employee') else False
-        modified_by = filters.get('modified_by') if filters.get('modified_by') else False
+        status = filters.get('status')
+        employee = filters.get('employee')
+        modified_by = filters.get('modified_by')
         modified = validate_filter(value=filters.get('modified'), type_check="timestamp") if filters.get('modified') else False
-        owner = filters.get('owner') if filters.get('owner') else False
+        owner = filters.get('owner')
         creation = validate_filter(value=filters.get('creation'), type_check='timestamp') if filters.get('creation') else False
-        router = filters.get('router') if filters.get('router') else False
-        page_size =  int(filters.get('page_size')) if filters.get('page_size') else 20
-        page_number = int(filters.get('page_number') )if filters.get('page_number') and int(filters.get('page_number')) <= 0 else 1
+        router = filters.get('router')
+        page_size =  int(filters.get('page_size', 20))
+        page_number = int(filters.get('page_number') )if filters.get('page_number') and int(filters.get('page_number')) > 0 else 1
         orderby_array = ['modified',"name","owner","idx", "channel_code","channel_name", "employee"]
         order_by = validate_filter(value=filters.get('order_by'),type=orderby_array,type_check='enum') if filters.get('order_by') else False
         sort = validate_filter(value=filters.get('sort'),type=['desc','asc'], type_check="enum") if filters.get('sort') else False
@@ -51,19 +51,17 @@ def get_list_router(filters):
         order_string = 'modified desc'
         if order_by and sort:
             order_string = f"{order_by} {sort}"
-        print(queryFilters)
         list_router = frappe.db.get_list('DMS Router',filters=queryFilters,fields=['*', 'UNIX_TIMESTAMP(travel_date) as travel_date'], 
                                        order_by=order_string, 
                                        start=page_size*(page_number-1), page_length=page_size)
         
         total = len(frappe.db.get_list('DMS Router',filters=queryFilters))
-        gen_response(200,'',{
+        return gen_response(200,'',{
             "data": list_router,
             "total": total,
             "page_size": page_size,
             "page_number":page_number
         })
-        return 
     except Exception as e: 
         exception_handel(e)
 
@@ -92,8 +90,7 @@ def get_router(id):
                       ).run(as_dict = 1)
             router = routers[0]
             router['customers'] = customer
-        gen_response(200,'',router)
-        return 
+        return gen_response(200,'',router)
     except Exception as e: 
         exception_handel(e)
 
@@ -103,19 +100,19 @@ def get_customer_router(data):
     try:
         view_mode = validate_filter(value=data.get('view_mode'),type=['list','map'],type_check='enum') if data.get('view_mode') else 'list'
         # phan trang
-        page_size =  int(data.get('page_size')) if data.get('page_size') else 20
-        page_number = int(data.get('page_number') )if data.get('page_number') and int(data.get('page_number')) <= 0 else 1
+        page_size =  int(data.get('page_size', 20))
+        page_number = int(data.get('page_number') )if data.get('page_number') and int(data.get('page_number')) > 0 else 1
         #bo loc tuyen
         router = validate_filter(type_check='type',type=list,value=data.get('router'))  if data.get('router') else False
-        status = data.get('status') if data.get('status') else False
+        status = data.get('status')
         #bo loc khach hang
         # tam bo qua bo loc khoang cach
         # distance = data.get('distance') if data.get('distance') else False
-        order_by = data.get('order_by') if data.get('order_by') else False
+        order_by = data.get('order_by')
         birthday_from = validate_filter(type_check='timestamp',type='start',value=data.get('birthday_from')) if data.get('birthday_from') else False
         birthday_to =validate_filter(type_check='timestamp',type='end',value=data.get('birthday_to'))  if data.get('birthday_to') else False
-        customer_group = data.get('customer_group') if data.get('customer_group') else False
-        customer_type = data.get('customer_type') if data.get('customer_type') else False
+        customer_group = data.get('customer_group')
+        customer_type = data.get('customer_type')
         queryFilters = {"is_deleted": False}
         if router:
             queryFilters['name'] = ["in",router]
@@ -156,7 +153,7 @@ def get_customer_router(data):
             if checkin != None:
                 customer['is_checkin'] = True
         total_customer= len(frappe.db.get_list('Customer',filters= FiltersCustomer))
-        gen_response(200,"", {
+        return gen_response(200,"", {
             "data": detail_customer,
             "total": total_customer,
             "page_size": page_size,
@@ -191,7 +188,7 @@ def create_router(body):
         body['doctype'] = "DMS Router"
         doc = frappe.get_doc(body)
         doc.save()
-        gen_response(201,"",doc)
+        return gen_response(201,"",doc)
     except Exception as e:
         exception_handel(e)
 
@@ -210,15 +207,11 @@ def update_router(body):
             if isinstance(body[key_router], list):
                 for customer in body[key_router]:
                     for key_cs in customer:
-                        # if key_cs not in field_customers_validate or (key_cs in field_customers_validate and not customer[key_cs]) :
                         if key_cs not in field_customers_validate  :
-                            gen_response(406,f"Field {key_cs} not validate",None)
-                            return 
+                            return gen_response(406,f"Field {key_cs} not validate",None)
             else:
-                #  if key_router not in field_validate or ( key_router in field_validate and not body[key_router] ) :
                  if key_router not in field_validate :
-                        gen_response(406,f"Field {key_router} not validate",None)
-                        return
+                        return gen_response(406,f"Field {key_router} not validate",None)
         # body['doctype'] = "DMS Router"
         doc = frappe.get_doc("DMS Router",name)
         for item,value in body.items():
@@ -228,7 +221,7 @@ def update_router(body):
                 doc.set(item, value)
         doc.save(ignore_version=True)
         frappe.db.commit()
-        gen_response(201,"",doc)
+        return gen_response(201,"",doc)
     except Exception as e:
         exception_handel(e)
 
@@ -285,15 +278,15 @@ def get_sale_person(data):
 @frappe.whitelist(methods="GET")
 def get_customer(filters):
     try:
-        page_size =  int(filters.get('page_size')) if filters.get('page_size') else 20
-        page_number = int(filters.get('page_number') )if filters.get('page_number') and int(filters.get('page_number')) <= 0 else 1
-        customer_group = filters.get('customer_group') if filters.get('customer_group') else False
-        customer_type = filters.get('customer_type') if filters.get('customer_type') else False 
-        customer_name = filters.get('customer_name') if filters.get('customer_name') else False 
+        page_size =  int(filters.get('page_size', 20))
+        page_number = int(filters.get('page_number')) if filters.get('page_number') and int(filters.get('page_number')) > 0 else 1
+        customer_group = filters.get('customer_group')
+        customer_type = filters.get('customer_type')
+        customer_name = filters.get('customer_name')
 
-        city = filters.get('city') if filters.get('city') else False 
-        district = filters.get('district') if filters.get('district') else False 
-        ward = filters.get('ward') if filters.get('ward') else False 
+        city = filters.get('city')
+        district = filters.get('district')
+        ward = filters.get('ward')
         queryFilters = {}
         if customer_type:
             queryFilters['customer_type'] = customer_type
@@ -321,7 +314,6 @@ def get_customer(filters):
                             ).run()
             for customers in listCustomer:
                 list_customer += customers
-            print('list_customer',list_customer)
             queryFilters['name'] = ['in',list_customer]
 
         data = frappe.db.get_list(
@@ -335,7 +327,7 @@ def get_customer(filters):
         total = len(frappe.db.get_list(
             "Customer",
             queryFilters))
-        gen_response(200,"",{
+        return gen_response(200,"",{
             "data":data,
             "total": total,
             "page_size": page_size,
@@ -348,9 +340,9 @@ def get_customer(filters):
 # api test handle filter address
 @frappe.whitelist(allow_guest=True)
 def test_address(filters):
-    city = filters.get('city') if filters.get('city') else False 
-    district = filters.get('district') if filters.get('district') else False 
-    ward = filters.get('ward') if filters.get('ward') else False 
+    city = filters.get('city')
+    district = filters.get('district')
+    ward = filters.get('ward')
     Address = frappe.qb.DocType("Address")
     DynamicLink = frappe.qb.DocType("Dynamic Link")  
     queryAddress = DynamicLink.link_doctype == "Customer"     
@@ -373,8 +365,7 @@ def test_address(filters):
 def get_all_router():
     try:
         list_router = frappe.db.get_list('DMS Router',fields=['name','channel_name'])
-        gen_response(200,'',list_router)
-        return 
+        return gen_response(200,'',list_router)
     except Exception as e: 
         exception_handel(e)
 

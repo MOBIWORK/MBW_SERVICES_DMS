@@ -5,5 +5,5 @@
 from frappe.tests.utils import FrappeTestCase
 
 
-class TestDMSKPINewCustomer(FrappeTestCase):
+class TestDMSKPI(FrappeTestCase):
 	pass

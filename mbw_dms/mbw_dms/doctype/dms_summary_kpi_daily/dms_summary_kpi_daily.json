@@ -8,53 +8,96 @@
  "engine": "InnoDB",
  "field_order": [
   "date",
-  "total_sales",
-  "total_checkins",
-  "average_sale_per_checkin",
-  "total_new_customers",
-  "total_checkins_on_route",
-  "total_checkins_off_route"
+  "nhan_vien_ban_hang",
+  "doanh_thu_ngay",
+  "doanh_so_ngay",
+  "so_kh_vt_duynhat",
+  "so_kh_vt_luot",
+  "solan_vt_dungtuyen",
+  "solan_vt_ngoaituyen",
+  "so_kh_dat_hang",
+  "so_kh_moi",
+  "so_don_hang",
+  "san_luong",
+  "sku",
+  "so_gio_lam_viec"
  ],
  "fields": [
-  {
-   "fieldname": "total_sales",
-   "fieldtype": "Float",
-   "label": "T\u1ed5ng doanh thu trong ng\u00e0y"
-  },
-  {
-   "fieldname": "total_checkins",
-   "fieldtype": "Int",
-   "label": "T\u1ed5ng s\u1ed1 l\u1ea7n vi\u1ebfng th\u0103m trong ng\u00e0y"
-  },
-  {
-   "fieldname": "average_sale_per_checkin",
-   "fieldtype": "Float",
-   "label": "Doanh thu trung b\u00ecnh m\u1ed7i l\u1ea7n checkin"
-  },
   {
    "fieldname": "date",
    "fieldtype": "Date",
    "label": "Ng\u00e0y"
   },
   {
-   "fieldname": "total_new_customers",
-   "fieldtype": "Int",
-   "label": "S\u1ed1 l\u01b0\u1ee3ng kh\u00e1ch h\u00e0ng m\u1edf m\u1edbi"
+   "fieldname": "nhan_vien_ban_hang",
+   "fieldtype": "Link",
+   "label": "Nh\u00e2n vi\u00ean b\u00e1n h\u00e0ng",
+   "options": "Employee"
   },
   {
-   "fieldname": "total_checkins_off_route",
-   "fieldtype": "Int",
-   "label": "T\u1ed5ng s\u1ed1 l\u1ea7n vi\u1ebfng th\u0103m ngo\u1ea1i tuy\u1ebfn"
+   "fieldname": "doanh_thu_ngay",
+   "fieldtype": "Float",
+   "label": "Doanh thu trong ng\u00e0y"
   },
   {
-   "fieldname": "total_checkins_on_route",
+   "fieldname": "doanh_so_ngay",
+   "fieldtype": "Float",
+   "label": "Doanh s\u1ed1 trong ng\u00e0y"
+  },
+  {
+   "fieldname": "so_kh_vt_luot",
+   "fieldtype": "Int",
+   "label": "S\u1ed1 KH vi\u1ebfng th\u0103m (l\u01b0\u1ee3t/ng\u00e0y)"
+  },
+  {
+   "fieldname": "so_kh_dat_hang",
+   "fieldtype": "Int",
+   "label": "S\u1ed1 Kh \u0111\u1eb7t h\u00e0ng"
+  },
+  {
+   "fieldname": "so_kh_moi",
+   "fieldtype": "Int",
+   "label": "S\u1ed1 KH m\u1edbi"
+  },
+  {
+   "fieldname": "so_don_hang",
+   "fieldtype": "Int",
+   "label": "S\u1ed1 \u0111\u01a1n h\u00e0ng"
+  },
+  {
+   "fieldname": "san_luong",
+   "fieldtype": "Int",
+   "label": "S\u1ea3n l\u01b0\u1ee3ng"
+  },
+  {
+   "fieldname": "sku",
+   "fieldtype": "Int",
+   "label": "SKU"
+  },
+  {
+   "fieldname": "so_gio_lam_viec",
+   "fieldtype": "Float",
+   "label": "S\u1ed1 gi\u1edd l\u00e0m vi\u1ec7c"
+  },
+  {
+   "fieldname": "so_kh_vt_duynhat",
+   "fieldtype": "Int",
+   "label": "S\u1ed1 KH vi\u1ebfng th\u0103m (duy nh\u1ea5t/ng\u00e0y)"
+  },
+  {
+   "fieldname": "solan_vt_dungtuyen",
    "fieldtype": "Int",
    "label": "T\u1ed5ng s\u1ed1 l\u1ea7n vi\u1ebfng th\u0103m \u0111\u00fang tuy\u1ebfn"
+  },
+  {
+   "fieldname": "solan_vt_ngoaituyen",
+   "fieldtype": "Int",
+   "label": "T\u1ed5ng s\u1ed1 l\u1ea7n vi\u1ebfng th\u0103m ngo\u1ea1i tuy\u1ebfn"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-02-16 09:42:42.024184",
+ "modified": "2024-02-19 15:13:04.140967",
  "modified_by": "Administrator",
  "module": "MBW DMS",
  "name": "DMS Summary KPI Daily",

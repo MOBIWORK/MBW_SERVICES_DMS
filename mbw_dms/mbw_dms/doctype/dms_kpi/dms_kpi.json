@@ -1,0 +1,156 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2024-02-19 10:00:13.781165",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_46db",
+  "nhom_ban_hang",
+  "nhan_vien_ban_hang",
+  "so_kh_vt_duynhat",
+  "so_kh_vt_luot",
+  "so_kh_dathang",
+  "so_kh_moi",
+  "so_don_hang",
+  "doanh_so",
+  "column_break_w0pu",
+  "doanh_thu",
+  "san_luong",
+  "sku",
+  "so_gio_lam_viec",
+  "ngay_hieu_luc_tu",
+  "ngay_hieu_luc_den",
+  "trang_thai"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_46db",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "nhom_ban_hang",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Nh\u00f3m b\u00e1n h\u00e0ng",
+   "options": "Sales Person",
+   "reqd": 1
+  },
+  {
+   "fieldname": "nhan_vien_ban_hang",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Nh\u00e2n vi\u00ean b\u00e1n h\u00e0ng",
+   "options": "Employee",
+   "reqd": 1
+  },
+  {
+   "fieldname": "so_kh_vt_duynhat",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "S\u1ed1 KH vi\u1ebfng th\u0103m (duy nh\u1ea5t/th\u00e1ng)",
+   "reqd": 1
+  },
+  {
+   "fieldname": "so_kh_vt_luot",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "S\u1ed1 KH vi\u1ebfng th\u0103m (l\u01b0\u1ee3t/th\u00e1ng)",
+   "reqd": 1
+  },
+  {
+   "fieldname": "so_kh_dathang",
+   "fieldtype": "Int",
+   "label": "S\u1ed1 KH \u0111\u1eb7t h\u00e0ng",
+   "reqd": 1
+  },
+  {
+   "fieldname": "so_kh_moi",
+   "fieldtype": "Int",
+   "label": "S\u1ed1 KH m\u1edbi",
+   "reqd": 1
+  },
+  {
+   "fieldname": "so_don_hang",
+   "fieldtype": "Int",
+   "label": "S\u1ed1 \u0111\u01a1n h\u00e0ng",
+   "reqd": 1
+  },
+  {
+   "fieldname": "doanh_so",
+   "fieldtype": "Float",
+   "label": "Doanh s\u1ed1",
+   "reqd": 1
+  },
+  {
+   "fieldname": "doanh_thu",
+   "fieldtype": "Float",
+   "label": "Doanh thu",
+   "reqd": 1
+  },
+  {
+   "fieldname": "san_luong",
+   "fieldtype": "Int",
+   "label": "S\u1ea3n l\u01b0\u1ee3ng",
+   "reqd": 1
+  },
+  {
+   "fieldname": "sku",
+   "fieldtype": "Int",
+   "label": "SKU",
+   "reqd": 1
+  },
+  {
+   "fieldname": "so_gio_lam_viec",
+   "fieldtype": "Float",
+   "label": "S\u1ed1 gi\u1edd l\u00e0m vi\u1ec7c",
+   "reqd": 1
+  },
+  {
+   "fieldname": "ngay_hieu_luc_tu",
+   "fieldtype": "Date",
+   "label": "Ng\u00e0y hi\u1ec7u l\u1ef1c t\u1eeb",
+   "reqd": 1
+  },
+  {
+   "fieldname": "ngay_hieu_luc_den",
+   "fieldtype": "Date",
+   "label": "Ng\u00e0y hi\u1ec7u l\u1ef1c \u0111\u1ebfn",
+   "reqd": 1
+  },
+  {
+   "fieldname": "trang_thai",
+   "fieldtype": "Select",
+   "label": "Tr\u1ea1ng th\u00e1i",
+   "options": "Ho\u1ea1t \u0111\u1ed9ng\nKh\u00f4ng ho\u1ea1t \u0111\u1ed9ng"
+  },
+  {
+   "fieldname": "column_break_w0pu",
+   "fieldtype": "Column Break"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2024-02-19 10:12:31.933556",
+ "modified_by": "Administrator",
+ "module": "MBW DMS",
+ "name": "DMS KPI",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

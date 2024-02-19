@@ -197,7 +197,7 @@ def create_customer(**kwargs):
             router.save()
 
         frappe.db.commit()
-        return gen_response(200, 'Thành công', {"name": new_customer.name})
+        return gen_response(201, 'Thành công', {"name": new_customer.name})
     except Exception as e:
         return exception_handel(e)
     

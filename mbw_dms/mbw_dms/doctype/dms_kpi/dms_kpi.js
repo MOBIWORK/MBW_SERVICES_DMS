@@ -1,8 +1,8 @@
 // Copyright (c) 2024, MBW and contributors
 // For license information, please see license.txt
 
-frappe.ui.form.on('DMS KPI New Customer', {
-	// refresh: function(frm) {
+// frappe.ui.form.on("DMS KPI", {
+// 	refresh(frm) {
 
-	// }
-});
+// 	},
+// });

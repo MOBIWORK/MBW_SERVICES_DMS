@@ -199,7 +199,7 @@ def create_sale_order(**kwargs):
         if grand_total == float(kwargs.get('grand_total')):
             new_order.insert()
             frappe.db.commit()
-            gen_response(200, 'Thành công',  {"name": new_order.name})
+            gen_response(201, 'Thành công',  {"name": new_order.name})
         else:
             return gen_response(400, i18n.t('translate.invalid_grand_total', locale=get_language()), {"grand_total": grand_total})
     except Exception as e:
@@ -281,7 +281,7 @@ def create_return_order(**kwargs):
         amount = 0
         for item_data in items:
             rate = float(item_data.get('rate'))   # Giá item
-            discount_percentage = float(item_data.get('discount_percentage'))  # Phần trăn chiết khấu của item
+            discount_percentage = float(item_data.get('discount_percentage', 0))  # Phần trăn chiết khấu của item
             new_order.append('items', {
                 'item_code': item_data.get('item_code'),
                 'qty': -item_data.get('qty'),
@@ -325,7 +325,7 @@ def create_return_order(**kwargs):
         if grand_total == float(kwargs.get('grand_total')):
             new_order.insert()
             frappe.db.commit()
-            gen_response(200, 'Thành công',  {"name": new_order.name})
+            gen_response(201, 'Thành công',  {"name": new_order.name})
         else:
             return gen_response(400, i18n.t('translate.invalid_grand_total', locale=get_language()), {"grand_total": grand_total})
     except Exception as e:
@@ -345,29 +345,32 @@ def edit_return_order(name, **kwargs):
                 items = kwargs.get('items')
                 if items:
                     for item_data in items:
-                        discount_percentage = float(item_data.get('discount_percentage')) if item_data.get('discount_percentage') is not None else None
-
+                        discount_percentage = item_data.get('discount_percentage')
+                        rate = item_data.get('rate')
+                        uom = item_data.get('uom')
                         # Số lượng sản phẩm không thể sửa về 0
-                        qty = int(item_data.get('qty')) if item_data.get('qty') is not None else 1
+                        qty = int(item_data.get('qty', 1))
                         if qty == 0:
                             return gen_response(400, 'Số lượng không thể bằng 0')
                         
                         # Kiểm tra xem sản phẩm đã tồn tại chưa, nếu chưa thì thêm mới
                         existing_item = next((item for item in order.items if item.item_code == item_data.get('item_code')), None)
                         if existing_item:
-                            if qty is not None:
+                            if qty:
                                 existing_item.qty = -qty
-                            existing_item.uom = item_data.get('uom')
-                            if discount_percentage is not None:
-                                existing_item.discount_percentage = discount_percentage
-                            existing_item.rate = item_data.get('rate')
+                            if uom:
+                                existing_item.uom = uom
+                            if discount_percentage:
+                                existing_item.discount_percentage = float(discount_percentage)
+                            if rate:
+                                existing_item.rate = float(rate)
                         else:
                             order.append('items', {
                                 'item_code': item_data.get('item_code'),
                                 'qty': -qty,
                                 'uom': item_data.get('uom'),
                                 'rate': item_data.get('rate'),
-                                'discount_percentage': discount_percentage if discount_percentage is not None else 0
+                                'discount_percentage': discount_percentage if discount_percentage else 0
                             })
 
                 # Trường hợp chỉnh sửa tax
