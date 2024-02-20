@@ -1,4 +1,6 @@
-export const getAttrInArray = (array=[], fields=[], options = {}) => {
+
+
+export const getAttrInArray = (array:any[], fields: any[], options = {}) => {
     let newArray:any[] = []
     array.forEach(data => {
         let obj = {}

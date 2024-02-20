@@ -1,7 +1,7 @@
 import axios from "axios";
 
 let AxiosService:any = axios;
-console.log(import.meta.env.VITE_BASE_URL);
+// console.log(import.meta.env.VITE_BASE_URL);
 
 if (import.meta.env.VITE_BASE_URL) {
   console.log('vao day');

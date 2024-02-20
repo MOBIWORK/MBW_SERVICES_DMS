@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import RowCustom from "./styled";
-import { Button, Col, Input, Modal, Radio, Row, Select } from "antd";
+import { Button, Col, Input, Modal, Radio, Row, Select, message, Space  } from "antd";
 import { FormItemCustom } from "../../components/form-item";
 import {SelectCommon} from '@/components'
 import { addCustomerOption, baseCustomers } from "./data";
@@ -12,6 +12,8 @@ import CustomerMap from "./customer-map";
 import { CustomerType } from "./type";
 import { ChooseCustomer, ImportCustomer } from "./modal";
 import * as XLSX from 'xlsx';
+import { getAttrInArray } from "../../util";
+import { AxiosService } from "../../services/server";
 
 type Props = {
   listCustomer: any[],
@@ -19,11 +21,18 @@ type Props = {
 }
 
 export default function Customer({listCustomer,handleCustomer}:Props) {
+  const [messageApi, contextHolder] = message.useMessage();
   const [viewMode,setViewMode] = useState('list')
   const [openChoose,setOpenChoose] = useState<boolean>(false)
   const [openImport,setOpenImport] = useState<boolean>(false)
   const [file,setFile] = useState()
   const [dataImport,setDataImport] = useState<any[]>([])
+  const warning = (message: string) => {
+    messageApi.open({
+      type: 'warning',
+      content: message,
+    });
+  };
   const handeClose = (type:'Choose'| 'Import' | null) => {
     switch(type) {
       case "Choose":
@@ -64,8 +73,18 @@ export default function Customer({listCustomer,handleCustomer}:Props) {
   }
 
   const handleImportCusTomer = async () => {
-    console.log(dataImport);
-    
+    // console.log(dataImport);
+    let importCustomers =  getAttrInArray(dataImport,["Mã khách hàng", "Thứ tự VT", "Tần suất"],{isNull: false})
+    const list_customerCodes = importCustomers.map(customer => customer["Mã khách hàng"]).filter(code => !!code && !listCustomer.map(cust => cust.customer_code).includes(code))
+
+    const rsImport  = await AxiosService.post("/api/method/mbw_dms.api.router.get_customer_import",{
+      customer_codes: list_customerCodes
+    })
+    console.log("rsImport:::",rsImport);
+
+    handleCustomer(prev => [...prev,...rsImport.result])
+    warning(rsImport.message)
+    setOpenImport(false)
   }
 
   return (

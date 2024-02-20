@@ -26,14 +26,12 @@ export function ImportCustomer({handleFile}: importProps) {
       } else if (status === 'error') {
         message.error(`${info.file.name} file upload failed.`);
       }
-      console.log("file",info);
-      //info.file.originFileObj
       let file = info.file.originFileObj
       handleFile(file)
       
     },
     onDrop(e) {
-      console.log('Dropped files', e.dataTransfer.files);
+      // console.log('Dropped files', e.dataTransfer.files,e);
     },
   };
   return (
