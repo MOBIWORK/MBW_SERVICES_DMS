@@ -8,21 +8,28 @@ import { AxiosService } from "../../services/server";
 import DetailModal from "./modal/detail";
 import useDebounce from "../../hooks/useDebount";
 import dayjs from "dayjs";
+import { listSale } from "../../types/listSale";
+import { employee } from "../../types/employeeFilter";
+import { rsData, rsDataFrappe } from "../../types/response";
 export default function MonitorAlbum() {
   const [listCustomerGroup, setCustomerGroup] = useState<any[]>([]);
-  const [listEmployee, setListEmployee] = useState<any[]>([]);
   const [dataAlbum, setDataAlbum] = useState([]);
   const [dataFilterAlbum, setDataFilterAlbum] = useState([]);
-  const [dataPerson, setDataPerson] = useState([]);
   const [album, setAlbum] = useState<string>();
   const [customer_name, setCustomer_name] = useState<string>();
   const [employee, setEmployee] = useState<string>();
-  const [team_sale, setPerson] = useState<string>();
   const [creation, setCreation] = useState<any>();
   const [keyS, setKeyS] = useState("");
   const [keyS1, setKeyS1] = useState("");
   const [keyS2, setKeyS2] = useState("");
   const [keyS3, setKeyS3] = useState("");
+
+  const [listEmployees, setListEmployees] = useState<any[]>([]);
+  const [listSales, setListSales] = useState<any[]>([]);
+
+  const [keySearch4, setKeySearch4] = useState("");
+  const [team_sale, setTeamSale] = useState<string>();
+  let seachbykey = useDebounce(keySearch4);
   const [modal, setModal] = useState<{
     open: boolean;
     id: any;
@@ -47,6 +54,43 @@ export default function MonitorAlbum() {
 
   useEffect(() => {
     (async () => {
+      let rsSales: rsData<listSale[]> = await AxiosService.get(
+        "/api/method/mbw_dms.api.router.get_team_sale"
+      );
+      console.log("rsSale", rsSales);
+
+      setListSales(
+        rsSales.result.map((team_sale: listSale) => ({
+          label: team_sale,
+          value: team_sale,
+        }))
+      );
+    })();
+  }, []);
+  useEffect(() => {
+    (async () => {
+      let rsEmployee: rsDataFrappe<employee[]> = await AxiosService.get(
+        "/api/method/mbw_dms.api.router.get_sale_person",
+        {
+          params: {
+            team_sale: team_sale,
+            key_search: seachbykey,
+          },
+        }
+      );
+      console.log("rsemp", rsEmployee);
+      let { message: results } = rsEmployee;
+      setListEmployees(
+        results.map((employee_filter: employee) => ({
+          value: employee_filter.employee_code,
+          label: employee_filter.employee_name || employee_filter.employee_code,
+        }))
+      );
+    })();
+  }, [team_sale, seachbykey]);
+
+  useEffect(() => {
+    (async () => {
       const rsCustomer = await AxiosService.get(
         "/api/method/mbw_dms.api.selling.customer.list_customer"
       );
@@ -57,23 +101,6 @@ export default function MonitorAlbum() {
         result.data.map((customer: any) => ({
           label: customer.customer_name,
           value: customer.customer_name,
-        }))
-      );
-    })();
-  }, []);
-
-  useEffect(() => {
-    (async () => {
-      const rsEmployee = await AxiosService.get(
-        "/api/method/mbw_dms.api.note.list_email"
-      );
-      console.log("aaaád", rsEmployee);
-      
-      let { result } = rsEmployee;
-      setListEmployee(
-        result.data.map((employee: any) => ({
-          label: employee.first_name,
-          value: employee.name,
         }))
       );
     })();
@@ -104,16 +131,7 @@ export default function MonitorAlbum() {
         }
       );
 
-      const rsPerson = await AxiosService.get(
-        "/api/method/mbw_dms.api.selling.customer.list_sale_person"
-      );
-
-      // if (creation === null || creation === undefined || creation === "") {
-      //   setCreation(dateNow);
-      // }
-
       setDataAlbum(rsAlbum.result);
-      setDataPerson(rsPerson.result);
     })();
   }, [album, customer_name, creation, team_sale, employee]);
 
@@ -161,16 +179,13 @@ export default function MonitorAlbum() {
               defaultValue={""}
               options={[
                 { label: "Tất cả nhóm bán hàng", value: "" },
-                ...dataPerson.map((person: any) => ({
-                  label: person.sales_person_name,
-                  value: person.sales_person_name,
-                })),
+                ...listSales
               ]}
               showSearch
               notFoundContent={null}
               onSearch={(value: string) => setKeyS3(value)}
               onChange={(value) => {
-                setPerson(value);
+                setTeamSale(value);
               }}
             />
           </FormItemCustom>
@@ -180,15 +195,16 @@ export default function MonitorAlbum() {
               className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
               options={[
                 { label: "Tất cả nhân viên", value: "" },
-                ...listEmployee,
+                ...listEmployees,
               ]}
               showSearch
               defaultValue={""}
               notFoundContent={null}
-              onSearch={(value: string) => setKeyS2(value)}
+              onSearch={setKeySearch4}
               onChange={(value) => {
                 setEmployee(value);
               }}
+              allowClear
             />
           </FormItemCustom>
 
@@ -240,7 +256,7 @@ export default function MonitorAlbum() {
             {dataAlbum.length > 0 &&
               dataAlbum.map((data: any) => (
                 <Col
-                  key={data?.DMS_ID}
+                  key={data?.name}
                   className="flex justify-center items-center px-4 pt-4 rounded-lg"
                   span={4}
                 >
