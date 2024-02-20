@@ -22,8 +22,8 @@ export default function Header() {
     <div className="w-full border-[#E2E6E9] border bg-white py-[7px]">
       <Row className="justify-between max-w-full w-[80%] mx-auto">
         <Col>
-          <Link to="/" className="w-[50px] h-[50px]">
-            <img src={logo} className="object-contain w-full h-full"/>
+          <Link to="/" className="w-[32px] h-[32px]">
+            <img src={logo} className="object-contain w-[32px] h-[32px]"/>
           </Link>
         </Col>
         <Col>
