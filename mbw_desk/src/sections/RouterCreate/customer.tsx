@@ -5,12 +5,13 @@ import { FormItemCustom } from "../../components/form-item";
 import {SelectCommon} from '@/components'
 import { addCustomerOption, baseCustomers } from "./data";
 import { List, ThunderIcon } from "../../icons";
-import { SearchOutlined } from "@ant-design/icons";
+import { SearchOutlined ,DownloadOutlined} from "@ant-design/icons";
 import { Map } from "../../icons/map";
 import CustomerList from "./customer-list";
 import CustomerMap from "./customer-map";
 import { CustomerType } from "./type";
 import { ChooseCustomer, ImportCustomer } from "./modal";
+import * as XLSX from 'xlsx';
 
 type Props = {
   listCustomer: any[],
@@ -21,6 +22,8 @@ export default function Customer({listCustomer,handleCustomer}:Props) {
   const [viewMode,setViewMode] = useState('list')
   const [openChoose,setOpenChoose] = useState<boolean>(false)
   const [openImport,setOpenImport] = useState<boolean>(false)
+  const [file,setFile] = useState()
+  const [dataImport,setDataImport] = useState<any[]>([])
   const handeClose = (type:'Choose'| 'Import' | null) => {
     switch(type) {
       case "Choose":
@@ -44,6 +47,25 @@ export default function Customer({listCustomer,handleCustomer}:Props) {
         break
       default: 
     }
+  }
+
+  const handleUpdateFile = async(file) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const data = new Uint8Array(e.target.result);
+      const workbook = XLSX.read(data, { type: 'array' });
+      const sheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[sheetName];
+      const jsonData = XLSX.utils.sheet_to_json(worksheet);
+      console.log("json_data",jsonData);
+      setDataImport(jsonData)
+    };
+    reader.readAsArrayBuffer(file);    
+  }
+
+  const handleImportCusTomer = async () => {
+    console.log(dataImport);
+    
   }
 
   return (
@@ -88,8 +110,21 @@ export default function Customer({listCustomer,handleCustomer}:Props) {
       <Modal width={1240} open={openChoose} onCancel={handeClose.bind(null,'Choose')} title={<strong className="text-xl">Chọn khách hàng</strong>} footer={false}> 
         <ChooseCustomer selected={listCustomer} handleAdd={handleCustomer} closeModal={setOpenChoose.bind(null,false)}/>
       </Modal>
-      <Modal width={777}   open={openImport} onCancel={handeClose.bind(null,'Import')} okText='Tiếp tục' cancelText='Hủy' title={<strong className="text-xl">Nhập dữ liệu khách hàng</strong>}>
-        <ImportCustomer />
+      <Modal 
+      width={777}   
+      open={openImport} 
+      onCancel={handeClose.bind(null,'Import')} 
+      okText='Tiếp tục' 
+      cancelText='Hủy' 
+      title={<>
+        <strong className="text-xl">Nhập dữ liệu khách hàng</strong><br/>
+        <Button type="link" className="px-0">
+          Tải về file mẫu <DownloadOutlined />
+      </Button>
+      </>}
+      onOk={handleImportCusTomer}
+      >
+        <ImportCustomer handleFile={handleUpdateFile}/>
       </Modal>
     </>
   );

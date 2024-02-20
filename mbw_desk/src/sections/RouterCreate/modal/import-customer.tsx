@@ -5,9 +5,16 @@ import { message, Upload } from 'antd';
 
 const { Dragger } = Upload;
 
-const props: UploadProps = {
+
+
+interface importProps {
+  handleFile: () => file 
+}
+export function ImportCustomer({handleFile}: importProps) {
+  const props: UploadProps = {
     name: 'file',
-    multiple: true,
+    // multiple: false,
+    accept: ".xls,.xlsx",
     action: 'https://run.mocky.io/v3/435e224c-44fb-4773-9faf-380c5e6a2188',
     onChange(info) {
       const { status } = info.file;
@@ -19,21 +26,24 @@ const props: UploadProps = {
       } else if (status === 'error') {
         message.error(`${info.file.name} file upload failed.`);
       }
+      console.log("file",info);
+      //info.file.originFileObj
+      let file = info.file.originFileObj
+      handleFile(file)
+      
     },
     onDrop(e) {
       console.log('Dropped files', e.dataTransfer.files);
     },
   };
-export function ImportCustomer() {
   return (
     <Dragger {...props}>
     <p className="ant-upload-drag-icon">
       <InboxOutlined />
     </p>
-    <p className="ant-upload-text">Click or drag file to this area to upload</p>
+    <p className="ant-upload-text">Kéo, thả hoặc chọn tệp để tải lên</p>
     <p className="ant-upload-hint">
-      Support for a single or bulk upload. Strictly prohibited from uploading company data or other
-      banned files.
+      Hỗ trợ tệp .xls, .xlsx
     </p>
   </Dragger>
   )
