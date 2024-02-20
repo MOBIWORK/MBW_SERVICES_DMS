@@ -33,6 +33,12 @@ export default function Customer({listCustomer,handleCustomer}:Props) {
       content: message,
     });
   };
+  const error = () => {
+    messageApi.open({
+      type: 'error',
+      content: 'Error',
+    });
+  };
   const handeClose = (type:'Choose'| 'Import' | null) => {
     switch(type) {
       case "Choose":
@@ -77,14 +83,19 @@ export default function Customer({listCustomer,handleCustomer}:Props) {
     let importCustomers =  getAttrInArray(dataImport,["Mã khách hàng", "Thứ tự VT", "Tần suất"],{isNull: false})
     const list_customerCodes = importCustomers.map(customer => customer["Mã khách hàng"]).filter(code => !!code && !listCustomer.map(cust => cust.customer_code).includes(code))
 
-    const rsImport  = await AxiosService.post("/api/method/mbw_dms.api.router.get_customer_import",{
-      customer_codes: list_customerCodes
-    })
-    console.log("rsImport:::",rsImport);
-
-    handleCustomer(prev => [...prev,...rsImport.result])
-    warning(rsImport.message)
-    setOpenImport(false)
+    try {
+      const rsImport  = await AxiosService.post("/api/method/mbw_dms.api.router.get_customer_import",{
+        customer_codes: list_customerCodes
+      })
+      console.log("rsImport:::",rsImport);
+  
+      handleCustomer(prev => [...prev,...rsImport.result])
+      warning(rsImport.message)
+      setOpenImport(false)
+      
+    } catch (err) {
+      error()
+    }
   }
 
   return (
