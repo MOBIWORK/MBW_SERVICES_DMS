@@ -17,6 +17,12 @@ def get_router(id):
 def get_customer_router(**kwargs):
     from mbw_dms.mbw_dms.doctype.dms_router.dms_router import get_customer_router
     return get_customer_router(data=kwargs)
+#danh sach khach hang import
+@frappe.whitelist(methods="POST")
+def get_customer_import(**params):
+    from mbw_dms.mbw_dms.doctype.dms_router.dms_router import get_customers_import
+    return get_customers_import(data=params)
+
 
 #them tuyen
 @frappe.whitelist()

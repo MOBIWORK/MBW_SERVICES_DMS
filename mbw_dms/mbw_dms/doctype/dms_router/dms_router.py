@@ -5,10 +5,11 @@ import frappe
 from frappe.model.document import Document
 from pypika import CustomFunction
 
-from mbw_dms.api.common import exception_handel, gen_response 
+from mbw_dms.api.common import exception_handel, gen_response,get_language
 from frappe.desk.reportview import get_filters_cond, get_match_cond
 from erpnext.controllers.queries import get_fields
 from mbw_dms.api.validators import validate_filter 
+from mbw_service_v2.config_translate import i18n
 
 UNIX_TIMESTAMP = CustomFunction('UNIX_TIMESTAMP', ['day'])
 
@@ -159,6 +160,27 @@ def get_customer_router(data):
             "page_size": page_size,
             "page_number": page_number
         })
+    except Exception as e :
+        exception_handel(e)
+
+
+def get_customers_import(data):
+    try:
+        list_customer_codes = data.get("customer_codes",[])
+        if len(list_customer_codes) == 0: 
+            return gen_response(500,i18n.t('translate.error', locale=get_language()) , []) 
+        FiltersCustomer = {"customer_code": ["in",list_customer_codes]}
+        fields_customer = [
+            'name','customer_primary_address'
+            ,'customer_code','customer_location_primary','mobile_no'
+            ,'customer_name'
+            ,'UNIX_TIMESTAMP(custom_birthday) as birthday'
+            ]
+        message= ""
+        list_customer = frappe.db.get_list('Customer',filters= FiltersCustomer,fields=fields_customer)      
+        if len(list_customer_codes) != len(list_customer): 
+            message =  i18n.t('translate.some_data_not_in_database', locale=get_language()) 
+        return gen_response(200,message, list_customer)
     except Exception as e :
         exception_handel(e)
 

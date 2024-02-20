@@ -1,4 +1,5 @@
 en:
+  some_data_not_in_database: Some data not in database
   not_found_shift: Shift not Assignment.
   invalid_shift: Shift not Valid.
   time_not_in: Inappropriate time.

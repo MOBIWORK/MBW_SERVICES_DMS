@@ -1,4 +1,5 @@
 vi:
+  some_data_not_in_database: Một số dữ liệu không có trong cơ sở dữ liệu
   not_found_shift: Ca này chưa đăng ký.
   invalid_shift: Ca không hợp lệ
   time_not_in: Thời gian không phù hợp.
