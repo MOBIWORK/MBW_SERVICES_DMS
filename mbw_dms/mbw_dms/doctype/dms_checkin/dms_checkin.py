@@ -3,15 +3,111 @@
 
 import frappe
 from frappe.model.document import Document
-from datetime import datetime
+import datetime
 from frappe.utils.data import get_time
-from mbw_dms.api.common import exception_handel, gen_response, get_language ,get_user_id,upload_image_s3, post_image
-from mbw_dms.api.validators import (validate_datetime,validate_filter)
+from mbw_dms.api.common import exception_handel, gen_response, get_language, get_user_id, upload_image_s3, post_image, get_employee_info
+from mbw_dms.api.validators import validate_datetime, validate_filter
 from mbw_dms.config_translate import i18n
 import json
+from frappe.utils import nowdate
+import calendar
 
 class DMSCheckin(Document):
-	pass
+    def after_insert(self):
+        self.update_kpi_monthly()
+
+    def existing_checkin(self, kh_ma, start_date, end_date, current_user):
+        existing_checkin = frappe.get_all(
+            'DMS Checkin',
+            filters={"creation": (">=", start_date), 
+                     "creation": ("<=", end_date), 
+                     "kh_ma": kh_ma, 
+                     "owner": current_user},
+            fields=['name']
+        )
+        return existing_checkin
+
+    def update_kpi_monthly(self):
+        # Lấy ngày tháng để truy xuất dữ liệu
+        month = int(nowdate().split('-')[1])
+        year = int(nowdate().split('-')[0])
+        start_date_str = f'{year:04d}-{month:02d}-01'
+        last_day_of_month = calendar.monthrange(year, month)[1]
+        end_date_str = f'{year:04d}-{month:02d}-{last_day_of_month:02d}'
+        start_date = frappe.utils.getdate(start_date_str)
+        end_date = frappe.utils.getdate(end_date_str)
+
+        # Lấy id của nhân viên
+        current_user = get_employee_info()
+        # Lấy tuyến của nhân viên
+        router_employee = frappe.get_all(
+            'DMS Router',
+            filters = {
+                "employee": current_user['name']
+            },
+            fields = ['travel_date']
+        )
+        list_travel_date = [router['travel_date'] for router in router_employee]
+        days = datetime.date.today()
+        # Lấy thứ của ngày
+        date = days.weekday()
+        # Chuyển đổi sang tên của ngày trong tuần
+        date_in_week = ["Thứ 2", "Thứ 2", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ Nhật"]
+        name_date = date_in_week[date]
+
+        # Kiểm tra xem khách hàng đã thực hiện checkin trong tháng này hay chưa
+        kh_ma = self.kh_ma
+        exists_checkin = self.existing_checkin(kh_ma=kh_ma, start_date=start_date, end_date=end_date, current_user=current_user['user_id'])
+
+        # Kiểm tra đã tồn tại bản ghi KPI của tháng này chưa
+        existing_monthly_summary = frappe.get_all(
+            'DMS Summary KPI Monthly',
+            filters={'thang': month, 'nam': year, 'nhan_vien_ban_hang': current_user['name']},
+            fields=['name']
+        )
+
+        if len(exists_checkin) > 1:
+            if existing_monthly_summary:
+                monthly_summary_doc = frappe.get_doc('DMS Summary KPI Monthly', existing_monthly_summary[0]['name'])
+                monthly_summary_doc.so_kh_vt_luot += 1
+                if name_date in list_travel_date:
+                    monthly_summary_doc.solan_vt_dungtuyen += 1
+                else:
+                    monthly_summary_doc.solan_vt_ngoaituyen += 1
+                monthly_summary_doc.save(ignore_permissions=True)
+            else:
+                monthly_summary_doc = frappe.get_doc({
+                    'doctype': 'DMS Summary KPI Monthly',
+                    'nam': year,
+                    'thang': month,
+                    'nhan_vien_ban_hang': current_user['name'],
+                    'so_kh_vt_luot': 1,
+                    'solan_vt_dungtuyen': 1 if name_date in list_travel_date else 0,
+                    'solan_vt_ngoaituyen': 1 if name_date not in list_travel_date else 0
+                })
+                monthly_summary_doc.insert(ignore_permissions=True)
+        else:
+            if existing_monthly_summary:
+                monthly_summary_doc = frappe.get_doc('DMS Summary KPI Monthly', existing_monthly_summary[0]['name'])
+                monthly_summary_doc.so_kh_vt_luot += 1
+                monthly_summary_doc.so_kh_vt_duynhat += 1
+                if name_date in list_travel_date:
+                    monthly_summary_doc.solan_vt_dungtuyen += 1
+                else:
+                    monthly_summary_doc.solan_vt_ngoaituyen += 1
+                monthly_summary_doc.save(ignore_permissions=True)
+            else:
+                monthly_summary_doc = frappe.get_doc({
+                    'doctype': 'DMS Summary KPI Monthly',
+                    'nam': year,
+                    'thang': month,
+                    'nhan_vien_ban_hang': current_user['name'],
+                    'so_kh_vt_luot': 1,
+                    'so_kh_vt_duynhat': 1,
+                    'solan_vt_dungtuyen': 1 if name_date in list_travel_date else 0,
+                    'solan_vt_ngoaituyen': 1 if name_date not in list_travel_date else 0
+                })
+                monthly_summary_doc.insert(ignore_permissions=True)
 
 # Tạo mới checkin
 @frappe.whitelist(methods='POST')
@@ -38,7 +134,7 @@ def create_checkin(kwargs):
                 new_checkin.set(key, created_date)
         new_checkin.insert()
         frappe.db.commit()
-        return gen_response(200, "Thành công", {"name": new_checkin.name})
+        return gen_response(201, "Thành công", {"name": new_checkin.name})
     except Exception as e:
         return exception_handel(e)
     
@@ -54,7 +150,7 @@ def add_checkin_image(name_checkin, kwargs):
             })
             checkin.checkin_id = name_checkin
             checkin.save()
-            return gen_response(200, 'Successful', [])
+            return gen_response(201, 'Successful', [])
         else:
             return gen_response(406, f"Không tồn tại check in {name_checkin}")
     except Exception as e:
@@ -82,7 +178,7 @@ def create_checkin_inventory(body):
         doc = frappe.get_doc(body)
         doc.save()
         frappe.db.commit()
-        return gen_response(200, "Thành công", {"name": doc.name})
+        return gen_response(201, "Thành công", {"name": doc.name})
     except Exception as e:
         return exception_handel(e)
 
@@ -101,7 +197,7 @@ def create_checkin_image(body):
         address = body.get('address')
         long = validate_filter(type_check='require',value=body.get('long'))
         lat = validate_filter(type_check='require',value=body.get('lat'))
-        create_by =  user.get('name')
+        create_by = user.get('name')
         create_time = datetime.now()
         description = ''
         if customer_name:
@@ -133,14 +229,12 @@ def create_checkin_image(body):
             new_album_image = frappe.get_doc(image_push)
             new_album_image.save()
             frappe.db.commit()
-            gen_response(200,'',rsUpload) 
-            return 
+            return gen_response(201,'',rsUpload) 
         except :
-            gen_response(200,"", {
+            return gen_response(200,"", {
                 "status": False,
                 "file_url" : None
             })
-        return
     except Exception as e:
         exception_handel(e)
 
@@ -175,7 +269,6 @@ def update_address_customer(body):
                     "address_location":address_location               
                 }
             if customer_info.get("customer_primary_address"):
-                # new_address.update({'name': f"{address_line1}, {state}, {county}, {city}"})
                 doc_address = frappe.get_doc("Address",customer_info.get("customer_primary_address"))
                 for key,value in new_address.items():
                     setattr(doc_address,key,value)
@@ -197,10 +290,9 @@ def update_address_customer(body):
                 doc_customer.save()
             
             frappe.db.commit()
-            gen_response(200,"",doc_address.get('address_title') )
-            return
+            return gen_response(200,"",doc_address.get('address_title') )
         else:
-            gen_response(406,i18n.t('translate.not_found', locale=get_language()),False)             
+            return gen_response(406,i18n.t('translate.not_found', locale=get_language()),False)             
         
     except Exception as e:
         exception_handel(e)

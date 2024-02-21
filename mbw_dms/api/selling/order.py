@@ -113,7 +113,7 @@ def get_sale_order(name):
 # Tạo mới đơn hàng
 @frappe.whitelist(methods='POST')
 def create_sale_order(**kwargs):
-    try:
+    # try:
         from erpnext.accounts.party import get_party_details
         kwargs = frappe._dict(kwargs)
         new_order = frappe.new_doc('Sales Order')
@@ -202,8 +202,8 @@ def create_sale_order(**kwargs):
             gen_response(201, 'Thành công',  {"name": new_order.name})
         else:
             return gen_response(400, i18n.t('translate.invalid_grand_total', locale=get_language()), {"grand_total": grand_total})
-    except Exception as e:
-        return exception_handel(e)
+    # except Exception as e:
+    #     return exception_handel(e)
 
 
 # Áp dụng quy tắc đặt giá
