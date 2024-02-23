@@ -13,9 +13,7 @@ from mbw_dms.api.common import (
     get_employee_info
 )
 
-from mbw_dms.api.validators import (
-    validate_filter
-)
+from mbw_dms.api.validators import validate_filter 
 UNIX_TIMESTAMP = CustomFunction('UNIX_TIMESTAMP', ['day'])
 
 class DMSFakeGPS(Document):

@@ -25,7 +25,7 @@ def create_type_of_problem(kwargs):
         new_type_of_problem.ma_loai_van_de = validate_not_none(kwargs.get('ma_loai_van_de'))
         new_type_of_problem.ten_loai_van_de = validate_not_none(kwargs.get('ten_loai_van_de'))
 
-        new_type_of_problem.insert()
+        new_type_of_problem.insert(ignore_permissions=True)
 
         return gen_response(201, "Tạo thành công", {"name": new_type_of_problem.name})
        
@@ -40,7 +40,6 @@ def create_proble_monitor(kwargs):
         new_proble_monitor = frappe.new_doc('DMS Problem Monitor')
         
         new_proble_monitor.ma_van_de = validate_not_none(kwargs.get('ma_van_de'))
-        
         new_proble_monitor.loai_van_de = validate_not_none(kwargs.get('loai_van_de'))
         new_proble_monitor.noi_dung = validate_not_none(kwargs.get('noi_dung'))
         new_proble_monitor.trang_thai = validate_choice(configs.status_type)(kwargs.get('trang_thai'))
@@ -49,7 +48,7 @@ def create_proble_monitor(kwargs):
         new_proble_monitor.dia_chi = validate_not_none(kwargs.get('dia_chi'))
         new_proble_monitor.so_dien_thoai = validate_phone_number(kwargs.get('so_dien_thoai'))
         
-        new_proble_monitor.insert()
+        new_proble_monitor.insert(ignore_permissions=True)
 
         return gen_response(201, "Tạo thành công", {"name": new_proble_monitor.name})
     except Exception as e:
@@ -67,7 +66,7 @@ def create_note(kwargs):
             })
         new_note.custom_checkin_id = validate_not_none(kwargs.get('custom_checkin_id'))
         new_note.public = 1
-        new_note.insert() 
+        new_note.insert(ignore_permissions=True) 
         return gen_response(201, "Tạo mới thành công", {"name": new_note.name})
     except Exception as e:
         return exception_handel(e)    
@@ -105,8 +104,8 @@ def list_note(kwargs):
             my_filter["name"] = ['like', f'%{name}%']
         if custom_checkin_id:
             my_filter["custom_checkin_id"] = ['like', f'%{custom_checkin_id}%']
-        list_note = frappe.db.get_list('Note',filters= my_filter ,fields=["name", "title", "content", "creation","custom_checkin_id"])
-        gen_response(200, "Thành công", list_note)
+        list_note = frappe.db.get_list('Note',filters=my_filter ,fields=["name", "title", "content", "creation","custom_checkin_id"])
+        return gen_response(200, "Thành công", list_note)
     except Exception as e:
         return exception_handel(e)
     
@@ -115,7 +114,7 @@ def list_note(kwargs):
 def list_note_type():
     try:
         my_filter = {}
-        list_note_type = frappe.db.get_list('DMS Note Type',filters= my_filter ,fields=["name", "ma_ghi_chu", "loai_ghi_chu"])
-        gen_response(200, "Thành công", list_note_type)
+        list_note_type = frappe.db.get_list('DMS Note Type',filters=my_filter ,fields=["name", "ma_ghi_chu", "loai_ghi_chu"])
+        return gen_response(200, "Thành công", list_note_type)
     except Exception as e:
         return exception_handel(e)

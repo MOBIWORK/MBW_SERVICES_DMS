@@ -15,6 +15,7 @@
   "so_kh_vt_duynhat",
   "so_kh_vt_luot",
   "solan_vt_dungtuyen",
+  "column_break_dlma",
   "solan_vt_ngoaituyen",
   "so_kh_moi",
   "so_kh_dat_hang",
@@ -48,7 +49,7 @@
   {
    "fieldname": "doanh_so_thang",
    "fieldtype": "Float",
-   "label": "T\u1ed5ng doanh s\u1ed1 th\u00e1ng"
+   "label": "T\u1ed5ng doanh s\u1ed1 vi\u1ebfng th\u0103m trong th\u00e1ng"
   },
   {
    "fieldname": "so_kh_vt_duynhat",
@@ -99,11 +100,15 @@
    "fieldname": "so_gio_lam_viec",
    "fieldtype": "Float",
    "label": "S\u1ed1 gi\u1edd l\u00e0m vi\u1ec7c"
+  },
+  {
+   "fieldname": "column_break_dlma",
+   "fieldtype": "Column Break"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-02-19 15:15:48.480363",
+ "modified": "2024-02-20 15:20:22.231331",
  "modified_by": "Administrator",
  "module": "MBW DMS",
  "name": "DMS Summary KPI Monthly",
