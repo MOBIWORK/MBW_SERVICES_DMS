@@ -41,7 +41,9 @@ def create_checkin(kwargs):
         return gen_response(200, "Thành công", {"name": new_checkin.name})
     except Exception as e:
         return exception_handel(e)
-    
+
+
+
     
 # Thêm ảnh checkin
 @frappe.whitelist(methods='PUT')
@@ -220,3 +222,30 @@ def cancel_checkout(data):
         return
     except Exception as e :
         exception_handel(e)
+
+import requests
+
+def create_checkin_ek(doc, method=None):
+    settings = frappe.db.get_singles_dict("MBW Employee Settings")
+    geo_service = settings.get("geo_service")
+    objectId = ""
+    projectId = ""
+    api_checkin = f"https://api.ekgis.vn/v1/checkin/{projectId}/{objectId}"
+    data_checkin = {
+                "projectid":projectId,
+                "objectid": projectId,
+                "lng": doc.checkin_long,
+                "lat": doc.checkin_lat,
+                "accuracy": doc.checkin_dochinhxac,
+                "battery_checkin": 0,
+                "battery_checkout": 0
+                }
+    if doc.checkin_giovao and not doc.checkin_giora:
+        data_checkin.update({"activity": "checkin"})
+        data_checkin.update({"time_checkin" : doc.checkin_giovao})
+    if doc.checkin_giovao and doc.checkin_giora:
+        data_checkin.update({"activity": "checkout"})
+        data_checkin.update({"time_checkin": doc.checkin_giora})
+    requests.post(url = api_checkin,data= data_checkin)
+
+    
