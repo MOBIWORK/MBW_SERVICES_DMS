@@ -113,7 +113,7 @@ def get_sale_order(name):
 # Tạo mới đơn hàng
 @frappe.whitelist(methods='POST')
 def create_sale_order(**kwargs):
-    # try:
+    try:
         from erpnext.accounts.party import get_party_details
         kwargs = frappe._dict(kwargs)
         new_order = frappe.new_doc('Sales Order')
@@ -202,8 +202,8 @@ def create_sale_order(**kwargs):
             gen_response(201, 'Thành công',  {"name": new_order.name})
         else:
             return gen_response(400, i18n.t('translate.invalid_grand_total', locale=get_language()), {"grand_total": grand_total})
-    # except Exception as e:
-    #     return exception_handel(e)
+    except Exception as e:
+        return exception_handel(e)
 
 
 # Áp dụng quy tắc đặt giá
@@ -215,7 +215,7 @@ def pricing_rule(**kwargs):
         for i, child in enumerate(pricing_rule):
             if "item_code" not in child and i < len(kwargs["items"]):
                 child["item_code"] = kwargs["items"][i]["item_code"]
-        gen_response(200, 'Thành công', pricing_rule)
+        return gen_response(200, 'Thành công', pricing_rule)
     except Exception as e:
         return exception_handel(e)
 
@@ -229,7 +229,7 @@ def price_list(**kwargs):
         for i, child in enumerate(price_list["children"]):
             if "item_code" not in child and i < len(kwargs["items"]):
                 child["item_code"] = kwargs["items"][i]["item_code"]
-        gen_response(200, 'Thành công', price_list)
+        return gen_response(200, 'Thành công', price_list)
     except Exception as e:
         return exception_handel(e)
 
@@ -248,7 +248,7 @@ def create_return_order(**kwargs):
         discount_percent = float(kwargs.get('additional_discount_percentage', 0))  # Chiết khấu theo % của đơn hàng
         discount_amount = float(kwargs.get('discount_amount', 0))                  # Tổng tiền chiết khấu của đơn hàng
         rate_taxes = float(kwargs.get('rate_taxes', 0))                            # Phần trăm thuế
-        apply_discount_on = kwargs.get('apply_discount_on')                     # Loại chiết khấu
+        apply_discount_on = kwargs.get('apply_discount_on', 'Grand Total')                     # Loại chiết khấu
         taxes_and_charges = kwargs.get('taxes_and_charges')                     # Loại thuế
 
         new_order.customer = validate_not_none(kwargs.customer)                                         
@@ -388,7 +388,7 @@ def edit_return_order(name, **kwargs):
                     order.set('discount_amount', float(discount_amount))
 
                 order.save()
-                gen_response(200, 'Cập nhật thành công')
+                return gen_response(200, 'Cập nhật thành công')
             else:
                 return gen_response(400, i18n.t('translate.invalid_edit_return_order', locale=get_language()))
         else:
