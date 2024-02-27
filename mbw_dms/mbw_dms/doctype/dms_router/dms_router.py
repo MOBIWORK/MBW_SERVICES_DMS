@@ -9,7 +9,7 @@ from mbw_dms.api.common import exception_handel, gen_response,get_language
 from frappe.desk.reportview import get_filters_cond, get_match_cond
 from erpnext.controllers.queries import get_fields
 from mbw_dms.api.validators import validate_filter 
-from mbw_service_v2.config_translate import i18n
+from mbw_dms.config_translate import i18n
 
 UNIX_TIMESTAMP = CustomFunction('UNIX_TIMESTAMP', ['day'])
 
