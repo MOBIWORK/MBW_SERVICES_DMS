@@ -7,7 +7,7 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "config_name",
+  "c\u1ea5u_h\u00ecnh_mobile_tab",
   "vt_ngoaituyen",
   "kb_vitringoaisaiso",
   "saiso_chophep_kb_vitringoaisaiso",
@@ -19,14 +19,13 @@
   "batbuoc_chupanh",
   "soluong_album",
   "soluong_anh",
-  "batbuoc_ghichu"
+  "batbuoc_ghichu",
+  "c\u1ea5u_h\u00ecnh_t\u00edch_h\u1ee3p_tab",
+  "ma_du_an",
+  "lay_thong_tin",
+  "api_key"
  ],
  "fields": [
-  {
-   "fieldname": "config_name",
-   "fieldtype": "Data",
-   "label": "T\u00ean config"
-  },
   {
    "default": "0",
    "fieldname": "vt_ngoaituyen",
@@ -98,15 +97,40 @@
    "fieldname": "thoigian_toithieu",
    "fieldtype": "Float",
    "label": "Th\u1eddi gian t\u1ed1i thi\u1ec3u"
+  },
+  {
+   "fieldname": "c\u1ea5u_h\u00ecnh_mobile_tab",
+   "fieldtype": "Tab Break",
+   "label": "C\u1ea5u h\u00ecnh Mobile"
+  },
+  {
+   "fieldname": "ma_du_an",
+   "fieldtype": "Data",
+   "label": "M\u00e3 d\u1ef1 \u00e1n"
+  },
+  {
+   "fieldname": "lay_thong_tin",
+   "fieldtype": "Button",
+   "label": "L\u1ea5y th\u00f4ng tin"
+  },
+  {
+   "fieldname": "c\u1ea5u_h\u00ecnh_t\u00edch_h\u1ee3p_tab",
+   "fieldtype": "Tab Break",
+   "label": "C\u1ea5u h\u00ecnh t\u00edch h\u1ee3p"
+  },
+  {
+   "fieldname": "api_key",
+   "fieldtype": "Data",
+   "label": "API Key EKGis"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-01-31 13:37:30.194931",
+ "modified": "2024-02-27 13:57:21.814728",
  "modified_by": "Administrator",
  "module": "MBW DMS",
- "name": "DMS Config Mobile",
+ "name": "DMS Settings",
  "owner": "Administrator",
  "permissions": [
   {

@@ -5,5 +5,5 @@
 from frappe.tests.utils import FrappeTestCase
 
 
-class TestDMSConfigMobile(FrappeTestCase):
+class TestDMSLogs(FrappeTestCase):
 	pass
