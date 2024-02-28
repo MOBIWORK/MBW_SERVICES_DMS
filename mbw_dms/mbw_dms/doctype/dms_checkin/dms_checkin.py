@@ -7,6 +7,7 @@ import datetime
 from frappe.utils.data import get_time
 from mbw_dms.api.common import exception_handel, gen_response, get_language, get_user_id, upload_image_s3, post_image, get_employee_info
 from mbw_dms.api.validators import validate_datetime, validate_filter
+from mbw_dms.mbw_dms.utils import create_dms_log
 from mbw_dms.config_translate import i18n
 import json
 from frappe.utils import nowdate
@@ -15,6 +16,7 @@ import calendar
 class DMSCheckin(Document):
     def after_insert(self):
         self.update_kpi_monthly()
+        self.send_data_to_ekgis()
 
     def existing_checkin(self, kh_ma, start_date, end_date, current_user):
         existing_checkin = frappe.get_all(
@@ -109,6 +111,65 @@ class DMSCheckin(Document):
                 })
                 monthly_summary_doc.insert(ignore_permissions=True)
 
+    def send_data_to_ekgis(self):
+        try:
+            # Tạo mới ObjectID
+            projectId = frappe.get_doc('DMS Settings').ma_du_an
+            if projectId is None:
+                frappe.msgprint(f"Chưa có Project ID")
+                return
+            api_key = frappe.get_doc('DMS Settings').api_key
+            api_url = f'https://api.ekgis.vn/tracking/{projectId}/object'
+            params = {"api_key": api_key}
+            data_post = {
+                'name': frappe.session.user,
+                'type': 'driver'
+            }
+            objectId = ''
+            user_name = frappe.db.get_list('Employee', filters={'user_id': frappe.session.user}, fields=['name', 'custom_employee_ekgis_objid'])
+            if user_name[0]['custom_employee_ekgis_objid'] is not None:
+                objectId = user_name[0]['custom_employee_ekgis_objid']
+            else:
+                response = requests.post(api_url, params=params, json=data_post)
+                employee = frappe.get_doc('Employee', user_name[0]['name'])
+                if response.status_code == 200:
+                    new_info = response.json()
+                    employee.custom_employee_ekgis_objid = new_info['results'].get('_id')
+                    employee.save()
+                    objectId = new_info['results'].get('_id')
+                else:
+                    frappe.msgprint(f"Lỗi khi gọi API tạo mới object ID: {response.status_code}")
+                    return
+                
+            # Tích hợp dữ liệu checkin vào ekgis
+            api_url_checkin=f'https://api.ekgis.vn/v1/checkin/{projectId}/{objectId}'
+            data_checkin = {
+                "projectid":projectId,
+                "objectid": objectId,
+                "uuid": "",
+                "lng": self.kh_long,
+                "lat": self.kh_lat,
+                "coordinates": "",
+                "activity": 'checkin',
+                "battery_checkin": self.checkin_pinvao,
+                "battery_checkout": self.checkin_pinra,
+                "accuracy": self.checkin_dochinhxac,
+                "time_checkin": self.checkin_giovao,
+                "time_checkout": "",
+                "ext": "",
+                "createddate": self.createddate,
+                "timestamp": ""
+            }
+            response_checkin = requests.post(api_url_checkin, params=params, json=data_checkin)
+
+            if response_checkin.status_code == 200:
+                    create_dms_log(status="Success")
+            else:
+                create_dms_log(status="Error", message=f"Lỗi khi gọi API checkin: {response_checkin.status_code}")
+        
+        except Exception as e:
+            create_dms_log(status="Error", exception=e, rollback=True)
+
 # Tạo mới checkin
 @frappe.whitelist(methods='POST')
 def create_checkin(kwargs):
@@ -200,7 +261,7 @@ def create_checkin_image(body):
         long = validate_filter(type_check='require',value=body.get('long'))
         lat = validate_filter(type_check='require',value=body.get('lat'))
         create_by = user.get('name')
-        create_time = datetime.datetime.now()
+        create_time = datetime.now()
         description = ''
         if customer_name:
             description += customer_name + '\\n'
