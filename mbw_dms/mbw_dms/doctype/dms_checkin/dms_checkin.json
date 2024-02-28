@@ -60,12 +60,12 @@
   },
   {
    "fieldname": "checkin_giovao",
-   "fieldtype": "Time",
+   "fieldtype": "Datetime",
    "label": "Checkin gi\u1edd v\u00e0o"
   },
   {
    "fieldname": "checkin_giora",
-   "fieldtype": "Time",
+   "fieldtype": "Datetime",
    "label": "Checkin gi\u1edd ra"
   },
   {
@@ -161,7 +161,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-01-29 14:58:38.320914",
+ "modified": "2024-02-28 11:33:54.433993",
  "modified_by": "Administrator",
  "module": "MBW DMS",
  "name": "DMS Checkin",
