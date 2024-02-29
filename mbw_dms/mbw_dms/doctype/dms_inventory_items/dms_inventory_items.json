@@ -52,7 +52,7 @@
   },
   {
    "fieldname": "update_at",
-   "fieldtype": "Data",
+   "fieldtype": "Date",
    "label": "Ng\u00e0y c\u1eadp nh\u1eadt"
   },
   {
