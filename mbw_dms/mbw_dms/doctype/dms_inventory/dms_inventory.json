@@ -10,6 +10,7 @@
   "customer_code",
   "customer_id",
   "customer_name",
+  "customer_type",
   "customer_address",
   "create_time",
   "create_by",
@@ -71,11 +72,16 @@
    "fieldname": "total_qty",
    "fieldtype": "Int",
    "label": "T\u1ed5ng t\u1ed3n"
+  },
+  {
+   "fieldname": "customer_type",
+   "fieldtype": "Data",
+   "label": "Lo\u1ea1i kh\u00e1ch h\u00e0ng"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-02-28 16:19:25.918555",
+ "modified": "2024-02-29 14:20:15.082357",
  "modified_by": "Administrator",
  "module": "MBW DMS",
  "name": "DMS Inventory",

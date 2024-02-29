@@ -13,13 +13,11 @@ DocName = "DMS Inventory"
 DocNameChild = "DMS Inventory Items"
 Inventory = frappe.qb.DocType(DocName)
 InventoryItem = frappe.qb.DocType(DocNameChild)
-def find(filters = {}, options = ["*","unix_timestamp(create_time) as create_time"],page_length = 20, page =1,order = "name desc",is_children = True,**data) :
+def find(filters = {}, options = ["*"],page_length = 20, page =1,order = "name desc",is_children = True,**data) :
 	results = frappe.db.get_list(DocName, filters=filters,fields= options, start=(page -1) * page_length,
     page_length=page_length,
 	parent_doctype=DocName
-	)
-
-	
+	)	
 	if(is_children): 
 		for inven in results:
 			filters_product = (Inventory.name == inven.get("name")) 
@@ -39,5 +37,6 @@ def find(filters = {}, options = ["*","unix_timestamp(create_time) as create_tim
 						,InventoryItem.update_bycode,InventoryItem.quanity,UNIX_TIMESTAMP(InventoryItem.exp_time).as_('exp_time'))
 				).run(as_dict=1)
 			inven["items"] = dataitem
+			inven["create_time"] = inven["create_time"].timestamp()
 	
 	return results
