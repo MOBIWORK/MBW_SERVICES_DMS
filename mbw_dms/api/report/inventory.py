@@ -1,5 +1,6 @@
 import frappe
-from mbw_dms.mbw_dms.doctype.dms_inventory import find
+from datetime import datetime
+from mbw_dms.mbw_dms.doctype.dms_inventory.dms_inventory import find
 
 from mbw_dms.api.common import gen_response ,exception_handel
 
@@ -8,8 +9,8 @@ from mbw_dms.api.common import gen_response ,exception_handel
 def get_customer_inventory(**boby):
     try:
         #phan trang
-        page_size = boby.get("page_size") if boby.get("page_size") or boby.get("page_size") >=20 else 20
-        page_number = boby.get("page_number") if boby.get("page_number") or boby.get("page_number") >=1 else 1
+        page_size = boby.get("page_size") if boby.get("page_size") and boby.get("page_size") >= 20 else 20
+        page_number = boby.get("page_number") if boby.get("page_number") and boby.get("page_number") >=1 else 1
         #san pham
         expire_from = boby.get("expire_from")
         expire_to = boby.get("expire_to")
@@ -24,6 +25,25 @@ def get_customer_inventory(**boby):
         total_to = boby.get("total_to")\
         #tao filter
         filters = {}
-        
+        if employee_sale:
+            filters.update({"create_by": employee_sale})
+        if expire_from:
+            expire_from = datetime.fromtimestamp(float(expire_from))
+            filters.update({"exp_time": [">=",expire_from]})
+        if expire_to:
+            expire_to = datetime.fromtimestamp(float(expire_to))
+            filters.update({"exp_time": ["<=",expire_to]})
+        if unit_product:
+            filters.update({"item_unit" : unit_product})
+        if qty_inven_from:
+            filters.update({"total_qty": [">=", float(qty_inven_from)]})
+        if qty_inven_to:
+            filters.update({"total_qty": ["<=", float(qty_inven_to)]})
+        if total_from:
+            filters.update({"total_qty": [">=", float(total_from)]})
+        if total_to:
+            filters.update({"total_qty": ["<=", float(total_to)]})
+        return find(filters=filters, page_length=page_size,page=page_number,)
     except Exception as e:
+        print(e)
         return exception_handel(e)
