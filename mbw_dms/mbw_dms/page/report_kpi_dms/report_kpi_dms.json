@@ -4,7 +4,7 @@
  "docstatus": 0,
  "doctype": "Page",
  "idx": 0,
- "modified": "2024-02-29 10:03:47.788404",
+ "modified": "2024-02-29 10:35:28.001194",
  "modified_by": "Administrator",
  "module": "MBW DMS",
  "name": "report-kpi-dms",
@@ -14,5 +14,6 @@
  "script": null,
  "standard": "Yes",
  "style": null,
- "system_page": 0
+ "system_page": 0,
+ "title": "B\u00e1o c\u00e1o KPI"
 }
