@@ -10,10 +10,13 @@
   "customer_code",
   "customer_id",
   "customer_name",
+  "customer_type",
   "customer_address",
   "create_time",
   "create_by",
-  "items"
+  "items",
+  "total_cost",
+  "total_qty"
  ],
  "fields": [
   {
@@ -59,11 +62,26 @@
    "fieldtype": "Data",
    "label": "Ng\u01b0\u1eddi T\u1ea1o",
    "reqd": 1
+  },
+  {
+   "fieldname": "total_cost",
+   "fieldtype": "Float",
+   "label": "T\u1ed5ng gi\u00e1 tr\u1ecb"
+  },
+  {
+   "fieldname": "total_qty",
+   "fieldtype": "Int",
+   "label": "T\u1ed5ng t\u1ed3n"
+  },
+  {
+   "fieldname": "customer_type",
+   "fieldtype": "Data",
+   "label": "Lo\u1ea1i kh\u00e1ch h\u00e0ng"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-01-22 09:49:47.380915",
+ "modified": "2024-02-29 14:20:15.082357",
  "modified_by": "Administrator",
  "module": "MBW DMS",
  "name": "DMS Inventory",

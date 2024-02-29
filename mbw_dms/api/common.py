@@ -253,3 +253,26 @@ def get_value_child_doctype(master_doctype, master_name, name_field):
 		field_child.append(child)
 
 	return field_child
+
+
+class ArrayMethod():
+    def __init__(self, data=[]):
+      self.main = data
+    
+    def find(self,callback):
+        for value in self.main :
+            if callback(value):
+                return value
+    def filter(self, callback):
+        array = []
+        for value in self.main :
+            if callback(value):
+                array.append(value)
+        return array
+    
+    def toMap(self, callback):
+        array = []
+        for value in self.main:
+            value = callback(value)
+            array.append(value)
+        return array
