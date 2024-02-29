@@ -1,0 +1,116 @@
+<!-- {% if list_sync.length %} -->
+<div class="table-section">
+  <table class="table table-background-jobs">
+    <thead>
+      <tr>
+        <td class="first-td">STT</td>
+        <td class="second-td">Nhân viên</td>
+        <td>Phòng/nhóm</td>
+        <td colspan="3">Số khách hàng viếng thăm</td>
+        <td colspan="3">Số khách hàng viếng thăm duy nhất</td>
+        <td colspan="3">Số khách hàng đặt hàng</td>
+        <td colspan="3">Số khách hàng thêm mới</td>
+        <td colspan="3">Số đơn hàng</td>
+        <td colspan="3">Doanh số</td>
+        <td colspan="3">Doanh thu</td>
+        <td colspan="3">Sản lượng</td>
+        <td colspan="3">SKU</td>
+        <td colspan="3">Số giờ làm việc</td>
+      </tr>
+      <tr>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td>KH</td>
+        <td>TH</td>
+        <td>TL</td>
+        <td>KH</td>
+        <td>TH</td>
+        <td>TL</td>
+        <td>KH</td>
+        <td>TH</td>
+        <td>TL</td>
+        <td>KH</td>
+        <td>TH</td>
+        <td>TL</td>
+        <td>KH</td>
+        <td>TH</td>
+        <td>TL</td>
+        <td>KH</td>
+        <td>TH</td>
+        <td>TL</td>
+        <td>KH</td>
+        <td>TH</td>
+        <td>TL</td>
+        <td>KH</td>
+        <td>TH</td>
+        <td>TL</td>
+        <td>KH</td>
+        <td>TH</td>
+        <td>TL</td>
+        <td>KH</td>
+        <td>TH</td>
+        <td>TL</td>
+      </tr>
+    </thead>
+    <tbody class="body-table">
+        <tr class="">
+            <td>1</td>
+        </tr>
+      <!-- {% for item in list_sync %}
+      <tr class="">
+        <td><a href="/app/employee/{{item.employee}}">{{item.employee_name}}</a></td>
+        <td>{{item.positions}}</td>
+        <td>{{item.area_manager}}</td>
+        <td>{{item.total_working}}</td>
+        <td>{{item.total_present}}</td>
+        <td>{{item.total_holiday}}</td>
+        <td>{{Intl.NumberFormat().format(Math.round(item.salary_basic))}} VND</td>
+        <td>{{Intl.NumberFormat().format(Math.round(item.salary_allowance))}} VND</td>
+        <td>{{Intl.NumberFormat().format(Math.round(item.salary_allowance))}} VND</td>
+        <td>{{Intl.NumberFormat().format(Math.round(item.total_deductions))}} VND</td>
+        <td>{{Intl.NumberFormat().format(Math.round(item.total_not_bonuses))}} VND</td>
+        <td>{{Intl.NumberFormat().format(Math.round(item.spending_sell_in))}} VND</td>
+        <td>{{Intl.NumberFormat().format(Math.round(item.actually_achieved_sell_in))}} VND</td>
+        <td>{{item.rate_sell_in}} %</td>
+        <td>{{Intl.NumberFormat().format(Math.round(item.spending_sell_out))}} VND</td>
+        <td>{{Intl.NumberFormat().format(Math.round(item.actually_achieved_sell_out))}} VND</td>
+        <td>{{item.rate_sell_out}} %</td>
+        <td>{{Intl.NumberFormat().format(Math.round(item.sell_out_80))}} VND</td>
+        <td>{{Intl.NumberFormat().format(Math.round(item.sell_out_90))}} VND</td>
+        <td>{{Intl.NumberFormat().format(Math.round(item.sell_out_100))}} VND</td>
+        <td>{{Intl.NumberFormat().format(Math.round(item.sell_out_110))}} VND</td>
+        <td>{{Intl.NumberFormat().format(Math.round(item.sell_out_120))}} VND</td>
+        <td>{{Intl.NumberFormat().format(Math.round(item.spending_kpi1))}} VND</td>
+        <td>{{Intl.NumberFormat().format(Math.round(item.actually_achieved_kpi1))}} VND</td>
+        <td>{{item.rate_kpi1}} %</td>
+        <td>{{Intl.NumberFormat().format(Math.round(item.kpi_80))}} VND</td>
+        <td>{{Intl.NumberFormat().format(Math.round(item.kpi_90))}} VND</td>
+        <td>{{Intl.NumberFormat().format(Math.round(item.kpi_100))}} VND</td>
+        <td>{{Intl.NumberFormat().format(Math.round(item.gross_pay))}} VND</td>
+        <td>{{Intl.NumberFormat().format(Math.round(item.total_deduction))}} VND</td>
+        <td>{{Intl.NumberFormat().format(Math.round(item.gross_pay - item.total_deduction))}} VND</td>
+      </tr>
+      {% endfor %} -->
+      
+    </tbody>
+    <!-- <tfoot>
+     <tr>
+      {{list_total}}
+     </tr>
+    </tfoot> -->
+  </table>
+</div>
+<!-- {% else %}
+<div class="no-background-jobs">
+  <img src="/assets/frappe/images/ui-states/list-empty-state.svg" alt="Empty State" />
+  <p class="text-muted">{{ __("Nothing to show") }}</p>
+</div>
+{% endif %} -->
+<div class="footer">
+  <div class="text-muted">
+    Hello
+    <!-- {{ frappe.datetime.now_datetime().toLocaleString("%Y-%m-%d")}} VND -->
+  </div>
+</div>
+
