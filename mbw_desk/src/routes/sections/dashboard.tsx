@@ -14,6 +14,7 @@ const RouterEmployee = lazy(()=> import('@/pages/RouterEmployee'))
 const SettingDMS = lazy(()=> import('@/pages/SettingDMS'))
 const MonitorAlbum = lazy(()=> import('@/pages/MonitorAlbum'))
 const Progress = lazy(()=> import('@/pages/Progress'))
+const ReportCustomer = lazy(()=> import('@/pages/ReportCustomer'))
 export const dashboardRoutes = [
     {
         path: '/',
@@ -45,6 +46,9 @@ export const dashboardRoutes = [
             },
             {
                 path: 'monitor-album',element: <MonitorAlbum/>
+            },
+            {
+                path: 'report-customer',element: <ReportCustomer/>
             },
         ]
     }
