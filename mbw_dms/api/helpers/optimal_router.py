@@ -18,7 +18,7 @@ def optimal_router(**kwargs):
         list_location = kwargs.get('locations',[])
         if len(list_location) <=1:
             return gen_response(200,"",list_location)
-        settings = frappe.db.get_singles_dict("DMS Setting")
+        settings = frappe.db.get_singles_dict("DMS Settings")
         select_service = settings.get("select_service")
         company_long = float(settings["company_long"])
         company_lat = float(settings["company_lat"])
