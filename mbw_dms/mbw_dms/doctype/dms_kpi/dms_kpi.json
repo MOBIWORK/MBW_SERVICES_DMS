@@ -85,26 +85,22 @@
   {
    "fieldname": "doanh_thu",
    "fieldtype": "Float",
-   "label": "Doanh thu",
-   "reqd": 1
+   "label": "Doanh thu"
   },
   {
    "fieldname": "san_luong",
    "fieldtype": "Int",
-   "label": "S\u1ea3n l\u01b0\u1ee3ng",
-   "reqd": 1
+   "label": "S\u1ea3n l\u01b0\u1ee3ng"
   },
   {
    "fieldname": "sku",
    "fieldtype": "Int",
-   "label": "SKU",
-   "reqd": 1
+   "label": "SKU"
   },
   {
    "fieldname": "so_gio_lam_viec",
    "fieldtype": "Float",
-   "label": "S\u1ed1 gi\u1edd l\u00e0m vi\u1ec7c",
-   "reqd": 1
+   "label": "S\u1ed1 gi\u1edd l\u00e0m vi\u1ec7c"
   },
   {
    "fieldname": "ngay_hieu_luc_tu",
@@ -122,7 +118,8 @@
    "fieldname": "trang_thai",
    "fieldtype": "Select",
    "label": "Tr\u1ea1ng th\u00e1i",
-   "options": "Ho\u1ea1t \u0111\u1ed9ng\nKh\u00f4ng ho\u1ea1t \u0111\u1ed9ng"
+   "options": "Ho\u1ea1t \u0111\u1ed9ng\nKh\u00f4ng ho\u1ea1t \u0111\u1ed9ng",
+   "reqd": 1
   },
   {
    "fieldname": "column_break_w0pu",
@@ -131,7 +128,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-02-19 10:12:31.933556",
+ "modified": "2024-02-23 10:08:55.652045",
  "modified_by": "Administrator",
  "module": "MBW DMS",
  "name": "DMS KPI",

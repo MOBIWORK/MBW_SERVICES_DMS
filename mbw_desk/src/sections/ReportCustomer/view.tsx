@@ -9,18 +9,23 @@ import {
   Form,
   DatePicker,
   Table,
+  InputNumber,
 } from "antd";
 import type { DatePickerProps, TableColumnsType } from "antd";
 import { LuFilter, LuFilterX } from "react-icons/lu";
 import { PiSortAscendingBold } from "react-icons/pi";
+import { useEffect, useState } from "react";
+import { AxiosService } from "../../services/server";
+import dayjs from "dayjs";
+import { useForm } from "antd/es/form/Form";
 
 interface DataCustomer {
   key: React.Key;
   stt?: string;
   customer_code: string;
   customer_name: string;
-  type_customer: string;
-  address: string;
+  customer_type: string;
+  customer_address: string;
 }
 
 interface ExpandedDataType {
@@ -28,19 +33,60 @@ interface ExpandedDataType {
   stt: string;
   item_code: string;
   item_name: string;
-  hsd: string;
-  unit: string;
-  ton: string;
+  exp_time: string;
+  item_unit: string;
+  quanity: string;
   total: string;
-  updateAt: string;
-  updateBy: string;
+  update_at: string;
+  update_byname: string;
+  item_price: string;
+  update_bycode: string;
 }
 
+const columns: TableColumnsType<DataCustomer> = [
+  {
+    title: "STT",
+    dataIndex: "stt",
+    key: "stt",
+    render: (_, record, index) => index + 1,
+  },
+  {
+    title: "Mã khách hàng",
+    dataIndex: "customer_code",
+    key: "customer_code",
+  },
+  {
+    title: "Tên khách hàng",
+    dataIndex: "customer_name",
+    key: "customer_name",
+  },
+  {
+    title: "Loại khách hàng",
+    dataIndex: "customer_type",
+    key: "customer_type",
+  },
+  {
+    title: "Địa chỉ",
+    dataIndex: "customer_address",
+    key: "customer_address",
+  },
+];
+
 export default function ReportCustomer() {
+  const [dataCustomer, setDataCustomer] = useState<DataCustomer[]>([]);
+  const [formFilter] = useForm();
+  const [expire_from, setExpireFrom] = useState<number>()
+  const [expire_to, setExpireTo] = useState<number>()
+  const [qty_inven_from, setInvenFrom] = useState<number>()
+  const [qty_inven_to, setInvenTo] = useState<number>()
+  const [total_from, setTotalFrom] = useState<number>()
+  const [total_to, setTotalTo] = useState<number>()
   const onChange: DatePickerProps["onChange"] = (dateString: any) => {
     console.log(dateString);
   };
-  const expandedRowRender = () => {
+  const expandedRowRender = (record: any) => {
+    console.log("rdsss", record);
+
     const columns: TableColumnsType<ExpandedDataType> = [
       {
         title: "STT",
@@ -50,67 +96,136 @@ export default function ReportCustomer() {
       },
       { title: "Mã sản phẩm", dataIndex: "item_code", key: "item_code" },
       { title: "Tên sản phẩm", dataIndex: "item_name", key: "item_name" },
-      { title: "Hạn sử dụng", dataIndex: "hsd", key: "hsd" },
-      { title: "Đơn vị tính", dataIndex: "unit", key: "unit" },
-      { title: "Tồn", dataIndex: "ton", key: "ton" },
-      { title: "Tổng giá trị", dataIndex: "total", key: "total" },
-      { title: "Ngày cập nhật", dataIndex: "updateAt", key: "updateAt" },
-      { title: "Người cập nhật", dataIndex: "updateBy", key: "updateBy" },
+      {
+        title: "Hạn sử dụng",
+        dataIndex: "exp_time",
+        key: "exp_time",
+        render: (_, record) => (
+          <p>{dayjs(record.exp_time * 1000).format("DD/MM/YYYY")}</p>
+        ),
+      },
+      { title: "Đơn vị tính", dataIndex: "item_unit", key: "item_unit" },
+      { title: "Tồn", dataIndex: "quanity", key: "quanity" },
+      {
+        title: "Giá sản phẩm",
+        dataIndex: "item_price",
+        key: "item_price",
+        render: (_, record) => (
+          <p>{Intl.NumberFormat().format(record.item_price)}</p>
+        ),
+      },
+      {
+        title: "Tổng giá trị",
+        dataIndex: "total",
+        key: "total",
+        render: (_, record) => (
+          <p>
+            {Intl.NumberFormat().format(record.quanity * record.item_price)}
+          </p>
+        ),
+      },
+      {
+        title: "Ngày cập nhật",
+        dataIndex: "update_at",
+        key: "update_at",
+        render: (_, record) => (
+          <p>{dayjs(record.update_at * 1000).format("DD/MM/YYYY")}</p>
+        ),
+      },
+      {
+        title: "Người cập nhật",
+        dataIndex: "update_byname",
+        key: "update_byname",
+      },
     ];
-
-    const data = [];
-    for (let i = 0; i < 3; ++i) {
-      data.push({
-        key: i.toString(),
-        item_code: "2014-12-24 23:12:00",
-        name: "This is production name",
-        item_name: "Upgraded: 56",
-        hsd: "",
-        unit: "",
-        ton: "",
-        total: "",
-        updateAt: "",
-        updateBy: "",
-      });
-    }
-    return <Table columns={columns} dataSource={data} pagination={false} />;
+    return (
+      <Table
+        columns={columns}
+        dataSource={record.items.map((item: ExpandedDataType) => {
+          return {
+            ...item,
+            key: item.item_code,
+          };
+        })}
+        pagination={false}
+      />
+    );
   };
 
-  const columns: TableColumnsType<DataCustomer> = [
-    {
-      title: "STT",
-      dataIndex: "stt",
-      key: "stt",
-      render: (_, record, index) => index + 1,
-    },
-    {
-      title: "Mã khách hàng",
-      dataIndex: "customer_code",
-      key: "customer_code",
-    },
-    {
-      title: "Tên khách hàng",
-      dataIndex: "customer_name",
-      key: "customer_name",
-    },
-    {
-      title: "Loại khách hàng",
-      dataIndex: "type_customer",
-      key: "type_customer",
-    },
-    { title: "Địa chỉ", dataIndex: "address", key: "address" },
-  ];
+  const handleSearchFilter = (val: any) => {
+    console.log("val:", val);
+    if(val.expire_from) {
+      let exDateFrom = Date.parse(val.expire_from['$d']) / 1000
+      setExpireFrom(exDateFrom)
+    }else {
+      setExpireFrom(undefined)
+    }
+    if(val.expire_to) {
+      let exDateTo = Date.parse(val.expire_to['$d']) / 1000
+      setExpireTo(exDateTo)
+    } else {
+      setExpireTo(undefined)
+    }
+    if(val.qty_inven_from) {
+      setInvenFrom(val.qty_inven_from)
+    } else {
+      setInvenFrom(undefined)
+    }
+    if(val.qty_inven_to) {
+      setInvenTo(val.qty_inven_to)
+    } else {
+      setInvenTo(undefined)
+    }
+    if(val.total_from) {
+      setTotalFrom(val.total_from)
+    } else {
+      setTotalFrom(undefined)
+    }
+    if(val.total_to) {
+      setTotalTo(val.total_to)
+    } else {
+      setTotalTo(undefined)
+    }
+  };
 
-  const data: DataCustomer[] = [];
-  for (let i = 0; i < 3; ++i) {
-    data.push({
-      key: i.toString(),
-      customer_code: "Screen",
-      customer_name: "iOS",
-      type_customer: "10.3.4.565",
-      address: "500",
+  useEffect(() => {
+    initDataCustomer();
+  }, []);
+
+  const initDataCustomer = async () => {
+    let urlDataCustomer =
+      "/api/method/mbw_dms.api.report.inventory.get_customer_inventory";
+    const response = await AxiosService.get(urlDataCustomer);
+    console.log("abc", response);
+    let data = response.result.map((item: DataCustomer) => {
+      return {
+        ...item,
+        key: item.name,
+      };
     });
-  }
+    setDataCustomer(data);
+  };
+
+  useEffect(() => {
+    (async () => {
+      const rsReport = await AxiosService.get(
+        "/api/method/mbw_dms.api.report.inventory.get_customer_inventory",
+        {
+          params: {
+            expire_from,
+            expire_to,
+            qty_inven_from,
+            qty_inven_to,
+            total_from,
+            total_to
+          },
+        }
+      );
+      setDataCustomer(rsReport.result)
+    })();
+    // 
+  }, [expire_from, expire_to , qty_inven_from, qty_inven_to, total_from, total_to]);
+
   return (
     <>
       <HeaderPage
@@ -145,7 +260,7 @@ export default function ReportCustomer() {
               <div className="flex justify-center items-center mr-4">
                 <Dropdown
                   placement="bottom"
-                  trigger={["click"]}
+                  // trigger={["click"]}
                   dropdownRender={() => (
                     <div className="p-4 rounded-xl !bg-white w-[400px]">
                       <div className="text-base font-medium text-[#212B36] leading-5">
@@ -153,7 +268,7 @@ export default function ReportCustomer() {
                       </div>
 
                       <div className="pt-6">
-                        <Form>
+                        <Form form={formFilter} onFinish={handleSearchFilter}>
                           <div className="font-semibold text-sm leading-5 text-[#212B36]">
                             Hạn sử dụng
                           </div>
@@ -162,7 +277,10 @@ export default function ReportCustomer() {
                               <span className="font-normal text-sm leading-5 text-[#637381]">
                                 Ngày bắt đầu
                               </span>
-                              <FormItemCustom className="pt-2">
+                              <FormItemCustom
+                                className="pt-2"
+                                name="expire_from"
+                              >
                                 <DatePicker
                                   format={"DD-MM-YYYY"}
                                   className="!bg-[#F4F6F8]"
@@ -174,7 +292,7 @@ export default function ReportCustomer() {
                               <span className="font-normal text-sm leading-5 text-[#637381]">
                                 Kết thúc
                               </span>
-                              <FormItemCustom className="pt-2">
+                              <FormItemCustom className="pt-2" name="expire_to">
                                 <DatePicker
                                   format={"DD-MM-YYYY"}
                                   className="!bg-[#F4F6F8]"
@@ -222,16 +340,24 @@ export default function ReportCustomer() {
                               <span className="font-normal text-sm leading-5 text-[#637381]">
                                 Từ
                               </span>
-                              <FormItemCustom className="pt-2">
-                                <Input placeholder="0" />
+                              <FormItemCustom className="pt-2" name="qty_inven_from">
+                                <InputNumber
+                                  controls={false}
+                                  className="w-full"
+                                  placeholder="0"
+                                />
                               </FormItemCustom>
                             </Col>
                             <Col span={12}>
                               <span className="font-normal text-sm leading-5 text-[#637381]">
                                 Đến
                               </span>
-                              <FormItemCustom className="pt-2">
-                                <Input placeholder="0" />
+                              <FormItemCustom className="pt-2" name="qty_inven_to">
+                                <InputNumber
+                                  controls={false}
+                                  className="w-full"
+                                  placeholder="0"
+                                />
                               </FormItemCustom>
                             </Col>
                           </Row>
@@ -244,9 +370,10 @@ export default function ReportCustomer() {
                               <span className="font-normal text-sm leading-5 text-[#637381]">
                                 Từ
                               </span>
-                              <FormItemCustom className="pt-2">
-                                <Input
-                                  className="!bg-[#F5F7FA]"
+                              <FormItemCustom className="pt-2" name="total_from">
+                                <InputNumber
+                                  controls={false}
+                                  className="!bg-[#F5F7FA] w-full"
                                   placeholder="0"
                                   suffix="VND"
                                 />
@@ -256,9 +383,10 @@ export default function ReportCustomer() {
                               <span className="font-normal text-sm leading-5 text-[#637381]">
                                 Đến
                               </span>
-                              <FormItemCustom className="pt-2">
-                                <Input
-                                  className="!bg-[#F5F7FA]"
+                              <FormItemCustom className="pt-2" name="total_to">
+                                <InputNumber
+                                  controls={false}
+                                  className="!bg-[#F5F7FA] w-full"
                                   placeholder="0"
                                   suffix="VND"
                                 />
@@ -268,8 +396,24 @@ export default function ReportCustomer() {
                           <Row className="justify-between pt-6 pb-4">
                             <div></div>
                             <div>
-                              <Button className="mr-3">Đặt lại</Button>
-                              <Button type="primary">Áp dụng</Button>
+                              <Button
+                                className="mr-3"
+                                onClick={(ev: any) => {
+                                  ev.preventDefault();
+                                  formFilter.resetFields();
+                                }}
+                              >
+                                Đặt lại
+                              </Button>
+                              <Button
+                                type="primary"
+                                onClick={() =>{
+                                  formFilter.submit()
+
+                                }}
+                              >
+                                Áp dụng
+                              </Button>
                             </div>
                           </Row>
                         </Form>
@@ -305,7 +449,7 @@ export default function ReportCustomer() {
           <TableCustom
             columns={columns}
             expandable={{ expandedRowRender, defaultExpandedRowKeys: ["0"] }}
-            dataSource={data}
+            dataSource={dataCustomer}
           />
         </div>
       </div>
