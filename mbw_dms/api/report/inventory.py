@@ -16,7 +16,7 @@ def get_customer_inventory(**boby):
         expire_to = boby.get("expire_to")
         update_at_from = boby.get("update_at_from")
         update_at_to = boby.get("update_at_to")
-        key_search = boby.get("key_search")
+        item_code = boby.get("item_code")
         ## lay theo don vi tinh sp
         unit_product = boby.get("unit_product")
         #nhan vien
@@ -30,8 +30,8 @@ def get_customer_inventory(**boby):
         filters = {}
         if employee_sale:
             filters.update({"create_by": employee_sale})
-        if key_search:
-            filters.update({"item_code": key_search})
+        if item_code:
+            filters.update({"item_code": item_code})
         if expire_from:
             expire_from = datetime.fromtimestamp(float(expire_from)).date()
             filters.update({"exp_time": [">=",expire_from]})
@@ -60,7 +60,7 @@ def get_customer_inventory(**boby):
             "update_at_from" :update_at_from,
             "update_at_to":update_at_to,
             "item_unit": unit_product,
-            "item_code": key_search
+            "item_code": item_code
         }))
     except Exception as e:
         print(e)
