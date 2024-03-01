@@ -40,16 +40,24 @@ def get_kpi_monthly():
                 filters={'ngay_hieu_luc_tu': (">=", start_date), 'ngay_hieu_luc_den': ("<=", end_date), 'nhan_vien_ban_hang': user_name},
                 fields=['so_kh_vt_luot', 'so_kh_moi', 'so_don_hang', 'doanh_so', 'doanh_thu'])
         
+        kpi = None
 		# Phần trăm kpi
-        kpi = {
-            'thang': monthly_summary[0]['thang'],
-            'doanh_thu': round(float(monthly_summary[0]['doanh_thu_thang']/kpi_employee[0]['doanh_thu']) * 100, 2),
-            'doanh_so': round(float(monthly_summary[0]['doanh_so_thang']/kpi_employee[0]['doanh_so']) * 100, 2),
-            'don_hang': round(float(monthly_summary[0]['so_don_hang']/kpi_employee[0]['so_don_hang']) * 100, 2),
-            'vieng_tham': round(float((monthly_summary[0]['solan_vt_dungtuyen'] + monthly_summary[0]['solan_vt_ngoaituyen'])/kpi_employee[0]['so_kh_vt_luot']) * 100, 2),
-            'kh_moi': round(float(monthly_summary[0]['so_kh_moi']/kpi_employee[0]['so_kh_moi']) * 100, 2)
-		}
-        
+        if len(monthly_summary) != 0 and len(kpi_employee) != 0:
+            kpi = {
+                'doanh_thu': round(float(monthly_summary[0]['doanh_thu_thang']/kpi_employee[0]['doanh_thu']) * 100, 2),
+                'doanh_so': round(float(monthly_summary[0]['doanh_so_thang']/kpi_employee[0]['doanh_so']) * 100, 2),
+                'don_hang': round(float(monthly_summary[0]['so_don_hang']/kpi_employee[0]['so_don_hang']) * 100, 2),
+                'vieng_tham': round(float((monthly_summary[0]['solan_vt_dungtuyen'] + monthly_summary[0]['solan_vt_ngoaituyen'])/kpi_employee[0]['so_kh_vt_luot']) * 100, 2),
+                'kh_moi': round(float(monthly_summary[0]['so_kh_moi']/kpi_employee[0]['so_kh_moi']) * 100, 2)
+            }
+        else:
+            kpi = {
+                'doanh_thu':0,
+                'doanh_so': 0,
+                'don_hang': 0,
+                'vieng_tham': 0,
+                'kh_moi': 0
+            }
         return gen_response(200, 'Thành công', kpi)
     except Exception as e:
         return exception_handel(e)
