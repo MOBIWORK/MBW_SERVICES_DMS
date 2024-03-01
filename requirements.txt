@@ -8,3 +8,5 @@ scipy
 minio
 geopy
 boto3
+
+pydash

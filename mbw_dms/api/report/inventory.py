@@ -5,7 +5,7 @@ from mbw_dms.mbw_dms.doctype.dms_inventory.dms_inventory import find
 from mbw_dms.api.common import gen_response ,exception_handel
 
 
-@frappe.whitelist(methods="GET")
+@frappe.whitelist(methods="GET",allow_guest=True)
 def get_customer_inventory(**boby):
     try:
         #phan trang
@@ -14,6 +14,9 @@ def get_customer_inventory(**boby):
         #san pham
         expire_from = boby.get("expire_from")
         expire_to = boby.get("expire_to")
+        update_at_from = boby.get("update_at_from")
+        update_at_to = boby.get("update_at_to")
+        key_search = boby.get("key_search")
         ## lay theo don vi tinh sp
         unit_product = boby.get("unit_product")
         #nhan vien
@@ -27,12 +30,20 @@ def get_customer_inventory(**boby):
         filters = {}
         if employee_sale:
             filters.update({"create_by": employee_sale})
+        if key_search:
+            filters.update({"item_code": key_search})
         if expire_from:
             expire_from = datetime.fromtimestamp(float(expire_from)).date()
             filters.update({"exp_time": [">=",expire_from]})
         if expire_to:
             expire_to = datetime.fromtimestamp(float(expire_to)).date()
             filters.update({"exp_time": ["<=",expire_to]})
+        if update_at_from:
+            update_at_from = datetime.fromtimestamp(float(update_at_from)).date()
+            filters.update({"exp_time": [">=",update_at_from]})
+        if update_at_to:
+            update_at_to = datetime.fromtimestamp(float(update_at_to)).date()
+            filters.update({"exp_time": ["<=",update_at_to]})
         if unit_product:
             filters.update({"item_unit" : unit_product})
         if qty_inven_from:
@@ -46,7 +57,10 @@ def get_customer_inventory(**boby):
         return gen_response(200,"",find(filters=filters, page_length=page_size,page=page_number,data= {
             "expire_from" :expire_from,
             "expire_to":expire_to,
-            "item_unit": unit_product
+            "update_at_from" :update_at_from,
+            "update_at_to":update_at_to,
+            "item_unit": unit_product,
+            "item_code": key_search
         }))
     except Exception as e:
         print(e)
