@@ -18,10 +18,10 @@ class DMSProvince(Document):
 @frappe.whitelist(methods='GET')
 def list_province():
     try:
-        list_provinces = frappe.cache.get_value("vn-province")
+        list_provinces = frappe.cache().get_value("vn-province")
         if list_provinces == None:
             list_provinces = frappe.db.get_list('DMS Province', fields=['name', 'ma_tinh', 'ten_tinh'], order_by='ma_tinh asc')
-            frappe.cache.set_value("vn-province", list_provinces)
+            frappe.cache().set_value("vn-province", list_provinces)
         return gen_response(200, 'Thành công', list_provinces)
     except Exception as e:
         return exception_handel(e)
