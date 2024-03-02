@@ -8,10 +8,10 @@ import {StylePropertyFunction, StyleExpression, ZoomDependentExpression, ZoomCon
 import CompoundExpression from '../style-spec/expression/compound_expression.js';
 import expressions from '../style-spec/expression/definitions/index.js';
 import ResolvedImage from '../style-spec/expression/types/resolved_image.js';
-import window from './window.js';
 import {AJAXError} from './ajax.js';
 
 import type {Transferable} from '../types/transferable.js';
+import Formatted, {FormattedSection} from '../style-spec/expression/types/formatted.js';
 
 type SerializedObject = interface { [_: string]: Serialized };
 export type Serialized =
@@ -55,7 +55,7 @@ const registry: Registry = {};
 export function register<T: any>(klass: Class<T>, name: string, options: RegisterOptions<T> = {}) {
     assert(name, 'Can\'t register a class without a name.');
     assert(!registry[name], `${name} is already registered.`);
-    (Object.defineProperty: any)(klass, '_classRegistryKey', {
+    Object.defineProperty(klass, '_classRegistryKey', {
         value: name,
         writeable: false
     });
@@ -87,6 +87,8 @@ register(Grid, 'Grid');
 
 register(Color, 'Color');
 register(Error, 'Error');
+register(Formatted, 'Formatted');
+register(FormattedSection, 'FormattedSection');
 register(AJAXError, 'AJAXError');
 register(ResolvedImage, 'ResolvedImage');
 register(StylePropertyFunction, 'StylePropertyFunction');
@@ -105,8 +107,7 @@ function isArrayBuffer(val: any): boolean {
 }
 
 function isImageBitmap(val: any): boolean {
-    return window.ImageBitmap &&
-        val instanceof window.ImageBitmap;
+    return self.ImageBitmap && val instanceof ImageBitmap;
 }
 
 /**
@@ -152,7 +153,7 @@ export function serialize(input: mixed, transferables: ?Set<Transferable>): Seri
         return view;
     }
 
-    if (input instanceof window.ImageData) {
+    if (input instanceof ImageData) {
         if (transferables) {
             transferables.add(input.data.buffer);
         }
@@ -236,7 +237,7 @@ export function deserialize(input: Serialized): mixed {
         isArrayBuffer(input) ||
         isImageBitmap(input) ||
         ArrayBuffer.isView(input) ||
-        input instanceof window.ImageData) {
+        input instanceof ImageData) {
         return input;
     }
 

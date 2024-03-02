@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import RowCustom from "./styled";
 import { Button, Col, Input, Modal, Radio, Row, Select, message, Space  } from "antd";
 import { FormItemCustom } from "../../components/form-item";
@@ -14,6 +14,7 @@ import { ChooseCustomer, ImportCustomer } from "./modal";
 import * as XLSX from 'xlsx';
 import { getAttrInArray } from "../../util";
 import { AxiosService } from "../../services/server";
+import { rsData } from "../../types/response";
 
 type Props = {
   listCustomer: any[],
@@ -97,6 +98,27 @@ export default function Customer({listCustomer,handleCustomer}:Props) {
       error()
     }
   }
+
+  const optimalRouter = useCallback(async () => {
+    // chuyển mảng người dùng thành mảng vị trí
+      const locations = listCustomer.filter(customer => customer.location).map((customer,index) => ({
+        "id":index,
+        "customer": customer.name,
+        "long": JSON.parse(customer.location as string)?.long,
+        "lat": JSON.parse(customer.location as string)?.lat
+    }))
+
+    // tối ưu mảng vị trí
+      const rsOptimal:rsData<any[] >= await AxiosService.post("/api/method/mbw_dms.api.helpers.optimal_router.optimal_router",{
+        locations 
+      })
+      // chuyển mảng vị trí thành mảng khách hàng
+      const optimal = rsOptimal.result.map((opLocation) => {
+        return  listCustomer.find(cs => cs.name == opLocation.customer) || false        
+      }).filter(op => op)
+      // cập nhật lại mảng khách hàng chung
+
+  },[listCustomer])
 
   return (
     <>

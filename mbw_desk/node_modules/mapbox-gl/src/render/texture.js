@@ -1,7 +1,5 @@
 // @flow
 
-import window from '../util/window.js';
-
 import type Context from '../gl/context.js';
 import type {RGBAImage, AlphaImage} from '../util/image.js';
 import {Float32Image} from '../util/image.js';
@@ -9,8 +7,14 @@ import assert from 'assert';
 
 export type TextureFormat =
     | $PropertyType<WebGL2RenderingContext, 'RGBA'>
-    | $PropertyType<WebGL2RenderingContext, 'ALPHA'>
-    | $PropertyType<WebGL2RenderingContext, 'DEPTH_COMPONENT'>;
+    | $PropertyType<WebGL2RenderingContext, 'DEPTH_COMPONENT'>
+    | $PropertyType<WebGL2RenderingContext, 'R8'>
+    | $PropertyType<WebGL2RenderingContext, 'R32F'>
+    | $PropertyType<WebGL2RenderingContext, 'RED'>;
+export type TextureType =
+    | $PropertyType<WebGL2RenderingContext, 'UNSIGNED_BYTE'>
+    | $PropertyType<WebGL2RenderingContext, 'UNSIGNED_SHORT'>
+    | $PropertyType<WebGL2RenderingContext, 'FLOAT'>;
 export type TextureFilter =
     | $PropertyType<WebGL2RenderingContext, 'LINEAR'>
     | $PropertyType<WebGL2RenderingContext, 'NEAREST_MIPMAP_NEAREST'>
@@ -62,7 +66,6 @@ class Texture {
         const {width, height} = image;
         const {context} = this;
         const {gl} = context;
-        const {HTMLImageElement, HTMLCanvasElement, HTMLVideoElement, ImageData, ImageBitmap} = window;
 
         gl.bindTexture(gl.TEXTURE_2D, this.texture);
 
@@ -75,24 +78,23 @@ class Texture {
 
             if (image instanceof HTMLImageElement || image instanceof HTMLCanvasElement || image instanceof HTMLVideoElement || image instanceof ImageData || (ImageBitmap && image instanceof ImageBitmap)) {
                 let baseFormat = this.format;
-                // $FlowFixMe[prop-missing] - Flow cannot check for gl.R8
                 if (this.format === gl.R8) {
-                    // $FlowFixMe[prop-missing] - Flow cannot check for gl.RED
                     baseFormat = gl.RED;
                 }
                 gl.texImage2D(gl.TEXTURE_2D, 0, this.format, baseFormat, gl.UNSIGNED_BYTE, image);
             } else {
                 let internalFormat = this.format;
                 let format = this.format;
-                let type = gl.UNSIGNED_BYTE;
+                let type: TextureType = gl.UNSIGNED_BYTE;
 
                 if (this.format === gl.DEPTH_COMPONENT) {
                     // $FlowFixMe[incompatible-type]
                     internalFormat = gl.DEPTH_COMPONENT16;
-                    // $FlowFixMe[incompatible-type]
                     type = gl.UNSIGNED_SHORT;
                 }
-
+                if (this.format === gl.R8) {
+                    format = gl.RED;
+                }
                 if (this.format === gl.R32F) {
                     assert(image instanceof Float32Image);
                     type = gl.FLOAT;
@@ -107,7 +109,7 @@ class Texture {
                 gl.texSubImage2D(gl.TEXTURE_2D, 0, x, y, gl.RGBA, gl.UNSIGNED_BYTE, image);
             } else {
                 let format = this.format;
-                let type = gl.UNSIGNED_BYTE;
+                let type: TextureType = gl.UNSIGNED_BYTE;
 
                 if (this.format === gl.R32F) {
                     assert(image instanceof Float32Image);
@@ -126,7 +128,7 @@ class Texture {
         }
     }
 
-    bind(filter: TextureFilter, wrap: TextureWrap) {
+    bind(filter: TextureFilter, wrap: TextureWrap, ignoreMipMap: boolean = false) {
         const {context} = this;
         const {gl} = context;
         gl.bindTexture(gl.TEXTURE_2D, this.texture);
@@ -134,7 +136,7 @@ class Texture {
         if (filter !== this.minFilter) {
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, filter);
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER,
-                this.useMipmap ? (filter === gl.NEAREST ? gl.NEAREST_MIPMAP_NEAREST : gl.LINEAR_MIPMAP_NEAREST) : filter
+                (this.useMipmap && !ignoreMipMap) ? (filter === gl.NEAREST ? gl.NEAREST_MIPMAP_NEAREST : gl.LINEAR_MIPMAP_LINEAR) : filter
             );
             this.minFilter = filter;
         }
@@ -157,7 +159,7 @@ class Texture {
         }
         if (minFilter !== this.minFilter) {
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER,
-                this.useMipmap ? (minFilter === gl.NEAREST ? gl.NEAREST_MIPMAP_NEAREST : gl.LINEAR_MIPMAP_NEAREST) : minFilter
+                this.useMipmap ? (minFilter === gl.NEAREST ? gl.NEAREST_MIPMAP_NEAREST : gl.LINEAR_MIPMAP_LINEAR) : minFilter
             );
             this.minFilter = minFilter;
         }

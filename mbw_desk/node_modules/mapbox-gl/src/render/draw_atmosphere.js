@@ -10,19 +10,19 @@ import {
     globeUseCustomAntiAliasing
 } from './../geo/projection/globe_util.js';
 import {atmosphereUniformValues} from '../terrain/globe_raster_program.js';
-import type Painter from './painter.js';
 import {AtmosphereBuffer} from '../render/atmosphere_buffer.js';
 import {degToRad, mapValue, clamp} from '../util/util.js';
 import {mat3, vec3, mat4, quat} from 'gl-matrix';
-import type {Vec3} from 'gl-matrix';
 import Fog from '../style/fog.js';
-import type IndexBuffer from '../gl/index_buffer.js';
-import type VertexBuffer from '../gl/vertex_buffer.js';
 import SegmentVector from '../data/segment.js';
 import {TriangleIndexArray, StarsVertexArray} from '../data/array_types.js';
 import {starsLayout} from './stars_attributes.js';
 import {starsUniformValues} from '../terrain/stars_program.js';
 import {mulberry32} from '../style-spec/util/random.js';
+import type Painter from './painter.js';
+import type {Vec3} from 'gl-matrix';
+import type IndexBuffer from '../gl/index_buffer.js';
+import type VertexBuffer from '../gl/vertex_buffer.js';
 import type {DynamicDefinesType} from './program/program_uniforms.js';
 
 function generateUniformDistributedPointsOnSphere(pointsCount: number): Array<Vec3> {
@@ -39,31 +39,50 @@ function generateUniformDistributedPointsOnSphere(pointsCount: number): Array<Ve
     return points;
 }
 
+class StarsParams {
+    starsCount: number;
+    sizeMultiplier: number;
+
+    constructor() {
+        this.starsCount = 16000;
+        this.sizeMultiplier = 0.15;
+    }
+}
 class Atmosphere {
     atmosphereBuffer: ?AtmosphereBuffer;
+    allocatedStarsCount: number;
     starsVx: ?VertexBuffer;
     starsIdx: ?IndexBuffer;
     starsSegments: SegmentVector;
     colorModeAlphaBlendedWriteRGB: ColorMode;
     colorModeWriteAlpha: ColorMode;
 
-    constructor() {
+    params: StarsParams;
+
+    constructor(painter: Painter) {
         this.colorModeAlphaBlendedWriteRGB = new ColorMode([ONE, ONE_MINUS_SRC_ALPHA, ONE, ONE_MINUS_SRC_ALPHA], Color.transparent, [true, true, true, false]);
         this.colorModeWriteAlpha = new ColorMode([ONE, ZERO, ONE, ZERO], Color.transparent, [false, false, false, true]);
+
+        this.params = new StarsParams();
+        this.allocatedStarsCount = 0;
+
+        painter.tp.registerParameter(this.params, ["Stars"], "starsCount", {min:100, max: 16000, step:1});
+        painter.tp.registerParameter(this.params, ["Stars"], "sizeMultiplier", {min:0.01, max: 2.0, step:0.01});
     }
 
     update(painter: Painter) {
         const context = painter.context;
 
-        if (!this.atmosphereBuffer) {
+        if (!this.atmosphereBuffer || this.allocatedStarsCount !== this.params.starsCount) {
             this.atmosphereBuffer = new AtmosphereBuffer(context);
 
+            this.allocatedStarsCount = this.params.starsCount;
+
             // Part of internal stlye spec, not exposed to gl-js
-            const starsCount = 16000;
             const sizeRange = 100.0;
             const intensityRange = 200.0;
 
-            const stars = generateUniformDistributedPointsOnSphere(starsCount);
+            const stars = generateUniformDistributedPointsOnSphere(this.allocatedStarsCount);
             const sRand = mulberry32(300);
 
             const vertices = new StarsVertexArray();
@@ -188,9 +207,6 @@ class Atmosphere {
 
         const program = painter.getOrCreateProgram('stars');
 
-        // Exposed in internal style spec for mobile
-        const sizeMultiplier = 0.15;
-
         const orientation = quat.identity([]);
 
         quat.rotateX(orientation, orientation, -tr._pitch);
@@ -208,10 +224,10 @@ class Atmosphere {
 
         const camUp = [0, 1, 0];
         vec3.transformMat3(camUp, camUp, modelviewInv);
-        vec3.scale(camUp, camUp, sizeMultiplier);
+        vec3.scale(camUp, camUp, this.params.sizeMultiplier);
         const camRight = [1, 0, 0];
         vec3.transformMat3(camRight, camRight, modelviewInv);
-        vec3.scale(camRight, camRight, sizeMultiplier);
+        vec3.scale(camRight, camRight, this.params.sizeMultiplier);
 
         const uniforms = starsUniformValues(
               mvp,

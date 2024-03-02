@@ -16,6 +16,7 @@ import Var from './definitions/var.js';
 
 import type {Expression, ExpressionRegistry} from './expression.js';
 import type {Type} from './types.js';
+import type {ConfigOptions} from '../../style/properties.js';
 
 /**
  * State associated parsing at a given point in an expression tree.
@@ -27,7 +28,8 @@ class ParsingContext {
     key: string;
     scope: Scope;
     errors: Array<ParsingError>;
-    options: ?Map<string, Expression>;
+    _scope: ?string;
+    options: ?ConfigOptions;
 
     // The expected type of this expression. Provided only to allow Expression
     // implementations to infer argument types: Expression#parse() need not
@@ -41,7 +43,8 @@ class ParsingContext {
         expectedType: ?Type,
         scope: Scope = new Scope(),
         errors: Array<ParsingError> = [],
-        options?: ?Map<string, Expression>
+        _scope: ?string,
+        options?: ?ConfigOptions
     ) {
         this.registry = registry;
         this.path = path;
@@ -49,6 +52,7 @@ class ParsingContext {
         this.scope = scope;
         this.errors = errors;
         this.expectedType = expectedType;
+        this._scope = _scope;
         this.options = options;
     }
 
@@ -123,7 +127,7 @@ class ParsingContext {
                 // parsed/compiled result. Expressions that expect an image should
                 // not be resolved here so we can later get the available images.
                 if (!(parsed instanceof Literal) && (parsed.type.kind !== 'resolvedImage') && isConstant(parsed)) {
-                    const ec = new EvaluationContext(this.options);
+                    const ec = new EvaluationContext(this._scope, this.options);
                     try {
                         parsed = new Literal(parsed.type, parsed.evaluate(ec));
                     } catch (e) {
@@ -163,6 +167,7 @@ class ParsingContext {
             expectedType || null,
             scope,
             this.errors,
+            this._scope,
             this.options
         );
     }

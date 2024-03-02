@@ -7,11 +7,11 @@ uniform float u_tile_units_to_pixels;
 
 uniform sampler2D u_image;
 
-varying vec2 v_normal;
-varying vec2 v_width2;
-varying float v_linesofar;
-varying float v_gamma_scale;
-varying float v_width;
+in vec2 v_normal;
+in vec2 v_width2;
+in float v_linesofar;
+in float v_gamma_scale;
+in float v_width;
 
 #pragma mapbox: define lowp vec4 pattern
 #pragma mapbox: define lowp float pixel_ratio
@@ -43,14 +43,16 @@ void main() {
     float blur2 = (blur + 1.0 / u_device_pixel_ratio) * v_gamma_scale;
     float alpha = clamp(min(dist - (v_width2.t - blur2), v_width2.s - dist) / blur2, 0.0, 1.0);
 
-    float x = mod(v_linesofar / pattern_size.x * aspect, 1.0);
+    float pattern_x = v_linesofar / pattern_size.x * aspect;
+    float x = mod(pattern_x, 1.0);
 
     float y = 0.5 * v_normal.y + 0.5;
 
     vec2 texel_size = 1.0 / u_texsize;
 
     vec2 pos = mix(pattern_tl * texel_size - texel_size, pattern_br * texel_size + texel_size, vec2(x, y));
-    vec4 color = texture2D(u_image, pos);
+    vec2 lod_pos = mix(pattern_tl * texel_size - texel_size, pattern_br * texel_size + texel_size, vec2(pattern_x, y));
+    vec4 color = textureLodCustom(u_image, pos, lod_pos);
 
 #ifdef LIGHTING_3D_MODE
     color = apply_lighting_ground(color);
@@ -65,10 +67,10 @@ void main() {
     color = applyCutout(color);
 #endif
 
-    gl_FragColor = color;
+    glFragColor = color;
 
 #ifdef OVERDRAW_INSPECTOR
-    gl_FragColor = vec4(1.0);
+    glFragColor = vec4(1.0);
 #endif
 
     HANDLE_WIREFRAME_DEBUG;
