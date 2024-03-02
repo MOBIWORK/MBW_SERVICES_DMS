@@ -23,7 +23,10 @@
   "c\u1ea5u_h\u00ecnh_t\u00edch_h\u1ee3p_tab",
   "ma_du_an",
   "lay_thong_tin",
-  "api_key"
+  "api_key",
+  "company_on_map",
+  "company_long",
+  "company_lat"
  ],
  "fields": [
   {
@@ -122,12 +125,27 @@
    "fieldname": "api_key",
    "fieldtype": "Data",
    "label": "API Key EKGis"
+  },
+  {
+   "fieldname": "company_on_map",
+   "fieldtype": "Geolocation",
+   "label": "company"
+  },
+  {
+   "fieldname": "company_long",
+   "fieldtype": "Float",
+   "label": "Long"
+  },
+  {
+   "fieldname": "company_lat",
+   "fieldtype": "Float",
+   "label": "Lat"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-02-27 13:57:21.814728",
+ "modified": "2024-03-01 16:54:15.326679",
  "modified_by": "Administrator",
  "module": "MBW DMS",
  "name": "DMS Settings",

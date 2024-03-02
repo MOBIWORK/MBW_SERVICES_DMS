@@ -19,6 +19,7 @@ def find(filters = {}, options = ["*"],page_length = 20, page =1,order = "name d
     page_length=page_length,
 	parent_doctype=DocName
 	)	
+	print("results",results)
 	fieldChil = [ "name",
 			  	"item_code",
 				"item_name",
