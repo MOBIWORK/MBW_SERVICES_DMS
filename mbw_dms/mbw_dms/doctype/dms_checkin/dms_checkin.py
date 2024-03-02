@@ -183,8 +183,8 @@ def create_checkin(kwargs):
             "checkout_khoangcach", "checkinvalidate_khoangcachcheckin",
             "checkinvalidate_khoangcachcheckout", "createdbyemail", "createbyname", 
         ]
-        datetime_keys = ["checkin_giovao", "checkin_giora", "checkin_timegps"]
-        date_keys = ["createddate", ]
+        datetime_keys = ["checkin_timegps"]
+        date_keys = ["createddate", "checkin_giovao", "checkin_giora"]
         for key, value in kwargs.items():
             if key in normal_keys:
                 new_checkin.set(key, value)
