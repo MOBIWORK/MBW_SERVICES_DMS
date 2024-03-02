@@ -117,6 +117,7 @@ def create_sale_order(**kwargs):
         from erpnext.accounts.party import get_party_details
         kwargs = frappe._dict(kwargs)
         new_order = frappe.new_doc('Sales Order')
+        user_name = frappe.get_value('Employee',{ 'user_id': frappe.session.user}, 'name')
 
         # Dữ liệu bắn lên để tạo sale order mới
         discount_percent = float(kwargs.get('additional_discount_percentage', 0))
@@ -145,7 +146,7 @@ def create_sale_order(**kwargs):
             new_order.append('sales_team', sales_team['sales_team'][0])
         if sales_team.get('sales_team') == []:
             new_order.append('sales_team', {
-                'sales_person': validate_not_none(kwargs.get('sale_persons')),
+                'sales_person': user_name,
                 'allocated_percentage': 100
             })
 
@@ -243,6 +244,7 @@ def create_return_order(**kwargs):
         new_order = frappe.new_doc('Sales Invoice')
         is_return = 1
         update_billed_amount_in_delivery_note = 1
+        user_name = frappe.get_value('Employee',{ 'user_id': frappe.session.user}, 'name')
 
         # Dữ liệu bắn lên để tạo sale order mới
         discount_percent = float(kwargs.get('additional_discount_percentage', 0))  # Chiết khấu theo % của đơn hàng
@@ -272,7 +274,7 @@ def create_return_order(**kwargs):
             new_order.append('sales_team', sales_team['sales_team'][0])
         if sales_team.get('sales_team') == []:
             new_order.append('sales_team', {
-                'sales_person': validate_not_none(kwargs.get('sale_persons')),
+                'sales_person': user_name,
                 'allocated_percentage': 100
             })
 
