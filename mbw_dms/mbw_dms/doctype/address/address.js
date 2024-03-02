@@ -4,7 +4,7 @@
 async function setAddressTitle(frm) {
 	let city = frm.doc.city
 	let county = frm.doc.county
-	let ward = frm.doc.ward
+	let ward = frm.doc.state
 	let address_line1 = frm.doc.address_line1
 	let address_title = new Array(5)
 	let city_name = ""
@@ -45,7 +45,7 @@ async function setAddressTitle(frm) {
 	}
 
 	if(address_line1) {
-		address_title[0] = address_title
+		address_title[0] = address_line1
 
 	}
 	address_title[4] = frm.doc.country
@@ -75,8 +75,6 @@ async function setLocation(frm) {
 	} catch (error) {
 		
 	}
-
-	console.log(rs);
 }
 
 frappe.ui.form.on('Address', {
