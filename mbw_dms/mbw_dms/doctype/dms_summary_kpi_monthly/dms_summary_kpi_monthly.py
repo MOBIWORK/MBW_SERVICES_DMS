@@ -41,8 +41,9 @@ def get_kpi_monthly():
                 fields=['so_kh_vt_luot', 'so_kh_moi', 'so_don_hang', 'doanh_so', 'doanh_thu'])
         
         kpi = None
-		# Phần trăm kpi
-        if len(monthly_summary) != 0 and len(kpi_employee) != 0:
+
+		# Tính toán chỉ số KPI nếu có dữ liệu
+        if monthly_summary and kpi_employee:
             kpi = {
                 'doanh_thu': round(float(monthly_summary[0]['doanh_thu_thang']/kpi_employee[0]['doanh_thu']) * 100, 2),
                 'doanh_so': round(float(monthly_summary[0]['doanh_so_thang']/kpi_employee[0]['doanh_so']) * 100, 2),
@@ -50,6 +51,8 @@ def get_kpi_monthly():
                 'vieng_tham': round(float((monthly_summary[0]['solan_vt_dungtuyen'] + monthly_summary[0]['solan_vt_ngoaituyen'])/kpi_employee[0]['so_kh_vt_luot']) * 100, 2),
                 'kh_moi': round(float(monthly_summary[0]['so_kh_moi']/kpi_employee[0]['so_kh_moi']) * 100, 2)
             }
+
+        # Nếu không có dữ liệu, gán giá trị 0 cho tất cả các chỉ số KPI
         else:
             kpi = {
                 'doanh_thu':0,
@@ -62,5 +65,21 @@ def get_kpi_monthly():
     except Exception as e:
         return exception_handel(e)
 	
+@frappe.whitelist(methods='GET')
+def get_kpi_employee(**kwargs):
+    filters = {}
+    thang = kwargs.get('thang')
+    nam = kwargs.get('nam')
+    nhom_ban_hang = kwargs.get('nhom_ban_hang')
+    nhan_vien = kwargs.get('nhan_vien')
+
+    if thang:
+        filters['thang'] = thang
+    if nam:
+        filters['nam'] = nam
+    if nhom_ban_hang:
+        filters['nhom_ban_hang'] = nhom_ban_hang
+    if nhan_vien:
+        filters['nhan_vien_ban_hang'] = nhan_vien
 
     
