@@ -26,9 +26,9 @@ refreshSync() {
 	let month = this.fieldMonth.get_value();
 	let year = this.fieldYear.get_value();
 	let company = this.fieldCompany.get_value();
-	let view_mode = this.viewMode.get_value();
+	// let view_mode = this.viewMode.get_value();
 	let employee = this.fieldIdNvHr.get_value()
-	let params = {month,year,company,view_mode}
+	let params = {month,year,company}
 	this.$content.html(
 		//   frappe.render_template("report_kpi_dms", {
 		// 	list_sync: list_data,
@@ -132,18 +132,18 @@ filters() {
 		fieldtype: "Select",
 		fieldname: "month",
 		options: [
-			{ "value": 1, "label": __("January") },
-			{ "value": 2, "label": __("February") },
-			{ "value": 3, "label": __("March") },
-			{ "value": 4, "label": __("April") },
-			{ "value": 5, "label": __("May") },
-			{ "value": 6, "label": __("June") },
-			{ "value": 7, "label": __("July") },
-			{ "value": 8, "label": __("August") },
-			{ "value": 9, "label": __("September") },
-			{ "value": 10, "label": __("October") },
-			{ "value": 11, "label": __("November") },
-			{ "value": 12, "label": __("December") },
+			{ "value": 1, "label": "Tháng 1" },
+			{ "value": 2, "label": "Tháng 2" },
+			{ "value": 3, "label": "Tháng 3" },
+			{ "value": 4, "label": "Tháng 4" },
+			{ "value": 5, "label": "Tháng 5" },
+			{ "value": 6, "label": "Tháng 6" },
+			{ "value": 7, "label": "Tháng 7" },
+			{ "value": 8, "label": "Tháng 8" },
+			{ "value": 9, "label": "Tháng 9" },
+			{ "value": 10, "label": "Tháng 10" },
+			{ "value": 11, "label": "Tháng 11" },
+			{ "value": 12, "label": "Tháng 12" },
 		],
 		// "default": frappe.datetime.str_to_obj(frappe.datetime.get_today()).getMonth() + 1,
 		change: () => {
@@ -177,30 +177,30 @@ filters() {
 		},
 	  });
 
-	this.viewMode = this.page.add_field({
-		"fieldname":"view_mode",
-		"label": __("View mode"),
-		"fieldtype": "Select",
-		"options": [
-			{
-				value: "em",
-				label: __("Employee Sale")
-			},
-			{
-				value: "ss",
-				label: __("Sales supervisor")
-			},
-			{
-				value: "asm",
-				label: __("Area Sales Manager")
-			}
-		],
-		"default": "em",
-		"reqd": 1,
-		change:() => {
-			this.refreshSync()
-		}
-	})
+	// this.viewMode = this.page.add_field({
+	// 	"fieldname":"view_mode",
+	// 	"label": __("View mode"),
+	// 	"fieldtype": "Select",
+	// 	"options": [
+	// 		{
+	// 			value: "em",
+	// 			label: __("Employee Sale")
+	// 		},
+	// 		{
+	// 			value: "ss",
+	// 			label: __("Sales supervisor")
+	// 		},
+	// 		{
+	// 			value: "asm",
+	// 			label: __("Area Sales Manager")
+	// 		}
+	// 	],
+	// 	"default": "em",
+	// 	"reqd": 1,
+	// 	change:() => {
+	// 		this.refreshSync()
+	// 	}
+	// })
 
 	let _this = this
 
@@ -208,7 +208,7 @@ filters() {
 
 refreshFilters() {
 	this.fieldIdNvHr.set_value("");
-	this.viewMode.set_value("em");
+	// this.viewMode.set_value("em");
   }
 
 getDefaultValue() {

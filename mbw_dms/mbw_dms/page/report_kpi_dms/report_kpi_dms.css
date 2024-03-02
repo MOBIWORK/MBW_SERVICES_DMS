@@ -1,6 +1,9 @@
 * {
     box-sizing:  border-box;
   }
+  .table-section {
+    height: 400px;
+  }
   
   .table-area {
       z-index: 0;
