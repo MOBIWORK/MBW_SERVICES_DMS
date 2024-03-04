@@ -117,9 +117,16 @@ def sales_report():
 			total = order.get("grand_total")
 			daily_totals[date_str] += total
 
+		# Tạo một danh sách để lưu trữ thông tin của các đơn bán hàng
+		orders_list = []
+
+		# Lặp qua từng mục trong daily_totals để tạo danh sách các đơn bán hàng
+		for date, total in daily_totals.items():
+			orders_list.append({"ngay": date, "doanh_so": total})
+
 		return gen_response(200, 'Thành công', {
 			"Kpi": kpi,
-			"sales_order": daily_totals
+			"sales_invoice": orders_list
 		})
 	except Exception as e:
 		return exception_handel(e)
@@ -182,9 +189,17 @@ def invoices_report():
 			total = order.get("grand_total")
 			daily_totals[date_str] += total
 
+		# Tạo một danh sách để lưu trữ thông tin của các hóa đơn bán hàng
+		invoices_list = []
+
+		# Lặp qua từng mục trong daily_totals để tạo danh sách các hóa đơn bán hàng
+		for date, total in daily_totals.items():
+			invoices_list.append({"ngay": date, "doanh_thu": total})
+
+		# Trả về phản hồi bao gồm cả KPI và danh sách hóa đơn bán hàng
 		return gen_response(200, 'Thành công', {
 			"Kpi": kpi,
-			"sales_invoice": daily_totals
+			"sales_invoice": invoices_list
 		})
 	except Exception as e:
 		return exception_handel(e)
