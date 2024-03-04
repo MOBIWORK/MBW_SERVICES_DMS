@@ -164,7 +164,7 @@ export function ChooseCustomer({selected,handleAdd,closeModal}:Props) {
                 {fil.key}: {fil.value}
               </TagCustom>
             ))}
-            <span className="cursor-pointer" onClick={() => handleClearFilter()}>Clear all</span>
+            
           </Row>
         )}
       </div>

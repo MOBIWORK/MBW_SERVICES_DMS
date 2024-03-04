@@ -22,11 +22,10 @@ type Props = {
 }
 
 export default function Customer({listCustomer,handleCustomer}:Props) {
-  const [messageApi, contextHolder] = message.useMessage();
+  const [messageApi] = message.useMessage();
   const [viewMode,setViewMode] = useState('list')
   const [openChoose,setOpenChoose] = useState<boolean>(false)
   const [openImport,setOpenImport] = useState<boolean>(false)
-  const [file,setFile] = useState()
   const [dataImport,setDataImport] = useState<any[]>([])
   const warning = (message: string) => {
     messageApi.open({
@@ -34,10 +33,17 @@ export default function Customer({listCustomer,handleCustomer}:Props) {
       content: message,
     });
   };
-  const error = () => {
+  const error = (message : string = "error") => {
     messageApi.open({
       type: 'error',
-      content: 'Error',
+      content: message,
+    });
+  };
+
+  const success = (message : string = "Success") => {
+    messageApi.open({
+      type: 'success',
+      content: message,
     });
   };
   const handeClose = (type:'Choose'| 'Import' | null) => {
@@ -100,8 +106,12 @@ export default function Customer({listCustomer,handleCustomer}:Props) {
   }
 
   const optimalRouter = useCallback(async () => {
+
+    //tách mảng người dùng thành 2 mảng con:có vị trí/ không vị trí
+    const customerLoactions = listCustomer.filter(customer => customer.location)
+    const customerNoLoactions = listCustomer.filter(customer => !customer.location)
     // chuyển mảng người dùng thành mảng vị trí
-      const locations = listCustomer.filter(customer => customer.location).map((customer,index) => ({
+      const locations = customerLoactions.map((customer,index) => ({
         "id":index,
         "customer": customer.name,
         "long": JSON.parse(customer.location as string)?.long,
@@ -109,13 +119,23 @@ export default function Customer({listCustomer,handleCustomer}:Props) {
     }))
 
     // tối ưu mảng vị trí
+    try {
       const rsOptimal:rsData<any[] >= await AxiosService.post("/api/method/mbw_dms.api.helpers.optimal_router.optimal_router",{
         locations 
       })
-      // chuyển mảng vị trí thành mảng khách hàng
-      const optimal = rsOptimal.result.map((opLocation) => {
-        return  listCustomer.find(cs => cs.name == opLocation.customer) || false        
-      }).filter(op => op)
+      // mảng vị trí khách hàng trả về
+      const locationsOptimal= rsOptimal.result
+      // chuyển mảng người dùng
+      const newCustomersLocation = locationsOptimal.map((csLocation) => {
+        let customerDetail = customerLoactions.find(customer => customer.name == csLocation.customer)
+        return customerDetail     
+      })
+      handleCustomer([...newCustomersLocation,...customerNoLoactions])
+      success()
+    } catch (err) {
+      error(err?.message || "Error")
+    }
+      
       // cập nhật lại mảng khách hàng chung
 
   },[listCustomer])
@@ -134,6 +154,7 @@ export default function Customer({listCustomer,handleCustomer}:Props) {
               <Button
                 className="w-full flex items-center text-[#1677ff] bg-[#1877f214] h-[36px]"
                 icon={<ThunderIcon />}
+                onClick={optimalRouter}
               >
                 Tối ưu tuyến
               </Button>
