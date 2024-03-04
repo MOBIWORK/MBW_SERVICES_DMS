@@ -489,6 +489,6 @@ def get_sale_order_by_checkin_id(**data):
 
             return gen_response(200,'Thành công', detail_order)
         else:
-            return gen_response(406, f"Không tồn tại đơn hàng có checkin_id là {checkin_id}")
+            return gen_response(200, 'Thành công', [])
     except Exception as e: 
         exception_handel(e)
