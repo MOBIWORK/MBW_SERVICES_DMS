@@ -97,11 +97,7 @@ export const optionsFrequency = [
     {
         label: "4",
         value: "4"
-    },
-    {
-        label: "5",
-        value: "5"
-    },
+    }
 ]
 
 

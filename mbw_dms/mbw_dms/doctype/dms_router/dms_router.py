@@ -343,7 +343,7 @@ def get_customer(filters):
             "Customer",
             queryFilters,
             ["name",'customer_code',"customer_name",'UNIX_TIMESTAMP(custom_birthday) as custom_birthday',
-             "location","customer_type","customer_name",
+             "customer_location_primary","customer_type","customer_name",
              "customer_primary_address as display_address","mobile_no as phone_number"],
             start=page_size*(page_number-1), 
             page_length=page_size)
@@ -351,9 +351,9 @@ def get_customer(filters):
         for customer in data:
             customer["longitude"] = False
             customer["latitude"] = False
-            if customer['location'] :
-                customer["longitude"] = json.loads(customer['location'] ).get('long')
-                customer["latitude"] =json.loads(customer['location'] ).get('lat')
+            if customer['customer_location_primary'] :
+                customer["longitude"] = json.loads(customer['customer_location_primary'] ).get('long')
+                customer["latitude"] =json.loads(customer['customer_location_primary'] ).get('lat')
 
         total = len(frappe.db.get_list(
             "Customer",

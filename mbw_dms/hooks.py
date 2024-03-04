@@ -244,5 +244,8 @@ fixtures = [
 doc_events = {
 	"DMS Checkin": {
 		"on_update": "mbw_dms.mbw_dms.doctype.dms_checkin.dms_checkin.create_checkin_ek"
-	}
+	},
+    "Address":{
+        "on_update": ""
+    }
 }

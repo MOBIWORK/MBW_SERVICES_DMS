@@ -22,7 +22,7 @@ type Props = {
 }
 
 export default function Customer({listCustomer,handleCustomer}:Props) {
-  const [messageApi] = message.useMessage();
+  const [messageApi, contextHolder] = message.useMessage();
   const [viewMode,setViewMode] = useState('list')
   const [openChoose,setOpenChoose] = useState<boolean>(false)
   const [openImport,setOpenImport] = useState<boolean>(false)
@@ -108,14 +108,14 @@ export default function Customer({listCustomer,handleCustomer}:Props) {
   const optimalRouter = useCallback(async () => {
 
     //tách mảng người dùng thành 2 mảng con:có vị trí/ không vị trí
-    const customerLoactions = listCustomer.filter(customer => customer.location)
-    const customerNoLoactions = listCustomer.filter(customer => !customer.location)
+    const customerLoactions = listCustomer.filter(customer => customer.longitude && customer.latitude)
+    const customerNoLoactions = listCustomer.filter(customer => !(customer.longitude && customer.latitude))
     // chuyển mảng người dùng thành mảng vị trí
       const locations = customerLoactions.map((customer,index) => ({
         "id":index,
         "customer": customer.name,
-        "long": JSON.parse(customer.location as string)?.long,
-        "lat": JSON.parse(customer.location as string)?.lat
+        "long": customer.longitude,
+        "lat": customer.latitude
     }))
 
     // tối ưu mảng vị trí
@@ -133,7 +133,7 @@ export default function Customer({listCustomer,handleCustomer}:Props) {
       handleCustomer([...newCustomersLocation,...customerNoLoactions])
       success()
     } catch (err) {
-      error(err?.message || "Error")
+      error(err?.response?.data?.message || "Something was wrong")
     }
       
       // cập nhật lại mảng khách hàng chung
@@ -141,7 +141,7 @@ export default function Customer({listCustomer,handleCustomer}:Props) {
   },[listCustomer])
 
   return (
-    <>
+    <>{contextHolder}
       <Row gutter={16} className={"justify-between p-4 pb-5 pt-10 mt-0"}>
         <Col>
           <Row gutter={8}>
