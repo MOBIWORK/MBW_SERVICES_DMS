@@ -30,22 +30,6 @@ export function Mapcustom(
   {locations}: {locations: location[]}
 ) {
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const route = [
-    { id: 1, latitude: 21.0285, longitude: 105.8542 },
-    { id: 2, latitude: 21.0278, longitude: 105.8352 },
-    { id: 3, latitude: 21.0285, longitude: 105.8523 }
-  ]
-  const toggleFullscreen = () => {
-    if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen();
-      setIsFullscreen(true);
-    } else {
-      if (document.exitFullscreen) {
-        document.exitFullscreen();
-        setIsFullscreen(false);
-      }
-    }
-  };
   return (
     <div
       className={
