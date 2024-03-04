@@ -4,14 +4,14 @@ import { Col, Row } from 'antd'
 import { TableCustom } from '../../components'
 import { baseCustomers, commonTable } from './data'
 import {  Mapcustom } from '../../components/map/map'
-import {locations} from '../../types/location'
+import {locationType} from '../../types/location'
 import {getAttrInArray} from "../../util"
 
 type Props = {
     data?: CustomerType[] | false
 }
 export default function CustomerMap({data}:Props) { 
-  const [locations,setLocation] = useState<locations[]>([])
+  const [locations,setLocation] = useState<locationType[]>([])
   useEffect(()=> {
     setLocation(getAttrInArray(data,["customer_name","longitude","latitude"], {isNull: false}))
   },[data])
