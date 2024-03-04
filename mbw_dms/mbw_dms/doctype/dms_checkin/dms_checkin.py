@@ -261,7 +261,7 @@ def create_checkin_image(body):
         long = validate_filter(type_check='require',value=body.get('long'))
         lat = validate_filter(type_check='require',value=body.get('lat'))
         create_by = user.get('name')
-        create_time = datetime.now()
+        create_time = datetime.datetime.now()
         description = ''
         if customer_name:
             description += customer_name + '\\n'
