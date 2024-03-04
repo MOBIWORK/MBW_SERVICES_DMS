@@ -61,7 +61,7 @@ export function ChooseCustomer({selected,handleAdd,closeModal}:Props) {
   const [page_number,setPageNumber] = useState<number>(1)
   const [total_Customer,setTotalNumber] = useState<number>(40)
   const rowSelection = {
-    selectedRowKeys: customerChoose && customerChoose.map(value => value.name) ,
+    selectedRowKeys: customerChoose && customerChoose.map(value => value.customer_code) ,
     onChange: (selectedRowKeys: React.Key[], selectedRows: CustomerType[]) => {
       setCustomerChoose(selectedRows);
     },
@@ -106,9 +106,9 @@ export function ChooseCustomer({selected,handleAdd,closeModal}:Props) {
     if(customerChoose.length >0) {
       
       handleAdd((prev:CustomerType[]) => {
-        let arrNameSelect = selected.map((cs:CustomerType) =>cs.name )
+        let arrNameSelect = selected.map((cs:CustomerType) =>cs.customer_code )
       customerChoose.forEach((cs:CustomerType) => {
-        if (!arrNameSelect.includes(cs.name))
+        if (!arrNameSelect.includes(cs.customer_code))
           prev = [cs,...prev]
       })
       return [...prev]
@@ -175,7 +175,7 @@ export function ChooseCustomer({selected,handleAdd,closeModal}:Props) {
         }}
         columns={columnSelectCustomer}
         dataSource={customerList.map((value: CustomerType) => ({
-          key: value.name,
+          key: value.customer_code,
           ...value,
         }))}
         pagination={false}

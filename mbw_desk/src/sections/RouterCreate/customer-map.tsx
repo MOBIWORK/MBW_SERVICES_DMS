@@ -13,6 +13,8 @@ type Props = {
 export default function CustomerMap({data}:Props) { 
   const [locations,setLocation] = useState<locationType[]>([])
   useEffect(()=> {
+    console.log("data in map",data);
+    
     setLocation(getAttrInArray(data,["customer_name","longitude","latitude"], {isNull: false}))
   },[data])
   return (

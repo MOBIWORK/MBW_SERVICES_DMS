@@ -193,7 +193,7 @@ def create_router(body):
         if body['cmd'] :
             del body['cmd']
         field_validate= ["travel_date","status", "customers", "channel_code", "team_sale","channel_name","employee"]
-        field_customers_validate = ["customer_code","customer_name","display_address","phone_number","customer","frequency"]
+        field_customers_validate = ["customer_code","customer_name","display_address","phone_number","customer","frequency","latitude","longitude"]
         # check_validate fields
         for key_router,value in body.items():
             if isinstance(body[key_router], list):
@@ -223,7 +223,7 @@ def update_router(body):
         if body['cmd'] :
             del body['cmd']
         field_validate= ["name","travel_date","status", "customers", "channel_code", "team_sale","channel_name","employee"]
-        field_customers_validate = ["customer_code","customer_name","display_address","phone_number","customer","frequency"]
+        field_customers_validate = ["customer_code","customer_name","display_address","phone_number","customer","frequency","latitude","longitude"]
         # check_validate fields
         for key_router,value in body.items():
             if isinstance(body[key_router], list):

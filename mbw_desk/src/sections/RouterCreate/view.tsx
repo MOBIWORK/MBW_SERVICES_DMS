@@ -33,7 +33,8 @@ export default function RouterCreate() {
   };
   const handleCreateRouter = useCallback(async(value:any) => {
     value = {...value,customers: customerRouter.map((customer)=> {
-      let key_push = ["customer_id","customer_code","customer_name","display_address","phone_number","customer","frequency"]
+      let key_push = ["customer_id","customer_code","customer_name","display_address","phone_number","customer","frequency","latitude","longitude"]
+
       for (let key in customer) {
         if(!key_push.includes(key)) {
           delete customer[key]
@@ -55,7 +56,7 @@ export default function RouterCreate() {
 
   const handleUpdateRouter = useCallback(async(value:any) => {
     value = {...value,customers: customerRouter.map((customer)=> {
-      let key_push = ["customer_id","customer_code","customer_name","display_address","phone_number","customer","frequency"]
+      let key_push = ["customer_id","customer_code","customer_name","display_address","phone_number","customer","frequency","latitude","longitude"]
       for (let key in customer) {
         if(!key_push.includes(key)) {
           delete customer[key]
