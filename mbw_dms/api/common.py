@@ -229,7 +229,8 @@ def upload_image_s3(image,description):
         print(e)
     # data response
     data = {}
-    data["file_url"] = f"https://{endpoint_s3}/{object_name}"
+    # data["file_url"] = f"https://{endpoint_s3}/{object_name}"
+    data["file_url"] = object_name
     data['status'] = True
     return data
 

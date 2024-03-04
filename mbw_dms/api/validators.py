@@ -26,9 +26,9 @@ def validate_phone_number(value):
 
 # Kiểm tra trường bắt buộc có dữ liệu truyền lên không được để trống (required=True)
 def validate_not_none(value):
-    if not value:
-        raise ValueError('Vui lòng nhập đầy đủ dữ liệu!')
-    return value
+    if not value[0]:
+        raise ValueError(f"Vui lòng nhập dữ liệu! {value[1]}")
+    return value[0]
 
 
 # Kiểm tra trường date truyền lên
