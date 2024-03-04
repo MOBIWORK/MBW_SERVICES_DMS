@@ -250,11 +250,11 @@ def create_return_order(**kwargs):
         discount_percent = float(kwargs.get('additional_discount_percentage', 0))  # Chiết khấu theo % của đơn hàng
         discount_amount = float(kwargs.get('discount_amount', 0))                  # Tổng tiền chiết khấu của đơn hàng
         rate_taxes = float(kwargs.get('rate_taxes', 0))                            # Phần trăm thuế
-        apply_discount_on = kwargs.get('apply_discount_on', 'Grand Total')                     # Loại chiết khấu
-        taxes_and_charges = kwargs.get('taxes_and_charges')                     # Loại thuế
+        apply_discount_on = kwargs.get('apply_discount_on', 'Grand Total')         # Loại chiết khấu
+        taxes_and_charges = kwargs.get('taxes_and_charges')                        # Loại thuế
 
         new_order.customer = validate_not_none(kwargs.customer)                                         
-        new_order.set_warehouse = validate_not_none(kwargs.get('set_warehouse'))                        # Kho hàng
+        new_order.set_warehouse = validate_not_none(kwargs.get('set_warehouse'))                            # Kho hàng
         if apply_discount_on is not None:
             new_order.apply_discount_on = validate_choice(configs.discount_type)(apply_discount_on)         # Loại Chiết khấu
             new_order.additional_discount_percentage = discount_percent                                     # Phần trăm chiết khấu
@@ -444,31 +444,50 @@ def delete_item(name_return_order, item_code):
 
 # Chi tiết đơn hàng theo checkin_id
 @frappe.whitelist(methods='GET')
-def get_sale_order_by_checkin_id(**data):
+def get_sale_order_by_checkin_id(doctype, **data):
     try:
         checkin_id = data.get('checkin_id')
-        detail_sales_order = frappe.db.get_list("Sales Order", filters={"checkin_id": checkin_id}, fields=['name'])
+        detail_sales_order = frappe.db.get_list(doctype, filters={"checkin_id": checkin_id}, fields=['name'])
         if detail_sales_order:
-            SalesOrder = frappe.qb.DocType("Sales Order")
+            SalesOrder = frappe.qb.DocType(doctype)
             Customer = frappe.qb.DocType("Customer")
-            SalesOrderItem = frappe.qb.DocType("Sales Order Item")
             SalesOrderTaxes = frappe.qb.DocType("Sales Taxes and Charges")
-            field_detail_sales = ['total','grand_total','customer','customer_name','address_display',"delivery_date",'set_warehouse','taxes_and_charges','total_taxes_and_charges','apply_discount_on','additional_discount_percentage','discount_amount','contact_person','rounded_total']
             field_detail_items = ['name', 'item_name','item_code','qty',"uom",'amount','discount_amount','discount_percentage']
-            detail = (frappe.qb.from_(SalesOrder)
-                    .inner_join(SalesOrderItem)
-                    .on(SalesOrder.name == SalesOrderItem.parent)
-                    
-                    .inner_join(Customer)
-                    .on(Customer.name == SalesOrder.customer)
-                    .where(SalesOrder.name == detail_sales_order[0].get('name'))
-                    .select(
-                        Customer.customer_code
-                        ,SalesOrder.customer,SalesOrder.customer_name,SalesOrder.address_display,UNIX_TIMESTAMP(SalesOrder.delivery_date).as_('delivery_date'),SalesOrder.set_warehouse,SalesOrder.total,SalesOrder.grand_total
-                        ,SalesOrder.taxes_and_charges,SalesOrder.total_taxes_and_charges, SalesOrder.apply_discount_on, SalesOrder.additional_discount_percentage,SalesOrder.discount_amount,SalesOrder.contact_person,SalesOrder.rounded_total
-                        ,SalesOrderItem.name, SalesOrderItem.item_name,SalesOrderItem.item_code,SalesOrderItem.qty, SalesOrderItem.uom,SalesOrderItem.amount,SalesOrderItem.discount_amount,SalesOrderItem.discount_percentage                        
-                    )
-                    ).run(as_dict =1)
+            field_detail_sales = []
+            if doctype == "Sales Order":
+                SalesOrderItem = frappe.qb.DocType("Sales Order Item")
+                field_detail_sales = ['total','grand_total','customer','customer_name','address_display',"delivery_date",'set_warehouse','taxes_and_charges','total_taxes_and_charges','apply_discount_on','additional_discount_percentage','discount_amount','contact_person','rounded_total']
+                detail = (frappe.qb.from_(SalesOrder)
+                        .inner_join(SalesOrderItem)
+                        .on(SalesOrder.name == SalesOrderItem.parent)
+                        
+                        .inner_join(Customer)
+                        .on(Customer.name == SalesOrder.customer)
+                        .where(SalesOrder.name == detail_sales_order[0].get('name'))
+                        .select(
+                            Customer.customer_code
+                            ,SalesOrder.customer,SalesOrder.customer_name,SalesOrder.address_display,UNIX_TIMESTAMP(SalesOrder.delivery_date).as_('delivery_date'),SalesOrder.set_warehouse,SalesOrder.total,SalesOrder.grand_total
+                            ,SalesOrder.taxes_and_charges,SalesOrder.total_taxes_and_charges, SalesOrder.apply_discount_on, SalesOrder.additional_discount_percentage,SalesOrder.discount_amount,SalesOrder.contact_person,SalesOrder.rounded_total
+                            ,SalesOrderItem.name, SalesOrderItem.item_name,SalesOrderItem.item_code,SalesOrderItem.qty, SalesOrderItem.uom,SalesOrderItem.amount,SalesOrderItem.discount_amount,SalesOrderItem.discount_percentage                        
+                        )
+                        ).run(as_dict =1)
+            if doctype == "Sales Invoice":
+                SalesOrderItem = frappe.qb.DocType("Sales Invoice Item")
+                field_detail_sales = ['total','grand_total','customer','customer_name','address_display',"posting_date",'set_warehouse','taxes_and_charges','total_taxes_and_charges','apply_discount_on','additional_discount_percentage','discount_amount','contact_person','rounded_total']
+                detail = (frappe.qb.from_(SalesOrder)
+                        .inner_join(SalesOrderItem)
+                        .on(SalesOrder.name == SalesOrderItem.parent)
+                        
+                        .inner_join(Customer)
+                        .on(Customer.name == SalesOrder.customer)
+                        .where(SalesOrder.name == detail_sales_order[0].get('name'))
+                        .select(
+                            Customer.customer_code
+                            ,SalesOrder.customer,SalesOrder.customer_name,SalesOrder.address_display,UNIX_TIMESTAMP(SalesOrder.posting_date).as_('posting_date'),SalesOrder.set_warehouse,SalesOrder.total,SalesOrder.grand_total
+                            ,SalesOrder.taxes_and_charges,SalesOrder.total_taxes_and_charges, SalesOrder.apply_discount_on, SalesOrder.additional_discount_percentage,SalesOrder.discount_amount,SalesOrder.contact_person,SalesOrder.rounded_total
+                            ,SalesOrderItem.name, SalesOrderItem.item_name,SalesOrderItem.item_code,SalesOrderItem.qty, SalesOrderItem.uom,SalesOrderItem.amount,SalesOrderItem.discount_amount,SalesOrderItem.discount_percentage                        
+                        )
+                        ).run(as_dict =1)
             detail_taxes = (frappe.qb.from_(SalesOrder)
                             .inner_join(SalesOrderTaxes)
                             .on(SalesOrder.name == SalesOrderTaxes.parent)
@@ -479,7 +498,7 @@ def get_sale_order_by_checkin_id(**data):
             if len(detail) > 0 :
                 items_list = {}
                 for key_item, value in detail[0].items() :
-                    if key_item in field_detail_sales:                    
+                    if key_item in field_detail_sales:  
                         detail_order.setdefault(key_item,value)
                     elif key_item in field_detail_items:
                         items_list.setdefault(key_item,value)
