@@ -216,7 +216,6 @@ def create_router(body):
         exception_handel(e)
 
 #cap nhat tuyen
-@frappe.whitelist(methods="PATCH")
 def update_router(body):
     try:
         body = dict(body)

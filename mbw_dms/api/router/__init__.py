@@ -31,7 +31,7 @@ def create_router(**kwargs):
     return create_router(body=kwargs)
 
 #cap nhat tuyen
-@frappe.whitelist()
+@frappe.whitelist(methods="PATCH")
 def update_router(**kwargs):
     from mbw_dms.mbw_dms.doctype.dms_router.dms_router import update_router
     return update_router(body=kwargs)
