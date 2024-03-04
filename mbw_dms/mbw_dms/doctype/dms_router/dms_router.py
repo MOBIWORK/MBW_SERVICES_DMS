@@ -2,6 +2,7 @@
 # For license information, please see license.txt
 
 import frappe
+import json
 from frappe.model.document import Document
 from pypika import CustomFunction
 
@@ -296,7 +297,7 @@ def get_sale_person(data):
     except Exception as e:
         exception_handel(e)
 
-
+# danh sách customer cho web
 @frappe.whitelist(methods="GET")
 def get_customer(filters):
     try:
@@ -346,6 +347,14 @@ def get_customer(filters):
              "customer_primary_address as display_address","mobile_no as phone_number"],
             start=page_size*(page_number-1), 
             page_length=page_size)
+        
+        for customer in data:
+            customer["longitude"] = False
+            customer["latitude"] = False
+            if customer['location'] :
+                customer["longitude"] = json.loads(customer['location'] ).get('long')
+                customer["latitude"] =json.loads(customer['location'] ).get('lat')
+
         total = len(frappe.db.get_list(
             "Customer",
             queryFilters))
