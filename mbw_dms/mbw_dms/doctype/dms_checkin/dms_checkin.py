@@ -251,7 +251,7 @@ def create_checkin_image(body):
     try:
         user = get_user_id()
         image = validate_filter(value=(body.get('image'),"image"),type_check='require')
-        album_id = validate_filter(value = (body.get('album_id'),"album"),type_check='require')
+        album_id = validate_filter(value = (body.get('album_id'),"album id"),type_check='require')
         album_name = validate_filter(type_check='require',value=(body.get('album_name'),"album name"))
         checkin_id = validate_filter(type_check='require',value=(body.get('checkin_id'),"checkin id"))
         customer_id = validate_filter(type_check='require',value=(body.get('customer_id'),"customer id"))

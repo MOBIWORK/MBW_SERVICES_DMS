@@ -9,9 +9,9 @@ import base64
 from frappe.core.doctype.file.utils import delete_file
 from frappe.utils.file_manager import save_file
 
-# from mbw_dms.api.file import (
-#     my_minio
-# )
+from mbw_dms.api.file import (
+    my_minio
+)
 from PIL import Image
 from PIL import ImageDraw
 from PIL import ImageFont
@@ -229,8 +229,7 @@ def upload_image_s3(image,description):
         print(e)
     # data response
     data = {}
-    # data["file_url"] = f"https://{endpoint_s3}/{object_name}"
-    data["file_url"] = object_name
+    data["file_url"] = f"https://{endpoint_s3}/{object_name}"
     data['status'] = True
     return data
 
