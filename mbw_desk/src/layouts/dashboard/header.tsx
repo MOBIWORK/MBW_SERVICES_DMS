@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Row, Col, Avatar, Dropdown, Space } from "antd";
 import type { MenuProps } from "antd";
-import {} from 'frappe-react-sdk'
-import { useFrappeAuth } from 'frappe-react-sdk';
+import {} from "frappe-react-sdk";
+import { useFrappeAuth } from "frappe-react-sdk";
 
 import { Link } from "react-router-dom";
 import logo from "../../assets/react.svg";
@@ -10,10 +10,8 @@ import { AxiosService } from "../../services/server";
 import { rsData } from "../../types/response";
 
 export default function Header() {
-  const {
-    currentUser,
-  } = useFrappeAuth();
-  
+  const { currentUser } = useFrappeAuth();
+
   const [empDetail, setEmpDetail] = useState<employeeType>();
   useEffect(() => {
     (async () => {
@@ -46,8 +44,8 @@ export default function Header() {
     },
   ];
   return (
-    <div className="w-full border-[#E2E6E9] border bg-white py-[7px]">
-      <Row className="justify-between max-w-full w-[80%] mx-auto">
+    <div className="w-full !border-[red] border bg-white py-[7px] !border-b-4">
+      <Row className="justify-between max-w-full w-[95%] mx-auto">
         <Col>
           <Link to="/" className="w-[32px] h-[32px]">
             <img src={logo} className="object-contain w-[32px] h-[32px]" />
@@ -59,9 +57,8 @@ export default function Header() {
             trigger={["click"]}
             placement={"bottomRight"}
             dropdownRender={(menu) => (
-              <div className="w-[200px]" >
+              <div className="w-[200px]">
                 {React.cloneElement(menu as React.ReactElement)}
-                
               </div>
             )}
           >

@@ -24,7 +24,6 @@ export function HeaderPage({ title, buttons }: Props) {
     <>
       <Row className="flex flex-wrap justify-between items-center px-0 py-5">
         <div className="flex justify-center items-center">
-            <IoIosMenu style={{ fontSize: "24px" }} />
           <span className="text-2xl font-semibold leading-[21px] ml-2">{title}</span>
         </div>
         <div className="flex mb-2">
