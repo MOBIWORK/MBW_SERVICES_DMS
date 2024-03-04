@@ -16,14 +16,16 @@ export default function DashboardLayout({ children }: Props) {
     //     {/* <div className='max-w-full w-[80%] mx-auto'><div  className="rounded-md">{children}</div></div> */}
     //   </div>
     // </div>
-    <Layout>
-      <Content style={{ padding: "0 0px" }}>
+    <Layout >
+      <Content style={{ padding: "0 0px"}} className="!bg-[#fff] w-screen min-h-screen">
         <Header />
         <Layout
           style={{
             padding: "24px 0",
             background: "#fff",
             borderRadius: "8px",
+            width: "80%",
+            margin: "0 auto"
           }}
         >
           <Sider style={{ background: "#fff" }} width={200}>
