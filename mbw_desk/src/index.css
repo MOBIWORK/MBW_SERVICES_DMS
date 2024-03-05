@@ -56,3 +56,32 @@
 .custom-slider div.slick-list div.slick-track div.slick-current{
   opacity: 1;
 }
+
+.ant-menu .ant-menu-item {
+  padding-left: 8px!important;
+}
+.ant-menu .ant-menu-submenu-title {
+  padding-left: 8px!important;
+}
+
+/* .ant-menu-submenu-inline .ant-menu-sub {
+  background: #fff;
+  padding-left: 24px!important;
+} */
+.ant-menu-sub .ant-menu-title-content {
+  margin-left: 30px;
+}
+
+/* .ant-menu-item-selected {
+  color: #637381!important;
+} */
+.ant-menu-submenu-selected >.ant-menu-submenu-title {
+  color: #212B36!important;
+}
+.ant-menu-item-selected .ant-menu-title-content{
+  color: red!important;
+}
+
+:where(.css-dev-only-do-not-override-dkbvqv).ant-menu-light .ant-menu-item-selected {
+  color: #637381!important;
+}
