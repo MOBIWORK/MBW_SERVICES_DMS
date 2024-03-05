@@ -254,7 +254,7 @@ def report_orders_invoices(customer_name):
 		data['doanh_thu_thang'] = total_invoices
 
 		# Lấy tên người viếng thăm cuối cùng và đặt hàng lần cuối
-		last_visit = frappe.get_list('DMS Checkin', filters={'kh_ten': customer_name}, limit=1, order_by="creation desc")
+		last_visit = frappe.get_list('DMS Checkin', filters={'kh_ten': customer_name}, limit=1, order_by="creation desc", fields=['owner', 'checkin_giovao'])
 		if last_visit:
 			user_checkin = frappe.get_value('Employee',{ 'user_id': last_visit[0].owner}, 'employee_name')
 			data['nv_vieng_tham'] = user_checkin
@@ -263,11 +263,11 @@ def report_orders_invoices(customer_name):
 			data['nv_vieng_tham'] = ''
 			data['vieng_tham_cuoi'] = ''
 
-		last_order = frappe.get_list('Sales Order', filters={'kh_ten': customer_name, 'docstatus': 1}, limit=1, order_by="creation desc")
+		last_order = frappe.get_list('Sales Order', filters={'customer': customer_name, 'docstatus': 1}, limit=1, order_by="creation desc", fields=['owner', 'creation'])
 		if last_order:
-			user_order = frappe.get_value('Employee',{ 'user_id': last_order.owner}, 'employee_name')
+			user_order = frappe.get_value('Employee',{ 'user_id': last_order[0].owner}, 'employee_name')
 			data['nv_dat_hang'] = user_order
-			data['don_hang_cuoi'] = last_order.creation
+			data['don_hang_cuoi'] = last_order[0].creation
 		else:
 			data['nv_dat_hang'] = ''
 			data['don_hang_cuoi'] = ''
