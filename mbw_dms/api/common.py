@@ -213,7 +213,7 @@ def upload_image_s3(image,description):
     imgdata = base64.b64decode(image)
     bucket_domain =frappe.local.site.replace('.','-')
     file_name = "checkin_" + \
-        "_" + str(datetime.now()) + ".png"
+        "_" + str(datetime.now()).replace(" ","_") + ".png"
     if description:
         imgdata_new = add_text_to_image(file_name, imgdata, description)
     else:
