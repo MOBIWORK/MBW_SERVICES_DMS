@@ -17,7 +17,8 @@ InventoryItem = frappe.qb.DocType(DocNameChild)
 def find(filters = {}, options = ["*"],page_length = 20, page =1,order = "name desc",is_children = True,**data) :
 	results = frappe.db.get_list(DocName, filters=filters,fields= options, start=(page -1) * page_length,
     page_length=page_length,
-	parent_doctype=DocName
+	parent_doctype=DocName,
+	distinct=True
 	)	
 	print("results",results)
 	fieldChil = [ "name",
