@@ -1,13 +1,1 @@
-[
- {
-  "docstatus": 0,
-  "doctype": "Client Script",
-  "dt": "Customer",
-  "enabled": 1,
-  "modified": "2024-01-22 10:53:06.689361",
-  "module": "MBW DMS",
-  "name": "Customer Location Script",
-  "script": "frappe.ui.form.on(\"Customer\", {\n  refresh: function (frm) {\n     \n  },\nonload:async function(frm) {\n    console.log('list_address',frm.doc.__onload.addr_list)\n    let primaryAddressObj = frm.doc.__onload.addr_list.find(address => address.is_primary_address == 1)\n    if(primaryAddressObj) {\n        frm.set_value('customer_location_primary',primaryAddressObj.address_location)\n        frm.doc.save()\n    }\n\n},\n\n});",
-  "view": "Form"
- }
-]
+[]
