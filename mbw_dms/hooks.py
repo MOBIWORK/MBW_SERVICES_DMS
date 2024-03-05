@@ -246,6 +246,9 @@ doc_events = {
 		"on_update": "mbw_dms.mbw_dms.doctype.dms_checkin.dms_checkin.create_checkin_ek"
 	},
     "Address":{
-        "on_update": ""
+        "on_update": "mbw_dms.mbw_dms.doctype.address.address.update_address"
+    },
+    "Customer": {
+        "on_update": "mbw_dms.controllers.dms_customer.update_location"
     }
 }

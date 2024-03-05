@@ -56,3 +56,15 @@ class DMSCustomer(Customer):
         monthly_summary_doc = frappe.get_doc('DMS Summary KPI Monthly', existing_monthly_summary[0]['name'])
         monthly_summary_doc.so_kh_moi -= 1
         monthly_summary_doc.save(ignore_permissions=True)
+
+
+
+def update_location(doc,method=None):    
+    if doc.customer_primary_address:
+        address = frappe.get_doc("Address", {
+            "name" : doc.customer_primary_address
+        })
+        if address:
+            doc.customer_location_primary = address.address_location
+            frappe.msgprint('update location')
+    pass
