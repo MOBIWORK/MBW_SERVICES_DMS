@@ -28,8 +28,9 @@ export function HeaderPage({ title, buttons }: Props) {
         </div>
         <div className="flex mb-2">
           {buttons &&
-            buttons.map((button) => (
+            buttons.map((button, index) => (
               <Button
+                key={index}
                 className={button.className}
                 size={button.size || "middle"}
                 icon={button.icon}

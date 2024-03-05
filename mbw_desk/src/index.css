@@ -85,3 +85,7 @@
 :where(.css-dev-only-do-not-override-dkbvqv).ant-menu-light .ant-menu-item-selected {
   color: #637381!important;
 }
+
+.active  .text-custom {
+  font-weight: 500!important;
+}

@@ -10,6 +10,7 @@ import {
   DatePicker,
   Table,
   InputNumber,
+  Select,
 } from "antd";
 import type { DatePickerProps, TableColumnsType } from "antd";
 import { LuFilter, LuFilterX } from "react-icons/lu";
@@ -18,6 +19,7 @@ import { useEffect, useState } from "react";
 import { AxiosService } from "../../services/server";
 import dayjs from "dayjs";
 import { useForm } from "antd/es/form/Form";
+import useDebounce from "../../hooks/useDebount";
 
 interface DataCustomer {
   key: React.Key;
@@ -26,6 +28,7 @@ interface DataCustomer {
   customer_name: string;
   customer_type: string;
   customer_address: string;
+  name: string;
 }
 
 interface ExpandedDataType {
@@ -75,17 +78,21 @@ const columns: TableColumnsType<DataCustomer> = [
 export default function ReportCustomer() {
   const [dataCustomer, setDataCustomer] = useState<DataCustomer[]>([]);
   const [formFilter] = useForm();
-  const [expire_from, setExpireFrom] = useState<number>()
-  const [expire_to, setExpireTo] = useState<number>()
-  const [qty_inven_from, setInvenFrom] = useState<number>()
-  const [qty_inven_to, setInvenTo] = useState<number>()
-  const [total_from, setTotalFrom] = useState<number>()
-  const [total_to, setTotalTo] = useState<number>()
+  const [expire_from, setExpireFrom] = useState<number>();
+  const [expire_to, setExpireTo] = useState<number>();
+  const [qty_inven_from, setInvenFrom] = useState<number>();
+  const [qty_inven_to, setInvenTo] = useState<number>();
+  const [total_from, setTotalFrom] = useState<number>();
+  const [total_to, setTotalTo] = useState<number>();
+  const [item, setItem] = useState<any[]>([]);
+  const [item_code, setItemCode] = useState("");
   const onChange: DatePickerProps["onChange"] = (dateString: any) => {
     console.log(dateString);
   };
+  const [keyItem, setKeyItem] = useState("");
+  let keySItem = useDebounce(keyItem, 500);
   const expandedRowRender = (record: any) => {
-    console.log("rdsss", record);
+    console.log("dataTableChid", record);
 
     const columns: TableColumnsType<ExpandedDataType> = [
       {
@@ -154,57 +161,77 @@ export default function ReportCustomer() {
 
   const handleSearchFilter = (val: any) => {
     console.log("val:", val);
-    if(val.expire_from) {
-      let exDateFrom = Date.parse(val.expire_from['$d']) / 1000
-      setExpireFrom(exDateFrom)
-    }else {
-      setExpireFrom(undefined)
-    }
-    if(val.expire_to) {
-      let exDateTo = Date.parse(val.expire_to['$d']) / 1000
-      setExpireTo(exDateTo)
+    if (val.expire_from) {
+      let exDateFrom = Date.parse(val.expire_from["$d"]) / 1000;
+      setExpireFrom(exDateFrom);
     } else {
-      setExpireTo(undefined)
+      setExpireFrom(undefined);
     }
-    if(val.qty_inven_from) {
-      setInvenFrom(val.qty_inven_from)
+    if (val.expire_to) {
+      let exDateTo = Date.parse(val.expire_to["$d"]) / 1000;
+      setExpireTo(exDateTo);
     } else {
-      setInvenFrom(undefined)
+      setExpireTo(undefined);
     }
-    if(val.qty_inven_to) {
-      setInvenTo(val.qty_inven_to)
+    if (val.qty_inven_from) {
+      setInvenFrom(val.qty_inven_from);
     } else {
-      setInvenTo(undefined)
+      setInvenFrom(undefined);
     }
-    if(val.total_from) {
-      setTotalFrom(val.total_from)
+    if (val.qty_inven_to) {
+      setInvenTo(val.qty_inven_to);
     } else {
-      setTotalFrom(undefined)
+      setInvenTo(undefined);
     }
-    if(val.total_to) {
-      setTotalTo(val.total_to)
+    if (val.total_from) {
+      setTotalFrom(val.total_from);
     } else {
-      setTotalTo(undefined)
+      setTotalFrom(undefined);
+    }
+    if (val.total_to) {
+      setTotalTo(val.total_to);
+    } else {
+      setTotalTo(undefined);
     }
   };
 
   useEffect(() => {
-    initDataCustomer();
+    (async () => {
+      const rsItem = await AxiosService.get(
+        "/api/method/mbw_dms.api.selling.product.list_product"
+      );
+
+      let { result } = rsItem;
+
+      setItem(
+        result.data.map((item: any) => ({
+          value: item.item_code,
+          label: item.item_name,
+          des: item.item_code,
+        }))
+      );
+    })();
   }, []);
 
-  const initDataCustomer = async () => {
-    let urlDataCustomer =
-      "/api/method/mbw_dms.api.report.inventory.get_customer_inventory";
-    const response = await AxiosService.get(urlDataCustomer);
-    console.log("abc", response);
-    let data = response.result.map((item: DataCustomer) => {
-      return {
-        ...item,
-        key: item.name,
-      };
-    });
-    setDataCustomer(data);
-  };
+  // useEffect(() => {
+  //   initDataCustomer();
+  // }, []);
+
+  // const initDataCustomer = async () => {
+  //   let urlDataCustomer =
+  //     "/api/method/mbw_dms.api.report.inventory.get_customer_inventory";
+  //   const response = await AxiosService.get(urlDataCustomer);
+  //   // console.log("dataTable", response);
+  //   let data = response.result.map((item: DataCustomer) => {
+  //     return {
+  //       ...item,
+  //       key: item.name,
+  //     };
+  //   });
+  //   console.log("datA", data);
+    
+  //   setDataCustomer(data);
+  // };
 
   useEffect(() => {
     (async () => {
@@ -217,14 +244,31 @@ export default function ReportCustomer() {
             qty_inven_from,
             qty_inven_to,
             total_from,
-            total_to
+            total_to,
+            item_code
           },
         }
       );
-      setDataCustomer(rsReport.result)
+      setDataCustomer(rsReport.result.map((item: DataCustomer) => {
+        return {
+          ...item,
+          key: item.name,
+        };
+      }));
     })();
-    // 
-  }, [expire_from, expire_to , qty_inven_from, qty_inven_to, total_from, total_to]);
+    //
+  }, [
+    expire_from,
+    expire_to,
+    qty_inven_from,
+    qty_inven_to,
+    total_from,
+    total_to,
+    item_code
+  ]);
+
+  console.log("keydataCustomer", dataCustomer);
+  
 
   return (
     <>
@@ -245,13 +289,43 @@ export default function ReportCustomer() {
           <Col span={14}>
             <Row gutter={8}>
               <Col span={8}>
-                <FormItemCustom className="w-[320px] border-none p-4">
-                  <Input
-                    className="!bg-[#F5F7FA] !h-8"
-                    placeholder="Tìm kiếm chiến dịch"
-                    prefix={<SearchOutlined />}
-                  />
-                </FormItemCustom>
+                <div className="flex justify-start items-center">
+                  <FormItemCustom className="w-[200px] border-none p-4">
+                    <Select
+                      filterOption={false}
+                      onChange={(value: any) => {
+                        setItemCode(value)
+                        // console.log("vaue:", value);
+                      }}
+                      showSearch
+                      // placeholder="Sản phẩm"
+                      defaultValue={""}
+                      notFoundContent={null}
+                      onSearch={(value: string) => setKeyItem(value)}
+                      options={[{ label: "Sản phẩm", value: "" }, ...item]}
+                      optionRender={(option) => {
+                        console.log("option:", option);
+
+                        return (
+                          <>
+                            <div className="text-sm">
+                              <p
+                                role="img"
+                                aria-label={option.data.label}
+                                className="my-1"
+                              >
+                                {option.data.label}
+                              </p>
+                              <span className="text-xs !font-semibold">
+                                {option.data.des}
+                              </span>
+                            </div>
+                          </>
+                        );
+                      }}
+                    />
+                  </FormItemCustom>
+                </div>
               </Col>
             </Row>
           </Col>
@@ -340,7 +414,10 @@ export default function ReportCustomer() {
                               <span className="font-normal text-sm leading-5 text-[#637381]">
                                 Từ
                               </span>
-                              <FormItemCustom className="pt-2" name="qty_inven_from">
+                              <FormItemCustom
+                                className="pt-2"
+                                name="qty_inven_from"
+                              >
                                 <InputNumber
                                   controls={false}
                                   className="w-full"
@@ -352,7 +429,10 @@ export default function ReportCustomer() {
                               <span className="font-normal text-sm leading-5 text-[#637381]">
                                 Đến
                               </span>
-                              <FormItemCustom className="pt-2" name="qty_inven_to">
+                              <FormItemCustom
+                                className="pt-2"
+                                name="qty_inven_to"
+                              >
                                 <InputNumber
                                   controls={false}
                                   className="w-full"
@@ -370,7 +450,10 @@ export default function ReportCustomer() {
                               <span className="font-normal text-sm leading-5 text-[#637381]">
                                 Từ
                               </span>
-                              <FormItemCustom className="pt-2" name="total_from">
+                              <FormItemCustom
+                                className="pt-2"
+                                name="total_from"
+                              >
                                 <InputNumber
                                   controls={false}
                                   className="!bg-[#F5F7FA] w-full"
@@ -407,9 +490,8 @@ export default function ReportCustomer() {
                               </Button>
                               <Button
                                 type="primary"
-                                onClick={() =>{
-                                  formFilter.submit()
-
+                                onClick={() => {
+                                  formFilter.submit();
                                 }}
                               >
                                 Áp dụng
@@ -423,22 +505,14 @@ export default function ReportCustomer() {
                 >
                   <Button
                     onClick={(e: any) => e.preventDefault()}
-                    className="flex items-center text-nowrap !text-[13px] !leading-[21px] !font-normal  border-r-[0.1px] rounded-r-none h-[32px]"
+                    className="flex items-center text-nowrap !text-[13px] !leading-[21px] !font-normal  border-r-[0.1px] rounded-r-none h-9"
                     icon={<LuFilter style={{ fontSize: "20px" }} />}
                   >
                     Bộ lọc
                   </Button>
                 </Dropdown>
-                <Button className="border-l-[0.1px] rounded-l-none h-[32px]">
+                <Button className="border-l-[0.1px] rounded-l-none h-9">
                   <LuFilterX style={{ fontSize: "20px" }} />
-                </Button>
-              </div>
-              <div className="flex justify-center items-center rounded-md">
-                <Button className="border-r-[0.1px] rounded-r-none">
-                  <PiSortAscendingBold style={{ fontSize: "20px" }} />
-                </Button>
-                <Button className="border-l-[0.1px] rounded-l-none">
-                  Lần cập nhật cuối cùng
                 </Button>
               </div>
             </div>
