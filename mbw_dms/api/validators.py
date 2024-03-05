@@ -26,10 +26,15 @@ def validate_phone_number(value):
 
 # Kiểm tra trường bắt buộc có dữ liệu truyền lên không được để trống (required=True)
 def validate_not_none(value):
+    if not value:
+        raise ValueError(f"Vui lòng nhập dữ liệu!")
+    return value
+
+
+def validate_not_none_field(value):
     if not value[0]:
         raise ValueError(f"Vui lòng nhập dữ liệu! {value[1]}")
     return value[0]
-
 
 # Kiểm tra trường date truyền lên
 def validate_date(value):
@@ -144,6 +149,7 @@ def validate_filter(type_check,type=None,value=None):
         "email": validate_email,
         "phone_number" :validate_phone_number,
         "require": validate_not_none,
+        "require_field": validate_not_none_field,
         "date": validate_date,
         "datetime":validate_datetime,
         "length":validate_length(type),
