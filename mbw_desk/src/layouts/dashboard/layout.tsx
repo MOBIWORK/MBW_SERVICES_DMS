@@ -29,7 +29,7 @@ export default function DashboardLayout({ children }: Props) {
           }}
         >
           <Sider style={{ background: "#fff" }} width={250}>
-            <div className="font-semibold text-lg text-[#919EAB] leading-[22px] mx-2 pb-4">
+            <div className="font-semibold text-lg text-[#919EAB] leading-[22px] pl-[12px] mx-2 pb-4">
               DMS
             </div>
             <MenuLeft />
