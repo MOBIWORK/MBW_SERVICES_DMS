@@ -11,6 +11,7 @@ import { Menu } from "antd";
 import { MenuProps } from "antd/lib";
 import { useState } from "react";
 import { Link, NavLink } from "react-router-dom";
+import { MenuCustom } from "../../components/menu/menu";
 
 export default function MenuLeft() {
   const [current, setCurrent] = useState(
@@ -43,7 +44,7 @@ export default function MenuLeft() {
         }
         to="/"
       >
-        <p className="text-[#637381] font-normal text-sm leading-[22px]">
+        <p className="text-[#212B36] text-custom font-normal text-sm leading-[22px]">
           Dashboard
         </p>
       </NavLink>,
@@ -57,7 +58,7 @@ export default function MenuLeft() {
         }
         to="/monitor-album"
       >
-        <p className="text-[#637381] font-normal text-sm leading-[22px]">
+        <p className="text-[#212B36] text-custom font-normal text-sm leading-[22px]">
           Giám sát
         </p>
       </NavLink>,
@@ -71,7 +72,7 @@ export default function MenuLeft() {
         }
         to="/router-control"
       >
-        <p className="text-[#637381] font-normal text-sm leading-[22px]">
+        <p className="text-[#212B36] text-custom font-normal text-sm leading-[22px]">
           Quản lý tuyến
         </p>
       </NavLink>,
@@ -85,7 +86,7 @@ export default function MenuLeft() {
           isPending ? "pending" : isActive ? "active" : ""
         }
       >
-        <p className="text-[#637381] font-normal text-sm leading-[22px]">
+        <p className="text-[#212B36] text-custom font-normal text-sm leading-[22px]">
           Báo cáo
         </p>
       </NavLink>,
@@ -99,7 +100,9 @@ export default function MenuLeft() {
             }
             to="/report-customer"
           >
-            Báo cáo tồn kho khách hàng
+            <p className="text-[#212B36] text-custom font-normal text-sm leading-[22px]">
+              Báo cáo tồn kho khách hàng
+            </p>
           </NavLink>,
           "5"
         ),
@@ -110,7 +113,9 @@ export default function MenuLeft() {
             }
             to="/app/report-kpi-dms"
           >
-            Báo cáo KPI
+            <p className="text-[#212B36] text-custom font-normal text-sm leading-[22px]">
+              Báo cáo KPI
+            </p>
           </NavLink>,
           "6"
         ),
@@ -119,11 +124,11 @@ export default function MenuLeft() {
   ];
   type MenuItem = Required<MenuProps>["items"][number];
   return (
-    <Menu
+    <MenuCustom
       onClick={onClick}
       selectedKeys={[current]}
       mode="inline"
       items={items}
-    ></Menu>
+    ></MenuCustom>
   );
 }

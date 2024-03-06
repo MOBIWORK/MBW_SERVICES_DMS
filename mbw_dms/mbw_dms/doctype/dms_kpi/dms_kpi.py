@@ -178,6 +178,7 @@ def invoices_report():
 			filters={"posting_date": (">=", start_date),
         			 "posting_date": ("<=", todays),
         			 "docstatus": 1,
+					 "is_return": 0,
 					 "owner": user_id},
 			fields=['grand_total', 'posting_date']
 		)
@@ -203,3 +204,77 @@ def invoices_report():
 		})
 	except Exception as e:
 		return exception_handel(e)
+	
+
+# Báo cáo doanh thu, đơn hàng cho Mobile
+@frappe.whitelist(methods='GET')
+def report_orders_invoices(customer_name):
+	try:
+		todays = today()
+		month = int(nowdate().split('-')[1])
+		year = int(nowdate().split('-')[0])
+		start_date_str = f'{year:04d}-{month:02d}-01'
+		start_date = frappe.utils.getdate(start_date_str)
+
+		user_id = frappe.session.user
+		data = {}
+		data['ngay'] = todays
+
+		# Lấy danh sách đơn hàng từ đầu tháng đến hiện tại
+		sales_order = frappe.get_all(
+			'Sales Order',
+			filters={
+					"transaction_date": (">=", start_date),
+					"transaction_date": ("<=", todays),
+					"customer_name": customer_name,
+					"docstatus": 1,
+					"owner": user_id
+				},
+			fields=['name']
+		)
+		data['so_don_trong_thang'] = len(sales_order)
+
+		# Lấy danh sách hóa đơn từ đầu tháng đến hiện tại
+		sales_invoice = frappe.get_all(
+			'Sales Invoice',
+			filters={
+					"posting_date": (">=", start_date),
+					"posting_date": ("<=", todays),
+					"docstatus": 1,
+					"customer_name": customer_name,
+					"is_return": 0,
+					"owner": user_id
+				},
+			fields=['grand_total', 'posting_date']
+		)
+		total_invoices = 0
+		for i in sales_invoice:
+			total_invoices += i['grand_total']
+		
+		data['doanh_thu_thang'] = total_invoices
+
+		# Lấy tên người viếng thăm cuối cùng và đặt hàng lần cuối
+		last_visit = frappe.get_list('DMS Checkin', filters={'kh_ten': customer_name}, limit=1, order_by="creation desc", fields=['owner', 'checkin_giovao'])
+		if last_visit:
+			user_checkin = frappe.get_value('Employee',{ 'user_id': last_visit[0].owner}, 'employee_name')
+			data['nv_vieng_tham'] = user_checkin
+			data['vieng_tham_cuoi'] = last_visit[0].checkin_giovao
+		else:
+			data['nv_vieng_tham'] = ''
+			data['vieng_tham_cuoi'] = ''
+
+		last_order = frappe.get_list('Sales Order', filters={'customer': customer_name, 'docstatus': 1}, limit=1, order_by="creation desc", fields=['owner', 'creation'])
+		if last_order:
+			user_order = frappe.get_value('Employee',{ 'user_id': last_order[0].owner}, 'employee_name')
+			data['nv_dat_hang'] = user_order
+			data['don_hang_cuoi'] = last_order[0].creation
+		else:
+			data['nv_dat_hang'] = ''
+			data['don_hang_cuoi'] = ''
+
+		return gen_response(200, 'Thành công', data)
+	
+	except Exception as e:
+		return exception_handel(e)
+
+	
