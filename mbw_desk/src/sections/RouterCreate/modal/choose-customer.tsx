@@ -136,7 +136,7 @@ export function ChooseCustomer({selected,handleAdd,closeModal}:Props) {
               icon={<LuFilter style={{ fontSize: "20px" }} />}
               onClick={setOpenFilter.bind(null, true)}
             >
-              Filter
+              Bộ lọc
             </Button>
             <Button
               className="border-l-[0.1px] rounded-l-none h-[36px]"
@@ -169,6 +169,7 @@ export function ChooseCustomer({selected,handleAdd,closeModal}:Props) {
         )}
       </div>
       <TableCustom
+        scroll={{y: 500 }}
         rowSelection={{
           type: "checkbox",
           ...rowSelection,
@@ -181,7 +182,7 @@ export function ChooseCustomer({selected,handleAdd,closeModal}:Props) {
         pagination={false}
       />
       <Row className="justify-end mt-2">
-        <Pagination defaultCurrent={page_number} pageSize={PAGE_SIZE}  total={total_Customer} onChange={(page,pageSize) => {
+        <Pagination showSizeChanger={false} defaultCurrent={page_number} pageSize={PAGE_SIZE}  total={total_Customer} onChange={(page,pageSize) => {
           setPageNumber(page);          
         }}/>
       </Row>

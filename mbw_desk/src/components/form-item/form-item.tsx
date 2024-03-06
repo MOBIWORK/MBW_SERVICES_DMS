@@ -18,7 +18,7 @@ export const FormItemCustom = styled(Form.Item)<{ disabled?: boolean }>`
 & .ant-form-item-label {
   & > label {
     color: black;
-    font-weight: 500;
+    font-weight: 400;
     font-size: 14px;
     line-height: 24px;
     height: 24px;

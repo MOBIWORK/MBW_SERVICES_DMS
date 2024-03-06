@@ -18,10 +18,15 @@ padding-left: 0!important;
     }
 }
 & .ant-menu-sub .ant-menu-item {
-
+    height: fit-content!important;
     border-radius: 0;
-    & a>p {
-        padding:0 0 0 34px;
+    padding: 8px 0px 8px 44px;
+    & a {
+        &>p {
+            padding:0 0 0 34px;
+            white-space: wrap;
+            margin: 0 !important;
+        }
     }
 }
 

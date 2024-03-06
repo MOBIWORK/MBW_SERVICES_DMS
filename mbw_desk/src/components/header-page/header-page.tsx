@@ -1,9 +1,5 @@
 import { Button, Row } from "antd";
-import React from "react";
-import { IoIosMenu } from "react-icons/io";
-import { LiaDownloadSolid } from "react-icons/lia";
-import { LuUploadCloud } from "react-icons/lu";
-import { VscAdd } from "react-icons/vsc";
+import React, { ReactNode } from "react";
 
 type button = {
   label: string;
@@ -17,9 +13,10 @@ type button = {
 type Props = {
   title: string;
   buttons?: button[];
+  customButton ?: ReactNode
 };
 
-export function HeaderPage({ title, buttons }: Props) {
+export function HeaderPage({ title, buttons ,customButton}: Props) {
   return (
     <>
       <Row className="flex flex-wrap justify-between items-center px-0 py-5">
@@ -40,6 +37,7 @@ export function HeaderPage({ title, buttons }: Props) {
                 {button.label}
               </Button>
             ))}
+            {customButton}
         </div>
       </Row>
     </>
