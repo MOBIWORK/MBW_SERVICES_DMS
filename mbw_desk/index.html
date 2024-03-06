@@ -1,21 +1,29 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/ess.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>MBW DMS Desk</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <div id="modals"></div>
-    <div id="popovers"></div>
-    <script type="module" src="/src/main.tsx"></script>
-    <script>
-      window.csrf_token = "{{ csrf_token }}"
-      window.frappe_version = "{{ frappe_version }}"
-      window.mbw_dms_version = "{{ mbw_dms_version }}"
-      window.site_name = "{{ site_name }}"
-    </script>
-  </body>
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/ess.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MBW DMS Desk</title>
+  <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+  <script src="https://files.ekgis.vn/sdks/v2.0.0/ekmap-platform.min.js"></script>
+  <link href="https://files.ekgis.vn/sdks/v2.0.0/ekmap-platform.min.css" rel="stylesheet" />
+</head>
+
+<body>
+  <div id="root"></div>
+  <div id="modals"></div>
+  <div id="popovers"></div>
+  <script type="module" src="/src/main.tsx"></script>
+  <script>
+    window.csrf_token = "{{ csrf_token }}"
+    window.frappe_version = "{{ frappe_version }}"
+    window.mbw_dms_version = "{{ mbw_dms_version }}"
+    window.site_name = "{{ site_name }}"
+
+    
+  </script>
+</body>
+
 </html>

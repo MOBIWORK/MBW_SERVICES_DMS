@@ -33,7 +33,7 @@ export const dashboardRoutes = [
                 path: 'router-control',element: <RouterControl/>
             },
             {
-                path: 'router-employee ',element: <Progress/>
+                path: 'router-employee',element: <RouterEmployee/>
             },
             {
                 path: 'dms-router/:type',element: <RouterCreate/>
