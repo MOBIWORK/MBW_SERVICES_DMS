@@ -54,7 +54,7 @@ export default function FilterCustomer({ form, filter, setFilter }: Props) {
     if (ma_tinh_thanh) {
       let rsDistrict = await AxiosService.get('/api/method/mbw_dms.api.location.list_district', {
         params: {
-          ma_tinh_thanh: Number.parseInt(ma_tinh_thanh)
+          ma_tinh: ma_tinh_thanh
         }
       })
   

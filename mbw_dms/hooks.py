@@ -120,7 +120,8 @@ website_route_rules = [
 override_doctype_class = {
 	"Customer": "mbw_dms.controllers.dms_customer.DMSCustomer",
     "Sales Order": "mbw_dms.controllers.dms_sales_order.DMSSalesOrder",
-    "Sales Invoice": "mbw_dms.controllers.dms_sales_invoice.DMSSalesInvoice"
+    "Sales Invoice": "mbw_dms.controllers.dms_sales_invoice.DMSSalesInvoice",
+    "Item": "mbw_dms.controllers.dms_item.DMS_Item"
 }
 
 # Document Events

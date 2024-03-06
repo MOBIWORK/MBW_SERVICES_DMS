@@ -3,9 +3,51 @@ import styled from "styled-components";
 
 
 export const TableCustom = styled(Table)`
+
 & .ant-table-container .ant-table-cell{
   font-size: 14px!important;
+  font-weight:500;
 }
+&.ant-table-wrapper table {
+  border-radius: 16px!important;
+}
+
+& .ant-table-thead {
+  &>tr {
+    & .ant-table-cell {
+
+      color : #637381;
+      line-height: 21px;
+      font-size: 14px;
+      font-weight: 500!important;
+    }
+    border-radius: 16px 16px 0 0 !important;
+    & th {
+      white-space : nowrap;
+      border-bottom: none
+    }
+    & th:first-child {
+      border-start-start-radius: 16px!important;
+    }
+  
+    & th:last-child {
+      border-start-end-radius: 16px!important;
+    }
+  }
+}
+
+& .ant-table-tbody>tr:last-child {
+  border-radius:  0 0 16px 16px!important;
+  & td:first-child {
+    border-end-start-radius: 16px!important;
+  }
+
+  & td:last-child {
+    border-end-end-radius: 16px!important;
+  }
+}
+
+
 
 .ant-table-container {
     table {

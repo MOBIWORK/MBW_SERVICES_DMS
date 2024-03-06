@@ -53,7 +53,7 @@ def get_list_router(filters):
         order_string = 'modified desc'
         if order_by and sort:
             order_string = f"{order_by} {sort}"
-        list_router = frappe.db.get_list('DMS Router',filters=queryFilters,fields=['*', 'UNIX_TIMESTAMP(travel_date) as travel_date'], 
+        list_router = frappe.db.get_list('DMS Router',filters=queryFilters,fields=['*', 'UNIX_TIMESTAMP(travel_date) as travel_date','UNIX_TIMESTAMP(creation) as creation','UNIX_TIMESTAMP(modified) as modified'], 
                                        order_by=order_string, 
                                        start=page_size*(page_number-1), page_length=page_size)
         

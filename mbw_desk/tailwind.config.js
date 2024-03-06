@@ -6,7 +6,7 @@ export default {
   ],
   theme: {
     extend: {
-      
+      fontFamily: "Inter"
     },
   },
   plugins: [],

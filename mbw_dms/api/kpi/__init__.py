@@ -24,3 +24,8 @@ def invoices_report():
 def report_visit_orders_invoices(customer_name):
     from mbw_dms.mbw_dms.doctype.dms_kpi.dms_kpi import report_orders_invoices
     return report_orders_invoices(customer_name=customer_name)
+
+@frappe.whitelist()
+def report_detail_visit(customer_name):
+    from mbw_dms.mbw_dms.doctype.dms_kpi.dms_kpi import report_detail_visit
+    return report_detail_visit(customer_name=customer_name)

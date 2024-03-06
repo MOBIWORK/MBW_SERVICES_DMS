@@ -2,6 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
+
 .custom-slider-container {
   position: relative;
 }
@@ -57,39 +58,3 @@
   opacity: 1;
 }
 
-.ant-menu .ant-menu-item {
-  padding-left: 8px!important;
-}
-.ant-menu .ant-menu-submenu-title {
-  padding-left: 8px!important;
-}
-
-/* .ant-menu-submenu-inline .ant-menu-sub {
-  background: #fff;
-  padding-left: 24px!important;
-} */
-.ant-menu-sub .ant-menu-title-content {
-  margin-left: 30px;
-}
-
-/* .ant-menu-item-selected {
-  color: #637381!important;
-} */
-.ant-menu-submenu-selected >.ant-menu-submenu-title {
-  color: #212B36!important;
-}
-.ant-menu-item-selected .ant-menu-title-content{
-  color: red!important;
-}
-
-:where(.css-dev-only-do-not-override-dkbvqv).ant-menu-light .ant-menu-item-selected {
-  color: #637381!important;
-}
-
-.active  .text-custom {
-  font-weight: 500!important;
-}
-
-:where(.css-dev-only-do-not-override-dkbvqv).ant-tabs .ant-tabs-tab+.ant-tabs-tab {
-  margin: 0px;
-}
