@@ -6,7 +6,9 @@ from frappe.model.document import Document
 from mbw_dms.api.common import (
     exception_handel,
     gen_response,
+	get_value_child_doctype
 )
+from mbw_dms.api.validators import validate_filter_timestamp
 from frappe.utils import nowdate, today
 import calendar
 from collections import defaultdict 
@@ -59,7 +61,7 @@ def visit_report():
 		return gen_response(200, 'Thành công', kpi)
 	except Exception as e:
 		return exception_handel(e)
-
+import bson
 # Báo cáo doanh số
 @frappe.whitelist(methods='GET')
 def sales_report():
@@ -273,6 +275,67 @@ def report_orders_invoices(customer_name):
 			data['don_hang_cuoi'] = ''
 
 		return gen_response(200, 'Thành công', data)
+	
+	except Exception as e:
+		return exception_handel(e)
+
+
+# Báo cáo chi tiết viếng thăm
+@frappe.whitelist(methods='GET')
+def report_detail_visit(customer_name, **kwargs):
+	try:
+		from_date = validate_filter_timestamp('start')(kwargs.get('from_date')) if kwargs.get('from_date') else None
+		to_date = validate_filter_timestamp('end')(kwargs.get('to_date')) if kwargs.get('to_date') else None
+		user_id = frappe.session.user
+		query_so = {}
+		if from_date and to_date:
+			query_so["transaction_date"] = ["between",[from_date,to_date]]
+		query_so["customer_name"] = customer_name
+		query_so["docstatus"] = 1
+		query_so["owner"] = user_id
+		data = {}
+
+		# Lấy danh sách đơn hàng
+		sales_order = frappe.get_all(
+			'Sales Order',
+			filters=query_so,
+			fields=['name', 'transaction_date', 'grand_total']
+		)
+		data['so_don_trong_thang'] = len(sales_order)
+
+		orders_list = []
+		grand_totals = 0
+		for i in sales_order:
+			order_info = {
+				'name': i.get('name'),
+				'transaction_date': i.get('transaction_date'),
+				'grand_total': i.get('grand_total')
+			}
+			orders_list.append(order_info)
+			grand_totals += i['grand_total']
+
+		data['so_tien_phai_tra'] = grand_totals
+		data['danh_sach_don'] = orders_list
+
+		# Tồn kho
+		query_inv = {}
+		if from_date and to_date:
+			query_inv["transaction_date"] = ["between",[from_date,to_date]]
+		query_so["customer_name"] = customer_name
+		query_so["owner"] = user_id
+		inventory = frappe.get_all(
+			'DMS Inventory',
+			filters=query_inv,
+			fields=['name', 'creation']
+		)
+		for i in inventory:
+			i['items'] = get_value_child_doctype('DMS Inventory', i['name'], 'items')
+
+		return gen_response(200, 'Thành công', {
+			"don_hang": data,
+			"ton_kho": inventory
+		})
+	
 	
 	except Exception as e:
 		return exception_handel(e)
