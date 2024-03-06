@@ -1,0 +1,50 @@
+[
+    {
+        "name": "1",
+        "urlImg": "https://os.alipayobjects.com/rmsportal/QBnOOoLaAfKPirc.png",
+        "customer_code": "23ASSD",
+        "customer_name": "Long Thần",
+        "department": "Phòng 1",
+        "status": "Không hoạt động",
+        "pin": "24",
+        "viengtham": "4/4",
+        "order": "2",
+        "doanhso": "50000000"
+    },
+    {
+        "name": "2",
+        "urlImg": "https://os.alipayobjects.com/rmsportal/QBnOOoLaAfKPirc.png",
+        "customer_code": "23SSSAA",
+        "customer_name": "Phong Trần",
+        "department": "Phòng 2",
+        "status": "Không hoạt động",
+        "pin": "34",
+        "viengtham": "3/4",
+        "order": "1",
+        "doanhso": "90000000"
+    },
+    {
+        "name": "3",
+        "urlImg": "https://os.alipayobjects.com/rmsportal/QBnOOoLaAfKPirc.png",
+        "customer_code": "2255ACS",
+        "customer_name": "Hoàng Thất",
+        "department": "Phòng 3",
+        "status": "Không hoạt động",
+        "pin": "44",
+        "viengtham": "1/4",
+        "order": "4",
+        "doanhso": "200000000"
+    },
+    {
+        "name": "5",
+        "urlImg": "https://os.alipayobjects.com/rmsportal/QBnOOoLaAfKPirc.png",
+        "customer_code": "1552SSSCCC",
+        "customer_name": "Tà Thần Thiên",
+        "department": "Phòng 6",
+        "status": "Không hoạt động",
+        "pin": "64",
+        "viengtham": "1/4",
+        "order": "4",
+        "doanhso": "2000700000"
+    }
+]

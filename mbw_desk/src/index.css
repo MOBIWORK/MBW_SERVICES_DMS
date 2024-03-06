@@ -89,3 +89,7 @@
 .active  .text-custom {
   font-weight: 500!important;
 }
+
+:where(.css-dev-only-do-not-override-dkbvqv).ant-tabs .ant-tabs-tab+.ant-tabs-tab {
+  margin: 0px;
+}
