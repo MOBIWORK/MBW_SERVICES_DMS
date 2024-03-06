@@ -58,3 +58,6 @@
   opacity: 1;
 }
 
+:where(.css-dev-only-do-not-override-1jlkgmc).ant-tabs .ant-tabs-tab+.ant-tabs-tab  {
+  margin: 0px;
+}
