@@ -1,10 +1,9 @@
 import { VerticalAlignBottomOutlined } from "@ant-design/icons";
-import { FormItemCustom, HeaderPage, TableCustom } from "../../components";
+import { FormItemCustom, HeaderPage } from "../../components";
 import { Select, Table, Typography } from "antd";
-import type { TableColumnsType } from "antd";
+import { TableReport } from "../ReportSales/tableCustom";
 
-const { Column, ColumnGroup } = TableCustom;
-const { Text } = Typography;
+const { Column, ColumnGroup } = TableReport;
 
 interface DataTypeKPI {
   key: React.Key;
@@ -158,7 +157,7 @@ export default function ReportKPI() {
           </FormItemCustom>
         </div>
         <div className="pt-5">
-          <TableCustom
+          <TableReport
             dataSource={data}
             bordered
             scroll={{ x: true }}
@@ -477,7 +476,7 @@ export default function ReportKPI() {
                 )}
               />
             </ColumnGroup>
-          </TableCustom>
+          </TableReport>
         </div>
       </div>
     </>
