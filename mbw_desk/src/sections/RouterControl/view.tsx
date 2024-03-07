@@ -195,7 +195,9 @@ export default function RouterControl() {
           status,
           router: router && router.reduce((prev, now) => `${prev};${now}`),
           employee,
-          ...filter
+          ...filter,
+          order_by: orderField.value,
+          sort: orderBy
         }
       })
 
@@ -204,7 +206,7 @@ export default function RouterControl() {
 
     })()
 
-  }, [router, employee, status, page, filter])
+  }, [router, employee, status, page, filter,orderBy,orderField])
 
 
   return (
