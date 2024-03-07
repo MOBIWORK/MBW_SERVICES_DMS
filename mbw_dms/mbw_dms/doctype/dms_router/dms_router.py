@@ -11,7 +11,9 @@ from frappe.desk.reportview import get_filters_cond, get_match_cond
 from erpnext.controllers.queries import get_fields
 from mbw_dms.api.validators import validate_filter 
 from mbw_dms.config_translate import i18n
+from datetime import datetime
 
+import pydash
 UNIX_TIMESTAMP = CustomFunction('UNIX_TIMESTAMP', ['day'])
 
 class DMSRouter(Document):
@@ -120,11 +122,19 @@ def get_customer_router(data):
             queryFilters['name'] = ["in",router]
         if status: 
             queryFilters['status'] = status
-        list_router = frappe.db.get_list('DMS Router',filters=queryFilters, pluck='name')
+        #lay danh sach theo ngay
+        from mbw_dms.api.common import weekday
+        today= datetime.now()
+        thu_trong_tuan, tuan_trong_thang = weekday(today)
+        if view_mode == "map":
+            queryFilters.update({"travel_date": ["between",["Không giới hạn",thu_trong_tuan]]})
+            queryFilters.update({"frequency": ["like",tuan_trong_thang]})    
+        list_router = frappe.db.get_list('DMS Router',filters=queryFilters, pluck='name',distinct=True)
         list_customer = []
         for router_name in list_router:
-            detail_router = frappe.get_doc("DMS Router",router_name)
-            list_customer += detail_router.get('customers')
+            detail_router = frappe.get_doc("DMS Router",{"name":router_name})
+            customer = pydash.filter_(detail_router.get('customers'),lambda value: value.frequency.find(str(tuan_trong_thang)))
+            list_customer += customer
         if order_by: 
             list_customer = sorted(list_customer, key= lambda x: x.customer_name.split(' ')[-1],reverse=True if order_by == 'desc' else False)
         list_customer_name = []
@@ -148,7 +158,15 @@ def get_customer_router(data):
         if(view_mode == 'list'):
             detail_customer = frappe.db.get_list('Customer',filters= FiltersCustomer,fields=fields_customer,start=page_size*(page_number-1), page_length=page_size)
         else:
-            detail_customer = frappe.db.get_list('Customer',filters= FiltersCustomer,fields=fields_customer)        
+            fields_customer= [
+            'name'
+            ,'customer_code','customer_location_primary',
+            "customer_primary_address"
+            ]
+            FiltersCustomer.update({"customer_location_primary": ["is", "set"]})
+              
+            detail_customer = frappe.db.get_list('Customer',filters= FiltersCustomer,fields=fields_customer)    
+            print("ok",detail_customer)    
         for customer in detail_customer:
             customer['is_checkin'] = False
             checkin = frappe.db.get_value("DMS Checkin",{"kh_ma":customer.get('customer_code')})

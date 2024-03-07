@@ -276,3 +276,22 @@ class ArrayMethod():
             value = callback(value)
             array.append(value)
         return array
+    
+def weekday(time:datetime):
+    print(time.strftime("%A"))
+    listngay = ('Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy')
+    anh_xa_ngay_sang_so = {
+    "Monday": 1,
+    "Tuesday": 2,
+    "Wednesday": 3,
+    "Thursday": 4,
+    "Friday": 5,
+    "Saturday": 6,
+    "Sunday": 0
+}
+    thu_trong_tuan = listngay[anh_xa_ngay_sang_so[time.strftime("%A")]]
+    tuan = time.strftime("%W")
+    tuan_trong_thang = float(tuan)%4 if float(tuan)%4 != 0 else 4
+
+    return thu_trong_tuan, tuan_trong_thang
+    
