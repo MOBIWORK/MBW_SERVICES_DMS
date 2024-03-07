@@ -19,11 +19,11 @@ type Props = {
 export function HeaderPage({ title, buttons ,customButton}: Props) {
   return (
     <>
-      <Row className="flex flex-wrap justify-between items-center px-0 py-5">
+      <Row className="flex flex-wrap justify-between items-center px-0 py-5 flex-nowrap">
         <div className="flex justify-center items-center">
           <span className="text-2xl font-semibold leading-[21px] ml-2">{title}</span>
         </div>
-        <div className="flex mb-2">
+        <div className="flex mb-2 flex-nowrap">
           {buttons &&
             buttons.map((button, index) => (
               <Button
