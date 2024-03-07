@@ -3,6 +3,8 @@ import { HeaderPage } from "../../components";
 import { Col, Row, Tabs } from "antd";
 import ActiveEmployee from "./active-employee";
 import UnActiveEmployee from "./unactive-employee";
+import { Helmet } from "react-helmet-async";
+import MapEkgis from "../../components/mapEkgis/map";
 
 export default function EmployeeMonitor() {
   return (
@@ -11,7 +13,9 @@ export default function EmployeeMonitor() {
       <div className="pt-3 mx-2 rounded-xl">
         <Row>
           <Col span={16} push={8}>
-            <div className="h-48 w-full bg-black">Hello map</div>
+            <div className="h-48 w-full">
+              <MapEkgis/>
+            </div>
           </Col>
           <Col span={8} pull={16}>
             <Tabs
