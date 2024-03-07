@@ -133,7 +133,9 @@ def get_customer_router(data):
         list_customer = []
         for router_name in list_router:
             detail_router = frappe.get_doc("DMS Router",{"name":router_name})
-            customer = pydash.filter_(detail_router.get('customers'),lambda value: value.frequency.find(str(tuan_trong_thang)))
+            customer = detail_router.get('customers')
+            if view_mode == "map":
+                customer = pydash.filter_(detail_router.get('customers'),lambda value: value.frequency.find(str(tuan_trong_thang)))
             list_customer += customer
         if order_by: 
             list_customer = sorted(list_customer, key= lambda x: x.customer_name.split(' ')[-1],reverse=True if order_by == 'desc' else False)
