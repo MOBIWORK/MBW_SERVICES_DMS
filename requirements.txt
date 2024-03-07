@@ -8,5 +8,6 @@ scipy
 minio
 geopy
 boto3
+bson
 
 pydash
