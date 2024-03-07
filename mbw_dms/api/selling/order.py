@@ -64,8 +64,6 @@ def get_sale_order(name):
 
             # Lấy ra các trường trong đơn hàng
             field_detail_sales = ['total','grand_total','customer','customer_name','address_display',"delivery_date",'set_warehouse','taxes_and_charges','total_taxes_and_charges','apply_discount_on','additional_discount_percentage','discount_amount','contact_person','rounded_total']
-            # Lấy ra các trường của item
-            field_detail_items = ['name', 'item_name','item_code','qty',"uom",'amount','discount_amount','discount_percentage']
 
             # Thực hiện join để lấy ra giá trị
             detail = (frappe.qb.from_(SalesOrder)
@@ -79,7 +77,6 @@ def get_sale_order(name):
                         Customer.customer_code
                         ,SalesOrder.customer,SalesOrder.customer_name,SalesOrder.address_display,UNIX_TIMESTAMP(SalesOrder.delivery_date).as_('delivery_date'),SalesOrder.set_warehouse,SalesOrder.total,SalesOrder.grand_total
                         ,SalesOrder.taxes_and_charges,SalesOrder.total_taxes_and_charges, SalesOrder.apply_discount_on, SalesOrder.additional_discount_percentage,SalesOrder.discount_amount,SalesOrder.contact_person,SalesOrder.rounded_total
-                        ,SalesOrderItem.name, SalesOrderItem.item_name,SalesOrderItem.item_code,SalesOrderItem.qty, SalesOrderItem.uom,SalesOrderItem.amount,SalesOrderItem.discount_amount,SalesOrderItem.discount_percentage                        
                     )
                     ).run(as_dict =1)
             # Lấy ra giá trị tax
@@ -92,15 +89,11 @@ def get_sale_order(name):
             
             # Lấy ra chi tiết đơn hàng
             detail_order = {"list_items": []}
-            # for item in detail :
-            items_list = {}
             if len(detail) > 0:
                 for key_item, value in detail[0].items() :
                     if key_item in field_detail_sales:                    
                         detail_order.setdefault(key_item,value)
-                    elif key_item in field_detail_items:
-                        items_list.setdefault(key_item,value)
-                detail_order['list_items'].append(items_list)
+                detail_order['list_items'] = get_items_in_sales_order(name)
             if len(detail_taxes) > 0 :
                 detail_order = {**detail_order,**detail_taxes[0]}
 
@@ -511,3 +504,22 @@ def get_sale_order_by_checkin_id(doctype, **data):
             return gen_response(200, 'Thành công', [])
     except Exception as e: 
         exception_handel(e)
+
+
+def get_items_in_sales_order(master_name):
+    if not master_name:
+        return
+    master_doc = frappe.get_doc('Sales Order', master_name)
+
+    items = master_doc.get('items')
+
+    fields_to_get = ['name', 'item_name', 'item_code', 'qty', 'uom', 'amount', 'discount_amount', 'discount_percentage', 'is_free_item']
+    result = []
+
+    for item in items:
+        item_dict = {}
+        for fieldname in fields_to_get:
+            item_dict[fieldname] = item.get(fieldname)
+        result.append(item_dict)
+
+    return result
