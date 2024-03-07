@@ -104,9 +104,9 @@ export default function RouterControl() {
   const [filter, setFilter] = useState({})
   const [orderBy, setOrder] = useState<"desc" | "asc">("desc")
   const [orderField, setOrderField] = useState<any>({
-    "label": "Cập nhật",
+    "label": "Thời gian cập nhật",
     "value": "modified"
-  })
+},)
   const [action, setAction] = useState({})
 
 
