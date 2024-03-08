@@ -90,14 +90,13 @@
    "default": "False",
    "fieldname": "is_deleted",
    "fieldtype": "Check",
-   "hidden": 1,
    "label": "Tr\u1ea1ng th\u00e1i x\u00f3a",
    "reqd": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-01-31 15:06:31.521421",
+ "modified": "2024-03-08 11:27:16.042285",
  "modified_by": "Administrator",
  "module": "MBW DMS",
  "name": "DMS Router",

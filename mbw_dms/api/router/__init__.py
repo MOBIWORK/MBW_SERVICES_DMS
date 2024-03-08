@@ -36,6 +36,13 @@ def update_router(**kwargs):
     from mbw_dms.mbw_dms.doctype.dms_router.dms_router import update_router
     return update_router(body=kwargs)
 
+#cap nhat trang thai nhieu  tuyen
+@frappe.whitelist(methods="PATCH")
+def update_routers(**kwargs):
+    from mbw_dms.mbw_dms.doctype.dms_router.dms_router import update_routers
+    return update_routers(body=kwargs)
+
+
 # nhom ban hang
 @frappe.whitelist()
 def get_team_sale():

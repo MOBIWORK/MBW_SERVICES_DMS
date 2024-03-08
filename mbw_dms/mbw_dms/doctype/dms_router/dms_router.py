@@ -11,7 +11,7 @@ from frappe.desk.reportview import get_filters_cond, get_match_cond
 from erpnext.controllers.queries import get_fields
 from mbw_dms.api.validators import validate_filter 
 from mbw_dms.config_translate import i18n
-from datetime import datetime
+from datetime import datetime,timedelta
 
 import pydash
 UNIX_TIMESTAMP = CustomFunction('UNIX_TIMESTAMP', ['day'])
@@ -42,11 +42,15 @@ def get_list_router(filters):
         if modified_by:
             queryFilters['modified_by'] = modified_by
         if modified:
-            queryFilters['modified'] = modified
+            start_date = datetime.combine(modified, datetime.min.time())
+            end_date = start_date + timedelta(days=1)
+            queryFilters['modified'] = ["between",[start_date,end_date]]
         if owner:
             queryFilters['owner'] = owner
         if creation:
-            queryFilters['creation'] = creation
+            start_date = datetime.combine(creation, datetime.min.time())
+            end_date = start_date + timedelta(days=1)
+            queryFilters['creation'] = ["between",[start_date,end_date]]
         if router:
             router = router.split(';')
             queryFilters['name'] = ["in",router]
@@ -55,6 +59,7 @@ def get_list_router(filters):
         order_string = 'modified desc'
         if order_by and sort:
             order_string = f"{order_by} {sort}"
+        print("queryFilters",queryFilters)
         list_router = frappe.db.get_list('DMS Router',filters=queryFilters,fields=['*', 'UNIX_TIMESTAMP(travel_date) as travel_date','UNIX_TIMESTAMP(creation) as creation','UNIX_TIMESTAMP(modified) as modified'], 
                                        order_by=order_string, 
                                        start=page_size*(page_number-1), page_length=page_size)
@@ -267,7 +272,42 @@ def update_router(body):
     except Exception as e:
         exception_handel(e)
 
+# cap nhat multi router
+def update_routers(body):
+    try:
+        body = dict(body)
+        name = validate_filter(type_check='require',value=body.get('name'))
+        status = body.get("status")
+        is_deleted = body.get("is_deleted")
+        if not status and not is_deleted or ( status and is_deleted):
+            return gen_response(406,"Choose action",[])
+        if status :
+            field_name = "status"
+            value = f"'{status}'"
+        elif is_deleted:
+            field_name = "is_deleted"
+            value = 1
+        
+        if not field_name or not value:
+            return gen_response(406,"Choose action",[])
+        if body['cmd'] :
+            del body['cmd']
+        
+        frappe.db.sql(f"""
+                UPDATE `tabDMS Router`
+                SET {field_name} = {value}
+                WHERE name IN {tuple(name) if len(tuple(name)) >1 else tuple(name[0])} ;        
+                """)
+        
+        frappe.db.commit()
 
+        update = frappe.db.get_list('DMS Router',
+                                    filters={"name": ["in", name]},
+                                    fields=['*', 'UNIX_TIMESTAMP(travel_date) as travel_date',
+                                            'UNIX_TIMESTAMP(creation) as creation','UNIX_TIMESTAMP(modified) as modified'])
+        return gen_response(200,"",update)
+    except Exception as e:
+        exception_handel(e)
 
 # nhom ban hang
 @frappe.whitelist(methods="GET")

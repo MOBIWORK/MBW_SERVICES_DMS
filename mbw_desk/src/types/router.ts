@@ -1,8 +1,8 @@
 export type router =  {
     "name": string,
     "owner": string,
-    "creation": "2024-02-02 14:57:29.359355",
-    "modified": "2024-02-03 09:14:18.003746",
+    "creation": number,
+    "modified": number,
     "modified_by": string,
     "channel_code": string,
     "team_sale": string,
