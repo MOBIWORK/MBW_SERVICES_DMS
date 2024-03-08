@@ -1,11 +1,8 @@
-import React from "react";
-import { FormItemCustom, HeaderPage, TableCustom } from "../../components";
-import { Avatar, Badge, Input } from "antd";
-import { SearchOutlined, UserOutlined } from "@ant-design/icons";
-import { Bag } from "../../icons/bag";
-import { Clock } from "../../icons/clock";
-import { Pin } from "../../icons/pin";
-import CardActive from "./card-active";
+import { FormItemCustom} from "../../components";
+import { Input } from "antd";
+import { SearchOutlined } from "@ant-design/icons";
+import data from "./datamonitor/dataactive.json"
+import CardCustom from "./components/CustomerCard";
 
 export default function ActiveEmployee() {
   return (
@@ -21,7 +18,7 @@ export default function ActiveEmployee() {
       </div>
 
       <div className="overscroll-none h-[70vh] overflow-y-scroll">
-        <CardActive/>
+        <CardCustom data={data} color={'green'} status="Đang hoạt động"/>
       </div>
     </>
   );

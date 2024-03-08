@@ -74,3 +74,47 @@ export const salePerson = [
         "value": "Sale person 2"
     },
 ]
+
+export const salepartner = [
+    {
+        "label": "Sale partner 1",
+        "value": "Sale partner 1"
+    },
+    {
+        "label": "Sale partner 2",
+        "value": "Sale partner 2"
+    },
+]
+
+export const party = [
+    {
+        "label": "party 1",
+        "value": "party 1"
+    },
+    {
+        "label": "party 2",
+        "value": "party 2"
+    },
+]
+
+export const partyType = [
+    {
+        "label": "party type 1",
+        "value": "party type 1"
+    },
+    {
+        "label": "party type 2",
+        "value": "party type 2"
+    },
+]
+
+export const customergroup = [
+    {
+        "label": "customergroup 1",
+        "value": "customergroup 1"
+    },
+    {
+        "label": "customergroup 2",
+        "value": "customergroup 2"
+    },
+]

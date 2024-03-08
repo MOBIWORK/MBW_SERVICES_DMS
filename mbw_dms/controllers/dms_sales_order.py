@@ -102,20 +102,23 @@ class DMSSalesOrder(SalesOrder):
             filters={'thang': month, 'nam': year, 'nhan_vien_ban_hang': user_name},
             fields=['name']
         )
-        grand_totals = self.grand_total
-        cus_name = self.customer
-        existing_cus = self.existing_customer(customer_name=cus_name, start_date=start_date, end_date=end_date, current_user=self.owner)
 
-        monthly_summary_doc = frappe.get_doc('DMS Summary KPI Monthly', existing_monthly_summary[0]['name'])
-        if len(existing_cus) == 1:
-            monthly_summary_doc.so_don_hang -= 1
-            monthly_summary_doc.doanh_so_thang -= grand_totals
-            monthly_summary_doc.san_luong -= sum(qty)
-            monthly_summary_doc.so_kh_dat_hang -= 1
-            monthly_summary_doc.sku -= len(uom)
+        if existing_monthly_summary:
+            monthly_summary_doc = frappe.get_doc('DMS Summary KPI Monthly', existing_monthly_summary[0]['name'])
+            grand_totals = self.grand_total
+            cus_name = self.customer
+            existing_cus = self.existing_customer(customer_name=cus_name, start_date=start_date, end_date=end_date, current_user=self.owner)
+            if len(existing_cus) == 1:
+                monthly_summary_doc.so_don_hang -= 1
+                monthly_summary_doc.doanh_so_thang -= grand_totals
+                monthly_summary_doc.san_luong -= sum(qty)
+                monthly_summary_doc.so_kh_dat_hang -= 1
+                monthly_summary_doc.sku -= len(uom)
+            else:
+                monthly_summary_doc.so_don_hang -= 1
+                monthly_summary_doc.doanh_so_thang -= grand_totals
+                monthly_summary_doc.san_luong -= sum(qty)
+                monthly_summary_doc.sku -= len(uom)
+            monthly_summary_doc.save(ignore_permissions=True)
         else:
-            monthly_summary_doc.so_don_hang -= 1
-            monthly_summary_doc.doanh_so_thang -= grand_totals
-            monthly_summary_doc.san_luong -= sum(qty)
-            monthly_summary_doc.sku -= len(uom)
-        monthly_summary_doc.save(ignore_permissions=True)
+            return
