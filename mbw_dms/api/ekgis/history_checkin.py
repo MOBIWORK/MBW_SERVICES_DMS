@@ -21,6 +21,9 @@ def get_history_checkin(**kwargs):
             }
             url = f'{API_URL}/{projectId}/{objectId}'
             history_checkin = requests.get(url, params=params)
-            return gen_response(200, 'Thành công', history_checkin)
+            if history_checkin.status_code == 200:
+                return gen_response(200, 'Thành công', history_checkin.json())
+            else:
+                return gen_response(406, "Không lấy được lịch sử checkin")
     except Exception as e:
         return exception_handel(e)
