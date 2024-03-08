@@ -1,7 +1,9 @@
 import { VerticalAlignBottomOutlined } from "@ant-design/icons";
 import { FormItemCustom, HeaderPage } from "../../components";
-import { Select, Table, Typography } from "antd";
+import { DatePicker, Select, Table, Typography } from "antd";
 import { TableReport } from "../ReportSales/tableCustom";
+import { month } from "./data";
+import { DatePickerProps } from "antd/lib";
 
 const { Column, ColumnGroup } = TableReport;
 
@@ -122,7 +124,11 @@ const data: DataTypeKPI[] = [
   },
 ];
 
+
 export default function ReportKPI() {
+  const onChange: DatePickerProps['onChange'] = (dateString) => {
+    console.log(dateString);
+  };
   return (
     <>
       <HeaderPage
@@ -143,17 +149,12 @@ export default function ReportKPI() {
             <Select
               className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
               defaultValue={""}
-              options={[{ label: "Tháng 2", value: "" }]}
+              options={month}
               showSearch
             />
           </FormItemCustom>
           <FormItemCustom className="w-[200px] border-none mr-2">
-            <Select
-              className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
-              defaultValue={""}
-              options={[{ label: "Năm 2024", value: "" }]}
-              showSearch
-            />
+            <DatePicker className="!bg-[#F4F6F8]" onChange={onChange} picker="year" />
           </FormItemCustom>
         </div>
         <div className="pt-5">
