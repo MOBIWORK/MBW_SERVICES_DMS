@@ -1,8 +1,17 @@
-import { VerticalAlignBottomOutlined } from "@ant-design/icons";
+import { SearchOutlined, VerticalAlignBottomOutlined } from "@ant-design/icons";
 import { FormItemCustom, HeaderPage } from "../../components";
-import { Select, Table, Typography } from "antd";
+import { Input, Select, Table, Typography } from "antd";
 import type { TableColumnsType } from "antd";
 import { TableReport } from "./tableCustom";
+import {
+  brand,
+  company,
+  customer,
+  itemgroup,
+  salePerson,
+  territory,
+  warehouse,
+} from "./data";
 
 interface DataTypeKPI {
   key: React.Key;
@@ -35,9 +44,7 @@ const columns: TableColumnsType<DataTypeKPI> = [
     dataIndex: "saleorder",
     key: "saleorder",
     render: (_, record: any) => (
-      <div className="!w-[175px]">
-        {record.saleorder}
-      </div>
+      <div className="!w-[175px]">{record.saleorder}</div>
     ),
   },
   {
@@ -168,11 +175,19 @@ export default function ReportSales() {
       />
       <div className="bg-white rounded-md py-7 px-4 border-[#DFE3E8] border-[0.2px] border-solid">
         <div className="flex justify-start items-center">
+          <FormItemCustom className="w-[320px] border-none p-4">
+            <Input
+              className="!bg-[#F4F6F8] options:bg-[#F4F6F8] !h-8"
+              placeholder="Sale order"
+              prefix={<SearchOutlined />}
+            />
+          </FormItemCustom>
+
           <FormItemCustom className="w-[200px] border-none mr-2">
             <Select
               className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
               defaultValue={""}
-              options={[{ label: "Tháng 2", value: "" }]}
+              options={[{ label: "Customer", value: "" }, ...customer]}
               showSearch
             />
           </FormItemCustom>
@@ -180,7 +195,7 @@ export default function ReportSales() {
             <Select
               className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
               defaultValue={""}
-              options={[{ label: "Năm 2024", value: "" }]}
+              options={[{ label: "Territory", value: "" }, ...territory]}
               showSearch
             />
           </FormItemCustom>
@@ -188,7 +203,26 @@ export default function ReportSales() {
             <Select
               className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
               defaultValue={""}
-              options={[{ label: "Năm 2024", value: "" }]}
+              options={[{ label: "Warehouse", value: "" }, ...warehouse]}
+              showSearch
+            />
+          </FormItemCustom>
+        </div>
+        <div className="flex justify-start items-center h-8">
+          <FormItemCustom className="w-[200px] border-none mr-2">
+            <Select
+              className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
+              defaultValue={""}
+              options={[{ label: "Company", value: "" }, ...company]}
+              showSearch
+            />
+          </FormItemCustom>
+
+          <FormItemCustom className="w-[200px] border-none mr-2">
+            <Select
+              className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
+              defaultValue={""}
+              options={[{ label: "Item group", value: "" }, ...itemgroup]}
               showSearch
             />
           </FormItemCustom>
@@ -196,7 +230,15 @@ export default function ReportSales() {
             <Select
               className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
               defaultValue={""}
-              options={[{ label: "Năm 2024", value: "" }]}
+              options={[{ label: "Brand", value: "" }, ...brand]}
+              showSearch
+            />
+          </FormItemCustom>
+          <FormItemCustom className="w-[200px] border-none mr-2">
+            <Select
+              className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
+              defaultValue={""}
+              options={[{ label: "Sale person", value: "" }, ...salePerson]}
               showSearch
             />
           </FormItemCustom>
