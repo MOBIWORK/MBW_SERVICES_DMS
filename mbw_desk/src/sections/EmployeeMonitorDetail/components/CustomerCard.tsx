@@ -30,7 +30,7 @@ export default function CustomerCard({customer,keyCard,mode="Checkin"}:cardProps
         <div> <ShoppingCartOutlined /><span className='text-base font-normal whitespace-normal text-[#1877F2] underline underline-offset-1 ml-2 cursor-pointer'>Xem đơn hàng</span></div> 
         </>}
       </div>
-      <Modal width={1000} className='h-[804px]' open={modalImage.isOpen} onCancel={setModalImage.bind(null,{isOpen: false,data:null})} footer={false}>        
+      <Modal width={1000} className='h-[804px]' open={modalImage.isOpen} onCancel={setModalImage.bind(null,{isOpen: false,data:null})} footer={false} title="Nội dung ảnh">        
             <ModalDetail data={modalImage.data} />
       </Modal>
     </>

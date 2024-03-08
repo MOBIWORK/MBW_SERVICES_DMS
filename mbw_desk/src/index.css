@@ -21,19 +21,10 @@
   align-items: center;
   cursor: pointer;
   z-index: 1;
-  opacity: 0; /* Ẩn mặc định */
   transition: opacity 0.3s ease;
 }
 
-.custom-arrow.prev {
-  left: 15px;
-  color: white;
-}
 
-.custom-arrow.next {
-  right: 15px;
-  color: white;
-}
 
 .custom-arrow.visible {
   opacity: 1; /* Hiển thị khi hover vào slider container */
@@ -60,4 +51,8 @@
 
 :where(.css-dev-only-do-not-override-1jlkgmc).ant-tabs .ant-tabs-tab+.ant-tabs-tab  {
   margin: 0px;
+}
+
+* {
+  letter-spacing: -0.025em;
 }

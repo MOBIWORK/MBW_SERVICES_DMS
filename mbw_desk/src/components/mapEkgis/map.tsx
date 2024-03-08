@@ -1,12 +1,12 @@
 import { Helmet } from 'react-helmet-async'
 
-export default function MapEkgis() {
+export default function MapEkgis({id ="map-ek"}:{id: string}) {
   return (
     <>
     <Helmet>
       <script>
      {` var map = new maplibregl.Map({
-      "container": 'map-ek',
+      "container": ${id},
       "center": [105, 17],
       "zoom": 4
         });
@@ -16,7 +16,7 @@ export default function MapEkgis() {
       ).addTo(map);`}
     </script>
     </Helmet>
-    <div id="map-ek" className='h-full w-full'></div>
+    <div id={id} className='h-full w-full'></div>
     </>
   )
 }

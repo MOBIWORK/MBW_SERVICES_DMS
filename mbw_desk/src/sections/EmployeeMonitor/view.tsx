@@ -12,39 +12,36 @@ export default function EmployeeMonitor() {
       <HeaderPage title="Giám sát viếng thăm khách hàng" />
       <div className="pt-3 mx-2 rounded-xl">
         <Row>
-          <Col span={16} push={8}>
-            <div className="h-48 w-full">
-              <MapEkgis/>
-            </div>
-          </Col>
-          <Col span={8} pull={16}>
-            <Tabs
-              className=""
-              defaultActiveKey="1"
-              items={[
-                {
-                  label: (
-                    <p className="pl-8 pr-16 mb-0 font-medium text-sm leading-[21px]">
-                      {" "}
-                      Hoạt động
-                    </p>
-                  ),
-                  key: "1",
-                  children: <ActiveEmployee />,
-                },
-                {
-                  label: (
-                    <p className="pl-8 pr-16 mb-0 font-medium text-sm leading-[21px]">
-                      Không hoạt động
-                    </p>
-                  ),
-                  key: "2",
-                  children: <UnActiveEmployee />,
-                },
-              ]}
-              indicatorSize={(origin) => origin - 1}
-            />
-          </Col>
+          <Tabs
+            className="w-[400px] border border-solid border-[#F5F5F5]"
+            defaultActiveKey="1"
+            items={[
+              {
+                label: (
+                  <p className="pl-8 pr-16 mb-0 font-medium text-sm leading-[21px]">
+                    {" "}
+                    Hoạt động
+                  </p>
+                ),
+                key: "1",
+                children: <ActiveEmployee />,
+              },
+              {
+                label: (
+                  <p className="pl-8 pr-16 mb-0 font-medium text-sm leading-[21px]">
+                    Không hoạt động
+                  </p>
+                ),
+                key: "2",
+                children: <UnActiveEmployee />,
+              },
+            ]}
+            indicatorSize={(origin) => origin - 1}
+          />
+          <div className="h-[82vh] flex-1">
+            <MapEkgis id={"monitor"} />
+          </div>
+
         </Row>
       </div>
     </>
