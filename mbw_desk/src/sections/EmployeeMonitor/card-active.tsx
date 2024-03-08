@@ -5,6 +5,7 @@ import { Bag } from "../../icons/bag";
 import { Clock } from "../../icons/clock";
 import { Pin } from "../../icons/pin";
 import data from "./datamonitor/dataactive.json";
+import { Link } from "react-router-dom";
 
 export default function CardActive() {
   console.log("data", data);
@@ -38,9 +39,9 @@ export default function CardActive() {
                     />
                   </Badge>
                   <div className="ml-2">
-                    <div className="text-[#212B36] font-medium leading-[21px] text-sm">
+                    <Link to={`/employee-monitor-detail/${rsData.customer_code}`} className="text-[#212B36] font-medium leading-[21px] text-sm">
                       {rsData.customer_name} - {rsData.customer_code}
-                    </div>
+                    </Link>
                     <div className="flex items-center h-5">
                       <Bag size={16} />
                       <p className="font-normal text-sm leading-[21px] text-[#637381] ml-2">

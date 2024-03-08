@@ -1,16 +1,19 @@
-import React from 'react'
+import classNames from "classnames"
 
 
 interface imageProps {
-  src : string|any
+  src : string|any,
+  height?:number
 }
-export default function ImageSlide({src}:imageProps) {
+export default function ImageSlide({src,height=100}:imageProps) {
   return (
-    <img
-      className="h-full w-full rounded-lg !object-contain"
-      src={
-        src
-      }
-    />
+    <div className={classNames(`h-[${height}px]` ,"rounded-[8px] overflow-hidden mx-3")}>
+      <img
+        className="h-full w-full !object-cover"
+        src={
+          src
+        }
+      />
+    </div>
   )
 }

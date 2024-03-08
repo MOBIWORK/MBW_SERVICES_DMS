@@ -7,6 +7,7 @@ export const TableCustom = styled(Table)`
 & .ant-table-container .ant-table-cell{
   font-size: 14px!important;
   font-weight:500;
+  letter-spacing: 0!important;
 }
 &.ant-table-wrapper table {
   border-radius: 16px!important;
