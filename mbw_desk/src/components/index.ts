@@ -14,3 +14,5 @@ export {MartLocation} from './mark-point'
 
 
 export {DropDownCustom} from './dropdownCustom'
+
+export {TagCustomOpen,TagCustomStatus} from './tag/tag'

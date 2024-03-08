@@ -1,5 +1,6 @@
 import React from 'react'
 import { Helmet } from 'react-helmet-async'
+import { DatePick } from '../../../components/date-picker/date-picker'
 
 export default function TravelHistory() {
   return (
@@ -23,7 +24,13 @@ export default function TravelHistory() {
         }
         </script>
      </Helmet>
-     <div id = "travel" className='w-screen h-[70vh] relative'>
+     <div className='border border-solid border-[#F5F5F5] rounded-lg'>
+      <div className='p-4 border border-solid border-transparent border-b-[#F5F5F5]'>
+        <DatePick />
+      </div>
+     <div id = "travel" className='h-[70vh] relative'>
+
+     </div>
 
      </div>
     </>

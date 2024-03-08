@@ -11,7 +11,7 @@ type button = {
 };
 
 type Props = {
-  title: string;
+  title: string | ReactNode;
   buttons?: button[];
   customButton ?: ReactNode
 };

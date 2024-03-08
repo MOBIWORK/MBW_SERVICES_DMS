@@ -6,7 +6,7 @@ export default function MapEkgis() {
     <Helmet>
       <script>
      {` var map = new maplibregl.Map({
-      "container": 'map',
+      "container": 'map-ek',
       "center": [105, 17],
       "zoom": 4
         });
@@ -16,7 +16,7 @@ export default function MapEkgis() {
       ).addTo(map);`}
     </script>
     </Helmet>
-    <div id="map" className='h-auto'></div>
+    <div id="map-ek" className='h-full w-full'></div>
     </>
   )
 }

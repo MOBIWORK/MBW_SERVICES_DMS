@@ -10,3 +10,5 @@ export {ArrowDown} from './arrow-down'
 export {PointMap} from './point'
 
 export {HistoryRouterIcon} from './HistoryRouterIcon'
+
+export {BackIos} from './back-ios'

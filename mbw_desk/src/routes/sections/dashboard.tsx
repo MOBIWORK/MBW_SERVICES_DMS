@@ -4,6 +4,7 @@ import React from "react";
 import { Outlet } from "react-router-dom";
 import DashboardLayout from '@/layouts/dashboard'
 import {LoadingScreen} from '@/components'
+import MonitorLayout from "../../layouts/monitor/layout";
 
 
 const RouterControl = lazy(()=> import('@/pages/RouterControl'))
@@ -57,11 +58,26 @@ export const dashboardRoutes = [
                 path: 'employee-monitor',element: <EmployeeMonitor/>
             },
             {
-                path: 'employee-monitor-detail/:slug',element: <EmployeeMonitorDetailPage/>
-            },
-            {
                 path: 'report-kpi',element: <ReportKPI/>
             },
         ]
+    }
+    ,
+    {
+        path: "/",
+        element: (
+            <MonitorLayout>
+                 <Suspense fallback={<LoadingScreen/>}>
+                    <Outlet/>
+                </Suspense>
+            </MonitorLayout>
+        ),
+        children: [
+            {
+                path: 'employee-monitor-detail/:slug',element: <EmployeeMonitorDetailPage/>
+            }
+
+        ]
+
     }
 ]

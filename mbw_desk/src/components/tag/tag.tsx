@@ -20,3 +20,14 @@ export const TagCustomStatus = ({children,type="Success"}:tagProps) => {
         •{children}
     </div>
 }
+
+interface tagopProps {
+    children : ReactNode | string | null,
+    type?: "Open" | "Close"
+}
+export const TagCustomOpen = ({children,type="Open"}:tagopProps) => {
+    return <div className={classNames('whitespace-nowrap px-2 rounded py-[8px] flex justify-center items-center text-[14px] leading-[21px]',type == "Open" ? "bg-[#22c55e14] text-[#22C55E]" : "bg-[#919eab14] text-[#919EAB]")}>
+        {children}
+    </div>
+}
+

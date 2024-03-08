@@ -7,3 +7,8 @@ mbw_dms/docs/current
 
 
 mbw_desk/.env.development
+
+mbw_dms/public
+
+
+mbw_dms/www
