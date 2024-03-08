@@ -12,6 +12,7 @@ from mbw_dms.config_translate import i18n
 import json
 from frappe.utils import nowdate
 import calendar
+from mbw_dms.api.ekgis.constant import API_URL, API_URL_TRACKING
 
 class DMSCheckin(Document):
     def after_insert(self):
@@ -119,7 +120,7 @@ class DMSCheckin(Document):
                 frappe.throw("Chưa có Project ID")
                 return
             api_key = frappe.get_doc('DMS Settings').api_key
-            api_url = f'https://api.ekgis.vn/tracking/{projectId}/object'
+            api_url = f'{API_URL_TRACKING}/{projectId}/object'
             params = {"api_key": api_key}
             data_post = {
                 'name': frappe.session.user,
@@ -142,7 +143,7 @@ class DMSCheckin(Document):
                     return
                 
             # Tích hợp dữ liệu checkin vào ekgis
-            api_url_checkin=f'https://api.ekgis.vn/v1/checkin/{projectId}/{objectId}'
+            api_url_checkin=f'{API_URL}/{projectId}/{objectId}'
             data_checkin = {
                 "projectid":projectId,
                 "objectid": objectId,
