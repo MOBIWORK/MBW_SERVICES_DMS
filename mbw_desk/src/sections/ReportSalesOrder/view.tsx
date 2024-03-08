@@ -2,7 +2,7 @@ import { SearchOutlined, VerticalAlignBottomOutlined } from "@ant-design/icons";
 import { FormItemCustom, HeaderPage } from "../../components";
 import { Input, Select, Table, Typography } from "antd";
 import type { TableColumnsType } from "antd";
-import { TableReport } from "./tableCustom";
+import { TableReport } from "../ReportSales/tableCustom";
 import {
   brand,
   company,
@@ -11,7 +11,7 @@ import {
   salePerson,
   territory,
   warehouse,
-} from "./data";
+} from "../ReportSales/data";
 
 interface DataTypeKPI {
   key: React.Key;
@@ -125,8 +125,8 @@ const data: DataTypeKPI[] = [
   {
     key: "KDA",
     name: "7382jsd",
-    saleorder: "SADD-123123",
-    customer: "Đặng Hào",
+    saleorder: "SHUAL211",
+    customer: "Thiên Tần",
     territory: "Hà Nội",
     warehouse: "Kho Hà Nội",
     postingdate: "16/04/2024",
@@ -142,8 +142,8 @@ const data: DataTypeKPI[] = [
   {
     key: "KDSD",
     name: "7382112",
-    saleorder: "ƯEERR-2222",
-    customer: "Đặng Phí",
+    saleorder: "DHDCCC233",
+    customer: "Đặng Hoắc",
     territory: "Hà Nội",
     warehouse: "Kho Hà Nội",
     postingdate: "15/04/2024",
@@ -158,11 +158,11 @@ const data: DataTypeKPI[] = [
   },
 ];
 
-export default function ReportSales() {
+export default function ReportSalesOrder() {
   return (
     <>
       <HeaderPage
-        title="Báo cáo tổng hợp bán hàng"
+        title="Báo cáo tổng hợp đặt hàng"
         buttons={[
           {
             label: "Xuất dữ liệu",

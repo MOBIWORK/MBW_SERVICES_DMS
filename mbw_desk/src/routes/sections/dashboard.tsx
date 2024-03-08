@@ -20,6 +20,7 @@ const EmployeeMonitor = lazy(()=> import('@/pages/EmployeeMonitor'))
 const EmployeeMonitorDetailPage = lazy(()=> import('@/pages/EmployeeMonitorDetail'))
 const ReportKPI = lazy(()=> import('@/pages/ReportKPI'))
 const ReportSales = lazy(()=> import('@/pages/ReportSales'))
+const ReportSalesOrder = lazy(()=> import('@/pages/ReportSalesOrder'))
 export const dashboardRoutes = [
     {
         path: '/',
@@ -64,6 +65,12 @@ export const dashboardRoutes = [
             {
                 path: 'report-sales',element: <ReportSales/>
             },
+            {
+                path: 'report-sales',element: <ReportSales/>
+            },
+            {
+                path: 'report-saleorder',element: <ReportSalesOrder/>
+            }
         ]
     }
     ,

@@ -124,6 +124,17 @@ export const listMenu: MenuItem[] = [
         </Link>,
         key: "report-sales",
       },
+      {
+        label: <Link
+          className={""}
+          to="/report-saleorder"
+        >
+          <p className="text-[#212B36] text-custom font-normal text-sm leading-[22px]">
+            Báo cáo tổng hợp đặt hàng
+          </p>
+        </Link>,
+        key: "report-saleorder",
+      },
     ]
   },
 ]
