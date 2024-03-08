@@ -1,9 +1,11 @@
 import { VerticalAlignBottomOutlined } from "@ant-design/icons";
-import { FormItemCustom, HeaderPage, TableCustom } from "../../components";
-import { Select, Table } from "antd";
-import type { TableColumnsType } from "antd";
+import { FormItemCustom, HeaderPage } from "../../components";
+import { DatePicker, Select, Table, Typography } from "antd";
+import { TableReport } from "../ReportSales/tableCustom";
+import { month } from "./data";
+import { DatePickerProps } from "antd/lib";
 
-const { Column, ColumnGroup } = TableCustom;
+const { Column, ColumnGroup } = TableReport;
 
 interface DataTypeKPI {
   key: React.Key;
@@ -42,6 +44,7 @@ interface DataTypeKPI {
   khvisitingwork: number;
   thvisitingwork: number;
   tlvisitingwork: number;
+  total?: number;
 }
 
 const data: DataTypeKPI[] = [
@@ -82,9 +85,50 @@ const data: DataTypeKPI[] = [
     thvisitingwork: 14,
     tlvisitingwork: 45,
   },
+  {
+    key: "KDSD",
+    name: "7382112",
+    employee_code: "HHHH02",
+    employee_name: "Hạo Thần",
+    department: "Phòng 2",
+    khvisiting: 5,
+    thvisiting: 1,
+    tlvisiting: 25,
+    khvisitingfirst: 4,
+    thvisitingfirst: 1,
+    tlvisitingfirst: 60,
+    khvisitingcustomerorder: 1,
+    thvisitingcustomerorder: 2,
+    tlvisitingcustomerorder: 59,
+    khvisitingnew: 1,
+    thvisitingnew: 1,
+    tlvisitingnew: 24,
+    khvisitingorder: 1,
+    thvisitingorder: 12,
+    tlvisitingorder: 56,
+    khvisitingsale: 1,
+    thvisitingsale: 2,
+    tlvisitingsale: 35,
+    khvisitingRevenue: 2,
+    thvisitingRevenue: 9,
+    tlvisitingRevenue: 87,
+    khvisitingQuantity: 0,
+    thvisitingQuantity: 0,
+    tlvisitingQuantity: 89,
+    khvisitingSKU: 2,
+    thvisitingSKU: 10,
+    tlvisitingSKU: 67,
+    khvisitingwork: 10,
+    thvisitingwork: 14,
+    tlvisitingwork: 45,
+  },
 ];
 
+
 export default function ReportKPI() {
+  const onChange: DatePickerProps['onChange'] = (dateString) => {
+    console.log(dateString);
+  };
   return (
     <>
       <HeaderPage
@@ -105,30 +149,47 @@ export default function ReportKPI() {
             <Select
               className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
               defaultValue={""}
-              options={[{ label: "Tháng 2", value: "" }]}
+              options={month}
               showSearch
             />
           </FormItemCustom>
           <FormItemCustom className="w-[200px] border-none mr-2">
-            <Select
-              className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
-              defaultValue={""}
-              options={[{ label: "Năm 2024", value: "" }]}
-              showSearch
-            />
+            <DatePicker className="!bg-[#F4F6F8]" onChange={onChange} picker="year" />
           </FormItemCustom>
         </div>
         <div className="pt-5">
-          <TableCustom className="!rounded-2xl" dataSource={data} bordered scroll={{ x: 1300 }}>
+          <TableReport
+            dataSource={data}
+            bordered
+            scroll={{ x: true }}
+            summary={(pageData) => {
+              let total = 0;
+              pageData.forEach((record) => {
+                // Calculate total from data rows
+                total += record.khvisiting
+              });
+      
+              return (
+                <Table.Summary.Row>
+                  <Table.Summary.Cell index={0}></Table.Summary.Cell>
+                  <Table.Summary.Cell index={1}>Tổng</Table.Summary.Cell>
+                  <Table.Summary.Cell index={2}></Table.Summary.Cell>
+                  <Table.Summary.Cell index={3}></Table.Summary.Cell>
+                  <Table.Summary.Cell index={4}>{total}</Table.Summary.Cell>
+                  <Table.Summary.Cell index={5}></Table.Summary.Cell>
+                  <Table.Summary.Cell index={6}></Table.Summary.Cell>
+                  <Table.Summary.Cell index={7}></Table.Summary.Cell>
+                </Table.Summary.Row>
+              );
+            }}
+          >
             <Column
               title="STT"
               dataIndex="stt"
               key="stt"
               fixed="left"
               width={60}
-              render= {(_: any, record: any,index:number) => (
-                index + 1
-              )}
+              render={(_: any, record: any, index: number) => index + 1}
             />
             <Column
               title="Mã Nhân viên"
@@ -148,7 +209,6 @@ export default function ReportKPI() {
               title="Phòng/nhóm"
               dataIndex="department"
               key="department"
-              fixed="left"
               width={210}
             />
             <ColumnGroup
@@ -173,7 +233,7 @@ export default function ReportKPI() {
                 width={70}
                 dataIndex="tlvisiting"
                 key="tlvisiting"
-                render= {(_: any, record: DataTypeKPI) => (
+                render={(_: any, record: DataTypeKPI) => (
                   <>{record.tlvisiting}%</>
                 )}
               />
@@ -200,7 +260,7 @@ export default function ReportKPI() {
                 width={70}
                 dataIndex="tlvisitingfirst"
                 key="tlvisitingfirst"
-                render= {(_: any, record: DataTypeKPI) => (
+                render={(_: any, record: DataTypeKPI) => (
                   <>{record.tlvisitingfirst}%</>
                 )}
               />
@@ -227,7 +287,7 @@ export default function ReportKPI() {
                 width={70}
                 dataIndex="tlvisitingcustomerorder"
                 key="tlvisitingcustomerorder"
-                render= {(_: any, record: DataTypeKPI) => (
+                render={(_: any, record: DataTypeKPI) => (
                   <>{record.tlvisitingcustomerorder}%</>
                 )}
               />
@@ -254,7 +314,7 @@ export default function ReportKPI() {
                 width={70}
                 dataIndex="tlvisitingnew"
                 key="tlvisitingnew"
-                render= {(_: any, record: DataTypeKPI) => (
+                render={(_: any, record: DataTypeKPI) => (
                   <>{record.tlvisitingnew}%</>
                 )}
               />
@@ -281,7 +341,7 @@ export default function ReportKPI() {
                 width={70}
                 dataIndex="tlvisitingorder"
                 key="tlvisitingorder"
-                render= {(_: any, record: DataTypeKPI) => (
+                render={(_: any, record: DataTypeKPI) => (
                   <>{record.tlvisitingorder}%</>
                 )}
               />
@@ -308,7 +368,7 @@ export default function ReportKPI() {
                 width={70}
                 dataIndex="tlvisitingsale"
                 key="tlvisitingsale"
-                render= {(_: any, record: DataTypeKPI) => (
+                render={(_: any, record: DataTypeKPI) => (
                   <>{record.tlvisitingsale}%</>
                 )}
               />
@@ -335,7 +395,7 @@ export default function ReportKPI() {
                 width={70}
                 dataIndex="tlvisitingRevenue"
                 key="tlvisitingRevenue"
-                render= {(_: any, record: DataTypeKPI) => (
+                render={(_: any, record: DataTypeKPI) => (
                   <>{record.tlvisitingRevenue}%</>
                 )}
               />
@@ -362,7 +422,7 @@ export default function ReportKPI() {
                 width={70}
                 dataIndex="tlvisitingQuantity"
                 key="tlvisitingQuantity"
-                render= {(_: any, record: DataTypeKPI) => (
+                render={(_: any, record: DataTypeKPI) => (
                   <>{record.tlvisitingQuantity}%</>
                 )}
               />
@@ -385,7 +445,7 @@ export default function ReportKPI() {
                 width={70}
                 dataIndex="tlvisitingSKU"
                 key="tlvisitingSKU"
-                render= {(_: any, record: DataTypeKPI) => (
+                render={(_: any, record: DataTypeKPI) => (
                   <>{record.tlvisitingSKU}%</>
                 )}
               />
@@ -412,12 +472,12 @@ export default function ReportKPI() {
                 width={70}
                 dataIndex="tlvisitingwork"
                 key="tlvisitingwork"
-                render= {(_: any, record: DataTypeKPI) => (
+                render={(_: any, record: DataTypeKPI) => (
                   <>{record.tlvisitingwork}%</>
                 )}
               />
             </ColumnGroup>
-          </TableCustom>
+          </TableReport>
         </div>
       </div>
     </>

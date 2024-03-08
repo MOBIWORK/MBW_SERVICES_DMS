@@ -105,13 +105,24 @@ export const listMenu: MenuItem[] = [
       {
         label: <Link
           className={""}
-          to="/app/report-kpi-dms"
+          to="/report-kpi"
         >
           <p className="text-[#212B36] text-custom font-normal text-sm leading-[22px]">
             Báo cáo KPI
           </p>
         </Link>,
         key: "report_kpi",
+      },
+      {
+        label: <Link
+          className={""}
+          to="/report-sales"
+        >
+          <p className="text-[#212B36] text-custom font-normal text-sm leading-[22px]">
+            Báo cáo tổng hợp bán hàng
+          </p>
+        </Link>,
+        key: "report-sales",
       },
     ]
   },
