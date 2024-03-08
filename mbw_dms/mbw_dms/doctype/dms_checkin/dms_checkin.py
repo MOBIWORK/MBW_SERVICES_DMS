@@ -116,7 +116,7 @@ class DMSCheckin(Document):
             # Tạo mới ObjectID
             projectId = frappe.get_doc('DMS Settings').ma_du_an
             if projectId is None:
-                frappe.msgprint(f"Chưa có Project ID")
+                frappe.throw("Chưa có Project ID")
                 return
             api_key = frappe.get_doc('DMS Settings').api_key
             api_url = f'https://api.ekgis.vn/tracking/{projectId}/object'
@@ -126,15 +126,15 @@ class DMSCheckin(Document):
                 'type': 'driver'
             }
             objectId = ''
-            user_name = frappe.db.get_list('Employee', filters={'user_id': frappe.session.user}, fields=['name', 'custom_employee_ekgis_objid'])
-            if user_name[0]['custom_employee_ekgis_objid'] is not None:
-                objectId = user_name[0]['custom_employee_ekgis_objid']
+            user_name = frappe.db.get_list('Employee', filters={'user_id': frappe.session.user}, fields=['name', 'object_id'])
+            if user_name[0]['object_id'] is not None:
+                objectId = user_name[0]['object_id']
             else:
                 response = requests.post(api_url, params=params, json=data_post)
                 employee = frappe.get_doc('Employee', user_name[0]['name'])
                 if response.status_code == 200:
                     new_info = response.json()
-                    employee.custom_employee_ekgis_objid = new_info['results'].get('_id')
+                    employee.object_id = new_info['results'].get('_id')
                     employee.save()
                     objectId = new_info['results'].get('_id')
                 else:
@@ -200,8 +200,6 @@ def create_checkin(kwargs):
         return exception_handel(e)
 
 
-
-    
 # Thêm ảnh checkin
 @frappe.whitelist(methods='PUT')
 def add_checkin_image(name_checkin, kwargs):

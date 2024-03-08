@@ -40,7 +40,6 @@ def visit_report():
 				filters={'thang': month, 'nam': year, 'nhan_vien_ban_hang': user_name},
 				fields=['solan_vt_dungtuyen']
 			)
-		
 		# Lấy Kpi nhân viên
 		kpi_employee = frappe.get_all('DMS KPI',
                 filters={'ngay_hieu_luc_tu': (">=", start_date), 'ngay_hieu_luc_den': ("<=", end_date), 'nhan_vien_ban_hang': user_name},
@@ -336,8 +335,5 @@ def report_detail_visit(customer_name, **kwargs):
 			"ton_kho": inventory
 		})
 	
-	
 	except Exception as e:
 		return exception_handel(e)
-
-	

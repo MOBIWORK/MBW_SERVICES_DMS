@@ -56,7 +56,9 @@ class DMSSalesInvoice(SalesInvoice):
             fields=['name']
         )
         grand_totals = self.grand_total
-
-        monthly_summary_doc = frappe.get_doc('DMS Summary KPI Monthly', existing_monthly_summary[0]['name'])
-        monthly_summary_doc.doanh_thu_thang -= grand_totals
-        monthly_summary_doc.save(ignore_permissions=True)
+        if existing_monthly_summary:
+            monthly_summary_doc = frappe.get_doc('DMS Summary KPI Monthly', existing_monthly_summary[0]['name'])
+            monthly_summary_doc.doanh_thu_thang -= grand_totals
+            monthly_summary_doc.save(ignore_permissions=True)
+        else:
+            return

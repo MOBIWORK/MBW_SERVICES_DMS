@@ -52,10 +52,12 @@ class DMSCustomer(Customer):
             filters={'thang': month, 'nam': year, 'nhan_vien_ban_hang': user_name},
             fields=['name']
         )
-
-        monthly_summary_doc = frappe.get_doc('DMS Summary KPI Monthly', existing_monthly_summary[0]['name'])
-        monthly_summary_doc.so_kh_moi -= 1
-        monthly_summary_doc.save(ignore_permissions=True)
+        if existing_monthly_summary:
+            monthly_summary_doc = frappe.get_doc('DMS Summary KPI Monthly', existing_monthly_summary[0]['name'])
+            monthly_summary_doc.so_kh_moi -= 1
+            monthly_summary_doc.save(ignore_permissions=True)
+        else:
+            return
 
 
 
