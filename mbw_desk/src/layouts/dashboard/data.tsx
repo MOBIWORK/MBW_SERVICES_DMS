@@ -44,13 +44,13 @@ export const listMenu: MenuItem[] = [
       {
         label: <Link
           className={""}
-          to="#"
+          to="employee-monitor"
         >
           <p className="text-[#212B36] text-custom font-normal text-sm leading-[22px]">
             Giám sát viếng thăm khách hàng
           </p>
         </Link>,
-        key: "giamsat-sell",
+        key: "employee-monitor",
       },
       {
         label: <Link

@@ -4,6 +4,11 @@ import { DatePicker, Select, Table, Typography } from "antd";
 import { TableReport } from "../ReportSales/tableCustom";
 import { month } from "./data";
 import { DatePickerProps } from "antd/lib";
+import { useEffect, useState } from "react";
+import { AxiosService } from "../../services/server";
+import { rsDataFrappe } from "../../types/response";
+import { employee } from "../../types/employeeFilter";
+import useDebounce from "../../hooks/useDebount";
 
 const { Column, ColumnGroup } = TableReport;
 
@@ -124,11 +129,43 @@ const data: DataTypeKPI[] = [
   },
 ];
 
-
 export default function ReportKPI() {
-  const onChange: DatePickerProps['onChange'] = (dateString) => {
+  const [listEmployees, setListEmployees] = useState<any[]>([]);
+  const [listSales, setListSales] = useState<any[]>([]);
+  const [team_sale, setTeamSale] = useState<string>();
+  const [keySearch4, setKeySearch4] = useState("");
+  const [employee, setEmployee] = useState<string>();
+  let seachbykey = useDebounce(keySearch4);
+  const [keyS3, setKeyS3] = useState("");
+
+  let keySearch3 = useDebounce(keyS3, 300);
+
+  const onChange: DatePickerProps["onChange"] = (dateString) => {
     console.log(dateString);
   };
+
+  useEffect(() => {
+    (async () => {
+      let rsEmployee: rsDataFrappe<employee[]> = await AxiosService.get(
+        "/api/method/mbw_dms.api.router.get_sale_person",
+        {
+          params: {
+            team_sale: team_sale,
+            key_search: seachbykey,
+          },
+        }
+      );
+      console.log("rsemp", rsEmployee);
+      let { message: results } = rsEmployee;
+      setListEmployees(
+        results.map((employee_filter: employee) => ({
+          value: employee_filter.employee_code,
+          label: employee_filter.employee_name || employee_filter.employee_code,
+        }))
+      );
+    })();
+  }, [team_sale, seachbykey]);
+
   return (
     <>
       <HeaderPage
@@ -154,7 +191,45 @@ export default function ReportKPI() {
             />
           </FormItemCustom>
           <FormItemCustom className="w-[200px] border-none mr-2">
-            <DatePicker className="!bg-[#F4F6F8]" onChange={onChange} picker="year" />
+            <DatePicker
+              className="!bg-[#F4F6F8]"
+              onChange={onChange}
+              picker="year"
+            />
+          </FormItemCustom>
+          <FormItemCustom className="w-[200px] border-none mr-2">
+            <Select
+              className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
+              defaultValue={""}
+              options={[
+                { label: "Tất cả nhóm bán hàng", value: "" },
+                ...listSales,
+              ]}
+              showSearch
+              notFoundContent={null}
+              onSearch={(value: string) => setKeyS3(value)}
+              onChange={(value) => {
+                setTeamSale(value);
+              }}
+            />
+          </FormItemCustom>
+
+          <FormItemCustom className="w-[200px] border-none mr-2">
+            <Select
+              className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
+              options={[
+                { label: "Tất cả nhân viên", value: "" },
+                ...listEmployees,
+              ]}
+              showSearch
+              defaultValue={""}
+              notFoundContent={null}
+              onSearch={setKeySearch4}
+              onChange={(value) => {
+                setEmployee(value);
+              }}
+              allowClear
+            />
           </FormItemCustom>
         </div>
         <div className="pt-5">
@@ -166,9 +241,9 @@ export default function ReportKPI() {
               let total = 0;
               pageData.forEach((record) => {
                 // Calculate total from data rows
-                total += record.khvisiting
+                total += record.khvisiting;
               });
-      
+
               return (
                 <Table.Summary.Row>
                   <Table.Summary.Cell index={0}></Table.Summary.Cell>
