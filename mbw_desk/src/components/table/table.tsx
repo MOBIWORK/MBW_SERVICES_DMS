@@ -154,4 +154,15 @@ export const TableCustom = styled(Table)`
       font-weight: 500;
     }
   }
+
+  & .ant-table-row-expand-icon-cell {
+    padding: 16px 0!important;
+  }
+
+  & .ant-table-cell {
+    & .ant-table-content {
+      padding: 25px 0;
+      margin-left: -18px;
+    }
+  }
 `;
