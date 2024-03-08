@@ -1,8 +1,8 @@
-import React from "react";
 import { FormItemCustom } from "../../components";
 import { Input } from "antd";
 import { SearchOutlined } from "@ant-design/icons";
-import CardUnActive from "./card-unactive";
+import CardCustom from "./components/CustomerCard";
+import data from "./datamonitor/dataunactive.json";
 
 export default function UnActiveEmployee() {
   return (
@@ -18,7 +18,7 @@ export default function UnActiveEmployee() {
       </div>
 
       <div className="overscroll-none h-[70vh] overflow-y-scroll">
-        <CardUnActive />
+        <CardCustom data={data} color={'rgb(169,169,169)'} status="Không hoạt động"/>
       </div>
     </>
   );
