@@ -22,6 +22,7 @@ const ReportKPI = lazy(()=> import('@/pages/ReportKPI'))
 const ReportSales = lazy(()=> import('@/pages/ReportSales'))
 const ReportSalesOrder = lazy(()=> import('@/pages/ReportSalesOrder'))
 const ReportDebt = lazy(()=> import('@/pages/ReportDebt'))
+const ReportCheckin = lazy(()=> import('@/pages/ReportCheckin'))
 export const dashboardRoutes = [
     {
         path: '/',
@@ -74,6 +75,9 @@ export const dashboardRoutes = [
             },
             {
                 path: 'report-debt',element: <ReportDebt/>
+            },
+            {
+                path: 'report-checkin',element: <ReportCheckin/>
             }
         ]
     }

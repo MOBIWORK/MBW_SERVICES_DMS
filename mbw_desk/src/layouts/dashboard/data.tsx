@@ -100,7 +100,7 @@ export const listMenu: MenuItem[] = [
             Báo cáo tồn kho khách hàng
           </p>
         </Link>,
-        key: "report_inventory",
+        key: "report-customer",
       },
       {
         label: <Link
@@ -112,6 +112,17 @@ export const listMenu: MenuItem[] = [
           </p>
         </Link>,
         key: "report_kpi",
+      },
+      {
+        label: <Link
+          className={""}
+          to="/report-checkin"
+        >
+          <p className="text-[#212B36] text-custom font-normal text-sm leading-[22px]">
+          Báo cáo viếng thăm
+          </p>
+        </Link>,
+        key: "report-checkin",
       },
       {
         label: <Link
