@@ -337,3 +337,8 @@ def report_detail_visit(customer_name, **kwargs):
 	
 	except Exception as e:
 		return exception_handel(e)
+	
+# Kết quả đi tuyến
+@frappe.whitelist(methods='GET')
+def route_results(**kwargs):
+	pass
