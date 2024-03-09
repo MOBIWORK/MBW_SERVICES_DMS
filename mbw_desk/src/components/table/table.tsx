@@ -162,6 +162,7 @@ export const TableCustom = styled(Table)`
   & .ant-table-cell {
     & .ant-table-content {
       padding: 25px 0;
+      padding-right: 25px;
       margin-left: -18px;
     }
   }

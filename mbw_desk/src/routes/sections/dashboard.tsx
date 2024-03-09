@@ -34,7 +34,7 @@ export const dashboardRoutes = [
         ),
         children: [
             {
-                index: true,element: <Progress/>
+                index: true,element: <RouterDashboard/>
             },
             {
                 path: 'router-control',element: <RouterControl/>

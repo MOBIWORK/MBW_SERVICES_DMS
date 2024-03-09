@@ -56,3 +56,7 @@
 * {
   letter-spacing: -0.025em;
 }
+
+p {
+  margin : 0;
+}
