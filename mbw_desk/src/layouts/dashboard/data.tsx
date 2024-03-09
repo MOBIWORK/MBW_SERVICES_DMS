@@ -81,14 +81,14 @@ export const listMenu: MenuItem[] = [
 
   //cham diem trung bay
   {
-    label: <Link
+    label: <a
       className={""}
-      to="/mbw_audit"
+      href="/mbw_audit"
     >
       <p className="text-[#212B36] text-custom font-normal text-sm leading-[22px]">
         Chấm điểm trưng bày
       </p>
-    </Link>,
+    </a>,
     icon: <FileImageOutlined  style={{ fontSize: "22px" }} />,
     key: "checkinimage",
   },
