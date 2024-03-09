@@ -1,4 +1,4 @@
-import { BarChartOutlined, FileDoneOutlined, FileSearchOutlined, ReconciliationOutlined } from "@ant-design/icons";
+import { BarChartOutlined, FileDoneOutlined, FileImageOutlined, FileSearchOutlined, ReconciliationOutlined } from "@ant-design/icons";
 import { MenuProps } from "antd";
 import { Link } from "react-router-dom";
 
@@ -78,6 +78,20 @@ export const listMenu: MenuItem[] = [
     icon: <FileDoneOutlined style={{ fontSize: "22px" }} />,
     key: "control",
   },
+
+  //cham diem trung bay
+  {
+    label: <Link
+      className={""}
+      to="/mbw_audit"
+    >
+      <p className="text-[#212B36] text-custom font-normal text-sm leading-[22px]">
+        Chấm điểm trưng bày
+      </p>
+    </Link>,
+    icon: <FileImageOutlined  style={{ fontSize: "22px" }} />,
+    key: "checkinimage",
+  },
   //report
   {
     label: <Link
@@ -100,7 +114,7 @@ export const listMenu: MenuItem[] = [
             Báo cáo tồn kho khách hàng
           </p>
         </Link>,
-        key: "report_inventory",
+        key: "report-customer",
       },
       {
         label: <Link
@@ -112,6 +126,17 @@ export const listMenu: MenuItem[] = [
           </p>
         </Link>,
         key: "report_kpi",
+      },
+      {
+        label: <Link
+          className={""}
+          to="/report-checkin"
+        >
+          <p className="text-[#212B36] text-custom font-normal text-sm leading-[22px]">
+          Báo cáo viếng thăm
+          </p>
+        </Link>,
+        key: "report-checkin",
       },
       {
         label: <Link

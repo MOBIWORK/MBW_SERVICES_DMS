@@ -23,4 +23,4 @@ dist-ssr
 *.sw?
 .env.development
 
-node_modules/*
+node_modules

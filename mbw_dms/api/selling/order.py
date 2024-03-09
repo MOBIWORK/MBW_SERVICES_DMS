@@ -61,9 +61,10 @@ def get_sale_order(name):
             Customer = frappe.qb.DocType("Customer")
             SalesOrderItem = frappe.qb.DocType("Sales Order Item")
             SalesOrderTaxes = frappe.qb.DocType("Sales Taxes and Charges")
+            Employee = frappe.qb.DocType("Employee")
 
             # Lấy ra các trường trong đơn hàng
-            field_detail_sales = ['total','grand_total','customer','customer_name','address_display',"delivery_date",'set_warehouse','taxes_and_charges','total_taxes_and_charges','apply_discount_on','additional_discount_percentage','discount_amount','contact_person','rounded_total']
+            field_detail_sales = ['total','grand_total','customer_code', 'customer','customer_name','address_display','delivery_date','set_warehouse','taxes_and_charges','total_taxes_and_charges','apply_discount_on','additional_discount_percentage','discount_amount','contact_person','rounded_total']
 
             # Thực hiện join để lấy ra giá trị
             detail = (frappe.qb.from_(SalesOrder)
@@ -76,7 +77,7 @@ def get_sale_order(name):
                     .select(
                         Customer.customer_code
                         ,SalesOrder.customer,SalesOrder.customer_name,SalesOrder.address_display,UNIX_TIMESTAMP(SalesOrder.delivery_date).as_('delivery_date'),SalesOrder.set_warehouse,SalesOrder.total,SalesOrder.grand_total
-                        ,SalesOrder.taxes_and_charges,SalesOrder.total_taxes_and_charges, SalesOrder.apply_discount_on, SalesOrder.additional_discount_percentage,SalesOrder.discount_amount,SalesOrder.contact_person,SalesOrder.rounded_total
+                        ,SalesOrder.taxes_and_charges,SalesOrder.total_taxes_and_charges, SalesOrder.apply_discount_on, SalesOrder.additional_discount_percentage,SalesOrder.discount_amount,SalesOrder.contact_person
                     )
                     ).run(as_dict =1)
             # Lấy ra giá trị tax
@@ -84,7 +85,15 @@ def get_sale_order(name):
                             .inner_join(SalesOrderTaxes)
                             .on(SalesOrder.name == SalesOrderTaxes.parent)
                             .where(SalesOrder.name == name)
-                            .select(SalesOrderTaxes.tax_amount,SalesOrderTaxes.rate,SalesOrderTaxes.account_head,SalesOrderTaxes.charge_type,)
+                            .select(SalesOrderTaxes.tax_amount,SalesOrderTaxes.rate.as_('rate_tax'))
+                            ).run(as_dict =1)
+            
+            # Lấy ra thông tin nhân viên bán hàng
+            employee = (frappe.qb.from_(SalesOrder)
+                            .inner_join(Employee)
+                            .on(SalesOrder.owner == Employee.user_id)
+                            .where(SalesOrder.name == name)
+                            .select(Employee.employee_name, Employee.cell_number, Employee.current_address)
                             ).run(as_dict =1)
             
             # Lấy ra chi tiết đơn hàng
@@ -96,6 +105,9 @@ def get_sale_order(name):
                 detail_order['list_items'] = get_items_in_sales_order(name)
             if len(detail_taxes) > 0 :
                 detail_order = {**detail_order,**detail_taxes[0]}
+            
+            if len(employee) > 0:
+                detail_order = {**detail_order, **detail_taxes[0], **employee[0]}
 
             return gen_response(200,'Thành công', detail_order)
         else:
@@ -513,7 +525,7 @@ def get_items_in_sales_order(master_name):
 
     items = master_doc.get('items')
 
-    fields_to_get = ['name', 'item_name', 'item_code', 'qty', 'uom', 'amount', 'discount_amount', 'discount_percentage', 'is_free_item']
+    fields_to_get = ['name', 'item_name', 'item_code', 'rate', 'qty', 'uom', 'amount', 'discount_amount', 'discount_percentage', 'is_free_item']
     result = []
 
     for item in items:
