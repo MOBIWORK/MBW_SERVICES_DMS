@@ -1,5 +1,5 @@
 export type locationType = {
-    longitude: number,
-    latitude: number,
+    long: number,
+    lat: number,
     customer_name?: string
 }
