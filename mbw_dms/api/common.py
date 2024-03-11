@@ -294,4 +294,16 @@ def weekday(time:datetime):
     tuan_trong_thang = float(tuan)%4 if float(tuan)%4 != 0 else 4
 
     return thu_trong_tuan, tuan_trong_thang
+
+
+# Tính tuần hiện tại của tháng
+def current_month_week():
+    today = datetime.today()
+    # Lấy ngày đầu tiên của tháng
+    first_day_of_month = today.replace(day=1)
+    # Tính toán số ngày đã trôi qua từ đầu tháng
+    passed_days = (today - first_day_of_month).days
+    # Tính toán tuần hiện tại của tháng
+    current_week = passed_days // 7 + 1
+    return current_week
     

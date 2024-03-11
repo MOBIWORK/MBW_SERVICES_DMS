@@ -5,7 +5,7 @@ import frappe
 from frappe.model.document import Document
 import datetime
 from frappe.utils.data import get_time
-from mbw_dms.api.common import exception_handel, gen_response, get_language, get_user_id, upload_image_s3, post_image, get_employee_info
+from mbw_dms.api.common import exception_handel, gen_response, get_language, get_user_id, upload_image_s3, post_image, get_employee_info, get_value_child_doctype
 from mbw_dms.api.validators import validate_datetime, validate_filter
 from mbw_dms.mbw_dms.utils import create_dms_log
 from mbw_dms.config_translate import i18n
@@ -18,6 +18,7 @@ class DMSCheckin(Document):
     def after_insert(self):
         self.update_kpi_monthly()
         self.send_data_to_ekgis()
+        self.check_router()
 
     def existing_checkin(self, kh_ma, start_date, end_date, current_user):
         existing_checkin = frappe.get_all(
@@ -55,7 +56,7 @@ class DMSCheckin(Document):
         # Lấy thứ của ngày
         date = days.weekday()
         # Chuyển đổi sang tên của ngày trong tuần
-        date_in_week = ["Thứ 2", "Thứ 2", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ Nhật"]
+        date_in_week = ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ Nhật"]
         name_date = date_in_week[date]
 
         # Kiểm tra xem khách hàng đã thực hiện checkin trong tháng này hay chưa
@@ -170,6 +171,33 @@ class DMSCheckin(Document):
         
         except Exception as e:
             create_dms_log(status="Error", exception=e, rollback=True)
+
+    def check_router(self):
+        # Lấy tuyến của nhân viên
+        user_id = frappe.session.user
+        user_name = frappe.get_value('Employee',{ 'user_id': user_id}, 'name')
+        # Lấy thứ của ngày
+        date_cre = datetime.datetime.strptime(self.creation, '%Y-%m-%d %H:%M:%S.%f')
+        date = date_cre.weekday()
+        # Chuyển đổi sang tên của ngày trong tuần
+        date_in_week = ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ Nhật"]
+        name_date = date_in_week[date]
+        router_employee = frappe.get_all(
+            'DMS Router',
+            filters = {
+                "employee": user_name,
+				"travel_date": name_date
+            },
+            fields = ['name']
+        )
+        if router_employee:
+            for i in router_employee:
+                i['customers'] = get_value_child_doctype('DMS Router', i['name'], 'customers')
+                for a in i['customers']:
+                    if self.kh_ten == a['customer']:
+                        self.checki_dungtuyen = 1
+                        self.save()
+
 
 # Tạo mới checkin
 @frappe.whitelist(methods='POST')
