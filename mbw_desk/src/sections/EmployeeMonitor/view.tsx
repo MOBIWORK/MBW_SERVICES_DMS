@@ -30,7 +30,7 @@ export default function EmployeeMonitor() {
               items={[
                 {
                   label: (
-                    <p className="px-2 text-base font-medium px-10">
+                    <p className="px-2 text-base font-medium px-10 w-[200px]">
                       {" "}
                       Hoạt động
                     </p>
@@ -40,7 +40,7 @@ export default function EmployeeMonitor() {
                 },
                 {
                   label: (
-                    <p className="px-2 text-base font-medium px-10">
+                    <p className="px-2 text-base font-medium px-10 w-[200px]">
                       Không hoạt động
                     </p>
                   ),
