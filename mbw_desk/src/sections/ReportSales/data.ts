@@ -118,3 +118,25 @@ export const customergroup = [
         "value": "customergroup 2"
     },
 ]
+
+export const typecustomer = [
+    {
+        "label": "Công ty",
+        "value": "Công ty"
+    },
+    {
+        "label": "Cá nhân",
+        "value": "Cá nhân"
+    },
+]
+
+export const area = [
+    {
+        "label": "Khu vực 1",
+        "value": "Khu vực 1"
+    },
+    {
+        "label": "Khu vực 2",
+        "value": "Khu vực 2"
+    },
+]
