@@ -14,7 +14,8 @@
   "exp_time",
   "update_at",
   "update_byname",
-  "update_bycode"
+  "update_bycode",
+  "total_cost"
  ],
  "fields": [
   {
@@ -64,12 +65,17 @@
    "fieldname": "update_bycode",
    "fieldtype": "Data",
    "label": "M\u00e3 ng\u01b0\u1eddi c\u1eadp nh\u1eadt"
+  },
+  {
+   "fieldname": "total_cost",
+   "fieldtype": "Float",
+   "label": "T\u1ed5ng gi\u00e1 tr\u1ecb"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-02-29 09:51:30.755667",
+ "modified": "2024-03-11 23:36:12.094911",
  "modified_by": "Administrator",
  "module": "MBW DMS",
  "name": "DMS Inventory Items",
