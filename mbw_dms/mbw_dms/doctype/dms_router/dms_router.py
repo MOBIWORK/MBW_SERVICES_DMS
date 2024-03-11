@@ -145,11 +145,9 @@ def get_customer_router(data):
             list_customer = sorted(list_customer, key= lambda x: x.customer_name.split(' ')[-1],reverse=True if order_by == 'desc' else False)
         list_customer_name = []
         for customer in list_customer:
-            list_customer_name.append(customer.get('customer'))
-        FiltersCustomer = {"name": ["in",list_customer_name]}
+            list_customer_name.append(customer.get('customer_code'))
+        FiltersCustomer = {"customer_code": ["in",list_customer_name]}
         if birthday_from and birthday_to:
-            # birthday_from = datetime.fromtimestamp(int(birthday_from))
-            # birthday_to = datetime.fromtimestamp(int(birthday_to))
             FiltersCustomer["birthday"] =["between",[birthday_from,birthday_to]]
         if customer_group:
             FiltersCustomer['customer_group'] =customer_group
@@ -172,7 +170,6 @@ def get_customer_router(data):
             FiltersCustomer.update({"customer_location_primary": ["is", "set"]})
               
             detail_customer = frappe.db.get_list('Customer',filters= FiltersCustomer,fields=fields_customer)    
-            print("ok",detail_customer)    
         for customer in detail_customer:
             customer['is_checkin'] = False
             checkin = frappe.db.get_value("DMS Checkin",{"kh_ma":customer.get('customer_code')})

@@ -18,7 +18,7 @@
  "fields": [
   {
    "fieldname": "customer",
-   "fieldtype": "Link",
+   "fieldtype": "Data",
    "label": "Kh\u00e1ch h\u00e0ng",
    "options": "Customer"
   },
@@ -67,7 +67,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-01-31 10:22:13.682400",
+ "modified": "2024-03-11 15:48:52.450344",
  "modified_by": "Administrator",
  "module": "MBW DMS",
  "name": "DMS Router Customer",
