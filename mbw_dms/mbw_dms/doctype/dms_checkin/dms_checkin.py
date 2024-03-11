@@ -195,7 +195,7 @@ class DMSCheckin(Document):
                 i['customers'] = get_value_child_doctype('DMS Router', i['name'], 'customers')
                 for a in i['customers']:
                     if self.kh_ten == a['customer']:
-                        self.checki_dungtuyen = 1
+                        self.checkin_dungtuyen = 1
                         self.save()
 
 

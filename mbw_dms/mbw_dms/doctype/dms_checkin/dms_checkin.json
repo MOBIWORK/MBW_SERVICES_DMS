@@ -31,7 +31,7 @@
   "createdbyemail",
   "createbyname",
   "checkin_id",
-  "checki_dungtuyen"
+  "checkin_dungtuyen"
  ],
  "fields": [
   {
@@ -161,14 +161,14 @@
   },
   {
    "default": "0",
-   "fieldname": "checki_dungtuyen",
+   "fieldname": "checkin_dungtuyen",
    "fieldtype": "Check",
    "label": "Checkin \u0111\u00fang tuy\u1ebfn"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-03-11 00:44:47.469028",
+ "modified": "2024-03-11 13:53:07.074313",
  "modified_by": "Administrator",
  "module": "MBW DMS",
  "name": "DMS Checkin",

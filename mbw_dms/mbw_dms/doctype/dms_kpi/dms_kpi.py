@@ -290,7 +290,7 @@ def report_detail_visit(customer_name, kwargs):
 		user_id = frappe.session.user
 		query_so = {}
 		if from_date and to_date:
-			query_so["transaction_date"] = ["between",[from_date,to_date]]
+			query_so["creation"] = ["between",[from_date,to_date]]
 		query_so["customer_name"] = customer_name
 		query_so["docstatus"] = 1
 		query_so["owner"] = user_id
@@ -321,7 +321,7 @@ def report_detail_visit(customer_name, kwargs):
 		# Tồn kho
 		query_inv = {}
 		if from_date and to_date:
-			query_inv["transaction_date"] = ["between",[from_date,to_date]]
+			query_inv["creation"] = ["between",[from_date,to_date]]
 		query_so["customer_name"] = customer_name
 		query_so["owner"] = user_id
 		inventory = frappe.get_all(
@@ -364,10 +364,15 @@ def router_results(kwargs):
 		data['vieng_tham_ko_don'] = 0
 		data['vieng_tham_co_anh'] = 0
 		data['vieng_tham_ko_anh'] = 0
+		data['vt_dung_tuyen'] = 0
+		data['vt_ngoai_tuyen'] = 0
 
-		data_checkin = frappe.get_all('DMS Checkin', filters=filters, fields=['name', 'checkin_donhang'])
+		data_checkin = frappe.get_all('DMS Checkin', filters=filters, fields=['name', 'kh_ten', 'checkin_donhang', 'checkin_dungtuyen'])
+		list_customer = []
 		for i in data_checkin:
-			i['checkin_hinhanh'] = get_value_child_doctype('DMS Checkin', i['name'])
+			if i['kh_ten'] not in list_customer:
+				list_customer.append(i['kh_ten'])
+			i['checkin_hinhanh'] = get_value_child_doctype('DMS Checkin', i['name'], 'checkin_hinhanh')
 			if i['checkin_donhang'] != 0:
 				data['vieng_tham_co_don'] += 1
 			if i['checkin_donhang'] == 0:
@@ -376,6 +381,10 @@ def router_results(kwargs):
 				data['vieng_tham_co_anh'] += 1
 			if len(i['checkin_hinhanh']) == 0:
 				data['vieng_tham_ko_anh'] += 1
+			if i['checkin_dungtuyen'] == 0:
+				data['vt_ngoai_tuyen'] += 1
+			if i['checkin_dungtuyen'] == 1:
+				data['vt_dung_tuyen'] += 1
 
 		# Check số khách hàng phải viếng thăm theo tuyến
 		# Lấy tuyến của nhân viên
@@ -407,7 +416,7 @@ def router_results(kwargs):
 					current_week = current_month_week()
 					if current_week in week_router:
 						cus += 1
-		data['so_kh_da_vt'] = len(data_checkin)
+		data['so_kh_da_vt'] = len(list_customer)
 		data['so_kh_phai_vt'] = cus
 		
 		return gen_response(200, 'Thành công', data)
