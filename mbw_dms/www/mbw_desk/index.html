@@ -1,22 +1,36 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/assets/mbw_dms/mbw_fe/ess.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>MBW DMS Desk</title>
-    <script type="module" crossorigin src="/assets/mbw_dms/mbw_fe/assets/index-vtiinQOu.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/mbw_dms/mbw_fe/assets/index-skMkQzbo.css">
-  </head>
-  <body>
-    <div id="root"></div>
-    <div id="modals"></div>
-    <div id="popovers"></div>
-    <script>
-      window.csrf_token = "{{ csrf_token }}"
-      window.frappe_version = "{{ frappe_version }}"
-      window.mbw_dms_version = "{{ mbw_dms_version }}"
-      window.site_name = "{{ site_name }}"
-    </script>
-  </body>
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/assets/mbw_dms/mbw_fe/ess.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MBW DMS Desk</title>
+  <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+  <script src="https://files.ekgis.vn/sdks/v2.0.0/ekmap-platform.min.js"></script>
+  <link href="https://files.ekgis.vn/sdks/v2.0.0/ekmap-platform.min.css" rel="stylesheet" />
+   <!-- eKMap Platform Tracking JS -->
+   <script src='https://files.ekgis.vn/sdks/tracking/ekmap-platform-for-tracking.min.js'></script>
+   <link href='https://files.ekgis.vn/sdks/tracking/ekmap-platform-for-tracking.min.css' rel='stylesheet' />
+   <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
+  <script type="module" crossorigin src="/assets/mbw_dms/mbw_fe/assets/index-DHY8iGeB.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/mbw_dms/mbw_fe/assets/index-BVvdXg3e.css">
+</head>
+
+<body>
+  <div id="root"></div>
+  <div id="modals"></div>
+  <div id="popovers"></div>
+  <script>
+    window.csrf_token = "{{ csrf_token }}"
+    window.frappe_version = "{{ frappe_version }}"
+    window.mbw_dms_version = "{{ mbw_dms_version }}"
+    window.site_name = "{{ site_name }}"
+
+    
+  </script>
+</body>
+
 </html>
