@@ -140,3 +140,25 @@ export const area = [
         "value": "Khu vực 2"
     },
 ]
+
+export const department = [
+    {
+        "label": "Phòng ban 1",
+        "value": "Phòng ban 1"
+    },
+    {
+        "label": "Phòng ban 2",
+        "value": "Phòng ban 2"
+    },
+]
+
+export const ordernew = [
+    {
+        "label": "Ordernew 1",
+        "value": "Ordernew 1"
+    },
+    {
+        "label": "Ordernew 2",
+        "value": "Ordernew 2"
+    },
+]
