@@ -115,8 +115,8 @@ def create_customer(**kwargs):
             elif key in choice_fields:
                 customer_type = validate_choice(configs.customer_type)(value)
                 new_customer.set(key, customer_type)
-        new_customer.customer_location_primary = json.dumps({"longitude": kwargs.get(
-                "longitude"), "latitude": kwargs.get("latitude")})
+        new_customer.customer_location_primary = json.dumps({"long": kwargs.get(
+                "longitude"), "lat": kwargs.get("latitude")})
 
         new_customer.append('credit_limits', {
             'company': kwargs.get('company'),
