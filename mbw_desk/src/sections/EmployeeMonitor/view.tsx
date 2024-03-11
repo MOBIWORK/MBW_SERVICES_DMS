@@ -24,12 +24,13 @@ export default function EmployeeMonitor() {
         <div className="pt-3 rounded-xl">
           <Row>
             <Tabs
+            centered
               className="w-[400px] border border-b-0 border-solid border-[#F5F5F5]"
               defaultActiveKey="1"
               items={[
                 {
                   label: (
-                    <p className="pl-8 pr-16 mb-0 font-medium text-sm leading-[21px]">
+                    <p className="px-2 text-base font-medium px-10">
                       {" "}
                       Hoạt động
                     </p>
@@ -39,7 +40,7 @@ export default function EmployeeMonitor() {
                 },
                 {
                   label: (
-                    <p className="pl-8 pr-16 mb-0 font-medium text-sm leading-[21px]">
+                    <p className="px-2 text-base font-medium px-10">
                       Không hoạt động
                     </p>
                   ),
