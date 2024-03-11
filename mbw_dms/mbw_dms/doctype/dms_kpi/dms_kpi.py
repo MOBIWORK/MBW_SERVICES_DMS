@@ -410,7 +410,7 @@ def router_results(kwargs):
 				for a in i['customers']:
 					fre = a['frequency']
 					week_router = []
-					frequency = fre.split(',')
+					frequency = fre.split(';')
 					for i in frequency:
 						week_router.append(int(i))
 					current_week = current_month_week()
