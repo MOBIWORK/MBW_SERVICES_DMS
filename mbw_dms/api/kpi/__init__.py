@@ -26,6 +26,11 @@ def report_visit_orders_invoices(customer_name):
     return report_orders_invoices(customer_name=customer_name)
 
 @frappe.whitelist()
-def report_detail_visit(customer_name):
+def report_detail_visit(customer_name, **kwargs):
     from mbw_dms.mbw_dms.doctype.dms_kpi.dms_kpi import report_detail_visit
-    return report_detail_visit(customer_name=customer_name)
+    return report_detail_visit(customer_name=customer_name, kwargs=kwargs)
+
+@frappe.whitelist()
+def router_results(**kwargs):
+    from mbw_dms.mbw_dms.doctype.dms_kpi.dms_kpi import router_results
+    return router_results(kwargs=kwargs)

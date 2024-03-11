@@ -6,12 +6,14 @@ from frappe.model.document import Document
 from mbw_dms.api.common import (
     exception_handel,
     gen_response,
-	get_value_child_doctype
+	get_value_child_doctype,
+	current_month_week
 )
 from mbw_dms.api.validators import validate_filter_timestamp
 from frappe.utils import nowdate, today
 import calendar
 from collections import defaultdict 
+import datetime
 
 class DMSKPI(Document):
 	pass
@@ -281,7 +283,7 @@ def report_orders_invoices(customer_name):
 
 # Báo cáo chi tiết viếng thăm
 @frappe.whitelist(methods='GET')
-def report_detail_visit(customer_name, **kwargs):
+def report_detail_visit(customer_name, kwargs):
 	try:
 		from_date = validate_filter_timestamp('start')(kwargs.get('from_date')) if kwargs.get('from_date') else None
 		to_date = validate_filter_timestamp('end')(kwargs.get('to_date')) if kwargs.get('to_date') else None
@@ -340,5 +342,74 @@ def report_detail_visit(customer_name, **kwargs):
 	
 # Kết quả đi tuyến
 @frappe.whitelist(methods='GET')
-def route_results(**kwargs):
-	pass
+def router_results(kwargs):
+	try:
+		data = {}
+		filters = {}
+		from_date = validate_filter_timestamp(type='start')(kwargs.get('from_date')) if kwargs.get('from_date') else None
+		to_date = validate_filter_timestamp(type='end')(kwargs.get('to_date')) if kwargs.get('to_date') else None
+		user_id = frappe.session.user
+		if from_date and to_date:
+			filters["creation"] = ["between",[from_date,to_date]]
+		filters['owner'] = user_id
+
+		# Tổng doanh số trong ngày
+		data['doanh_so'] = 0
+		sales_order = frappe.get_all('Sales Order', filters=filters, fields=['grand_total'])
+		for i in sales_order:
+			data['doanh_so'] += i['grand_total']
+
+		# Dữ liệu viếng thăm
+		data['vieng_tham_co_don'] = 0
+		data['vieng_tham_ko_don'] = 0
+		data['vieng_tham_co_anh'] = 0
+		data['vieng_tham_ko_anh'] = 0
+
+		data_checkin = frappe.get_all('DMS Checkin', filters=filters, fields=['name', 'checkin_donhang'])
+		for i in data_checkin:
+			i['checkin_hinhanh'] = get_value_child_doctype('DMS Checkin', i['name'])
+			if i['checkin_donhang'] != 0:
+				data['vieng_tham_co_don'] += 1
+			if i['checkin_donhang'] == 0:
+				data['vieng_tham_ko_don'] += 1
+			if len(i['checkin_hinhanh']) != 0:
+				data['vieng_tham_co_anh'] += 1
+			if len(i['checkin_hinhanh']) == 0:
+				data['vieng_tham_ko_anh'] += 1
+
+		# Check số khách hàng phải viếng thăm theo tuyến
+		# Lấy tuyến của nhân viên
+		user_name = frappe.get_value('Employee',{ 'user_id': user_id}, 'name')
+        # Lấy thứ của ngày
+		days = datetime.date.today()
+		date = days.weekday()
+        # Chuyển đổi sang tên của ngày trong tuần
+		date_in_week = ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ Nhật"]
+		name_date = date_in_week[date]
+		router_employee = frappe.get_all(
+            'DMS Router',
+            filters = {
+                "employee": user_name,
+				"travel_date": name_date
+            },
+            fields = ['name']
+        )
+		cus = 0
+		if router_employee:
+			for i in router_employee:
+				i['customers'] = get_value_child_doctype('DMS Router', i['name'], 'customers')
+				for a in i['customers']:
+					fre = a['frequency']
+					week_router = []
+					frequency = fre.split(',')
+					for i in frequency:
+						week_router.append(int(i))
+					current_week = current_month_week()
+					if current_week in week_router:
+						cus += 1
+		data['so_kh_da_vt'] = len(data_checkin)
+		data['so_kh_phai_vt'] = cus
+		
+		return gen_response(200, 'Thành công', data)
+	except Exception as e:
+		return exception_handel(e)
