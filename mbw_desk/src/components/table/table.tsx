@@ -13,7 +13,7 @@ export const TableCustom = styled(Table)`
   border-radius: 16px!important;
 }
 
-& .ant-table-thead {
+&:not(:has(.ant-table-cell)) .ant-table-thead {
   &>tr {
     & .ant-table-cell {
 
@@ -47,7 +47,10 @@ export const TableCustom = styled(Table)`
     border-end-end-radius: 16px!important;
   }
 }
-
+& .ant-table-row-expand-icon-cell {
+  padding: 0 16px!important;
+  border-inline-end: none!important;
+}
 
 
 .ant-table-container {
@@ -156,7 +159,7 @@ export const TableCustom = styled(Table)`
   }
 
   & .ant-table-row-expand-icon-cell {
-    padding: 16px 0!important;
+    padding: 16px!important;
   }
 
   & .ant-table-cell {

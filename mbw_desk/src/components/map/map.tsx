@@ -13,7 +13,7 @@ import { createMapLibreGlMapController } from "@maptiler/geocoding-control/mapli
 import "@maptiler/geocoding-control/style.css";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { MartLocation } from "..";
-import { location } from "../../types/location";
+import { locationType } from "../../types/location";
 
 interface Location {
   geometry: {
@@ -27,7 +27,7 @@ interface Location {
 
 
 export function Mapcustom(
-  {locations}: {locations: location[]}
+  {locations}: {locations: locationType[]}
 ) {
   const [isFullscreen, setIsFullscreen] = useState(false);
   return (
@@ -48,8 +48,8 @@ export function Mapcustom(
         {locations.map(point => (
           <Marker
             key={point.customer_name}
-            latitude={point.latitude}
-            longitude={point.longitude}
+            latitude={point.lat}
+            longitude={point.long}
             offsetLeft={-20}
             offsetTop={-10}
           >
@@ -72,7 +72,7 @@ export function Mapcustom(
                   },
                   'geometry': {
                     'type': 'LineString',
-                    'coordinates':locations.map(location=> [location.longitude,location.latitude])
+                    'coordinates':locations.map(location=> [location.long,location.lat])
                   }
                 }
               ]

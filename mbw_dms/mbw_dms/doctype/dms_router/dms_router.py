@@ -93,9 +93,8 @@ def get_router(id):
                       .on(Router.name == RouterCustomer.parent)
                       .where(Router.name == name)
                       .select(RouterCustomer.customer,RouterCustomer.customer_code,RouterCustomer.customer_name,RouterCustomer.display_address,
-                              RouterCustomer.phone_number,RouterCustomer.frequency,RouterCustomer.longitude,RouterCustomer.latitude
-                              )
-                        
+                              RouterCustomer.phone_number,RouterCustomer.frequency,RouterCustomer.long,RouterCustomer.lat
+                              )                        
                       ).run(as_dict = 1)
             router = routers[0]
             router['customers'] = customer
@@ -218,7 +217,7 @@ def create_router(body):
         if body['cmd'] :
             del body['cmd']
         field_validate= ["travel_date","status", "customers", "channel_code", "team_sale","channel_name","employee"]
-        field_customers_validate = ["customer_code","customer_name","display_address","phone_number","customer","frequency","latitude","longitude"]
+        field_customers_validate = ["customer_code","customer_name","display_address","phone_number","customer","frequency","lat","long"]
         # check_validate fields
         for key_router,value in body.items():
             if isinstance(body[key_router], list):
@@ -248,7 +247,7 @@ def update_router(body):
         if body['cmd'] :
             del body['cmd']
         field_validate= ["name","travel_date","status", "customers", "channel_code", "team_sale","channel_name","employee"]
-        field_customers_validate = ["customer_code","customer_name","display_address","phone_number","customer","frequency","latitude","longitude"]
+        field_customers_validate = ["customer_code","customer_name","display_address","phone_number","customer","frequency","lat","long"]
         # check_validate fields
         for key_router,value in body.items():
             if isinstance(body[key_router], list):
@@ -408,11 +407,11 @@ def get_customer(filters):
             page_length=page_size)
         
         for customer in data:
-            customer["longitude"] = False
-            customer["latitude"] = False
+            customer["long"] = False
+            customer["lat"] = False
             if customer['customer_location_primary'] :
-                customer["longitude"] = json.loads(customer['customer_location_primary'] ).get('long')
-                customer["latitude"] =json.loads(customer['customer_location_primary'] ).get('lat')
+                customer["long"] = json.loads(customer['customer_location_primary'] ).get('long')
+                customer["lat"] =json.loads(customer['customer_location_primary'] ).get('lat')
 
         total = len(frappe.db.get_list(
             "Customer",

@@ -15,7 +15,7 @@ export default function CustomerMap({data}:Props) {
   useEffect(()=> {
     console.log("data in map",data);
     
-    setLocation(getAttrInArray(data,["customer_name","longitude","latitude"], {isNull: false}))
+    setLocation(getAttrInArray(data,["customer_name","long","lat"], {isNull: false}))
   },[data])
   return (
     <>
