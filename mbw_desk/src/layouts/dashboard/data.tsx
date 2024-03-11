@@ -56,13 +56,13 @@ export const listMenu: MenuItem[] = [
       },
       {
         label: (
-          <Link className={""} to="#">
+          <Link className={""} to="employee-monitor-kpi">
             <p className="text-[#212B36] text-custom font-normal text-sm leading-[22px]">
               Giám sát nhân viên theo kpi
             </p>
           </Link>
         ),
-        key: "giamsat-kpi",
+        key: "employee-monitor-kpi",
       },
     ],
   },

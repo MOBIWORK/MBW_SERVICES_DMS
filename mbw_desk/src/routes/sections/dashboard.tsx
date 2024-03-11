@@ -25,6 +25,7 @@ const ReportDebt = lazy(()=> import('@/pages/ReportDebt'))
 const ReportCheckin = lazy(()=> import('@/pages/ReportCheckin'))
 const ReportCustomNew = lazy(()=> import('@/pages/ReportCustomNew'))
 const ReportCheckinFirst = lazy(()=> import('@/pages/ReportCheckinFirst'))
+const EmployeeMonitorKPI = lazy(()=> import('@/pages/EmployeeMonitorKPI'))
 export const dashboardRoutes = [
     {
         path: '/',
@@ -86,6 +87,9 @@ export const dashboardRoutes = [
             },
             {
                 path: 'report-checkin-first',element: <ReportCheckinFirst/>
+            },
+            {
+                path: 'employee-monitor-kpi',element: <EmployeeMonitorKPI/>
             }
         ]
         
