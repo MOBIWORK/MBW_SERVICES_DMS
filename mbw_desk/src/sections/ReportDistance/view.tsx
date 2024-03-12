@@ -1,12 +1,65 @@
-import React from "react";
+import React, { useState } from "react";
 import { FormItemCustom, HeaderPage, TableCustom } from "../../components";
 import { VerticalAlignBottomOutlined } from "@ant-design/icons";
-import { DatePicker, Select } from "antd";
+import { DatePicker, Select, message} from "antd";
+import 'dayjs/locale/vi';
+import dayjs from "dayjs";
 
 const { Column, ColumnGroup } = TableCustom;
 const { RangePicker } = DatePicker;
-
+dayjs.locale('vi');
 export default function ReportDistance() {
+  const [selectedRange, setSelectedRange] = useState([]);
+
+  const generateDateObjects = (startDate, endDate) => {
+    const dateObjects = [];
+    let currentDate = dayjs(startDate);
+
+    while (currentDate.isBefore(endDate) || currentDate.isSame(endDate, 'day')) {
+      dateObjects.push({
+        date: currentDate.format('DD/MM/YYYY'),
+        dayOfWeek: currentDate.format('dddd')
+      });
+      currentDate = currentDate.add(1, 'day');
+    }
+
+    return dateObjects;
+  };
+
+  const handleRangeChange = (dates) => {
+    setSelectedRange(dates);
+    if (dates.length === 2) {
+      const [start, end] = dates;
+      const dateObjects = generateDateObjects(start, end);
+      console.log(dateObjects);
+    }
+  };
+
+  // const [selectedRange, setSelectedRange] = useState([]);
+
+  // const handleRangeChange = (dates) => {
+  //   setSelectedRange(dates);
+  //   const startDate = dayjs(dates[0]);
+  //   const endDate = dayjs(dates[1]);
+  //   const dateObjects = generateDateObjects(startDate, endDate);
+  //   console.log(dateObjects);
+  // };
+
+  // const generateDateObjects = (startDate, endDate) => {
+  //   const dateObjects = [];
+  //   let currentDate = startDate;
+
+  //   while (currentDate.isBefore(endDate) || currentDate.isSame(endDate, 'day')) {
+  //     dateObjects.push({
+  //       date: currentDate.format('DD/MM/YYYY'),
+  //       dayOfWeek: currentDate.format('dddd')
+  //     });
+  //     currentDate = currentDate.add(1, 'day');
+  //   }
+
+  //   return dateObjects;
+  // };
+
   return (
     <>
       <HeaderPage
@@ -67,7 +120,13 @@ export default function ReportDistance() {
               showSearch
               notFoundContent={null}
             /> */}
-            <RangePicker placeholder={["Từ ngày", "Đến ngày"]} className="!bg-[#F4F6F8] !h-8" format={"DD/MM/YYYY"} />
+            <RangePicker
+              onChange={handleRangeChange}
+              value={selectedRange}
+              placeholder={["Từ ngày", "Đến ngày"]}
+              className="!bg-[#F4F6F8] !h-8"
+              format={"DD/MM/YYYY"}
+            />
           </FormItemCustom>
         </div>
         <div className="pt-5">
