@@ -6,34 +6,40 @@ import { ChartCustom } from "./components/chart";
 import { ListCustom } from "./components/list";
 import MapEkgis from "../../components/mapEkgis/map";
 import { cardData, dataChart, dataChart2, itemsProduct } from "./data";
+import { useEffect, useState } from "react";
+import { ResultType } from "antd/es/result";
 
 
 
 export default function RouterDashboard() {
- 
+  const [report, setReport] = useState<ResultType>()
+  const [isLoading, setLoading] = useState<boolean>(true)
+  useEffect(() => {
+
+  }, [])
   return (
     <>
-    <HeaderPage title="Tổng quan"/>
-     <Row gutter={20}>
-      <Col>
-        <Doanhso data={{}}/>
-      </Col>
-      <Col className="flex-1">
-        <Row gutter={[20,10]}>
-          {cardData.map((card,index) => <Col key={index} span={8}>
-            <InfoCard  data={{title: card.title, value: card.value}}/>
-          </Col>)}
-        </Row>
-      </Col>
-     </Row>
-     <Row gutter={20} className="my-5">
-      <Col span={14} ><ChartCustom data={dataChart2}/></Col>
-      <Col span={10} ><ListCustom data={itemsProduct}/></Col>
-     </Row>
+      <HeaderPage title="Tổng quan" />
+      <Row gutter={20}>
+        <Col>
+          <Doanhso data={{}} />
+        </Col>
+        <Col className="flex-1">
+          <Row gutter={[20, 10]}>
+            {cardData.map((card, index) => <Col key={index} span={8}>
+              <InfoCard data={{ title: card.title, value: card.value }} />
+            </Col>)}
+          </Row>
+        </Col>
+      </Row>
+      <Row gutter={20} className="my-5">
+        <Col span={14} ><ChartCustom data={dataChart2} /></Col>
+        <Col span={10} ><ListCustom data={itemsProduct} /></Col>
+      </Row>
 
-     <WrapperCard type="map">
+      <WrapperCard type="map">
         <div className="h-[600px]"><MapEkgis id="dashboard" /></div>
-     </WrapperCard>
+      </WrapperCard>
     </>
   );
 }

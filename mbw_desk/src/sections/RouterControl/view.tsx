@@ -202,7 +202,7 @@ export default function RouterControl() {
           page_size: PAGE_SIZE,
           page_number: page,
           status,
-          router: router && router.reduce((prev, now) => `${prev};${now}`),
+          router: router && router.length > 0 ? router.reduce((prev, now) => `${prev};${now}`) : "",
           employee,
           ...filter,
           order_by: orderField.value,
@@ -317,10 +317,10 @@ export default function RouterControl() {
                           mode="multiple"
                           filterOption={false}
                           onChange={(value) => {
-                            console.log('router', router);
-
                             setRouter(value)
-
+                          }}
+                          onDeselect={(value) => {
+                            setRouter(prev => prev?.filter(vl => vl !== value))
                           }}
                           showSearch
                           // filterOption={false}
@@ -349,7 +349,7 @@ export default function RouterControl() {
                           notFoundContent={null}
                           onSearch={(value: string) => setKeyS(value)}
                           options={[{ label: "Tất cả nhân viên", value: "" }, ...listEmployees]}
-                          onChange={(value) => {
+                          onSelect={(value) => {
                             setEmployee(value)
 
                           }}
@@ -436,7 +436,7 @@ export default function RouterControl() {
               </Row>
               {/* hien thi table  */}
               <div className="pt-5">
-                <div>
+                <div className="w-full overflow-x-scroll">
                   <TableCustom
                     rowSelection={rowSelection}
                     columns={columns.map(column => {

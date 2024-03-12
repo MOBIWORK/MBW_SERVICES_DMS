@@ -1,1 +1,4 @@
-export type listSale = string
+export type listSale = {
+    name: string,
+    parent_sales_person ?: string | null
+}

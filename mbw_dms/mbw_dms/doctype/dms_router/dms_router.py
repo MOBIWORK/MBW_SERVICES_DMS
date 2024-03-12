@@ -450,7 +450,7 @@ def test_address(filters):
 @frappe.whitelist(methods='GET')
 def get_all_router():
     try:
-        list_router = frappe.db.get_list('DMS Router',fields=['name','channel_name'])
+        list_router = frappe.db.get_list('DMS Router',fields=['name','channel_name',"channel_code"])
         return gen_response(200,'',list_router)
     except Exception as e: 
         exception_handel(e)
