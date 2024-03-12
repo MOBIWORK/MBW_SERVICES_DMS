@@ -1,10 +1,10 @@
 import classNames from "classnames";
 import { ReactNode } from "react";
-import { Upicon } from "./icons";
+import { Downicon, Upicon } from "./icons";
 
 
 export const WrapperCard = ({children,type="card"}: {children: ReactNode | string,type?: "map" | "card"}) => {
-    return <div className={classNames("border border-solid border-[#DFE3E8] rounded-2xl overflow-hidden max-h-485px",type=="card" && "p-6")}>
+    return <div className={classNames("border border-solid border-[#DFE3E8] rounded-2xl overflow-hidden ",type=="card" && "p-6")}>
     {children}
     </div>
 }
@@ -16,9 +16,9 @@ export const Doanhso =({data}: {data:any}) => {
             <p className="text-base font-medium">
                 Doanh số hôm nay
             </p>
-            <div className="text-[15px] text-[#637381] flex items-center justify-center py-4"><Upicon/> {`+89,4%`} vs hôm qua</div>
+            <div className="text-[15px] text-[#637381] flex items-center justify-center py-4">{data.phan_tram > 0 ? <><Upicon/> {`+${data.phan_tram}%`}</> : <><Downicon/> {`${data.phan_tram}%`}</>}  vs hôm qua</div>
             <div className="text-[#22C55E] text-4xl font-medium flex items-center justify-center py-4">{
-                new Intl.NumberFormat().format(1000000000)
+                new Intl.NumberFormat().format(data.doanh_so)
             } <span className="text-xl">đ</span></div>
         </div>
     </WrapperCard>

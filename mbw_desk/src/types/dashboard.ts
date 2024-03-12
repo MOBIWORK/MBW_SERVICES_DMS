@@ -19,6 +19,7 @@
   
   export interface DsSpDoanhSoCao {
     ten_sp: string
-    doanh_so: number
+    doanh_so: number,
+    image?:string
   }
   
