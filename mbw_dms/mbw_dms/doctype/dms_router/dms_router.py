@@ -111,7 +111,7 @@ def get_customer_router(data):
         page_size =  int(data.get('page_size', 20))
         page_number = int(data.get('page_number') )if data.get('page_number') and int(data.get('page_number')) > 0 else 1
         #bo loc tuyen
-        router = validate_filter(type_check='type',type=list,value=data.get('router'))  if data.get('router') else False
+        router = validate_filter(type_check='type',type=str,value=data.get('router')).split(";")  if data.get('router') else False
         status = data.get('status')
         #bo loc khach hang
         # tam bo qua bo loc khoang cach
