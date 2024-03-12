@@ -1,10 +1,7 @@
-import React from 'react'
-import { LoadingOutlined } from '@ant-design/icons';
-import { Spin } from 'antd';
-
+import loading from '@/assets/loading.gif'
 
 export default function LoadingScreen() {
   return (
-    <div className='flex items-center justify-center w-screen h-screen'><Spin indicator={<LoadingOutlined style={{ fontSize: 50 }} spin />} /></div>
+    <div className='flex items-center justify-center w-full h-screen'><img src={loading}/></div>
   )
 }
