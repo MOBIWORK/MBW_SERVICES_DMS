@@ -1,7 +1,7 @@
 import frappe
 import datetime
 
-from mbw_dms.api.common import gen_response ,exception_handel, get_value_child_doctype
+from mbw_dms.api.common import gen_response ,exception_handel, get_value_child_doctype, validate_image
 from collections import defaultdict
 
 # Dữ liệu báo cáo tổng hợp
@@ -28,7 +28,6 @@ def synthesis_report(**kwargs):
 
         # Lấy dữ liệu Sales Order cho hôm qua
         sales_orders_yesterday = frappe.get_all('Sales Order', filters=filter_yesterday, fields=['name', 'grand_total'])
-        print('========================= value: ', sales_orders_yesterday, flush=True)
 
         # Lấy dữ liệu Sales Order cho hôm nay
         sales_orders_today = frappe.get_all('Sales Order', filters={**filter_today, "docstatus":1}, fields=['name', 'grand_total', 'customer', 'creation'])
@@ -37,6 +36,7 @@ def synthesis_report(**kwargs):
         list_cus = []
         list_grand_total = []
         item_counts = defaultdict(int)
+        top_item_list = []
 
         for i in sales_orders_today:
             data['doanh_so'] += i['grand_total']
@@ -55,6 +55,16 @@ def synthesis_report(**kwargs):
             for item in i['items']:
                 data['so_san_pham'] += item['qty']
                 item_counts[item['item_name']] += item['amount']
+                item_image = frappe.get_value("Item", {'item_name': item['item_name']}, "image")
+
+                item_dict = {
+                    "ten_sp": item["item_name"],
+                    "doanh_so": item["amount"],
+                    "image": validate_image(item_image)
+                }
+                if item_dict not in top_item_list:
+                    top_item_list.append(item_dict)
+
         
         # Biểu đồ doanh số
         data['bieu_do_doanh_so'] = list_grand_total
@@ -63,14 +73,7 @@ def synthesis_report(**kwargs):
         data['so_nguoi_mua'] = len(list_cus)    
 
         # Danh sách sản phẩm có doanh số cao nhất
-        top_items = sorted(item_counts.items(), key=lambda x: x[1], reverse=True)[:5]
-        top_item_list = []
-        for item_name, amount in top_items:
-            item_dict = {
-                "ten_sp": item_name,
-                "doanh_so": amount
-            }
-            top_item_list.append(item_dict)    
+        top_item_list = sorted(top_item_list, key=lambda x: x["doanh_so"], reverse=True)[:5]
         data['ds_sp_doanh_so_cao'] = top_item_list
         
         # So sánh doanh số với ngày hôm qua
