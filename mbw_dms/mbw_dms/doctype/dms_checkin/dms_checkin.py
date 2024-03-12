@@ -152,13 +152,13 @@ class DMSCheckin(Document):
                 "lng": self.kh_long,
                 "lat": self.kh_lat,
                 "coordinates": "",
-                "activity": 'checkin',
+                "activity": "checkin",
                 "battery_checkin": self.checkin_pinvao,
                 "battery_checkout": self.checkin_pinra,
                 "accuracy": self.checkin_dochinhxac,
                 "time_checkin": self.checkin_giovao,
                 "time_checkout": "",
-                "ext": "",
+                "ext": self.kh_ten,
                 "createddate": self.createddate,
                 "timestamp": ""
             }
@@ -261,7 +261,7 @@ def create_checkin_inventory(body):
         items = body.get('inventory_items')
         for item in items:
             item['exp_time'] = validate_filter(type_check='date',value=item['exp_time'])
-            item['total_price'] = item['quanity'] * item['item_price']
+            item['total_cost'] = item['quantity'] * item['item_price']
         body['doctype'] = "DMS Inventory"
         body['create_by'] = user.get('name')
         body['items'] = items

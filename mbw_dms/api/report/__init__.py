@@ -28,6 +28,7 @@ def synthesis_report(**kwargs):
 
         # Lấy dữ liệu Sales Order cho hôm qua
         sales_orders_yesterday = frappe.get_all('Sales Order', filters=filter_yesterday, fields=['name', 'grand_total'])
+        print('========================= value: ', sales_orders_yesterday, flush=True)
 
         # Lấy dữ liệu Sales Order cho hôm nay
         sales_orders_today = frappe.get_all('Sales Order', filters={**filter_today, "docstatus":1}, fields=['name', 'grand_total', 'customer', 'creation'])
@@ -76,11 +77,10 @@ def synthesis_report(**kwargs):
         total_yesterday = 0
         for i in sales_orders_yesterday:
             total_yesterday += i['grand_total']
-
         if total_yesterday == 0:
             data['tang_vs_hqua'] = 100
         else:
-            data['tang_vs_hqua'] = 100 - data['doanh_so'] / total_yesterday * 100
+            data['tang_vs_hqua'] = data['doanh_so'] / total_yesterday * 100 - 100
 
         # Số lượng đơn hàng    
         data['don_hang'] = len(sales_orders_today)

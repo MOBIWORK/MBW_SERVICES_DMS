@@ -38,7 +38,7 @@ interface ExpandedDataType {
   item_name: string;
   exp_time: string;
   item_unit: string;
-  quanity: string;
+  quantity: string;
   total: string;
   update_at: string;
   update_byname: string;
@@ -112,7 +112,7 @@ export default function ReportCustomer() {
         ),
       },
       { title: "Đơn vị tính", dataIndex: "item_unit", key: "item_unit" },
-      { title: "Tồn", dataIndex: "quanity", key: "quanity" },
+      { title: "Tồn", dataIndex: "quantity", key: "quantity" },
       {
         title: "Giá sản phẩm",
         dataIndex: "item_price",
@@ -127,7 +127,7 @@ export default function ReportCustomer() {
         key: "total",
         render: (_, record) => (
           <p>
-            {Intl.NumberFormat().format(record.quanity * record.item_price)}
+            {Intl.NumberFormat().format(record.quantity * record.item_price)}
           </p>
         ),
       },
