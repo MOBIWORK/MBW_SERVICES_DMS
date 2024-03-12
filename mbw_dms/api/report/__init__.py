@@ -60,7 +60,7 @@ def synthesis_report(**kwargs):
                 item_dict = {
                     "ten_sp": item["item_name"],
                     "doanh_so": item["amount"],
-                    "anh_sp": validate_image(item_image)
+                    "image": validate_image(item_image)
                 }
                 if item_dict not in top_item_list:
                     top_item_list.append(item_dict)
