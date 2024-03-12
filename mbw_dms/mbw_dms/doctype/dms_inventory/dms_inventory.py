@@ -20,13 +20,13 @@ def find(filters = {}, options = ["*"],page_length = 20, page =1,order = "name d
 	parent_doctype=DocName,
 	distinct=True
 	)	
-	print("results",results)
 	fieldChil = [ "name",
 			  	"item_code",
 				"item_name",
 				"item_unit",
 				"item_price",
 				"quanity",
+				"total_price",
 				"exp_time",
 				"update_at",
 				"update_byname",
@@ -55,8 +55,9 @@ def find(filters = {}, options = ["*"],page_length = 20, page =1,order = "name d
 			items = pydash.filter_(items,filterFunction)
 			def chooseField(value) :
 				new_value =  pydash.pick(value,fieldChil)
-				new_value["exp_time"] =datetime.combine(new_value["exp_time"], datetime.min.time()).timestamp()
-				new_value["update_at"] = datetime.combine(new_value["update_at"], datetime.min.time()).timestamp()
+				new_value["exp_time"] = datetime.combine(new_value["exp_time"], datetime.min.time()).timestamp()
+				if new_value.get('update_at'):
+					new_value["update_at"] = datetime.combine(new_value["update_at"], datetime.min.time()).timestamp()
 				return new_value
 			items = pydash.map_(items,chooseField)
 			inven["items"] = items

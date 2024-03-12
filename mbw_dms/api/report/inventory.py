@@ -8,25 +8,25 @@ from mbw_dms.api.common import gen_response ,exception_handel
 @frappe.whitelist(methods="GET",allow_guest=True)
 def get_customer_inventory(**boby):
     try:
-        #phan trang
+        # phan trang
         page_size = boby.get("page_size") if boby.get("page_size") and boby.get("page_size") >= 20 else 20
         page_number = boby.get("page_number") if boby.get("page_number") and boby.get("page_number") >=1 else 1
-        #san pham
+        # san pham
         expire_from = boby.get("expire_from")
         expire_to = boby.get("expire_to")
         update_at_from = boby.get("update_at_from")
         update_at_to = boby.get("update_at_to")
         item_code = boby.get("item_code")
-        ## lay theo don vi tinh sp
+        # lay theo don vi tinh sp
         unit_product = boby.get("unit_product")
-        #nhan vien
+        # nhan vien
         employee_sale = boby.get("employee_sale")
         # nang cao: so luong sp khach hang dang ton, tong gia tri cac sp dang ton
         qty_inven_from = boby.get("qty_inven_from")
         qty_inven_to = boby.get("qty_inven_to")
         total_from = boby.get("total_from")
         total_to = boby.get("total_to")
-        #tao filter
+        # tao filter
         filters = {}
         if employee_sale:
             filters.update({"create_by": employee_sale})
@@ -63,5 +63,4 @@ def get_customer_inventory(**boby):
             "item_code": item_code
         }))
     except Exception as e:
-        print(e)
         return exception_handel(e)

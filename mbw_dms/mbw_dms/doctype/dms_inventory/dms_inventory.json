@@ -8,7 +8,6 @@
  "engine": "InnoDB",
  "field_order": [
   "customer_code",
-  "customer_id",
   "customer_name",
   "customer_type",
   "customer_address",
@@ -42,13 +41,8 @@
   {
    "fieldname": "customer_code",
    "fieldtype": "Data",
-   "label": "Id Kh\u00e1ch H\u00e0ng",
+   "label": "M\u00e3 Kh\u00e1ch H\u00e0ng",
    "reqd": 1
-  },
-  {
-   "fieldname": "customer_id",
-   "fieldtype": "Data",
-   "label": "M\u00e3 Kh\u00e1ch H\u00e0ng"
   },
   {
    "fieldname": "customer_address",
@@ -81,7 +75,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-02-29 14:20:15.082357",
+ "modified": "2024-03-11 22:20:54.875123",
  "modified_by": "Administrator",
  "module": "MBW DMS",
  "name": "DMS Inventory",

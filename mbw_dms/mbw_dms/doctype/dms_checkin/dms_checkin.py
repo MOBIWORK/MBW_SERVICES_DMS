@@ -252,8 +252,7 @@ def create_checkin_inventory(body):
     try:
         user = get_user_id()
         normal_keys = [
-            "inventory_cus_name", "inventory_cus_id", "inventory_customer_name"
-            , "inventory_cus_address", "inventory_items"
+            "customer_code", "customer_name", "customer_type", "customer_address"
         ]
         del body['cmd']
         for key, value in body.items():
@@ -262,9 +261,10 @@ def create_checkin_inventory(body):
         items = body.get('inventory_items')
         for item in items:
             item['exp_time'] = validate_filter(type_check='date',value=item['exp_time'])
+            item['total_price'] = item['quanity'] * item['item_price']
         body['doctype'] = "DMS Inventory"
         body['create_by'] = user.get('name')
-        body['inventory_items'] = items
+        body['items'] = items
         doc = frappe.get_doc(body)
         doc.save()
         frappe.db.commit()

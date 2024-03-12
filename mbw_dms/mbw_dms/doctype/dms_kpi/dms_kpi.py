@@ -353,9 +353,10 @@ def router_results(kwargs):
 			filters["creation"] = ["between",[from_date,to_date]]
 		filters['owner'] = user_id
 
+
 		# Tổng doanh số trong ngày
 		data['doanh_so'] = 0
-		sales_order = frappe.get_all('Sales Order', filters=filters, fields=['grand_total'])
+		sales_order = frappe.get_all('Sales Order', filters={**filters, 'docstatus':1}, fields=['grand_total'])
 		for i in sales_order:
 			data['doanh_so'] += i['grand_total']
 
