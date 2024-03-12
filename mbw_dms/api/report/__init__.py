@@ -37,15 +37,13 @@ def synthesis_report(**kwargs):
         list_grand_total = []
         item_counts = defaultdict(int)
         top_item_list = []
+        total_by_creation_time = defaultdict(float)
 
         for i in sales_orders_today:
             data['doanh_so'] += i['grand_total']
             # Định dạng lại giờ, phút và giây theo định dạng %H
             creation_time = i['creation'].strftime("%H")
-            list_grand_total.append({
-                'doanh_so': i['grand_total'],
-                'thoi_gian': creation_time
-            })
+            total_by_creation_time[creation_time] += i['grand_total']
             
             # Lấy số lượng khách hàng
             if i['customer'] not in list_cus:
@@ -55,15 +53,17 @@ def synthesis_report(**kwargs):
             for item in i['items']:
                 data['so_san_pham'] += item['qty']
                 item_counts[item['item_name']] += item['amount']
-                item_image = frappe.get_value("Item", {'item_name': item['item_name']}, "image")
+        list_grand_total = [{'doanh_so': total, 'thoi_gian': time} for time, total in total_by_creation_time.items()]
+        data['bieu_do_doanh_so'] = list_grand_total
 
-                item_dict = {
-                    "ten_sp": item["item_name"],
-                    "doanh_so": item["amount"],
-                    "image": validate_image(item_image)
-                }
-                if item_dict not in top_item_list:
-                    top_item_list.append(item_dict)
+        top_item_list = []
+        for item_name, amount in item_counts.items():
+            item_dict = {
+                "ten_sp": item_name,
+                "doanh_so": amount,
+                "image": validate_image(frappe.get_value("Item", {'item_name': item_name}, "image"))
+            }
+            top_item_list.append(item_dict)
 
         
         # Biểu đồ doanh số
