@@ -48,9 +48,9 @@ def find(filters = {}, options = ["*"],page_length = 20, page =1,order = "name d
 				if  data.get("data").get("expire_to"):
 					filters_product = filters_product & (value.exp_time <=  data.get("data").get("expire_to"))
 				if data.get("data").get("update_at_from"):
-					filters_product = filters_product & (value.exp_time >=  data.get("data").get("update_at_from"))
+					filters_product = filters_product & (value.update_at >=  data.get("data").get("update_at_from"))
 				if  data.get("data").get("update_at_to"):
-					filters_product = filters_product & (value.exp_time <=  data.get("data").get("update_at_to"))
+					filters_product = filters_product & (value.update_at <=  data.get("data").get("update_at_to"))
 				return filters_product
 			items = pydash.filter_(items,filterFunction)
 			def chooseField(value) :

@@ -31,28 +31,28 @@ export const cardData = [
 export const itemsProduct = [
     {
         image: "https://i.pinimg.com/236x/bd/c3/f3/bdc3f323464509d73a1b42f5071a78b2.jpg",
-        name: "Dell Computer Monitor",
-        price: " 73900000"
+        ten_sp: "Dell Computer Monitor",
+        doanh_so: " 73900000"
     },
     {
         image: "https://i.pinimg.com/236x/bd/c3/f3/bdc3f323464509d73a1b42f5071a78b2.jpg",
-        name: "Dell Computer Monitor",
-        price: " 73900000"
+        ten_sp: "Dell Computer Monitor",
+        doanh_so: " 73900000"
     },
     {
         image: "https://i.pinimg.com/236x/bd/c3/f3/bdc3f323464509d73a1b42f5071a78b2.jpg",
-        name: "Dell Computer Monitor",
-        price: " 73900000"
+        ten_sp: "Dell Computer Monitor dáigduagfkausdfgaudsfgvauvfkauvduvasuydfvasdfugvasdfjagsdfasdjfhgasdfyha",
+        doanh_so: " 73900000"
     },
     {
         image: "https://i.pinimg.com/236x/bd/c3/f3/bdc3f323464509d73a1b42f5071a78b2.jpg",
-        name: "Dell Computer Monitor",
-        price: " 73900000"
+        ten_sp: "Dell Computer Monitor",
+        doanh_so: " 73900000"
     },
     {
         image: "https://i.pinimg.com/236x/bd/c3/f3/bdc3f323464509d73a1b42f5071a78b2.jpg",
-        name: "Dell Computer Monitor",
-        price: " 73900000"
+        ten_sp: "Dell Computer Monitor",
+        doanh_so: " 73900000"
     }
 ]
 

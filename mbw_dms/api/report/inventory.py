@@ -40,10 +40,10 @@ def get_customer_inventory(**boby):
             filters.update({"exp_time": ["<=",expire_to]})
         if update_at_from:
             update_at_from = datetime.fromtimestamp(float(update_at_from)).date()
-            filters.update({"exp_time": [">=",update_at_from]})
+            filters.update({"update_at": [">=",update_at_from]})
         if update_at_to:
             update_at_to = datetime.fromtimestamp(float(update_at_to)).date()
-            filters.update({"exp_time": ["<=",update_at_to]})
+            filters.update({"update_at": ["<=",update_at_to]})
         if unit_product:
             filters.update({"item_unit" : unit_product})
         if qty_inven_from:
@@ -51,9 +51,9 @@ def get_customer_inventory(**boby):
         if qty_inven_to:
             filters.update({"total_qty": ["<=", float(qty_inven_to)]})
         if total_from:
-            filters.update({"total_qty": [">=", float(total_from)]})
+            filters.update({"total_cost": [">=", float(total_from)]})
         if total_to:
-            filters.update({"total_qty": ["<=", float(total_to)]})
+            filters.update({"total_cost": ["<=", float(total_to)]})
         return gen_response(200,"",find(filters=filters, page_length=page_size,page=page_number,data= {
             "expire_from" :expire_from,
             "expire_to":expire_to,
