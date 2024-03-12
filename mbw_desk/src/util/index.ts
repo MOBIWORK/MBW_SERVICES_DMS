@@ -22,11 +22,21 @@ export const getAttrInArray = (array:any[], fields: any[], options = {}) => {
     return newArray
 }
 
-interface treeArrayProps {data : any[], parentField?: string,parentValue : null | any}
-export const treeArray = ({data=[], parentField="",parentValue = null}:treeArrayProps) => {
-    let parentArray = data.filter(dt => dt[parentField] == parentValue)
-        
-    
+interface treeArrayProps {data : any[], parentField?: string,parentValue ?: null | any,keyValue : string}
+export const treeArray = ( {data =[], parentField="",parentValue=null,keyValue=""}:treeArrayProps):any[] => {  
+    if(data.length == 0) return data
+    let arr = data.filter(element => element[parentField] == parentValue)
+    return arr.map((element:any[]) => {
+      return {
+        ...element,
+        children: treeArray({
+          data: data.filter(element => element[parentField] !== parentValue),
+          parentField,
+          parentValue: element[keyValue as any] as string,
+          keyValue
+        })
+      }
+    })    
 }
 
 /**

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { FormItemCustom } from "../../components/form-item/form-item";
-import { Col, DatePicker, Input, Select } from "antd";
+import { Col, DatePicker, Input, Select, TreeSelect } from "antd";
 import RowCustom from "./styled";
 import { optionsTravel_date, statusOption } from "./data";
 import { rsData, rsDataFrappe } from "../../types/response";
@@ -8,6 +8,7 @@ import { listSale } from "../../types/listSale";
 import { AxiosService } from "../../services/server";
 import { employee } from "../../types/employeeFilter";
 import useDebounce from "../../hooks/useDebount"
+import { treeArray } from "../../util";
 
 let timeout: ReturnType<typeof setTimeout> | null;
 let currentValue: string;
@@ -31,7 +32,7 @@ const fetch = (value: string, callback: Function) => {
     callback("");
   }
 };
-export default function GeneralInformation({form}) {
+export default function GeneralInformation({form}:{form :any}) {
   console.log(form);
   
   // const { getFieldDecorator, setFieldsValue } = form;
@@ -46,10 +47,21 @@ export default function GeneralInformation({form}) {
       let rsSales: rsData<listSale[]> = await AxiosService.get(
         "/api/method/mbw_dms.api.router.get_team_sale"
       );
-      setListSales(rsSales.result.map((team_sale:listSale) => ({
-        label: team_sale.name,
-        value: team_sale.name
-      })))
+      console.log("tree",treeArray({data: rsSales.result.map((team_sale:listSale) => ({
+        title: team_sale.name,
+        value: team_sale.name,
+        ...team_sale
+      })),keyValue: "value", parentField: "parent_sales_person"}));
+      
+      // setListSales(rsSales.result.map((team_sale:listSale) => ({
+      //   label: team_sale.name,
+      //   value: team_sale.name
+      // })))
+      setListSales(treeArray({data: rsSales.result.map((team_sale:listSale) => ({
+        title: team_sale.name,
+        value: team_sale.name,
+        ...team_sale
+      })),keyValue: "value", parentField: "parent_sales_person"}))
     })();
   }, []);
   useEffect(() => {
@@ -85,7 +97,7 @@ export default function GeneralInformation({form}) {
       <RowCustom>
         <Col span={12}>
           <FormItemCustom label="Team sale" name="team_sale" required>
-            <Select showSearch options={listSales} defaultActiveFirstOption={false} onChange={(value:string) => {
+            <TreeSelect showSearch treeData={listSales}  onChange={(value:string) => {
               setTeamSale(value)
               form.setFieldsValue({"employee":undefined})
             }}/>
