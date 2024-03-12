@@ -1,9 +1,10 @@
 import React from "react";
 import { FormItemCustom, HeaderPage, TableCustom } from "../../components";
 import { VerticalAlignBottomOutlined } from "@ant-design/icons";
-import { Select } from "antd";
+import { DatePicker, Select } from "antd";
 
 const { Column, ColumnGroup } = TableCustom;
+const { RangePicker } = DatePicker;
 
 export default function ReportDistance() {
   return (
@@ -58,14 +59,15 @@ export default function ReportDistance() {
               notFoundContent={null}
             />
           </FormItemCustom>
-          <FormItemCustom className="w-[200px] border-none mr-2">
-            <Select
+          <FormItemCustom className="w-[250px] border-none mr-2">
+            {/* <Select
               className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
               defaultValue={""}
               options={[{ label: "Từ ngày đến ngày", value: "" }]}
               showSearch
               notFoundContent={null}
-            />
+            /> */}
+            <RangePicker placeholder={["Từ ngày", "Đến ngày"]} className="!bg-[#F4F6F8] !h-8" format={"DD/MM/YYYY"} />
           </FormItemCustom>
         </div>
         <div className="pt-5">
@@ -118,12 +120,12 @@ export default function ReportDistance() {
               </ColumnGroup>
             </ColumnGroup>
             <ColumnGroup title="Bình quân/ngày" width={190}>
-            <Column
-                  title="Viếng thăm"
-                  dataIndex="checkin_3"
-                  key="checkin_2"
-                />
-                <Column title="Tự động" dataIndex="auto_3" key="auto_3" />
+              <Column
+                title="Viếng thăm"
+                dataIndex="checkin_3"
+                key="checkin_2"
+              />
+              <Column title="Tự động" dataIndex="auto_3" key="auto_3" />
               {/* <ColumnGroup title="">
                
               </ColumnGroup> */}
