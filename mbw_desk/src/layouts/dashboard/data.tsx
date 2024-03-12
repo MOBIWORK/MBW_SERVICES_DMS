@@ -183,6 +183,16 @@ export const listMenu: MenuItem[] = [
         ),
         key: "report-checkin-first",
       },
+      {
+        label: (
+          <Link className={""} to="/report-distance">
+            <p className="text-[#212B36] text-custom font-normal text-sm leading-[22px]">
+              Báo cáo tổng hợp cự ly di chuyển từng nhân viên (km)
+            </p>
+          </Link>
+        ),
+        key: "report-distance",
+      },
     ],
   },
 ];
