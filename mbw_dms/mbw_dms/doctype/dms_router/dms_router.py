@@ -123,7 +123,7 @@ def get_customer_router(data):
         customer_type = data.get('customer_type')
         queryFilters = {"is_deleted": False}
         if router:
-            queryFilters['name'] = ["in",router]
+            queryFilters['channel_code'] = ["in",router]
         if status: 
             queryFilters['status'] = status
         #lay danh sach theo ngay
@@ -309,7 +309,7 @@ def update_routers(body):
 @frappe.whitelist(methods="GET")
 def get_team_sale():
     try:
-        data = frappe.db.get_list("Sales Person",{"is_group":1}, pluck='name')
+        data = frappe.db.get_list("Sales Person",{"is_group":1},["name", "parent_sales_person"])
         gen_response(200,"",data)
     except Exception as e:
         exception_handel(e)
