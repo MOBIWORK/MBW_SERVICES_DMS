@@ -145,6 +145,9 @@ class DMSCheckin(Document):
                 
             # Tích hợp dữ liệu checkin vào ekgis
             api_url_checkin=f'{API_URL}/{projectId}/{objectId}'
+            ext = {"customer_name": self.kh_ten, "address": self.kh_diachi}
+            json_object = json.dumps(ext)
+
             data_checkin = {
                 "projectid":projectId,
                 "objectid": objectId,
@@ -158,7 +161,7 @@ class DMSCheckin(Document):
                 "accuracy": self.checkin_dochinhxac,
                 "time_checkin": self.checkin_giovao,
                 "time_checkout": "",
-                "ext": self.kh_ten,
+                "ext": json_object,
                 "createddate": self.createddate,
                 "timestamp": ""
             }
