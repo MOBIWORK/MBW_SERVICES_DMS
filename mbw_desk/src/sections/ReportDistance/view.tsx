@@ -1,37 +1,23 @@
 import React, { useState } from "react";
 import { FormItemCustom, HeaderPage, TableCustom } from "../../components";
 import { VerticalAlignBottomOutlined } from "@ant-design/icons";
-import { DatePicker, Select, message} from "antd";
-import 'dayjs/locale/vi';
+import { DatePicker, Select, message } from "antd";
+import { arrayDays } from "../../util";
 import dayjs from "dayjs";
 
 const { Column, ColumnGroup } = TableCustom;
 const { RangePicker } = DatePicker;
-dayjs.locale('vi');
+
 export default function ReportDistance() {
   const [selectedRange, setSelectedRange] = useState([]);
-
-  const generateDateObjects = (startDate, endDate) => {
-    const dateObjects = [];
-    let currentDate = dayjs(startDate);
-
-    while (currentDate.isBefore(endDate) || currentDate.isSame(endDate, 'day')) {
-      dateObjects.push({
-        date: currentDate.format('DD/MM/YYYY'),
-        dayOfWeek: currentDate.format('dddd')
-      });
-      currentDate = currentDate.add(1, 'day');
-    }
-
-    return dateObjects;
-  };
+  const [dateColumn, setDateColumn] = useState<any[]>([])
 
   const handleRangeChange = (dates) => {
     setSelectedRange(dates);
     if (dates.length === 2) {
       const [start, end] = dates;
-      const dateObjects = generateDateObjects(start, end);
-      console.log(dateObjects);
+      const dateObjects = arrayDays(start, end);
+      setDateColumn(dateObjects);
     }
   };
 
@@ -75,6 +61,7 @@ export default function ReportDistance() {
         ]}
       />
       <div className="bg-white rounded-md py-7 px-4 border-[#DFE3E8] border-[0.2px] border-solid">
+        {/* filter */}
         <div className="flex justify-start items-center">
           <FormItemCustom className="w-[200px] border-none mr-2">
             <Select
@@ -129,6 +116,9 @@ export default function ReportDistance() {
             />
           </FormItemCustom>
         </div>
+        {/* end filter */}
+
+        table
         <div className="pt-5">
           <TableCustom bordered scroll={{ x: true }}>
             <Column
@@ -150,12 +140,14 @@ export default function ReportDistance() {
               key="employee_name"
               width={177}
             />
-            <ColumnGroup
+            {/* ngày  */}
+            {dateColumn.map((dColumn) => <ColumnGroup
+              key={dColumn.date}
               className="!whitespace-normal"
               width={180}
-              title="Ngày 02"
+              title={`Ngày ${dayjs(dColumn.date,"DD/MM/YYYY").date()}`}
             >
-              <ColumnGroup title="Thứ 6">
+              <ColumnGroup title={dColumn.dayOfWeek}>
                 <Column
                   title="Viếng thăm"
                   dataIndex="checkin_1"
@@ -163,21 +155,10 @@ export default function ReportDistance() {
                 />
                 <Column title="Tự động" dataIndex="auto_1" key="auto_1" />
               </ColumnGroup>
-            </ColumnGroup>
-            <ColumnGroup
-              className="!whitespace-normal"
-              width={180}
-              title="Ngày 03"
-            >
-              <ColumnGroup title="Thứ 7">
-                <Column
-                  title="Viếng thăm"
-                  dataIndex="checkin_2"
-                  key="checkin_2"
-                />
-                <Column title="Tự động" dataIndex="auto_2" key="auto_2" />
-              </ColumnGroup>
-            </ColumnGroup>
+            </ColumnGroup>)}
+          
+            {/* kết thúc ngày */}
+            
             <ColumnGroup title="Bình quân/ngày" width={190}>
               <Column
                 title="Viếng thăm"

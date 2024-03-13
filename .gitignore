@@ -10,6 +10,9 @@ mbw_desk/.env.development
 
 mbw_desk/node_modules
 
+mbw_dms/public
+
+mbw_dms/www
 
 
 node_modules

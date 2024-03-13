@@ -1,4 +1,5 @@
-
+import 'dayjs/locale/vi';
+import dayjs from "dayjs";
 
 export const getAttrInArray = (array:any[], fields: any[], options = {}) => {
     let newArray:any[] = []
@@ -74,3 +75,19 @@ export const treeArray = ( {data =[], parentField="",parentValue=null,keyValue="
   },
 ];
  */
+dayjs.locale("vi");
+export const arrayDays = (startTime,endTime) => {
+  const dateObjects = [];
+  let currentDate = dayjs(startTime);
+
+  while (currentDate.isBefore(endTime) || currentDate.isSame(endTime, 'day')) {
+    dateObjects.push({
+      date: currentDate.format('DD/MM/YYYY'),
+      dayOfWeek: currentDate.format('dddd')
+    });
+    currentDate = currentDate.add(1, 'day');
+  }
+  console.log("dateObjects",dateObjects);
+  
+  return dateObjects;
+}
