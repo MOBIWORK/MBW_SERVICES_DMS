@@ -14,6 +14,7 @@ class DMSSalesInvoice(SalesInvoice):
 
         # Lấy id của nhân viên
         user_name = frappe.get_value('Employee',{ 'user_id': self.owner}, 'name')
+        sales_team = frappe.get_value("DMS KPI", {'nhan_vien_ban_hang': user_name}, "nhom_ban_hang")
 
         # Kiểm tra đã tồn tại bản ghi KPI của tháng này chưa
         existing_monthly_summary = frappe.get_all(
@@ -33,6 +34,7 @@ class DMSSalesInvoice(SalesInvoice):
                 'nam': year,
                 'thang': month,
                 'nhan_vien_ban_hang': user_name,
+                'nhom_ban_hang': sales_team,
                 'doanh_thu_thang': grand_totals,
             })
             monthly_summary_doc.insert(ignore_permissions=True)

@@ -34,6 +34,7 @@ class DMSSalesOrder(SalesOrder):
         
         # Lấy id của nhân viên
         user_name = frappe.get_value('Employee',{ 'user_id': self.owner}, 'name')
+        sales_team = frappe.get_value("DMS KPI", {'nhan_vien_ban_hang': user_name}, "nhom_ban_hang")
 
         # Tính sản lượng (số sản phẩm/đơn) và sku(số mặt hàng/đơn) trong đơn hàng
         items = self.items
@@ -70,6 +71,7 @@ class DMSSalesOrder(SalesOrder):
                 'nam': year,
                 'thang': month,
                 'nhan_vien_ban_hang': user_name,
+                'nhom_ban_hang': sales_team,
                 'so_don_hang': 1,
                 'doanh_so_thang': grand_totals,
                 'so_kh_dat_hang': 1
