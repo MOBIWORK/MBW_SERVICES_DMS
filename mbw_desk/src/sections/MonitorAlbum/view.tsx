@@ -1,6 +1,14 @@
 import { useEffect, useState } from "react";
 import { FormItemCustom, HeaderPage } from "../../components";
-import { Col, Row, Select, Modal, DatePicker, DatePickerProps } from "antd";
+import {
+  Col,
+  Row,
+  Select,
+  Modal,
+  DatePicker,
+  DatePickerProps,
+  TreeSelect,
+} from "antd";
 import { CardCustom } from "../../components/card/card";
 import { UserIcon } from "../../icons/user";
 import { PictureIcon } from "../../icons/picture";
@@ -11,6 +19,7 @@ import dayjs from "dayjs";
 import { listSale } from "../../types/listSale";
 import { employee } from "../../types/employeeFilter";
 import { rsData, rsDataFrappe } from "../../types/response";
+import { treeArray } from "../../util";
 export default function MonitorAlbum() {
   const [listCustomerGroup, setCustomerGroup] = useState<any[]>([]);
   const [dataAlbum, setDataAlbum] = useState([]);
@@ -52,18 +61,35 @@ export default function MonitorAlbum() {
   // const now = Date.parse(dateNow as string) / 1000;
   // console.log("dateNow", now);
 
+  //thêm
   useEffect(() => {
     (async () => {
       let rsSales: rsData<listSale[]> = await AxiosService.get(
         "/api/method/mbw_dms.api.router.get_team_sale"
       );
-      console.log("rsSale", rsSales);
+      console.log(
+        "tree",
+        treeArray({
+          data: rsSales.result.map((team_sale: listSale) => ({
+            title: team_sale.name,
+            value: team_sale.name,
+            ...team_sale,
+          })),
+          keyValue: "value",
+          parentField: "parent_sales_person",
+        })
+      );
 
       setListSales(
-        rsSales.result.map((team_sale: listSale) => ({
-          label: team_sale,
-          value: team_sale,
-        }))
+        treeArray({
+          data: rsSales.result.map((team_sale: listSale) => ({
+            title: team_sale.name,
+            value: team_sale.name,
+            ...team_sale,
+          })),
+          keyValue: "value",
+          parentField: "parent_sales_person",
+        })
       );
     })();
   }, []);
@@ -78,7 +104,6 @@ export default function MonitorAlbum() {
           },
         }
       );
-      console.log("rsemp", rsEmployee);
       let { message: results } = rsEmployee;
       setListEmployees(
         results.map((employee_filter: employee) => ({
@@ -174,17 +199,13 @@ export default function MonitorAlbum() {
             />
           </FormItemCustom>
           <FormItemCustom className="w-[200px] border-none mr-2">
-            <Select
-              className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
-              defaultValue={""}
-              options={[
-                { label: "Tất cả nhóm bán hàng", value: "" },
-                ...listSales
-              ]}
+            <TreeSelect
               showSearch
-              notFoundContent={null}
-              onSearch={(value: string) => setKeyS3(value)}
-              onChange={(value) => {
+              treeData={[
+                { label: "Tất cả nhân viên", value: "" },
+                ...listSales,
+              ]}
+              onChange={(value: string) => {
                 setTeamSale(value);
               }}
             />

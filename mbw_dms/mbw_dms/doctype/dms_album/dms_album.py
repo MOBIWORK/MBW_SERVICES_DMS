@@ -42,6 +42,7 @@ def create_album_image(kwargs):
 def list_monitor_album(kwargs):
     try:
         name = kwargs.get('album')
+        album_name = kwargs.get('album_name')
         customer_name = kwargs.get('customer_name')
         team_sale = kwargs.get('team_sale')
         creation = kwargs.get('creation')
@@ -58,6 +59,8 @@ def list_monitor_album(kwargs):
             my_filter["creation"] = ['like', f'%{creation}%']
         if team_sale:
             my_filter["team_sale"] = ['like', f'%{team_sale}%']
+        if album_name:
+            my_filter["album_name"] = ['like', f'%{album_name}%']
         album_image = frappe.db.get_list('DMS Album Image',filters=my_filter, fields=["name","creation", "owner", "album_id", "album_name", "checkin_id", "customer_id", "customer_name", "customer_code", "customer_long", "customer_lat", "image_url", "team_sale", "employee"])
         for albums in album_image:
             albums['creation'] = (albums.get('creation')).strftime('%H:%M, %d-%m-%Y')

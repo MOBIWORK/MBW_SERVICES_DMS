@@ -91,15 +91,15 @@ export default function ReportCustomer() {
   };
   const [keyItem, setKeyItem] = useState("");
   let keySItem = useDebounce(keyItem, 500);
-  const expandedRowRender = (record: any) => {
-    console.log("dataTableChid", record);
+  const expandedRowRender = (recordTable: any) => {
+    console.log("dataTableChid", recordTable);
 
     const columns: TableColumnsType<ExpandedDataType> = [
       {
         title: "STT",
         dataIndex: "stt",
         key: "stt",
-        render: (_, record, index) => index + 1,
+        render: (_, record: any, index) => index + 1,
       },
       { title: "Mã sản phẩm", dataIndex: "item_code", key: "item_code" },
       { title: "Tên sản phẩm", dataIndex: "item_name", key: "item_name" },
@@ -107,7 +107,7 @@ export default function ReportCustomer() {
         title: "Hạn sử dụng",
         dataIndex: "exp_time",
         key: "exp_time",
-        render: (_, record) => (
+        render: (_, record: any) => (
           <p>{dayjs(record.exp_time * 1000).format("DD/MM/YYYY")}</p>
         ),
       },
@@ -117,7 +117,7 @@ export default function ReportCustomer() {
         title: "Giá sản phẩm",
         dataIndex: "item_price",
         key: "item_price",
-        render: (_, record) => (
+        render: (_, record: any) => (
           <p>{Intl.NumberFormat().format(record.item_price)}</p>
         ),
       },
@@ -125,7 +125,7 @@ export default function ReportCustomer() {
         title: "Tổng giá trị",
         dataIndex: "total",
         key: "total",
-        render: (_, record) => (
+        render: (_, record: any) => (
           <p>
             {Intl.NumberFormat().format(record.quantity * record.item_price)}
           </p>
@@ -148,7 +148,7 @@ export default function ReportCustomer() {
     return (
       <Table
         columns={columns}
-        dataSource={record.items.map((item: ExpandedDataType) => {
+        dataSource={recordTable.items.map((item: ExpandedDataType) => {
           return {
             ...item,
             key: item.item_code,
@@ -213,26 +213,6 @@ export default function ReportCustomer() {
     })();
   }, []);
 
-  // useEffect(() => {
-  //   initDataCustomer();
-  // }, []);
-
-  // const initDataCustomer = async () => {
-  //   let urlDataCustomer =
-  //     "/api/method/mbw_dms.api.report.inventory.get_customer_inventory";
-  //   const response = await AxiosService.get(urlDataCustomer);
-  //   // console.log("dataTable", response);
-  //   let data = response.result.map((item: DataCustomer) => {
-  //     return {
-  //       ...item,
-  //       key: item.name,
-  //     };
-  //   });
-  //   console.log("datA", data);
-    
-  //   setDataCustomer(data);
-  // };
-
   useEffect(() => {
     (async () => {
       const rsReport = await AxiosService.get(
@@ -245,16 +225,18 @@ export default function ReportCustomer() {
             qty_inven_to,
             total_from,
             total_to,
-            item_code
+            item_code,
           },
         }
       );
-      setDataCustomer(rsReport.result.map((item: DataCustomer) => {
-        return {
-          ...item,
-          key: item.name,
-        };
-      }));
+      setDataCustomer(
+        rsReport.result.map((item: DataCustomer) => {
+          return {
+            ...item,
+            key: item.name,
+          };
+        })
+      );
     })();
     //
   }, [
@@ -264,11 +246,10 @@ export default function ReportCustomer() {
     qty_inven_to,
     total_from,
     total_to,
-    item_code
+    item_code,
   ]);
 
   console.log("keydataCustomer", dataCustomer);
-  
 
   return (
     <>
@@ -294,7 +275,7 @@ export default function ReportCustomer() {
                     <Select
                       filterOption={false}
                       onChange={(value: any) => {
-                        setItemCode(value)
+                        setItemCode(value);
                         // console.log("vaue:", value);
                       }}
                       showSearch
