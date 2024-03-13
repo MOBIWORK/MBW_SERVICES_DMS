@@ -69,6 +69,7 @@ class DMSCheckin(Document):
             filters={'thang': month, 'nam': year, 'nhan_vien_ban_hang': current_user['name']},
             fields=['name']
         )
+        sales_team = frappe.get_value("DMS KPI", {'nhan_vien_ban_hang': current_user['name']}, "nhom_ban_hang")
 
         if len(exists_checkin) > 1:
             if existing_monthly_summary:
@@ -85,6 +86,7 @@ class DMSCheckin(Document):
                     'nam': year,
                     'thang': month,
                     'nhan_vien_ban_hang': current_user['name'],
+                    'nhom_ban_hang': sales_team,
                     'so_kh_vt_luot': 1,
                     'solan_vt_dungtuyen': 1 if name_date in list_travel_date else 0,
                     'solan_vt_ngoaituyen': 1 if name_date not in list_travel_date else 0
@@ -106,6 +108,7 @@ class DMSCheckin(Document):
                     'nam': year,
                     'thang': month,
                     'nhan_vien_ban_hang': current_user['name'],
+                    'nhom_ban_hang': sales_team,
                     'so_kh_vt_luot': 1,
                     'so_kh_vt_duynhat': 1,
                     'solan_vt_dungtuyen': 1 if name_date in list_travel_date else 0,

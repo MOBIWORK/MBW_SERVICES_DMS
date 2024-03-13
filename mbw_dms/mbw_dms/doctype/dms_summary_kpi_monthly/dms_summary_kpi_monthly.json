@@ -10,6 +10,7 @@
   "nam",
   "thang",
   "nhan_vien_ban_hang",
+  "nhom_ban_hang",
   "doanh_thu_thang",
   "doanh_so_thang",
   "so_kh_vt_duynhat",
@@ -104,11 +105,17 @@
   {
    "fieldname": "column_break_dlma",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "nhom_ban_hang",
+   "fieldtype": "Link",
+   "label": "Nh\u00f3m b\u00e1n h\u00e0ng",
+   "options": "Sales Person"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-02-20 15:20:22.231331",
+ "modified": "2024-03-12 15:34:40.502627",
  "modified_by": "Administrator",
  "module": "MBW DMS",
  "name": "DMS Summary KPI Monthly",
