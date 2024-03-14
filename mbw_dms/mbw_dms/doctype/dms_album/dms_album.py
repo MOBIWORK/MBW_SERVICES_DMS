@@ -61,7 +61,7 @@ def list_monitor_album(kwargs):
             my_filter["team_sale"] = ['like', f'%{team_sale}%']
         if album_name:
             my_filter["album_name"] = ['like', f'%{album_name}%']
-        album_image = frappe.db.get_list('DMS Album Image',filters=my_filter, fields=["name","creation", "owner", "album_id", "album_name", "checkin_id", "customer_id", "customer_name", "customer_code", "customer_long", "customer_lat", "image_url", "team_sale", "employee"])
+        album_image = frappe.db.get_list('DMS Album Image',filters=my_filter, fields=["name","creation", "owner", "album_id", "album_name", "checkin_id", "customer_id", "customer_name", "customer_code", "customer_long", "customer_lat", "image_url", "team_sale", "employee"], distinct=True)
         for albums in album_image:
             albums['creation'] = (albums.get('creation')).strftime('%H:%M, %d-%m-%Y')
             albums['employee'] = frappe.db.get_all("Employee", {"employee": albums.get('employee')}, ['name', 'first_name'])
@@ -92,6 +92,14 @@ def create_album(kwargs):
 def list_album():
     try:
         album_image = frappe.db.get_list('DMS Album', fields=["name", "ma_album", "ten_album", "so_anh_toi_thieu", "trang_thai"])
+        gen_response(200, "Thành công", album_image)
+    except Exception as e:
+        return exception_handel(e)
+    
+@frappe.whitelist()
+def list_album_name():
+    try:
+        album_image = frappe.db.get_list('DMS Album Image', fields=["album_name"], distinct=True)
         gen_response(200, "Thành công", album_image)
     except Exception as e:
         return exception_handel(e)

@@ -23,3 +23,8 @@ def create_album(kwargs):
 def list_album():
     from mbw_dms.mbw_dms.doctype.dms_album.dms_album import list_album
     return list_album()
+
+@frappe.whitelist()
+def list_album_name():
+    from mbw_dms.mbw_dms.doctype.dms_album.dms_album import list_album_name
+    return list_album_name()

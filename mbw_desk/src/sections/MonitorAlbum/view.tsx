@@ -39,6 +39,7 @@ export default function MonitorAlbum() {
   const [keySearch4, setKeySearch4] = useState("");
   const [team_sale, setTeamSale] = useState<string>();
   let seachbykey = useDebounce(keySearch4);
+  const [album_name, setAlbumName] = useState<string>();
   const [modal, setModal] = useState<{
     open: boolean;
     id: any;
@@ -134,7 +135,7 @@ export default function MonitorAlbum() {
   useEffect(() => {
     (async () => {
       const rsAlbum = await AxiosService.get(
-        "/api/method/mbw_dms.api.album.list_monitor_album"
+        "/api/method/mbw_dms.api.album.list_album_name"
       );
       setDataFilterAlbum(rsAlbum.result);
       setCreation(dateNow);
@@ -147,11 +148,11 @@ export default function MonitorAlbum() {
         "/api/method/mbw_dms.api.album.list_monitor_album",
         {
           params: {
-            album,
             customer_name,
             creation,
             team_sale,
             employee,
+            album_name: album 
           },
         }
       );
@@ -259,7 +260,7 @@ export default function MonitorAlbum() {
                 { label: "Tất cả Album", value: "" },
                 ...dataFilterAlbum.map((album: any) => ({
                   label: album.album_name,
-                  value: album.name,
+                  value: album.album_name,
                 })),
               ]}
               onSearch={(value: string) => setKeyS(value)}
