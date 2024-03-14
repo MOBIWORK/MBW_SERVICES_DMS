@@ -118,7 +118,8 @@ def kpi_report(**kwargs):
             "data": data,
             "sum": totals,
             "page_number": page_number,
-            "page_size": page_size
+            "page_size": page_size,
+            "totals": len(data)
         })
     except Exception as e:
         return exception_handel(e)
