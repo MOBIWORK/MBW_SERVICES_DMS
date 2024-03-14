@@ -33,10 +33,18 @@ def kpi_report(**kwargs):
             WHERE {}
             LIMIT %s OFFSET %s
         """.format(where_condition)
+
         
         limit = page_size
         offset = (page_number - 1) * limit
         data = frappe.db.sql(sql_query, (limit, offset), as_dict=True)
+        sql_query_count = """
+            SELECT COUNT(*)
+            FROM `tabDMS Summary KPI Monthly` mo
+            JOIN `tabDMS KPI` kpi ON mo.nhan_vien_ban_hang = kpi.nhan_vien_ban_hang
+            WHERE {}
+        """.format(where_condition)
+        count_data = frappe.db.sql(sql_query_count, as_dict=True)
         totals = {
             'tong_kh_vt': 0,
             'tong_th_vt': 0,
@@ -119,7 +127,7 @@ def kpi_report(**kwargs):
             "sum": totals,
             "page_number": page_number,
             "page_size": page_size,
-            "totals": len(data)
+            "totals": count_data[0]['COUNT(*)']
         })
     except Exception as e:
         return exception_handel(e)
