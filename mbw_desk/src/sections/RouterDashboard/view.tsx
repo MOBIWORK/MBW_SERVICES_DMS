@@ -29,7 +29,7 @@ export default function RouterDashboard() {
     <>
       <HeaderPage title="Tổng quan" />
       <Row gutter={20}>
-        <Col>
+        <Col span={8}>
           <Doanhso data={{
             doanh_so :report?.doanh_so,
             phan_tram: report?.tang_vs_hqua
