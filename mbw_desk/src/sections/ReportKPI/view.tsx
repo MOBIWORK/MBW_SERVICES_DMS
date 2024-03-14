@@ -1,14 +1,17 @@
 import { VerticalAlignBottomOutlined } from "@ant-design/icons";
 import { FormItemCustom, HeaderPage } from "../../components";
-import { DatePicker, Select, Table, Typography } from "antd";
+import { DatePicker, Select, Table, TreeSelect, Typography } from "antd";
 import { TableReport } from "../ReportSales/tableCustom";
-import { month } from "./data";
+import { monthAll } from "./data";
 import { DatePickerProps } from "antd/lib";
 import { useEffect, useState } from "react";
 import { AxiosService } from "../../services/server";
-import { rsDataFrappe } from "../../types/response";
+import { rsData, rsDataFrappe } from "../../types/response";
 import { employee } from "../../types/employeeFilter";
 import useDebounce from "../../hooks/useDebount";
+import dayjs from "dayjs";
+import { treeArray } from "../../util";
+import { listSale } from "../../types/listSale";
 
 const { Column, ColumnGroup } = TableReport;
 
@@ -16,146 +19,99 @@ interface DataTypeKPI {
   key: React.Key;
   name: string;
   stt?: number;
-  employee_code: string;
-  employee_name: string;
-  department: string;
-  khvisiting: number;
-  thvisiting: number;
-  tlvisiting: number;
-  khvisitingfirst: number;
-  thvisitingfirst: number;
-  tlvisitingfirst: number;
-  khvisitingcustomerorder: number;
-  thvisitingcustomerorder: number;
-  tlvisitingcustomerorder: number;
-  khvisitingnew: number;
-  thvisitingnew: number;
-  tlvisitingnew: number;
-  khvisitingorder: number;
-  thvisitingorder: number;
-  tlvisitingorder: number;
-  khvisitingsale: number;
-  thvisitingsale: number;
-  tlvisitingsale: number;
-  khvisitingRevenue: number;
-  thvisitingRevenue: number;
-  tlvisitingRevenue: number;
-  khvisitingQuantity: number;
-  thvisitingQuantity: number;
-  tlvisitingQuantity: number;
-  khvisitingSKU: number;
-  thvisitingSKU: number;
-  tlvisitingSKU: number;
-  khvisitingwork: number;
-  thvisitingwork: number;
-  tlvisitingwork: number;
+  nhan_vien_ban_hang: string;
+  ten_nv: string;
+  nhom_ban_hang: string;
+  kh_vt: number;
+  th_vt: number;
+  tl_vt: number;
+  kh_vt_dn: number;
+  th_vt_dn: number;
+  tl_vt_dn: number;
+  kh_dat_hang: number;
+  th_dat_hang: number;
+  tl_dat_hang: number;
+  kh_kh_moi: number;
+  th_kh_moi: number;
+  tl_kh_moi: number;
+  kh_don_hang: number;
+  th_don_hang: number;
+  tl_don_hang: number;
+  kh_doanh_so: number;
+  th_doanh_so: number;
+  tl_doanh_so: number;
+  kh_doanh_thu: number;
+  th_doanh_thu: number;
+  tl_doanh_thu: number;
+  kh_san_lg: number;
+  th_san_lg: number;
+  tl_san_luong: number;
+  kh_sku: number;
+  th_sku: number;
+  tl_sku: number;
+  kh_so_gio_lam_viec: number;
+  th_so_gio_lam_viec: number;
+  tl_so_gio_lam_viec: number;
   total?: number;
 }
-
-const data: DataTypeKPI[] = [
-  {
-    key: "KDA",
-    name: "7382jsd",
-    employee_code: "HHHH01",
-    employee_name: "Tần Hạo",
-    department: "Phòng 1",
-    khvisiting: 5,
-    thvisiting: 1,
-    tlvisiting: 25,
-    khvisitingfirst: 4,
-    thvisitingfirst: 1,
-    tlvisitingfirst: 60,
-    khvisitingcustomerorder: 1,
-    thvisitingcustomerorder: 2,
-    tlvisitingcustomerorder: 59,
-    khvisitingnew: 1,
-    thvisitingnew: 1,
-    tlvisitingnew: 24,
-    khvisitingorder: 1,
-    thvisitingorder: 12,
-    tlvisitingorder: 56,
-    khvisitingsale: 1,
-    thvisitingsale: 2,
-    tlvisitingsale: 35,
-    khvisitingRevenue: 2,
-    thvisitingRevenue: 9,
-    tlvisitingRevenue: 87,
-    khvisitingQuantity: 0,
-    thvisitingQuantity: 0,
-    tlvisitingQuantity: 89,
-    khvisitingSKU: 2,
-    thvisitingSKU: 10,
-    tlvisitingSKU: 67,
-    khvisitingwork: 10,
-    thvisitingwork: 14,
-    tlvisitingwork: 45,
-  },
-  {
-    key: "KDSD",
-    name: "7382112",
-    employee_code: "HHHH02",
-    employee_name: "Hạo Thần",
-    department: "Phòng 2",
-    khvisiting: 5,
-    thvisiting: 1,
-    tlvisiting: 25,
-    khvisitingfirst: 4,
-    thvisitingfirst: 1,
-    tlvisitingfirst: 60,
-    khvisitingcustomerorder: 1,
-    thvisitingcustomerorder: 2,
-    tlvisitingcustomerorder: 59,
-    khvisitingnew: 1,
-    thvisitingnew: 1,
-    tlvisitingnew: 24,
-    khvisitingorder: 1,
-    thvisitingorder: 12,
-    tlvisitingorder: 56,
-    khvisitingsale: 1,
-    thvisitingsale: 2,
-    tlvisitingsale: 35,
-    khvisitingRevenue: 2,
-    thvisitingRevenue: 9,
-    tlvisitingRevenue: 87,
-    khvisitingQuantity: 0,
-    thvisitingQuantity: 0,
-    tlvisitingQuantity: 89,
-    khvisitingSKU: 2,
-    thvisitingSKU: 10,
-    tlvisitingSKU: 67,
-    khvisitingwork: 10,
-    thvisitingwork: 14,
-    tlvisitingwork: 45,
-  },
-];
 
 export default function ReportKPI() {
   const [listEmployees, setListEmployees] = useState<any[]>([]);
   const [listSales, setListSales] = useState<any[]>([]);
-  const [team_sale, setTeamSale] = useState<string>();
+  const [sales_team, setTeamSale] = useState<string>();
   const [keySearch4, setKeySearch4] = useState("");
   const [employee, setEmployee] = useState<string>();
   let seachbykey = useDebounce(keySearch4);
   const [keyS3, setKeyS3] = useState("");
+  const [page, setPage] = useState<number>(1);
+  const PAGE_SIZE = 20;
+  const [dataReort, setDataReport] = useState<any[]>([]);
+  const [fmonth, setFmonth] = useState("");
+  const [fyear, setFYear] = useState("");
+  const [total, setTotal] = useState<number>(0)
 
   let keySearch3 = useDebounce(keyS3, 300);
 
-  const onChange: DatePickerProps["onChange"] = (dateString) => {
-    console.log(dateString);
+  const onChange: DatePickerProps["onChange"] = (date) => {
+    setFYear(date?.["$y"].toString())
   };
 
+  const currentMonth = dayjs().month() + 1; // Lấy tháng hiện tại (đánh số từ 0)
+  const month = currentMonth.toString();
+  const year = dayjs().format('YYYY');
+  
+
+
+  useEffect(() => {
+    (async () => {
+      let rsSales: rsData<listSale[]> = await AxiosService.get(
+        "/api/method/mbw_dms.api.router.get_team_sale"
+      );
+
+      setListSales(
+        treeArray({
+          data: rsSales.result.map((team_sale: listSale) => ({
+            title: team_sale.name,
+            value: team_sale.name,
+            ...team_sale,
+          })),
+          keyValue: "value",
+          parentField: "parent_sales_person",
+        })
+      );
+    })();
+  }, []);
   useEffect(() => {
     (async () => {
       let rsEmployee: rsDataFrappe<employee[]> = await AxiosService.get(
         "/api/method/mbw_dms.api.router.get_sale_person",
         {
           params: {
-            team_sale: team_sale,
+            team_sale: sales_team,
             key_search: seachbykey,
           },
         }
       );
-      console.log("rsemp", rsEmployee);
       let { message: results } = rsEmployee;
       setListEmployees(
         results.map((employee_filter: employee) => ({
@@ -164,7 +120,30 @@ export default function ReportKPI() {
         }))
       );
     })();
-  }, [team_sale, seachbykey]);
+  }, [sales_team, seachbykey]);
+
+  useEffect(() => {
+    if(fyear === undefined || fyear === "") {
+      setFYear(year)
+    }
+    (async () => {
+      const rsData = await AxiosService.get(
+        "/api/method/mbw_dms.api.report.kpi.kpi_report",
+        {
+          params: {
+            page_size: PAGE_SIZE,
+            page_number: page,
+            month: fmonth,
+            year: fyear,
+            sales_team,
+            employee,
+          },
+        }
+      );
+      setDataReport(rsData?.result);
+      setTotal(rsData?.result?.totals)
+    })();
+  }, [fmonth, fyear, sales_team, employee, page]);
 
   return (
     <>
@@ -185,8 +164,11 @@ export default function ReportKPI() {
           <FormItemCustom className="w-[200px] border-none mr-2">
             <Select
               className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
-              defaultValue={""}
-              options={month}
+              defaultValue={month}
+              options={monthAll}
+              onChange={(value: string) => {
+                setFmonth(value)
+              }}
               showSearch
             />
           </FormItemCustom>
@@ -195,20 +177,18 @@ export default function ReportKPI() {
               className="!bg-[#F4F6F8]"
               onChange={onChange}
               picker="year"
+              defaultValue={dayjs().startOf('year')}
             />
           </FormItemCustom>
           <FormItemCustom className="w-[200px] border-none mr-2">
-            <Select
-              className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
+            <TreeSelect
+              showSearch
               defaultValue={""}
-              options={[
-                { label: "Tất cả nhóm bán hàng", value: "" },
+              treeData={[
+                { label: "Tất cả nhân viên", value: "" },
                 ...listSales,
               ]}
-              showSearch
-              notFoundContent={null}
-              onSearch={(value: string) => setKeyS3(value)}
-              onChange={(value) => {
+              onChange={(value: string) => {
                 setTeamSale(value);
               }}
             />
@@ -232,28 +212,99 @@ export default function ReportKPI() {
             />
           </FormItemCustom>
         </div>
+        {/* {routersTable?.map(router => ({ key: router.name, ...router }))} */}
         <div className="pt-5">
           <TableReport
-            dataSource={data}
+            dataSource={dataReort?.data?.map((report) => ({
+              key: report.name,
+              ...report,
+            }))}
             bordered
             scroll={{ x: true }}
-            summary={(pageData) => {
-              let total = 0;
-              pageData.forEach((record) => {
-                // Calculate total from data rows
-                total += record.khvisiting;
-              });
-
+            pagination={{
+              defaultPageSize: PAGE_SIZE,
+              total,
+              onChange(page, pageSize) {
+                setPage(page);
+              },
+            }}
+            summary={() => {
               return (
                 <Table.Summary.Row>
                   <Table.Summary.Cell index={0}></Table.Summary.Cell>
                   <Table.Summary.Cell index={1}>Tổng</Table.Summary.Cell>
                   <Table.Summary.Cell index={2}></Table.Summary.Cell>
                   <Table.Summary.Cell index={3}></Table.Summary.Cell>
-                  <Table.Summary.Cell index={4}>{total}</Table.Summary.Cell>
-                  <Table.Summary.Cell index={5}></Table.Summary.Cell>
+                  <Table.Summary.Cell index={4}>
+                    {dataReort?.sum?.tong_kh_vt}
+                  </Table.Summary.Cell>
+                  <Table.Summary.Cell index={5}>
+                    {dataReort?.sum?.tong_th_vt}
+                  </Table.Summary.Cell>
                   <Table.Summary.Cell index={6}></Table.Summary.Cell>
-                  <Table.Summary.Cell index={7}></Table.Summary.Cell>
+                  <Table.Summary.Cell index={7}>
+                    {dataReort?.sum?.tong_kh_vt_dn}
+                  </Table.Summary.Cell>
+                  <Table.Summary.Cell index={8}>
+                    {dataReort?.sum?.tong_th_vt_dn}
+                  </Table.Summary.Cell>
+                  <Table.Summary.Cell index={9}></Table.Summary.Cell>
+                  <Table.Summary.Cell index={10}>
+                    {dataReort?.sum?.tong_kh_dat_hang}
+                  </Table.Summary.Cell>
+                  <Table.Summary.Cell index={11}>
+                    {dataReort?.sum?.tong_th_dat_hang}
+                  </Table.Summary.Cell>
+                  <Table.Summary.Cell index={12}></Table.Summary.Cell>
+                  <Table.Summary.Cell index={13}>
+                    {dataReort?.sum?.tong_kh_kh_moi}
+                  </Table.Summary.Cell>
+                  <Table.Summary.Cell index={14}>
+                    {dataReort?.sum?.tong_th_kh_moi}
+                  </Table.Summary.Cell>
+                  <Table.Summary.Cell index={15}></Table.Summary.Cell>
+                  <Table.Summary.Cell index={16}>
+                    {dataReort?.sum?.tong_kh_don_hang}
+                  </Table.Summary.Cell>
+                  <Table.Summary.Cell index={17}>
+                    {dataReort?.sum?.tong_th_don_hang}
+                  </Table.Summary.Cell>
+                  <Table.Summary.Cell index={18}></Table.Summary.Cell>
+                  <Table.Summary.Cell index={19}>
+                    {dataReort?.sum?.tong_kh_doanh_so}
+                  </Table.Summary.Cell>
+                  <Table.Summary.Cell index={20}>
+                    {dataReort?.sum?.tong_th_doanh_so}
+                  </Table.Summary.Cell>
+                  <Table.Summary.Cell index={21}></Table.Summary.Cell>
+                  <Table.Summary.Cell index={22}>
+                    {dataReort?.sum?.tong_kh_doanh_thu}
+                  </Table.Summary.Cell>
+                  <Table.Summary.Cell index={23}>
+                    {dataReort?.sum?.tong_th_doanh_thu}
+                  </Table.Summary.Cell>
+                  <Table.Summary.Cell index={24}></Table.Summary.Cell>
+                  <Table.Summary.Cell index={25}>
+                    {dataReort?.sum?.tong_kh_san_lg}
+                  </Table.Summary.Cell>
+                  <Table.Summary.Cell index={26}>
+                    {dataReort?.sum?.tong_th_san_lg}
+                  </Table.Summary.Cell>
+                  <Table.Summary.Cell index={27}></Table.Summary.Cell>
+                  <Table.Summary.Cell index={28}>
+                    {dataReort?.sum?.tong_kh_sku}
+                  </Table.Summary.Cell>
+                  <Table.Summary.Cell index={29}>
+                    {dataReort?.sum?.tong_th_sku}
+                  </Table.Summary.Cell>
+                  <Table.Summary.Cell index={30}></Table.Summary.Cell>
+                  <Table.Summary.Cell index={31}>
+                    {dataReort?.sum?.tong_kh_so_gio_lam_viec}
+                  </Table.Summary.Cell>
+                  <Table.Summary.Cell index={32}>
+                    {dataReort?.sum?.tong_th_so_gio_lam_viec}
+                  </Table.Summary.Cell>
+                  <Table.Summary.Cell index={33}></Table.Summary.Cell>
                 </Table.Summary.Row>
               );
             }}
@@ -268,49 +319,39 @@ export default function ReportKPI() {
             />
             <Column
               title="Mã Nhân viên"
-              dataIndex="employee_code"
-              key="employee_code"
+              dataIndex="nhan_vien_ban_hang"
+              key="nhan_vien_ban_hang"
               fixed="left"
               width={130}
             />
             <Column
               title="Nhân viên"
-              dataIndex="employee_name"
-              key="employee_name"
+              dataIndex="ten_nv"
+              key="ten_nv"
               fixed="left"
               width={200}
             />
             <Column
               title="Phòng/nhóm"
-              dataIndex="department"
-              key="department"
-              width={210}
+              dataIndex="nhom_ban_hang"
+              key="nhom_ban_hang"
+              render={(_, record: any) => (
+                <div className="!w-[180px]">{record.nhom_ban_hang}</div>
+              )}
             />
             <ColumnGroup
               className="!whitespace-normal"
               title="Số khách hàng viếng thăm"
               width={210}
             >
-              <Column
-                title="KH"
-                width={70}
-                dataIndex="khvisiting"
-                key="khvisiting"
-              />
-              <Column
-                title="TH"
-                width={70}
-                dataIndex="thvisiting"
-                key="thvisiting"
-              />
+              <Column title="KH" width={70} dataIndex="kh_vt" key="kh_vt" />
+              <Column title="TH" width={70} dataIndex="th_vt" key="th_vt" />
               <Column
                 title="TL"
                 width={70}
-                dataIndex="tlvisiting"
-                key="tlvisiting"
-                render={(_: any, record: DataTypeKPI) => (
-                  <>{record.tlvisiting}%</>
-                )}
+                dataIndex="tl_vt"
+                key="tl_vt"
+                render={(_: any, record: DataTypeKPI) => <>{record.tl_vt}%</>}
               />
             </ColumnGroup>
             <ColumnGroup
@@ -321,22 +362,22 @@ export default function ReportKPI() {
               <Column
                 title="KH"
                 width={70}
-                dataIndex="khvisitingfirst"
-                key="khvisitingfirst"
+                dataIndex="kh_vt_dn"
+                key="kh_vt_dn"
               />
               <Column
                 title="TH"
                 width={70}
-                dataIndex="thvisitingfirst"
-                key="thvisitingfirst"
+                dataIndex="th_vt_dn"
+                key="th_vt_dn"
               />
               <Column
                 title="TL"
                 width={70}
-                dataIndex="tlvisitingfirst"
-                key="tlvisitingfirst"
+                dataIndex="tl_vt_dn"
+                key="tl_vt_dn"
                 render={(_: any, record: DataTypeKPI) => (
-                  <>{record.tlvisitingfirst}%</>
+                  <>{record.tl_vt_dn}%</>
                 )}
               />
             </ColumnGroup>
@@ -348,22 +389,22 @@ export default function ReportKPI() {
               <Column
                 title="KH"
                 width={70}
-                dataIndex="khvisitingcustomerorder"
-                key="khvisitingcustomerorder"
+                dataIndex="kh_dat_hang"
+                key="kh_dat_hang"
               />
               <Column
                 title="TH"
                 width={70}
-                dataIndex="thvisitingcustomerorder"
-                key="thvisitingcustomerorder"
+                dataIndex="th_dat_hang"
+                key="th_dat_hang"
               />
               <Column
                 title="TL"
                 width={70}
-                dataIndex="tlvisitingcustomerorder"
-                key="tlvisitingcustomerorder"
+                dataIndex="tl_dat_hang"
+                key="tl_dat_hang"
                 render={(_: any, record: DataTypeKPI) => (
-                  <>{record.tlvisitingcustomerorder}%</>
+                  <>{record.tl_dat_hang}%</>
                 )}
               />
             </ColumnGroup>
@@ -375,22 +416,22 @@ export default function ReportKPI() {
               <Column
                 title="KH"
                 width={70}
-                dataIndex="khvisitingnew"
-                key="khvisitingnew"
+                dataIndex="kh_kh_moi"
+                key="kh_kh_moi"
               />
               <Column
                 title="TH"
                 width={70}
-                dataIndex="thvisitingnew"
-                key="thvisitingnew"
+                dataIndex="th_kh_moi"
+                key="th_kh_moi"
               />
               <Column
                 title="TL"
                 width={70}
-                dataIndex="tlvisitingnew"
-                key="tlvisitingnew"
+                dataIndex="tl_kh_moi"
+                key="tl_kh_moi"
                 render={(_: any, record: DataTypeKPI) => (
-                  <>{record.tlvisitingnew}%</>
+                  <>{record.tl_kh_moi}%</>
                 )}
               />
             </ColumnGroup>
@@ -402,22 +443,22 @@ export default function ReportKPI() {
               <Column
                 title="KH"
                 width={70}
-                dataIndex="khvisitingorder"
-                key="khvisitingorder"
+                dataIndex="kh_don_hang"
+                key="kh_don_hang"
               />
               <Column
                 title="TH"
                 width={70}
-                dataIndex="thvisitingorder"
-                key="thvisitingorder"
+                dataIndex="th_don_hang"
+                key="th_don_hang"
               />
               <Column
                 title="TL"
                 width={70}
-                dataIndex="tlvisitingorder"
-                key="tlvisitingorder"
+                dataIndex="tl_don_hang"
+                key="tl_don_hang"
                 render={(_: any, record: DataTypeKPI) => (
-                  <>{record.tlvisitingorder}%</>
+                  <>{record.tl_don_hang}%</>
                 )}
               />
             </ColumnGroup>
@@ -429,22 +470,22 @@ export default function ReportKPI() {
               <Column
                 title="KH"
                 width={70}
-                dataIndex="khvisitingsale"
-                key="khvisitingsale"
+                dataIndex="kh_doanh_so"
+                key="kh_doanh_so"
               />
               <Column
                 title="TH"
                 width={70}
-                dataIndex="thvisitingsale"
-                key="thvisitingsale"
+                dataIndex="th_doanh_so"
+                key="th_doanh_so"
               />
               <Column
                 title="TL"
                 width={70}
-                dataIndex="tlvisitingsale"
-                key="tlvisitingsale"
+                dataIndex="tl_don_hang"
+                key="tl_don_hang"
                 render={(_: any, record: DataTypeKPI) => (
-                  <>{record.tlvisitingsale}%</>
+                  <>{record.tl_don_hang}%</>
                 )}
               />
             </ColumnGroup>
@@ -456,22 +497,22 @@ export default function ReportKPI() {
               <Column
                 title="KH"
                 width={70}
-                dataIndex="khvisitingRevenue"
-                key="khvisitingRevenue"
+                dataIndex="kh_doanh_thu"
+                key="kh_doanh_thu"
               />
               <Column
                 title="TH"
                 width={70}
-                dataIndex="thvisitingRevenue"
-                key="thvisitingRevenue"
+                dataIndex="th_doanh_thu"
+                key="th_doanh_thu"
               />
               <Column
                 title="TL"
                 width={70}
-                dataIndex="tlvisitingRevenue"
-                key="tlvisitingRevenue"
+                dataIndex="tl_doanh_thu"
+                key="tl_doanh_thu"
                 render={(_: any, record: DataTypeKPI) => (
-                  <>{record.tlvisitingRevenue}%</>
+                  <>{record.tl_doanh_thu}%</>
                 )}
               />
             </ColumnGroup>
@@ -483,46 +524,34 @@ export default function ReportKPI() {
               <Column
                 title="KH"
                 width={70}
-                dataIndex="khvisitingQuantity"
-                key="khvisitingQuantity"
+                dataIndex="kh_san_lg"
+                key="kh_san_lg"
               />
               <Column
                 title="TH"
                 width={70}
-                dataIndex="thvisitingQuantity"
-                key="thvisitingQuantity"
+                dataIndex="th_san_lg"
+                key="th_san_lg"
               />
               <Column
                 title="TL"
                 width={70}
-                dataIndex="tlvisitingQuantity"
-                key="tlvisitingQuantity"
+                dataIndex="tl_san_luong"
+                key="tl_san_luong"
                 render={(_: any, record: DataTypeKPI) => (
-                  <>{record.tlvisitingQuantity}%</>
+                  <>{record.tl_san_luong}%</>
                 )}
               />
             </ColumnGroup>
             <ColumnGroup className="!whitespace-normal" title="SKU" width={210}>
-              <Column
-                title="KH"
-                width={70}
-                dataIndex="khvisitingSKU"
-                key="khvisitingSKU"
-              />
-              <Column
-                title="TH"
-                width={70}
-                dataIndex="thvisitingSKU"
-                key="thvisitingSKU"
-              />
+              <Column title="KH" width={70} dataIndex="kh_sku" key="kh_sku" />
+              <Column title="TH" width={70} dataIndex="th_sku" key="th_sku" />
               <Column
                 title="TL"
                 width={70}
-                dataIndex="tlvisitingSKU"
-                key="tlvisitingSKU"
-                render={(_: any, record: DataTypeKPI) => (
-                  <>{record.tlvisitingSKU}%</>
-                )}
+                dataIndex="tl_sku"
+                key="tl_sku"
+                render={(_: any, record: DataTypeKPI) => <>{record.tl_sku}%</>}
               />
             </ColumnGroup>
             <ColumnGroup
@@ -533,22 +562,22 @@ export default function ReportKPI() {
               <Column
                 title="KH"
                 width={70}
-                dataIndex="khvisitingwork"
-                key="khvisitingwork"
+                dataIndex="kh_so_gio_lam_viec"
+                key="kh_so_gio_lam_viec"
               />
               <Column
                 title="TH"
                 width={70}
-                dataIndex="thvisitingwork"
-                key="thvisitingwork"
+                dataIndex="th_so_gio_lam_viec"
+                key="th_so_gio_lam_viec"
               />
               <Column
                 title="TL"
                 width={70}
-                dataIndex="tlvisitingwork"
-                key="tlvisitingwork"
+                dataIndex="tl_so_gio_lam_viec"
+                key="tl_so_gio_lam_viec"
                 render={(_: any, record: DataTypeKPI) => (
-                  <>{record.tlvisitingwork}%</>
+                  <>{record.tl_so_gio_lam_viec}%</>
                 )}
               />
             </ColumnGroup>
