@@ -141,8 +141,10 @@ def get_customer_router(data):
             if view_mode == "map":
                 customer = pydash.filter_(detail_router.get('customers'),lambda value: value.frequency.find(str(tuan_trong_thang)))
             list_customer += customer
+        sort = "customer_name desc"
         if order_by: 
-            list_customer = sorted(list_customer, key= lambda x: x.customer_name.split(' ')[-1],reverse=True if order_by == 'desc' else False)
+            sort = f"customer_name {order_by}"
+        #     list_customer = sorted(list_customer, key= lambda x: x.customer_name.split(' ')[-1],reverse=True if order_by == 'desc' else False)
         list_customer_name = []
         for customer in list_customer:
             list_customer_name.append(customer.get('customer_code'))
@@ -160,7 +162,7 @@ def get_customer_router(data):
             ,'UNIX_TIMESTAMP(custom_birthday) as birthday'
             ]
         if(view_mode == 'list'):
-            detail_customer = frappe.db.get_list('Customer',filters= FiltersCustomer,fields=fields_customer,start=page_size*(page_number-1), page_length=page_size)
+            detail_customer = frappe.db.get_list('Customer',filters= FiltersCustomer,fields=fields_customer,start=page_size*(page_number-1), page_length=page_size,order_by=sort)
         else:
             fields_customer= [
             'name'
