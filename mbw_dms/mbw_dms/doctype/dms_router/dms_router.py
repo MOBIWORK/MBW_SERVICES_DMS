@@ -154,7 +154,7 @@ def get_customer_router(data):
         if customer_group:
             FiltersCustomer['customer_group'] =customer_group
         if customer_type:
-            FiltersCustomer['customer_type'] =customer_group
+            FiltersCustomer['customer_type'] =customer_type
         fields_customer = [
             'name','customer_primary_address'
             ,'customer_code','customer_location_primary','mobile_no'

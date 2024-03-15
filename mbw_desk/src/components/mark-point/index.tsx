@@ -7,7 +7,7 @@ interface locationProps {
 export function MartLocation({des}:locationProps) {
   return (
     <div className= "relative">
-        <span className='absolute whitespace-nowrap top-[-50%]'>
+        <span className='absolute whitespace-nowrap top-[-50%] bg-white block px-2 rounded-md -left-[50%] shadow-sm font-medium'>
             {des}
         </span>
       <PointMap/>
