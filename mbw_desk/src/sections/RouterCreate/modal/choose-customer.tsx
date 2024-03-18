@@ -52,18 +52,23 @@ type Props = {
 
 export function ChooseCustomer({selected,handleAdd,closeModal}:Props) {
   const [form] = useForm();
-  const [customerChoose, setCustomerChoose] = useState<CustomerType[]>([]);
+  const [page_number,setPageNumber] = useState<number>(1)
+  const [customerChoose, setCustomerChoose] = useState<{[key:number]:CustomerType[]}>({1: []});
   const [customerList, setCustomerList] =
-    useState<CustomerType[]>(baseCustomers);
+    useState<CustomerType[]>([]);
   const [filter, setFilter] = useState<{}>({});
   const [openFilter, setOpenFilter] = useState<boolean>(false);
   const PAGE_SIZE=20
-  const [page_number,setPageNumber] = useState<number>(1)
   const [total_Customer,setTotalNumber] = useState<number>(40)
   const rowSelection = {
-    selectedRowKeys: customerChoose && customerChoose.map(value => value.customer_code) ,
+    selectedRowKeys: customerChoose[page_number] && customerChoose[page_number].map(value => value.customer_code) ,
     onChange: (selectedRowKeys: React.Key[], selectedRows: CustomerType[]) => {
-      setCustomerChoose(selectedRows);
+      setCustomerChoose((prev) => {
+          return ({
+            ...prev,
+            [page_number]: selectedRows
+          })
+      });
     },
   };
 
@@ -87,6 +92,16 @@ export function ChooseCustomer({selected,handleAdd,closeModal}:Props) {
         setFilter({})
     }
   }
+ 
+
+  const handleAddCustomer =() => {
+    let chooseC = Object.keys(customerChoose).reduce((prev:any[],now:string) => {
+      let now2 = Number.parseInt(now)
+      return ([...prev,...customerChoose[now2]])
+    },[])    
+    handleAdd(chooseC)
+    closeModal()
+  }
   useEffect(()=> {
     (async() => {
       const rsCustomer = await AxiosService.get('/api/method/mbw_dms.api.router.get_customer',{
@@ -96,30 +111,42 @@ export function ChooseCustomer({selected,handleAdd,closeModal}:Props) {
           page_number
         }
       })
+      console.log(rsCustomer?.result?.data);
+      
       setCustomerList(rsCustomer?.result?.data)
       setTotalNumber(rsCustomer.result?.total)
       
     })()
   },[filter,page_number])
-
-  const handleAddCustomer =() => {
-    if(customerChoose.length >0) {
-      
-      handleAdd((prev:CustomerType[]) => {
-        let arrNameSelect = selected.map((cs:CustomerType) =>cs.customer_code )
-      customerChoose.forEach((cs:CustomerType) => {
-        if (!arrNameSelect.includes(cs.customer_code))
-          prev = [cs,...prev]
-      })
-      return [...prev]
-      })
-    }
-    closeModal()
-  }
-
   useEffect(() => {
-    setCustomerChoose(selected)
-  },[selected])
+  if(customerList.length>0)     {
+    let csCode = customerList.map(cs => cs.customer_code)
+    let selectedPage = selected.filter(csSelect => csCode.includes(csSelect.customer_code))
+    console.log("selected",{csCode,selectedPage});
+    
+    setCustomerChoose((prev)=> {
+      console.log("prev",prev);
+      
+      if(prev[page_number] && prev[page_number].length > 0){
+        console.log("chọn cũ");
+        
+        return prev
+      }else{
+        console.log("chọn mới",selectedPage);
+        
+        if(Object.keys(prev).length > 0) {
+          return {...prev,[page_number]: selectedPage}
+
+        }else {
+          return {[page_number]: selectedPage}
+        }
+      }
+
+    })
+    
+  }
+  },[selected,page_number,customerList])
+  
   return (
     <>
       <Row className="justify-between">
@@ -148,7 +175,8 @@ export function ChooseCustomer({selected,handleAdd,closeModal}:Props) {
         </Col>
         <Col className="inline-flex items-center">
           <span className="mr-4">
-            Đã chọn {customerChoose.length || 0} khách hàng
+            Đã chọn {Object.keys(customerChoose).reduce((prev,now) => prev + customerChoose[now].length,0)} khách hàng
+
           </span>
           <Button type="primary" onClick={handleAddCustomer}>Thêm</Button>
         </Col>
