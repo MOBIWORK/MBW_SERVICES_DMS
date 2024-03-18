@@ -34,9 +34,9 @@ def get_list_sales_order(**filters):
             query['status'] = validate_choice(configs.status_order)(status)
         sale_orders =frappe.db.get_list('Sales Order', 
                                        filters=query, 
-                                       fields=['customer', 'name','address_display','UNIX_TIMESTAMP(po_date) as po_date','UNIX_TIMESTAMP(creation) as creation','grand_total','rounding_adjustment','rounded_total','status'], 
+                                       fields=['customer', 'name','address_display','UNIX_TIMESTAMP(po_date) as po_date','UNIX_TIMESTAMP(delivery_date) as delivery_date','UNIX_TIMESTAMP(creation) as creation','grand_total','rounding_adjustment','rounded_total','status'], 
                                        order_by='delivery_date desc', 
-                                       start=page_size*(page_number-1)*page_size, page_length=page_size,
+                                       start=page_size*(page_number-1), page_length=page_size,
                                         )
         for sale_order in sale_orders :
             sale_order['custom_id'] = frappe.db.get_value("Customer",filters={'name': sale_order['customer']},fieldname=['customer_code'])
