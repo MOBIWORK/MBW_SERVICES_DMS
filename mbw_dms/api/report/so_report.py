@@ -36,7 +36,7 @@ def so_report(**kwargs):
             'sum_grand_total': 0,
         }
 
-        sale_orders =frappe.db.get_list('Sales Order', 
+        sale_orders = frappe.db.get_list('Sales Order', 
                                        filters=filters, 
                                        fields=['name', 'customer', 'territory', 'warehouse', 'transaction_date','total', 'grand_total', 'company', 'owner', 'discount_amount'], 
                                        order_by='transaction_date desc', 
@@ -97,7 +97,7 @@ def si_report(**kwargs):
             'sum_grand_total': 0,
         }
 
-        sale_invoices =frappe.db.get_list('Sales Invoice', 
+        sale_invoices = frappe.db.get_list('Sales Invoice', 
                                        filters=filters, 
                                        fields=['name', 'customer', 'territory', 'warehouse', 'posting_date','total', 'grand_total', 'company', 'owner', 'discount_amount'], 
                                        start=page_size*(page_number-1), page_length=page_size)
