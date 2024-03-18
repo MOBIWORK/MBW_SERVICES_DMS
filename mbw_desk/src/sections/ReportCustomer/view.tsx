@@ -80,6 +80,8 @@ export default function ReportCustomer() {
   const [formFilter] = useForm();
   const [expire_from, setExpireFrom] = useState<number>();
   const [expire_to, setExpireTo] = useState<number>();
+  const [update_at_from, setUpdateFrom] = useState<number>();
+  const [update_at_to, setUpdateTo] = useState<number>();
   const [qty_inven_from, setInvenFrom] = useState<number>();
   const [qty_inven_to, setInvenTo] = useState<number>();
   const [total_from, setTotalFrom] = useState<number>();
@@ -92,8 +94,6 @@ export default function ReportCustomer() {
   const [keyItem, setKeyItem] = useState("");
   let keySItem = useDebounce(keyItem, 500);
   const expandedRowRender = (recordTable: any) => {
-    console.log("dataTableChid", recordTable);
-
     const columns: TableColumnsType<ExpandedDataType> = [
       {
         title: "STT",
@@ -135,7 +135,7 @@ export default function ReportCustomer() {
         title: "Ngày cập nhật",
         dataIndex: "update_at",
         key: "update_at",
-        render: (_, record) => (
+        render: (_, record: any) => (
           <p>{dayjs(record.update_at * 1000).format("DD/MM/YYYY")}</p>
         ),
       },
@@ -143,6 +143,12 @@ export default function ReportCustomer() {
         title: "Người cập nhật",
         dataIndex: "update_byname",
         key: "update_byname",
+        render: (_, record: any) => (
+          <>
+            <div>{record.update_byname}</div>
+            <div className="font-normal text-sm leading-[21px] text-[#637381]">{record.update_bycode}</div>
+          </>
+        ),
       },
     ];
     return (
@@ -193,6 +199,18 @@ export default function ReportCustomer() {
     } else {
       setTotalTo(undefined);
     }
+    if (val.update_at_from) {
+      let upDateFrom = Date.parse(val.update_at_from["$d"]) / 1000;
+      setUpdateFrom(upDateFrom);
+    } else {
+      setUpdateFrom(undefined);
+    }
+    if (val.update_at_to) {
+      let upDateTo = Date.parse(val.update_at_to["$d"]) / 1000;
+      setUpdateTo(upDateTo);
+    } else {
+      setUpdateTo(undefined);
+    }
   };
 
   useEffect(() => {
@@ -221,6 +239,8 @@ export default function ReportCustomer() {
           params: {
             expire_from,
             expire_to,
+            update_at_from,
+            update_at_to,
             qty_inven_from,
             qty_inven_to,
             total_from,
@@ -247,6 +267,8 @@ export default function ReportCustomer() {
     total_from,
     total_to,
     item_code,
+    update_at_from,
+    update_at_to
   ]);
 
   console.log("keydataCustomer", dataCustomer);
@@ -365,7 +387,7 @@ export default function ReportCustomer() {
                               <span className="font-normal text-sm leading-5 text-[#637381]">
                                 Ngày bắt đầu
                               </span>
-                              <FormItemCustom className="pt-2">
+                              <FormItemCustom name="update_at_from" className="pt-2">
                                 <DatePicker
                                   format={"DD-MM-YYYY"}
                                   className="!bg-[#F4F6F8]"
@@ -377,7 +399,7 @@ export default function ReportCustomer() {
                               <span className="font-normal text-sm leading-5 text-[#637381]">
                                 Kết thúc
                               </span>
-                              <FormItemCustom className="pt-2">
+                              <FormItemCustom name="update_at_to" className="pt-2">
                                 <DatePicker
                                   format={"DD-MM-YYYY"}
                                   className="!bg-[#F4F6F8]"
