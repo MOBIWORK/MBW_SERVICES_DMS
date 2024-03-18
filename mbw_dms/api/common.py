@@ -307,3 +307,20 @@ def current_month_week():
     current_week = passed_days // 7 + 1
     return current_week
     
+
+def get_child_values_doc(doctype, master_name, fields_to_get, chil_name):
+    if not master_name:
+        return
+    master_doc = frappe.get_doc(doctype, master_name)
+
+    chil_values = master_doc.get(chil_name)
+
+    result = []
+
+    for item in chil_values:
+        item_dict = {}
+        for fieldname in fields_to_get:
+            item_dict[fieldname] = item.get(fieldname)
+        result.append(item_dict)
+
+    return result
