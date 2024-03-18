@@ -68,7 +68,7 @@ Account {0}: You can not assign itself as parent account,Tài khoản {0}: Bạn
 Account: {0} can only be updated via Stock Transactions,Tài khoản: {0} chỉ có thể được cập nhật thông qua bút toán kho,
 Account: {0} with currency: {1} can not be selected,Không thể chọn được Tài khoản: {0} với loại tiền tệ: {1},
 Accountant,Kế toán viên,
-Accounting,Kế toán,
+Accounting,Kế toán 123,
 Accounting Entry for Asset,Nhập kế toán cho tài sản,
 Accounting Entry for Stock,Hạch toán kế toán cho hàng tồn kho,
 Accounting Entry for {0}: {1} can only be made in currency: {2},Hạch toán kế toán cho {0}: {1} chỉ có thể được thực hiện bằng loại tiền tệ: {2},
