@@ -52,7 +52,7 @@ def list_product(**kwargs):
                 return pydash.pick(value,"link_image")
             images_links = pydash.map_(images,return_fiel)
             item["custom_images_item"] = images_links
-        count = frappe.db.count('Item', filters= my_filter)
+        count = len(frappe.db.get_list("Item",filters=my_filter))
         for item in items:
             item['image'] = validate_image(item.get("image"))
             item['details'] = frappe.get_all("Item Price", filters={"item_code": item.get('item_code')}, fields=['uom', 'price_list_rate', 'valid_from', 'currency'])
