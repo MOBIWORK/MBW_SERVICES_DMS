@@ -64,7 +64,7 @@ def get_sale_order(name):
             Employee = frappe.qb.DocType("Employee")
 
             # Lấy ra các trường trong đơn hàng
-            field_detail_sales = ['total','grand_total','customer_code', 'customer','customer_name','address_display','delivery_date','set_warehouse','taxes_and_charges','total_taxes_and_charges','apply_discount_on','additional_discount_percentage','discount_amount','contact_person','rounded_total']
+            field_detail_sales = ['total','grand_total','customer_code', 'customer','customer_name','address_display','delivery_date','set_warehouse','taxes_and_charges','total_taxes_and_charges','apply_discount_on','additional_discount_percentage','discount_amount','contact_person','rounded_total', 'status']
 
             # Thực hiện join để lấy ra giá trị
             detail = (frappe.qb.from_(SalesOrder)
@@ -77,7 +77,7 @@ def get_sale_order(name):
                     .select(
                         Customer.customer_code
                         ,SalesOrder.customer,SalesOrder.customer_name,SalesOrder.address_display,UNIX_TIMESTAMP(SalesOrder.delivery_date).as_('delivery_date'),SalesOrder.set_warehouse,SalesOrder.total,SalesOrder.grand_total
-                        ,SalesOrder.taxes_and_charges,SalesOrder.total_taxes_and_charges, SalesOrder.apply_discount_on, SalesOrder.additional_discount_percentage,SalesOrder.discount_amount,SalesOrder.contact_person
+                        ,SalesOrder.taxes_and_charges,SalesOrder.total_taxes_and_charges, SalesOrder.apply_discount_on, SalesOrder.additional_discount_percentage,SalesOrder.discount_amount,SalesOrder.contact_person, SalesOrder.status
                     )
                     ).run(as_dict =1)
             # Lấy ra giá trị tax
