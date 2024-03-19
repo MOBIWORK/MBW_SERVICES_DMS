@@ -26,7 +26,7 @@ def so_report(**kwargs):
         if kwargs.get('territory'):
             filters['territory'] = kwargs.get('territory')
         if kwargs.get('warehouse'):
-            filters['warehouse'] = kwargs.get('warehouse')
+            filters['set_warehouse'] = kwargs.get('warehouse')
         if kwargs.get('company'):
             filters['company'] = kwargs.get('company')
         if kwargs.get('employee'):
@@ -43,7 +43,7 @@ def so_report(**kwargs):
 
         sale_orders = frappe.db.get_list('Sales Order', 
                                        filters=filters, 
-                                       fields=['name', 'customer', 'territory', 'warehouse', 'transaction_date','total', 'grand_total', 'company', 'owner', 'discount_amount'], 
+                                       fields=['name', 'customer', 'territory', 'set_warehouse', 'transaction_date','total', 'grand_total', 'company', 'owner', 'discount_amount'], 
                                        order_by='transaction_date desc', 
                                        start=page_size*(page_number-1), page_length=page_size)
         for i in sale_orders:
@@ -90,7 +90,7 @@ def si_report(**kwargs):
         if kwargs.get('territory'):
             filters['territory'] = kwargs.get('territory')
         if kwargs.get('warehouse'):
-            filters['warehouse'] = kwargs.get('warehouse')
+            filters['set_warehouse'] = kwargs.get('warehouse')
         if kwargs.get('company'):
             filters['company'] = kwargs.get('company')
         if kwargs.get('employee'):
@@ -107,7 +107,7 @@ def si_report(**kwargs):
 
         sale_invoices = frappe.db.get_list('Sales Invoice', 
                                        filters=filters, 
-                                       fields=['name', 'customer', 'territory', 'warehouse', 'posting_date','total', 'grand_total', 'company', 'owner', 'discount_amount'], 
+                                       fields=['name', 'customer', 'territory', 'set_warehouse', 'posting_date','total', 'grand_total', 'company', 'owner', 'discount_amount'], 
                                        start=page_size*(page_number-1), page_length=page_size)
         for i in sale_invoices:
             if i['owner'] == 'Administrator':
