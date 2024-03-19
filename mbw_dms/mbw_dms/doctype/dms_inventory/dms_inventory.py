@@ -63,4 +63,11 @@ def find(filters = {}, options = ["*"],page_length = 20, page =1,order = "name d
 			inven["items"] = items
 			inven["create_time"] = inven["create_time"].timestamp()
 	
-	return results
+
+	count = len(frappe.db.get_list(DocName, filters=filters))
+	return {
+		"data": results,
+		"total": count,
+		"page_number": page,
+		"page_size": page_length
+		}
