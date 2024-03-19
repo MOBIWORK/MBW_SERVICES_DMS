@@ -33,7 +33,7 @@ def so_report(**kwargs):
             filters['owner '] = kwargs.get('employee')
         filters['docstatus'] = 1
 
-        field_items = ['name', 'item_name', 'item_code', 'brand', 'rate', 'qty', 'amount', 'discount_amount', 'discount_percentage']
+        field_items = ['name', 'item_name', 'item_code', 'item_group', 'brand', 'rate', 'qty', 'amount', 'discount_amount', 'discount_percentage']
         totals = {
             'sum_total': 0,
             'sum_vat': 0,
@@ -97,7 +97,7 @@ def si_report(**kwargs):
             filters['owner '] = kwargs.get('employee')
         filters['docstatus'] = 1
 
-        field_items = ['name', 'item_name', 'item_code', 'brand', 'rate', 'qty', 'amount', 'discount_amount', 'discount_percentage']
+        field_items = ['name', 'item_name', 'item_code', 'item_group', 'brand', 'rate', 'qty', 'amount', 'discount_amount', 'discount_percentage']
         totals = {
             'sum_total': 0,
             'sum_vat': 0,
