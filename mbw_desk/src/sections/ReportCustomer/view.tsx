@@ -1,5 +1,5 @@
 import { SearchOutlined, VerticalAlignBottomOutlined } from "@ant-design/icons";
-import { FormItemCustom, HeaderPage, TableCustom } from "../../components";
+import { DropDownCustom, FormItemCustom, HeaderPage, TableCustom } from "../../components";
 import {
   Input,
   Row,
@@ -336,174 +336,171 @@ export default function ReportCustomer() {
             <div className="flex flex-wrap items-center">
               <div className="flex justify-center items-center mr-4">
                 <Dropdown
-                  placement="bottom"
+                  placement="bottomRight"
                   // trigger={["click"]}
                   dropdownRender={() => (
-                    <div className="p-4 rounded-xl !bg-white w-[400px]">
-                      <div className="text-base font-medium text-[#212B36] leading-5">
-                        Bộ lọc
-                      </div>
-
-                      <div className="pt-6">
-                        <Form form={formFilter} onFinish={handleSearchFilter}>
-                          <div className="font-semibold text-sm leading-5 text-[#212B36]">
-                            Hạn sử dụng
-                          </div>
-                          <Row className="pt-1" gutter={16}>
-                            <Col span={12}>
-                              <span className="font-normal text-sm leading-5 text-[#637381]">
-                                Ngày bắt đầu
-                              </span>
-                              <FormItemCustom
-                                className="pt-2"
-                                name="expire_from"
-                              >
-                                <DatePicker
-                                  format={"DD-MM-YYYY"}
-                                  className="!bg-[#F4F6F8]"
-                                  onChange={onChange}
-                                />
-                              </FormItemCustom>
-                            </Col>
-                            <Col span={12}>
-                              <span className="font-normal text-sm leading-5 text-[#637381]">
-                                Kết thúc
-                              </span>
-                              <FormItemCustom className="pt-2" name="expire_to">
-                                <DatePicker
-                                  format={"DD-MM-YYYY"}
-                                  className="!bg-[#F4F6F8]"
-                                  onChange={onChange}
-                                />
-                              </FormItemCustom>
-                            </Col>
-                          </Row>
-
-                          <div className="pt-5 font-semibold text-sm leading-5 text-[#212B36]">
-                            Ngày cập nhật
-                          </div>
-                          <Row className="pt-1" gutter={16}>
-                            <Col span={12}>
-                              <span className="font-normal text-sm leading-5 text-[#637381]">
-                                Ngày bắt đầu
-                              </span>
-                              <FormItemCustom name="update_at_from" className="pt-2">
-                                <DatePicker
-                                  format={"DD-MM-YYYY"}
-                                  className="!bg-[#F4F6F8]"
-                                  onChange={onChange}
-                                />
-                              </FormItemCustom>
-                            </Col>
-                            <Col span={12}>
-                              <span className="font-normal text-sm leading-5 text-[#637381]">
-                                Kết thúc
-                              </span>
-                              <FormItemCustom name="update_at_to" className="pt-2">
-                                <DatePicker
-                                  format={"DD-MM-YYYY"}
-                                  className="!bg-[#F4F6F8]"
-                                  onChange={onChange}
-                                />
-                              </FormItemCustom>
-                            </Col>
-                          </Row>
-
-                          <div className="pt-5 font-semibold text-sm leading-5 text-[#212B36]">
-                            Số lượng tồn kho
-                          </div>
-                          <Row className="pt-1" gutter={16}>
-                            <Col span={12}>
-                              <span className="font-normal text-sm leading-5 text-[#637381]">
-                                Từ
-                              </span>
-                              <FormItemCustom
-                                className="pt-2"
-                                name="qty_inven_from"
-                              >
-                                <InputNumber
-                                  controls={false}
-                                  className="w-full"
-                                  placeholder="0"
-                                />
-                              </FormItemCustom>
-                            </Col>
-                            <Col span={12}>
-                              <span className="font-normal text-sm leading-5 text-[#637381]">
-                                Đến
-                              </span>
-                              <FormItemCustom
-                                className="pt-2"
-                                name="qty_inven_to"
-                              >
-                                <InputNumber
-                                  controls={false}
-                                  className="w-full"
-                                  placeholder="0"
-                                />
-                              </FormItemCustom>
-                            </Col>
-                          </Row>
-
-                          <div className="pt-5 font-semibold text-sm leading-5 text-[#212B36]">
-                            Tổng giá trị
-                          </div>
-                          <Row className="pt-1" gutter={16}>
-                            <Col span={12}>
-                              <span className="font-normal text-sm leading-5 text-[#637381]">
-                                Từ
-                              </span>
-                              <FormItemCustom
-                                className="pt-2"
-                                name="total_from"
-                              >
-                                <InputNumber
-                                  controls={false}
-                                  className="!bg-[#F5F7FA] w-full"
-                                  placeholder="0"
-                                  suffix="VND"
-                                />
-                              </FormItemCustom>
-                            </Col>
-                            <Col span={12}>
-                              <span className="font-normal text-sm leading-5 text-[#637381]">
-                                Đến
-                              </span>
-                              <FormItemCustom className="pt-2" name="total_to">
-                                <InputNumber
-                                  controls={false}
-                                  className="!bg-[#F5F7FA] w-full"
-                                  placeholder="0"
-                                  suffix="VND"
-                                />
-                              </FormItemCustom>
-                            </Col>
-                          </Row>
-                          <Row className="justify-between pt-6 pb-4">
-                            <div></div>
-                            <div>
-                              <Button
-                                className="mr-3"
-                                onClick={(ev: any) => {
-                                  ev.preventDefault();
-                                  formFilter.resetFields();
-                                }}
-                              >
-                                Đặt lại
-                              </Button>
-                              <Button
-                                type="primary"
-                                onClick={() => {
-                                  formFilter.submit();
-                                }}
-                              >
-                                Áp dụng
-                              </Button>
+                  <DropDownCustom title={"Bộ lọc"}>
+                        <div className="pt-6">
+                          <Form form={formFilter} onFinish={handleSearchFilter}>
+                            <div className="font-semibold text-sm leading-5 text-[#212B36]">
+                              Hạn sử dụng
                             </div>
-                          </Row>
-                        </Form>
-                      </div>
-                    </div>
+                            <Row className="pt-1" gutter={16}>
+                              <Col span={12}>
+                                <span className="font-normal text-sm leading-5 text-[#637381]">
+                                  Ngày bắt đầu
+                                </span>
+                                <FormItemCustom
+                                  className="pt-2"
+                                  name="expire_from"
+                                >
+                                  <DatePicker
+                                    format={"DD-MM-YYYY"}
+                                    className="!bg-[#F4F6F8]"
+                                    onChange={onChange}
+                                  />
+                                </FormItemCustom>
+                              </Col>
+                              <Col span={12}>
+                                <span className="font-normal text-sm leading-5 text-[#637381]">
+                                  Kết thúc
+                                </span>
+                                <FormItemCustom className="pt-2" name="expire_to">
+                                  <DatePicker
+                                    format={"DD-MM-YYYY"}
+                                    className="!bg-[#F4F6F8]"
+                                    onChange={onChange}
+                                  />
+                                </FormItemCustom>
+                              </Col>
+                            </Row>
+  
+                            <div className="pt-5 font-semibold text-sm leading-5 text-[#212B36]">
+                              Ngày cập nhật
+                            </div>
+                            <Row className="pt-1" gutter={16}>
+                              <Col span={12}>
+                                <span className="font-normal text-sm leading-5 text-[#637381]">
+                                  Ngày bắt đầu
+                                </span>
+                                <FormItemCustom name="update_at_from" className="pt-2">
+                                  <DatePicker
+                                    format={"DD-MM-YYYY"}
+                                    className="!bg-[#F4F6F8]"
+                                    onChange={onChange}
+                                  />
+                                </FormItemCustom>
+                              </Col>
+                              <Col span={12}>
+                                <span className="font-normal text-sm leading-5 text-[#637381]">
+                                  Kết thúc
+                                </span>
+                                <FormItemCustom name="update_at_to" className="pt-2">
+                                  <DatePicker
+                                    format={"DD-MM-YYYY"}
+                                    className="!bg-[#F4F6F8]"
+                                    onChange={onChange}
+                                  />
+                                </FormItemCustom>
+                              </Col>
+                            </Row>
+  
+                            <div className="pt-5 font-semibold text-sm leading-5 text-[#212B36]">
+                              Số lượng tồn kho
+                            </div>
+                            <Row className="pt-1" gutter={16}>
+                              <Col span={12}>
+                                <span className="font-normal text-sm leading-5 text-[#637381]">
+                                  Từ
+                                </span>
+                                <FormItemCustom
+                                  className="pt-2"
+                                  name="qty_inven_from"
+                                >
+                                  <InputNumber
+                                    controls={false}
+                                    className="w-full"
+                                    placeholder="0"
+                                  />
+                                </FormItemCustom>
+                              </Col>
+                              <Col span={12}>
+                                <span className="font-normal text-sm leading-5 text-[#637381]">
+                                  Đến
+                                </span>
+                                <FormItemCustom
+                                  className="pt-2"
+                                  name="qty_inven_to"
+                                >
+                                  <InputNumber
+                                    controls={false}
+                                    className="w-full"
+                                    placeholder="0"
+                                  />
+                                </FormItemCustom>
+                              </Col>
+                            </Row>
+  
+                            <div className="pt-5 font-semibold text-sm leading-5 text-[#212B36]">
+                              Tổng giá trị
+                            </div>
+                            <Row className="pt-1" gutter={16}>
+                              <Col span={12}>
+                                <span className="font-normal text-sm leading-5 text-[#637381]">
+                                  Từ
+                                </span>
+                                <FormItemCustom
+                                  className="pt-2"
+                                  name="total_from"
+                                >
+                                  <InputNumber
+                                    controls={false}
+                                    className="!bg-[#F5F7FA] w-full"
+                                    placeholder="0"
+                                    suffix="VND"
+                                  />
+                                </FormItemCustom>
+                              </Col>
+                              <Col span={12}>
+                                <span className="font-normal text-sm leading-5 text-[#637381]">
+                                  Đến
+                                </span>
+                                <FormItemCustom className="pt-2" name="total_to">
+                                  <InputNumber
+                                    controls={false}
+                                    className="!bg-[#F5F7FA] w-full"
+                                    placeholder="0"
+                                    suffix="VND"
+                                  />
+                                </FormItemCustom>
+                              </Col>
+                            </Row>
+                            <Row className="justify-between pt-6 pb-4">
+                              <div></div>
+                              <div>
+                                <Button
+                                  className="mr-3"
+                                  onClick={(ev: any) => {
+                                    ev.preventDefault();
+                                    formFilter.resetFields();
+                                  }}
+                                >
+                                  Đặt lại
+                                </Button>
+                                <Button
+                                  type="primary"
+                                  onClick={() => {
+                                    formFilter.submit();
+                                  }}
+                                >
+                                  Áp dụng
+                                </Button>
+                              </div>
+                            </Row>
+                          </Form>
+                        </div>
+                      
+                  </DropDownCustom>
                   )}
                 >
                   <Button

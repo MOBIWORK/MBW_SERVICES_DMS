@@ -278,7 +278,7 @@ export default function ReportSalesOrder() {
               defaultValue={""}
               options={[{ label: "Công ty", value: "" }, ...listCompany]}
               onSelect={(value) => {
-                console.log(value)
+                console.log(value,[{ label: "Công ty", value: "" }, ...listCompany])
                 
                 setCompany(value);
               }}
@@ -312,7 +312,7 @@ export default function ReportSalesOrder() {
             <Select
               className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
               defaultValue={""}
-              options={[{ label: "Company", value: "" }, ...company]}
+              options={[{ label: "Company", value: "" }]}
               showSearch
             />
           </FormItemCustom>
