@@ -79,7 +79,7 @@ export default function RouterControl() {
   const [form] = useForm()
   const [keyS, setKeyS] = useState("");
   const [keySRouter, setKeySRouter] = useState("");
-  let keySearch = useDebounce(keyS, 300);
+  let keySearch = useDebounce(keyS, 500);
   let keySearchRouter = useDebounce(keySRouter, 500);
   const [listEmployees, setListEmployees] = useState<any[]>([]);
   const [listRouter, setListRouter] = useState<any[]>([]);
@@ -143,6 +143,8 @@ export default function RouterControl() {
     option?: { label: string; value: string }
   ) => (option?.label ?? "").toLowerCase().includes(input.toLowerCase());
   useEffect(() => {
+    console.log(keySearch);
+    
     (async () => {
       let rsEmployee: rsDataFrappe<employee[]> = await AxiosService.get(
         "/api/method/frappe.desk.search.search_link",
@@ -157,7 +159,6 @@ export default function RouterControl() {
         }
       );
       let { message: results } = rsEmployee;
-
       setListEmployees(
         results.map((employee_filter: employee) => ({
           value: employee_filter.value,
@@ -311,7 +312,7 @@ export default function RouterControl() {
                 <Col span={14}>
                   <Row gutter={8}>
                     <Col span={8}>
-                      <FormItemCustom name="employee" required>
+                      <FormItemCustom name="router">
                         <Select
                           // labelInValue
                           mode="multiple"
@@ -323,11 +324,11 @@ export default function RouterControl() {
                             setRouter(prev => prev?.filter(vl => vl !== value))
                           }}
                           showSearch
-                          // filterOption={false}
                           placeholder="Tuyến"
                           notFoundContent={null}
                           onSearch={(value: string) => setKeySRouter(value)}
                           options={listRouter}
+                          allowClear
                           optionRender={(option) => {
                             return <div className="text-sm">
                               <p role="img" aria-label={option.data.label} className="my-1">
@@ -341,18 +342,21 @@ export default function RouterControl() {
                       </FormItemCustom>
                     </Col>
                     <Col span={8}>
-                      <FormItemCustom name="employee" required>
+                      <FormItemCustom name="employee">
                         <Select
-                          placeholder="Nhân viên bán hàng"
+                          placeholder="Tất cả nhân viên"
                           showSearch
-                          // filterOption={false}
+                          filterOption={false}
                           notFoundContent={null}
-                          onSearch={(value: string) => setKeyS(value)}
-                          options={[{ label: "Tất cả nhân viên", value: "" }, ...listEmployees]}
+                          allowClear
+                          onSearch={(value: string) => {
+                            setKeyS(value)
+                          }}
+                          options={listEmployees}
                           onSelect={(value) => {
                             setEmployee(value)
-
                           }}
+                          
                         />
                       </FormItemCustom>
                     </Col>
