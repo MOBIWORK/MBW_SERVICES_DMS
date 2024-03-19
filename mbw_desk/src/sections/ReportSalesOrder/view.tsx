@@ -1,5 +1,5 @@
 import { SearchOutlined, VerticalAlignBottomOutlined } from "@ant-design/icons";
-import { FormItemCustom, HeaderPage } from "../../components";
+import { FormItemCustom, HeaderPage, TableCustom } from "../../components";
 import { Input, Select, Table, Typography } from "antd";
 import type { TableColumnsType } from "antd";
 import { TableReport } from "../ReportSales/tableCustom";
@@ -12,27 +12,39 @@ import {
   territory,
   warehouse,
 } from "../ReportSales/data";
+import { useEffect, useState } from "react";
+import { AxiosService } from "../../services/server";
+import dayjs from "dayjs";
+import useDebounce from "../../hooks/useDebount";
 
-interface DataTypeKPI {
+interface DataSaleOrder {
   key: React.Key;
   name: string;
   stt?: number;
-  saleorder: string;
+  transaction_date: string;
   customer: string;
   territory: string;
-  warehouse: string;
-  postingdate: string;
-  itemcode: string;
-  itemgroup: string;
-  brand: string;
-  qty?: number;
-  amount?: number;
-  saleperson?: string;
-  contribution?: number;
-  contributionamount?: number;
+  set_warehouse: string;
+  employee: string;
+  total: number; // thành tiền
+  tax_amount: number; // tiền vat
+  discount_amount: number; // chiết khấu
+  grand_total: number; // tổng tiền
 }
 
-const columns: TableColumnsType<DataTypeKPI> = [
+interface DataItem {
+  item_name: string;
+  item_code: string;
+  brand: string;
+  item_group: string;
+  rate: number; // đơn giá
+  qty: number;
+  discount_percentage: number; // chiết khấu phần trăm
+  discount_amount: number; // tiền triết khấu
+  amount: number; // tổng tiền
+}
+
+const columns: TableColumnsType<DataSaleOrder> = [
   {
     title: "STT",
     dataIndex: "stt",
@@ -40,125 +52,210 @@ const columns: TableColumnsType<DataTypeKPI> = [
     render: (_, record: any, index: number) => index + 1,
   },
   {
-    title: "Sales order",
-    dataIndex: "saleorder",
-    key: "saleorder",
+    title: "Đơn đặt",
+    dataIndex: "name",
+    key: "name",
+    render: (_, record: any) => <div className="!w-[175px]">{record.name}</div>,
+  },
+  {
+    title: "Khách hàng",
+    dataIndex: "customer",
+    key: "customer",
     render: (_, record: any) => (
-      <div className="!w-[175px]">{record.saleorder}</div>
+      <div className="!w-[175px]">{record.customer}</div>
     ),
   },
   {
-    title: "Customer",
-    dataIndex: "customer",
-    key: "customer",
-  },
-  {
-    title: "Territory",
+    title: "Khu vực",
     dataIndex: "territory",
     key: "territory",
   },
   {
-    title: "Warehouse",
-    dataIndex: "warehouse",
-    key: "warehouse",
+    title: "Kho",
+    dataIndex: "set_warehouse",
+    key: "set_warehouse",
+    render: (_, record: any) => (
+      <div className="!w-[175px]">{record.set_warehouse}</div>
+    ),
   },
   {
-    title: "Posting date",
-    dataIndex: "postingdate",
-    key: "postingdate",
+    title: "Ngày tạo",
+    dataIndex: "transaction_date",
+    key: "transaction_date",
+    render: (_, record: any) => (
+      <div className="!w-[175px]">
+        {dayjs(record.transaction_date).format("DD/MM/YYYY")}
+      </div>
+    ),
   },
   {
-    title: "Item code",
-    dataIndex: "itemcode",
-    key: "itemcode",
+    title: "Nhân viên",
+    dataIndex: "employee",
+    key: "employee",
   },
   {
-    title: "Item group",
-    dataIndex: "itemgroup",
-    key: "itemgroup",
-  },
-  {
-    title: "Brand",
-    dataIndex: "brand",
-    key: "brand",
-  },
-  {
-    title: "Qty",
-    dataIndex: "qty",
-    key: "qty",
-  },
-  {
-    title: "Amount",
-    dataIndex: "amount",
-    key: "amount",
+    title: "Thành tiền",
+    dataIndex: "total",
+    key: "total",
     render: (_, record: any) => (
       <>
         <span className="mr-2">VND</span>
-        {record.amount}
+        {Intl.NumberFormat().format(record.total)}
       </>
     ),
   },
   {
-    title: "Sale person",
-    dataIndex: "saleperson",
-    key: "saleperson",
-  },
-  {
-    title: "Contribution",
-    dataIndex: "contribution",
-    key: "contribution",
-  },
-  {
-    title: "Contribution Amount",
-    dataIndex: "contributionamount",
-    key: "contributionamount",
+    title: "Tiền VAT",
+    dataIndex: "tax_amount",
+    key: "tax_amount",
     render: (_, record: any) => (
       <>
         <span className="mr-2">VND</span>
-        {record.contributionamount}
+        {Intl.NumberFormat().format(record.tax_amount)}
       </>
     ),
   },
-];
-
-const data: DataTypeKPI[] = [
   {
-    key: "KDA",
-    name: "7382jsd",
-    saleorder: "SHUAL211",
-    customer: "Thiên Tần",
-    territory: "Hà Nội",
-    warehouse: "Kho Hà Nội",
-    postingdate: "16/04/2024",
-    itemcode: "OU-11",
-    itemgroup: "Nhóm sp KM",
-    brand: "ABB",
-    qty: 25,
-    amount: 45666666,
-    saleperson: "Trần Bảo",
-    contribution: 100000,
-    contributionamount: 30000000,
+    title: "Chiết khấu",
+    dataIndex: "discount_amount",
+    key: "discount_amount",
+    render: (_, record: any) => (
+      <>
+        <span className="mr-2">VND</span>
+        {Intl.NumberFormat().format(record.discount_amount)}
+      </>
+    ),
   },
   {
-    key: "KDSD",
-    name: "7382112",
-    saleorder: "DHDCCC233",
-    customer: "Đặng Hoắc",
-    territory: "Hà Nội",
-    warehouse: "Kho Hà Nội",
-    postingdate: "15/04/2024",
-    itemcode: "UI-11",
-    itemgroup: "Nhóm sp KM",
-    brand: "ABB",
-    qty: 78,
-    amount: 45666666,
-    saleperson: "Hạ Trang",
-    contribution: 100000,
-    contributionamount: 30000000,
+    title: "Tổng tiền",
+    dataIndex: "grand_total",
+    key: "grand_total",
+    render: (_, record: any) => (
+      <>
+        <span className="mr-2">VND</span>
+        {Intl.NumberFormat().format(record.grand_total)}
+      </>
+    ),
   },
 ];
 
 export default function ReportSalesOrder() {
+  const [dataSaleOrder, setDataSaleOrder] = useState<DataSaleOrder[]>([]);
+  const [total, setTotal] = useState<number>(0);
+  const PAGE_SIZE = 20;
+  const [page, setPage] = useState<number>(1);
+  const [listCompany, setListCompany] = useState<any[]>([]);
+  const [company, setCompany] = useState("");
+  const [keySCompany, setKeySCompany] = useState("");
+  // const [company, setcCompany] = useState
+  let keySearchCompany = useDebounce(keySCompany, 500);
+
+  const expandedRowRender = (recordTable: any) => {
+    const columns: TableColumnsType<DataItem> = [
+      {
+        title: "STT",
+        dataIndex: "stt",
+        key: "stt",
+        render: (_, record: any, index) => index + 1,
+      },
+      { title: "Mã sản phẩm", dataIndex: "item_code", key: "item_code" },
+      { title: "Tên sản phẩm", dataIndex: "item_name", key: "item_name" },
+      { title: "Nhóm sản phẩm", dataIndex: "item_group", key: "item_group" },
+      { title: "Nhãn hàng", dataIndex: "brand", key: "brand" },
+      { title: "Đơn giá", dataIndex: "rate", key: "rate" },
+      { title: "Số lượng", dataIndex: "qty", key: "qty" },
+      {
+        title: "Chiết khấu (%)",
+        dataIndex: "discount_percentage",
+        key: "discount_percentage",
+      },
+      {
+        title: "Tiền chiết khấu",
+        dataIndex: "discount_amount",
+        key: "discount_amount",
+        render: (_, record: any) => (
+          <>
+            <span className="mr-2">VND</span>
+            {Intl.NumberFormat().format(record.discount_amount)}
+          </>
+        ),
+      },
+      {
+        title: "Tổng tiền",
+        dataIndex: "amount",
+        key: "amount",
+        render: (_, record: any) => (
+          <>
+            <span className="mr-2">VND</span>
+            {Intl.NumberFormat().format(record.amount)}
+          </>
+        ),
+      },
+    ];
+    return (
+      <Table
+        columns={columns}
+        dataSource={recordTable.items.map((item: DataItem) => {
+          return {
+            ...item,
+            key: item.item_code,
+          };
+        })}
+        pagination={false}
+      />
+    );
+  };
+
+  useEffect(() => {
+    (async () => {
+      let rsCompany: any = await AxiosService.get(
+        "/api/method/frappe.desk.search.search_link",
+        {
+          params: {
+            txt: keySearchCompany,
+            doctype: "Company",
+            ignore_user_permissions: 0,
+            query: "",
+          },
+        }
+      );
+
+      let { message: results } = rsCompany;
+
+      console.log("rsCom", results);
+
+      setListCompany(
+        results.map((dtCompany: any) => ({
+          value: dtCompany.value,
+          label: dtCompany.value,
+        }))
+      );
+    })();
+  }, [keySearchCompany]);
+
+  useEffect(() => {
+    (async () => {
+      console.log("abc", company)
+      
+      const rsData = await AxiosService.get(
+        "/api/method/mbw_dms.api.report.so_report.so_report",
+        {
+          params: {
+            page_size: PAGE_SIZE,
+            page_number: page,
+            company: company,
+          },
+        }
+      );
+
+      let { result } = rsData;
+      console.log("data", result);
+
+      setDataSaleOrder(result);
+      setTotal(result?.totals);
+    })();
+  }, [page, company]);
+
   return (
     <>
       <HeaderPage
@@ -175,19 +272,21 @@ export default function ReportSalesOrder() {
       />
       <div className="bg-white rounded-md py-7 px-4 border-[#DFE3E8] border-[0.2px] border-solid">
         <div className="flex justify-start items-center">
-          <FormItemCustom className="w-[320px] border-none pr-2">
-            <Input
-              className="!bg-[#F4F6F8] options:bg-[#F4F6F8] !h-8"
-              placeholder="Sale order"
-              prefix={<SearchOutlined />}
-            />
-          </FormItemCustom>
-
           <FormItemCustom className="w-[200px] border-none mr-2">
             <Select
               className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
               defaultValue={""}
-              options={[{ label: "Customer", value: "" }, ...customer]}
+              options={[{ label: "Công ty", value: "" }, ...listCompany]}
+              onSelect={(value) => {
+                console.log(value)
+                
+                setCompany(value);
+              }}
+              onSearch={(value: string) => {
+                setKeySCompany(value);
+              }}
+              filterOption={false}
+              allowClear
               showSearch
             />
           </FormItemCustom>
@@ -208,7 +307,7 @@ export default function ReportSalesOrder() {
             />
           </FormItemCustom>
         </div>
-        <div className="flex justify-start items-center h-8 pt-9">
+        <div className="flex justify-start items-center h-8 pt-9 pb-5">
           <FormItemCustom className="w-[200px] border-none mr-2">
             <Select
               className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
@@ -244,17 +343,26 @@ export default function ReportSalesOrder() {
           </FormItemCustom>
         </div>
         <div className="pt-5">
-          <TableReport
-            dataSource={data}
+          <TableCustom
+            dataSource={dataSaleOrder?.data?.map((dataSale: DataSaleOrder) => {
+              return {
+                ...dataSale,
+                key: dataSale.name,
+              };
+            })}
+            expandable={{ expandedRowRender, defaultExpandedRowKeys: ["0"] }}
             bordered
             columns={columns}
             scroll={{ x: true }}
-            summary={(pageData) => {
-              let total = 0;
-              pageData.forEach((record) => {
-                // Calculate total from data rows
-                // total += record.khvisiting
-              });
+            pagination={{
+              defaultPageSize: PAGE_SIZE,
+              total,
+              onChange(page) {
+                setPage(page);
+              },
+            }}
+            summary={() => {
+              console.log("sale", dataSaleOrder);
 
               return (
                 <Table.Summary.Row>
@@ -266,6 +374,26 @@ export default function ReportSalesOrder() {
                   <Table.Summary.Cell index={5}></Table.Summary.Cell>
                   <Table.Summary.Cell index={6}></Table.Summary.Cell>
                   <Table.Summary.Cell index={7}></Table.Summary.Cell>
+                  <Table.Summary.Cell index={8}>
+                    <span className="mr-2">VND</span>
+                    {Intl.NumberFormat().format(dataSaleOrder?.sum?.sum_total)}
+                  </Table.Summary.Cell>
+                  <Table.Summary.Cell index={9}>
+                    <span className="mr-2">VND</span>
+                    {Intl.NumberFormat().format(dataSaleOrder?.sum?.sum_vat)}
+                  </Table.Summary.Cell>
+                  <Table.Summary.Cell index={10}>
+                    <span className="mr-2">VND</span>
+                    {Intl.NumberFormat().format(
+                      dataSaleOrder?.sum?.sum_discount_amount
+                    )}
+                  </Table.Summary.Cell>
+                  <Table.Summary.Cell index={11}>
+                    <span className="mr-2">VND</span>
+                    {Intl.NumberFormat().format(
+                      dataSaleOrder?.sum?.sum_grand_total
+                    )}
+                  </Table.Summary.Cell>
                 </Table.Summary.Row>
               );
             }}
