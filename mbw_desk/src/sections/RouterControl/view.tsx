@@ -359,6 +359,7 @@ export default function RouterControl() {
                           }}
                           onClear={()=> {
                             setDelete(prev => !prev)
+                            setEmployee(undefined)
                           }}
                           
                         />
