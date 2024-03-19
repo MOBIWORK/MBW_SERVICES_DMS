@@ -7,7 +7,7 @@ from mbw_dms.api.common import (
 )
 import json
 from mbw_dms.config_translate import i18n
-
+from frappe import _
 
 @frappe.whitelist(methods="GET", allow_guest=True)
 def get_address_location(**kwargs):
@@ -15,16 +15,15 @@ def get_address_location(**kwargs):
         lat = kwargs.get('lat')
         lon = kwargs.get('lon')
         settings = frappe.db.get_singles_dict("DMS Settings")
-        geo_service = settings.get("geo_service")
 
-        key = settings.get("api_key_ekgis")
+        key = settings.get("api_key")
         url = f"https://api.ekgis.vn/v1/place/geocode/reverse/address?latlng={lat},{lon}&gg=1&api_key={key}"
-        if not key or not geo_service:
-            return gen_response(400, i18n.t('translate.not_found_setting_map', locale=get_language()))
+        if not key:
+            return gen_response(400, _("Not found setting key map"))
 
         # call geolocation
         response = requests.get(url)
-        return gen_response(200, i18n.t('translate.successfully', locale=get_language()), json.loads(response.text))
+        return gen_response(200, _("Successfully"), json.loads(response.text))
     except Exception as e:
         return exception_handel(e)
 
@@ -34,14 +33,13 @@ def get_coordinates_location(**kwargs):
     try:
         address = kwargs.get("address")
         settings = frappe.db.get_singles_dict("DMS Settings")
-        geo_service = settings.get("geo_service")
 
-        key = settings.get("api_key_ekgis")
+        key = settings.get("api_key")
         url = f"https://api.ekgis.vn/v1/place/geocode/forward?address={address}&gg=1&api_key={key}"
-        if not key or not geo_service:
-            return gen_response(400, i18n.t('translate.not_found_setting_map', locale=get_language()))
+        if not key :
+            return gen_response(400, _("Not found setting key map"))
 
         response = requests.get(url)
-        return gen_response(200, i18n.t('translate.successfully', locale=get_language()), json.loads(response.text))
+        return gen_response(200, _("Successfully"), json.loads(response.text))
     except Exception as e:
         return exception_handel(e)
