@@ -42,8 +42,7 @@ def kpi_report(**kwargs):
             SELECT COUNT(*)
             FROM `tabDMS Summary KPI Monthly` mo
             JOIN `tabDMS KPI` kpi ON mo.nhan_vien_ban_hang = kpi.nhan_vien_ban_hang
-            WHERE {}
-        """.format(where_condition)
+        """
         count_data = frappe.db.sql(sql_query_count, as_dict=True)
         totals = {
             'tong_kh_vt': 0,

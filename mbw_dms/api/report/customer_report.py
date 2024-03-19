@@ -21,7 +21,7 @@ def customer_report(**kwargs):
                                        fields=["name", "customer_name","customer_code","customer_type", "customer_group", "territory", "industry", "image","website", "customer_primary_contact", "customer_primary_address", "customer_details"], 
                                        start=page_size*(page_number-1), page_length=page_size)
 
-        customer_count = frappe.db.count('Customer', filters=filters)
+        customer_count = frappe.db.count('Customer')
         return gen_response(200, 'Thành công', {
             "data": list_customers,
             "totals": customer_count,
