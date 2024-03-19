@@ -1,21 +1,12 @@
-import { SearchOutlined, VerticalAlignBottomOutlined } from "@ant-design/icons";
+import { VerticalAlignBottomOutlined } from "@ant-design/icons";
 import { FormItemCustom, HeaderPage, TableCustom } from "../../components";
-import { Input, Select, Table, Typography } from "antd";
+import { DatePicker, Select, Table } from "antd";
 import type { TableColumnsType } from "antd";
-import { TableReport } from "../ReportSales/tableCustom";
-import {
-  brand,
-  company,
-  customer,
-  itemgroup,
-  salePerson,
-  territory,
-  warehouse,
-} from "../ReportSales/data";
 import { useEffect, useState } from "react";
 import { AxiosService } from "../../services/server";
 import dayjs from "dayjs";
 import useDebounce from "../../hooks/useDebount";
+import { DatePickerProps } from "antd/lib";
 
 interface DataSaleOrder {
   key: React.Key;
@@ -69,6 +60,9 @@ const columns: TableColumnsType<DataSaleOrder> = [
     title: "Khu vực",
     dataIndex: "territory",
     key: "territory",
+    render: (_, record: any) => (
+      <div className="!w-[175px]">{record.territory}</div>
+    ),
   },
   {
     title: "Kho",
@@ -84,7 +78,7 @@ const columns: TableColumnsType<DataSaleOrder> = [
     key: "transaction_date",
     render: (_, record: any) => (
       <div className="!w-[175px]">
-        {dayjs(record.transaction_date).format("DD/MM/YYYY")}
+        {dayjs(record.transaction_date * 1000).format("DD/MM/YYYY")}
       </div>
     ),
   },
@@ -147,8 +141,25 @@ export default function ReportSalesOrder() {
   const [listCompany, setListCompany] = useState<any[]>([]);
   const [company, setCompany] = useState("");
   const [keySCompany, setKeySCompany] = useState("");
-  // const [company, setcCompany] = useState
+  const [territory, setTerritory] = useState("");
+  const [listTerritory, setListTerritory] = useState<any[]>([]);
+  const [keySTerritory, setKeySTerritory] = useState("");
+  const [customer, setCustomer] = useState("");
+  const [listCustomer, setListCustomer] = useState<any[]>([]);
+  const [keySCustomer, setKeySCustomer] = useState("");
+  const [from_date, setFromDate] = useState<any>();
+  const [to_date, setToDate] = useState<any>();
+  const [warehouse, setWarehouse] = useState("");
+  const [listWarehouse, setListWarehouse] = useState<any[]>([]);
+  const [keySWarehouse, setKeySWarehouse] = useState("");
+  const [employee, setEmployee] = useState("");
+  const [listEmployee, setListEmployee] = useState<any[]>([]);
+  const [keySEmployee, setKeySEmployee] = useState("");
   let keySearchCompany = useDebounce(keySCompany, 500);
+  let keySearchTerritory = useDebounce(keySTerritory, 500);
+  let keySearchCustomer = useDebounce(keySCustomer, 500);
+  let keySearchWarehouse = useDebounce(keySWarehouse, 500);
+  let keySearchEmployee = useDebounce(keySEmployee, 500);
 
   const expandedRowRender = (recordTable: any) => {
     const columns: TableColumnsType<DataItem> = [
@@ -222,8 +233,6 @@ export default function ReportSalesOrder() {
 
       let { message: results } = rsCompany;
 
-      console.log("rsCom", results);
-
       setListCompany(
         results.map((dtCompany: any) => ({
           value: dtCompany.value,
@@ -235,8 +244,108 @@ export default function ReportSalesOrder() {
 
   useEffect(() => {
     (async () => {
-      console.log("abc", company)
+      let rsCustomer: any = await AxiosService.get(
+        "/api/method/frappe.desk.search.search_link",
+        {
+          params: {
+            txt: keySearchCustomer,
+            doctype: "Customer",
+            ignore_user_permissions: 0,
+            query: "",
+          },
+        }
+      );
+
+      let { message: results } = rsCustomer;
+
+      setListCustomer(
+        results.map((dtCustomer: any) => ({
+          value: dtCustomer.value,
+          label: dtCustomer.value,
+        }))
+      );
+    })();
+  }, [keySearchCustomer]);
+
+  useEffect(() => {
+    (async () => {
+      let rsWarehouse: any = await AxiosService.get(
+        "/api/method/frappe.desk.search.search_link",
+        {
+          params: {
+            txt: keySearchWarehouse,
+            doctype: "Warehouse",
+            ignore_user_permissions: 0,
+            query: "",
+          },
+        }
+      );
+
+      let { message: results } = rsWarehouse;
+
+      setListWarehouse(
+        results.map((dtCustomer: any) => ({
+          value: dtCustomer.value,
+          label: dtCustomer.value,
+        }))
+      );
+    })();
+  }, [keySearchWarehouse]);
+
+  useEffect(() => {
+    (async () => {
+      let rsTerritory: any = await AxiosService.get(
+        "/api/method/frappe.desk.search.search_link",
+        {
+          params: {
+            txt: keySearchTerritory,
+            doctype: "Territory",
+            ignore_user_permissions: 0,
+            query: "",
+          },
+        }
+      );
+
+      let { message: results } = rsTerritory;
+
+      setListTerritory(
+        results.map((dtTerritory: any) => ({
+          value: dtTerritory.value,
+          label: dtTerritory.value,
+        }))
+      );
+    })();
+  }, [keySearchTerritory]);
+
+  useEffect(() => {
+    (async () => {
+      let rsEmployee: any = await AxiosService.get(
+        "/api/method/frappe.desk.search.search_link",
+        {
+          params: {
+            txt: keySearchTerritory,
+            doctype: "Employee",
+            ignore_user_permissions: 0,
+            query: "mbw_dms.api.report.so_report.employee_query",
+          },
+        }
+      );
+
+      let { message: results } = rsEmployee;
+
+      console.log("rsEmployee", results);
       
+      setListEmployee(
+        results.map((dtEmployee: any) => ({
+          value: dtEmployee.description.split(',')[1].trim(),
+          label: dtEmployee.description.split(',')[0].trim(),
+        }))
+      );
+    })();
+  }, [keySearchEmployee]);
+
+  useEffect(() => {
+    (async () => {
       const rsData = await AxiosService.get(
         "/api/method/mbw_dms.api.report.so_report.so_report",
         {
@@ -244,17 +353,40 @@ export default function ReportSalesOrder() {
             page_size: PAGE_SIZE,
             page_number: page,
             company: company,
+            territory: territory,
+            customer: customer,
+            from_date: from_date,
+            to_date: to_date,
+            warehouse : warehouse,
+            employee: employee
           },
         }
       );
 
       let { result } = rsData;
-      console.log("data", result);
 
       setDataSaleOrder(result);
       setTotal(result?.totals);
     })();
-  }, [page, company]);
+  }, [page, company, territory, customer, from_date, to_date, warehouse, employee]);
+
+  const onChange: DatePickerProps["onChange"] = (dateString: any) => {
+    if (dateString === null || dateString === undefined) {
+      setFromDate("");
+    } else {
+      let fDate = Date.parse(dateString["$d"]) / 1000;
+      setFromDate(fDate);
+    }
+  };
+
+  const onChange1: DatePickerProps["onChange"] = (dateString: any) => {
+    if (dateString === null || dateString === undefined) {
+      setToDate("");
+    } else {
+      let tDate = Date.parse(dateString["$d"]) / 1000;
+      setToDate(tDate);
+    }
+  };
 
   return (
     <>
@@ -278,41 +410,14 @@ export default function ReportSalesOrder() {
               defaultValue={""}
               options={[{ label: "Công ty", value: "" }, ...listCompany]}
               onSelect={(value) => {
-                console.log(value,[{ label: "Công ty", value: "" }, ...listCompany])
-                
                 setCompany(value);
               }}
               onSearch={(value: string) => {
                 setKeySCompany(value);
               }}
+              onClear={() => setCompany("")}
               filterOption={false}
               allowClear
-              showSearch
-            />
-          </FormItemCustom>
-          <FormItemCustom className="w-[200px] border-none mr-2">
-            <Select
-              className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
-              defaultValue={""}
-              options={[{ label: "Territory", value: "" }, ...territory]}
-              showSearch
-            />
-          </FormItemCustom>
-          <FormItemCustom className="w-[200px] border-none mr-2">
-            <Select
-              className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
-              defaultValue={""}
-              options={[{ label: "Warehouse", value: "" }, ...warehouse]}
-              showSearch
-            />
-          </FormItemCustom>
-        </div>
-        <div className="flex justify-start items-center h-8 pt-9 pb-5">
-          <FormItemCustom className="w-[200px] border-none mr-2">
-            <Select
-              className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
-              defaultValue={""}
-              options={[{ label: "Company", value: "" }]}
               showSearch
             />
           </FormItemCustom>
@@ -321,23 +426,90 @@ export default function ReportSalesOrder() {
             <Select
               className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
               defaultValue={""}
-              options={[{ label: "Item group", value: "" }, ...itemgroup]}
+              options={[{ label: "Khách hàng", value: "" }, ...listCustomer]}
+              onSelect={(value) => {
+                setCustomer(value);
+              }}
+              onSearch={(value: string) => {
+                setKeySCustomer(value);
+              }}
+              onClear={() => setCustomer("")}
+              filterOption={false}
+              allowClear
               showSearch
             />
           </FormItemCustom>
+
           <FormItemCustom className="w-[200px] border-none mr-2">
             <Select
               className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
               defaultValue={""}
-              options={[{ label: "Brand", value: "" }, ...brand]}
+              options={[{ label: "Khu vực", value: "" }, ...listTerritory]}
+              onSelect={(value) => {
+                setTerritory(value);
+              }}
+              onSearch={(value: string) => {
+                setKeySTerritory(value);
+              }}
+              onClear={() => setTerritory("")}
+              filterOption={false}
+              allowClear
               showSearch
             />
           </FormItemCustom>
+
+          <FormItemCustom className="w-[200px] border-none mr-2">
+            <DatePicker
+              format={"DD-MM-YYYY"}
+              placeholder="Từ ngày"
+              className="!bg-[#F4F6F8]"
+              onChange={onChange}
+            />
+          </FormItemCustom>
+
+          <FormItemCustom className="w-[200px] border-none mr-2">
+            <DatePicker
+              format={"DD-MM-YYYY"}
+              placeholder="Đến ngày"
+              className="!bg-[#F4F6F8]"
+              onChange={onChange1}
+            />
+          </FormItemCustom>
+        </div>
+        <div className="flex justify-start items-center h-8 pt-9 pb-5">
+        <FormItemCustom className="w-[200px] border-none mr-2">
+            <Select
+              className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
+              defaultValue={""}
+              options={[{ label: "Kho", value: "" }, ...listWarehouse]}
+              onSelect={(value) => {
+                setWarehouse(value);
+              }}
+              onSearch={(value: string) => {
+                setKeySWarehouse(value);
+              }}
+              onClear={() => setWarehouse("")}
+              filterOption={false}
+              allowClear
+              showSearch
+            />
+          </FormItemCustom>
+
           <FormItemCustom className="w-[200px] border-none mr-2">
             <Select
               className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
               defaultValue={""}
-              options={[{ label: "Sale person", value: "" }, ...salePerson]}
+              options={[{ label: "Nhân viên", value: "" }, ...listEmployee]}
+              onSelect={(value) => {
+                console.log("va", value)
+                setEmployee(value);
+              }}
+              onSearch={(value: string) => {
+                setKeySEmployee(value);
+              }}
+              onClear={() => setEmployee("")}
+              filterOption={false}
+              allowClear
               showSearch
             />
           </FormItemCustom>
