@@ -77,7 +77,8 @@ export default function RouterControl() {
   const navigate = useNavigate();
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [form] = useForm()
-  const [keyS, setKeyS] = useState("");
+  const [keyS, setKeyS] = useState<string | false>("");
+  const [isdeletedField,setDelete] = useState<boolean>(false)
   const [keySRouter, setKeySRouter] = useState("");
   let keySearch = useDebounce(keyS, 500);
   let keySearchRouter = useDebounce(keySRouter, 500);
@@ -166,7 +167,7 @@ export default function RouterControl() {
         }))
       );
     })();
-  }, [keySearch]);
+  }, [keySearch,isdeletedField]);
 
   useEffect(() => {
     (async () => {
@@ -355,6 +356,9 @@ export default function RouterControl() {
                           options={listEmployees}
                           onSelect={(value) => {
                             setEmployee(value)
+                          }}
+                          onClear={()=> {
+                            setDelete(prev => !prev)
                           }}
                           
                         />
