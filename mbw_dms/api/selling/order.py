@@ -204,6 +204,10 @@ def create_sale_order(**kwargs):
         
         # So sánh với giá bên mobile tính toán
         if grand_total == float(kwargs.get('grand_total')):
+            customer = frappe.get_doc('Customer', kwargs.customer)
+            customer.has_sales_order = 1
+            customer.save()
+            
             new_order.insert()
             frappe.db.commit()
             gen_response(201, 'Thành công',  {"name": new_order.name})
