@@ -33,7 +33,7 @@ def get_address_location(**kwargs):
 def get_coordinates_location(**kwargs):
     try:
         address = kwargs.get("address")
-        settings = frappe.db.get_singles_dict("MBW Employee Settings")
+        settings = frappe.db.get_singles_dict("DMS Settings")
         geo_service = settings.get("geo_service")
 
         key = settings.get("api_key_ekgis")
