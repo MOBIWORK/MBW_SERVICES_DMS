@@ -54,7 +54,8 @@ def so_report(**kwargs):
             i['tax_amount'] = frappe.get_value('Sales Taxes and Charges', {'parent': i['name']}, 'tax_amount')
             i['items'] = get_child_values_doc(doctype='Sales Order', master_name=i['name'], fields_to_get=field_items, chil_name='items')
             totals['sum_total'] += i['total']
-            totals['sum_vat'] += i['tax_amount']
+            if i['tax_amount']:
+                totals['sum_vat'] += i['tax_amount']
             totals['sum_discount_amount'] += i['discount_amount']
             totals['sum_grand_total'] += i['grand_total']
         count_data = frappe.db.count('Sales Order', {'docstatus':1})
@@ -116,7 +117,8 @@ def si_report(**kwargs):
             i['tax_amount'] = frappe.get_value('Sales Taxes and Charges', {'parent': i['name']}, 'tax_amount')
             i['items'] = get_child_values_doc(doctype='Sales Invoice', master_name=i['name'], fields_to_get=field_items, chil_name='items')
             totals['sum_total'] += i['total']
-            totals['sum_vat'] += i['tax_amount']
+            if i['tax_amount']:
+                totals['sum_vat'] += i['tax_amount']
             totals['sum_discount_amount'] += i['discount_amount']
             totals['sum_grand_total'] += i['grand_total']
         count_data = frappe.db.count('Sales Invoice', {'docstatus':1})
