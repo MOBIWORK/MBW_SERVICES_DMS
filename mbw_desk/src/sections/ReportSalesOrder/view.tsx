@@ -46,7 +46,17 @@ const columns: TableColumnsType<DataSaleOrder> = [
     title: "Đơn đặt",
     dataIndex: "name",
     key: "name",
-    render: (_, record: any) => <div className="!w-[175px]">{record.name}</div>,
+    render: (_, record: any) => (
+      <div className="!w-[175px]">
+        <a
+          className="text-[#212B36]"
+          href={`app/sales-order/${record.name}`}
+          target="_blank"
+        >
+          {record.name}
+        </a>
+      </div>
+    ),
   },
   {
     title: "Khách hàng",
@@ -86,6 +96,9 @@ const columns: TableColumnsType<DataSaleOrder> = [
     title: "Nhân viên",
     dataIndex: "employee",
     key: "employee",
+    render: (_, record: any) => (
+      <div className="!w-[150px]">{record.employee}</div>
+    ),
   },
   {
     title: "Thành tiền",
@@ -334,11 +347,11 @@ export default function ReportSalesOrder() {
       let { message: results } = rsEmployee;
 
       console.log("rsEmployee", results);
-      
+
       setListEmployee(
         results.map((dtEmployee: any) => ({
-          value: dtEmployee.description.split(',')[1].trim(),
-          label: dtEmployee.description.split(',')[0].trim(),
+          value: dtEmployee.description.split(",")[1].trim(),
+          label: dtEmployee.description.split(",")[0].trim(),
         }))
       );
     })();
@@ -357,8 +370,8 @@ export default function ReportSalesOrder() {
             customer: customer,
             from_date: from_date,
             to_date: to_date,
-            warehouse : warehouse,
-            employee: employee
+            warehouse: warehouse,
+            employee: employee,
           },
         }
       );
@@ -368,7 +381,16 @@ export default function ReportSalesOrder() {
       setDataSaleOrder(result);
       setTotal(result?.totals);
     })();
-  }, [page, company, territory, customer, from_date, to_date, warehouse, employee]);
+  }, [
+    page,
+    company,
+    territory,
+    customer,
+    from_date,
+    to_date,
+    warehouse,
+    employee,
+  ]);
 
   const onChange: DatePickerProps["onChange"] = (dateString: any) => {
     if (dateString === null || dateString === undefined) {
@@ -403,12 +425,35 @@ export default function ReportSalesOrder() {
         ]}
       />
       <div className="bg-white rounded-md py-7 px-4 border-[#DFE3E8] border-[0.2px] border-solid">
+        {/* label */}
+        <div className="flex justify-start items-center">
+          <FormItemCustom
+            className="w-[200px] border-none mr-2"
+            label={"Công ty"}
+          ></FormItemCustom>
+          <FormItemCustom
+            className="w-[200px] border-none mr-2"
+            label={"Khách hàng"}
+          ></FormItemCustom>
+          <FormItemCustom
+            className="w-[200px] border-none mr-2"
+            label={"Khu vực"}
+          ></FormItemCustom>
+          <FormItemCustom
+            className="w-[200px] border-none mr-2"
+            label={"Từ ngày"}
+          ></FormItemCustom>
+          <FormItemCustom
+            className="w-[200px] border-none mr-2"
+            label={"Đến ngày"}
+          ></FormItemCustom>
+        </div>
+
         <div className="flex justify-start items-center">
           <FormItemCustom className="w-[200px] border-none mr-2">
             <Select
               className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
-              defaultValue={""}
-              options={[{ label: "Công ty", value: "" }, ...listCompany]}
+              options={listCompany}
               onSelect={(value) => {
                 setCompany(value);
               }}
@@ -425,8 +470,7 @@ export default function ReportSalesOrder() {
           <FormItemCustom className="w-[200px] border-none mr-2">
             <Select
               className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
-              defaultValue={""}
-              options={[{ label: "Khách hàng", value: "" }, ...listCustomer]}
+              options={listCustomer}
               onSelect={(value) => {
                 setCustomer(value);
               }}
@@ -444,7 +488,7 @@ export default function ReportSalesOrder() {
             <Select
               className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
               defaultValue={""}
-              options={[{ label: "Khu vực", value: "" }, ...listTerritory]}
+              options={listTerritory}
               onSelect={(value) => {
                 setTerritory(value);
               }}
@@ -461,7 +505,6 @@ export default function ReportSalesOrder() {
           <FormItemCustom className="w-[200px] border-none mr-2">
             <DatePicker
               format={"DD-MM-YYYY"}
-              placeholder="Từ ngày"
               className="!bg-[#F4F6F8]"
               onChange={onChange}
             />
@@ -470,18 +513,29 @@ export default function ReportSalesOrder() {
           <FormItemCustom className="w-[200px] border-none mr-2">
             <DatePicker
               format={"DD-MM-YYYY"}
-              placeholder="Đến ngày"
               className="!bg-[#F4F6F8]"
               onChange={onChange1}
             />
           </FormItemCustom>
         </div>
-        <div className="flex justify-start items-center h-8 pt-9 pb-5">
-        <FormItemCustom className="w-[200px] border-none mr-2">
+
+        {/* label */}
+        <div className="flex justify-start items-center pt-2">
+          <FormItemCustom
+            className="w-[200px] border-none mr-2"
+            label={"Kho"}
+          ></FormItemCustom>
+          <FormItemCustom
+            className="w-[200px] border-none mr-2"
+            label={"Nhân viên"}
+          ></FormItemCustom>
+        </div>
+
+        <div className="flex justify-start items-center h-8 mt-2 pb-5">
+          <FormItemCustom className="w-[200px] border-none mr-2">
             <Select
               className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
-              defaultValue={""}
-              options={[{ label: "Kho", value: "" }, ...listWarehouse]}
+              options={listWarehouse}
               onSelect={(value) => {
                 setWarehouse(value);
               }}
@@ -498,10 +552,8 @@ export default function ReportSalesOrder() {
           <FormItemCustom className="w-[200px] border-none mr-2">
             <Select
               className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
-              defaultValue={""}
-              options={[{ label: "Nhân viên", value: "" }, ...listEmployee]}
+              options={listEmployee}
               onSelect={(value) => {
-                console.log("va", value)
                 setEmployee(value);
               }}
               onSearch={(value: string) => {

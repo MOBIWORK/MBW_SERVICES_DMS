@@ -1,7 +1,11 @@
-import { SearchOutlined, VerticalAlignBottomOutlined } from "@ant-design/icons";
-import { DropDownCustom, FormItemCustom, HeaderPage, TableCustom } from "../../components";
+import { VerticalAlignBottomOutlined } from "@ant-design/icons";
 import {
-  Input,
+  DropDownCustom,
+  FormItemCustom,
+  HeaderPage,
+  TableCustom,
+} from "../../components";
+import {
   Row,
   Col,
   Button,
@@ -14,7 +18,6 @@ import {
 } from "antd";
 import type { DatePickerProps, TableColumnsType } from "antd";
 import { LuFilter, LuFilterX } from "react-icons/lu";
-import { PiSortAscendingBold } from "react-icons/pi";
 import { useEffect, useState } from "react";
 import { AxiosService } from "../../services/server";
 import dayjs from "dayjs";
@@ -91,8 +94,15 @@ export default function ReportCustomer() {
   const onChange: DatePickerProps["onChange"] = (dateString: any) => {
     console.log(dateString);
   };
+  const PAGE_SIZE = 20;
+  const [page, setPage] = useState<number>(1);
+  const [total, setTotal] = useState<number>(0);
   const [keyItem, setKeyItem] = useState("");
+  const [unit, setUnit] = useState("");
+  const [listUnit, setListUnit] = useState<any[]>([]);
+  const [keySUnit, setKeySUnit] = useState("");
   let keySItem = useDebounce(keyItem, 500);
+  let keySearchUnit = useDebounce(keySUnit, 500);
   const expandedRowRender = (recordTable: any) => {
     const columns: TableColumnsType<ExpandedDataType> = [
       {
@@ -146,7 +156,9 @@ export default function ReportCustomer() {
         render: (_, record: any) => (
           <>
             <div>{record.update_byname}</div>
-            <div className="font-normal text-sm leading-[21px] text-[#637381]">{record.update_bycode}</div>
+            <div className="font-normal text-sm leading-[21px] text-[#637381]">
+              {record.update_bycode}
+            </div>
           </>
         ),
       },
@@ -166,7 +178,6 @@ export default function ReportCustomer() {
   };
 
   const handleSearchFilter = (val: any) => {
-    console.log("val:", val);
     if (val.expire_from) {
       let exDateFrom = Date.parse(val.expire_from["$d"]) / 1000;
       setExpireFrom(exDateFrom);
@@ -215,21 +226,54 @@ export default function ReportCustomer() {
 
   useEffect(() => {
     (async () => {
-      const rsItem = await AxiosService.get(
-        "/api/method/mbw_dms.api.selling.product.list_product"
+      let rsItem: any = await AxiosService.get(
+        "/api/method/frappe.desk.search.search_link",
+        {
+          params: {
+            txt: keySItem,
+            doctype: "Item",
+            ignore_user_permissions: 0,
+            query: "",
+          },
+        }
       );
 
-      let { result } = rsItem;
+      let { message: results } = rsItem;
 
       setItem(
-        result.data.map((item: any) => ({
-          value: item.item_code,
-          label: item.item_name,
-          des: item.item_code,
+        results.map((item: any) => ({
+          value: item.value,
+          label: item.description.split(",")[0].trim(),
+          des: item.value,
         }))
       );
     })();
-  }, []);
+  }, [keySItem]);
+
+  useEffect(() => {
+    (async () => {
+      let rsUOM: any = await AxiosService.get(
+        "/api/method/frappe.desk.search.search_link",
+        {
+          params: {
+            txt: keySearchUnit,
+            doctype: "UOM",
+            ignore_user_permissions: 0,
+            query: "",
+          },
+        }
+      );
+
+      let { message: results } = rsUOM;
+
+      setListUnit(
+        results.map((uom: any) => ({
+          value: uom.value,
+          label: uom.value,
+        }))
+      );
+    })();
+  }, [keySearchUnit]);
 
   useEffect(() => {
     (async () => {
@@ -246,17 +290,16 @@ export default function ReportCustomer() {
             total_from,
             total_to,
             item_code,
+            page_size: PAGE_SIZE,
+            page_number: page,
+            unit_product: unit
           },
         }
       );
-      setDataCustomer(
-        rsReport.result.map((item: DataCustomer) => {
-          return {
-            ...item,
-            key: item.name,
-          };
-        })
-      );
+      console.log("ddd", rsReport);
+
+      setDataCustomer(rsReport.result);
+      setTotal(rsReport?.result?.total);
     })();
     //
   }, [
@@ -268,10 +311,10 @@ export default function ReportCustomer() {
     total_to,
     item_code,
     update_at_from,
-    update_at_to
+    update_at_to,
+    page,
+    unit
   ]);
-
-  console.log("keydataCustomer", dataCustomer);
 
   return (
     <>
@@ -287,28 +330,37 @@ export default function ReportCustomer() {
           },
         ]}
       />
-      <div className="bg-white rounded-xl pt-4">
+      <div className="bg-white rounded-xl pt-4 border-[#DFE3E8] border-[0.2px] border-solid">
         <Row className="justify-between items-center w-full">
           <Col span={14}>
             <Row gutter={8}>
-              <Col span={8}>
+              <Col className="mx-4 w-full" span={24}>
+                <div className="flex justify-start items-center ">
+                  <FormItemCustom
+                    className="!w-[200px] border-none mr-2"
+                    label={"Sản phẩm"}
+                  ></FormItemCustom>
+                  <FormItemCustom
+                    className="w-[200px] border-none mr-2"
+                    label={"Đơn vị tính"}
+                  ></FormItemCustom>
+                </div>
+              </Col>
+              <Col className="mx-4 w-full" span={24}>
                 <div className="flex justify-start items-center">
-                  <FormItemCustom className="w-[200px] border-none p-4">
+                  <FormItemCustom className="!w-[200px] border-none mr-2">
                     <Select
                       filterOption={false}
-                      onChange={(value: any) => {
-                        setItemCode(value);
-                        // console.log("vaue:", value);
-                      }}
                       showSearch
-                      // placeholder="Sản phẩm"
-                      defaultValue={""}
                       notFoundContent={null}
                       onSearch={(value: string) => setKeyItem(value)}
-                      options={[{ label: "Sản phẩm", value: "" }, ...item]}
+                      options={item}
+                      onSelect={(value) => {
+                        setItemCode(value);
+                      }}
+                      allowClear
+                      onClear={() => setItemCode("")}
                       optionRender={(option) => {
-                        console.log("option:", option);
-
                         return (
                           <>
                             <div className="text-sm">
@@ -328,6 +380,23 @@ export default function ReportCustomer() {
                       }}
                     />
                   </FormItemCustom>
+
+                  <FormItemCustom className="!w-[200px] border-none mr-2">
+                    <Select
+                      className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
+                      options={listUnit}
+                      onSelect={(value) => {
+                        setUnit(value);
+                      }}
+                      onSearch={(value: string) => {
+                        setKeySUnit(value);
+                      }}
+                      onClear={() => setUnit("")}
+                      filterOption={false}
+                      allowClear
+                      showSearch
+                    />
+                  </FormItemCustom>
                 </div>
               </Col>
             </Row>
@@ -339,168 +408,173 @@ export default function ReportCustomer() {
                   placement="bottomRight"
                   // trigger={["click"]}
                   dropdownRender={() => (
-                  <DropDownCustom title={"Bộ lọc"}>
-                        <div className="pt-6">
-                          <Form form={formFilter} onFinish={handleSearchFilter}>
-                            <div className="font-semibold text-sm leading-5 text-[#212B36]">
-                              Hạn sử dụng
+                    <DropDownCustom title={"Bộ lọc"}>
+                      <div className="pt-6">
+                        <Form form={formFilter} onFinish={handleSearchFilter}>
+                          <div className="font-semibold text-sm leading-5 text-[#212B36]">
+                            Hạn sử dụng
+                          </div>
+                          <Row className="pt-1" gutter={16}>
+                            <Col span={12}>
+                              <span className="font-normal text-sm leading-5 text-[#637381]">
+                                Ngày bắt đầu
+                              </span>
+                              <FormItemCustom
+                                className="pt-2"
+                                name="expire_from"
+                              >
+                                <DatePicker
+                                  format={"DD-MM-YYYY"}
+                                  className="!bg-[#F4F6F8]"
+                                  onChange={onChange}
+                                />
+                              </FormItemCustom>
+                            </Col>
+                            <Col span={12}>
+                              <span className="font-normal text-sm leading-5 text-[#637381]">
+                                Kết thúc
+                              </span>
+                              <FormItemCustom className="pt-2" name="expire_to">
+                                <DatePicker
+                                  format={"DD-MM-YYYY"}
+                                  className="!bg-[#F4F6F8]"
+                                  onChange={onChange}
+                                />
+                              </FormItemCustom>
+                            </Col>
+                          </Row>
+
+                          <div className="pt-5 font-semibold text-sm leading-5 text-[#212B36]">
+                            Ngày cập nhật
+                          </div>
+                          <Row className="pt-1" gutter={16}>
+                            <Col span={12}>
+                              <span className="font-normal text-sm leading-5 text-[#637381]">
+                                Ngày bắt đầu
+                              </span>
+                              <FormItemCustom
+                                name="update_at_from"
+                                className="pt-2"
+                              >
+                                <DatePicker
+                                  format={"DD-MM-YYYY"}
+                                  className="!bg-[#F4F6F8]"
+                                  onChange={onChange}
+                                />
+                              </FormItemCustom>
+                            </Col>
+                            <Col span={12}>
+                              <span className="font-normal text-sm leading-5 text-[#637381]">
+                                Kết thúc
+                              </span>
+                              <FormItemCustom
+                                name="update_at_to"
+                                className="pt-2"
+                              >
+                                <DatePicker
+                                  format={"DD-MM-YYYY"}
+                                  className="!bg-[#F4F6F8]"
+                                  onChange={onChange}
+                                />
+                              </FormItemCustom>
+                            </Col>
+                          </Row>
+
+                          <div className="pt-5 font-semibold text-sm leading-5 text-[#212B36]">
+                            Số lượng tồn kho
+                          </div>
+                          <Row className="pt-1" gutter={16}>
+                            <Col span={12}>
+                              <span className="font-normal text-sm leading-5 text-[#637381]">
+                                Từ
+                              </span>
+                              <FormItemCustom
+                                className="pt-2"
+                                name="qty_inven_from"
+                              >
+                                <InputNumber
+                                  controls={false}
+                                  className="w-full"
+                                  placeholder="0"
+                                />
+                              </FormItemCustom>
+                            </Col>
+                            <Col span={12}>
+                              <span className="font-normal text-sm leading-5 text-[#637381]">
+                                Đến
+                              </span>
+                              <FormItemCustom
+                                className="pt-2"
+                                name="qty_inven_to"
+                              >
+                                <InputNumber
+                                  controls={false}
+                                  className="w-full"
+                                  placeholder="0"
+                                />
+                              </FormItemCustom>
+                            </Col>
+                          </Row>
+
+                          <div className="pt-5 font-semibold text-sm leading-5 text-[#212B36]">
+                            Tổng giá trị
+                          </div>
+                          <Row className="pt-1" gutter={16}>
+                            <Col span={12}>
+                              <span className="font-normal text-sm leading-5 text-[#637381]">
+                                Từ
+                              </span>
+                              <FormItemCustom
+                                className="pt-2"
+                                name="total_from"
+                              >
+                                <InputNumber
+                                  controls={false}
+                                  className="!bg-[#F5F7FA] w-full"
+                                  placeholder="0"
+                                  suffix="VND"
+                                />
+                              </FormItemCustom>
+                            </Col>
+                            <Col span={12}>
+                              <span className="font-normal text-sm leading-5 text-[#637381]">
+                                Đến
+                              </span>
+                              <FormItemCustom className="pt-2" name="total_to">
+                                <InputNumber
+                                  controls={false}
+                                  className="!bg-[#F5F7FA] w-full"
+                                  placeholder="0"
+                                  suffix="VND"
+                                />
+                              </FormItemCustom>
+                            </Col>
+                          </Row>
+                          <Row className="justify-between pt-6 pb-4">
+                            <div></div>
+                            <div>
+                              <Button
+                                className="mr-3"
+                                onClick={(ev: any) => {
+                                  ev.preventDefault();
+                                  formFilter.resetFields();
+                                }}
+                              >
+                                Đặt lại
+                              </Button>
+                              <Button
+                                type="primary"
+                                onClick={() => {
+                                  formFilter.submit();
+                                }}
+                              >
+                                Áp dụng
+                              </Button>
                             </div>
-                            <Row className="pt-1" gutter={16}>
-                              <Col span={12}>
-                                <span className="font-normal text-sm leading-5 text-[#637381]">
-                                  Ngày bắt đầu
-                                </span>
-                                <FormItemCustom
-                                  className="pt-2"
-                                  name="expire_from"
-                                >
-                                  <DatePicker
-                                    format={"DD-MM-YYYY"}
-                                    className="!bg-[#F4F6F8]"
-                                    onChange={onChange}
-                                  />
-                                </FormItemCustom>
-                              </Col>
-                              <Col span={12}>
-                                <span className="font-normal text-sm leading-5 text-[#637381]">
-                                  Kết thúc
-                                </span>
-                                <FormItemCustom className="pt-2" name="expire_to">
-                                  <DatePicker
-                                    format={"DD-MM-YYYY"}
-                                    className="!bg-[#F4F6F8]"
-                                    onChange={onChange}
-                                  />
-                                </FormItemCustom>
-                              </Col>
-                            </Row>
-  
-                            <div className="pt-5 font-semibold text-sm leading-5 text-[#212B36]">
-                              Ngày cập nhật
-                            </div>
-                            <Row className="pt-1" gutter={16}>
-                              <Col span={12}>
-                                <span className="font-normal text-sm leading-5 text-[#637381]">
-                                  Ngày bắt đầu
-                                </span>
-                                <FormItemCustom name="update_at_from" className="pt-2">
-                                  <DatePicker
-                                    format={"DD-MM-YYYY"}
-                                    className="!bg-[#F4F6F8]"
-                                    onChange={onChange}
-                                  />
-                                </FormItemCustom>
-                              </Col>
-                              <Col span={12}>
-                                <span className="font-normal text-sm leading-5 text-[#637381]">
-                                  Kết thúc
-                                </span>
-                                <FormItemCustom name="update_at_to" className="pt-2">
-                                  <DatePicker
-                                    format={"DD-MM-YYYY"}
-                                    className="!bg-[#F4F6F8]"
-                                    onChange={onChange}
-                                  />
-                                </FormItemCustom>
-                              </Col>
-                            </Row>
-  
-                            <div className="pt-5 font-semibold text-sm leading-5 text-[#212B36]">
-                              Số lượng tồn kho
-                            </div>
-                            <Row className="pt-1" gutter={16}>
-                              <Col span={12}>
-                                <span className="font-normal text-sm leading-5 text-[#637381]">
-                                  Từ
-                                </span>
-                                <FormItemCustom
-                                  className="pt-2"
-                                  name="qty_inven_from"
-                                >
-                                  <InputNumber
-                                    controls={false}
-                                    className="w-full"
-                                    placeholder="0"
-                                  />
-                                </FormItemCustom>
-                              </Col>
-                              <Col span={12}>
-                                <span className="font-normal text-sm leading-5 text-[#637381]">
-                                  Đến
-                                </span>
-                                <FormItemCustom
-                                  className="pt-2"
-                                  name="qty_inven_to"
-                                >
-                                  <InputNumber
-                                    controls={false}
-                                    className="w-full"
-                                    placeholder="0"
-                                  />
-                                </FormItemCustom>
-                              </Col>
-                            </Row>
-  
-                            <div className="pt-5 font-semibold text-sm leading-5 text-[#212B36]">
-                              Tổng giá trị
-                            </div>
-                            <Row className="pt-1" gutter={16}>
-                              <Col span={12}>
-                                <span className="font-normal text-sm leading-5 text-[#637381]">
-                                  Từ
-                                </span>
-                                <FormItemCustom
-                                  className="pt-2"
-                                  name="total_from"
-                                >
-                                  <InputNumber
-                                    controls={false}
-                                    className="!bg-[#F5F7FA] w-full"
-                                    placeholder="0"
-                                    suffix="VND"
-                                  />
-                                </FormItemCustom>
-                              </Col>
-                              <Col span={12}>
-                                <span className="font-normal text-sm leading-5 text-[#637381]">
-                                  Đến
-                                </span>
-                                <FormItemCustom className="pt-2" name="total_to">
-                                  <InputNumber
-                                    controls={false}
-                                    className="!bg-[#F5F7FA] w-full"
-                                    placeholder="0"
-                                    suffix="VND"
-                                  />
-                                </FormItemCustom>
-                              </Col>
-                            </Row>
-                            <Row className="justify-between pt-6 pb-4">
-                              <div></div>
-                              <div>
-                                <Button
-                                  className="mr-3"
-                                  onClick={(ev: any) => {
-                                    ev.preventDefault();
-                                    formFilter.resetFields();
-                                  }}
-                                >
-                                  Đặt lại
-                                </Button>
-                                <Button
-                                  type="primary"
-                                  onClick={() => {
-                                    formFilter.submit();
-                                  }}
-                                >
-                                  Áp dụng
-                                </Button>
-                              </div>
-                            </Row>
-                          </Form>
-                        </div>
-                      
-                  </DropDownCustom>
+                          </Row>
+                        </Form>
+                      </div>
+                    </DropDownCustom>
                   )}
                 >
                   <Button
@@ -523,7 +597,19 @@ export default function ReportCustomer() {
           <TableCustom
             columns={columns}
             expandable={{ expandedRowRender, defaultExpandedRowKeys: ["0"] }}
-            dataSource={dataCustomer}
+            dataSource={dataCustomer?.data?.map((dataCus: DataCustomer) => {
+              return {
+                ...dataCus,
+                key: dataCus.name,
+              };
+            })}
+            pagination={{
+              defaultPageSize: PAGE_SIZE,
+              total,
+              onChange(page) {
+                setPage(page);
+              },
+            }}
           />
         </div>
       </div>

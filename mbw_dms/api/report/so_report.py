@@ -21,7 +21,6 @@ def so_report(**kwargs):
             filters["transaction_date"] = [">=",from_date]
         elif to_date:
             filters["transaction_date"] = ["<=", to_date]
-        print('========================= value: ', filters, flush=True)
         if kwargs.get('customer'):
             filters['customer'] = kwargs.get('customer')
         if kwargs.get('territory'):
@@ -83,10 +82,10 @@ def si_report(**kwargs):
         page_number = int(kwargs.get('page_number')) if kwargs.get('page_number') and int(kwargs.get('page_number')) >=1 else 1
         if from_date and to_date:
             filters["transaction_date"] = ["between", [from_date, to_date]]
-        if from_date:
-            filters["creation"] = [">=",from_date]
-        if to_date:
-            filters["creation"] = ["<=", to_date]
+        elif from_date:
+            filters["transaction_date"] = [">=",from_date]
+        elif to_date:
+            filters["transaction_date"] = ["<=", to_date]
 
         if kwargs.get('customer'):
             filters['customer'] = kwargs.get('customer')

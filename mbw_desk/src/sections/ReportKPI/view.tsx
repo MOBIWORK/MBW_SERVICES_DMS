@@ -62,25 +62,21 @@ export default function ReportKPI() {
   const [keySearch4, setKeySearch4] = useState("");
   const [employee, setEmployee] = useState<string>();
   let seachbykey = useDebounce(keySearch4);
-  const [keyS3, setKeyS3] = useState("");
   const [page, setPage] = useState<number>(1);
   const PAGE_SIZE = 20;
   const [dataReort, setDataReport] = useState<any[]>([]);
   const [fmonth, setFmonth] = useState("");
   const [fyear, setFYear] = useState("");
-  const [total, setTotal] = useState<number>(0)
+  const [total, setTotal] = useState<number>(0);
 
-  let keySearch3 = useDebounce(keyS3, 300);
 
   const onChange: DatePickerProps["onChange"] = (date) => {
-    setFYear(date?.["$y"].toString())
+    setFYear(date?.["$y"].toString());
   };
 
   const currentMonth = dayjs().month() + 1; // Lấy tháng hiện tại (đánh số từ 0)
   const month = currentMonth.toString();
-  const year = dayjs().format('YYYY');
-  
-
+  const year = dayjs().format("YYYY");
 
   useEffect(() => {
     (async () => {
@@ -123,8 +119,8 @@ export default function ReportKPI() {
   }, [sales_team, seachbykey]);
 
   useEffect(() => {
-    if(fyear === undefined || fyear === "") {
-      setFYear(year)
+    if (fyear === undefined || fyear === "") {
+      setFYear(year);
     }
     (async () => {
       const rsData = await AxiosService.get(
@@ -141,7 +137,7 @@ export default function ReportKPI() {
         }
       );
       setDataReport(rsData?.result);
-      setTotal(rsData?.result?.totals)
+      setTotal(rsData?.result?.totals);
     })();
   }, [fmonth, fyear, sales_team, employee, page]);
 
@@ -167,7 +163,7 @@ export default function ReportKPI() {
               defaultValue={month}
               options={monthAll}
               onChange={(value: string) => {
-                setFmonth(value)
+                setFmonth(value);
               }}
               showSearch
             />
@@ -177,7 +173,7 @@ export default function ReportKPI() {
               className="!bg-[#F4F6F8]"
               onChange={onChange}
               picker="year"
-              defaultValue={dayjs().startOf('year')}
+              defaultValue={dayjs().startOf("year")}
             />
           </FormItemCustom>
           <FormItemCustom className="w-[200px] border-none mr-2">
@@ -185,7 +181,7 @@ export default function ReportKPI() {
               showSearch
               defaultValue={""}
               treeData={[
-                { label: "Tất cả nhân viên", value: "" },
+                { label: "Tất cả nhóm bán hàng", value: "" },
                 ...listSales,
               ]}
               onChange={(value: string) => {
@@ -194,21 +190,23 @@ export default function ReportKPI() {
             />
           </FormItemCustom>
 
-          <FormItemCustom className="w-[200px] border-none mr-2">
+          <FormItemCustom name="employee"className="w-[200px] border-none mr-2">
             <Select
-              className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
-              options={[
-                { label: "Tất cả nhân viên", value: "" },
-                ...listEmployees,
-              ]}
               showSearch
-              defaultValue={""}
+              filterOption={false}
               notFoundContent={null}
-              onSearch={setKeySearch4}
-              onChange={(value) => {
+              defaultValue={""}
+              allowClear
+              onSearch={(value: string) => {
+                setKeySearch4(value);
+              }}
+              options={[ { label: "Tất cả nhân viên", value: "" },...listEmployees]}
+              onSelect={(value) => {
                 setEmployee(value);
               }}
-              allowClear
+              onClear={() => {
+                setEmployee("");
+              }}
             />
           </FormItemCustom>
         </div>
@@ -224,7 +222,7 @@ export default function ReportKPI() {
             pagination={{
               defaultPageSize: PAGE_SIZE,
               total,
-              onChange(page, pageSize) {
+              onChange(page) {
                 setPage(page);
               },
             }}
