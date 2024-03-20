@@ -32,10 +32,15 @@ def get_list_sales_order(**filters):
             query["creation"] = ["between",[from_date,to_date]]
         if status is not None and status != "All":
             query['status'] = validate_choice(configs.status_order)(status)
-        print("query",query)
+        if filters.get('customer_name'):
+            query['customer_name'] = filters.get('customer_name')
+        if filters.get('customer'):
+            query['customer'] = filters.get('customer')
+        if filters.get('name'):
+            query['name'] = filters.get('name')
         sale_orders =frappe.db.get_list('Sales Order', 
                                        filters=query, 
-                                       fields=['customer', 'name','address_display','UNIX_TIMESTAMP(po_date) as po_date','UNIX_TIMESTAMP(delivery_date) as delivery_date','UNIX_TIMESTAMP(creation) as creation','grand_total','rounding_adjustment','rounded_total','status'], 
+                                       fields=['customer', 'customer_name', 'name','address_display','UNIX_TIMESTAMP(po_date) as po_date','UNIX_TIMESTAMP(delivery_date) as delivery_date','UNIX_TIMESTAMP(creation) as creation','grand_total','rounding_adjustment','rounded_total','status'], 
                                        order_by='delivery_date desc', 
                                        start=page_size*(page_number-1), page_length=page_size,
                                         )

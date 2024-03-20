@@ -32,7 +32,7 @@ def customer_report(**kwargs):
         where_conditions = " AND ".join(filters)
 
         sql_query = """
-            SELECT cus.name as cus_id, cus.owner, cus.creation, cus.customer_name, cus.customer_code, cus.customer_type, cus.tax_id, cus.customer_group, cus.territory, cus.customer_primary_contact as contact, cus.customer_primary_address as address,
+            SELECT cus.name as cus_id, cus.owner, UNIX_TIMESTAMP(cus.creation) as creation, cus.customer_name, cus.customer_code, cus.customer_type, cus.tax_id, cus.customer_group, cus.territory, cus.customer_primary_contact as contact, cus.customer_primary_address as address,
             cus.mobile_no as phone, em.name as employee_id, em.employee_name, em.department
             FROM `tabCustomer` cus
             JOIN `tabEmployee` em ON cus.owner = em.user_id

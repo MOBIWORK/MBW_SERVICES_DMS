@@ -81,11 +81,11 @@ def si_report(**kwargs):
         page_size =  int(kwargs.get('page_size', 20))
         page_number = int(kwargs.get('page_number')) if kwargs.get('page_number') and int(kwargs.get('page_number')) >=1 else 1
         if from_date and to_date:
-            filters["transaction_date"] = ["between", [from_date, to_date]]
+            filters["posting_date"] = ["between", [from_date, to_date]]
         elif from_date:
-            filters["transaction_date"] = [">=",from_date]
+            filters["posting_date"] = [">=",from_date]
         elif to_date:
-            filters["transaction_date"] = ["<=", to_date]
+            filters["posting_date"] = ["<=", to_date]
 
         if kwargs.get('customer'):
             filters['customer'] = kwargs.get('customer')
