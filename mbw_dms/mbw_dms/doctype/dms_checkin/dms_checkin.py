@@ -19,6 +19,7 @@ class DMSCheckin(Document):
         self.update_kpi_monthly()
         self.send_data_to_ekgis()
         self.check_router()
+        self.update_data_first_checkin()
 
     def existing_checkin(self, kh_ma, start_date, end_date, current_user):
         existing_checkin = frappe.get_all(
@@ -203,6 +204,30 @@ class DMSCheckin(Document):
                     if self.kh_ten == a['customer']:
                         self.checkin_dungtuyen = 1
                         self.save()
+
+    def update_data_first_checkin(self):
+        new_data = frappe.new_doc('DMS First Checkin Customer')
+        customer_name = self.kh_ten
+        existing_checkin = frappe.get_all('DMS Checkin', filters={"kh_ten": customer_name}, fields=['name'])
+        if len(existing_checkin) == 1:
+            if frappe.db.exists('Employee', {'user_id': self.owner}):
+                employee = frappe.get_doc('Employee', {'user_id': self.owner}).as_dict()
+                new_data.department = employee.department
+                new_data.employee_id = employee.name
+                new_data.employee_name = employee.employee_name
+            cus = frappe.get_doc('Customer', {'customer_name': customer_name}).as_dict()
+            new_data.customer_name = customer_name
+            new_data.customer_code = cus.customer_code
+            new_data.customer_type = cus.customer_type
+            new_data.customer_group = cus.customer_group
+            new_data.tax_id = cus.tax_id
+            new_data.phone = cus.mobile_no
+            new_data.address = cus.customer_primary_address
+            new_data.contact_person = cus.customer_primary_contact
+            new_data.territory = cus.territory
+            new_data.date_checkin = self.createddate
+            new_data.insert()
+            frappe.db.commit()
 
 
 # Tạo mới checkin
