@@ -30,10 +30,11 @@ def kpi_report(**kwargs):
             mo.so_kh_moi as th_kh_moi, kpi.so_kh_moi as kh_kh_moi, mo.doanh_so_thang as th_doanh_so, kpi.doanh_so as kh_doanh_so, mo.doanh_thu_thang as th_doanh_thu, kpi.doanh_thu as kh_doanh_thu, mo.san_luong as th_san_lg, kpi.san_luong as kh_san_lg, mo.sku as th_sku, kpi.sku as kh_sku, mo.so_gio_lam_viec as th_so_gio_lam_viec, kpi.so_gio_lam_viec as kh_so_gio_lam_viec
             FROM `tabDMS Summary KPI Monthly` mo
             JOIN `tabDMS KPI` kpi ON mo.nhan_vien_ban_hang = kpi.nhan_vien_ban_hang
-            WHERE {}
-            LIMIT %s OFFSET %s
-        """.format(where_condition)
+        """
 
+        if where_condition:
+            sql_query += " WHERE {}".format(where_condition)
+        sql_query += " LIMIT %s OFFSET %s"
         
         limit = page_size
         offset = (page_number - 1) * limit
