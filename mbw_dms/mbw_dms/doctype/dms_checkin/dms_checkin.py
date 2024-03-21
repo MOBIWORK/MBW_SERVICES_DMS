@@ -217,7 +217,7 @@ class DMSCheckin(Document):
                 new_data.employee_name = employee.employee_name
             cus = frappe.get_doc('Customer', {'customer_name': customer_name}).as_dict()
             new_data.customer_name = customer_name
-            new_data.customer_code = cus.customer_code
+            new_data.customer_id = cus.customer_code
             new_data.customer_type = cus.customer_type
             new_data.customer_group = cus.customer_group
             new_data.tax_id = cus.tax_id
@@ -228,6 +228,8 @@ class DMSCheckin(Document):
             new_data.date_checkin = self.createddate
             new_data.insert()
             frappe.db.commit()
+        else:
+            return
 
 
 # Tạo mới checkin
