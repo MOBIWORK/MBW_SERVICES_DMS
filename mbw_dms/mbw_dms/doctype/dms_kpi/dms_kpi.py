@@ -62,7 +62,7 @@ def visit_report():
 		return gen_response(200, 'Thành công', kpi)
 	except Exception as e:
 		return exception_handel(e)
-import bson
+	
 # Báo cáo doanh số
 @frappe.whitelist(methods='GET')
 def sales_report():
@@ -419,6 +419,30 @@ def router_results(kwargs):
 						cus += 1
 		data['so_kh_da_vt'] = len(list_customer)
 		data['so_kh_phai_vt'] = cus
+		
+		return gen_response(200, 'Thành công', data)
+	except Exception as e:
+		return exception_handel(e)
+	
+# Báo cáo viếng thăm
+@frappe.whitelist(methods='GET')
+def checkin_report(kwargs):
+	try:
+		data = {}
+		filters = {}
+		from_date = validate_filter_timestamp(type='start')(kwargs.get('from_date')) if kwargs.get('from_date') else None
+		to_date = validate_filter_timestamp(type='end')(kwargs.get('to_date')) if kwargs.get('to_date') else None
+		user_id = frappe.session.user
+		if from_date and to_date:
+			filters["creation"] = ["between",[from_date,to_date]]
+		filters['owner'] = user_id
+
+		# Tổng doanh thu trong ngày
+		data['doanh_so'] = 0
+		sales_order = frappe.get_all('Sales Invoice', filters={**filters, 'docstatus':1}, fields=['grand_total'])
+		for i in sales_order:
+			data['doanh_so'] += i['grand_total']
+
 		
 		return gen_response(200, 'Thành công', data)
 	except Exception as e:

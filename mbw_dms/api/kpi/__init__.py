@@ -34,3 +34,8 @@ def report_detail_visit(customer_name, **kwargs):
 def router_results(**kwargs):
     from mbw_dms.mbw_dms.doctype.dms_kpi.dms_kpi import router_results
     return router_results(kwargs=kwargs)
+
+@frappe.whitelist()
+def checkin_report(**kwargs):
+    from mbw_dms.mbw_dms.doctype.dms_kpi.dms_kpi import checkin_report
+    return checkin_report(kwargs=kwargs)
