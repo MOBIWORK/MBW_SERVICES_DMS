@@ -9,9 +9,9 @@ import base64
 from frappe.core.doctype.file.utils import delete_file
 from frappe.utils.file_manager import save_file
 
-# from mbw_dms.api.file import (
-#     my_minio
-# )
+from mbw_dms.api.file import (
+    my_minio
+)
 from PIL import Image
 from PIL import ImageDraw
 from PIL import ImageFont
