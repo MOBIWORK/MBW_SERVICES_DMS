@@ -121,12 +121,12 @@ export const customergroup = [
 
 export const typecustomer = [
     {
-        "label": "Công ty",
-        "value": "Công ty"
+        "label": "Company",
+        "value": "Company"
     },
     {
-        "label": "Cá nhân",
-        "value": "Cá nhân"
+        "label": "Individual",
+        "value": "Individual"
     },
 ]
 
@@ -160,5 +160,16 @@ export const ordernew = [
     {
         "label": "Ordernew 2",
         "value": "Ordernew 2"
+    },
+]
+
+export const psorder = [
+    {
+        "label": "Có phát sinh đơn hàng",
+        "value": true
+    },
+    {
+        "label": "Không phát sinh đơn hàng",
+        "value": false
     },
 ]

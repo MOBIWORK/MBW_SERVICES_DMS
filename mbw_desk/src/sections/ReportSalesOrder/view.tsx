@@ -336,7 +336,7 @@ export default function ReportSalesOrder() {
         "/api/method/frappe.desk.search.search_link",
         {
           params: {
-            txt: keySearchTerritory,
+            txt: keySearchEmployee,
             doctype: "Employee",
             ignore_user_permissions: 0,
             query: "mbw_dms.api.report.so_report.employee_query",
@@ -345,8 +345,6 @@ export default function ReportSalesOrder() {
       );
 
       let { message: results } = rsEmployee;
-
-      console.log("rsEmployee", results);
 
       setListEmployee(
         results.map((dtEmployee: any) => ({
