@@ -24,6 +24,7 @@
   "ma_du_an",
   "lay_thong_tin",
   "api_key",
+  "address_company",
   "company_on_map",
   "company_long",
   "company_lat"
@@ -129,7 +130,7 @@
   {
    "fieldname": "company_on_map",
    "fieldtype": "Geolocation",
-   "label": "company"
+   "label": "Company on map"
   },
   {
    "fieldname": "company_long",
@@ -140,12 +141,17 @@
    "fieldname": "company_lat",
    "fieldtype": "Float",
    "label": "Lat"
+  },
+  {
+   "fieldname": "address_company",
+   "fieldtype": "Data",
+   "label": "Address company"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-03-01 16:54:15.326679",
+ "modified": "2024-03-22 15:14:28.325828",
  "modified_by": "Administrator",
  "module": "MBW DMS",
  "name": "DMS Settings",
