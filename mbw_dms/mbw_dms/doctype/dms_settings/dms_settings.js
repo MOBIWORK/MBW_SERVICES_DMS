@@ -71,7 +71,7 @@ frappe.ui.form.on('DMS Settings', {
 			if(rs.result.results) {
 				let {
 					geometry: { location :{lat,lng}},
-				  } = rs[0];
+				  } = rs.result.results[0];
 				  frm.set_value(
 					"company_on_map",
 					JSON.stringify([
