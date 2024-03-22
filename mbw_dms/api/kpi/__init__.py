@@ -39,3 +39,8 @@ def router_results(**kwargs):
 def checkin_report(**kwargs):
     from mbw_dms.mbw_dms.doctype.dms_kpi.dms_kpi import checkin_report
     return checkin_report(kwargs=kwargs)
+
+@frappe.whitelist()
+def order_statistics(**kwargs):
+    from mbw_dms.mbw_dms.doctype.dms_kpi.dms_kpi import order_statistics
+    return order_statistics(kwargs=kwargs)

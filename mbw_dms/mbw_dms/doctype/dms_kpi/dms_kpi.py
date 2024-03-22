@@ -7,7 +7,8 @@ from mbw_dms.api.common import (
     exception_handel,
     gen_response,
 	get_value_child_doctype,
-	current_month_week
+	current_month_week,
+	get_child_values_doc
 )
 from mbw_dms.api.validators import validate_filter_timestamp
 from frappe.utils import nowdate, today
@@ -499,6 +500,51 @@ def checkin_report(kwargs):
 			"data": data,
 			"has_checkin": data_checkin,
 			"not_checkin": filtered_customers
+		})
+	except Exception as e:
+		return exception_handel(e)
+
+# Thống kê phiếu đặt hàng
+@frappe.whitelist(methods="GET")
+def order_statistics(kwargs):
+	try:
+		data = {}
+		details = []
+		filters = {}
+		from_date = validate_filter_timestamp(type='start')(kwargs.get('from_date')) if kwargs.get('from_date') else None
+		to_date = validate_filter_timestamp(type='end')(kwargs.get('to_date')) if kwargs.get('to_date') else None
+		user_id = frappe.session.user
+		if from_date and to_date:
+			filters["creation"] = ["between",[from_date,to_date]]
+		filters['owner'] = user_id
+
+		field_items = ['qty', 'amount']
+		# Tổng hợp số khách hàng, số sản phẩm
+		list_customer = []
+		sales_order = frappe.get_all('Sales Order', filters={**filters, 'docstatus':1}, fields=['name', 'customer'])
+
+		sum_qty = 0
+		for i in sales_order:
+			if i['customer'] not in sales_order:
+				list_customer.append(i['customer'])
+
+			items = get_child_values_doc(doctype='Sales Order', master_name=i['name'], fields_to_get=field_items, chil_name='items')
+			qty = {item.get('qty') for item in items}
+			amount = {item.get('amount') for item in items}
+			sum_qty += sum(qty) 
+			info_order = {
+				'khach_hang': i['customer'],
+				'so_luong': sum(qty),
+				'thanh_tien': sum(amount)
+			}
+			details.append(info_order)
+
+		data['so_khach_hang'] = len(list_customer)
+		data['so_sp'] = sum_qty
+
+		return gen_response(200, 'Thành công', {
+			"data": data,
+			"details": details
 		})
 	except Exception as e:
 		return exception_handel(e)
