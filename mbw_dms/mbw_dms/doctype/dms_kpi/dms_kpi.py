@@ -389,7 +389,7 @@ def router_results(kwargs):
 
 		# Check số khách hàng phải viếng thăm theo tuyến
 		# Lấy tuyến của nhân viên
-		user_name = frappe.get_value('Employee',{ 'user_id': user_id}, 'name')
+		user_name = frappe.get_value('Employee', {'user_id': user_id}, 'name')
         # Lấy thứ của ngày
 		days = datetime.date.today()
 		date = days.weekday()
@@ -436,6 +436,7 @@ def checkin_report(kwargs):
 		if from_date and to_date:
 			filters["creation"] = ["between",[from_date,to_date]]
 		filters['owner'] = user_id
+		user_name = frappe.get_value('Employee', {'user_id': user_id}, 'name')
 
 		# Tổng doanh thu trong ngày
 		data['doanh_so'] = 0
@@ -443,7 +444,61 @@ def checkin_report(kwargs):
 		for i in sales_order:
 			data['doanh_so'] += i['grand_total']
 
+		data_checkin = frappe.get_all('DMS Checkin', filters=filters, fields=['name', 'kh_ten', 'kh_ma', 'checkin_giovao', 'checkin_giora', 'checkin_donhang', 'checkin_dungtuyen'])
+		list_customer = []
+		for i in data_checkin:
+			if i['kh_ten'] not in list_customer:
+				list_customer.append(i['kh_ten'])
+			i['doanh_so'] = frappe.get_value('Sales Order', {'customer': i['kh_ten']}, 'grand_total')
+
+		# Check số khách hàng phải viếng thăm theo tuyến
+		# Lấy tuyến của nhân viên
+		user_name = frappe.get_value('Employee', {'user_id': user_id}, 'name')
+        # Lấy thứ của ngày
+		days = datetime.date.today()
+		date = days.weekday()
+        # Chuyển đổi sang tên của ngày trong tuần
+		date_in_week = ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ Nhật"]
+		name_date = date_in_week[date]
+		router_employee = frappe.get_all(
+            'DMS Router',
+            filters = {
+                "employee": user_name,
+				"travel_date": name_date
+            },
+            fields = ['name']
+        )
+
+		cus_not_checkin = 0
+		if router_employee:
+			for i in router_employee:
+				i['customers'] = get_value_child_doctype('DMS Router', i['name'], 'customers')
+				filtered_customers = []
+				for a in i['customers']:
+					fre = a['frequency']
+					week_router = []
+					frequency = fre.split(';')
+					for i in frequency:
+						week_router.append(int(i))
+					current_week = current_month_week()
+					if current_week in week_router:
+						# data khách hàng chưa checkin
+						if not frappe.db.exists('DMS Checkin', {'kh_ten': a['customer']}):
+							cus_not_checkin += 1
+
+							filtered_customer = a.copy()
+							filtered_customer.pop('frequency', None)
+							filtered_customer.pop('long', None)
+							filtered_customer.pop('lat', None)
+							filtered_customers.append(filtered_customer)
 		
-		return gen_response(200, 'Thành công', data)
+		data['so_kh_da_vt'] = len(list_customer)
+		data['so_kh_chua_vt'] = cus_not_checkin
+
+		return gen_response(200, 'Thành công', {
+			"data": data,
+			"has_checkin": data_checkin,
+			"not_checkin": filtered_customers
+		})
 	except Exception as e:
 		return exception_handel(e)
