@@ -20,7 +20,7 @@ class DMSKPI(Document):
 	pass
 
 
-# Báo cáo viếng thăm
+# Báo cáo kpi viếng thăm
 @frappe.whitelist(methods='GET')
 def visit_report():
 	try:
@@ -510,6 +510,7 @@ def order_statistics(kwargs):
 	try:
 		data = {}
 		details = []
+		detail_items = []
 		filters = {}
 		from_date = validate_filter_timestamp(type='start')(kwargs.get('from_date')) if kwargs.get('from_date') else None
 		to_date = validate_filter_timestamp(type='end')(kwargs.get('to_date')) if kwargs.get('to_date') else None
@@ -518,33 +519,64 @@ def order_statistics(kwargs):
 			filters["creation"] = ["between",[from_date,to_date]]
 		filters['owner'] = user_id
 
-		field_items = ['qty', 'amount']
+		field_items = ['item_name', 'qty', 'uom', 'amount']
 		# Tổng hợp số khách hàng, số sản phẩm
 		list_customer = []
 		sales_order = frappe.get_all('Sales Order', filters={**filters, 'docstatus':1}, fields=['name', 'customer'])
 
 		sum_qty = 0
+		t_items = []
 		for i in sales_order:
 			if i['customer'] not in sales_order:
 				list_customer.append(i['customer'])
 
 			items = get_child_values_doc(doctype='Sales Order', master_name=i['name'], fields_to_get=field_items, chil_name='items')
-			qty = {item.get('qty') for item in items}
-			amount = {item.get('amount') for item in items}
-			sum_qty += sum(qty) 
+			qty = [item.get('qty') for item in items]
+			amount = [item.get('amount') for item in items]
+			sum_qty += int(sum(qty))
 			info_order = {
-				'khach_hang': i['customer'],
-				'so_luong': sum(qty),
-				'thanh_tien': sum(amount)
+				'customer': i['customer'],
+				'qty': sum(qty),
+				'amount': sum(amount)
 			}
 			details.append(info_order)
+			for item in items:
+				detail_items.append(item)
+				if item['item_name'] not in t_items:
+					t_items.append(item['item_name'])
 
-		data['so_khach_hang'] = len(list_customer)
-		data['so_sp'] = sum_qty
+		data['total_customers'] = len(list_customer)
+		data['total_items'] = len(t_items)
+		data['total_qty'] = sum_qty
 
 		return gen_response(200, 'Thành công', {
 			"data": data,
-			"details": details
+			"details": details,
+			"detail_items": detail_items
+		})
+	except Exception as e:
+		return exception_handel(e)
+	
+
+# Báo cáo khách hàng mới
+@frappe.whitelist(methods='GET')
+def new_customer_report(kwargs):
+	try:
+		data = {}
+		filters = {}
+		from_date = validate_filter_timestamp(type='start')(kwargs.get('from_date')) if kwargs.get('from_date') else None
+		to_date = validate_filter_timestamp(type='end')(kwargs.get('to_date')) if kwargs.get('to_date') else None
+		user_id = frappe.session.user
+		if from_date and to_date:
+			filters["creation"] = ["between",[from_date,to_date]]
+		filters['owner'] = user_id
+
+		list_customers = frappe.db.get_all('Customer', filters=filters, fields=['name', 'customer_name', 'customer_type', 'customer_group', 'UNIX_TIMESTAMP(creation) as date_collection', 'customer_primary_address as address'])
+		data['total_new_cus'] = frappe.db.count('Customer', filters=filters)
+
+		return gen_response(200, 'Thành công', {
+			"data": data,
+			"list_customer": list_customers
 		})
 	except Exception as e:
 		return exception_handel(e)

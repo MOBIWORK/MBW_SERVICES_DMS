@@ -44,3 +44,8 @@ def checkin_report(**kwargs):
 def order_statistics(**kwargs):
     from mbw_dms.mbw_dms.doctype.dms_kpi.dms_kpi import order_statistics
     return order_statistics(kwargs=kwargs)
+
+@frappe.whitelist()
+def new_customer_report(**kwargs):
+    from mbw_dms.mbw_dms.doctype.dms_kpi.dms_kpi import new_customer_report
+    return new_customer_report(kwargs=kwargs)
