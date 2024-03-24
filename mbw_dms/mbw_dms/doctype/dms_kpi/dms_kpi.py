@@ -580,3 +580,123 @@ def new_customer_report(kwargs):
 		})
 	except Exception as e:
 		return exception_handel(e)
+
+# Chỉ tiêu KPI
+@frappe.whitelist(methods='GET')
+def kpi_targets(kwargs):
+	try:
+		month = int(kwargs.get('month'))
+		year = int(kwargs.get('year'))
+		start_date_str = f'{year:04d}-{month:02d}-01'
+		last_day_of_month = calendar.monthrange(year, month)[1]
+		end_date_str = f'{year:04d}-{month:02d}-{last_day_of_month:02d}'
+		start_date = frappe.utils.getdate(start_date_str)
+		end_date = frappe.utils.getdate(end_date_str)
+
+		today = datetime.datetime.now().date()
+		first_day = today.replace(day=1)
+
+    	# Lấy id của nhân viên
+		user_name = frappe.get_value('Employee',{ 'user_id': frappe.session.user}, 'name')
+        
+    	# Lấy Kpi tháng
+		monthly_summary = frappe.get_all(
+        'DMS Summary KPI Monthly',
+        filters={'thang': month, 'nam': year, 'nhan_vien_ban_hang': user_name},
+        fields=['name', 'nam', 'thang', 'nhan_vien_ban_hang', 'doanh_thu_thang', 'doanh_so_thang', 'solan_vt_dungtuyen', 'solan_vt_ngoaituyen', 'so_kh_moi', 'so_don_hang']
+      	)
+
+    	# Lấy Kpi nhân viên
+		kpi_employee = frappe.get_all('DMS KPI',
+                filters={'ngay_hieu_luc_tu': (">=", start_date), 'ngay_hieu_luc_den': ("<=", end_date), 'nhan_vien_ban_hang': user_name},
+                fields=['so_kh_vt_luot', 'so_kh_moi', 'so_don_hang', 'doanh_so', 'doanh_thu'])
+        
+    	# Tính toán chỉ số KPI nếu có dữ liệu
+		kpi = None
+		if monthly_summary and kpi_employee:
+			kpi = {
+				'so_ngay_thuc_hien': (today - first_day).days + 1 if datetime.datetime.now().month == month else last_day_of_month,
+				'th_doanh_thu': monthly_summary[0]['doanh_thu_thang'],
+				'kh_doanh_thu': kpi_employee[0]['doanh_thu'],
+				'cl_doanh_thu': kpi_employee[0]['doanh_thu'] - monthly_summary[0]['doanh_thu_thang'],
+				'th_doanh_so': monthly_summary[0]['doanh_so_thang'],
+				'kh_doanh_so': kpi_employee[0]['doanh_so'],
+				'cl_doanh_so': kpi_employee[0]['doanh_so'] - monthly_summary[0]['doanh_so_thang'],
+				'th_don_hang': monthly_summary[0]['so_don_hang'],
+				'kh_don_hang': kpi_employee[0]['so_don_hang'],
+				'cl_don_hang': kpi_employee[0]['so_don_hang'] - monthly_summary[0]['so_don_hang'],
+				'th_vieng_tham': monthly_summary[0]['solan_vt_dungtuyen'] + monthly_summary[0]['solan_vt_ngoaituyen'],
+				'kh_vieng_tham': kpi_employee[0]['so_kh_vt_luot'],
+				'cl_vieng_tham': kpi_employee[0]['so_kh_vt_luot'] - monthly_summary[0]['solan_vt_dungtuyen'] - monthly_summary[0]['solan_vt_ngoaituyen'],
+				'th_kh_moi': monthly_summary[0]['so_kh_moi'],
+				'kh_kh_moi': kpi_employee[0]['so_kh_moi'],
+				'cl_kh_moi': kpi_employee[0]['so_kh_moi'] - monthly_summary[0]['so_kh_moi'],
+                'ti_le_doanh_thu': round(float(monthly_summary[0]['doanh_thu_thang']/kpi_employee[0]['doanh_thu']) * 100, 2),
+                'ti_le_doanh_so': round(float(monthly_summary[0]['doanh_so_thang']/kpi_employee[0]['doanh_so']) * 100, 2),
+                'ti_le_don_hang': round(float(monthly_summary[0]['so_don_hang']/kpi_employee[0]['so_don_hang']) * 100, 2),
+                'ti_le_vieng_tham': round(float((monthly_summary[0]['solan_vt_dungtuyen'] + monthly_summary[0]['solan_vt_ngoaituyen'])/kpi_employee[0]['so_kh_vt_luot']) * 100, 2),
+                'ti_le_kh_moi': round(float(monthly_summary[0]['so_kh_moi']/kpi_employee[0]['so_kh_moi']) * 100, 2)
+            }
+
+        # Nếu không có dữ liệu, gán giá trị 0 cho tất cả các chỉ số KPI
+		else:
+			kpi = {
+                'so_ngay_thuc_hien': 0,
+				'th_doanh_thu':0,
+				'kh_doanh_thu': 0,
+				'cl_doanh_thu': 0,
+				'th_doanh_so': 0,
+				'kh_doanh_so': 0,
+				'cl_doanh_so': 0,
+				'th_don_hang': 0,
+				'kh_don_hang': 0,
+				'cl_don_hang': 0,
+				'th_vieng_tham': 0,
+				'kh_vieng_tham': 0,
+				'cl_vieng_tham': 0,
+				'th_kh_moi': 0,
+				'kh_kh_moi': 0,
+				'cl_kh_moi': 0,
+                'ti_le_doanh_thu': 0,
+                'ti_le_doanh_so': 0,
+                'ti_le_don_hang': 0,
+                'ti_le_vieng_tham': 0,
+                'ti_le_kh_moi': 0
+            }
+		return gen_response(200, 'Thành công', kpi)
+	except Exception as e:
+		return exception_handel(e)
+
+# Khách hàng chưa phát sinh đơn
+@frappe.whitelist(methods='GET')
+def customer_not_order(kwargs):
+	try:
+		date = kwargs.get('date')
+		# Lấy tuyến của nhân viên
+		user_id = frappe.session.user
+		user_name = frappe.get_value('Employee',{ 'user_id': user_id}, 'name')
+        # Lấy thứ của ngày
+		date_cre = datetime.datetime.strptime(date, '%Y-%m-%d')
+		date = date_cre.weekday()
+        # Chuyển đổi sang tên của ngày trong tuần
+		date_in_week = ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ Nhật"]
+		name_date = date_in_week[date]
+		router_employee = frappe.get_value('DMS Router',
+            {
+                "employee": user_name,
+				"travel_date": name_date
+            },
+            'name'
+        )
+		if router_employee:
+			# for i in router_employee:
+			customers = get_value_child_doctype('DMS Router', router_employee, 'customers')
+			total_customers = len(customers)
+			for i in customers:
+				pass
+		return gen_response(200, 'Thành công', {
+			"total_customers": total_customers
+		})
+		
+	except Exception as e:
+		return exception_handel(e)

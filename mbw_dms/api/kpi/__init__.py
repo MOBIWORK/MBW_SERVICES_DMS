@@ -49,3 +49,13 @@ def order_statistics(**kwargs):
 def new_customer_report(**kwargs):
     from mbw_dms.mbw_dms.doctype.dms_kpi.dms_kpi import new_customer_report
     return new_customer_report(kwargs=kwargs)
+
+@frappe.whitelist()
+def kpi_targets(**kwargs):
+    from mbw_dms.mbw_dms.doctype.dms_kpi.dms_kpi import kpi_targets
+    return kpi_targets(kwargs=kwargs)
+
+@frappe.whitelist()
+def customer_not_order(**kwargs):
+    from mbw_dms.mbw_dms.doctype.dms_kpi.dms_kpi import customer_not_order
+    return customer_not_order(kwargs=kwargs)
