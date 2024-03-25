@@ -448,6 +448,10 @@ def checkin_report(kwargs):
 		data_checkin = frappe.get_all('DMS Checkin', filters=filters, fields=['name', 'kh_ten', 'kh_ma', 'checkin_giovao', 'checkin_giora', 'checkin_donhang', 'checkin_dungtuyen'])
 		list_customer = []
 		for i in data_checkin:
+			i['checkin_hinhanh'] = 0
+			checkin_image = get_value_child_doctype('DMS Checkin', i['name'], 'checkin_hinhanh')
+			if checkin_image:
+				i['checkin_hinhanh'] = len(checkin_image)
 			if i['kh_ten'] not in list_customer:
 				list_customer.append(i['kh_ten'])
 			i['doanh_so'] = frappe.get_value('Sales Order', {'customer': i['kh_ten']}, 'grand_total')
@@ -519,7 +523,7 @@ def order_statistics(kwargs):
 			filters["creation"] = ["between",[from_date,to_date]]
 		filters['owner'] = user_id
 
-		field_items = ['item_name', 'qty', 'uom', 'amount']
+		field_items = ['item_name', 'rate', 'qty', 'uom', 'amount']
 		# Tổng hợp số khách hàng, số sản phẩm
 		list_customer = []
 		sales_order = frappe.get_all('Sales Order', filters={**filters, 'docstatus':1}, fields=['name', 'customer'])
@@ -529,6 +533,7 @@ def order_statistics(kwargs):
 		for i in sales_order:
 			if i['customer'] not in sales_order:
 				list_customer.append(i['customer'])
+			i['customer_code'] = frappe.get_value('Customer', {'name': i['customer']}, 'customer_code')
 
 			items = get_child_values_doc(doctype='Sales Order', master_name=i['name'], fields_to_get=field_items, chil_name='items')
 			qty = [item.get('qty') for item in items]
@@ -536,6 +541,7 @@ def order_statistics(kwargs):
 			sum_qty += int(sum(qty))
 			info_order = {
 				'customer': i['customer'],
+				'customer_code': i['customer_code'],
 				'qty': sum(qty),
 				'amount': sum(amount)
 			}
@@ -671,29 +677,30 @@ def kpi_targets(kwargs):
 @frappe.whitelist(methods='GET')
 def customer_not_order(kwargs):
 	try:
-		date = kwargs.get('date')
+		date = int(kwargs.get('date'))
+		from_date = validate_filter_timestamp(type='start')(date)
+		to_date = validate_filter_timestamp(type='end')(date)
 		# Lấy tuyến của nhân viên
 		user_id = frappe.session.user
 		user_name = frappe.get_value('Employee',{ 'user_id': user_id}, 'name')
         # Lấy thứ của ngày
-		date_cre = datetime.datetime.strptime(date, '%Y-%m-%d')
+		date_cre = datetime.datetime.fromtimestamp(date)
 		date = date_cre.weekday()
         # Chuyển đổi sang tên của ngày trong tuần
 		date_in_week = ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ Nhật"]
 		name_date = date_in_week[date]
-		router_employee = frappe.get_value('DMS Router',
-            {
-                "employee": user_name,
-				"travel_date": name_date
-            },
-            'name'
-        )
+		router_employee = frappe.get_value('DMS Router', {"employee": user_name, "travel_date": name_date}, "name")
 		if router_employee:
-			# for i in router_employee:
 			customers = get_value_child_doctype('DMS Router', router_employee, 'customers')
 			total_customers = len(customers)
+			list_cus_not_order = []
+			total_customers = 0
 			for i in customers:
-				pass
+				if not frappe.db.exists('Sales Order', {'customer_name':i['customer'], 'creation': ('between', [from_date, to_date])}):
+					list_cus_not_order.append(i['customer'])
+					total_customers += 1
+
+
 		return gen_response(200, 'Thành công', {
 			"total_customers": total_customers
 		})

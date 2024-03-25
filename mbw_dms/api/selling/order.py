@@ -61,7 +61,7 @@ def get_list_sales_order(**filters):
 # Chi tiết sales order
 @frappe.whitelist(methods='GET')
 def get_sale_order(name):
-    try:
+    # try:
         if frappe.db.exists("Sales Order", name, cache=True):
             SalesOrder = frappe.qb.DocType("Sales Order")
             Customer = frappe.qb.DocType("Customer")
@@ -113,13 +113,13 @@ def get_sale_order(name):
                 detail_order = {**detail_order,**detail_taxes[0]}
             
             if len(employee) > 0:
-                detail_order = {**detail_order, **detail_taxes[0], **employee[0]}
+                detail_order = {**detail_order, **employee[0]}
 
             return gen_response(200,'Thành công', detail_order)
         else:
             return gen_response(406, f"Không tồn tại đơn hàng {name}")
-    except Exception as e: 
-        exception_handel(e)
+    # except Exception as e: 
+    #     exception_handel(e)
 
 # Tạo mới đơn hàng
 @frappe.whitelist(methods='POST')
