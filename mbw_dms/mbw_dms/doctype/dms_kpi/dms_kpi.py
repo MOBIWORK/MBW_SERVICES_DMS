@@ -689,20 +689,30 @@ def customer_not_order(kwargs):
         # Chuyển đổi sang tên của ngày trong tuần
 		date_in_week = ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ Nhật"]
 		name_date = date_in_week[date]
+
 		router_employee = frappe.get_value('DMS Router', {"employee": user_name, "travel_date": name_date}, "name")
+		list_cus_not_order = []
+		total_customers = 0
 		if router_employee:
 			customers = get_value_child_doctype('DMS Router', router_employee, 'customers')
 			total_customers = len(customers)
-			list_cus_not_order = []
 			total_customers = 0
 			for i in customers:
-				if not frappe.db.exists('Sales Order', {'customer_name':i['customer'], 'creation': ('between', [from_date, to_date])}):
-					list_cus_not_order.append(i['customer'])
+				if not frappe.db.exists('Sales Order', {'customer_name': i['customer'], 'creation': ('between', [from_date, to_date])}):
+					transaction_date = frappe.get_all('Sales Order', filters={'customer_name': i['customer']}, order_by='transaction_date desc', fields=['transaction_date'])
+					info = {
+						'ten_kh': i['customer_name'],
+						'ma_kh': i['customer_code'],
+						'dia_chi': i['display_address'],
+						'ngay_dat_hang_cuoi': transaction_date[0].transaction_date if transaction_date else None,
+						'so_ngay_chua_dat_hang': (date_cre.date() - transaction_date[0].transaction_date).days + 1 if transaction_date else 0
+					}
 					total_customers += 1
-
+					list_cus_not_order.append(info)
 
 		return gen_response(200, 'Thành công', {
-			"total_customers": total_customers
+			"total_customers": total_customers,
+			"details": list_cus_not_order
 		})
 		
 	except Exception as e:
