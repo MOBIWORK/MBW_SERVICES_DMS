@@ -2,18 +2,26 @@ import React, { useState } from "react";
 import Header from "./header";
 import MenuLeft from "./menu";
 import { Layout } from "antd";
+import styled from "styled-components";
 
 type Props = {
   children: React.ReactNode;
 };
 const { Content, Sider } = Layout;
+
+
+const SiderCustome = styled(Sider)` 
+& .ant-layout-sider-trigger {
+  display: none;
+}
+`
 export default function DashboardLayout({ children }: Props) {
   const [collapsed, setCollapsed] = useState(false);
   return (
     <Layout>
-        <Sider style={{ background: "#fff" }} width={!collapsed ? 250 : 78} collapsible collapsed={collapsed} >            
+        <SiderCustome style={{ background: "#fff" }} width={!collapsed ? 250 : 78} collapsible collapsed={collapsed} >            
             <MenuLeft handleCollapsed = {setCollapsed} collapsed={collapsed}/>
-          </Sider>
+          </SiderCustome>
       <Layout >
         <Content style={{ padding: "0 0px"}} className="!bg-[#fff] min-h-screen">
           <Header />

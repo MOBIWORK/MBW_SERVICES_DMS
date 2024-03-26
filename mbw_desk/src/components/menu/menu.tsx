@@ -15,17 +15,16 @@ const WrapperMenu = styled.div`
         line-height: 22px;
         min-height: 40px;
         height: unset!important;
-
         & .ant-menu-item-icon {
             color: #637381!important;
         }
         
         &.ant-menu-item-selected a {
+            white-space: normal!important;
             & p {
                 width:100%;
                 display:block;
                 font-weight: 600!important;
-                white-space: normal!important;
                 padding: 4px 0!important;
             }
         }
