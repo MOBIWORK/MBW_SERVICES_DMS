@@ -529,6 +529,7 @@ def order_statistics(kwargs):
 		sales_order = frappe.get_all('Sales Order', filters={**filters, 'docstatus':1}, fields=['name', 'customer'])
 
 		sum_qty = 0
+		sum_amount = 0
 		t_items = []
 		for i in sales_order:
 			if i['customer'] not in sales_order:
@@ -538,6 +539,7 @@ def order_statistics(kwargs):
 			items = get_child_values_doc(doctype='Sales Order', master_name=i['name'], fields_to_get=field_items, chil_name='items')
 			qty = [item.get('qty') for item in items]
 			amount = [item.get('amount') for item in items]
+			sum_amount += sum(amount)
 			sum_qty += int(sum(qty))
 			info_order = {
 				'customer': i['customer'],
@@ -554,6 +556,7 @@ def order_statistics(kwargs):
 		data['total_customers'] = len(list_customer)
 		data['total_items'] = len(t_items)
 		data['total_qty'] = sum_qty
+		data['sum_amount'] = sum_amount
 
 		return gen_response(200, 'Thành công', {
 			"data": data,
