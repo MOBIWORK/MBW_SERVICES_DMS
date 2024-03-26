@@ -4,7 +4,7 @@ import { Downicon, Upicon } from "./icons";
 
 
 export const WrapperCard = ({children,type="card"}: {children: ReactNode | string,type?: "map" | "card"}) => {
-    return <div className={classNames("border border-solid border-[#DFE3E8] rounded-2xl overflow-hidden ",type=="card" && "p-6")}>
+    return <div className={classNames("bg-white border border-solid border-[#DFE3E8] rounded-2xl overflow-hidden ",type=="card" && "p-6")}>
     {children}
     </div>
 }
@@ -12,7 +12,7 @@ export const WrapperCard = ({children,type="card"}: {children: ReactNode | strin
 
 export const Doanhso =({data}: {data:any}) => {
     return <WrapperCard>
-         <div className="text-center">
+         <div className="text-center bg-white">
             <p className="text-base font-medium">
                 Doanh số hôm nay
             </p>

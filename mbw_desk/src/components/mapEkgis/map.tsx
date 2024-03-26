@@ -1,11 +1,13 @@
 import { Helmet } from 'react-helmet-async'
 
-export default function MapEkgis({id ="map-ek"}:{id: string}) {
+export function MapEkgis({id ="map-ek"}:{id: string}) {
   return (
     <>
     <Helmet>
       <script>
-     {` var map = new maplibregl.Map({
+     {` 
+     console.log("in here")
+     var map = new maplibregl.Map({
       "container": ${id},
       "center": [105, 17],
       "zoom": 4

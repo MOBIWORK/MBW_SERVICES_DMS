@@ -10,7 +10,10 @@ import { BASE_URL } from './routes/path.ts';
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import { ConfigProvider } from 'antd';
+import dayjs from 'dayjs'
 
+import 'dayjs/locale/vi';
+dayjs.locale('vi');
 const root = ReactDOM.createRoot(document.getElementById('root')!)
 
 root.render(

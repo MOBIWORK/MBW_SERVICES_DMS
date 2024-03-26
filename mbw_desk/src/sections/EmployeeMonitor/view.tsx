@@ -3,7 +3,7 @@ import { FormItemCustom, HeaderPage } from "../../components";
 import { Col, Row, Select, Tabs } from "antd";
 import ActiveEmployee from "./active-employee";
 import UnActiveEmployee from "./unactive-employee";
-import MapEkgis from "../../components/mapEkgis/map";
+import {MapEkgis} from "../../components/mapEkgis/map";
 import { department } from "../ReportSales/data";
 
 export default function EmployeeMonitor() {
@@ -30,7 +30,7 @@ export default function EmployeeMonitor() {
               items={[
                 {
                   label: (
-                    <p className="px-2 text-base font-medium px-10 w-[200px]">
+                    <p className="text-base font-medium px-10">
                       {" "}
                       Hoạt động
                     </p>
@@ -40,7 +40,7 @@ export default function EmployeeMonitor() {
                 },
                 {
                   label: (
-                    <p className="px-2 text-base font-medium px-10 w-[200px]">
+                    <p className="text-base font-medium px-10 ">
                       Không hoạt động
                     </p>
                   ),

@@ -13,10 +13,9 @@ export default function MonitorLayout({ children }: Props) {
         <Header />
         <Layout
           style={{
-            padding: "24px 0",
+            padding: "24px 20px 24px 0",
             background: "#fff",
             borderRadius: "8px",
-            width: "80%",
             margin: "0 auto"
           }}
         >

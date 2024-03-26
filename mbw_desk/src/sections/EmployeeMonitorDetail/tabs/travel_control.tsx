@@ -1,4 +1,4 @@
-import MapEkgis from "../../../components/mapEkgis/map";
+import {MapEkgis} from "../../../components/mapEkgis";
 import { Tabs } from "antd";
 import Travel from "./travel";
 import NotTravel from "./not_travel";
@@ -61,7 +61,7 @@ export default function TravelControl() {
         />
       </div>
       <div className="flex-1 h-[72vh]">
-        <MapEkgis />
+        <MapEkgis id="hd"/>
       </div>
     </div>
   );

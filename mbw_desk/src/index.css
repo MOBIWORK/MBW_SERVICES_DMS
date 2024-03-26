@@ -55,8 +55,44 @@
 
 * {
   letter-spacing: -0.025em;
+
+  scrollbar-width: thin;
+  scrollbar-color: #888 #f1f1f1;
 }
 
 p {
   margin : 0;
+}
+
+
+/*Style chú giải*/
+.map-legend {
+  position: absolute;
+  z-index: 1;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 10px;
+  max-width: 300px;
+  right: 10px;
+  top: 5px;
+}
+.map-legend h2 {
+  font-size: 15px;
+  margin-bottom: 10px;
+}
+.map-legend ul {
+  list-style: none;
+  padding: 0;
+}
+.map-legend li {
+  margin-bottom: 5px;
+  font-size: 13px;
+}
+.legend-icon {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 5px;
 }

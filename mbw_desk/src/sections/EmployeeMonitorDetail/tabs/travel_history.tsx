@@ -1,35 +1,30 @@
-import React from 'react'
-import { Helmet } from 'react-helmet-async'
+import React, { useState } from 'react'
 import { DatePick } from '../../../components/date-picker/date-picker'
-
+import dayjs, { Dayjs } from 'dayjs'
+import { TodayLimit, tmpToTimeZone } from '../../../util'
+import { MapEkgisHistory } from '../../../components/mapEkgis'
+// Thiết lập ngôn ngữ cho dayjs
+// import 'dayjs/locale/vi';
+// dayjs.locale('vi');
 export default function TravelHistory() {
+
+  const [time,setTime] = useState<any>(Date.now())
+  const [from_time,setFTime] = useState<string>( tmpToTimeZone(new Date().setHours(0,0,0).toString()) )
+  const [to_time,setTTime] = useState<string>( tmpToTimeZone(new Date().setHours(24,0,0).toString()) )
+
+  const handleChangeTime = (value:any) => {
+      setTime(value)
+      setFTime(tmpToTimeZone(TodayLimit(value).today))
+      setTTime(tmpToTimeZone(TodayLimit(value).nextday))
+  }
   return (
     <>
-     <Helmet>
-      <script>
-        {
-          `
-          var options = {
-                  container: 'travel', //id div chứa map
-                  projectId: '6556e471178a1db24ac1a711',
-                  objectId: '655824e13a62d46bf149dced',
-                  from_time: '2024-02-28T07:00:00',
-                  to_time: '2024-02-29T08:00:00',
-                  pageNumber: 1,
-                  pageSize: 1000,
-                  apiKey: 'w1Dlh2wRon7mE6sL196TgvLS45fw02uon74pJ0rc',
-              };
-              var map = new ekmapplf_tracking.locationHistory(options);
-      `
-        }
-        </script>
-     </Helmet>
      <div className='border border-solid border-[#F5F5F5] rounded-lg'>
       <div className='p-4 border border-solid border-transparent border-b-[#F5F5F5]'>
-        <DatePick />
+        <DatePick defaultValue={dayjs(time)} format={"DD-MM-YYYY"} onChange={handleChangeTime}/>
       </div>
      <div id = "travel" className='h-[70vh] relative'>
-
+     <MapEkgisHistory from_time={from_time} to_time={to_time} objectId='655824e13a62d46bf149dced' projectId= '6556e471178a1db24ac1a711'/>
      </div>
 
      </div>

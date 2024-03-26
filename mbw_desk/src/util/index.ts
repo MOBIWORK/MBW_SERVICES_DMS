@@ -1,5 +1,6 @@
 import 'dayjs/locale/vi';
 import dayjs from "dayjs";
+import timezone from 'dayjs/plugin/timezone';
 
 export const getAttrInArray = (array:any[], fields: any[], options = {}) => {
     let newArray:any[] = []
@@ -90,4 +91,16 @@ export const arrayDays = (startTime,endTime) => {
   console.log("dateObjects",dateObjects);
   
   return dateObjects;
+}
+
+export const tmpToTimeZone =(day:string) => { // Output: 202
+return dayjs.unix(Number.parseFloat(day) / 1000).format('YYYY-MM-DDTHH:mm:ss')
+}
+
+export const TodayLimit = (day:any) => {
+  const today = (new Date(day)).setHours(0,0,0).toString()
+  const nextday = (new Date(day)).setHours(24,0,0).toString()
+  console.log({today,nextday});
+  
+  return {today,nextday}
 }

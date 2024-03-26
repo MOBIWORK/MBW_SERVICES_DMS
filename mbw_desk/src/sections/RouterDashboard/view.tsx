@@ -4,12 +4,13 @@ import { HeaderPage } from "../../components";
 import { Doanhso, InfoCard, WrapperCard } from "./components/card";
 import { ChartCustom } from "./components/chart";
 import { ListCustom } from "./components/list";
-import MapEkgis from "../../components/mapEkgis/map";
+import {MapEkgis} from "../../components/mapEkgis/map";
 import { cardData, dataChart, dataChart2, itemsProduct } from "./data";
 import { useEffect, useState } from "react";
 import { AxiosService } from "../../services/server";
 import { rsData } from "../../types/response";
 import { ResultType } from "../../types/dashboard";
+import { MapEkgisRealTime } from "../../components/mapEkgis";
 
 
 
@@ -82,7 +83,7 @@ export default function RouterDashboard() {
       </Row>
 
       <WrapperCard type="map">
-        <div className="h-[600px]"><MapEkgis id="dashboard" /></div>
+        <div className="h-[600px]"><MapEkgisRealTime /></div>
       </WrapperCard>
     </>
   );

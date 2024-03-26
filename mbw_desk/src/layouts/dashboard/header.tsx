@@ -45,14 +45,8 @@ export default function Header() {
   ];
   return (
     <div className="w-full !border-[red] border bg-white py-[7px] !border-b-4">
-      <Row className="justify-between max-w-full w-[80%] mx-auto">
-        <Col>
-          <Link to="/" className="w-[32px] h-[32px]">
-            <img src={logo} className="object-contain w-[32px] h-[32px]" />
-          </Link>
-        </Col>
-        <Col>
-          <Dropdown
+      <Row className="justify-end max-w-full ">
+        <Dropdown
             menu={{ items }}
             trigger={["click"]}
             placement={"bottomRight"}
@@ -70,7 +64,6 @@ export default function Header() {
               {!empDetail?.image && empDetail?.employee_name[0]}
             </Avatar>
           </Dropdown>
-        </Col>
       </Row>
     </div>
   );
