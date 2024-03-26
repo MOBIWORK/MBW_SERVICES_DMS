@@ -523,7 +523,7 @@ def order_statistics(kwargs):
 			filters["creation"] = ["between",[from_date,to_date]]
 		filters['owner'] = user_id
 
-		field_items = ['item_name', 'rate', 'qty', 'uom', 'amount']
+		field_items = ['item_name', 'item_code', 'rate', 'qty', 'uom', 'amount']
 		# Tổng hợp số khách hàng, số sản phẩm
 		list_customer = []
 		sales_order = frappe.get_all('Sales Order', filters={**filters, 'docstatus':1}, fields=['name', 'customer'])
