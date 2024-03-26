@@ -18,4 +18,4 @@ def change_password(user, current_password, new_password):
     # Cập nhật mật khẩu mới
     update_password(user, new_password)
 
-    return gen_response(200, "Mật khẩu đã được thay đổi thành công")
+    return gen_response(200, "Cập nhật thành công")
