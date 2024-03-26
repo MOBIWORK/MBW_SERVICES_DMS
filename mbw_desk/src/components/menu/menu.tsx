@@ -15,11 +15,12 @@ const WrapperMenu = styled.div`
         line-height: 22px;
         min-height: 40px;
         height: unset!important;
+
         & .ant-menu-item-icon {
             color: #637381!important;
         }
+        
         &.ant-menu-item-selected a {
-            // display:block;
             & p {
                 width:100%;
                 display:block;
@@ -34,11 +35,18 @@ const WrapperMenu = styled.div`
         }
     }
 
+    & .ant-menu-submenu.ant-menu-submenu-vertical.ant-menu-submenu-selected .ant-menu-submenu-title {
+        & .ant-menu-item-icon {
+            color: #212B36!important;
+        }
+    }
+
     & .ant-menu-submenu:has(.ant-menu-item-selected) .ant-menu-item-icon{
         color: #212B36!important;
     }
 
 }
+
 
 
 `
