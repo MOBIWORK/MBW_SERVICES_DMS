@@ -1,0 +1,31 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2024-03-27 16:51:49.149807",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "ngang_hang"
+ ],
+ "fields": [
+  {
+   "fieldname": "ngang_hang",
+   "fieldtype": "Link",
+   "label": "Industry",
+   "options": "DMS Industry"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2024-03-27 16:53:00.755670",
+ "modified_by": "Administrator",
+ "module": "MBW DMS",
+ "name": "Industrys",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
