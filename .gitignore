@@ -13,3 +13,5 @@ mbw_desk/node_modules
 
 
 node_modules
+
+/mbw_dms/public/css/styles.output.css

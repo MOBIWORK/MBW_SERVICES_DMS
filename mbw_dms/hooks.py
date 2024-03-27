@@ -18,11 +18,11 @@ website_route_rules = [
 # ------------------
 
 # include js, css files in header of desk.html
-# app_include_css = "/assets/mbw_dms/css/mbw_dms.css"
+# app_include_css = "/assets/mbw_dms/css/tailwind.css"
 # app_include_js = "/assets/mbw_dms/js/mbw_dms.js"
 
 # include js, css files in header of web template
-# web_include_css = "/assets/mbw_dms/css/mbw_dms.css"
+# web_include_css = "/assets/mbw_dms/css/tailwind.css"
 # web_include_js = "/assets/mbw_dms/js/mbw_dms.js"
 
 # include custom scss in every website theme (without file extension ".scss")
