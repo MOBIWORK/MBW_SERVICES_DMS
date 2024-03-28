@@ -173,3 +173,83 @@ export const psorder = [
         "value": false
     },
 ]
+
+export const desc = [
+    {
+        "label": "Tên nhân viên A → Z",
+        "value": "Tên nhân viên A → Z"
+    },
+    {
+        "label": "Tên nhân  viên Z → A",
+        "value": "Tên nhân  viên Z → A"
+    },
+    {
+        "label": "Chỉ tiêu viếng thăm tăng dần",
+        "value": "Chỉ tiêu viếng thăm tăng dần"
+    },
+    {
+        "label": "Chỉ tiêu đơn hàng tăng dần",
+        "value": "Chỉ tiêu đơn hàng tăng dần"
+    },
+    {
+        "label": "Chỉ tiêu viếng thăm giảm dần",
+        "value": "Chỉ tiêu viếng thăm giảm dần"
+    },
+    {
+        "label": "Chỉ tiêu đơn hàng giảm dần",
+        "value": "Chỉ tiêu đơn hàng giảm dần"
+    },
+    {
+        "label": "Chỉ tiêu doanh số tăng dần",
+        "value": "Chỉ tiêu doanh số tăng dần"
+    },
+    {
+        "label": "Chỉ tiêu doanh số giảm dần",
+        "value": "Chỉ tiêu doanh số giảm dần"
+    },
+]
+
+export const vt = [
+    {
+        "label": "Có viếng thăm",
+        "value": true
+    },
+    {
+        "label": "Không có viếng thăm",
+        "value": false
+    },
+]
+
+export const chitieud = [
+    {
+        "label": "Chỉ tiêu ngày",
+        "value": true
+    },
+    {
+        "label": "chỉ tiêu tháng",
+        "value": false
+    },
+]
+
+export const chitieu = [
+    {
+        "label": "Đạt các chỉ tiêu",
+        "value": true
+    },
+    {
+        "label": "Chưa đạt chỉ tiêu viếng thăm",
+        "value": false
+    },
+    {
+        "label": "Chưa đạt chỉ tiêu đơn hàng",
+        "value": false
+    },
+    {
+        "label": "Chưa đạt chỉ tiêu doanh số",
+        "value": false
+    },
+    {
+        "label": "Chưa đạt tất cả các chỉ tiêu",
+        "value": false
+    },
+]

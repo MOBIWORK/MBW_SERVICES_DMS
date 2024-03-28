@@ -7,7 +7,13 @@ import logo from "../../assets/react.svg";
 import { Col, Row } from "antd";
 import { DoubleLeftOutlined, DoubleRightOutlined } from "@ant-design/icons";
 
-export default function MenuLeft({handleCollapsed,collapsed}: {handleCollapsed:any,collapsed:boolean}) {
+export default function MenuLeft({
+  handleCollapsed,
+  collapsed,
+}: {
+  handleCollapsed: any;
+  collapsed: boolean;
+}) {
   const [current, setCurrent] = useState(
     localStorage.getItem("selectedKey") || "1"
   );
@@ -25,7 +31,7 @@ export default function MenuLeft({handleCollapsed,collapsed}: {handleCollapsed:a
     <div>
       <Row className="justify-between items-center py-4 pl-4">
         <Col>
-          <Link to="/" className="w-[32px] h-[32px]">
+          <Link to="/app/home" className="w-[32px] h-[32px]">
             <img src={logo} className="object-contain w-[32px] h-[32px]" />
           </Link>
         </Col>
@@ -34,7 +40,7 @@ export default function MenuLeft({handleCollapsed,collapsed}: {handleCollapsed:a
         </Col>
       </Row>
       <div className="font-semibold text-lg text-[#919EAB] leading-[22px] pl-[8px] mx-2 pb-4">
-        DMS
+        <Link className="font-semibold text-lg !text-[#919EAB] leading-[22px]" to="/">DMS</Link>
       </div>
       <MenuCustom
         theme="light"
