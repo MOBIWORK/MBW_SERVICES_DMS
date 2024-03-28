@@ -20,17 +20,24 @@ const WrapperMenu = styled.div`
         }
         
         &.ant-menu-item-selected a {
-            white-space: normal!important;
+            font-weight: 600!important;
             & p {
                 width:100%;
                 display:block;
-                font-weight: 600!important;
                 padding: 4px 0!important;
             }
         }
 
         &.ant-menu-item-selected .ant-menu-item-icon {
             color: #212B36!important;
+        }
+    }
+    & .ant-menu-submenu  {
+        & .ant-menu-item-selected a {
+            font-weight: 600!important;
+            display: block;
+            padding: 10px 0;
+            white-space: normal!important;
         }
     }
 
