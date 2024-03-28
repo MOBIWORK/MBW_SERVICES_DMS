@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_import": 1,
  "allow_rename": 1,
  "autoname": "field:industry_name",
  "creation": "2024-03-27 16:15:23.182695",
@@ -23,7 +24,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-03-27 16:50:26.462493",
+ "modified": "2024-03-28 11:31:57.455256",
  "modified_by": "Administrator",
  "module": "MBW DMS",
  "name": "DMS Industry",
