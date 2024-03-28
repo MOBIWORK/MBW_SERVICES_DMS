@@ -27,7 +27,8 @@
   "address_company",
   "company_on_map",
   "company_long",
-  "company_lat"
+  "company_lat",
+  "industrys"
  ],
  "fields": [
   {
@@ -146,12 +147,18 @@
    "fieldname": "address_company",
    "fieldtype": "Data",
    "label": "Address company"
+  },
+  {
+   "fieldname": "industrys",
+   "fieldtype": "Table MultiSelect",
+   "label": "Ng\u00e0nh h\u00e0ng",
+   "options": "Industrys"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-03-22 15:14:28.325828",
+ "modified": "2024-03-27 16:53:42.471499",
  "modified_by": "Administrator",
  "module": "MBW DMS",
  "name": "DMS Settings",
