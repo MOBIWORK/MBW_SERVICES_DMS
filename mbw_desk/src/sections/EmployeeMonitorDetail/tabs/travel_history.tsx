@@ -24,7 +24,7 @@ export default function TravelHistory() {
         <DatePick defaultValue={dayjs(time)} format={"DD-MM-YYYY"} onChange={handleChangeTime}/>
       </div>
      <div id = "travel" className='h-[70vh] relative'>
-     <MapEkgisHistory from_time={from_time} to_time={to_time} objectId='655824e13a62d46bf149dced' projectId= '6556e471178a1db24ac1a711'/>
+     <MapEkgisHistory from_time={from_time} to_time={to_time} objectId='654c8a12d65d3e52f2d286de' projectId= '6556e471178a1db24ac1a711'/>
      </div>
 
      </div>

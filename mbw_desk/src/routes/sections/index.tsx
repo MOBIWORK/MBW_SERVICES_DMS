@@ -5,6 +5,7 @@ import path from 'path';
 import RouterControl from '../../sections/RouterControl/view';
 import Progress from '../../pages/Progress'
 import NotFound from '../../pages/NotFound'
+import { authRoutes } from './auth';
 // ----------------------------------------------------------------------
 
 export default function Router() {
@@ -15,9 +16,11 @@ export default function Router() {
     },
     //dashboard router
     ...dashboardRoutes,
+    ...authRoutes,
      {
       path: '*',
       element: <NotFound />
-     }
+     },
+     
 ])
 }

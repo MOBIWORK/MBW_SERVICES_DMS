@@ -96,3 +96,7 @@ p {
   border-radius: 50%;
   margin-right: 5px;
 }
+
+body, * {
+  font-family: "Inter" ,sans-serif;
+}

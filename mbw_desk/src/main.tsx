@@ -11,7 +11,7 @@ import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import { ConfigProvider } from 'antd';
 import dayjs from 'dayjs'
-
+import i18n from './i18n';
 import 'dayjs/locale/vi';
 dayjs.locale('vi');
 const root = ReactDOM.createRoot(document.getElementById('root')!)
