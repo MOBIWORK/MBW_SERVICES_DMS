@@ -43,7 +43,7 @@ function FormLogin(props: Props) {
                     { value: 'vi', label: <div className="flex items-center"> <VietNameFlag/>{" "} <span className='ml-1'>Tiếng Việt</span> </div>},
                     { value: 'en', label: <div className="flex items-center"><EnglandFlag/>{" "} <span className='ml-1'>English</span> </div>}, 
                 ]}
-                defaultValue={localStorage.getItem("i18nextLng") || "vi"}
+                defaultValue={localStorage.getItem("i18nextLng") && localStorage.getItem("i18nextLng") =="vi-VN" ? "vi" : localStorage.getItem("i18nextLng")}
                 onChange={(value:string) => {changeLanguage(value)}}
             />
 
