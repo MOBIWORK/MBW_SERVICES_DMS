@@ -4,12 +4,18 @@
 	"support": "Hỗ trợ",
 	"hdsd" : "Hướng dẫn sử dụng",
 	"Login_to_erpn": "Đăng nhập hệ thống ERPNext Plus",
+	"Login_to_erpn_email": "Đăng nhập hệ thống với liên kết email",
+	"Login_to_erpn_forgot": "Quên mật khẩu",
 	"forgot": "Quên mật khẩu",
 	"or": "Hoặc",
 	"LoginEmail":"Đăng nhập với Email",
 	"Login":"Đăng nhập",
 	"error_login": "Đăng nhập không hợp lệ. Thử lại",
+	"error_form_login": "Lỗi. Thử lại",
 	"Chinh_sach": "Chính sách bảo mật",
 	"Dieu_khoan": "Điều khoản sử dụng ",
-	"Lien_he":"Liên hệ"
+	"Lien_he":"Liên hệ",
+	"back_login" : "Quay lại đăng nhập",
+	"login_email": "Gửi liên kết đăng nhập",
+	"forgot_btn": "Đặt lại mật khẩu"
 }
