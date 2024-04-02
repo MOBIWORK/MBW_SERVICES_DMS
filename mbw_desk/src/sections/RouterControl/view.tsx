@@ -161,7 +161,7 @@ export default function RouterControl() {
       );
       let { message: results } = rsEmployee;
       setListEmployees(
-        results.map((employee_filter: employee) => ({
+        results.map((employee_filter: any) => ({
           value: employee_filter.value,
           label: employee_filter.description,
         }))
@@ -186,7 +186,7 @@ export default function RouterControl() {
       let { message: results } = rsRouter;
 
       setListRouter(
-        results.map((router: employee) => ({
+        results.map((router: any) => ({
           value: router.value,
           label: router.description.split(',')[0],
           desc: router.description.split(',')[1]
@@ -307,10 +307,10 @@ export default function RouterControl() {
       <div className="bg-[#f9fafa]">
         <div className="mx-2 pt-5 pb-10">
           <div className="pt-5">
-            <div className="h-auto bg-white py-7 px-4 rounded-lg">
+            <div className="h-auto bg-white py-7 rounded-lg border border-solid border-[#DFE3E8]">
               {/* header  */}
-              <Row className="justify-between w-full">
-                <Col span={14}>
+              <Row className="justify-between w-full  px-4">
+                <Col span={14} className="hidden lg:block">
                   <Row gutter={8}>
                     <Col span={8}>
                       <FormItemCustom name="router">
@@ -344,7 +344,7 @@ export default function RouterControl() {
                     </Col>
                     <Col span={8}>
                       <FormItemCustom name="employee">
-                        <Select
+                        <Select                          
                           placeholder="Tất cả nhân viên"
                           showSearch
                           filterOption={false}
@@ -393,7 +393,7 @@ export default function RouterControl() {
                     </Col>
                   </Row>
                 </Col>
-                <Col>
+                <Col className="">
                   <div className="flex flex-wrap items-center">
                     <div className="flex justify-center items-center mr-4">
                       <Dropdown
@@ -416,36 +416,13 @@ export default function RouterControl() {
                         <LuFilterX style={{ fontSize: "20px" }} />
                       </Button>
                     </div>
-                    <div className="flex justify-center items-center rounded-md">
-                      <Button className="border-r-[0.1px] rounded-r-none" onClick={() => setOrder(prev => prev == "asc" ? "desc" : "asc")}>
-                        {orderBy == "asc" ? <PiSortAscendingBold style={{ fontSize: "20px" }} /> : <PiSortDescendingBold style={{ fontSize: "20px" }} />}
-                      </Button>
-                      <Dropdown
-                        trigger={["click"]}
-                        placement="bottomRight"
-                        dropdownRender={(menu) => (
-                          <DropDownCustom>
-                            <div className="-m-4">
-
-                              {
-                                orderFields.map((fiel, index) => <p className="p-2 block mb-0 cursor-pointer hover:bg-[#f5f5f5]" key={index} onClick={setOrderField.bind(null, fiel)}>
-                                  {fiel.label}
-                                </p>)
-                              }
-                            </div>
-                          </DropDownCustom>
-                        )}>
-                        <Button className="border-l-[0.1px] rounded-l-none">
-                          {orderField.label}
-                        </Button>
-                      </Dropdown>
-                    </div>
+                   
                   </div>
                 </Col>
               </Row>
               {/* hien thi table  */}
               <div className="pt-5">
-                <div className="w-full overflow-x-scroll">
+                <div className="w-full overflow-x-scroll ">
                   <TableCustom
                     rowSelection={rowSelection}
                     columns={columns.map(column => {

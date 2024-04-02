@@ -17,8 +17,8 @@ export const successToast = (text:string|ReactNode) => {
   message.success(text)
 }
 
-export const [modal, contextHolder] = Modal.useModal();
 export const modalMessage = (title: string = "",content: string = "") => {
+ const [modal] = Modal.useModal();
   const info = modal.info({
     title,
     content
