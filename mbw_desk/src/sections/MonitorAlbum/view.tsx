@@ -20,6 +20,8 @@ import { listSale } from "../../types/listSale";
 import { employee } from "../../types/employeeFilter";
 import { rsData, rsDataFrappe } from "../../types/response";
 import { treeArray } from "../../util";
+const dateNow = new Date().toJSON().slice(0, 10);
+
 export default function MonitorAlbum() {
   const [listCustomerGroup, setCustomerGroup] = useState<any[]>([]);
   const [dataAlbum, setDataAlbum] = useState([]);
@@ -58,9 +60,6 @@ export default function MonitorAlbum() {
     });
   };
 
-  const dateNow = new Date().toJSON().slice(0, 10);
-  // const now = Date.parse(dateNow as string) / 1000;
-  // console.log("dateNow", now);
 
   //thêm
   useEffect(() => {
@@ -137,26 +136,34 @@ export default function MonitorAlbum() {
       const rsAlbum = await AxiosService.get(
         "/api/method/mbw_dms.api.album.list_album_name"
       );
-      setDataFilterAlbum(rsAlbum.result);
       setCreation(dateNow);
+      setDataFilterAlbum(rsAlbum.result);
     })();
   }, []);
 
   useEffect(() => {
     (async () => {
+      console.table(
+        {
+          customer_name,
+          creation: creation,
+          team_sale,
+          employee,
+          album_name: album 
+        },
+      )
       const rsAlbum = await AxiosService.get(
         "/api/method/mbw_dms.api.album.list_monitor_album",
         {
           params: {
             customer_name,
-            creation,
+            creation: creation,
             team_sale,
             employee,
             album_name: album 
           },
         }
       );
-
       setDataAlbum(rsAlbum.result);
     })();
   }, [album, customer_name, creation, team_sale, employee]);
@@ -195,7 +202,7 @@ export default function MonitorAlbum() {
             <DatePicker
               format={"DD-MM-YYYY"}
               className="!bg-[#F4F6F8]"
-              defaultValue={dayjs(creation)}
+              defaultValue={dayjs(dateNow)}
               onChange={onChange}
             />
           </FormItemCustom>
