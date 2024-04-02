@@ -114,7 +114,7 @@ export default function RouterCreate() {
           }
         ]}
       />
-      <div className="bg-white rounded-md">
+      <div className="bg-white rounded-md border border-solid border-[#DFE3E8] overflow-hidden">
         <Form
           layout="vertical"
           form={form}

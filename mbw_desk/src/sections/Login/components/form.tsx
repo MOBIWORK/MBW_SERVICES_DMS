@@ -74,13 +74,13 @@ function FormLogin(props: Props) {
         setErrorLogin(false)
     },[formLoad])
     return (
-        <div className="w-[465px] mx-auto bg-white p-[30px] rounded-[18px] shadow-sm">
+        <div className="w-[465px] bg-white p-[30px] rounded-[18px] shadow-sm">
             <SelectLanguage
                 options={[
                     { value: 'vi', label: <div className="flex items-center"> <VietNameFlag/>{" "} <span className='ml-1'>Tiếng Việt</span> </div>},
                     { value: 'en', label: <div className="flex items-center"><EnglandFlag/>{" "} <span className='ml-1'>English</span> </div>}, 
                 ]}
-                defaultValue={localStorage.getItem("i18nextLng") && localStorage.getItem("i18nextLng") =="vi-VN" ? "vi" : localStorage.getItem("i18nextLng")}
+                defaultValue={localStorage.getItem("i18nextLng") && localStorage.getItem("i18nextLng") =="vi-VN" ? "vi" : localStorage.getItem("i18nextLng") =="en-US" ? "en" : localStorage.getItem("i18nextLng")}
                 onChange={(value:string) => {changeLanguage(value)}}
             />
 
@@ -105,7 +105,7 @@ function FormLogin(props: Props) {
                     formLoad == "login" && 
                <>
                     <p className='my-5 text-center font-normal'>{t("or")}</p>
-                    <Button onClick={setFormLoad.bind(null,"login_email")} className='w-full bg-[#F3F3F3] hover:bg-[#d9d9d9] px-4 font-semibold text-[15px] !text-[#222222] !h-fit leading-[26px] !border-[#d9d9d9] '>
+                    <Button onClick={setFormLoad.bind(null,"login_email")} className='w-full bg-[#F3F3F3] hover:bg-[#d9d9d9] px-4 font-semibold text-[15px] !text-[#222222] !h-fit leading-[26px] !border-none '>
                             {t("LoginEmail")}
                         </Button>
                </>

@@ -16,11 +16,11 @@ function LoginView(props: Props) {
             <Header />
             <div className="flex-1">
                <Content classN="h-full items-center">
-                    <Row className='w-full h-full items-center'>
-                        <Col className="gutter-row text-center hidden lg:block " span={24} lg={12}>
+                    <Row className='w-full h-full items-center justify-between'>
+                        <Col className="gutter-row text-center hidden lg:block flex-1" span={24} lg={12}>
                             <img className='w-[543.6px] h-[563.51px] object-contain' src={image} />
                         </Col>
-                        <Col  className="gutter-row" span={24}  lg={12}><FormLogin /></Col>
+                        <Col  className="gutter-row inline-flex justify-end" span={24}  lg={12}><FormLogin /></Col>
     
                     </Row>
                </Content>

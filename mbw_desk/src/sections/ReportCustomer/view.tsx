@@ -330,8 +330,8 @@ export default function ReportCustomer() {
           },
         ]}
       />
-      <div className="bg-white rounded-xl pt-4 border-[#DFE3E8] border-[0.2px] border-solid">
-        <Row className="justify-between items-center w-full">
+      <div className="bg-white rounded-xl border-[#DFE3E8] border-[0.2px] border-solid">
+        <Row className="justify-between items-end w-full p-4">
           <Col span={14}>
             <Row gutter={8}>
               <Col className="mx-4 w-full" span={24}>
@@ -593,7 +593,6 @@ export default function ReportCustomer() {
           </Col>
         </Row>
 
-        <div className="p-4">
           <TableCustom
             columns={columns}
             expandable={{ expandedRowRender, defaultExpandedRowKeys: ["0"] }}
@@ -611,6 +610,7 @@ export default function ReportCustomer() {
               },
             }}
           />
+        <div className="">
         </div>
       </div>
     </>

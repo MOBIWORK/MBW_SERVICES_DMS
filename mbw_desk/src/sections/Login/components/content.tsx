@@ -11,8 +11,8 @@ interface Props {
 function Content({children,bg,pd,classN} : Props) {
 
     return (
-        <div className={classNames('w-full',bg && `bg-[white]`,pd && "px-[24px]",classN)}>
-            <div className="w-[1290px] mx-auto max-w-full flex flex-row justify-between items-center h-full">{children} </div>
+        <div className={classNames('w-full',bg && `bg-[white]`,classN)}>
+            <div className={classNames("w-[1290px] mx-auto max-w-full flex flex-row justify-between items-center h-full",pd && "px-[24px]")}>{children} </div>
         </div>
     )
 }

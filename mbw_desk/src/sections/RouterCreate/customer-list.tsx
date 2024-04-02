@@ -59,7 +59,7 @@ export default function CustomerList({data,handleData}:Props) {
     
     ] 
   return (
-    <div className='p-4'>
+    <div className=''>
     <TableCustom 
         columns={columnsCustomer}
         dataSource={data}

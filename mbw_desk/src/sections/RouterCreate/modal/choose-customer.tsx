@@ -196,19 +196,21 @@ export function ChooseCustomer({selected,handleAdd,closeModal}:Props) {
           </Row>
         )}
       </div>
-      <TableCustom
-        scroll={{y: 500 }}
-        rowSelection={{
-          type: "checkbox",
-          ...rowSelection,
-        }}
-        columns={columnSelectCustomer}
-        dataSource={customerList.map((value: CustomerType) => ({
-          key: value.customer_code,
-          ...value,
-        }))}
-        pagination={false}
-      />
+      <div className="-mx-6">
+        <TableCustom
+          scroll={{y: 500 }}
+          rowSelection={{
+            type: "checkbox",
+            ...rowSelection,
+          }}
+          columns={columnSelectCustomer}
+          dataSource={customerList.map((value: CustomerType) => ({
+            key: value.customer_code,
+            ...value,
+          }))}
+          pagination={false}
+        />
+      </div>
       <Row className="justify-end mt-2">
         <Pagination showSizeChanger={false} defaultCurrent={page_number} pageSize={PAGE_SIZE}  total={total_Customer} onChange={(page,pageSize) => {
           setPageNumber(page);          

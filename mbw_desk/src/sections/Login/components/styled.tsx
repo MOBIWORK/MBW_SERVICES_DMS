@@ -10,6 +10,7 @@ heigh: 28px;
 export const InputLogin = styled(Input)`
 & ,& input, & .ant-input-affix-wrapper {
     background: #F4F6F8!important;
+    border: none!important;
 }
 
 & input:not(:placeholder-shown) {
@@ -25,6 +26,7 @@ export const InputLogin = styled(Input)`
 export const InputLoginPw = styled(Input.Password)`
 & ,& input, & .ant-input-affix-wrapper {
     background: #F4F6F8!important;
+    border: none!important;
 }
 
 & input:not(:placeholder-shown) {

@@ -2,14 +2,15 @@ import { Table } from "antd";
 import styled from "styled-components";
 
 
-export const TableCustomWrapper = styled(Table)`
-
+export const TableCustom = styled(Table)<{$border?: boolean}>`
+& table {
+  border-left: ${props => props.$border ? "" : "none"}!important;
+  border-right: ${props => props.$border ? "" : "none"}!important;
+}
 & .ant-table-container .ant-table-cell{
   font-size: 14px!important;
   font-weight:500;
   letter-spacing: normal!important;
-}
-&.ant-table-wrapper table {
 }
 
 &:not(:has(.ant-table-cell)) .ant-table-thead {
@@ -30,15 +31,12 @@ export const TableCustomWrapper = styled(Table)`
       border-bottom: none
     }
     & th:first-child {
-      // border-start-start-radius: 16px!important;
       border-start-start-radius: 0!important;
-      border-start-start: 1px!important;
+      border-start-start: 1!important;
     }
   
     & th:last-child {
-      // border-start-end-radius: 16px!important;
       border-start-end-radius: 0!important;
-      border-start-end: 1px!important;
     }
   }
 }
@@ -46,12 +44,10 @@ export const TableCustomWrapper = styled(Table)`
 & .ant-table-tbody>tr:last-child {
   border-radius:  0 0 16px 16px!important;
   & td:first-child {
-    // border-end-start-radius: 16px!important;
     border-end-start-radius: 0!important;
   }
 
   & td:last-child {
-    // border-end-end-radius: 16px!important;
     border-end-end-radius: 0!important;
   }
 }
@@ -64,7 +60,6 @@ export const TableCustomWrapper = styled(Table)`
 .ant-table-container {
     table {
       border: 1px solid #ebebeb;
-      // border-radius: 4px;
     }
 
     .ant-table-thead {
@@ -177,10 +172,19 @@ export const TableCustomWrapper = styled(Table)`
       margin-left: -18px;
     }
   }
-`;
 
-export const TableCustom  = ({...props}) => {
-  return <TableCustomWrapper>
-    <Table {...props}/>
-  </TableCustomWrapper>
-}
+  /* bang vuong */
+  &.ant-table-wrapper {
+    & table {
+      border-start-start-radius: 0px!important;
+      border-start-end-radius: 0px!important;
+    }
+    & .ant-table-container table>thead>tr:first-child >*:first-child {
+      border-start-start-radius: 0px!important;
+    }
+
+    & .ant-table-container table>thead>tr:first-child >*:last-child {
+      border-start-start-radius: 0px!important;
+    }
+  } 
+`;
