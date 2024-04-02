@@ -2,7 +2,7 @@ import { Table } from "antd";
 import styled from "styled-components";
 
 
-export const TableCustom = styled(Table)`
+export const TableCustomWrapper = styled(Table)`
 
 & .ant-table-container .ant-table-cell{
   font-size: 14px!important;
@@ -32,17 +32,19 @@ export const TableCustom = styled(Table)`
     & th:first-child {
       // border-start-start-radius: 16px!important;
       border-start-start-radius: 0!important;
+      border-start-start: 1px!important;
     }
   
     & th:last-child {
       // border-start-end-radius: 16px!important;
       border-start-end-radius: 0!important;
+      border-start-end: 1px!important;
     }
   }
 }
 
 & .ant-table-tbody>tr:last-child {
-  // border-radius:  0 0 16px 16px!important;
+  border-radius:  0 0 16px 16px!important;
   & td:first-child {
     // border-end-start-radius: 16px!important;
     border-end-start-radius: 0!important;
@@ -176,3 +178,9 @@ export const TableCustom = styled(Table)`
     }
   }
 `;
+
+export const TableCustom  = ({...props}) => {
+  return <TableCustomWrapper>
+    <Table {...props}/>
+  </TableCustomWrapper>
+}
