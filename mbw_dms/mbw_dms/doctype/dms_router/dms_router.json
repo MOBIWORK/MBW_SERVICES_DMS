@@ -96,7 +96,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-03-08 11:27:16.042285",
+ "modified": "2024-04-01 14:33:51.451884",
  "modified_by": "Administrator",
  "module": "MBW DMS",
  "name": "DMS Router",
@@ -111,6 +111,19 @@
    "read": 1,
    "report": 1,
    "role": "System Manager",
+   "select": 1,
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales User",
    "select": 1,
    "share": 1,
    "write": 1
