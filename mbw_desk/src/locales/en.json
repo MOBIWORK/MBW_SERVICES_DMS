@@ -4,12 +4,18 @@
 	"support": "Support",
 	"hdsd" : "User manual",
 	"Login_to_erpn": "Login to ERPNext Plus system",
+	"Login_to_erpn_email": "Login With Email Link",
+	"Login_to_erpn_forgot": "Forgot password",
 	"forgot": "Forgot password",
 	"or": "Or",
 	"LoginEmail":"Login with Email link",
 	"Login":"Login",
 	"error_login": "Login is Invalid. Try again",
+	"error_form_login": "Error. Try again",
 	"Chinh_sach": "Privacy policy",
 	"Dieu_khoan": "Term of use",
-	"Lien_he":"Contact"
+	"Lien_he":"Contact",
+	"back_login" : "Back to login",
+	"login_email": "Send login link",
+	"forgot_btn": "Reset password"
 }

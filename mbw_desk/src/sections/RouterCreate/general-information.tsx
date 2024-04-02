@@ -44,28 +44,34 @@ export default function GeneralInformation({form}:{form :any}) {
   const [saleEmp,setSaleEmp] = useState<string>()
   useEffect(() => {
     (async () => {
-      let rsSales: rsData<listSale[]> = await AxiosService.get(
-        "/api/method/mbw_dms.api.router.get_team_sale"
-      );
-      console.log("tree",treeArray({data: rsSales.result.map((team_sale:listSale) => ({
-        title: team_sale.name,
-        value: team_sale.name,
-        ...team_sale
-      })),keyValue: "value", parentField: "parent_sales_person"}));
-      
-      // setListSales(rsSales.result.map((team_sale:listSale) => ({
-      //   label: team_sale.name,
-      //   value: team_sale.name
-      // })))
-      setListSales(treeArray({data: rsSales.result.map((team_sale:listSale) => ({
-        title: team_sale.name,
-        value: team_sale.name,
-        ...team_sale
-      })),keyValue: "value", parentField: "parent_sales_person"}))
+      try {
+        let rsSales: rsData<listSale[]> = await AxiosService.get(
+          "/api/method/mbw_dms.api.router.get_team_sale"
+        );
+        console.log("tree",treeArray({data: rsSales.result.map((team_sale:listSale) => ({
+          title: team_sale.name,
+          value: team_sale.name,
+          ...team_sale
+        })),keyValue: "value", parentField: "parent_sales_person"}));
+        
+        // setListSales(rsSales.result.map((team_sale:listSale) => ({
+        //   label: team_sale.name,
+        //   value: team_sale.name
+        // })))
+        setListSales(treeArray({data: rsSales.result.map((team_sale:listSale) => ({
+          title: team_sale.name,
+          value: team_sale.name,
+          ...team_sale
+        })),keyValue: "value", parentField: "parent_sales_person"}))
+        
+      } catch (error) {
+        
+      }
     })();
   }, []);
   useEffect(() => {
     (async() => {
+      try {
         let rsEmployee: rsDataFrappe<employee[]> = await AxiosService.get("/api/method/mbw_dms.api.router.get_sale_person",{
         params: {
           team_sale:teamSale,
@@ -78,6 +84,10 @@ export default function GeneralInformation({form}:{form :any}) {
         value: employee_filter.employee_code,
         label: employee_filter.employee_name || employee_filter.employee_code
       })))
+        
+      } catch (error) {
+        
+      }
     })()
   },[teamSale,seachbykey])
   return (

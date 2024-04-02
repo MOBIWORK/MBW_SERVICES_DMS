@@ -78,15 +78,21 @@ export default function RouterCreate() {
   useEffect(()=> {
     if(type !== 'create-dms-router') {
       (async() => {
-        const rsRouter:rsData<router> = await AxiosService.get(`/api/method/mbw_dms.api.router.get_router`, {
-          params: {
-            id: type
-          }
-        })
-        setDetailRouter(rsRouter.result)
-        if(rsRouter.result)
-          form.setFieldsValue(rsRouter.result)
-          setCustomerRouter(rsRouter.result?.customers || [])
+        try {
+          const rsRouter:rsData<router> = await AxiosService.get(`/api/method/mbw_dms.api.router.get_router`, {
+            params: {
+              id: type
+            }
+          })
+          setDetailRouter(rsRouter.result)
+          if(rsRouter.result)
+            form.setFieldsValue(rsRouter.result)
+            setCustomerRouter(rsRouter.result?.customers || [])
+
+        }catch(err) {
+          console.log("error");
+          
+        }
       })()
     }
   },[type])

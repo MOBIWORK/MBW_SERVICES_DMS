@@ -18,8 +18,8 @@ export function AuthProvider({children}:Props) {
   } = useFrappeAuth();
   console.log(window.location.pathname);
   
-    if(!isLoading && !currentUser && window.location.pathname != `${BASE_URL || ""}/auth/login` )
-      window.location.href = `${BASE_URL||""}/auth/login`
+    // if(!isLoading && !currentUser && window.location.pathname != `${BASE_URL || ""}/auth/login` )
+    //   window.location.href = `${BASE_URL||""}/auth/login`
     return <>{children}</>
 
 }

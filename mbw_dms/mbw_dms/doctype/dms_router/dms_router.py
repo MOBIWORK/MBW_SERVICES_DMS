@@ -132,7 +132,8 @@ def get_customer_router(data):
         thu_trong_tuan, tuan_trong_thang = weekday(today)
         if view_mode == "map":
             queryFilters.update({"travel_date": ["between",["Không giới hạn",thu_trong_tuan]]})
-            queryFilters.update({"frequency": ["like",tuan_trong_thang]})    
+            queryFilters.update({"frequency": ["like",tuan_trong_thang]})  
+        print("queryFilters",queryFilters)  
         list_router = frappe.db.get_list('DMS Router',filters=queryFilters, pluck='name',distinct=True)
         list_customer = []
         for router_name in list_router:
