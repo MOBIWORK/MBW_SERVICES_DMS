@@ -1,6 +1,6 @@
 import React, { ReactNode, useState } from 'react'
 import Content from './content'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next';
 import type { MenuProps } from 'antd';
 import { Dropdown, Space } from 'antd';
@@ -28,15 +28,15 @@ function Header(props: Props) {
     const [showMenu, setShowMenu] = useState<boolean>(false)
     const itemsDownLoad: MenuProps['items'] = [
         {
-            label: "Ứng dụng ESS dành cho Android",
+            label: <Link to={'https://play.google.com/store/apps/details?id=mbw.next.ess'}>Ứng dụng ESS dành cho Android</Link>,
             key: '0',
         },
         {
-            label: "Ứng dụng ESS dành cho IOS",
+            label: <Link to='https://apps.apple.com/no/app/mbw-ess/id6473134079'>Ứng dụng ESS dành cho IOS</Link>,
             key: '1',
         },
         {
-            label: "Ứng dụng SFA dành cho Android",
+            label: <Link to="https://play.google.com/store/apps/details?id=mbw.next.dms">Ứng dụng SFA dành cho Android</Link>,
             key: '2',
         },
         {
@@ -115,7 +115,7 @@ function Header(props: Props) {
             </Content>
             <Content bg>
                 {showMenu && <div className={classNames("w-full py-3 flex lg:hidden flex-col  items-center justify-center")}>
-                    <MenuItem >
+                    <MenuItem to='https://mbw.vn/' >
                         {t('about_MBW')}
                     </MenuItem>
                     <Dropdown
@@ -149,7 +149,7 @@ function Header(props: Props) {
                             </Space>
                         </a>
                     </Dropdown>
-                    <MenuItem >
+                    <MenuItem to='https://docsdms.mbwcloud.com/user_Guide_ERPNext'>
                         {t('hdsd')}
                     </MenuItem>
 
