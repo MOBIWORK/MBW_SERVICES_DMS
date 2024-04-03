@@ -1,5 +1,5 @@
 import { VerticalAlignBottomOutlined } from "@ant-design/icons";
-import { FormItemCustom, HeaderPage } from "../../components";
+import { FormItemCustom, HeaderPage, TableCustom } from "../../components";
 import { DatePicker, Select, Table, TreeSelect, Typography } from "antd";
 import { TableReport } from "../ReportSales/tableCustom";
 import { monthAll } from "./data";
@@ -13,7 +13,7 @@ import dayjs from "dayjs";
 import { treeArray } from "../../util";
 import { listSale } from "../../types/listSale";
 
-const { Column, ColumnGroup } = TableReport;
+const { Column, ColumnGroup } = TableCustom;
 
 interface DataTypeKPI {
   key: React.Key;
@@ -68,7 +68,6 @@ export default function ReportKPI() {
   const [fmonth, setFmonth] = useState("");
   const [fyear, setFYear] = useState("");
   const [total, setTotal] = useState<number>(0);
-
 
   const onChange: DatePickerProps["onChange"] = (date) => {
     setFYear(date?.["$y"].toString());
@@ -155,11 +154,11 @@ export default function ReportKPI() {
           },
         ]}
       />
-      <div className="bg-white rounded-md py-7 px-4 border-[#DFE3E8] border-[0.2px] border-solid">
-        <div className="flex justify-start items-center">
+      <div className="bg-white rounded-md py-7 border-[#DFE3E8] border-[0.2px] border-solid">
+        <div className="flex justify-start items-center px-4">
           <FormItemCustom className="w-[200px] border-none mr-2">
             <Select
-              className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
+              className="!bg-[#F4F6F8] options:bg-[#F4F6F8] !h-8"
               defaultValue={month}
               options={monthAll}
               onChange={(value: string) => {
@@ -170,7 +169,7 @@ export default function ReportKPI() {
           </FormItemCustom>
           <FormItemCustom className="w-[200px] border-none mr-2">
             <DatePicker
-              className="!bg-[#F4F6F8]"
+              className="!bg-[#F4F6F8] !h-8"
               onChange={onChange}
               picker="year"
               defaultValue={dayjs().startOf("year")}
@@ -190,7 +189,10 @@ export default function ReportKPI() {
             />
           </FormItemCustom>
 
-          <FormItemCustom name="employee"className="w-[200px] border-none mr-2">
+          <FormItemCustom
+            name="employee"
+            className="w-[200px] border-none mr-2"
+          >
             <Select
               showSearch
               filterOption={false}
@@ -200,7 +202,10 @@ export default function ReportKPI() {
               onSearch={(value: string) => {
                 setKeySearch4(value);
               }}
-              options={[ { label: "Tất cả nhân viên", value: "" },...listEmployees]}
+              options={[
+                { label: "Tất cả nhân viên", value: "" },
+                ...listEmployees,
+              ]}
               onSelect={(value) => {
                 setEmployee(value);
               }}
@@ -212,7 +217,7 @@ export default function ReportKPI() {
         </div>
         {/* {routersTable?.map(router => ({ key: router.name, ...router }))} */}
         <div className="pt-5">
-          <TableReport
+          <TableCustom
             dataSource={dataReort?.data?.map((report) => ({
               key: report.name,
               ...report,
@@ -269,17 +274,17 @@ export default function ReportKPI() {
                   </Table.Summary.Cell>
                   <Table.Summary.Cell index={18}></Table.Summary.Cell>
                   <Table.Summary.Cell index={19}>
-                    {dataReort?.sum?.tong_kh_doanh_so}
+                    {Intl.NumberFormat().format(dataReort?.sum?.tong_kh_doanh_so)}
                   </Table.Summary.Cell>
                   <Table.Summary.Cell index={20}>
-                    {dataReort?.sum?.tong_th_doanh_so}
+                    {Intl.NumberFormat().format(dataReort?.sum?.tong_th_doanh_so)}
                   </Table.Summary.Cell>
                   <Table.Summary.Cell index={21}></Table.Summary.Cell>
                   <Table.Summary.Cell index={22}>
-                    {dataReort?.sum?.tong_kh_doanh_thu}
+                    {Intl.NumberFormat().format(dataReort?.sum?.tong_kh_doanh_thu)}
                   </Table.Summary.Cell>
                   <Table.Summary.Cell index={23}>
-                    {dataReort?.sum?.tong_th_doanh_thu}
+                    {Intl.NumberFormat().format(dataReort?.sum?.tong_th_doanh_thu)}
                   </Table.Summary.Cell>
                   <Table.Summary.Cell index={24}></Table.Summary.Cell>
                   <Table.Summary.Cell index={25}>
@@ -312,7 +317,7 @@ export default function ReportKPI() {
               dataIndex="stt"
               key="stt"
               fixed="left"
-              width={60}
+              className="!text-center"
               render={(_: any, record: any, index: number) => index + 1}
             />
             <Column
@@ -320,14 +325,14 @@ export default function ReportKPI() {
               dataIndex="nhan_vien_ban_hang"
               key="nhan_vien_ban_hang"
               fixed="left"
-              width={130}
+              render={(_: any, record: any) => <><div className="!min-w-[130px]">{record.nhan_vien_ban_hang}</div></>}
             />
             <Column
               title="Nhân viên"
               dataIndex="ten_nv"
               key="ten_nv"
               fixed="left"
-              width={200}
+              render={(_: any, record: any) => <><div className="!min-w-[200px]">{record.ten_nv}</div></>}
             />
             <Column
               title="Phòng/nhóm"
@@ -338,9 +343,8 @@ export default function ReportKPI() {
               )}
             />
             <ColumnGroup
-              className="!whitespace-normal"
+              className="!whitespace-normal !min-w-[210px] !text-center"
               title="Số khách hàng viếng thăm"
-              width={210}
             >
               <Column title="KH" width={70} dataIndex="kh_vt" key="kh_vt" />
               <Column title="TH" width={70} dataIndex="th_vt" key="th_vt" />
@@ -353,9 +357,8 @@ export default function ReportKPI() {
               />
             </ColumnGroup>
             <ColumnGroup
-              className="!whitespace-normal"
+              className="!whitespace-normal !min-w-[210px] !text-center"
               title="Số khách hàng viếng thăm duy nhất"
-              width={210}
             >
               <Column
                 title="KH"
@@ -380,9 +383,8 @@ export default function ReportKPI() {
               />
             </ColumnGroup>
             <ColumnGroup
-              className="!whitespace-normal"
+              className="!whitespace-normal !min-w-[210px] !text-center"
               title="Số khách hàng đặt hàng"
-              width={210}
             >
               <Column
                 title="KH"
@@ -407,9 +409,8 @@ export default function ReportKPI() {
               />
             </ColumnGroup>
             <ColumnGroup
-              className="!whitespace-normal"
+              className="!whitespace-normal !min-w-[210px] !text-center"
               title="Số khách hàng thêm mới"
-              width={210}
             >
               <Column
                 title="KH"
@@ -462,20 +463,25 @@ export default function ReportKPI() {
             </ColumnGroup>
             <ColumnGroup
               className="!whitespace-normal"
-              title="Doanh số"
+              title="Doanh số (VNĐ)"
               width={210}
             >
               <Column
                 title="KH"
-                width={70}
                 dataIndex="kh_doanh_so"
                 key="kh_doanh_so"
+                render={(_: any, record: DataTypeKPI) => (
+                  <>{Intl.NumberFormat().format(record.kh_doanh_so)}</>
+                )}
               />
               <Column
                 title="TH"
                 width={70}
                 dataIndex="th_doanh_so"
                 key="th_doanh_so"
+                render={(_: any, record: DataTypeKPI) => (
+                  <>{Intl.NumberFormat().format(record.th_doanh_so)}</>
+                )}
               />
               <Column
                 title="TL"
@@ -489,7 +495,7 @@ export default function ReportKPI() {
             </ColumnGroup>
             <ColumnGroup
               className="!whitespace-normal"
-              title="Doanh thu"
+              title="Doanh thu (VNĐ)"
               width={210}
             >
               <Column
@@ -497,12 +503,18 @@ export default function ReportKPI() {
                 width={70}
                 dataIndex="kh_doanh_thu"
                 key="kh_doanh_thu"
+                render={(_: any, record: DataTypeKPI) => (
+                  <>{Intl.NumberFormat().format(record.kh_doanh_thu)}</>
+                )}
               />
               <Column
                 title="TH"
                 width={70}
                 dataIndex="th_doanh_thu"
                 key="th_doanh_thu"
+                render={(_: any, record: DataTypeKPI) => (
+                  <>{Intl.NumberFormat().format(record.th_doanh_thu)}</>
+                )}
               />
               <Column
                 title="TL"
@@ -579,7 +591,7 @@ export default function ReportKPI() {
                 )}
               />
             </ColumnGroup>
-          </TableReport>
+          </TableCustom>
         </div>
       </div>
     </>

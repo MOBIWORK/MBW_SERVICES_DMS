@@ -405,6 +405,7 @@ export default function ReportCustomer() {
             <div className="flex flex-wrap items-center">
               <div className="flex justify-center items-center mr-4">
                 <Dropdown
+                  className="!h-8"
                   placement="bottomRight"
                   // trigger={["click"]}
                   dropdownRender={() => (
@@ -585,7 +586,7 @@ export default function ReportCustomer() {
                     Bộ lọc
                   </Button>
                 </Dropdown>
-                <Button className="border-l-[0.1px] rounded-l-none h-9">
+                <Button className="border-l-[0.1px] rounded-l-none !h-8">
                   <LuFilterX style={{ fontSize: "20px" }} />
                 </Button>
               </div>

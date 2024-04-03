@@ -133,16 +133,6 @@ export default function MonitorAlbum() {
 
   useEffect(() => {
     (async () => {
-      const rsAlbum = await AxiosService.get(
-        "/api/method/mbw_dms.api.album.list_album_name"
-      );
-      setCreation(dateNow);
-      setDataFilterAlbum(rsAlbum.result);
-    })();
-  }, []);
-
-  useEffect(() => {
-    (async () => {
       console.table(
         {
           customer_name,
@@ -167,6 +157,16 @@ export default function MonitorAlbum() {
       setDataAlbum(rsAlbum.result);
     })();
   }, [album, customer_name, creation, team_sale, employee]);
+
+  useEffect(() => {
+    (async () => {
+      const rsAlbum = await AxiosService.get(
+        "/api/method/mbw_dms.api.album.list_album_name"
+      );
+      setCreation(dateNow);
+      setDataFilterAlbum(rsAlbum.result);
+    })();
+  }, []);
 
   const onChange: DatePickerProps["onChange"] = (dateString) => {
     setCreation(dateString?.format("YYYY-MM-DD"));
@@ -201,7 +201,7 @@ export default function MonitorAlbum() {
           <FormItemCustom className="w-[200px] border-none mr-2">
             <DatePicker
               format={"DD-MM-YYYY"}
-              className="!bg-[#F4F6F8]"
+              className="!bg-[#F4F6F8] !h-8"
               defaultValue={dayjs(dateNow)}
               onChange={onChange}
             />
