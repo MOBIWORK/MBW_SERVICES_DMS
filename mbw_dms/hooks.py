@@ -251,6 +251,9 @@ doc_events = {
     },
     "Customer": {
         "on_update": "mbw_dms.controllers.dms_customer.update_location"
+    },
+    "User": {
+        "after_insert": "mbw_dms.controllers.dms_users.create_employee_and_sales_team"
     }
 }
 
