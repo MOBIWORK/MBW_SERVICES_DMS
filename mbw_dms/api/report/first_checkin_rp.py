@@ -40,7 +40,7 @@ def first_checkin_report(**kwargs):
                                  fields=['department', 'employee_id', 'employee_name', 'customer_name', 'customer_code', 'customer_type', 'customer_group', 'contact_person', 'phone',
                                          'tax_id', 'territory', 'address', 'date_checkin'],
                                  start=page_size*(page_number-1), page_length=page_size)
-        totals = frappe.db.count('DMS First Checkin Customer')
+        totals = frappe.db.count('DMS First Checkin Customer', filters=filters)
 
         return gen_response(200, 'Thành công', {
             "data": data,

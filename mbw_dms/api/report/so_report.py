@@ -59,7 +59,7 @@ def so_report(**kwargs):
                 totals['sum_vat'] += i['tax_amount']
             totals['sum_discount_amount'] += i['discount_amount']
             totals['sum_grand_total'] += i['grand_total']
-        count_data = frappe.db.count('Sales Order', {'docstatus':1})
+        count_data = frappe.db.count('Sales Order', filters=filters)
 
         return gen_response(200, 'Thành công', {
             "data": sale_orders,
@@ -123,7 +123,7 @@ def si_report(**kwargs):
                 totals['sum_vat'] += i['tax_amount']
             totals['sum_discount_amount'] += i['discount_amount']
             totals['sum_grand_total'] += i['grand_total']
-        count_data = frappe.db.count('Sales Invoice', {'docstatus':1})
+        count_data = frappe.db.count('Sales Invoice', filters=filters)
 
         return gen_response(200, 'Thành công', {
             "data": sale_invoices,
