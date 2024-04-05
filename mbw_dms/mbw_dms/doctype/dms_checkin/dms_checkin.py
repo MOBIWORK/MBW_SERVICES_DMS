@@ -439,8 +439,6 @@ def cancel_checkout(data):
 import requests
 
 def create_checkin_ek(doc, method=None):
-    settings = frappe.db.get_singles_dict("MBW Employee Settings")
-    geo_service = settings.get("geo_service")
     objectId = ""
     projectId = ""
     api_checkin = f"https://api.ekgis.vn/v1/checkin/{projectId}/{objectId}"
