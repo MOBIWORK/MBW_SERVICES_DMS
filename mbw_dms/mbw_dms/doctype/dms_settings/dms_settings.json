@@ -28,7 +28,12 @@
   "company_on_map",
   "company_long",
   "company_lat",
-  "industrys"
+  "industrys",
+  "aws_tab",
+  "access_key_s3",
+  "key_secret_s3",
+  "endpoint_s3",
+  "bucket_name_s3"
  ],
  "fields": [
   {
@@ -153,12 +158,37 @@
    "fieldtype": "Table MultiSelect",
    "label": "Ng\u00e0nh h\u00e0ng",
    "options": "Industrys"
+  },
+  {
+   "fieldname": "aws_tab",
+   "fieldtype": "Tab Break",
+   "label": "AWS"
+  },
+  {
+   "fieldname": "access_key_s3",
+   "fieldtype": "Data",
+   "label": "Access Key AWS"
+  },
+  {
+   "fieldname": "key_secret_s3",
+   "fieldtype": "Data",
+   "label": "Secret Key AWS"
+  },
+  {
+   "fieldname": "endpoint_s3",
+   "fieldtype": "Data",
+   "label": "Endpoint"
+  },
+  {
+   "fieldname": "bucket_name_s3",
+   "fieldtype": "Data",
+   "label": "BUCKET NAME S3"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-03-27 16:53:42.471499",
+ "modified": "2024-04-05 16:30:13.369829",
  "modified_by": "Administrator",
  "module": "MBW DMS",
  "name": "DMS Settings",
