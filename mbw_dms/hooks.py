@@ -254,7 +254,10 @@ doc_events = {
     },
     # "User": {
     #     "after_insert": "mbw_dms.controllers.dms_users.create_employee_and_sales_team"
-    # }
+    # },
+    "Sales Person": {
+        "on_update": "mbw_dms.controllers.dms_sales_person.create_user_permission"
+    },
 }
 
 import frappe
