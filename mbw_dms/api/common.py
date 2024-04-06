@@ -10,9 +10,9 @@ from frappe.core.doctype.file.utils import delete_file
 from frappe.utils.file_manager import save_file
 
 # comment lại thì đẩy lên nhớ mở ra/ không thì chạy bench setup requirements chứ .
-from mbw_dms.api.file import (
-    my_minio
-)
+# from mbw_dms.api.file import (
+#     my_minio
+# )
 from PIL import Image
 from PIL import ImageDraw
 from PIL import ImageFont
