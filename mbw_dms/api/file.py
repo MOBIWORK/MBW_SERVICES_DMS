@@ -90,7 +90,7 @@ class MinioConnection:
                                       length=length, part_size=part_size)
 
 def create_my_minio():
-    settings = frappe.get_doc("DMS Settings").as_dict()
+    settings = frappe.get_doc("MBW Employee Settings").as_dict()
     return MinioConnection(
         endpoint=settings.get("endpoint_s3"),
         access_key=settings.get("access_key_s3"),
