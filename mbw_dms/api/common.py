@@ -10,9 +10,7 @@ from frappe.core.doctype.file.utils import delete_file
 from frappe.utils.file_manager import save_file
 
 # comment lại thì đẩy lên nhớ mở ra/ không thì chạy bench setup requirements chứ .
-# from mbw_dms.api.file import (
-#     my_minio
-# )
+from mbw_dms.api.file import create_my_minio
 from PIL import Image
 from PIL import ImageDraw
 from PIL import ImageFont
@@ -76,7 +74,7 @@ def get_language():
 
     return lang
 
-def exception_handel(e):
+def exception_handle(e):
     frappe.log_error(title="DMS Mobile App Error",
                      message=frappe.get_traceback())
     return gen_response(406, cstr(e))
@@ -225,7 +223,7 @@ def upload_image_s3(image,description):
     # if not my_minio.bucket_exists(bucket_domain):
     #     my_minio.make_bucket(bucket_domain)
     try:    
-        my_minio.put_object(bucket_name=bucket_name_s3, object_name=f"{bucket_domain}/{file_name}", data=io.BytesIO(imgdata_new))
+        create_my_minio('AWS Settings').put_object(bucket_name=bucket_name_s3, object_name=f"{bucket_domain}/{file_name}", data=io.BytesIO(imgdata_new))
     except Exception as e:
         print(e)
     # data response

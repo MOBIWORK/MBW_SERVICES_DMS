@@ -4,7 +4,7 @@ import json
 from datetime import datetime
 
 from mbw_dms.api.common import (
-    exception_handel,
+    exception_handle,
     gen_response,
     validate_image,
     post_image,
@@ -67,7 +67,7 @@ def list_customer(**kwargs):
             "total": record
         })
     except Exception as e:
-        return exception_handel(e)
+        return exception_handle(e)
     
 
 #list customer type Company Individual
@@ -77,7 +77,7 @@ def list_customer_type():
         brand = frappe.db.get_list('Customer Group', fields=["name", "customer_group_name"])
         return gen_response(200, "Thành công", brand)
     except Exception as e:
-        return exception_handel(e)
+        return exception_handle(e)
     
 # delete customer
 @frappe.whitelist(methods="DELETE")
@@ -86,7 +86,7 @@ def delete_customer(name):
         frappe.delete_doc('Customer',name)
         return gen_response(200, "Thành công", [])
     except Exception as e:
-        exception_handel(e)
+        exception_handle(e)
 
 # create customer
 @frappe.whitelist(methods="POST")
@@ -199,7 +199,7 @@ def create_customer(**kwargs):
         frappe.db.commit()
         return gen_response(201, 'Thành công', {"name": new_customer.name})
     except Exception as e:
-        return exception_handel(e)
+        return exception_handle(e)
     
 # list 
 @frappe.whitelist(methods="GET")
@@ -208,7 +208,7 @@ def list_territory():
         territory = frappe.db.get_list('Territory', fields=["name", "territory_name"])
         return gen_response(200, 'Thành công', territory)
     except Exception as e:
-        return exception_handel(e)
+        return exception_handle(e)
     
 # update
 @frappe.whitelist(methods="PUT")
@@ -223,7 +223,7 @@ def update_customer(name, **kwargs):
         else:
             return gen_response(406, f"Không tồn tại {name}")
     except Exception as e:
-        return exception_handel(e)
+        return exception_handle(e)
     
 @frappe.whitelist(methods="GET")
 def get_customer_addresses(customer_name):
@@ -252,7 +252,7 @@ def list_router(customer_name):
             i['customers'] = get_value_child_doctype('DMS Router', i['name'], 'customers')
         return gen_response(200, 'Thành công', list_router)
     except Exception as e:
-        return exception_handel(e)
+        return exception_handle(e)
     
 #list sales person
 @frappe.whitelist(methods='GET')
@@ -265,4 +265,4 @@ def list_sale_person():
         )
         return gen_response(200, 'Thành công', sale_person)
     except Exception as e:
-        return exception_handel(e)
+        return exception_handle(e)

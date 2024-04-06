@@ -3,7 +3,7 @@ from frappe import _
 from pypika import CustomFunction
 UNIX_TIMESTAMP = CustomFunction('UNIX_TIMESTAMP', ['day'])
 from mbw_dms.api.common import (
-    exception_handel,
+    exception_handle,
     gen_response,
     get_language,
     get_value_child_doctype
@@ -55,7 +55,7 @@ def get_list_sales_order(**filters):
             "page_number":page_number
         })
     except Exception as e: 
-        exception_handel(e)
+        exception_handle(e)
 
 
 # Chi tiết sales order
@@ -119,7 +119,7 @@ def get_sale_order(name):
         else:
             return gen_response(406, f"Không tồn tại đơn hàng {name}")
     # except Exception as e: 
-    #     exception_handel(e)
+    #     exception_handle(e)
 
 # Tạo mới đơn hàng
 @frappe.whitelist(methods='POST')
@@ -219,7 +219,7 @@ def create_sale_order(**kwargs):
         else:
             return gen_response(400, i18n.t('translate.invalid_grand_total', locale=get_language()), {"grand_total": grand_total})
     except Exception as e:
-        return exception_handel(e)
+        return exception_handle(e)
 
 
 # Áp dụng quy tắc đặt giá
@@ -233,7 +233,7 @@ def pricing_rule(**kwargs):
                 child["item_code"] = kwargs["items"][i]["item_code"]
         return gen_response(200, 'Thành công', pricing_rule)
     except Exception as e:
-        return exception_handel(e)
+        return exception_handle(e)
 
 
 # Áp dụng bảng giá
@@ -247,7 +247,7 @@ def price_list(**kwargs):
                 child["item_code"] = kwargs["items"][i]["item_code"]
         return gen_response(200, 'Thành công', price_list)
     except Exception as e:
-        return exception_handel(e)
+        return exception_handle(e)
 
 
 # Tạo mới phiếu trả hàng
@@ -346,7 +346,7 @@ def create_return_order(**kwargs):
         else:
             return gen_response(400, i18n.t('translate.invalid_grand_total', locale=get_language()), {"grand_total": grand_total})
     except Exception as e:
-        return exception_handel(e)
+        return exception_handle(e)
 
 # Chỉnh sửa phiếu trả hàng
 @frappe.whitelist(methods='PUT')
@@ -411,7 +411,7 @@ def edit_return_order(name, **kwargs):
         else:
             return gen_response(406, f"Không tồn tại {name}")
     except Exception as e:
-        return exception_handel(e)
+        return exception_handle(e)
 
 # Xóa phiếu trả hàng
 @frappe.whitelist(methods='DELETE')
@@ -427,7 +427,7 @@ def delete_return_order(name, **kwargs):
         else:
             return gen_response(406, f"Không tồn tại {name}")
     except Exception as e:
-        exception_handel(e)
+        exception_handle(e)
 
 # Xóa items trong phiếu trả hàng
 @frappe.whitelist(methods='DELETE')
@@ -455,7 +455,7 @@ def delete_item(name_return_order, item_code):
         else:
             return gen_response(406, f"Không tồn tại phiếu trả hàng {name_return_order}")
     except Exception as e:
-        exception_handel(e)
+        exception_handle(e)
 
 # Chi tiết đơn hàng theo checkin_id
 @frappe.whitelist(methods='GET')
@@ -525,7 +525,7 @@ def get_sale_order_by_checkin_id(doctype, **data):
         else:
             return gen_response(200, 'Thành công', [])
     except Exception as e: 
-        exception_handel(e)
+        exception_handle(e)
 
 
 def get_items_in_sales_order(master_name):

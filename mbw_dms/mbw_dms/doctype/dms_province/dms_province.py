@@ -6,7 +6,7 @@ from frappe.model.document import Document
 from frappe import _
 
 from mbw_dms.api.common import (
-    exception_handel,
+    exception_handle,
     gen_response,
 )
 
@@ -24,7 +24,7 @@ def list_province():
             frappe.cache().set_value("vn-province", list_provinces)
         return gen_response(200, 'Thành công', list_provinces)
     except Exception as e:
-        return exception_handel(e)
+        return exception_handle(e)
     
 @frappe.whitelist(methods="GET", allow_guest=True)
 def get_name_city(name):

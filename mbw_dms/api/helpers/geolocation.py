@@ -3,7 +3,7 @@ import requests
 from mbw_dms.api.common import (
     gen_response,
     get_language,
-    exception_handel
+    exception_handle
 )
 import json
 from mbw_dms.config_translate import i18n
@@ -25,7 +25,7 @@ def get_address_location(**kwargs):
         response = requests.get(url)
         return gen_response(200, _("Successfully"), json.loads(response.text))
     except Exception as e:
-        return exception_handel(e)
+        return exception_handle(e)
 
 
 @frappe.whitelist(allow_guest=True)
@@ -42,4 +42,4 @@ def get_coordinates_location(**kwargs):
         response = requests.get(url)
         return gen_response(200, _("Successfully"), json.loads(response.text))
     except Exception as e:
-        return exception_handel(e)
+        return exception_handle(e)

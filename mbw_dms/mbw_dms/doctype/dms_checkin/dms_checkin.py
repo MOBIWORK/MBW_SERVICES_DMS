@@ -5,7 +5,7 @@ import frappe
 from frappe.model.document import Document
 import datetime
 from frappe.utils.data import get_time
-from mbw_dms.api.common import exception_handel, gen_response, get_language, get_user_id, upload_image_s3, post_image, get_employee_info, get_value_child_doctype
+from mbw_dms.api.common import exception_handle, gen_response, get_language, get_user_id, upload_image_s3, post_image, get_employee_info, get_value_child_doctype
 from mbw_dms.api.validators import validate_datetime, validate_filter
 from mbw_dms.mbw_dms.utils import create_dms_log
 from mbw_dms.config_translate import i18n
@@ -259,7 +259,7 @@ def create_checkin(kwargs):
         frappe.db.commit()
         return gen_response(201, "Thành công", {"name": new_checkin.name})
     except Exception as e:
-        return exception_handel(e)
+        return exception_handle(e)
 
 
 # Thêm ảnh checkin
@@ -277,7 +277,7 @@ def add_checkin_image(name_checkin, kwargs):
         else:
             return gen_response(406, f"Không tồn tại check in {name_checkin}")
     except Exception as e:
-        return exception_handel(e)
+        return exception_handle(e)
 
 # Tạo mới checkin tồn kho
 @frappe.whitelist(methods='POST')
@@ -303,7 +303,7 @@ def create_checkin_inventory(body):
         frappe.db.commit()
         return gen_response(201, "Thành công", {"name": doc.name})
     except Exception as e:
-        return exception_handel(e)
+        return exception_handle(e)
 
 
 @frappe.whitelist(methods='POST')
@@ -359,7 +359,7 @@ def create_checkin_image(body):
                 "file_url" : None
             })
     except Exception as e:
-        exception_handel(e)
+        exception_handle(e)
 
 # Cập nhật địa chỉ khách hàng
 @frappe.whitelist(methods='PATCH')
@@ -418,7 +418,7 @@ def update_address_customer(body):
             return gen_response(406,i18n.t('translate.not_found', locale=get_language()),False)             
         
     except Exception as e:
-        exception_handel(e)
+        exception_handle(e)
 
 # cancel checkout
 @frappe.whitelist(methods="DELETE")
@@ -434,7 +434,7 @@ def cancel_checkout(data):
         frappe.db.delete("DMS Album Image",{"checkin_id":checkin_id})
         return
     except Exception as e :
-        exception_handel(e)
+        exception_handle(e)
 
 import requests
 

@@ -3,18 +3,12 @@
 
 import frappe
 from frappe.model.document import Document
-from mbw_dms.api.common import (
-    exception_handel,
-    gen_response,
-	get_value_child_doctype,
-	current_month_week,
-	get_child_values_doc
-)
 from mbw_dms.api.validators import validate_filter_timestamp
 from frappe.utils import nowdate, today
 import calendar
 from collections import defaultdict 
 import datetime
+from mbw_dms.api.common import exception_handle,gen_response,get_value_child_doctype,current_month_week,get_child_values_doc
 
 class DMSKPI(Document):
 	pass
@@ -62,7 +56,7 @@ def visit_report():
             }
 		return gen_response(200, 'Thành công', kpi)
 	except Exception as e:
-		return exception_handel(e)
+		return exception_handle(e)
 	
 # Báo cáo doanh số
 @frappe.whitelist(methods='GET')
@@ -133,7 +127,7 @@ def sales_report():
 			"sales_invoice": orders_list
 		})
 	except Exception as e:
-		return exception_handel(e)
+		return exception_handle(e)
 	
 
 # Báo cáo doanh thu nhân viên
@@ -207,7 +201,7 @@ def invoices_report():
 			"sales_invoice": invoices_list
 		})
 	except Exception as e:
-		return exception_handel(e)
+		return exception_handle(e)
 	
 
 # Báo cáo doanh thu, đơn hàng cho Mobile
@@ -279,7 +273,7 @@ def report_orders_invoices(customer_name):
 		return gen_response(200, 'Thành công', data)
 	
 	except Exception as e:
-		return exception_handel(e)
+		return exception_handle(e)
 
 
 # Báo cáo chi tiết viếng thăm
@@ -339,7 +333,7 @@ def report_detail_visit(customer_name, kwargs):
 		})
 	
 	except Exception as e:
-		return exception_handel(e)
+		return exception_handle(e)
 	
 # Kết quả đi tuyến
 @frappe.whitelist(methods='GET')
@@ -423,7 +417,7 @@ def router_results(kwargs):
 		
 		return gen_response(200, 'Thành công', data)
 	except Exception as e:
-		return exception_handel(e)
+		return exception_handle(e)
 	
 # Báo cáo viếng thăm
 @frappe.whitelist(methods='GET')
@@ -506,7 +500,7 @@ def checkin_report(kwargs):
 			"not_checkin": filtered_customers
 		})
 	except Exception as e:
-		return exception_handel(e)
+		return exception_handle(e)
 
 # Thống kê phiếu đặt hàng
 @frappe.whitelist(methods="GET")
@@ -564,7 +558,7 @@ def order_statistics(kwargs):
 			"detail_items": detail_items
 		})
 	except Exception as e:
-		return exception_handel(e)
+		return exception_handle(e)
 	
 
 # Báo cáo khách hàng mới
@@ -588,7 +582,7 @@ def new_customer_report(kwargs):
 			"list_customer": list_customers
 		})
 	except Exception as e:
-		return exception_handel(e)
+		return exception_handle(e)
 
 # Chỉ tiêu KPI
 @frappe.whitelist(methods='GET')
@@ -674,7 +668,7 @@ def kpi_targets(kwargs):
             }
 		return gen_response(200, 'Thành công', kpi)
 	except Exception as e:
-		return exception_handel(e)
+		return exception_handle(e)
 
 # Khách hàng chưa phát sinh đơn
 @frappe.whitelist(methods='GET')
@@ -719,4 +713,4 @@ def customer_not_order(kwargs):
 		})
 		
 	except Exception as e:
-		return exception_handel(e)
+		return exception_handle(e)

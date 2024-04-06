@@ -8,7 +8,7 @@ import json
 from pypika import CustomFunction
 
 from mbw_dms.api.common import (
-    exception_handel,
+    exception_handle,
     gen_response,
     get_employee_info
 )
@@ -54,4 +54,4 @@ def insert_fake_gps(body):
             "name": new_fake.name
         })
     except Exception as e:
-        exception_handel(e)
+        exception_handle(e)

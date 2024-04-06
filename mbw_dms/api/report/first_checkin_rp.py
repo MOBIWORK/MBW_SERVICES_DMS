@@ -1,6 +1,6 @@
 import frappe
 
-from mbw_dms.api.common import gen_response, exception_handel
+from mbw_dms.api.common import gen_response, exception_handle
 from mbw_dms.api.validators import validate_filter_timestamp
 
 @frappe.whitelist(methods='GET')
@@ -49,4 +49,4 @@ def first_checkin_report(**kwargs):
             "page_size": page_size
         })
     except Exception as e:
-        return exception_handel(e)
+        return exception_handle(e)

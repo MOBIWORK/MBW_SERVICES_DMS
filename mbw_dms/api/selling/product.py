@@ -2,7 +2,7 @@ import frappe
 from frappe import _
 import pydash
 from mbw_dms.api.common import (
-    exception_handel,
+    exception_handle,
     gen_response,
     validate_image,
 )
@@ -67,7 +67,7 @@ def list_product(**kwargs):
         })
 
     except Exception as e:
-        return exception_handel(e)
+        return exception_handle(e)
 
     
 #list brand
@@ -77,7 +77,7 @@ def list_brand():
         brand = frappe.db.get_list('Brand', fields=["name", "brand", "description"])
         return gen_response(200, "Thành công", brand)
     except Exception as e:
-        return exception_handel(e)
+        return exception_handle(e)
     
 #list Industry
 @frappe.whitelist(methods="GET")
@@ -86,7 +86,7 @@ def list_industry():
         industry = frappe.db.get_list('Industry Type', fields=["name", "industry"],ignore_permissions=True)
         return gen_response(200, "Thành công", industry)
     except Exception as e:
-        return exception_handel(e)
+        return exception_handle(e)
     
 #list item group
 @frappe.whitelist(methods="GET")
@@ -95,7 +95,7 @@ def list_item_group():
         item_group = frappe.db.get_list('Item Group', fields=["name", "item_group_name", "parent_item_group"])
         return gen_response(200, "Thành công", item_group)
     except Exception as e:
-        return exception_handel(e)
+        return exception_handle(e)
     
 # List UOM
 @frappe.whitelist(methods='GET')
@@ -109,7 +109,7 @@ def list_uom(**kwargs):
         list_uom = frappe.db.get_list('UOM', filters=uom_filter, fields=['name', 'uom_name'])
         return gen_response(200, "Thành công", list_uom)
     except Exception as e:
-        return exception_handel(e)
+        return exception_handle(e)
     
 # List warehouse
 @frappe.whitelist(methods='GET')
@@ -123,7 +123,7 @@ def list_warehouse(**kwargs):
         list_warehouse = frappe.db.get_list('Warehouse', filters=warehouse_filter, fields=['name', 'warehouse_name'])
         return gen_response(200, 'Thành công', list_warehouse)
     except Exception as e:
-        return exception_handel(e)
+        return exception_handle(e)
     
 # List VAT
 @frappe.whitelist(methods='GET')
@@ -141,5 +141,5 @@ def list_vat(**kwargs):
                             ).run(as_dict =1)
         return gen_response(200, 'Thành công', detail_taxes)
     except Exception as e:
-        return exception_handel(e)
+        return exception_handle(e)
     

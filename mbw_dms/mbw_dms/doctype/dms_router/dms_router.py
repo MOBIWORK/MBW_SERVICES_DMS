@@ -6,7 +6,7 @@ import json
 from frappe.model.document import Document
 from pypika import CustomFunction
 
-from mbw_dms.api.common import exception_handel, gen_response,get_language
+from mbw_dms.api.common import exception_handle, gen_response,get_language
 from frappe.desk.reportview import get_filters_cond, get_match_cond
 from erpnext.controllers.queries import get_fields
 from mbw_dms.api.validators import validate_filter 
@@ -72,7 +72,7 @@ def get_list_router(filters):
             "page_number":page_number
         })
     except Exception as e: 
-        exception_handel(e)
+        exception_handle(e)
 
 
 # chi tiet tuyen
@@ -100,7 +100,7 @@ def get_router(id):
             router['customers'] = customer
         return gen_response(200,'',router)
     except Exception as e: 
-        exception_handel(e)
+        exception_handle(e)
 
 # danh sach khach hang cham soc
 @frappe.whitelist(methods="GET")
@@ -186,7 +186,7 @@ def get_customer_router(data):
             "page_number": page_number
         })
     except Exception as e :
-        exception_handel(e)
+        exception_handle(e)
 
 
 def get_customers_import(data):
@@ -207,7 +207,7 @@ def get_customers_import(data):
             message =  i18n.t('translate.some_data_not_in_database', locale=get_language()) 
         return gen_response(200,message, list_customer)
     except Exception as e :
-        exception_handel(e)
+        exception_handle(e)
 
 #them tuyen
 @frappe.whitelist(methods="POST")
@@ -237,7 +237,7 @@ def create_router(body):
         doc.save()
         return gen_response(201,"",doc)
     except Exception as e:
-        exception_handel(e)
+        exception_handle(e)
 
 #cap nhat tuyen
 def update_router(body):
@@ -269,7 +269,7 @@ def update_router(body):
         frappe.db.commit()
         return gen_response(201,"",doc)
     except Exception as e:
-        exception_handel(e)
+        exception_handle(e)
 
 # cap nhat multi router
 def update_routers(body):
@@ -306,7 +306,7 @@ def update_routers(body):
                                             'UNIX_TIMESTAMP(creation) as creation','UNIX_TIMESTAMP(modified) as modified'])
         return gen_response(200,"",update)
     except Exception as e:
-        exception_handel(e)
+        exception_handle(e)
 
 # nhom ban hang
 @frappe.whitelist(methods="GET")
@@ -315,7 +315,7 @@ def get_team_sale():
         data = frappe.db.get_list("Sales Person",{"is_group":1},["name", "parent_sales_person"])
         gen_response(200,"",data)
     except Exception as e:
-        exception_handel(e)
+        exception_handle(e)
 
 @frappe.whitelist(methods="GET")
 def get_sale_person(data):
@@ -353,7 +353,7 @@ def get_sale_person(data):
                     })
         return employees
     except Exception as e:
-        exception_handel(e)
+        exception_handle(e)
 
 # danh sách customer cho web
 @frappe.whitelist(methods="GET")
@@ -423,7 +423,7 @@ def get_customer(filters):
             "page_number": page_number
         })
     except Exception as e:
-        exception_handel(e)
+        exception_handle(e)
 
 
 # api test handle filter address
@@ -456,7 +456,7 @@ def get_all_router():
         list_router = frappe.db.get_list('DMS Router',fields=['name','channel_name',"channel_code"])
         return gen_response(200,'',list_router)
     except Exception as e: 
-        exception_handel(e)
+        exception_handle(e)
 
 # Router query
 @frappe.whitelist()

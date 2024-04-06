@@ -1,6 +1,6 @@
 import frappe
 from mbw_dms.api.common import (
-    exception_handel,
+    exception_handle,
     gen_response,
 )
 from mbw_dms.api.ekgis.constant import API_URL
@@ -26,4 +26,4 @@ def get_history_checkin(**kwargs):
             else:
                 return gen_response(406, "Không lấy được lịch sử checkin")
     except Exception as e:
-        return exception_handel(e)
+        return exception_handle(e)

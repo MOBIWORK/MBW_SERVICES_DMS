@@ -1,6 +1,6 @@
 import frappe
 
-from mbw_dms.api.common import gen_response ,exception_handel, get_child_values_doc
+from mbw_dms.api.common import gen_response ,exception_handle, get_child_values_doc
 from mbw_dms.api.validators import validate_filter_timestamp
 from datetime import datetime
 
@@ -69,7 +69,7 @@ def so_report(**kwargs):
             "totals": count_data
         })
     except Exception as e:
-        return exception_handel(e)
+        return exception_handle(e)
     
 # Báo cáo tổng hợp bán hàng
 @frappe.whitelist(methods='GET')
@@ -133,7 +133,7 @@ def si_report(**kwargs):
             "totals": count_data
         })
     except Exception as e:
-        return exception_handel(e)
+        return exception_handle(e)
     
 @frappe.whitelist(methods='GET')
 def list_company(**kwargs):
@@ -145,7 +145,7 @@ def list_company(**kwargs):
         list_company = frappe.db.get_list('Company', filters=filter_company, fields=['name', 'company_name'])
         return gen_response(200, 'Thành công', list_company)
     except Exception as e:
-        return exception_handel(e)
+        return exception_handle(e)
     
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs

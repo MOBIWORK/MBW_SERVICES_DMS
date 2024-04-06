@@ -2,7 +2,7 @@ import frappe
 from frappe import _
 
 from mbw_dms.api.common import (
-    exception_handel,
+    exception_handle,
     gen_response,
 )
 
@@ -28,4 +28,4 @@ def list_warehouse(**kwargs):
         list_warehouses = frappe.db.get_list('Warehouse', fields=["*"])
         gen_response(200, 'Thành công', list_warehouses)
     except Exception as e:
-        return exception_handel(e)
+        return exception_handle(e)

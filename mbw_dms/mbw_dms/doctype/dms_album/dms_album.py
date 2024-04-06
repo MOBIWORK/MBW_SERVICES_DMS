@@ -6,7 +6,7 @@ from frappe.model.document import Document
 from frappe import _
 
 from mbw_dms.api.common import (
-    exception_handel,
+    exception_handle,
     gen_response,
 )
 from mbw_dms.api.validators import validate_not_none, validate_choice
@@ -35,7 +35,7 @@ def create_album_image(kwargs):
         return gen_response(201, "Tạo thành công", {"name": new_album_image.name})
        
     except Exception as e:
-        return exception_handel(e)
+        return exception_handle(e)
 
 #list album Image
 @frappe.whitelist(methods="GET")
@@ -68,7 +68,7 @@ def list_monitor_album(kwargs):
             albums['customer_name'] = frappe.db.get_all("Customer", {"customer_code": albums.get('customer_code')}, ['customer_name','customer_type', 'customer_group'])
         return gen_response(200, "Thành công", album_image)
     except Exception as e:
-        return exception_handel(e)
+        return exception_handle(e)
 
 
 #create Album
@@ -85,7 +85,7 @@ def create_album(kwargs):
         return gen_response(201, "Tạo thành công", {"name": new_album.name})
        
     except Exception as e:
-        return exception_handel(e)
+        return exception_handle(e)
     
 #list 
 @frappe.whitelist(methods="GET")
@@ -94,7 +94,7 @@ def list_album():
         album_image = frappe.db.get_list('DMS Album', fields=["name", "ma_album", "ten_album", "so_anh_toi_thieu", "trang_thai"])
         gen_response(200, "Thành công", album_image)
     except Exception as e:
-        return exception_handel(e)
+        return exception_handle(e)
     
 @frappe.whitelist()
 def list_album_name():
@@ -102,4 +102,4 @@ def list_album_name():
         album_image = frappe.db.get_list('DMS Album Image', fields=["album_name"], distinct=True)
         gen_response(200, "Thành công", album_image)
     except Exception as e:
-        return exception_handel(e)
+        return exception_handle(e)

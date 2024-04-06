@@ -2,7 +2,7 @@ import frappe
 from datetime import datetime
 from mbw_dms.mbw_dms.doctype.dms_inventory.dms_inventory import find
 
-from mbw_dms.api.common import gen_response ,exception_handel
+from mbw_dms.api.common import gen_response ,exception_handle
 
 
 @frappe.whitelist(methods="GET",allow_guest=True)
@@ -63,4 +63,4 @@ def get_customer_inventory(**body):
             "item_code": item_code
         }))
     except Exception as e:
-        return exception_handel(e)
+        return exception_handle(e)

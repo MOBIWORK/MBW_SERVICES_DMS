@@ -6,7 +6,7 @@ from frappe.model.document import Document
 from frappe import _
 
 from mbw_dms.api.common import (
-    exception_handel,
+    exception_handle,
     gen_response,
     validate_image,
 )
@@ -30,7 +30,7 @@ def create_type_of_problem(kwargs):
         return gen_response(201, "Tạo thành công", {"name": new_type_of_problem.name})
        
     except Exception as e:
-        return exception_handel(e)
+        return exception_handle(e)
     
 
 #create Problem Monitor
@@ -52,7 +52,7 @@ def create_proble_monitor(kwargs):
 
         return gen_response(201, "Tạo thành công", {"name": new_proble_monitor.name})
     except Exception as e:
-        return exception_handel(e)
+        return exception_handle(e)
     
 @frappe.whitelist(methods="POST")
 def create_note(kwargs):
@@ -69,7 +69,7 @@ def create_note(kwargs):
         new_note.insert(ignore_permissions=True) 
         return gen_response(201, "Tạo mới thành công", {"name": new_note.name})
     except Exception as e:
-        return exception_handel(e)    
+        return exception_handle(e)    
     
 @frappe.whitelist(methods="GET")
 def list_email(kwargs):
@@ -91,7 +91,7 @@ def list_email(kwargs):
             "page_number": page_number
             })
     except Exception as e:
-        return exception_handel(e) 
+        return exception_handle(e) 
     
 #list note
 @frappe.whitelist(methods="GET")
@@ -107,7 +107,7 @@ def list_note(kwargs):
         list_note = frappe.db.get_list('Note',filters=my_filter ,fields=["name", "title", "content", "creation","custom_checkin_id"])
         return gen_response(200, "Thành công", list_note)
     except Exception as e:
-        return exception_handel(e)
+        return exception_handle(e)
     
 #list note type
 @frappe.whitelist(methods="GET")
@@ -117,4 +117,4 @@ def list_note_type():
         list_note_type = frappe.db.get_list('DMS Note Type',filters=my_filter ,fields=["name", "ma_ghi_chu", "loai_ghi_chu"])
         return gen_response(200, "Thành công", list_note_type)
     except Exception as e:
-        return exception_handel(e)
+        return exception_handle(e)

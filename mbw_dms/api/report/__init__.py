@@ -1,7 +1,7 @@
 import frappe
 import datetime
 
-from mbw_dms.api.common import gen_response ,exception_handel, get_value_child_doctype, validate_image
+from mbw_dms.api.common import gen_response ,exception_handle, get_value_child_doctype, validate_image
 from collections import defaultdict
 
 # Dữ liệu báo cáo tổng hợp
@@ -105,4 +105,4 @@ def synthesis_report(**kwargs):
 
         return gen_response(200, 'Thành công', data)
     except Exception as e:
-        return exception_handel(e)
+        return exception_handle(e)

@@ -3,9 +3,9 @@
 
 import frappe
 from frappe.model.document import Document
-from mbw_dms.api.common import exception_handel, gen_response
 from mbw_dms.api.validators import validate_not_none
 import requests
+from mbw_dms.api.common import exception_handle, gen_response
 
 class DMSSettings(Document):
     def on_update(self):
@@ -45,4 +45,4 @@ def get_list_config():
             frappe.cache().set_value("website-config", list_configs)
         return gen_response(200, 'Thành công', list_configs)
     except Exception as e:
-        return exception_handel(e)
+        return exception_handle(e)

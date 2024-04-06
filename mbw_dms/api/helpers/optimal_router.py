@@ -1,7 +1,7 @@
 import frappe
 from frappe import _
 from mbw_dms.api.common import (
-    exception_handel,
+    exception_handle,
     gen_response,
     get_language,
     ArrayMethod
@@ -63,4 +63,4 @@ def optimal_router(**kwargs):
 
         return gen_response(200, i18n.t('translate.successfully', locale=get_language()), optimal_arr)
     except Exception as e:
-        return exception_handel(e)
+        return exception_handle(e)

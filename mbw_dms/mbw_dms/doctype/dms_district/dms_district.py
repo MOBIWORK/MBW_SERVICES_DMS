@@ -6,7 +6,7 @@ from frappe.model.document import Document
 from frappe import _
 
 from mbw_dms.api.common import (
-    exception_handel,
+    exception_handle,
     gen_response,
 )
 from mbw_dms.api.validators import validate_not_none
@@ -22,7 +22,7 @@ def list_district(ma_tinh):
         list_districts = frappe.db.get_list('DMS District', filters={'ma_tinh_thanh': validate_not_none(ma_tinh)}, fields=['name', 'ma_huyen', 'ten_huyen', 'ma_tinh_thanh'], order_by='ma_huyen asc')
         return gen_response(200, 'Thành công', list_districts)
     except Exception as e:
-        return exception_handel(e)
+        return exception_handle(e)
     
 @frappe.whitelist(methods="GET", allow_guest=True)
 def get_name_district(name):
