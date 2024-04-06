@@ -1,0 +1,58 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2024-04-06 10:35:28.420866",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "access_key_s3",
+  "key_secret_s3",
+  "endpoint_s3",
+  "bucket_name_s3"
+ ],
+ "fields": [
+  {
+   "fieldname": "access_key_s3",
+   "fieldtype": "Data",
+   "label": "Access Key AWS"
+  },
+  {
+   "fieldname": "key_secret_s3",
+   "fieldtype": "Data",
+   "label": "access_key_s3"
+  },
+  {
+   "fieldname": "endpoint_s3",
+   "fieldtype": "Data",
+   "label": "Endpoint"
+  },
+  {
+   "fieldname": "bucket_name_s3",
+   "fieldtype": "Data",
+   "label": "endpoint_s3"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2024-04-06 10:37:59.843427",
+ "modified_by": "Administrator",
+ "module": "MBW DMS",
+ "name": "AWS Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

@@ -207,7 +207,7 @@ def add_text_to_image(file_name, imgdata, description):
     return image_base64_new
 
 def upload_image_s3(image,description):
-    settings = frappe.get_doc("MBW Employee Settings").as_dict()
+    settings = frappe.get_doc("AWS Settings").as_dict()
     bucket_name_s3 = settings.get('bucket_name_s3')
     # bucket_name_s3 = "mbw-dms"
     endpoint_s3 = settings.get('endpoint_s3')
