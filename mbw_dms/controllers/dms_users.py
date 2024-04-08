@@ -18,6 +18,6 @@ def create_employee_and_sales_team(doc, method):
     sales_person = frappe.new_doc("Sales Person")
     sales_person.sales_person_name = employee.employee_name
     sales_person.employee = employee.name
-    sales_person.is_group = 1
+    sales_person.is_group = 0
     sales_person.insert()
         
