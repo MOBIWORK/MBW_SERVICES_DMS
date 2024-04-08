@@ -4,7 +4,7 @@
 import frappe
 from frappe.model.document import Document
 from mbw_dms.api.common import (
-    exception_handel,
+    exception_handle,
     gen_response,
 )
 from frappe.utils import nowdate
@@ -63,7 +63,7 @@ def get_kpi_monthly():
             }
         return gen_response(200, 'Thành công', kpi)
     except Exception as e:
-        return exception_handel(e)
+        return exception_handle(e)
 	
 @frappe.whitelist(methods='GET')
 def get_kpi_employee(**kwargs):
