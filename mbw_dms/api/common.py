@@ -205,7 +205,7 @@ def add_text_to_image(file_name, imgdata, description):
     return image_base64_new
 
 def upload_image_s3(image,description):
-    settings = frappe.get_doc("AWS Settings").as_dict()
+    settings = frappe.get_doc("DMS Settings").as_dict()
     bucket_name_s3 = settings.get('bucket_name_s3')
     # bucket_name_s3 = "mbw-dms"
     endpoint_s3 = settings.get('endpoint_s3')
@@ -223,7 +223,7 @@ def upload_image_s3(image,description):
     # if not my_minio.bucket_exists(bucket_domain):
     #     my_minio.make_bucket(bucket_domain)
     try:    
-        create_my_minio('AWS Settings').put_object(bucket_name=bucket_name_s3, object_name=f"{bucket_domain}/{file_name}", data=io.BytesIO(imgdata_new))
+        create_my_minio('DMS Settings').put_object(bucket_name=bucket_name_s3, object_name=f"{bucket_domain}/{file_name}", data=io.BytesIO(imgdata_new))
     except Exception as e:
         print(e)
     # data response
