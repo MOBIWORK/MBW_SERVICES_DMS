@@ -37,7 +37,7 @@ def get_projectID(**kwargs):
     
 # Lấy project ID và Object ID
 @frappe.whitelist(methods='GET')
-def get_project_object_id(employee_id):
+def get_project_object_id(name):
     try:
         projectID = ''
         dms_settinngs = frappe.get_doc("DMS Settings").as_dict()
@@ -45,8 +45,8 @@ def get_project_object_id(employee_id):
             projectID = dms_settinngs.get('ma_du_an')
 
         objectId = ''
-        user_name = frappe.db.get_list('Employee', filters={'user_id': employee_id}, fields=['object_id'])
-        if user_name[0]['object_id'] is not None:
+        user_name = frappe.db.get_list('Employee', filters={'name': name}, fields=['object_id'])
+        if user_name and user_name[0]['object_id'] is not None:
             objectId = user_name[0]['object_id']
 
         return gen_response(200, 'Thành công', {
