@@ -16,7 +16,11 @@ export function MenuItem({ children, to, button }: {
 }) {
     const navigate = useNavigate()
     return <div className={classNames('p-4 cursor-pointer flex items-center font-medium text-base text-[#525252]', button && "leading-[19.5px] h-5 rounded-lg py-2 bg-[#C4161C] text-[#FFFFFF] text-[13px] font-normal")} onClick={() => {
-        to && navigate(to)
+        console.log(`to : ${to}`);
+        if(to){
+
+        window.location.href = to
+        }
     }}>{children}</div>
 }
 
@@ -69,7 +73,7 @@ function Header(props: Props) {
                 <div>
                     <div className='block lg:hidden px-3 py-1 border border-solid border-[#0000001a] w-fit rounded' onClick={()=> setShowMenu(prev => !prev)}><MenuOutlined /></div>
                     <div className={classNames("hidden lg:flex flex-col lg:flex-row lg:items-center")}>
-                        <MenuItem >
+                        <MenuItem to='https://mbw.vn/'>
                             {t('about_MBW')}
                         </MenuItem>
                         <Dropdown
@@ -103,7 +107,7 @@ function Header(props: Props) {
                                 </Space>
                             </a>
                         </Dropdown>
-                        <MenuItem >
+                        <MenuItem to='https://docsdms.mbwcloud.com/user_Guide_ERPNext'>
                             {t('hdsd')}
                         </MenuItem>
 
