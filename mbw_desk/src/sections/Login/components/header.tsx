@@ -109,7 +109,7 @@ function Header(props: Props) {
                             {t('hdsd')}
                         </MenuItem>
 
-                        <MenuItem button>
+                        <MenuItem button to="https://helpdesk.mbwcloud.com/">
                             {t('support')}
                         </MenuItem>
                     </div>
