@@ -137,7 +137,8 @@ def create_sale_order(**kwargs):
         apply_discount_on = kwargs.get('apply_discount_on')
         taxes_and_charges = kwargs.get('taxes_and_charges') if kwargs.get('taxes_and_charges') else None
 
-        new_order.customer = validate_not_none(kwargs.customer)                                         
+        new_order.customer = validate_not_none(kwargs.customer)     
+        new_order.custom_sales_manager = frappe.get_value('Customer', {'name': kwargs.customer}, 'custom_sales_manager')                                    
         new_order.delivery_date = validate_date(kwargs.delivery_date)                                   # Ngày giao
         new_order.set_warehouse = validate_not_none(kwargs.get('set_warehouse'))                        # Kho hàng
 
