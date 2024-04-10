@@ -115,6 +115,12 @@ def create_customer(**kwargs):
             elif key in choice_fields:
                 customer_type = validate_choice(configs.customer_type)(value)
                 new_customer.set(key, customer_type)
+        
+        user_id = frappe.session.user
+        employee_name = frappe.get_value('Employee', {'user_id': user_id}, 'name')
+        sale_person = frappe.get_value('Sales Person', {'employee': employee_name}, 'name')
+        new_customer.custom_sales_manager = sale_person
+
         new_customer.customer_location_primary = json.dumps({"long": kwargs.get(
                 "longitude"), "lat": kwargs.get("latitude")})
 
@@ -260,7 +266,7 @@ def list_sale_person():
     try:
         sale_person = frappe.get_list(
         "Sales Person",
-        filters={"is_group": 1, "enabled": 1},
+        filters={"enabled": 1},
         fields=['name','sales_person_name']
         )
         return gen_response(200, 'Thành công', sale_person)

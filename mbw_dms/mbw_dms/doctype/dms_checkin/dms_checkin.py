@@ -134,7 +134,7 @@ class DMSCheckin(Document):
             }
             objectId = ''
             user_name = frappe.db.get_list('Employee', filters={'user_id': frappe.session.user}, fields=['name', 'object_id'])
-            if user_name[0]['object_id'] is not None:
+            if user_name and user_name[0]['object_id'] is not None:
                 objectId = user_name[0]['object_id']
             else:
                 response = requests.post(api_url, params=params, json=data_post)
