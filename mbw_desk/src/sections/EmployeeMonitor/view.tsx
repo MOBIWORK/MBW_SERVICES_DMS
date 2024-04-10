@@ -7,7 +7,7 @@ import { MapEkgis } from "../../components/mapEkgis/map";
 import { chitieu, desc, psorder, vt,chitieud } from "../ReportSales/data";
 import { AxiosService } from "../../services/server";
 import useDebounce from "../../hooks/useDebount";
-
+import {SupervisoryStaffRealTime} from '@/components'
 export default function EmployeeMonitor() {
   const [listDepartment, setListDepartment] = useState<any[]>([]);
   const [department, setDepartment] = useState("");
@@ -47,7 +47,7 @@ export default function EmployeeMonitor() {
   }, [keySearchDepartment]);
   return (
     <>
-      <HeaderPage title="Giám sát viếng thăm khách hàng" />
+      {/* <HeaderPage title="Giám sát viếng thăm khách hàng" />
       <div className="bg-white rounded-md pt-7 border-[#DFE3E8] border-[0.2px] border-solid w-full">
         <div className="flex justify-start items-center pt-2">
           <FormItemCustom
@@ -189,7 +189,8 @@ export default function EmployeeMonitor() {
             </div>
           </Row>
         </div>
-      </div>
+      </div> */}
+      < SupervisoryStaffRealTime />
     </>
   );
 }

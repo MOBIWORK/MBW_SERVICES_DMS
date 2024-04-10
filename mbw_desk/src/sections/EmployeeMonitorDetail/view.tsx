@@ -5,10 +5,11 @@ import { UnorderedListOutlined } from '@ant-design/icons'
 import { BackIos, HistoryRouterIcon } from '../../icons'
 import TravelControl from './tabs/travel_control'
 import TravelHistory from './tabs/travel_history'
-import { Link } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 
 export default function EmployeeMonitorDetail() {
   const [viewMode,setViewMode] = useState<"list"|"history">("list")
+  const {employee_id} = useParams()
   return (
     <>
       <Breadcrumb items={[
@@ -39,7 +40,7 @@ export default function EmployeeMonitorDetail() {
         </>
       }/>
       {
-        viewMode == "list" ? <TravelControl/> : <TravelHistory/>
+        viewMode == "list" ? <TravelControl employee={employee_id}/> : <TravelHistory employee={employee_id}/>
       }
     </>
   )

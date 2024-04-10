@@ -110,7 +110,7 @@ export const dashboardRoutes = [
         ),
         children: [
             {
-                path: 'employee-monitor-detail/:slug',element: <EmployeeMonitorDetailPage/>
+                path: 'employee-monitor-detail/:employee_id',element: <EmployeeMonitorDetailPage/>
             }
 
         ]

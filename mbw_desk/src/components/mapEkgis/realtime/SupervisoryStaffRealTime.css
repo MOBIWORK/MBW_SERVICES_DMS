@@ -1,0 +1,6 @@
+.wrap-card-container{
+    padding: 5px;
+}
+.card-container {
+    display: flex;
+}

@@ -1,11 +1,10 @@
-import React ,{useState,useEffect}from 'react'
+import {useState,useEffect}from 'react'
 import { CustomerType } from './type'
 import { Col, Row } from 'antd'
-import { TableCustom } from '../../components'
-import { baseCustomers, commonTable } from './data'
-import {  Mapcustom } from '../../components/map/map'
-import {locationType} from '../../types/location'
-import {getAttrInArray} from "../../util"
+import {  commonTable } from './data'
+import {  Mapcustom ,TableCustom} from '@/components'
+import {locationType} from '@/types/location'
+import {getAttrInArray} from "@/util"
 
 type Props = {
     data?: CustomerType[] | false
