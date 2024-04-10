@@ -73,7 +73,7 @@ function Header(props: Props) {
                 <div>
                     <div className='block lg:hidden px-3 py-1 border border-solid border-[#0000001a] w-fit rounded' onClick={()=> setShowMenu(prev => !prev)}><MenuOutlined /></div>
                     <div className={classNames("hidden lg:flex flex-col lg:flex-row lg:items-center")}>
-                        <MenuItem to='https://mbw.vn/'>
+                        <MenuItem to='https://mbw.vn/ve-mbw/'>
                             {t('about_MBW')}
                         </MenuItem>
                         <Dropdown
@@ -107,7 +107,7 @@ function Header(props: Props) {
                                 </Space>
                             </a>
                         </Dropdown>
-                        <MenuItem to='https://docsdms.mbwcloud.com/user_Guide_ERPNext'>
+                        <MenuItem to='https://docsdms.mbwcloud.com/HDSD_MBWDMS/s%E1%BB%AD-d%E1%BB%A5ng-dms-tr%C3%AAn-erpnext'>
                             {t('hdsd')}
                         </MenuItem>
 
@@ -119,7 +119,7 @@ function Header(props: Props) {
             </Content>
             <Content bg>
                 {showMenu && <div className={classNames("w-full py-3 flex lg:hidden flex-col  items-center justify-center")}>
-                    <MenuItem to='https://mbw.vn/' >
+                    <MenuItem to='https://mbw.vn/ve-mbw/' >
                         {t('about_MBW')}
                     </MenuItem>
                     <Dropdown
@@ -153,7 +153,7 @@ function Header(props: Props) {
                             </Space>
                         </a>
                     </Dropdown>
-                    <MenuItem to='https://docsdms.mbwcloud.com/user_Guide_ERPNext'>
+                    <MenuItem to='https://docsdms.mbwcloud.com/HDSD_MBWDMS/s%E1%BB%AD-d%E1%BB%A5ng-dms-tr%C3%AAn-erpnext'>
                         {t('hdsd')}
                     </MenuItem>
 
