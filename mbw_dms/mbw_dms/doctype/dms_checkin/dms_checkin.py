@@ -43,12 +43,13 @@ class DMSCheckin(Document):
         end_date = frappe.utils.getdate(end_date_str)
 
         # Lấy id của nhân viên
-        current_user = get_employee_info()
+        user_id = frappe.session.user
+        user_name = frappe.get_value('Employee', {'user_id': user_id}, 'name')
         # Lấy tuyến của nhân viên
         router_employee = frappe.get_all(
             'DMS Router',
             filters = {
-                "employee": current_user['name']
+                "employee": user_name
             },
             fields = ['travel_date']
         )
@@ -62,15 +63,15 @@ class DMSCheckin(Document):
 
         # Kiểm tra xem khách hàng đã thực hiện checkin trong tháng này hay chưa
         kh_ma = self.kh_ma
-        exists_checkin = self.existing_checkin(kh_ma=kh_ma, start_date=start_date, end_date=end_date, current_user=current_user['user_id'])
+        exists_checkin = self.existing_checkin(kh_ma=kh_ma, start_date=start_date, end_date=end_date, current_user=user_id)
 
         # Kiểm tra đã tồn tại bản ghi KPI của tháng này chưa
         existing_monthly_summary = frappe.get_all(
             'DMS Summary KPI Monthly',
-            filters={'thang': month, 'nam': year, 'nhan_vien_ban_hang': current_user['name']},
+            filters={'thang': month, 'nam': year, 'nhan_vien_ban_hang': user_name},
             fields=['name']
         )
-        sales_team = frappe.get_value("DMS KPI", {'nhan_vien_ban_hang': current_user['name']}, "nhom_ban_hang")
+        sales_team = frappe.get_value("DMS KPI", {'nhan_vien_ban_hang': user_name}, "nhom_ban_hang")
 
         if len(exists_checkin) > 1:
             if existing_monthly_summary:
@@ -86,7 +87,7 @@ class DMSCheckin(Document):
                     'doctype': 'DMS Summary KPI Monthly',
                     'nam': year,
                     'thang': month,
-                    'nhan_vien_ban_hang': current_user['name'],
+                    'nhan_vien_ban_hang': user_name,
                     'nhom_ban_hang': sales_team,
                     'so_kh_vt_luot': 1,
                     'solan_vt_dungtuyen': 1 if name_date in list_travel_date else 0,
@@ -108,7 +109,7 @@ class DMSCheckin(Document):
                     'doctype': 'DMS Summary KPI Monthly',
                     'nam': year,
                     'thang': month,
-                    'nhan_vien_ban_hang': current_user['name'],
+                    'nhan_vien_ban_hang': user_name,
                     'nhom_ban_hang': sales_team,
                     'so_kh_vt_luot': 1,
                     'so_kh_vt_duynhat': 1,

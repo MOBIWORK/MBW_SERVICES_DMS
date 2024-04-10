@@ -11,6 +11,7 @@ def synthesis_report(**kwargs):
         data = {}
         data['doanh_so'] = 0
         data['tang_vs_hqua'] = 0
+        data['don_hang'] = 0
         # Lấy ngày hôm nay và ngày hôm qua
         today = datetime.date.today()
         yesterday = today - datetime.timedelta(days=1)
@@ -86,11 +87,14 @@ def synthesis_report(**kwargs):
             data['tang_vs_hqua'] = data['doanh_so'] / total_yesterday * 100 - 100
 
         # Số lượng đơn hàng    
-        data['don_hang'] = len(sales_orders_today)
+        if sales_orders_today:
+            data['don_hang'] = len(sales_orders_today)
 
         # Lấy dữ liệu viếng thăm
+        data['luot_vt'] = 0
         data_checkin = frappe.get_all('DMS Checkin', filters=filter_today, fields=['name', 'owner'])
-        data['luot_vt'] = len(data_checkin)
+        if data_checkin:
+            data['luot_vt'] = len(data_checkin)
         data['ti_le_chuyen_doi'] = 0
         if data['luot_vt'] != 0:
             data['ti_le_chuyen_doi'] = data['don_hang']/data['luot_vt']*100
@@ -102,6 +106,54 @@ def synthesis_report(**kwargs):
             if i['owner'] not in employee:
                 employee.append(i['owner'])
         data['so_nv_online'] = len(employee)
+
+        return gen_response(200, 'Thành công', data)
+    except Exception as e:
+        return exception_handle(e)
+    
+
+# Báo cáo giám sát thời gian thực
+@frappe.whitelist(methods='GET')
+def real_time_monitoring_report(**kwargs):
+    try:
+        data = {}
+        data['doanh_so'] = 0
+        data['don_hang'] = 0
+        data['luot_vt'] = 0
+        today = datetime.date.today()
+
+        # Thiết lập khoảng thời gian ngày hôm nay
+        from_date_today = datetime.datetime.combine(today, datetime.time.min)
+        to_date_today = datetime.datetime.combine(today, datetime.time.max)
+
+        filter_today = {"creation": ["between", [from_date_today, to_date_today]]}
+
+        # Lấy dữ liệu Sales Order cho hôm nay
+        sales_orders_today = frappe.get_all('Sales Order', filters={**filter_today, "docstatus":1}, fields=['name', 'grand_total', 'customer', 'creation'])
+
+        for i in sales_orders_today:
+            data['doanh_so'] += i['grand_total']
+        
+        # Số lượng đơn hàng    
+        if sales_orders_today:
+            data['don_hang'] = len(sales_orders_today)
+
+        # Lấy dữ liệu viếng thăm
+        data_checkin = frappe.get_all('DMS Checkin', filters=filter_today, fields=['name', 'owner'])
+        if data_checkin:
+            data['luot_vt'] = len(data_checkin)
+
+        # Lấy số nhân viên
+        total_employee = frappe.db.count("Employee")
+
+        # Lấy số nhân viên online, offline
+        data['so_nv_online'] = 0
+        employee = []
+        for i in data_checkin:
+            if i['owner'] not in employee:
+                employee.append(i['owner'])
+        data['so_nv_online'] = len(employee)
+        data['so_nv_offline'] = total_employee - data['so_nv_online']
 
         return gen_response(200, 'Thành công', data)
     except Exception as e:
