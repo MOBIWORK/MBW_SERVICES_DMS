@@ -453,7 +453,19 @@ def test_address(filters):
 @frappe.whitelist(methods='GET')
 def get_all_router():
     try:
-        list_router = frappe.db.get_list('DMS Router',fields=['name','channel_name',"channel_code"])
+        from mbw_dms.api.common import weekday
+        thu_trong_tuan, week = weekday(datetime.now())
+        print(thu_trong_tuan, week )
+        filter  = {
+            "frequency": ["like", f"%{int(week)}%"]
+        }
+        list_router = frappe.db.get_list('DMS Router',filters=filter,fields=['name','channel_name',"channel_code","travel_date"],distinct=True)
+        for value in list_router:
+            value["is_today"] = False
+
+            if value["travel_date"] == thu_trong_tuan:
+                value["is_today"] = True
+
         return gen_response(200,'',list_router)
     except Exception as e: 
         exception_handle(e)

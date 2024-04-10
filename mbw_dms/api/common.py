@@ -277,8 +277,10 @@ class ArrayMethod():
         return array
     
 def weekday(time:datetime):
-    print(time.strftime("%A"))
-    listngay = ('Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy')
+    # print(time.strftime("%A"),time)
+    first_week_month = time.replace(day=1)
+    W_first = float(first_week_month.strftime("%W"))
+    listngay = ('Chủ nhật', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7')
     anh_xa_ngay_sang_so = {
     "Monday": 1,
     "Tuesday": 2,
@@ -289,10 +291,9 @@ def weekday(time:datetime):
     "Sunday": 0
 }
     thu_trong_tuan = listngay[anh_xa_ngay_sang_so[time.strftime("%A")]]
-    tuan = time.strftime("%W")
-    tuan_trong_thang = float(tuan)%4 if float(tuan)%4 != 0 else 4
-
-    return thu_trong_tuan, tuan_trong_thang
+    w = float(time.strftime("%W"))
+    tuan =(w - W_first) + 1
+    return thu_trong_tuan, tuan
 
 
 # Tính tuần hiện tại của tháng
