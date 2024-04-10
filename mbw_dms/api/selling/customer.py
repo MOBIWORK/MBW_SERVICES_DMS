@@ -99,7 +99,7 @@ def create_customer(**kwargs):
 
         # Tạo mới khách hàng
         new_customer = frappe.new_doc('Customer')
-        required_fields = ['customer_code', 'customer_name', 'customer_group', 'territory']
+        required_fields = ['customer_code', 'customer_name', 'customer_group', 'territory', 'custom_sales_manager']
         normal_fields = ['customer_details', 'website']
         date_fields = ['custom_birthday']
         choice_fields = ['customer_type']
@@ -260,7 +260,7 @@ def list_sale_person():
     try:
         sale_person = frappe.get_list(
         "Sales Person",
-        filters={"is_group": 1, "enabled": 1},
+        filters={"enabled": 1},
         fields=['name','sales_person_name']
         )
         return gen_response(200, 'Thành công', sale_person)
