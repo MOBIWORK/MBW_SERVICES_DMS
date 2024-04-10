@@ -34,7 +34,7 @@ export default function CustomerList({data,handleData}:Props) {
                 onChange={(frequency: string[]) => {                    
                     handleData(prev => {
                         return prev.map(customer => {
-                            if(customer.customer_id == record.customer_id) {
+                            if(customer.customer_code == record.customer_code) {
                                 customer['frequency'] = frequency.toString().replaceAll(",",";")
                             }
                             return customer
