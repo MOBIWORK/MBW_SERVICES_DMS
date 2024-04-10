@@ -99,7 +99,7 @@ def create_customer(**kwargs):
 
         # Tạo mới khách hàng
         new_customer = frappe.new_doc('Customer')
-        required_fields = ['customer_code', 'customer_name', 'customer_group', 'territory', 'custom_sales_manager']
+        required_fields = ['customer_code', 'customer_name', 'customer_group', 'territory']
         normal_fields = ['customer_details', 'website']
         date_fields = ['custom_birthday']
         choice_fields = ['customer_type']
@@ -115,6 +115,12 @@ def create_customer(**kwargs):
             elif key in choice_fields:
                 customer_type = validate_choice(configs.customer_type)(value)
                 new_customer.set(key, customer_type)
+        
+        user_id = frappe.session.user
+        employee_name = frappe.get_value('Employee', {'user_id': user_id}, 'name')
+        sale_person = frappe.get_value('Sales Person', {'employee': employee_name}, 'name')
+        new_customer.custom_sales_manager = sale_person
+
         new_customer.customer_location_primary = json.dumps({"long": kwargs.get(
                 "longitude"), "lat": kwargs.get("latitude")})
 
