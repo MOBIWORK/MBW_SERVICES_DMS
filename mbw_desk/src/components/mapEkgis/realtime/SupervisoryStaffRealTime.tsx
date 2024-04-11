@@ -7,6 +7,32 @@ import { AxiosService } from '../../../services/server';
 import { use } from 'i18next';
 
 export default function SupervisoryStaffRealTime() {
+
+  const [summaryOver, setSummaryOver] = useState<
+    {
+      so_nv_online: number | 0,
+      so_nv_offline: number | 0,
+      luot_vt: number | 0,
+      don_hang: number | 0,
+      doanh_so: number | 0,
+    }>({
+      so_nv_online: 0,
+      so_nv_offline: 0,
+      luot_vt: 0,
+      don_hang: 0,
+      doanh_so: 0,
+    })
+
+    useEffect(()=>{
+      initDataSummaryOver();
+    })
+  
+    const initDataSummaryOver = async () => {
+      console.log("call service");
+      const rs = await AxiosService.get(`/mbw_dms.api.report.real_time_monitoring_report`);
+      console.log(rs);
+    }
+
   // data di chuyển nhân viên
   const dataDistanceEmployee = [
     {
@@ -161,17 +187,17 @@ export default function SupervisoryStaffRealTime() {
   // option hiển thị map
   const [options,setOptions] =  useState<{apiKey:string | null,projectId:string | null}>({
     apiKey: import.meta.env.VITE_API_KEY,
-    projectId: null
+    projectId: '6556e471178a1db24ac1a711'
   })
 
   useEffect(() => {
-    (async() => {
-      const rs = await AxiosService.get('/api/method/mbw_dms.api.user.get_projectID')
-      setOptions(prev => ({
-        ...prev,
-        projectId: rs.result[ "Project ID"]
-      }))
-    })()
+    // (async() => {
+    //   const rs = await AxiosService.get('/api/method/mbw_dms.api.user.get_projectID')
+    //   setOptions(prev => ({
+    //     ...prev,
+    //     projectId: rs.result[ "Project ID"]
+    //   }))
+    // })()
   },[])
   return (
     <>

@@ -8,7 +8,7 @@ import MapLegend from './maplegend_realtime';
 
 const ekmapplf = window.ekmapplf;
 
-function RealtimeMap({ options }) {
+function RealtimeMap({ options, onClickPopup }) {
     const mapContainer = useRef(null);
     const map = useRef(null);
     const intervalIdRef = useRef(null);
@@ -38,6 +38,7 @@ function RealtimeMap({ options }) {
                     center: _options.center,
                     zoom: _options.zoom,
                     minZoom: 1,
+                    pitch: 30,
                 });
                 var _map = map.current;
                 // console.log(_map);
@@ -178,15 +179,6 @@ function RealtimeMap({ options }) {
                 });
 
                 const setMap = async () => {
-                    if (!_map.getImage('marker-track')) {
-                        const markerTrack = await _map.loadImage(_options.iconTrack);
-                        _map.addImage('marker-track', markerTrack.data)
-                    }
-                    if (!_map.getImage('marker-checkin')) {
-                        const markerCheckin = await _map.loadImage(_options.iconCheckin);
-                        _map.addImage('marker-checkin', markerCheckin.data)
-                    }
-
                     const getAllObjs = async () => {
                         let url = `https://api.ekgis.vn/tracking/${_options.projectId}/objects?api_key=${_options.apiKey}`;
                         let response = await fetch(url);
@@ -201,72 +193,65 @@ function RealtimeMap({ options }) {
 
                 const loadMap = async (objectIds) => {
                     if (!Array.isArray(objectIds)) return;
+
                     const getLastPos = async (objectId) => {
                         try {
-                            let urlTracking = `https://api.ekgis.vn/v2/tracking/locationHistory/position/${_options.projectId}/${objectId}/lastest?api_key=${_options.apiKey}`;
-                            let responseTracking = await fetch(urlTracking);
-                            let DataTracking = await responseTracking.json();
-                            var TrackTimestamp = DataTracking.position ? Date.parse(DataTracking.position.timestamp) : 0;
-
-                            let urlCheckin = `https://api.ekgis.vn/v1/checkin/${_options.projectId}/${objectId}/lastcheckin?api_key=${_options.apiKey}`;
-                            let responseCheckin = await fetch(urlCheckin);
-                            let DataCheckin = await responseCheckin.json();
-                            var CheckinTimestamp = DataCheckin.length ? Date.parse(DataCheckin[0].timestamp) : 0;
-
-                            var data = {
-                                '_id': DataTracking.summary.name,
-                                'name': DataTracking.summary.name,
-                                'type': TrackTimestamp > CheckinTimestamp ? 'tracking' : (DataCheckin.length ? 'checkin' : null),
-                                'position': TrackTimestamp > CheckinTimestamp ? DataTracking.position : (DataCheckin.length ? DataCheckin[0] : null),
+                            const urlTracking = `https://api.ekgis.vn/v2/tracking/locationHistory/position/${_options.projectId}/${objectId}/lastest?api_key=${_options.apiKey}`;
+                            const urlCheckin = `https://api.ekgis.vn/v1/checkin/${_options.projectId}/${objectId}/lastcheckin?api_key=${_options.apiKey}`;
+                            const responseTracking = await fetch(urlTracking);
+                            const responseCheckin = await fetch(urlCheckin);
+                            const DataTracking = await responseTracking.json();
+                            const DataCheckin = await responseCheckin.json();
+                            if (!DataTracking.position && !DataCheckin.length) {
+                                return {
+                                    '_id': DataTracking.summary._id,
+                                    'name': DataTracking.summary.name,
+                                };
                             }
-                            return data;
+                            const TrackTimestamp = DataTracking.position ? Date.parse(DataTracking.position.timestamp) : 0;
+                            const CheckinTimestamp = DataCheckin.length ? Date.parse(DataCheckin[0].timestamp) : 0;
+                            const isTracking = TrackTimestamp > CheckinTimestamp;
+                            const coords = isTracking ? [DataTracking.position.coords.longitude, DataTracking.position.coords.latitude] : DataCheckin[0].coordinates.split(',').map(coord => parseFloat(coord));
+                            const address = await reverseGeocode(coords);
+                            return {
+                                '_id': DataTracking.summary._id,
+                                'name': DataTracking.summary.name,
+                                'type': isTracking ? 'tracking' : 'checkin',
+                                'position': isTracking ? DataTracking.position : DataCheckin[0],
+                                'coordinates': coords,
+                                'address': address,
+                            };
                         } catch (error) {
                             console.error('Error getting last position:', error);
                             throw error;
                         }
                     };
-
-                    const lastestPromises = objectIds.map(item =>
-                        getLastPos(item)
-                            .then(response => {
-                                return response;
-                            })
-                            .catch(error => {
-                                return null;
-                            })
-                    );
-                    const DataObjs = await Promise.all(lastestPromises);
-
-                    // console.log('load');
+                    const DataObjs = await Promise.all(objectIds.map(item => getLastPos(item).catch(error => null)));
                     // console.log(DataObjs);
-
-                    var FeatureCollection = {
+                    const FeatureCollection = {
                         'type': 'FeatureCollection',
-                        'features': DataObjs.map((data) => {
-                            const { type, object, position, coordinates } = data;
-                            if (type === 'tracking') {
+                        'features': await Promise.all(DataObjs.map((data) => {
+                            if (data.type) {
                                 return {
                                     'type': 'Feature',
                                     'properties': data,
                                     'geometry': {
                                         'type': 'Point',
-                                        'coordinates': [position.coords.longitude, position.coords.latitude]
+                                        'coordinates': data.coordinates
                                     }
                                 };
-                            } else if (type === 'checkin') {
-                                return {
-                                    'type': 'Feature',
-                                    'properties': data,
-                                    'geometry': {
-                                        'type': 'Point',
-                                        'coordinates': position.coordinates.split(',').map(coord => parseFloat(coord))
-                                    }
-                                };
-                            } else {
-                                return null;
-                            }
-                        }).filter(feature => feature !== null),
+                            } else return null;
+                        })).then(features => features.filter(feature => feature !== null))
                     };
+                    if (!_map.getImage('marker-track')) {
+                        const markerTrack = await _map.loadImage(_options.iconTrack);
+                        console.log(markerTrack);
+                        _map.addImage('marker-track', markerTrack.data)
+                    }
+                    if (!_map.getImage('marker-checkin')) {
+                        const markerCheckin = await _map.loadImage(_options.iconCheckin);
+                        _map.addImage('marker-checkin', markerCheckin.data)
+                    }
 
                     if (_map.getSource(`ek-tracking-live-${_map_Container.id}-source`)) {
                         _map.getSource(`ek-tracking-live-${_map_Container.id}-source`).setData(FeatureCollection);
@@ -276,14 +261,16 @@ function RealtimeMap({ options }) {
                             'data': FeatureCollection,
                             'cluster': true,
                             'clusterMaxZoom': 14,
-                            'clusterRadius': 50
+                            'clusterRadius': 55
                         });
 
+                        //cluster
                         _map.addLayer({
                             id: `ek-tracking-live-${_map_Container.id}-clusters`,
                             type: 'circle',
                             source: `ek-tracking-live-${_map_Container.id}-source`,
-                            filter: ['has', 'point_count'],
+                            // filter: ['has', 'point_count'],
+                            filter: ['==', 'cluster', true],
                             paint: {
                                 'circle-color': [
                                     'step',
@@ -308,46 +295,16 @@ function RealtimeMap({ options }) {
                                 'circle-stroke-width': 5
                             }
                         });
-
                         _map.addLayer({
                             id: `ek-tracking-live-${_map_Container.id}-cluster-count`,
                             type: 'symbol',
                             source: `ek-tracking-live-${_map_Container.id}-source`,
-                            filter: ['has', 'point_count'],
+                            // filter: ['has', 'point_count'],
+                            filter: ['==', 'cluster', true],
                             layout: {
                                 'text-field': '{point_count_abbreviated}',
                                 'text-size': 12
                             }
-                        });
-
-                        _map.addLayer({
-                            'id': `ek-tracking-live-${_map_Container.id}-unclustered-point`,
-                            'type': 'symbol',
-                            'source': `ek-tracking-live-${_map_Container.id}-source`,
-                            'filter': ['!', ['has', 'point_count']],
-                            'layout': {
-                                // 'icon-image': [
-                                //     'match',
-                                //     ['get', 'type'],
-                                //     'checkin', 'marker-checkin',
-                                //     'marker-track',
-                                // ],
-                                'icon-image': 'marker-checkin',
-                                'icon-anchor': 'bottom',
-                                'icon-overlap': 'always',
-                                'icon-size': 0.7,
-                                'text-field': ['get', 'name'],
-                                'text-size': 11,
-                                'text-overlap': 'cooperative',
-                                'text-offset': [0, -3],
-                                'text-anchor': 'bottom',
-                                'text-letter-spacing': 0.05,
-                            },
-                            'paint': {
-                                'text-color': '#212B36',
-                                'text-halo-color': '#fff',
-                                'text-halo-width': 1.5,
-                            },
                         });
 
                         _map.on('mouseenter', `ek-tracking-live-${_map_Container.id}-clusters`, () => {
@@ -364,76 +321,73 @@ function RealtimeMap({ options }) {
                             const zoom = await _map.getSource(`ek-tracking-live-${_map_Container.id}-source`).getClusterExpansionZoom(clusterId);
                             _map.easeTo({
                                 center: features[0].geometry.coordinates,
-                                zoom: zoom,
+                                zoom: zoom + 0.01,
                             });
                         });
 
-                        _map.on('mouseenter', `ek-tracking-live-${_map_Container.id}-unclustered-point`, () => {
-                            _map.getCanvas().style.cursor = 'pointer';
-                        });
-                        _map.on('mouseleave', `ek-tracking-live-${_map_Container.id}-unclustered-point`, () => {
-                            _map.getCanvas().style.cursor = '';
-                        })
-                        _map.on('click', `ek-tracking-live-${_map_Container.id}-unclustered-point`, async (e) => {
-                            const bbox = [
-                                [e.point.x - 5, e.point.y - 5],
-                                [e.point.x + 5, e.point.y + 5],
-                            ];
-                            const selectedFeatures = _map.queryRenderedFeatures(bbox, {
-                                layers: [`ek-tracking-live-${_map_Container.id}-unclustered-point`],
-                            });
-                            // console.log(selectedFeatures[0]);
+                        //uncluster
+                        const markers = {};
+                        let markersOnScreen = {};
+                        async function updateMarkers() {
+                            const newMarkers = {};
+                            const features = _map.querySourceFeatures(`ek-tracking-live-${_map_Container.id}-source`);
+                            for (let i = 0; i < features.length; i++) {
+                                const coords = features[i].geometry.coordinates;
+                                const props = features[i].properties;
+                                if (props.cluster) continue;
+                                const id = props._id;
+                                let marker = markers[id];
+                                if (!marker) {
+                                    const el = document.createElement('div');
+                                    el.className = 'marker-employee';
+                                    el.innerHTML = `
+                                        <div class="marker-name">${props.name}</div>
+                                        <div class="marker-img"></div>`;
+                                    let popup = new maplibregl.Popup({ offset: [0, -27], closeButton: false })
+                                        .setHTML(
+                                            `<div class="ek-tracking-his-popup-info">
+                                                <b>${props.name}</b>
+                                            </div>
+                                            <div class="ek-tracking-his-popup-info">
+                                                <span class="ek-tracking-his-popup-icon ekmapplf_tracking-icon-marker ekmapplf_tracking-icon-default-color"></span>
+                                                <span>${props.address}</span>
+                                            </div>
+                                            <div class="ek-tracking-his-popup-info" style="justify-content: end;">
+                                                <span class="show-his">Xem lịch sử</span>
+                                            </div>
+                                            `)
+                                    popup.on('open', () => {
+                                        el.querySelector('.marker-name').style.display = 'none';
+                                        popup.getElement().querySelector('.show-his').addEventListener('click', () => {
+                                            onClickPopup(props._id)
+                                        })
+                                    })
+                                    popup.on('close', () => {
+                                        el.querySelector('.marker-name').style.removeProperty('display');
+                                    })
+                                    marker = markers[id] = new maplibregl.Marker({ element: el, anchor: 'bottom' })
+                                        .setPopup(popup)
+                                        .setLngLat(coords);
 
-                            let address = await reverseGeocode(selectedFeatures[0].geometry.coordinates);
+                                }
+                                newMarkers[id] = marker;
 
-                            if (_popup) _popup.remove();
-                            _popup = new maplibregl.Popup({ className: 'ek-tracking-his-popup', anchor: 'bottom', closeButton: false })
-                                .setLngLat(selectedFeatures[0].geometry.coordinates)
-                                .setHTML(
-                                    `<div class="ek-tracking-his-popup-info">
-                                        <b>${selectedFeatures[0].properties.name}</b>
-                                    </div>
-                                    <div class="ek-tracking-his-popup-info">
-                                        <span class="ek-tracking-his-popup-icon ekmapplf_tracking-icon-marker ekmapplf_tracking-icon-default-color"></span>
-                                        <span>${address}</span>
-                                    </div>`)
-                                .setOffset([0, -20])
-                                .addTo(_map);
+                                if (markersOnScreen[id]) marker.addTo(_map);
+                            }
+
+                            for (let id in markersOnScreen) {
+                                if (!newMarkers[id]) markersOnScreen[id].remove();
+                            }
+                            markersOnScreen = newMarkers;
+                        }
+
+                        _map.on('data', (e) => {
+                            if (e.sourceId !== `ek-tracking-live-${_map_Container.id}-source` || !e.isSourceLoaded) return;
+                            _map.on('move', updateMarkers);
+                            _map.on('moveend', updateMarkers);
+                            updateMarkers();
                         });
                     }
-
-                    // for (const feature of FeatureCollection.features) {
-                    //     const el = document.createElement('div');
-                    //     el.className = 'marker-employee';
-                    //     el.innerHTML = `
-                    //         <div class="marker-name">
-                    //             <span>${feature.properties.name}</span>
-                    //         </div>
-                    //         <div class="marker-img"></div>
-                    //     `;
-                    //     let address = await reverseGeocode(feature.geometry.coordinates);
-                    //     let MarkerPopup = new maplibregl.Popup({ offset: [0, -25] })
-                    //         .setHTML(
-                    //             `<div class="ek-tracking-his-popup-info">
-                    //                 <b>${feature.properties.name}</b>
-                    //             </div>
-                    //             <div class="ek-tracking-his-popup-info">
-                    //                 <span class="ek-tracking-his-popup-icon ekmapplf_tracking-icon-marker ekmapplf_tracking-icon-default-color"></span>
-                    //                 <span>${address}</span>
-                    //             </div>`);
-                    //     MarkerPopup.on('open', () => {
-                    //         let name = el.querySelector('.marker-name');
-                    //         name.style.display = 'none';
-                    //     })
-                    //     MarkerPopup.on('close', () => {
-                    //         let name = el.querySelector('.marker-name');
-                    //         if (name.style.display) name.style.removeProperty('display');
-                    //     })
-                    //     new maplibregl.Marker({ element: el, anchor: 'bottom' })
-                    //         .setLngLat(feature.geometry.coordinates)
-                    //         .setPopup(MarkerPopup)
-                    //         .addTo(_map);
-                    // }
                     return FeatureCollection;
                 }
 

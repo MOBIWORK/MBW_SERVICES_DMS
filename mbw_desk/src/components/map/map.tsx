@@ -41,8 +41,7 @@ function HistoryMap({ options }) {
     if (_options.from_time === "" || !_options.from_time) throw new Error("Parameter from_time not valid");
     if (_options.to_time === "" || !_options.to_time) throw new Error("Parameter to_time not valid");
     if (_options.markerImage) _options.iconTrack = _options.markerImage;
-
-
+    
     useEffect(() => {
         const initializeMap = async () => {
             try {
