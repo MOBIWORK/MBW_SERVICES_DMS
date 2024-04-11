@@ -224,11 +224,11 @@ export default function SupervisoryStaffRealTime() {
                   <div className="wrap-card-container">
                     <div className="flex items-center">
                       <div className="flex items-center justify-center" style={{width:'56px', height: '56px', backgroundColor: '#22C55E1F', gap: '8px', borderRadius: '15px'}}>
-                        <div style={{width: '44px', height: '44px', backgroundImage: 'url("/user_online.png")', backgroundSize: 'Cover'}}></div>
+                        <div style={{width: '44px', height: '44px', backgroundSize: 'Cover'}} className='icon_user_online'></div>
                       </div>
                       <div style={{marginLeft: '10px'}}>
-                        <div style={{fontSize: '14px',fontWeight: 500, lineHeight: '17px', color: '#212B36'}}>Số nhân viên online</div>
-                        <div style={{fontWeight: 600, fontSize: '20px', lineHeight: '24px', color: '#22C55E', marginTop: '10px'}}>{summaryOver.so_nv_online}</div>
+                        <div className='title_card'>Số nhân viên online</div>
+                        <div className='content_card'>{summaryOver.so_nv_online}</div>
                       </div>
                     </div>
                   </div>
@@ -239,11 +239,11 @@ export default function SupervisoryStaffRealTime() {
                   <div className="wrap-card-container">
                   <div className="flex items-center">
                       <div className="flex items-center justify-center" style={{width:'56px', height: '56px', backgroundColor: '#FF56301F', gap: '8px', borderRadius: '15px',}}>
-                        <div style={{width: '44px', height: '44px', backgroundImage: 'url("/user_offline.png")', backgroundSize: 'Cover'}}></div>
+                        <div style={{width: '44px', height: '44px', backgroundSize: 'Cover'}} className='icon_user_offline'></div>
                       </div>
                       <div style={{marginLeft: '10px'}}>
-                        <div style={{fontSize: '14px',fontWeight: 500, lineHeight: '17px', color: '#212B36'}}>Số nhân viên offline</div>
-                        <div style={{fontWeight: 600, fontSize: '20px', lineHeight: '24px', color: '#FF5630', marginTop: '10px'}}>{summaryOver.so_nv_offline}</div>
+                        <div className='title_card'>Số nhân viên offline</div>
+                        <div className='content_card'>{summaryOver.so_nv_offline}</div>
                       </div>
                     </div>
                   </div>
@@ -256,11 +256,11 @@ export default function SupervisoryStaffRealTime() {
                   <div className="wrap-card-container">
                     <div className="flex items-center">
                       <div className="flex items-center justify-center" style={{width:'56px', height: '56px', backgroundColor: '#00B8D91F', gap: '8px', borderRadius: '15px'}}>
-                        <div style={{width: '44px', height: '44px', backgroundImage: 'url("/visiting.png")', backgroundSize: 'Cover'}}></div>
+                        <div style={{width: '44px', height: '44px', backgroundSize: 'Cover'}} className='icon_visiting'></div>
                       </div>
                       <div style={{marginLeft: '10px'}}>
-                        <div style={{fontSize: '14px',fontWeight: 500, lineHeight: '17px', color: '#212B36'}}>Tổng lượt viếng thăm</div>
-                        <div style={{fontWeight: 600, fontSize: '20px', lineHeight: '24px', color: '#212B36', marginTop: '10px'}}>{summaryOver.luot_vt}</div>
+                        <div className='title_card'>Tổng lượt viếng thăm</div>
+                        <div className='content_card'>{summaryOver.luot_vt}</div>
                       </div>
                     </div>
                   </div>
@@ -271,11 +271,11 @@ export default function SupervisoryStaffRealTime() {
                   <div className="wrap-card-container">
                   <div className="flex items-center">
                       <div className="flex items-center justify-center" style={{width:'56px', height: '56px', backgroundColor: '#FFAB001F', gap: '8px', borderRadius: '15px'}}>
-                        <div style={{width: '44px', height: '48px', backgroundImage: 'url("/boxing.png")', backgroundSize: 'Cover'}}></div>
+                        <div style={{width: '44px', height: '48px', backgroundSize: 'Cover'}} className='icon_boxing'></div>
                       </div>
                       <div style={{marginLeft: '10px'}}>
-                        <div style={{fontSize: '14px',fontWeight: 500, lineHeight: '17px', color: '#212B36'}}>Tổng đơn hàng</div>
-                        <div style={{fontWeight: 600, fontSize: '20px', lineHeight: '24px', color: '#212B36', marginTop: '10px'}}>{summaryOver.don_hang}</div>
+                        <div className='title_card'>Tổng đơn hàng</div>
+                        <div className='content_card'>{summaryOver.don_hang}</div>
                       </div>
                     </div>
                   </div>
@@ -286,11 +286,11 @@ export default function SupervisoryStaffRealTime() {
                   <div className="wrap-card-container">
                     <div className="flex items-center">
                       <div className="flex items-center justify-center" style={{width:'56px', height: '56px', backgroundColor: '#1877F21F', gap: '8px', borderRadius: '15px'}}>
-                        <div style={{width: '44px', height: '44px', backgroundImage: 'url("/money.png")', backgroundSize: 'Cover'}}></div>
+                        <div style={{width: '44px', height: '44px', backgroundSize: 'Cover'}} className='icon_money'></div>
                       </div>
                       <div style={{marginLeft: '10px'}}>
-                        <div style={{fontSize: '14px',fontWeight: 500, lineHeight: '17px', color: '#212B36'}}>Tổng doanh số</div>
-                        <div style={{fontWeight: 600, fontSize: '20px', lineHeight: '24px', color: '#212B36', marginTop: '10px'}}>{formatUnitNumber(summaryOver.doanh_so)}</div>
+                        <div className='title_card'>Tổng doanh số</div>
+                        <div className='content_card'>{formatUnitNumber(summaryOver.doanh_so)}</div>
                       </div>
                     </div>
                   </div>
@@ -311,13 +311,13 @@ export default function SupervisoryStaffRealTime() {
                             <div className="flex items-center">
                               <div className="flex items-center justify-center" style={{width: '24px', height: '24px'}}>
                                 {index == 0 && (
-                                  <div style={{width: '24px', height: '24px', backgroundImage: 'url("/first.png")', backgroundSize: 'Cover'}}></div>
+                                  <div style={{width: '24px', height: '24px', backgroundSize: 'Cover'}} className='icon_first'></div>
                                 )}
                                 {index == 1 && (
-                                  <div style={{width: '24px', height: '24px', backgroundImage: 'url("/second.png")', backgroundSize: 'Cover'}}></div>
+                                  <div style={{width: '24px', height: '24px', backgroundSize: 'Cover'}} className='icon_second'></div>
                                 )}
                                 {index == 2 && (
-                                  <div style={{width: '24px', height: '24px', backgroundImage: 'url("/third.png")', backgroundSize: 'Cover'}}></div>
+                                  <div style={{width: '24px', height: '24px', backgroundSize: 'Cover'}} className='icon_third'></div>
                                 )}
                               </div>
                               <div className="mx-3">{item.stt}</div>
@@ -365,7 +365,7 @@ export default function SupervisoryStaffRealTime() {
                                   {item.visiting}
                                 </div>
                                 <div className="flex items-center justify-center" style={{width: '20px', height: '20px'}}>
-                                  <div style={{width: '14px', height: '17px', backgroundImage: 'url("/visiting.png")', backgroundSize: 'Cover'}}></div>
+                                  <div style={{width: '14px', height: '17px', backgroundSize: 'Cover'}} className='icon_visiting'></div>
                                 </div>
                               </div>
                               <div className="items-center mx-3 flex" style={{flexDirection: 'column'}}>
@@ -373,7 +373,7 @@ export default function SupervisoryStaffRealTime() {
                                   {item.boxing}
                                 </div>
                                 <div className="flex items-center justify-center" style={{width: '20px', height: '20px'}}>
-                                  <div style={{width: '16px', height: '17px', backgroundImage: 'url("/boxing.png")', backgroundSize: 'Cover'}}></div>
+                                  <div style={{width: '16px', height: '17px', backgroundSize: 'Cover'}} className='icon_boxing'></div>
                                 </div>
                               </div>
                             </div>

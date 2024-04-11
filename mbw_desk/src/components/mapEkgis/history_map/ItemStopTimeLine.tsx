@@ -1,3 +1,5 @@
+import './SupervisoryStaff.css';
+
 interface DataStopTimeLine{
     time_stop: string;
     address: string;
@@ -6,7 +8,7 @@ interface DataStopTimeLine{
 export function  ItemStopTimeLineDot(){
     return <>
         <div style={{height:'36px', width:'36px', borderRadius:'32px', border:'1px solid #DFE3E8', gap:'8px'}} className="flex items-center justify-center">
-            <div style={{width: '20px', height: '20px', backgroundImage: 'url("public/stoping.png")', backgroundSize: 'Cover'}}></div>
+            <div style={{width: '20px', height: '20px', backgroundSize: 'Cover'}} className='icon_parking'></div>
         </div>
     </>
 }
@@ -20,7 +22,7 @@ export function ItemStopTimeLineContent({ data }: { data: DataStopTimeLine }){
         </div>
         <div className="flex" style={{marginTop: '5px'}}>
             <div style={{height: '20px', width: '20px', marginLeft: '5px', marginRight: '5px'}} className="flex items-center justify-center">
-                <div style={{width: '15px', height: '18px', backgroundImage: 'url("public/marker.png")', backgroundSize: 'Cover'}}></div>
+                <div style={{width: '15px', height: '18px', backgroundSize: 'Cover'}} className='icon_marker'></div>
             </div>
             <div style={{color: '#637381', fontWeight: 400, fontSize: '14px', lineHeight: '21px'}}>
                 {data.address}

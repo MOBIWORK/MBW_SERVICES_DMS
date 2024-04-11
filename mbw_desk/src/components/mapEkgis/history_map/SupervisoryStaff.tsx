@@ -87,7 +87,7 @@ export default function SupervisoryStaff({options}) {
             <div className="wrap-card-container">
               <div className="flex items-center">
                 <div className="flex items-center justify-center" style={{ width: '64px', height: '64px', backgroundColor: '#8E33FF1F', gap: '8px', borderRadius: '15px' }}>
-                  <div style={{ width: '44px', height: '44px', backgroundImage: 'url("/distance.png")', backgroundSize: 'Cover' }}></div>
+                  <div style={{ width: '44px', height: '44px', backgroundSize: 'Cover' }} className="icon_distance"></div>
                 </div>
                 <div style={{ marginLeft: '10px' }}>
                   <div style={{ opacity: '70%', color: '#212B36', fontSize: '14px', fontWeight: 500 }}>Quãng đường di chuyển</div>
@@ -102,7 +102,7 @@ export default function SupervisoryStaff({options}) {
             <div className="wrap-card-container">
               <div className="flex items-center">
                 <div className="flex items-center justify-center" style={{ width: '64px', height: '64px', backgroundColor: '#00B8D91F', gap: '8px', borderRadius: '15px' }}>
-                  <div style={{ width: '44px', height: '44px', backgroundImage: 'url("/clock.png")', backgroundSize: 'Cover' }}></div>
+                  <div style={{ width: '44px', height: '44px', backgroundSize: 'Cover' }} className="icon_clock"></div>
                 </div>
                 <div style={{ marginLeft: '10px' }}>
                   <div style={{ opacity: '70%', color: '#212B36', fontSize: '14px', fontWeight: 500 }}>Thời gian di chuyển</div>
@@ -117,7 +117,7 @@ export default function SupervisoryStaff({options}) {
             <div className="wrap-card-container">
               <div className="flex items-center">
                 <div className="flex items-center justify-center" style={{ width: '64px', height: '64px', backgroundColor: '#FFAB001F', gap: '8px', borderRadius: '15px' }}>
-                  <div style={{ width: '44px', height: '44px', backgroundImage: 'url("/speeding.png")', backgroundSize: 'Cover' }}></div>
+                  <div style={{ width: '44px', height: '44px', backgroundSize: 'Cover' }} className="icon_speeding"></div>
                 </div>
                 <div style={{ marginLeft: '10px' }}>
                   <div style={{ opacity: '70%', color: '#212B36', fontSize: '14px', fontWeight: 500 }}>Tốc độ trung bình</div>
@@ -131,7 +131,7 @@ export default function SupervisoryStaff({options}) {
           <WrapperCard>
           <div className="flex ">
                 <div className="flex items-center justify-center" style={{ width: '64px', height: '64px', backgroundColor: '#1877F21F', gap: '8px', borderRadius: '15px' }}>
-                  <div style={{ width: '44px', height: '44px', backgroundImage: 'url("/parking.png")', backgroundSize: 'Cover' }}></div>
+                  <div style={{ width: '44px', height: '44px', backgroundSize: 'Cover' }} className="icon_parking"></div>
                 </div>
                 <div style={{ marginLeft: '10px', width: '100%' }} className="flex items-center">
                   <div style={{marginRight: '40px'}}>
@@ -159,7 +159,7 @@ export default function SupervisoryStaff({options}) {
           <WrapperCard>
           <div className="flex ">
                 <div className="flex items-center justify-center" style={{ width: '64px', height: '64px', backgroundColor: '#FF56301F', gap: '8px', borderRadius: '15px' }}>
-                  <div style={{ width: '44px', height: '44px', backgroundImage: 'url("/checking.png")', backgroundSize: 'Cover' }}></div>
+                  <div style={{ width: '44px', height: '44px', backgroundSize: 'Cover' }} className="icon_checking"></div>
                 </div>
                 <div style={{ marginLeft: '10px', width: '100%' }} className="flex items-center ">
                   <div style={{marginRight: '13px'}}>
