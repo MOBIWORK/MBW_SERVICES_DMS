@@ -272,3 +272,21 @@ def list_sale_person():
         return gen_response(200, 'Thành công', sale_person)
     except Exception as e:
         return exception_handle(e)
+
+
+@frappe.whitelist(methods='GET')
+def get_customer_has_location(**kwargs):
+    try:
+        sql_query = """
+            SELECT
+                name, customer_name, customer_code, customer_type, customer_group, territory, customer_primary_contact, customer_primary_address, customer_location_primary
+            FROM
+                tabCustomer
+            WHERE
+                customer_location_primary IS NOT NULL
+        """
+
+        list_customers = frappe.db.sql(sql_query, as_dict=True)
+        return gen_response(200, 'Thành công', list_customers)
+    except Exception as e:
+        return exception_handle(e)
