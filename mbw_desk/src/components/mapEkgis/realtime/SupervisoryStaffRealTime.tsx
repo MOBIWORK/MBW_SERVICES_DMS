@@ -28,9 +28,10 @@ export default function SupervisoryStaffRealTime() {
     })
   
     const initDataSummaryOver = async () => {
-      console.log("call service");
-      const rs = await AxiosService.get(`/mbw_dms.api.report.real_time_monitoring_report`);
-      console.log(rs);
+      const rs = await AxiosService.get(`/api/method/mbw_dms.api.report.real_time_monitoring_report`);
+      if(rs.message == "Thành công"){
+        setSummaryOver(rs.result);
+      }
     }
 
   // data di chuyển nhân viên
@@ -187,17 +188,22 @@ export default function SupervisoryStaffRealTime() {
   // option hiển thị map
   const [options,setOptions] =  useState<{apiKey:string | null,projectId:string | null}>({
     apiKey: import.meta.env.VITE_API_KEY,
-    projectId: '6556e471178a1db24ac1a711'
+    projectId: ''
   })
 
+  const formatUnitNumber = (num: number) => {
+    return num.toLocaleString('en-US').replace(/,/g, '.');
+  }
+
   useEffect(() => {
-    // (async() => {
-    //   const rs = await AxiosService.get('/api/method/mbw_dms.api.user.get_projectID')
-    //   setOptions(prev => ({
-    //     ...prev,
-    //     projectId: rs.result[ "Project ID"]
-    //   }))
-    // })()
+    (async() => {
+      const rs = await AxiosService.get('/api/method/mbw_dms.api.user.get_projectID');
+      console.log(rs);
+      setOptions(prev => ({
+        ...prev,
+        projectId: rs.result[ "Project ID"]
+      }))
+    })()
   },[])
   return (
     <>
@@ -205,9 +211,9 @@ export default function SupervisoryStaffRealTime() {
         <div className="flex justify-center items-center">
           <span className="text-2xl font-semibold leading-[21px]">Giám sát thời gian thực</span>
         </div>
-        <div className="flex mb-2">
+        {/* <div className="flex mb-2">
           <Button icon={<FilterOutlined />}>Bộ lọc</Button>
-        </div>
+        </div> */}
       </Row>
       <Row style={{ marginTop: "20px" }} gutter={5}>
         <Col span={12} className="card-container">
@@ -222,7 +228,7 @@ export default function SupervisoryStaffRealTime() {
                       </div>
                       <div style={{marginLeft: '10px'}}>
                         <div style={{fontSize: '14px',fontWeight: 500, lineHeight: '17px', color: '#212B36'}}>Số nhân viên online</div>
-                        <div style={{fontWeight: 600, fontSize: '20px', lineHeight: '24px', color: '#22C55E', marginTop: '10px'}}>10</div>
+                        <div style={{fontWeight: 600, fontSize: '20px', lineHeight: '24px', color: '#22C55E', marginTop: '10px'}}>{summaryOver.so_nv_online}</div>
                       </div>
                     </div>
                   </div>
@@ -237,7 +243,7 @@ export default function SupervisoryStaffRealTime() {
                       </div>
                       <div style={{marginLeft: '10px'}}>
                         <div style={{fontSize: '14px',fontWeight: 500, lineHeight: '17px', color: '#212B36'}}>Số nhân viên offline</div>
-                        <div style={{fontWeight: 600, fontSize: '20px', lineHeight: '24px', color: '#FF5630', marginTop: '10px'}}>10</div>
+                        <div style={{fontWeight: 600, fontSize: '20px', lineHeight: '24px', color: '#FF5630', marginTop: '10px'}}>{summaryOver.so_nv_offline}</div>
                       </div>
                     </div>
                   </div>
@@ -254,7 +260,7 @@ export default function SupervisoryStaffRealTime() {
                       </div>
                       <div style={{marginLeft: '10px'}}>
                         <div style={{fontSize: '14px',fontWeight: 500, lineHeight: '17px', color: '#212B36'}}>Tổng lượt viếng thăm</div>
-                        <div style={{fontWeight: 600, fontSize: '20px', lineHeight: '24px', color: '#212B36', marginTop: '10px'}}>20</div>
+                        <div style={{fontWeight: 600, fontSize: '20px', lineHeight: '24px', color: '#212B36', marginTop: '10px'}}>{summaryOver.luot_vt}</div>
                       </div>
                     </div>
                   </div>
@@ -269,7 +275,7 @@ export default function SupervisoryStaffRealTime() {
                       </div>
                       <div style={{marginLeft: '10px'}}>
                         <div style={{fontSize: '14px',fontWeight: 500, lineHeight: '17px', color: '#212B36'}}>Tổng đơn hàng</div>
-                        <div style={{fontWeight: 600, fontSize: '20px', lineHeight: '24px', color: '#212B36', marginTop: '10px'}}>10</div>
+                        <div style={{fontWeight: 600, fontSize: '20px', lineHeight: '24px', color: '#212B36', marginTop: '10px'}}>{summaryOver.don_hang}</div>
                       </div>
                     </div>
                   </div>
@@ -284,7 +290,7 @@ export default function SupervisoryStaffRealTime() {
                       </div>
                       <div style={{marginLeft: '10px'}}>
                         <div style={{fontSize: '14px',fontWeight: 500, lineHeight: '17px', color: '#212B36'}}>Tổng doanh số</div>
-                        <div style={{fontWeight: 600, fontSize: '20px', lineHeight: '24px', color: '#212B36', marginTop: '10px'}}>200.000.000</div>
+                        <div style={{fontWeight: 600, fontSize: '20px', lineHeight: '24px', color: '#212B36', marginTop: '10px'}}>{formatUnitNumber(summaryOver.doanh_so)}</div>
                       </div>
                     </div>
                   </div>
