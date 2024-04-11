@@ -15,7 +15,7 @@ export const listMenu: MenuItem[] = [
   {
     label: (
       <Link className={""} to="/">
-          Dashboard
+          Tổng quan
       </Link>
     ),
     icon: <BarChartOutlined style={{ fontSize: "22px" }} />,
@@ -25,7 +25,7 @@ export const listMenu: MenuItem[] = [
   {
     label: (
       <Link className={""} to="/customers-map">
-          Customer Map
+          Bản đồ khách hàng
       </Link>
     ),
     icon: <AliyunOutlined style={{ fontSize: "22px" }}  />,
