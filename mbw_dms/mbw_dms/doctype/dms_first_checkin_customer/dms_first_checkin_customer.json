@@ -90,7 +90,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-04-10 10:15:38.099586",
+ "modified": "2024-04-11 09:37:26.550540",
  "modified_by": "Administrator",
  "module": "MBW DMS",
  "name": "DMS First Checkin Customer",
@@ -117,6 +117,33 @@
    "role": "All",
    "select": 1,
    "share": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales Manager",
+   "select": 1,
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "if_owner": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales User",
+   "select": 1,
+   "share": 1,
+   "write": 1
   }
  ],
  "sort_field": "modified",
