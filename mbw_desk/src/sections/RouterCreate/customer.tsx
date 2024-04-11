@@ -101,7 +101,7 @@ export default function Customer({listCustomer,handleCustomer}:Props) {
       setOpenImport(false)
       
     } catch (err) {
-      error()
+      error(err?.response?.data?.message || "Something was wrong")
     }
   }
 
@@ -147,7 +147,7 @@ export default function Customer({listCustomer,handleCustomer}:Props) {
           <Row gutter={8}>
             <Col span={9} className="text-[#1677ff]">
               <FormItemCustom>
-                <SelectCommon defaultValue={"add"} options={addCustomerOption} onSelect={handeOpen} />
+                <SelectCommon placeholder="Thêm khách hàng" options={addCustomerOption} onSelect={handeOpen} />
               </FormItemCustom>
             </Col>
             <Col span={7}>

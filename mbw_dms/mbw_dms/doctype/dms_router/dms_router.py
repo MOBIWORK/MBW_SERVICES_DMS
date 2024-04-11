@@ -2,6 +2,7 @@
 # For license information, please see license.txt
 
 import frappe
+from frappe import _
 import json
 from frappe.model.document import Document
 from pypika import CustomFunction
@@ -216,6 +217,13 @@ def create_router(body):
         body = dict(body)
         if body['cmd'] :
             del body['cmd']
+        is_has_travel_date = frappe.db.get_value("DMS Router",filters={
+        "employee": body.get('employee'),
+        "travel_date":body.get('travel_date'),
+        "status": "Active"
+        })
+        if is_has_travel_date:
+            return gen_response(500,body.get('employee')+  _(" have Router in this weekday"))
         field_validate= ["travel_date","status", "customers", "channel_code", "team_sale","channel_name","employee"]
         field_customers_validate = ["customer_code","customer_name","display_address","phone_number","customer","frequency","lat","long"]
         # check_validate fields
@@ -244,6 +252,14 @@ def update_router(body):
     try:
         body = dict(body)
         name = validate_filter(type_check='require',value=body.get('name'))
+        is_has_travel_date = frappe.db.get_value("DMS Router",filters={
+            "employee": body.get('employee'),
+            "travel_date":body.get('travel_date'),
+            "status": "Active",
+            "name": ["!=",name]
+        })
+        if is_has_travel_date:
+            return gen_response(500,body.get('employee')+  _(" have Router in this weekday"))
         if body['cmd'] :
             del body['cmd']
         field_validate= ["name","travel_date","status", "customers", "channel_code", "team_sale","channel_name","employee"]
@@ -291,12 +307,18 @@ def update_routers(body):
             return gen_response(406,"Choose action",[])
         if body['cmd'] :
             del body['cmd']
-        
-        frappe.db.sql(f"""
-                UPDATE `tabDMS Router`
-                SET {field_name} = {value}
-                WHERE name IN {tuple(name) if len(tuple(name)) >1 else tuple(name[0])} ;        
-                """)
+
+        if len(name) ==1 :
+            frappe.db.set_value('DMS Router', name[0], {
+                field_name: value,
+            })
+        else :
+            name_arr = tuple(name)
+            frappe.db.sql(f"""
+                    UPDATE `tabDMS Router`
+                    SET {field_name} = {value}
+                    WHERE name IN {name_arr} ;        
+                    """)
         
         frappe.db.commit()
 

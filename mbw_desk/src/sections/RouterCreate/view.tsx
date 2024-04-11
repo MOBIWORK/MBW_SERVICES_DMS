@@ -25,10 +25,10 @@ export default function RouterCreate() {
     });
   };
 
-  const error = () => {
+  const error = (mes) => {
     messageApi.open({
       type: 'error',
-      content: 'Something was wrong',
+      content: mes || 'Something was wrong',
     });
   };
   const handleCreateRouter = useCallback(async(value:any) => {
@@ -47,7 +47,7 @@ export default function RouterCreate() {
       success()
       navigate('/router-control')
     } catch (err) {
-      error()
+      error(err)
       console.log("error create",err);
 
       
@@ -69,7 +69,7 @@ export default function RouterCreate() {
       success()
       navigate('/router-control')
     } catch (err) {
-      error()
+      error(err || "Something was wrong")
       console.log("error create",err);
 
       

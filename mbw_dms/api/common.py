@@ -292,7 +292,7 @@ def weekday(time:datetime):
 }
     thu_trong_tuan = listngay[anh_xa_ngay_sang_so[time.strftime("%A")]]
     w = float(time.strftime("%W"))
-    tuan =(w - W_first) + 1
+    tuan =(w - W_first) + 1 if (w - W_first) + 1 <5 else 1
     return thu_trong_tuan, tuan
 
 

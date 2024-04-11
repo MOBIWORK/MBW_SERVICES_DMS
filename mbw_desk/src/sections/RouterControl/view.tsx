@@ -48,8 +48,8 @@ const columns = [
   },
   {
     title: "Ngày tạo",
-    dataIndex: "modified",
-    key: "modified",
+    dataIndex: "creation",
+    key: "creation",
     render: (value: number) => dayjs(value * 1000).format("DD/MM/YYYY")
 
   },
@@ -229,7 +229,7 @@ export default function RouterControl() {
         let arrNameUpdate = rsUpdate.result.map(rt => rt.name)
         const routerNotUpdate = prev.filter(router => !arrNameUpdate.includes(router.name))
         
-        return  [...rsUpdate.result,...routerNotUpdate]
+        return  [...rsUpdate.result,...routerNotUpdate].filter(vl => !vl.is_deleted)
       })
       setAction({
         isOpen:false,
@@ -426,10 +426,24 @@ export default function RouterControl() {
                   <TableCustom
                     rowSelection={rowSelection}
                     columns={columns.map(column => {
-                      if (column.dataIndex == 'channel_code')
-                        return ({ ...column, render: (text:any, record:any, index:number) => <Link className="!text-slate-900" to={`/dms-router/${record?.name}`}>{text}</Link> })
-                      else return column
-                    })}
+                      if(!["creation","modified","status"].includes(column.key)){
+                        return ({ ...column, render: (text:any, record:any, index:number) => <Link key={record?.name} className="!text-slate-900" to={`/dms-router/${record?.name}`}>{text}</Link> })
+
+                      }
+                      else if(["creation","modified"].includes(column.key)) {
+                        return ({ ...column, 
+                          render: (text:any, record:any, index:number) => <Link key={record?.name} className="!text-slate-900" to={`/dms-router/${record?.name}`}>
+                            {dayjs(text * 1000).format("DD/MM/YYYY")}
+                            </Link> })
+                      }
+                      else{
+                        return ({ ...column, 
+                          render: (text:any, record:any, index:number) => <Link key={record?.name} className="!text-slate-900" to={`/dms-router/${record?.name}`}>
+                            {text == "Active" ? <TagCustomStatus > Hoạt động</TagCustomStatus > : <TagCustomStatus type="Warning" > Khóa</TagCustomStatus >}
+                            </Link> })
+                          
+                    }
+                  })}
                     dataSource={routersTable?.map(router => ({ key: router.name, ...router }))}
                     pagination={{
                       defaultPageSize: PAGE_SIZE,

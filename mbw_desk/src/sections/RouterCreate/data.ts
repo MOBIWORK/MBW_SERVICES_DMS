@@ -1,6 +1,5 @@
 import type {  ColumnsType } from 'antd/es/table'
 import { CustomerType } from './type'
-import { Filter } from '../../../../../../archived/apps/helpdesk-2023-12-01/desk/src/types';
 
 type Options = {
     label: string,
@@ -19,10 +18,6 @@ export const statusOption:Options[] = [
 ]
 
 export const addCustomerOption:Options[] = [
-    {
-        label: "Thêm khách hàng",
-        value: 'add'
-    },
     {
         label: "Chọn khách hàng",
         value: "Choose"
