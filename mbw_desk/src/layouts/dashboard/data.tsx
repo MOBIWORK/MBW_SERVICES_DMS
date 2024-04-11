@@ -1,4 +1,5 @@
 import {
+  AliyunOutlined,
   BarChartOutlined,
   FileDoneOutlined,
   FileImageOutlined,
@@ -19,6 +20,16 @@ export const listMenu: MenuItem[] = [
     ),
     icon: <BarChartOutlined style={{ fontSize: "22px" }} />,
     key: "dashboard",
+  },
+  //customer map
+  {
+    label: (
+      <Link className={""} to="/customers-map">
+          Customer Map
+      </Link>
+    ),
+    icon: <AliyunOutlined style={{ fontSize: "22px" }}  />,
+    key: "csmap",
   },
   //giam sat
   {

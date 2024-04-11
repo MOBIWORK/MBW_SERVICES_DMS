@@ -27,6 +27,7 @@ const ReportCustomNew = lazy(()=> import('@/pages/ReportCustomNew'))
 const ReportCheckinFirst = lazy(()=> import('@/pages/ReportCheckinFirst'))
 const EmployeeMonitorKPI = lazy(()=> import('@/pages/EmployeeMonitorKPI'))
 const ReportDistance = lazy(()=> import('@/pages/ReportDistance'))
+const CustomersMap = lazy(()=> import('@/pages/CustomersMap'))
 export const dashboardRoutes = [
     {
         path: '/',
@@ -94,6 +95,9 @@ export const dashboardRoutes = [
             },
             {
                 path: 'report-distance',element: <ReportDistance/>
+            },
+            {
+                path: "customers-map",element: <CustomersMap/>
             }
         ]
         
