@@ -2,10 +2,11 @@
 
 import Context from '../gl/context.js';
 import type {UniformValues} from './uniform_binding.js';
-import Painter from './painter.js';
 import {Uniform4f} from './uniform_binding.js';
 import {smoothstep, warnOnce} from '../util/util.js';
 import {MIN_LOD_PITCH} from '../geo/transform.js';
+
+import type Painter from './painter.js';
 
 export type CutoffUniformsType = {|
     'u_cutoff_params': Uniform4f,
@@ -42,7 +43,7 @@ export const getCutoffParams = (
         return {
             shouldRenderCutoff: false,
             uniformValues: {
-                'u_cutoff_params': [0, 0, 0, 0]
+                'u_cutoff_params': [0, 0, 0, 1]
             }
         };
     }
@@ -54,8 +55,7 @@ export const getCutoffParams = (
     const zRange = tr._farZ - tr._nearZ;
     const cameraToCenterDistance = tr.cameraToCenterDistance;
     const fadeRangePixels = cutoffFadeRange * tr.height;
-    // Scaled down by 0.75 because at the minimum zoom level the first LOD tile closer than the center
-    const cutoffDistance = lerp(cameraToCenterDistance * 0.75, tr._farZ + fadeRangePixels, pitchScale) * zoomScale;
+    const cutoffDistance = lerp(cameraToCenterDistance, tr._farZ + fadeRangePixels, pitchScale) * zoomScale;
     const relativeCutoffDistance = ((cutoffDistance - tr._nearZ) / zRange);
     const relativeCutoffFadeDistance = ((cutoffDistance - fadeRangePixels - tr._nearZ) / zRange);
     return {

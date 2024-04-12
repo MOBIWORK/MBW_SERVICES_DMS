@@ -9,9 +9,14 @@ import { ItemMovingTimeLineDot, ItemMovingTimeLineContent } from "./ItemMovingTi
 import { ItemStopTimeLineDot, ItemStopTimeLineContent } from "./ItemStopTimeLine";
 
 
-export default function SupervisoryStaff({options}:{options:any}) {
+export default function SupervisoryStaff({options, loading}) {
 
   const [timeLineHistory, setTimeLineHistory] = useState<any[]>([]);
+  const [loadingPage, setLoadingPage] = useState<boolean>(false);
+
+  useEffect(() => {
+    setLoadingPage(loading);
+  }, [loading]);
 
   useEffect(() => {
     console.log(options);
@@ -50,11 +55,14 @@ export default function SupervisoryStaff({options}:{options:any}) {
     setTimeLineHistory(arrTimeLineHistory);
   }, [options])
 
-  const formatUnitDistance = (distance: number)=> {
-    return Math.round(distance/1000);
+  const formatDistance = (distance: number)=> {
+    if(distance < 1000) return `${distance} m`;
+    return `${Math.round(distance/1000)} km`;
   }
-  const formatUnitTime = (time: number) => {
-    return Math.round(time/60);
+  const formatTime = (time: number) => {
+    if(time < 60) return `${time} giây`;
+    else if(time >= 60 && time < 3600) return `${time/60} phút`;
+    return `${Math.round(time/3600)} giờ`;
   }
   const formatUnitSpeed = (speed: number) => {
     return Math.round(speed * 3.6);
@@ -67,6 +75,19 @@ export default function SupervisoryStaff({options}:{options:any}) {
 
   return (
     <>
+      {/* <Row className="flex flex-wrap justify-between items-center px-0">
+        <div className="flex justify-center items-center">
+          <p className="mr-2 cursor-pointer">
+            <LeftOutlined />
+          </p>
+          <span className="text-2xl font-semibold leading-[21px]">Nhân viên Chu Quỳnh Anh - NV1234</span>
+        </div>
+        <div className="flex mb-2">
+          <Form.Item className="border-none" style={{ padding: '20px 0', margin: '0' }}>
+            <DatePicker />
+          </Form.Item>
+        </div>
+      </Row> */}
       <Row gutter={20}>
         <Col span={4} className="card-container">
           <WrapperCard>
@@ -77,7 +98,7 @@ export default function SupervisoryStaff({options}:{options:any}) {
                 </div>
                 <div style={{ marginLeft: '10px' }}>
                   <div style={{ opacity: '70%', color: '#212B36', fontSize: '14px', fontWeight: 500 }}>Quãng đường di chuyển</div>
-                  <div style={{ fontWeight: 600, fontSize: '22px', color: '#212B36', marginTop: '8px' }}>{options.summary && formatUnitDistance(options.summary.move.distance)} km</div>
+                  <div style={{ fontWeight: 600, fontSize: '22px', color: '#212B36', marginTop: '8px' }}>{options.summary && formatDistance(options.summary.move.distance)}</div>
                 </div>
               </div>
             </div>
@@ -92,7 +113,7 @@ export default function SupervisoryStaff({options}:{options:any}) {
                 </div>
                 <div style={{ marginLeft: '10px' }}>
                   <div style={{ opacity: '70%', color: '#212B36', fontSize: '14px', fontWeight: 500 }}>Thời gian di chuyển</div>
-                  <div style={{ fontWeight: 600, fontSize: '22px', color: '#212B36', marginTop: '8px' }}>{options.summary && formatUnitTime(options.summary.move.totalTime)} phút</div>
+                  <div style={{ fontWeight: 600, fontSize: '22px', color: '#212B36', marginTop: '8px' }}>{options.summary && formatTime(options.summary.move.totalTime)}</div>
                 </div>
               </div>
             </div>
@@ -134,7 +155,7 @@ export default function SupervisoryStaff({options}:{options:any}) {
                       Thời gian dừng
                     </div>
                     <div style={{ fontWeight: 600, fontSize: '22px', color: '#212B36', marginTop: '8px' }}>
-                      {options.summary && formatUnitTime(options.summary.stop.totalTime)} phút
+                      {options.summary && formatTime(options.summary.stop.totalTime)}
                     </div>
                   </div>
                 </div>
@@ -162,7 +183,7 @@ export default function SupervisoryStaff({options}:{options:any}) {
                     Thời gian viếng thăm
                     </div>
                     <div style={{ fontWeight: 600, fontSize: '22px', color: '#212B36', marginTop: '8px' }}>
-                    {options.summary && formatUnitTime(options.summary.checkin.totalTime)} phút
+                    {options.summary && formatTime(options.summary.checkin.totalTime)}
                     </div>
                   </div>
                 </div>

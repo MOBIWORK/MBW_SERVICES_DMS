@@ -24,27 +24,11 @@ vec3 elevationVector(vec2 pos) { return vec3(0, 0, 1); }
 
 #endif
 
-// Handle skirt flag for terrain & globe shaders
-
-const float skirtOffset = 24575.0;
-vec3 decomposeToPosAndSkirt(vec2 posWithComposedSkirt)
-{
-    float skirt = float(posWithComposedSkirt.x >= skirtOffset);
-    vec2 pos = posWithComposedSkirt - vec2(skirt * skirtOffset, 0.0);
-
-    return vec3(pos, skirt);
-}
-
 #ifdef TERRAIN
 
-#ifdef TERRAIN_DEM_FLOAT_FORMAT
 uniform highp sampler2D u_dem;
 uniform highp sampler2D u_dem_prev;
-#else
-uniform highp sampler2D u_dem;
-uniform highp sampler2D u_dem_prev;
-#endif
-uniform vec4 u_dem_unpack;
+
 uniform vec2 u_dem_tl;
 uniform vec2 u_dem_tl_prev;
 uniform float u_dem_scale;
@@ -64,10 +48,6 @@ vec4 tileUvToDemSample(vec2 uv, float dem_size, float dem_scale, vec2 dem_tl) {
     return vec4((pos - f + 0.5) / (dem_size + 2.0), f);
 }
 
-float decodeElevation(vec4 v) {
-    return dot(vec4(v.xyz * 255.0, -1.0), u_dem_unpack);
-}
-
 float currentElevation(vec2 apos) {
 #ifdef TERRAIN_DEM_FLOAT_FORMAT
     vec2 pos = (u_dem_size * (apos / 8192.0 * u_dem_scale + u_dem_tl) + 1.5) / (u_dem_size + 2.0);
@@ -78,10 +58,10 @@ float currentElevation(vec2 apos) {
     vec2 pos = r.xy;
     vec2 f = r.zw;
 
-    float tl = decodeElevation(texture2D(u_dem, pos));
-    float tr = decodeElevation(texture2D(u_dem, pos + vec2(dd, 0.0)));
-    float bl = decodeElevation(texture2D(u_dem, pos + vec2(0.0, dd)));
-    float br = decodeElevation(texture2D(u_dem, pos + vec2(dd, dd)));
+    float tl = texture(u_dem, pos).r;
+    float tr = texture(u_dem, pos + vec2(dd, 0)).r;
+    float bl = texture(u_dem, pos + vec2(0, dd)).r;
+    float br = texture(u_dem, pos + vec2(dd, dd)).r;
 
     return u_exaggeration * mix(mix(tl, tr, f.x), mix(bl, br, f.x), f.y);
 #endif
@@ -97,10 +77,10 @@ float prevElevation(vec2 apos) {
     vec2 pos = r.xy;
     vec2 f = r.zw;
 
-    float tl = decodeElevation(texture2D(u_dem_prev, pos));
-    float tr = decodeElevation(texture2D(u_dem_prev, pos + vec2(dd, 0.0)));
-    float bl = decodeElevation(texture2D(u_dem_prev, pos + vec2(0.0, dd)));
-    float br = decodeElevation(texture2D(u_dem_prev, pos + vec2(dd, dd)));
+    float tl = texture(u_dem_prev, pos).r;
+    float tr = texture(u_dem_prev, pos + vec2(dd, 0)).r;
+    float bl = texture(u_dem_prev, pos + vec2(0, dd)).r;
+    float br = texture(u_dem_prev, pos + vec2(dd, dd)).r;
 
     return u_exaggeration * mix(mix(tl, tr, f.x), mix(bl, br, f.x), f.y);
 #endif
@@ -135,7 +115,7 @@ highp float unpack_depth(highp vec4 rgba_depth)
 
 bool isOccluded(vec4 frag) {
     vec3 coord = frag.xyz / frag.w;
-    float depth = unpack_depth(texture2D(u_depth, (coord.xy + 1.0) * 0.5));
+    float depth = unpack_depth(texture(u_depth, (coord.xy + 1.0) * 0.5));
     return coord.z > depth + 0.0005;
 }
 
@@ -145,10 +125,10 @@ float occlusionFade(vec4 frag) {
     vec3 df = vec3(5.0 * u_depth_size_inv, 0.0);
     vec2 uv = 0.5 * coord.xy + 0.5;
     vec4 depth = vec4(
-        unpack_depth(texture2D(u_depth, uv - df.xz)),
-        unpack_depth(texture2D(u_depth, uv + df.xz)),
-        unpack_depth(texture2D(u_depth, uv - df.zy)),
-        unpack_depth(texture2D(u_depth, uv + df.zy))
+        unpack_depth(texture(u_depth, uv - df.xz)),
+        unpack_depth(texture(u_depth, uv + df.xz)),
+        unpack_depth(texture(u_depth, uv - df.zy)),
+        unpack_depth(texture(u_depth, uv + df.zy))
     );
     return dot(vec4(0.25), vec4(1.0) - clamp(300.0 * (vec4(coord.z - 0.001) - depth), 0.0, 1.0));
 }
@@ -158,21 +138,10 @@ float occlusionFade(vec4 frag) {
  // This is so that rendering changes are reflected on CPU side for feature querying.
 
 vec4 fourSample(vec2 pos, vec2 off) {
-#ifdef TERRAIN_DEM_FLOAT_FORMAT
     float tl = texture(u_dem, pos).r;
     float tr = texture(u_dem, pos + vec2(off.x, 0.0)).r;
     float bl = texture(u_dem, pos + vec2(0.0, off.y)).r;
     float br = texture(u_dem, pos + off).r;
-#else
-    vec4 demtl = vec4(texture2D(u_dem, pos).xyz * 255.0, -1.0);
-    float tl = dot(demtl, u_dem_unpack);
-    vec4 demtr = vec4(texture2D(u_dem, pos + vec2(off.x, 0.0)).xyz * 255.0, -1.0);
-    float tr = dot(demtr, u_dem_unpack);
-    vec4 dembl = vec4(texture2D(u_dem, pos + vec2(0.0, off.y)).xyz * 255.0, -1.0);
-    float bl = dot(dembl, u_dem_unpack);
-    vec4 dembr = vec4(texture2D(u_dem, pos + off).xyz * 255.0, -1.0);
-    float br = dot(dembr, u_dem_unpack);
-#endif
     return vec4(tl, tr, bl, br);
 }
 

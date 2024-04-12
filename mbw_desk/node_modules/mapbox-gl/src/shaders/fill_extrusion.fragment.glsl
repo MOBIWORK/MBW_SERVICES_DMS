@@ -2,27 +2,27 @@
 #include "_prelude_shadow.fragment.glsl"
 #include "_prelude_lighting.glsl"
 
-varying vec4 v_color;
+in vec4 v_color;
+in vec4 v_flat;
 
 #ifdef RENDER_SHADOWS
-varying highp vec4 v_pos_light_view_0;
-varying highp vec4 v_pos_light_view_1;
-varying float v_depth;
+in highp vec4 v_pos_light_view_0;
+in highp vec4 v_pos_light_view_1;
 #endif
 
 uniform lowp float u_opacity;
 
 #ifdef FAUX_AO
 uniform lowp vec2 u_ao;
-varying vec2 v_ao;
+in vec2 v_ao;
 #endif
 
 #if defined(ZERO_ROOF_RADIUS) && !defined(LIGHTING_3D_MODE)
-varying vec4 v_roof_color;
+in vec4 v_roof_color;
 #endif
 
 #if defined(ZERO_ROOF_RADIUS) || defined(RENDER_SHADOWS) || defined(LIGHTING_3D_MODE)
-varying highp vec3 v_normal;
+in highp vec3 v_normal;
 #endif
 
 uniform vec3 u_flood_light_color;
@@ -31,11 +31,13 @@ uniform float u_flood_light_intensity;
 uniform vec3 u_ground_shadow_factor;
 
 #if defined(LIGHTING_3D_MODE) && defined(FLOOD_LIGHT)
-varying float v_flood_radius;
-varying float v_has_floodlight;
+in float v_flood_radius;
+in float v_has_floodlight;
 #endif
 
-varying float v_height;
+uniform float u_emissive_strength;
+
+in float v_height;
 
 void main() {
 
@@ -91,7 +93,7 @@ float flood_radiance = 0.0;
 #ifdef FLOOD_LIGHT
     float ndotl_unclamped = dot(normal, u_shadow_direction);
     float ndotl = max(0.0, ndotl_unclamped);
-    float occlusion = ndotl_unclamped < 0.0 ? 1.0 : shadow_occlusion(ndotl, v_pos_light_view_0, v_pos_light_view_1, v_depth);
+    float occlusion = ndotl_unclamped < 0.0 ? 1.0 : shadow_occlusion(ndotl, v_pos_light_view_0, v_pos_light_view_1, 1.0 / gl_FragCoord.w);
 
     // Compute both FE and flood lights separately and interpolate between the two.
     // "litColor" uses pretty much "shadowed_light_factor_normal" as the directional component.
@@ -100,7 +102,7 @@ float flood_radiance = 0.0;
 
     color.rgb = mix(litColor, floodLitColor, flood_radiance);
 #else // FLOOD_LIGHT
-    float shadowed_lighting_factor = shadowed_light_factor_normal(normal, v_pos_light_view_0, v_pos_light_view_1, v_depth);
+    float shadowed_lighting_factor = shadowed_light_factor_normal(normal, v_pos_light_view_0, v_pos_light_view_1, 1.0 / gl_FragCoord.w);
     color.rgb = apply_lighting(color.rgb, normal, shadowed_lighting_factor);
 #endif // !FLOOD_LIGHT 
 #else // RENDER_SHADOWS
@@ -110,6 +112,7 @@ float flood_radiance = 0.0;
 #endif // FLOOD_LIGHT
 #endif // !RENDER_SHADOWS
 
+    color.rgb = mix(color.rgb, v_flat.rgb, u_emissive_strength);
     color *= u_opacity;
 #endif // LIGHTING_3D_MODE
 
@@ -117,18 +120,14 @@ float flood_radiance = 0.0;
     color = fog_dither(fog_apply_premultiplied(color, v_fog_pos, h));
 #endif
 
-#ifdef RENDER_CUTOFF
-    color *= v_cutoff_opacity;
-#endif
-
 #ifdef INDICATOR_CUTOUT
     color = applyCutout(color);
 #endif
 
-    gl_FragColor = color;
+    glFragColor = color;
 
 #ifdef OVERDRAW_INSPECTOR
-    gl_FragColor = vec4(1.0);
+    glFragColor = vec4(1.0);
 #endif
 
     HANDLE_WIREFRAME_DEBUG;

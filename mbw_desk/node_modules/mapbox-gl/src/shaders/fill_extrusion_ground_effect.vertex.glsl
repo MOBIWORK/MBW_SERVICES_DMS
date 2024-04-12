@@ -1,16 +1,16 @@
 #include "_prelude_fog.vertex.glsl"
 
-attribute highp vec4 a_pos_end;
-attribute highp float a_angular_offset_factor;
-attribute highp float a_hidden_by_landmark;
+in highp vec4 a_pos_end;
+in highp float a_angular_offset_factor;
+in highp float a_hidden_by_landmark;
 
 #ifdef SDF_SUBPASS
-varying highp vec2 v_pos;
-varying highp vec4 v_line_segment;
-varying highp float v_flood_light_radius_tile;
-varying highp vec2 v_ao;
+out highp vec2 v_pos;
+out highp vec4 v_line_segment;
+out highp float v_flood_light_radius_tile;
+out highp vec2 v_ao;
 #ifdef FOG
-varying highp float v_fog;
+out highp float v_fog;
 #endif
 #endif
 
@@ -36,16 +36,15 @@ void main() {
     vec2 start_bottom = a_pos_end.zw - q * 2.0;
 
     float fl_ground_radius = flood_light_ground_radius;
-#ifdef FORCE_ABS_FL_GROUND_RADIUS
     fl_ground_radius = abs(flood_light_ground_radius);
-#endif
+    float direction = flood_light_ground_radius < 0.0 ? -1.0 : 1.0;
     float flood_radius_tile = fl_ground_radius * u_meter_to_tile;
     vec2 v = normalize(q - p);
     float ao_radius = u_ao.y / 3.5; // adjust AO radius slightly
     float effect_radius = mix(flood_radius_tile, ao_radius, u_ao_pass) + u_edge_radius;
 
     float angular_offset_factor = a_angular_offset_factor / NORM * TANGENT_CUTOFF;
-    float angular_offset = angular_offset_factor * effect_radius;
+    float angular_offset = direction * angular_offset_factor * effect_radius;
 
     float top = 1.0 - start_bottom.y;
 
@@ -53,7 +52,7 @@ void main() {
     vec2 extrusion_parallel = v * side * mix(1.0, angular_offset, top);
 
     vec2 perp = vec2(v.y, -v.x);
-    vec2 extrusion_perp = perp * effect_radius * top;
+    vec2 extrusion_perp = direction * perp * effect_radius * top;
 
     vec3 pos = vec3(mix(q, p, start_bottom.x), 0.0);
     pos.xy += extrusion_parallel + extrusion_perp;

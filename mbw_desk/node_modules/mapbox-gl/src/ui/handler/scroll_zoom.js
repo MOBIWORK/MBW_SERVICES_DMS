@@ -5,12 +5,12 @@ import * as DOM from '../../util/dom.js';
 
 import {ease as _ease, bindAll, bezier, isFullscreen} from '../../util/util.js';
 import browser from '../../util/browser.js';
-import window from '../../util/window.js';
 import {number as interpolate} from '../../style-spec/util/interpolate.js';
 import Point from '@mapbox/point-geometry';
 
 import type Map from '../map.js';
-import type HandlerManager, {HandlerResult} from '../handler_manager.js';
+import type HandlerManager from '../handler_manager.js';
+import type {Handler, HandlerResult} from '../handler.js';
 import MercatorCoordinate from '../../geo/mercator_coordinate.js';
 
 // deltaY value for mouse scroll wheel identification
@@ -31,7 +31,7 @@ const maxScalePerFrame = 2;
  * @see [Example: Toggle interactions](https://docs.mapbox.com/mapbox-gl-js/example/toggle-interaction-handlers/)
  * @see [Example: Disable scroll zoom](https://docs.mapbox.com/mapbox-gl-js/example/disable-scroll-zoom/)
  */
-class ScrollZoomHandler {
+class ScrollZoomHandler implements Handler {
     _map: Map;
     _el: HTMLElement;
     _enabled: boolean;
@@ -163,6 +163,7 @@ class ScrollZoomHandler {
         }
     }
 
+    // $FlowFixMe[method-unbinding]
     wheel(e: WheelEvent) {
         if (!this.isEnabled()) return;
 
@@ -178,7 +179,7 @@ class ScrollZoomHandler {
         }
 
         // Remove `any` cast when https://github.com/facebook/flow/issues/4879 is fixed.
-        let value = e.deltaMode === (window.WheelEvent: any).DOM_DELTA_LINE ? e.deltaY * 40 : e.deltaY;
+        let value = e.deltaMode === (WheelEvent: any).DOM_DELTA_LINE ? e.deltaY * 40 : e.deltaY;
         const now = browser.now(),
             timeDelta = now - (this._lastWheelEventTime || 0);
 
@@ -266,6 +267,7 @@ class ScrollZoomHandler {
         }
     }
 
+    // $FlowFixMe[method-unbinding]
     renderFrame(): ?HandlerResult {
         if (!this._frameId) return;
         this._frameId = null;
@@ -402,7 +404,7 @@ class ScrollZoomHandler {
         if (this._map && !this._alertContainer) {
             this._alertContainer = DOM.create('div', 'mapboxgl-scroll-zoom-blocker', this._map._container);
 
-            if (/(Mac|iPad)/i.test(window.navigator.userAgent)) {
+            if (/(Mac|iPad)/i.test(navigator.userAgent)) {
                 this._alertContainer.textContent = this._map._getUIString('ScrollZoomBlocker.CmdMessage');
             } else {
                 this._alertContainer.textContent = this._map._getUIString('ScrollZoomBlocker.CtrlMessage');
@@ -422,7 +424,7 @@ class ScrollZoomHandler {
 
         this._alertTimer = setTimeout(() => {
             this._alertContainer.classList.remove('mapboxgl-scroll-zoom-blocker-show');
-            this._alertContainer.setAttribute("role", "null");
+            this._alertContainer.removeAttribute("role");
         }, 200);
     }
 

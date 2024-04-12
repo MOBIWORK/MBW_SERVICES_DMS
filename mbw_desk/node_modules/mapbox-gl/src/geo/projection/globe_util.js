@@ -16,8 +16,19 @@ import {members as globeLayoutAttributes} from '../../terrain/globe_attributes.j
 import posAttributes from '../../data/pos_attributes.js';
 import {TriangleIndexArray, GlobeVertexArray, PosArray} from '../../data/array_types.js';
 import {Aabb, Ray} from '../../util/primitives.js';
-import LngLat, {earthRadius} from '../lng_lat.js';
-import LngLatBounds from '../lng_lat_bounds.js';
+import LngLat, {earthRadius, csLatLngToECEF, latLngToECEF, LngLatBounds} from '../lng_lat.js';
+import {
+    GLOBE_RADIUS,
+    GLOBE_MIN,
+    GLOBE_MAX,
+    TILE_SIZE,
+    GLOBE_NORMALIZATION_MASK,
+    GLOBE_ZOOM_THRESHOLD_MIN,
+    GLOBE_ZOOM_THRESHOLD_MAX,
+    GLOBE_VERTEX_GRID_SIZE,
+    GLOBE_LATITUDINAL_GRID_LOD_TABLE
+} from './globe_constants.js';
+import Point from '@mapbox/point-geometry';
 
 import type Painter from '../../render/painter.js';
 import type {CanonicalTileID, UnwrappedTileID} from '../../source/tile_id.js';
@@ -26,36 +37,10 @@ import type {Vec3, Mat4} from 'gl-matrix';
 import type IndexBuffer from '../../gl/index_buffer.js';
 import type VertexBuffer from '../../gl/vertex_buffer.js';
 import type Transform from '../transform.js';
-import Point from '@mapbox/point-geometry';
-import assert from 'assert';
 
-export const GLOBE_ZOOM_THRESHOLD_MIN = 5;
-export const GLOBE_ZOOM_THRESHOLD_MAX = 6;
-
-// At low zoom levels the globe gets rendered so that the scale at this
-// latitude matches it's scale in a mercator map. The choice of latitude is
-// a bit arbitrary. Different choices will match mercator more closely in different
-// views. 45 is a good enough choice because:
-// - it's half way from the pole to the equator
-// - matches most middle latitudes reasonably well
-// - biases towards increasing size rather than decreasing
-// - makes the globe slightly larger at very low zoom levels, where it already
-//   covers less pixels than mercator (due to the curved surface)
-//
-//   Changing this value will change how large a globe is rendered and could affect
-//   end users. This should only be done of the tradeoffs between change and improvement
-//   are carefully considered.
-export const GLOBE_SCALE_MATCH_LATITUDE = 45;
-
-export const GLOBE_RADIUS = EXTENT / Math.PI / 2.0;
-const GLOBE_NORMALIZATION_BIT_RANGE = 15;
-const GLOBE_NORMALIZATION_MASK = (1 << (GLOBE_NORMALIZATION_BIT_RANGE - 1)) - 1;
-const GLOBE_VERTEX_GRID_SIZE = 64;
-const GLOBE_LATITUDINAL_GRID_LOD_TABLE = [GLOBE_VERTEX_GRID_SIZE, GLOBE_VERTEX_GRID_SIZE / 2, GLOBE_VERTEX_GRID_SIZE / 4];
-const TILE_SIZE = 512;
-
-const GLOBE_MIN = -GLOBE_RADIUS;
-const GLOBE_MAX = GLOBE_RADIUS;
+export function globeMetersToEcef(d: number): number {
+    return d * GLOBE_RADIUS / earthRadius;
+}
 
 const GLOBE_LOW_ZOOM_TILE_AABBS = [
     // z == 0
@@ -66,10 +51,6 @@ const GLOBE_LOW_ZOOM_TILE_AABBS = [
     new Aabb([GLOBE_MIN, 0, GLOBE_MIN], [0, GLOBE_MAX, GLOBE_MAX]), // x=0, y=1
     new Aabb([0, 0, GLOBE_MIN], [GLOBE_MAX, GLOBE_MAX, GLOBE_MAX])  // x=1, y=1
 ];
-
-export function globeMetersToEcef(d: number): number {
-    return d * GLOBE_RADIUS / earthRadius;
-}
 
 export function globePointCoordinate(tr: Transform, x: number, y: number, clampToHorizon: boolean = true): ?MercatorCoordinate {
     const point0 = vec3.scale([], tr._camera.position, tr.worldSize);
@@ -266,7 +247,7 @@ export function aabbForTileOnGlobe(tr: Transform, numTiles: number, tileId: Cano
     // It is enough to extend the aabb to contain only the edge that's closest to the center point.
     const bounds = tileCornersToBounds(tileId, extendToPoles);
 
-    const corners = boundsToECEF(bounds);
+    const corners = boundsToECEF(bounds, GLOBE_RADIUS + globeMetersToEcef(tr._tileCoverLift));
 
     // Transform the corners to world space
     transformPoints(corners, m, scale);
@@ -289,6 +270,15 @@ export function aabbForTileOnGlobe(tr: Transform, numTiles: number, tileId: Cano
         vec3.min(cornerMin, cornerMin, center);
         vec3.max(cornerMax, cornerMax, center);
 
+        return new Aabb(cornerMin, cornerMax);
+    }
+
+    if (tr._tileCoverLift > 0.0) {
+        // Early return for elevated globe tiles, where the tile cover optimization is ignored
+        for (const corner of corners) {
+            vec3.min(cornerMin, cornerMin, corner);
+            vec3.max(cornerMax, cornerMax, corner);
+        }
         return new Aabb(cornerMin, cornerMax);
     }
 
@@ -405,7 +395,7 @@ function mercatorTileCornersInCameraSpace({x, y, z}: CanonicalTileID, numTiles: 
         [w, n, 0]];
 }
 
-function boundsToECEF(bounds: LngLatBounds): Array<Vec3> {
+function boundsToECEF(bounds: LngLatBounds, radius: number = GLOBE_RADIUS): Array<Vec3> {
     const ny = degToRad(bounds.getNorth());
     const sy = degToRad(bounds.getSouth());
     const cosN = Math.cos(ny);
@@ -415,35 +405,11 @@ function boundsToECEF(bounds: LngLatBounds): Array<Vec3> {
     const w = bounds.getWest();
     const e = bounds.getEast();
     return [
-        csLatLngToECEF(cosS, sinS, w),
-        csLatLngToECEF(cosS, sinS, e),
-        csLatLngToECEF(cosN, sinN, e),
-        csLatLngToECEF(cosN, sinN, w)
+        csLatLngToECEF(cosS, sinS, w, radius),
+        csLatLngToECEF(cosS, sinS, e, radius),
+        csLatLngToECEF(cosN, sinN, e, radius),
+        csLatLngToECEF(cosN, sinN, w, radius)
     ];
-}
-
-function csLatLngToECEF(cosLat: number, sinLat: number, lng: number, radius: number = GLOBE_RADIUS): Vec3 {
-    lng = degToRad(lng);
-
-    // Convert lat & lng to spherical representation. Use zoom=0 as a reference
-    const sx = cosLat * Math.sin(lng) * radius;
-    const sy = -sinLat * radius;
-    const sz = cosLat * Math.cos(lng) * radius;
-
-    return [sx, sy, sz];
-}
-
-export function ecefToLatLng([x, y, z]: Array<number>): LngLat {
-    const radius = Math.hypot(x, y, z);
-    const lng = Math.atan2(x, z);
-    const lat = Math.PI * 0.5 - Math.acos(-y / radius);
-
-    return new LngLat(radToDeg(lng), radToDeg(lat));
-}
-
-export function latLngToECEF(lat: number, lng: number, radius?: number): Vec3 {
-    assert(lat <= 90 && lat >= -90, 'Lattitude must be between -90 and 90');
-    return csLatLngToECEF(Math.cos(degToRad(lat)), Math.sin(degToRad(lat)), lng, radius);
 }
 
 export function tileCoordToECEF(x: number, y: number, id: CanonicalTileID, radius?: number): Vec3 {
@@ -563,7 +529,7 @@ export function globePoleMatrixForTile(z: number, x: number, tr: Transform): Flo
 export function globeUseCustomAntiAliasing(painter: Painter, context: Context, transform: Transform): boolean {
     const transitionT = globeToMercatorTransition(transform.zoom);
     const useContextAA = painter.style.map._antialias;
-    const disabled = context.extStandardDerivativesForceOff || (painter.terrain && painter.terrain.exaggeration() > 0.0);
+    const disabled = context.options.extStandardDerivativesForceOff || (painter.terrain && painter.terrain.exaggeration() > 0.0);
     return transitionT === 0.0 && !useContextAA && !disabled;
 }
 

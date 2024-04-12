@@ -1,6 +1,5 @@
-
+// @noflow
 // Disable Flow annotations here because Flow doesn't support importing GLSL files
-/* eslint-disable flowtype/require-valid-file-annotation */
 
 import preludeCommon from './_prelude.glsl';
 import preludeFrag from './_prelude.fragment.glsl';
@@ -47,6 +46,14 @@ import linePatternFrag from './line_pattern.fragment.glsl';
 import linePatternVert from './line_pattern.vertex.glsl';
 import rasterFrag from './raster.fragment.glsl';
 import rasterVert from './raster.vertex.glsl';
+import rasterParticleFrag from './raster_particle.fragment.glsl';
+import rasterParticleVert from './raster_particle.vertex.glsl';
+import rasterParticleDrawFrag from './raster_particle_draw.fragment.glsl';
+import rasterParticleDrawVert from './raster_particle_draw.vertex.glsl';
+import rasterParticleTextureFrag from './raster_particle_texture.fragment.glsl';
+import rasterParticleTextureVert from './raster_particle_texture.vertex.glsl';
+import rasterParticleUpdateFrag from './raster_particle_update.fragment.glsl';
+import rasterParticleUpdateVert from './raster_particle_update.vertex.glsl';
 import symbolIconFrag from './symbol_icon.fragment.glsl';
 import symbolIconVert from './symbol_icon.vertex.glsl';
 import symbolSDFFrag from './symbol_sdf.fragment.glsl';
@@ -64,6 +71,8 @@ import preludeTerrainVert from './_prelude_terrain.vertex.glsl';
 import preludeFogVert from './_prelude_fog.vertex.glsl';
 import preludeFogFrag from './_prelude_fog.fragment.glsl';
 import preludeLighting from './_prelude_lighting.glsl';
+import preludeRasterArrayFrag from './_prelude_raster_array.glsl';
+import preludeRasterParticleFrag from './_prelude_raster_particle.glsl';
 import skyboxCaptureFrag from './skybox_capture.fragment.glsl';
 import skyboxCaptureVert from './skybox_capture.vertex.glsl';
 import globeFrag from './globe_raster.fragment.glsl';
@@ -88,16 +97,22 @@ import preludeShadowFrag from '../../3d-style/shaders/_prelude_shadow.fragment.g
 export let preludeTerrain = {};
 export let preludeFog = {};
 export let preludeShadow = {};
+export let preludeRasterArray = {};
+export let preludeRasterParticle = {};
 
 const commonDefines = [];
 parseUsedPreprocessorDefines(preludeCommon, commonDefines);
+parseUsedPreprocessorDefines(preludeVert, commonDefines);
+parseUsedPreprocessorDefines(preludeFrag, commonDefines);
 export const includeMap = {
     "_prelude_fog.vertex.glsl": preludeFogVert,
     "_prelude_terrain.vertex.glsl": preludeTerrainVert,
     "_prelude_shadow.vertex.glsl": preludeShadowVert,
     "_prelude_fog.fragment.glsl": preludeFogFrag,
     "_prelude_shadow.fragment.glsl": preludeShadowFrag,
-    "_prelude_lighting.glsl": preludeLighting
+    "_prelude_lighting.glsl": preludeLighting,
+    "_prelude_raster_array.glsl": preludeRasterArrayFrag,
+    "_prelude_raster_particle.glsl": preludeRasterParticleFrag
 };
 // Populated during precompilation
 const defineMap = {};
@@ -105,47 +120,15 @@ const defineMap = {};
 preludeTerrain = compile('', preludeTerrainVert);
 preludeFog = compile(preludeFogFrag, preludeFogVert);
 preludeShadow = compile(preludeShadowFrag, preludeShadowVert);
+preludeRasterArray = compile(preludeRasterArrayFrag, '');
+preludeRasterParticle = compile(preludeRasterParticleFrag, '');
 
 export const prelude = compile(preludeFrag, preludeVert);
 export const preludeCommonSource = preludeCommon;
 export const preludeLightingSource = preludeLighting;
 
-export const preludeVertPrecisionQualifiers = `
-#ifdef GL_ES
-precision highp float;
-#else
-
-#if !defined(lowp)
-#define lowp
-#endif
-
-#if !defined(mediump)
-#define mediump
-#endif
-
-#if !defined(highp)
-#define highp
-#endif
-
-#endif`;
-export const preludeFragPrecisionQualifiers = `
-#ifdef GL_ES
-precision mediump float;
-#else
-
-#if !defined(lowp)
-#define lowp
-#endif
-
-#if !defined(mediump)
-#define mediump
-#endif
-
-#if !defined(highp)
-#define highp
-#endif
-
-#endif`;
+export const preludeVertPrecisionQualifiers = `precision highp float;`;
+export const preludeFragPrecisionQualifiers = `precision mediump float;`;
 
 export default {
     background: compile(backgroundFrag, backgroundVert),
@@ -171,6 +154,10 @@ export default {
     line: compile(lineFrag, lineVert),
     linePattern: compile(linePatternFrag, linePatternVert),
     raster: compile(rasterFrag, rasterVert),
+    rasterParticle: compile(rasterParticleFrag, rasterParticleVert),
+    rasterParticleDraw: compile(rasterParticleDrawFrag, rasterParticleDrawVert),
+    rasterParticleTexture: compile(rasterParticleTextureFrag, rasterParticleTextureVert),
+    rasterParticleUpdate: compile(rasterParticleUpdateFrag, rasterParticleUpdateVert),
     symbolIcon: compile(symbolIconFrag, symbolIconVert),
     symbolSDF: compile(symbolSDFFrag, symbolSDFVert),
     symbolTextAndIcon: compile(symbolTextAndIconFrag, symbolTextAndIconVert),
@@ -212,15 +199,18 @@ export function parseUsedPreprocessorDefines(source, defines) {
 export function compile(fragmentSource, vertexSource) {
     const includeRegex = /#include\s+"([^"]+)"/g;
     const pragmaRegex = /#pragma mapbox: ([\w\-]+) ([\w]+) ([\w]+) ([\w]+)/g;
-    const attributeRegex = /attribute(\S*) (highp |mediump |lowp )?([\w]+) ([\w]+)/g;
+    const attributeRegex = /(attribute(\S*)|(^\s*|;)in) (highp |mediump |lowp )?([\w]+) ([\w]+)/gm;
 
     let staticAttributes = vertexSource.match(attributeRegex);
-    // remove duplicates as Safari does not support lookbehind in regex
-    // so we need to get rid of initialize-* expressions
+
     if (staticAttributes) {
-        staticAttributes = staticAttributes.filter((element, index) => {
-            return staticAttributes.indexOf(element) === index;
+        staticAttributes = staticAttributes.map((str) => {
+            const tokens = str.split(' ');
+            return tokens[tokens.length - 1];
         });
+        // remove duplicates as Safari does not support lookbehind in regex
+        // so we need to get rid of initialize-* expressions
+        staticAttributes = [...new Set(staticAttributes)];
     }
     const fragmentPragmas = {};
 
@@ -234,6 +224,11 @@ export function compile(fragmentSource, vertexSource) {
         vertexIncludes.push(name);
         return '';
     });
+
+    if (vertexSource.includes("flat out")) {
+        console.error(`The usage of "flat" qualifier is disallowed, see: https://bugs.webkit.org/show_bug.cgi?id=268071`);
+        return;
+    }
 
     let usedDefines = [...commonDefines];
     parseUsedPreprocessorDefines(fragmentSource, usedDefines);
@@ -254,7 +249,7 @@ export function compile(fragmentSource, vertexSource) {
         if (operation === 'define') {
             return `
 #ifndef HAS_UNIFORM_u_${name}
-varying ${precision} ${type} ${name};
+in ${precision} ${type} ${name};
 #else
 uniform ${precision} ${type} u_${name};
 #endif
@@ -268,7 +263,7 @@ uniform ${precision} ${type} u_${name};
         } else if (operation === 'define-attribute') {
             return `
 #ifdef HAS_ATTRIBUTE_a_${name}
-    varying ${precision} ${type} ${name};
+    in ${precision} ${type} ${name};
 #endif
 `;
         } else if (operation === 'initialize-attribute') {
@@ -284,7 +279,7 @@ uniform ${precision} ${type} u_${name};
         if (operation === 'define-attribute-vertex-shader-only') {
             return `
 #ifdef HAS_ATTRIBUTE_a_${name}
-attribute ${precision} ${type} a_${name};
+in ${precision} ${type} a_${name};
 #endif
 `;
         } else if (fragmentPragmas[name]) {
@@ -292,8 +287,8 @@ attribute ${precision} ${type} a_${name};
                 return `
 #ifndef HAS_UNIFORM_u_${name}
 uniform lowp float u_${name}_t;
-attribute ${precision} ${attrType} a_${name};
-varying ${precision} ${type} ${name};
+in ${precision} ${attrType} a_${name};
+out ${precision} ${type} ${name};
 #else
 uniform ${precision} ${type} u_${name};
 #endif
@@ -320,8 +315,8 @@ uniform ${precision} ${type} u_${name};
             } else if (operation === 'define-attribute') {
                 return `
 #ifdef HAS_ATTRIBUTE_a_${name}
-    attribute ${precision} ${type} a_${name};
-    varying ${precision} ${type} ${name};
+    in ${precision} ${type} a_${name};
+    out ${precision} ${type} ${name};
 #endif
 `;
             } else if (operation === 'initialize-attribute') {
@@ -336,7 +331,7 @@ uniform ${precision} ${type} u_${name};
                 return `
 #ifndef HAS_UNIFORM_u_${name}
 uniform lowp float u_${name}_t;
-attribute ${precision} ${attrType} a_${name};
+in ${precision} ${attrType} a_${name};
 #else
 uniform ${precision} ${type} u_${name};
 #endif
@@ -345,10 +340,10 @@ uniform ${precision} ${type} u_${name};
                 if (unpackType === 'mat4') {
                     return `
 #ifdef INSTANCED_ARRAYS
-attribute vec4 a_${name}0;
-attribute vec4 a_${name}1;
-attribute vec4 a_${name}2;
-attribute vec4 a_${name}3;
+in vec4 a_${name}0;
+in vec4 a_${name}1;
+in vec4 a_${name}2;
+in vec4 a_${name}3;
 #else
 uniform ${precision} ${type} u_${name};
 #endif
@@ -356,7 +351,7 @@ uniform ${precision} ${type} u_${name};
                 } else {
                     return `
 #ifdef INSTANCED_ARRAYS
-attribute ${precision} ${attrType} a_${name};
+in ${precision} ${attrType} a_${name};
 #else
 uniform ${precision} ${type} u_${name};
 #endif

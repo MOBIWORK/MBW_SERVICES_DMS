@@ -148,20 +148,10 @@ export const operations: {[_: string]: string} = {
      */
     removeImport: 'removeImport',
 
-    /*
-     *  { command: 'setImportUrl', args: [importId, styleUrl] }
+    /**
+     * { command: 'updateImport', args: [importId, importSpecification | styleUrl] }
      */
-    setImportUrl: 'setImportUrl',
-
-    /*
-     *  { command: 'setImportData', args: [importId, stylesheet] }
-     */
-    setImportData: 'setImportData',
-
-    /*
-     *  { command: 'setImportConfig', args: [importId, config] }
-     */
-    setImportConfig: 'setImportConfig'
+    updateImport: 'updateImport'
 };
 
 function addSource(sourceId: string, after: Sources, commands: Array<Command>) {
@@ -424,20 +414,7 @@ export function diffImports(before: Array<ImportSpecification> = [], after: Arra
         const beforeImport = beforeIndex[afterImport.id];
         if (!beforeImport || isEqual(beforeImport, afterImport)) continue;
 
-        if (!isEqual(beforeImport.config, afterImport.config)) {
-            commands.push({command: operations.setImportConfig, args: [afterImport.id, afterImport.config]});
-        }
-
-        if (!isEqual(beforeImport.url, afterImport.url)) {
-            commands.push({command: operations.setImportUrl, args: [afterImport.id, afterImport.url]});
-        }
-
-        const beforeData = beforeImport && beforeImport.data;
-        const afterData = afterImport.data;
-
-        if (!isEqual(beforeData, afterData)) {
-            commands.push({command: operations.setImportData, args: [afterImport.id, afterData]});
-        }
+        commands.push({command: operations.updateImport, args: [afterImport.id, afterImport]});
     }
 }
 
@@ -462,7 +439,7 @@ export function diffImports(before: Array<ImportSpecification> = [], after: Arra
 export default function diffStyles(before: StyleSpecification, after: StyleSpecification): Array<Command> {
     if (!before) return [{command: operations.setStyle, args: [after]}];
 
-    let commands = [];
+    let commands: Array<Command> = [];
 
     try {
         // Handle changes to top-level properties
@@ -486,6 +463,10 @@ export default function diffStyles(before: StyleSpecification, after: StyleSpeci
         }
         if (!isEqual(before.glyphs, after.glyphs)) {
             commands.push({command: operations.setGlyphs, args: [after.glyphs]});
+        }
+        // Handle changes to `imports` before other mergable top-level properties
+        if (!isEqual(before.imports, after.imports)) {
+            diffImports(before.imports, after.imports, commands);
         }
         if (!isEqual(before.transition, after.transition)) {
             commands.push({command: operations.setTransition, args: [after.transition]});
@@ -550,9 +531,6 @@ export default function diffStyles(before: StyleSpecification, after: StyleSpeci
 
         // Handle changes to `layers`
         diffLayers(beforeLayers, after.layers, commands);
-
-        // Handle changes to `imports`
-        diffImports(before.imports, after.imports, commands);
     } catch (e) {
         // fall back to setStyle
         console.warn('Unable to compute style diff:', e);

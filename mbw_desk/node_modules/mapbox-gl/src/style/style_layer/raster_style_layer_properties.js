@@ -1,4 +1,4 @@
-// This file is generated. Edit build/generate-style-code.js, then run `yarn run codegen`.
+// This file is generated. Edit build/generate-style-code.js, then run `npm run codegen`.
 // @flow
 /* eslint-disable */
 
@@ -37,6 +37,9 @@ export type PaintProps = {|
     "raster-contrast": DataConstantProperty<number>,
     "raster-resampling": DataConstantProperty<"linear" | "nearest">,
     "raster-fade-duration": DataConstantProperty<number>,
+    "raster-emissive-strength": DataConstantProperty<number>,
+    "raster-array-band": DataConstantProperty<string>,
+    "raster-elevation": DataConstantProperty<number>,
 |};
 
 const paint: Properties<PaintProps> = new Properties({
@@ -51,6 +54,9 @@ const paint: Properties<PaintProps> = new Properties({
     "raster-contrast": new DataConstantProperty(styleSpec["paint_raster"]["raster-contrast"]),
     "raster-resampling": new DataConstantProperty(styleSpec["paint_raster"]["raster-resampling"]),
     "raster-fade-duration": new DataConstantProperty(styleSpec["paint_raster"]["raster-fade-duration"]),
+    "raster-emissive-strength": new DataConstantProperty(styleSpec["paint_raster"]["raster-emissive-strength"]),
+    "raster-array-band": new DataConstantProperty(styleSpec["paint_raster"]["raster-array-band"]),
+    "raster-elevation": new DataConstantProperty(styleSpec["paint_raster"]["raster-elevation"]),
 });
 
 // Note: without adding the explicit type annotation, Flow infers weaker types
