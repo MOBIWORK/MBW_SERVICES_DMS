@@ -95,13 +95,14 @@ def get_list_top_employee(**kwargs):
 
         customer_set = set()
         for i in router_employee:
-            user_id = frappe.get_value('Employee', {'name': i['employee']}, 'user_id')
-            employee_name = frappe.get_value('Employee', {'name': i['employee']}, 'employee_name')
+            emp = frappe.get_doc('Employee', {'name': i['employee']}).as_dict()
             if from_date and to_date:
                 filters["creation"] = ["between",[from_date,to_date]]
-            filters['owner'] = user_id
+            if emp:
+                filters['owner'] = emp.user_id
 
-            i['employee_name'] = employee_name
+                i['employee_name'] = emp.employee_name
+                i['employee_avatar'] = emp.image
 
             data_sales_order = frappe.get_all('Sales Order', filters=filters, fields=['name'])
             i['sales_order'] = len(data_sales_order)
