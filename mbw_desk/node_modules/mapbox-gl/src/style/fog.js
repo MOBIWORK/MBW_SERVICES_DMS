@@ -7,19 +7,20 @@ import {validateStyle, validateFog, emitValidationErrors} from './validate_style
 import {Properties, Transitionable, Transitioning, PossiblyEvaluated, DataConstantProperty} from './properties.js';
 import Color from '../style-spec/util/color.js';
 import {FOG_PITCH_START, FOG_PITCH_END, FOG_OPACITY_THRESHOLD, getFogOpacityAtLngLat, getFogOpacityAtMercCoord, getFovAdjustedFogRange, getFogOpacityForBounds} from './fog_helpers.js';
-import type {FogSpecification} from '../style-spec/types.js';
-import type EvaluationParameters from './evaluation_parameters.js';
-import type {TransitionParameters} from './properties.js';
-import type LngLat from '../geo/lng_lat.js';
-import type Transform from '../geo/transform.js';
-import type {StyleSetterOptions} from '../style/style.js';
-import type {FogState} from './fog_helpers.js';
-import type {Mat4, Vec3} from 'gl-matrix';
 import {number as interpolate, array as vecInterpolate} from '../style-spec/util/interpolate.js';
 import {globeToMercatorTransition} from '../geo/projection/globe_util.js';
 import {Frustum} from '../util/primitives.js';
 import {OverscaledTileID} from '../source/tile_id.js';
 import EXTENT from '../style-spec/data/extent.js';
+
+import type {FogSpecification} from '../style-spec/types.js';
+import type EvaluationParameters from './evaluation_parameters.js';
+import type {TransitionParameters, ConfigOptions} from './properties.js';
+import type LngLat from '../geo/lng_lat.js';
+import type Transform from '../geo/transform.js';
+import type {StyleSetterOptions} from '../style/style.js';
+import type {FogState} from './fog_helpers.js';
+import type {Mat4, Vec3} from 'gl-matrix';
 
 type Props = {|
     "range": DataConstantProperty<[number, number]>,
@@ -45,17 +46,19 @@ class Fog extends Evented {
     _transitionable: Transitionable<Props>;
     _transitioning: Transitioning<Props>;
     properties: PossiblyEvaluated<Props>;
+    _options: FogSpecification;
 
     // Alternate projections do not yet support fog.
     // Hold on to transform so that we know whether a projection is set.
     _transform: Transform;
 
-    constructor(fogOptions?: FogSpecification, transform: Transform) {
+    constructor(fogOptions?: FogSpecification, transform: Transform, scope: string, configOptions?: ?ConfigOptions) {
         super();
-        this._transitionable = new Transitionable(fogProperties);
-        this.set(fogOptions);
+        this._transitionable = new Transitionable(fogProperties, scope, new Map(configOptions));
+        this.set(fogOptions, configOptions);
         this._transitioning = this._transitionable.untransitioned();
         this._transform = transform;
+        this.properties = new PossiblyEvaluated(fogProperties);
     }
 
     get state(): FogState {
@@ -78,7 +81,7 @@ class Fog extends Evented {
         return (this._transitionable.serialize(): any);
     }
 
-    set(fog?: FogSpecification, options: StyleSetterOptions = {}) {
+    set(fog?: FogSpecification, configOptions?: ?ConfigOptions, options: StyleSetterOptions = {}) {
         if (this._validate(validateFog, fog, options)) {
             return;
         }
@@ -91,7 +94,8 @@ class Fog extends Evented {
             }
         }
 
-        this._transitionable.setTransitionOrValue<FogSpecification>(properties);
+        this._options = properties;
+        this._transitionable.setTransitionOrValue<FogSpecification>(this._options, configOptions);
     }
 
     getOpacity(pitch: number): number {
@@ -154,6 +158,10 @@ class Fog extends Evented {
         }
 
         return false;
+    }
+
+    updateConfig(configOptions?: ?ConfigOptions) {
+        this._transitionable.setTransitionOrValue<FogSpecification>(this._options, new Map(configOptions));
     }
 
     updateTransitions(parameters: TransitionParameters) {

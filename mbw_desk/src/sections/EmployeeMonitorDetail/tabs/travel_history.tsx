@@ -14,7 +14,7 @@ export default function TravelHistory({ employee }: { employee?: string }) {
   const [time, setTime] = useState<any>(Date.now())
   const [from_time, setFTime] = useState<string>(tmpToTimeZone(new Date().setHours(0, 0, 0).toString()))
   const [to_time, setTTime] = useState<string>(tmpToTimeZone(new Date().setHours(24, 0, 0).toString()))
-
+  const [loading, setLoading] = useState<boolean>(true);
   const handleChangeTime = (value: any) => {
     setTime(value)
     setFTime(tmpToTimeZone(TodayLimit(value).today))
@@ -36,6 +36,7 @@ export default function TravelHistory({ employee }: { employee?: string }) {
     })
   
   const initDataSummary = async () => {
+    setLoading(true);
     let urlSummary = `https://api.ekgis.vn/v2/tracking/locationHistory/summary/${options.projectId}/${options.objectId}?from_time=${from_time}&to_time=${to_time}&api_key=${options.apiKey}`;
     let resSummary = await axios.get(urlSummary);
     if(resSummary.statusText == "OK"){
@@ -45,6 +46,7 @@ export default function TravelHistory({ employee }: { employee?: string }) {
         details: resSummary.data["details"],
       }));
     }
+    setLoading(false);
   }
 
   useEffect(() => {
@@ -77,7 +79,7 @@ export default function TravelHistory({ employee }: { employee?: string }) {
         </div>
         <div id="travel" className='h-[70vh] relative'>
           {/* <MapEkgisHistory from_time={from_time} to_time={to_time} objectId='654c8a12d65d3e52f2d286de' projectId= '6556e471178a1db24ac1a711'/> */}
-          {options.projectId && options.objectId && <SupervisoryStaff options={options} /> }
+          {options.projectId && options.objectId && <SupervisoryStaff options={options} loading={loading}/> }
           
         </div>
 

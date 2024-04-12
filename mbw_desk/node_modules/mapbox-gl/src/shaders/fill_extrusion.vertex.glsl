@@ -3,12 +3,6 @@
 #include "_prelude_shadow.vertex.glsl"
 #include "_prelude_lighting.glsl"
 
-#if __VERSION__ >= 300
-#ifdef RENDER_CUTOFF
-invariant gl_Position;
-#endif
-#endif
-
 uniform mat4 u_matrix;
 uniform vec3 u_lightcolor;
 uniform lowp vec3 u_lightpos;
@@ -17,12 +11,12 @@ uniform float u_vertical_gradient;
 uniform lowp float u_opacity;
 uniform float u_edge_radius;
 
-attribute vec4 a_pos_normal_ed;
-attribute vec2 a_centroid_pos;
+in vec4 a_pos_normal_ed;
+in vec2 a_centroid_pos;
 
 #ifdef PROJECTION_GLOBE_VIEW
-attribute vec3 a_pos_3;         // Projected position on the globe
-attribute vec3 a_pos_normal_3;  // Surface normal at the position
+in vec3 a_pos_3;         // Projected position on the globe
+in vec3 a_pos_normal_3;  // Surface normal at the position
 
 uniform mat4 u_inv_rot_matrix;
 uniform vec2 u_merc_center;
@@ -34,36 +28,37 @@ uniform float u_height_lift;
 
 uniform highp float u_vertical_scale;
 
-varying vec4 v_color;
+out vec4 v_color;
+out vec4 v_flat;
 
 #ifdef RENDER_SHADOWS
 uniform mat4 u_light_matrix_0;
 uniform mat4 u_light_matrix_1;
 
-varying highp vec4 v_pos_light_view_0;
-varying highp vec4 v_pos_light_view_1;
-varying float v_depth;
+out highp vec4 v_pos_light_view_0;
+out highp vec4 v_pos_light_view_1;
+out float v_depth;
 #endif
 
 #if defined(ZERO_ROOF_RADIUS) && !defined(LIGHTING_3D_MODE)
-varying vec4 v_roof_color;
+out vec4 v_roof_color;
 #endif
 
 #if defined(ZERO_ROOF_RADIUS) || defined(RENDER_SHADOWS) || defined(LIGHTING_3D_MODE)
-varying highp vec3 v_normal;
+out highp vec3 v_normal;
 #endif
 
 #ifdef FAUX_AO
 uniform lowp vec2 u_ao;
-varying vec2 v_ao;
+out vec2 v_ao;
 #endif
 
 #if defined(LIGHTING_3D_MODE) && defined(FLOOD_LIGHT)
-varying float v_flood_radius;
-varying float v_has_floodlight;
+out float v_flood_radius;
+out float v_has_floodlight;
 #endif
 
-varying float v_height;
+out float v_height;
 
 #pragma mapbox: define highp float base
 #pragma mapbox: define highp float height
@@ -97,6 +92,7 @@ void main() {
 
     base = max(0.0, base);
 
+    float attr_height = height;
     height = max(0.0, top_up_ny.y == 0.0 && top_up_ny.x == 1.0 ? height - u_edge_radius : height);
 
     float t = top_up_ny.x;
@@ -108,7 +104,7 @@ void main() {
 
     float ele = 0.0;
     float h = 0.0;
-    float c_ele;
+    float c_ele = 0.0;
     vec3 pos;
 #ifdef TERRAIN
     bool flat_roof = centroid_pos.x != 0.0 && t > 0.0;
@@ -132,8 +128,28 @@ void main() {
     pos = mix_globe_mercator(globe_pos, merc_pos, u_zoom_transition);
 #endif
 
-    float hidden = float(centroid_pos.x == 0.0 && centroid_pos.y == 1.0);
-    gl_Position = mix(u_matrix * vec4(pos, 1), AWAY, hidden);
+    float cutoff = 1.0;
+    vec3 scaled_pos = pos;
+#ifdef RENDER_CUTOFF
+    vec3 centroid_random = vec3(centroid_pos.xy, centroid_pos.x + centroid_pos.y + 1.0);
+    vec3 ground_pos = centroid_pos.x == 0.0 ? pos.xyz : (centroid_random / 8.0);
+    vec4 ground = u_matrix * vec4(ground_pos.xy, ele, 1.0);
+    cutoff = max(0.01, cutoff_opacity(u_cutoff_params, ground.z));
+    if (centroid_pos.y != 0.0 && centroid_pos.x != 0.0) {
+        vec3 g = floor(ground_pos);
+        vec3 mod_ = centroid_random - g * 8.0;
+        float seed = min(1.0, 0.1 * (min(3.5, max(mod_.x + mod_.y, 0.2 * attr_height)) * 0.35 + mod_.z));
+        if (cutoff < 0.8 - seed) {
+            cutoff = 0.0;
+        }
+    }
+    float cutoff_scale = cutoff;
+
+    scaled_pos.z = mix(c_ele, h, cutoff_scale);
+#endif
+    float hidden = float((centroid_pos.x == 0.0 && centroid_pos.y == 1.0) || (cutoff < 0.01 && centroid_pos.x != 0.0));
+
+    gl_Position = mix(u_matrix * vec4(scaled_pos, 1), AWAY, hidden);
     h = h - ele;
     v_height = h;
 
@@ -147,7 +163,6 @@ void main() {
 #endif
     v_pos_light_view_0 = u_light_matrix_0 * vec4(shd_pos0, 1);
     v_pos_light_view_1 = u_light_matrix_1 * vec4(shd_pos1, 1);
-    v_depth = gl_Position.w;
 #endif
 
     float NdotL = 0.0;
@@ -209,7 +224,7 @@ void main() {
 #endif // FLOOD_LIGHT
 
     v_color = vec4(color.rgb, 1.0);
-
+    v_flat = vec4(linearProduct(color.rgb, vec3(calculate_NdotL(normal))), 1.0);
 #else // LIGHTING_3D_MODE
     // Assign final color based on surface + ambient light color, diffuse light NdotL, and light color
     // with lower bounds adjusted to hue of light
@@ -229,9 +244,5 @@ void main() {
 
 #ifdef FOG
     v_fog_pos = fog_position(pos);
-#endif
-
-#ifdef RENDER_CUTOFF
-    v_cutoff_opacity = cutoff_opacity(u_cutoff_params, gl_Position.z);
 #endif
 }

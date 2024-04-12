@@ -1,22 +1,12 @@
-#ifdef GL_ES
 precision highp float;
-#endif
 
 uniform sampler2D u_image;
-varying vec2 v_pos;
+in vec2 v_pos;
 uniform vec2 u_dimension;
 uniform float u_zoom;
-uniform vec4 u_unpack;
 
 float getElevation(vec2 coord) {
-#ifdef TERRAIN_DEM_FLOAT_FORMAT
     return texture(u_image, coord).r / 4.0;
-#else
-    // Convert encoded elevation value to meters
-    vec4 data = texture2D(u_image, coord) * 255.0;
-    data.a = -1.0;
-    return dot(data, u_unpack) / 4.0;
-#endif
 }
 
 void main() {
@@ -66,7 +56,7 @@ void main() {
         (f + g + g + h) - (a + b + b + c)
     ) / pow(2.0, exaggeration + (19.2562 - u_zoom));
 
-    gl_FragColor = clamp(vec4(
+    glFragColor = clamp(vec4(
         deriv.x / 2.0 + 0.5,
         deriv.y / 2.0 + 0.5,
         1.0,

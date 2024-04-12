@@ -17,12 +17,12 @@ function RealtimeMap({ options, onClickPopup }) {
         center: [105, 17],
         zoom: 4.5,
         reloadTime: 60000,
-        iconTrack: 'https://files.ekgis.vn/sdks/tracking/assets/custom_marker.png',
-        iconNavigation: 'https://files.ekgis.vn/sdks/tracking/assets/arrow.png',
-        iconCheckin: 'https://files.ekgis.vn/sdks/tracking/assets/check-icon.png',
-        iconStart: 'https://files.ekgis.vn/sdks/tracking/assets/start-icon.png',
-        iconEnd: 'https://files.ekgis.vn/sdks/tracking/assets/end-icon.png',
-        iconStop: 'https://files.ekgis.vn/sdks/tracking/assets/stop-icon.png',
+        iconTrack: '/public/assets/custom_marker.png',
+        iconNavigation: '/public/assets/arrow.png',
+        iconCheckin: '/public/assets/check-icon.png',
+        iconStart: '/public/assets/start-icon.png',
+        iconEnd: '/public/assets/end-icon.png',
+        iconStop: '/public/assets/stop-icon.png',
     };
     const _options = extend({}, defaultOptions, options);
     if (_options.apiKey == "" || !_options.apiKey) throw new Error("Parameter apiKey not valid");
@@ -244,13 +244,12 @@ function RealtimeMap({ options, onClickPopup }) {
                         })).then(features => features.filter(feature => feature !== null))
                     };
                     if (!_map.getImage('marker-track')) {
-                        const markerTrack = await _map.loadImage(_options.iconTrack);
-                        console.log(markerTrack);
-                        _map.addImage('marker-track', markerTrack.data)
+                        let iconTrack = await _map.loadImage(_options.iconTrack);
+                        _map.addImage('marker-track', iconTrack.data);
                     }
                     if (!_map.getImage('marker-checkin')) {
-                        const markerCheckin = await _map.loadImage(_options.iconCheckin);
-                        _map.addImage('marker-checkin', markerCheckin.data)
+                        let iconCheckIn = await _map.loadImage(_options.iconCheckin);
+                        _map.addImage('marker-checkin', iconCheckIn.data);
                     }
 
                     if (_map.getSource(`ek-tracking-live-${_map_Container.id}-source`)) {

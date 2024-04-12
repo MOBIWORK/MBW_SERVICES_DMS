@@ -67,6 +67,17 @@ export interface Property<T, R> {
     interpolate(a: R, b: R, t: number): R;
 }
 
+export type ConfigOptionValue = {
+    default: Expression;
+    value?: Expression;
+    values?: Array<mixed>;
+    minValue?: number;
+    maxValue?: number;
+    stepValue?: number;
+    type?: 'string' | 'number' | 'boolean' | 'color';
+};
+export type ConfigOptions = Map<string, ConfigOptionValue>;
+
 /**
  *  `PropertyValue` represents the value part of a property key-value unit. It's used to represent both
  *  paint and layout property values, and regardless of whether or not their property supports data-driven
@@ -91,10 +102,10 @@ export class PropertyValue<T, R> {
     value: PropertyValueSpecification<T> | void;
     expression: StylePropertyExpression;
 
-    constructor(property: Property<T, R>, value: PropertyValueSpecification<T> | void, options?: ?Map<string, Expression>) {
+    constructor(property: Property<T, R>, value: PropertyValueSpecification<T> | void, scope?: ?string, options?: ?ConfigOptions) {
         this.property = property;
         this.value = value;
-        this.expression = normalizePropertyExpression(value === undefined ? property.specification.default : value, property.specification, options);
+        this.expression = normalizePropertyExpression(value === undefined ? property.specification.default : value, property.specification, scope, options);
     }
 
     isDataDriven(): boolean {
@@ -130,9 +141,9 @@ class TransitionablePropertyValue<T, R> {
     value: PropertyValue<T, R>;
     transition: TransitionSpecification | void;
 
-    constructor(property: Property<T, R>, options?: ?Map<string, Expression>) {
+    constructor(property: Property<T, R>, scope?: ?string, options?: ?ConfigOptions) {
         this.property = property;
-        this.value = new PropertyValue(property, undefined, options);
+        this.value = new PropertyValue(property, undefined, scope, options);
     }
 
     transitioned(parameters: TransitionParameters,
@@ -165,12 +176,14 @@ type TransitionablePropertyValues<Props: Object>
 export class Transitionable<Props: Object> {
     _properties: Properties<Props>;
     _values: TransitionablePropertyValues<Props>;
-    _options: ?Map<string, Expression>;
+    _scope: ?string;
+    _options: ?ConfigOptions;
     isConfigDependent: boolean;
 
-    constructor(properties: Properties<Props>, options?: ?Map<string, Expression>) {
+    constructor(properties: Properties<Props>, scope?: ?string, options?: ?ConfigOptions) {
         this._properties = properties;
         this._values = (Object.create(properties.defaultTransitionablePropertyValues): any);
+        this._scope = scope;
         this._options = options;
         this.isConfigDependent = false;
     }
@@ -181,15 +194,15 @@ export class Transitionable<Props: Object> {
 
     setValue<S: string, T>(name: S, value: PropertyValueSpecification<T> | void) {
         if (!this._values.hasOwnProperty(name)) {
-            this._values[name] = new TransitionablePropertyValue(this._values[name].property, this._options);
+            this._values[name] = new TransitionablePropertyValue(this._values[name].property, this._scope, this._options);
         }
         // Note that we do not _remove_ an own property in the case where a value is being reset
         // to the default: the transition might still be non-default.
-        this._values[name].value = new PropertyValue(this._values[name].property, value === null ? undefined : clone(value), this._options);
+        this._values[name].value = new PropertyValue(this._values[name].property, value === null ? undefined : clone(value), this._scope, this._options);
         this.isConfigDependent = this.isConfigDependent || this._values[name].value.expression.isConfigDependent;
     }
 
-    setTransitionOrValue<P: Object>(properties: ?P, options?: ?Map<string, Expression>) {
+    setTransitionOrValue<P: Object>(properties: ?P, options?: ?ConfigOptions) {
         if (options) this._options = options;
 
         const specProperties = this._properties.properties;
@@ -392,12 +405,14 @@ type PropertyValueSpecifications<Props: Object>
 export class Layout<Props: Object> {
     _properties: Properties<Props>;
     _values: PropertyValues<Props>;
-    _options: ?Map<string, Expression>;
+    _scope: string;
+    _options: ?ConfigOptions;
     isConfigDependent: boolean;
 
-    constructor(properties: Properties<Props>, options?: ?Map<string, Expression>) {
+    constructor(properties: Properties<Props>, scope: string, options?: ?ConfigOptions) {
         this._properties = properties;
         this._values = (Object.create(properties.defaultPropertyValues): any);
+        this._scope = scope;
         this._options = options;
         this.isConfigDependent = false;
     }
@@ -407,7 +422,7 @@ export class Layout<Props: Object> {
     }
 
     setValue<S: string>(name: S, value: any) {
-        this._values[name] = new PropertyValue(this._values[name].property, value === null ? undefined : clone(value), this._options);
+        this._values[name] = new PropertyValue(this._values[name].property, value === null ? undefined : clone(value), this._scope, this._options);
         this.isConfigDependent = this.isConfigDependent || this._values[name].expression.isConfigDependent;
     }
 

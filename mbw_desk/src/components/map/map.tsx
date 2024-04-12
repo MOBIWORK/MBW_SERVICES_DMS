@@ -11,7 +11,7 @@ const ekmapplf = window.ekmapplf;
 
 function HistoryMap({ options }) {
     const mapContainer = useRef(null);
-    const map = useRef(null);
+    const mapHistoryEmployee = useRef(null);
     const HistoryData = useRef(null);
     const [showControls, setShowControls] = useState(false);
 
@@ -20,12 +20,12 @@ function HistoryMap({ options }) {
         zoom: 4.5,
         pageNumber: 1,
         pageSize: 5000,
-        iconTrack: 'https://files.ekgis.vn/sdks/tracking/assets/custom_marker.png',
-        iconNavigation: 'https://files.ekgis.vn/sdks/tracking/assets/arrow.png',
-        iconCheckin: 'https://files.ekgis.vn/sdks/tracking/assets/check-icon.png',
-        iconStart: 'https://files.ekgis.vn/sdks/tracking/assets/start-icon.png',
-        iconEnd: 'https://files.ekgis.vn/sdks/tracking/assets/end-icon.png',
-        iconStop: 'https://files.ekgis.vn/sdks/tracking/assets/stop-icon.png',
+        iconTrack: '/public/assets/custom_marker.png',
+        iconNavigation: '/public/assets/arrow.png',
+        iconCheckin: '/public/assets/check-icon.png',
+        iconStart: '/public/assets/start-icon.png',
+        iconEnd: '/public/assets/end-icon.png',
+        iconStop: '/public/assets/stop-icon.png',
         showRoute: true,
         lineCorlor: '#01579B',
         lineWidth: 5,
@@ -46,20 +46,20 @@ function HistoryMap({ options }) {
         const initializeMap = async () => {
             try {
                 var _popup;
-                map.current = new maplibregl.Map({
+                mapHistoryEmployee.current = new maplibregl.Map({
                     container: mapContainer.current,
                     center: _options.center,
                     zoom: _options.zoom,
                     minZoom: 1,
                 });
-                var _map = map.current;
+                var _mapHistoryEmployee = mapHistoryEmployee.current;
                 // console.log(_map);
-                const _map_Container = _map.getContainer();
+                const _map_Container = _mapHistoryEmployee.getContainer();
 
                 // _map.setPadding({ top: 100, bottom: 100, left: 250, right: 70 });
-                _map.setPadding({ top: 100, bottom: 100, left: 100, right: 100 });
+                _mapHistoryEmployee.setPadding({ top: 100, bottom: 100, left: 100, right: 100 });
 
-                new ekmapplf.VectorBaseMap('OSM:Bright', _options.apiKey).addTo(_map);
+                new ekmapplf.VectorBaseMap('OSM:Bright', _options.apiKey).addTo(_mapHistoryEmployee);
 
                 var basemap = new ekmapplf.control.BaseMap({
                     id: 'ekmapplf_tracking_ctrl_basemap_' + _map_Container.id,
@@ -122,19 +122,19 @@ function HistoryMap({ options }) {
                         },
                     ],
                 });
-                _map.addControl(basemap, 'bottom-left');
+                _mapHistoryEmployee.addControl(basemap, 'bottom-left');
                 basemap.on('changeBaseLayer', async function (response) {
-                    await new ekmapplf.VectorBaseMap(response.layer, _options.apiKey).addTo(_map);
+                    await new ekmapplf.VectorBaseMap(response.layer, _options.apiKey).addTo(_mapHistoryEmployee);
                     setTimeout(() => {
                         setMap(_options.from_time, _options.to_time, _options.pageNumber, _options.pageSize);
                     }, 500)
                 });
 
-                _map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'bottom-right');
+                _mapHistoryEmployee.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'bottom-right');
 
                 // bản đồ 3D
                 var is3DMap = false;
-                if (_map.getPitch() > 0) is3DMap = true;
+                if (_mapHistoryEmployee.getPitch() > 0) is3DMap = true;
                 else is3DMap = false;
                 var cl = 'maplibregl-terrain2d-control';
                 var tl = 'Hiển thị 2D'
@@ -164,14 +164,14 @@ function HistoryMap({ options }) {
                         btn._div.title = "Hiển thị 3D";
                     }
                     if (is3DMap) {
-                        _map.easeTo({ pitch: 60 });
-                        _map.setLayoutProperty('building-3d', 'visibility', 'visible');
+                        _mapHistoryEmployee.easeTo({ pitch: 60 });
+                        _mapHistoryEmployee.setLayoutProperty('building-3d', 'visibility', 'visible');
                     } else {
-                        _map.easeTo({ pitch: 0 });
-                        _map.setLayoutProperty('building-3d', 'visibility', 'none');
+                        _mapHistoryEmployee.easeTo({ pitch: 0 });
+                        _mapHistoryEmployee.setLayoutProperty('building-3d', 'visibility', 'none');
                     }
                 });
-                _map.addControl(btn3D, 'bottom-right');
+                _mapHistoryEmployee.addControl(btn3D, 'bottom-right');
 
                 // Layer
                 // let btnLayer = new ekmapplf.control.Button({
@@ -221,9 +221,9 @@ function HistoryMap({ options }) {
                 // })
                 // _map.addControl(btnLayer, 'bottom-right');
 
-                _map.addControl(new maplibregl.FullscreenControl(), 'bottom-right');
+                _mapHistoryEmployee.addControl(new maplibregl.FullscreenControl(), 'bottom-right');
 
-                _map.on('load', async () => {
+                _mapHistoryEmployee.on('load', async () => {
                     try {
                         await setMap(_options.from_time, _options.to_time, _options.pageNumber, _options.pageSize);
                         setTimeout(() => setShowControls(true), 2000);
@@ -371,21 +371,21 @@ function HistoryMap({ options }) {
 
                     if (!arrData.length) return;
                     var boundbox = bbox(LineSource);
-                    _map.fitBounds(boundbox, { padding: 100, maxZoom: 14, duration: 1500 });
+                    _mapHistoryEmployee.fitBounds(boundbox, { padding: 100, maxZoom: 14, duration: 1500 });
                     return arrData;
                 };
 
                 const setLine = (LineSource) => {
                     try {
-                        if (_map.getSource(`ek-tracking-his-${_map_Container.id}-line-source`)) {
-                            _map.getSource(`ek-tracking-his-${_map_Container.id}-line-source`).setData(LineSource)
+                        if (_mapHistoryEmployee.getSource(`ek-tracking-his-${_map_Container.id}-line-source`)) {
+                            _mapHistoryEmployee.getSource(`ek-tracking-his-${_map_Container.id}-line-source`).setData(LineSource)
                         } else {
-                            _map.addSource(`ek-tracking-his-${_map_Container.id}-line-source`, {
+                            _mapHistoryEmployee.addSource(`ek-tracking-his-${_map_Container.id}-line-source`, {
                                 'type': 'geojson',
                                 'data': LineSource,
                             });
 
-                            _map.addLayer({
+                            _mapHistoryEmployee.addLayer({
                                 'id': `ek-tracking-his-${_map_Container.id}-LineString`,
                                 'type': 'line',
                                 'source': `ek-tracking-his-${_map_Container.id}-line-source`,
@@ -408,33 +408,35 @@ function HistoryMap({ options }) {
                 };
 
                 const setPoints = async (CheckSource, TrackSource) => {
+                    console.log(_mapHistoryEmployee);
                     try {
-                        if (!_map.getImage('marker-start')) {
-                            const iconCheckin = await _map.loadImage(_options.iconStart);
-                            _map.addImage('marker-start', iconCheckin.data)
+                        if (!_mapHistoryEmployee.getImage('marker-start')) {
+                            const iconCheckin = await _mapHistoryEmployee.loadImage(_options.iconStart);
+                            console.log(iconCheckin);
+                            _mapHistoryEmployee.addImage('marker-start', iconCheckin.data)
                         }
-                        if (!_map.getImage('marker-end')) {
-                            const iconCheckin = await _map.loadImage(_options.iconEnd);
-                            _map.addImage('marker-end', iconCheckin.data)
+                        if (!_mapHistoryEmployee.getImage('marker-end')) {
+                            const iconCheckin = await _mapHistoryEmployee.loadImage(_options.iconEnd);
+                            _mapHistoryEmployee.addImage('marker-end', iconCheckin.data)
                         }
-                        if (!_map.getImage('marker-check')) {
-                            const iconCheckin = await _map.loadImage(_options.iconCheckin);
-                            _map.addImage('marker-check', iconCheckin.data)
+                        if (!_mapHistoryEmployee.getImage('marker-check')) {
+                            const iconCheckin = await _mapHistoryEmployee.loadImage(_options.iconCheckin);
+                            _mapHistoryEmployee.addImage('marker-check', iconCheckin.data)
                         }
-                        if (!_map.getImage('marker-stop')) {
-                            const iconStop = await _map.loadImage(_options.iconStop);
-                            _map.addImage('marker-stop', iconStop.data)
+                        if (!_mapHistoryEmployee.getImage('marker-stop')) {
+                            const iconStop = await _mapHistoryEmployee.loadImage(_options.iconStop);
+                            _mapHistoryEmployee.addImage('marker-stop', iconStop.data)
                         }
 
-                        if (_map.getSource(`ek-tracking-his-${_map_Container.id}-track-source`)) {
-                            _map.getSource(`ek-tracking-his-${_map_Container.id}-track-source`).setData(TrackSource)
+                        if (_mapHistoryEmployee.getSource(`ek-tracking-his-${_map_Container.id}-track-source`)) {
+                            _mapHistoryEmployee.getSource(`ek-tracking-his-${_map_Container.id}-track-source`).setData(TrackSource)
                         } else {
-                            _map.addSource(`ek-tracking-his-${_map_Container.id}-track-source`, {
+                            _mapHistoryEmployee.addSource(`ek-tracking-his-${_map_Container.id}-track-source`, {
                                 'type': 'geojson',
                                 'data': TrackSource,
                             });
 
-                            _map.addLayer({
+                            _mapHistoryEmployee.addLayer({
                                 'id': `ek-tracking-his-${_map_Container.id}-track-point-start`,
                                 'type': 'symbol',
                                 'source': `ek-tracking-his-${_map_Container.id}-track-source`,
@@ -447,7 +449,7 @@ function HistoryMap({ options }) {
                                 },
                                 'filter': ['==', 'step', 1],
                             });
-                            _map.addLayer({
+                            _mapHistoryEmployee.addLayer({
                                 'id': `ek-tracking-his-${_map_Container.id}-track-point-end`,
                                 'type': 'symbol',
                                 'source': `ek-tracking-his-${_map_Container.id}-track-source`,
@@ -460,7 +462,7 @@ function HistoryMap({ options }) {
                                 },
                                 'filter': ['==', 'step', TrackSource.features.length],
                             });
-                            _map.addLayer({
+                            _mapHistoryEmployee.addLayer({
                                 'id': `ek-tracking-his-${_map_Container.id}-track-point-stop`,
                                 'type': 'symbol',
                                 'source': `ek-tracking-his-${_map_Container.id}-track-source`,
@@ -473,13 +475,13 @@ function HistoryMap({ options }) {
                                 'filter': ['==', 'type', 'stop'],
                             });
 
-                            _map.on('mouseenter', `ek-tracking-his-${_map_Container.id}-track-point-start`, (e) => {
-                                _map.getCanvas().style.cursor = 'pointer';
+                            _mapHistoryEmployee.on('mouseenter', `ek-tracking-his-${_map_Container.id}-track-point-start`, (e) => {
+                                _mapHistoryEmployee.getCanvas().style.cursor = 'pointer';
                                 const bbox = [
                                     [e.point.x - 5, e.point.y - 5],
                                     [e.point.x + 5, e.point.y + 5],
                                 ];
-                                const selectedFeatures = _map.queryRenderedFeatures(bbox, {
+                                const selectedFeatures = _mapHistoryEmployee.queryRenderedFeatures(bbox, {
                                     layers: [`ek-tracking-his-${_map_Container.id}-track-point-start`],
                                 });
                                 if (_popup) _popup.remove();
@@ -497,20 +499,20 @@ function HistoryMap({ options }) {
                                         </div>`: ``}`
                                     )
                                     .setOffset([0, -20])
-                                    .addTo(_map);
+                                    .addTo(_mapHistoryEmployee);
                             });
-                            _map.on('mouseleave', `ek-tracking-his-${_map_Container.id}-track-point-start`, () => {
-                                _map.getCanvas().style.cursor = '';
+                            _mapHistoryEmployee.on('mouseleave', `ek-tracking-his-${_map_Container.id}-track-point-start`, () => {
+                                _mapHistoryEmployee.getCanvas().style.cursor = '';
                                 if (_popup) _popup.remove();
                             })
 
-                            _map.on('mouseenter', `ek-tracking-his-${_map_Container.id}-track-point-end`, (e) => {
-                                _map.getCanvas().style.cursor = 'pointer';
+                            _mapHistoryEmployee.on('mouseenter', `ek-tracking-his-${_map_Container.id}-track-point-end`, (e) => {
+                                _mapHistoryEmployee.getCanvas().style.cursor = 'pointer';
                                 const bbox = [
                                     [e.point.x - 5, e.point.y - 5],
                                     [e.point.x + 5, e.point.y + 5],
                                 ];
-                                const selectedFeatures = _map.queryRenderedFeatures(bbox, {
+                                const selectedFeatures = _mapHistoryEmployee.queryRenderedFeatures(bbox, {
                                     layers: [`ek-tracking-his-${_map_Container.id}-track-point-end`],
                                 });
                                 if (_popup) _popup.remove();
@@ -529,18 +531,18 @@ function HistoryMap({ options }) {
                                 `
                                     )
                                     .setOffset([0, -20])
-                                    .addTo(_map);
+                                    .addTo(_mapHistoryEmployee);
                             });
-                            _map.on('mouseleave', `ek-tracking-his-${_map_Container.id}-track-point-end`, () => {
-                                _map.getCanvas().style.cursor = '';
+                            _mapHistoryEmployee.on('mouseleave', `ek-tracking-his-${_map_Container.id}-track-point-end`, () => {
+                                _mapHistoryEmployee.getCanvas().style.cursor = '';
                                 if (_popup) _popup.remove();
                             })
                         }
 
-                        if (_map.getSource(`ek-tracking-his-${_map_Container.id}-check-source`)) {
-                            _map.getSource(`ek-tracking-his-${_map_Container.id}-check-source`).setData(CheckSource)
+                        if (_mapHistoryEmployee.getSource(`ek-tracking-his-${_map_Container.id}-check-source`)) {
+                            _mapHistoryEmployee.getSource(`ek-tracking-his-${_map_Container.id}-check-source`).setData(CheckSource)
                         } else {
-                            _map.addSource(`ek-tracking-his-${_map_Container.id}-check-source`, {
+                            _mapHistoryEmployee.addSource(`ek-tracking-his-${_map_Container.id}-check-source`, {
                                 'type': 'geojson',
                                 'data': CheckSource,
                                 'cluster': true,
@@ -548,7 +550,7 @@ function HistoryMap({ options }) {
                                 'clusterRadius': 50
                             });
 
-                            _map.addLayer({
+                            _mapHistoryEmployee.addLayer({
                                 id: `ek-tracking-his-${_map_Container.id}-check-clusters`,
                                 type: 'circle',
                                 source: `ek-tracking-his-${_map_Container.id}-check-source`,
@@ -580,7 +582,7 @@ function HistoryMap({ options }) {
                                     ['has', 'point_count'],
                                 ]
                             });
-                            _map.addLayer({
+                            _mapHistoryEmployee.addLayer({
                                 id: `ek-tracking-his-${_map_Container.id}-check-cluster-count`,
                                 type: 'symbol',
                                 source: `ek-tracking-his-${_map_Container.id}-check-source`,
@@ -593,7 +595,7 @@ function HistoryMap({ options }) {
                                     ['has', 'point_count'],
                                 ]
                             });
-                            _map.addLayer({
+                            _mapHistoryEmployee.addLayer({
                                 'id': `ek-tracking-his-${_map_Container.id}-check-point`,
                                 'type': 'symbol',
                                 'source': `ek-tracking-his-${_map_Container.id}-check-source`,
@@ -609,31 +611,31 @@ function HistoryMap({ options }) {
                                 ]
                             });
 
-                            _map.on('mouseenter', `ek-tracking-his-${_map_Container.id}-check-clusters`, () => {
-                                _map.getCanvas().style.cursor = 'pointer';
+                            _mapHistoryEmployee.on('mouseenter', `ek-tracking-his-${_map_Container.id}-check-clusters`, () => {
+                                _mapHistoryEmployee.getCanvas().style.cursor = 'pointer';
                             });
-                            _map.on('mouseleave', `ek-tracking-his-${_map_Container.id}-check-clusters`, () => {
-                                _map.getCanvas().style.cursor = '';
+                            _mapHistoryEmployee.on('mouseleave', `ek-tracking-his-${_map_Container.id}-check-clusters`, () => {
+                                _mapHistoryEmployee.getCanvas().style.cursor = '';
                             });
-                            _map.on('click', `ek-tracking-his-${_map_Container.id}-check-clusters`, async (e) => {
-                                const features = _map.queryRenderedFeatures(e.point, {
+                            _mapHistoryEmployee.on('click', `ek-tracking-his-${_map_Container.id}-check-clusters`, async (e) => {
+                                const features = _mapHistoryEmployee.queryRenderedFeatures(e.point, {
                                     layers: [`ek-tracking-his-${_map_Container.id}-check-clusters`]
                                 });
                                 const clusterId = features[0].properties.cluster_id;
-                                const zoom = await _map.getSource(`ek-tracking-his-${_map_Container.id}-check-source`).getClusterExpansionZoom(clusterId);
-                                _map.easeTo({
+                                const zoom = await _mapHistoryEmployee.getSource(`ek-tracking-his-${_map_Container.id}-check-source`).getClusterExpansionZoom(clusterId);
+                                _mapHistoryEmployee.easeTo({
                                     center: features[0].geometry.coordinates,
                                     zoom: zoom,
                                 });
                             });
 
-                            _map.on('mouseenter', `ek-tracking-his-${_map_Container.id}-check-point`, (e) => {
-                                _map.getCanvas().style.cursor = 'pointer';
+                            _mapHistoryEmployee.on('mouseenter', `ek-tracking-his-${_map_Container.id}-check-point`, (e) => {
+                                _mapHistoryEmployee.getCanvas().style.cursor = 'pointer';
                                 const bbox = [
                                     [e.point.x - 5, e.point.y - 5],
                                     [e.point.x + 5, e.point.y + 5],
                                 ];
-                                const selectedFeatures = _map.queryRenderedFeatures(bbox, {
+                                const selectedFeatures = _mapHistoryEmployee.queryRenderedFeatures(bbox, {
                                     layers: [`ek-tracking-his-${_map_Container.id}-check-point`],
                                 });
                                 if (_popup) _popup.remove();
@@ -660,10 +662,10 @@ function HistoryMap({ options }) {
                                 `
                                     )
                                     .setOffset([0, -20])
-                                    .addTo(_map);
+                                    .addTo(_mapHistoryEmployee);
                             });
-                            _map.on('mouseleave', `ek-tracking-his-${_map_Container.id}-check-point`, () => {
-                                _map.getCanvas().style.cursor = '';
+                            _mapHistoryEmployee.on('mouseleave', `ek-tracking-his-${_map_Container.id}-check-point`, () => {
+                                _mapHistoryEmployee.getCanvas().style.cursor = '';
                                 if (_popup) _popup.remove();
                             })
                         }
@@ -689,15 +691,15 @@ function HistoryMap({ options }) {
 
                 const setNavigation = async () => {
                     try {
-                        let LineSource = await _map.getSource(`ek-tracking-his-${_map_Container.id}-line-source`)._data;
-                        if (!_map.getImage('marker-navigation')) {
-                            const iconNavigation = await _map.loadImage(_options.iconNavigation);
-                            _map.addImage('marker-navigation', iconNavigation.data)
+                        let LineSource = await _mapHistoryEmployee.getSource(`ek-tracking-his-${_map_Container.id}-line-source`)._data;
+                        if (!_mapHistoryEmployee.getImage('marker-navigation')) {
+                            const iconNavigation = await _mapHistoryEmployee.loadImage(_options.iconNavigation);
+                            _mapHistoryEmployee.addImage('marker-navigation', iconNavigation.data)
                         }
 
-                        if (!_map.getImage('marker-stop')) {
-                            const iconStop = await _map.loadImage(_options.iconStop);
-                            _map.addImage('marker-stop', iconStop.data)
+                        if (!_mapHistoryEmployee.getImage('marker-stop')) {
+                            const iconStop = await _mapHistoryEmployee.loadImage(_options.iconStop);
+                            _mapHistoryEmployee.addImage('marker-stop', iconStop.data)
                         }
 
                         var NavigationPoint = {
@@ -730,14 +732,14 @@ function HistoryMap({ options }) {
                         //     'features': []
                         // };
 
-                        if (_map.getSource(`ek-tracking-his-${_map_Container.id}-navigation-line-source`)) {
-                            _map.getSource(`ek-tracking-his-${_map_Container.id}-navigation-line-source`).setData(Navigationline)
+                        if (_mapHistoryEmployee.getSource(`ek-tracking-his-${_map_Container.id}-navigation-line-source`)) {
+                            _mapHistoryEmployee.getSource(`ek-tracking-his-${_map_Container.id}-navigation-line-source`).setData(Navigationline)
                         } else {
-                            _map.addSource(`ek-tracking-his-${_map_Container.id}-navigation-line-source`, {
+                            _mapHistoryEmployee.addSource(`ek-tracking-his-${_map_Container.id}-navigation-line-source`, {
                                 'type': 'geojson',
                                 'data': Navigationline
                             });
-                            _map.addLayer({
+                            _mapHistoryEmployee.addLayer({
                                 'id': `ek-tracking-his-${_map_Container.id}-navigation-line-animation`,
                                 'source': `ek-tracking-his-${_map_Container.id}-navigation-line-source`,
                                 'type': 'line',
@@ -753,14 +755,14 @@ function HistoryMap({ options }) {
                             });
                         }
 
-                        if (_map.getSource(`ek-tracking-his-${_map_Container.id}-navigation-point-source`)) {
-                            _map.getSource(`ek-tracking-his-${_map_Container.id}-navigation-point-source`).setData(NavigationPoint)
+                        if (_mapHistoryEmployee.getSource(`ek-tracking-his-${_map_Container.id}-navigation-point-source`)) {
+                            _mapHistoryEmployee.getSource(`ek-tracking-his-${_map_Container.id}-navigation-point-source`).setData(NavigationPoint)
                         } else {
-                            _map.addSource(`ek-tracking-his-${_map_Container.id}-navigation-point-source`, {
+                            _mapHistoryEmployee.addSource(`ek-tracking-his-${_map_Container.id}-navigation-point-source`, {
                                 'type': 'geojson',
                                 'data': NavigationPoint
                             });
-                            _map.addLayer({
+                            _mapHistoryEmployee.addLayer({
                                 'id': `ek-tracking-his-${_map_Container.id}-navigation-point-animation`,
                                 'source': `ek-tracking-his-${_map_Container.id}-navigation-point-source`,
                                 'type': 'symbol',
@@ -803,7 +805,7 @@ function HistoryMap({ options }) {
                 };
 
                 const visibleRouteLayer = (visible) => {
-                    _map.setLayoutProperty(`ek-tracking-his-${_map_Container.id}-LineString`, 'visibility', visible);
+                    _mapHistoryEmployee.setLayoutProperty(`ek-tracking-his-${_map_Container.id}-LineString`, 'visibility', visible);
                 }
 
                 const reverseGeocode = async (position) => {

@@ -45,12 +45,13 @@ import FormatExpression from './format.js';
 import ImageExpression from './image.js';
 import Length from './length.js';
 import Within from './within.js';
+import Config from './config.js';
 import Distance from './distance.js';
+import {mulberry32} from '../../util/random.js';
 
 import type EvaluationContext from '../evaluation_context.js';
 import type {Varargs} from '../compound_expression.js';
 import type {Expression, ExpressionRegistry} from '../expression.js';
-import {mulberry32} from '../../util/random.js';
 
 const expressions: ExpressionRegistry = {
     // special forms
@@ -110,7 +111,9 @@ const expressions: ExpressionRegistry = {
     // $FlowFixMe[method-unbinding]
     'within': Within,
     // $FlowFixMe[method-unbinding]
-    'distance': Distance
+    'distance': Distance,
+    // $FlowFixMe[method-unbinding]
+    'config': Config
 };
 
 function rgba(ctx: EvaluationContext, [r, g, b, a]: Array<Expression>) {
@@ -143,14 +146,6 @@ function has(key: string, obj: {[string]: any}): boolean {
 function get(key: string, obj: {[string]: any}) {
     const v = obj[key];
     return typeof v === 'undefined' ? null : v;
-}
-
-function getConfig(ctx: EvaluationContext, key: string, scope: string) {
-    if (scope.length) {
-        key += `\u{1f}${scope}`;
-    }
-    const v = ctx.getConfig(key);
-    return v ? v.evaluate(ctx) : null;
 }
 
 function binarySearch(v: any, a: {[number]: any}, i: number, j: number) {
@@ -245,18 +240,6 @@ CompoundExpression.register(expressions, {
             ]
         ]
     },
-    'config': {
-        type: ValueType,
-        overloads: [
-            [
-                [StringType],
-                (ctx, [key]) => getConfig(ctx, key.evaluate(ctx), '')
-            ], [
-                [StringType, StringType],
-                (ctx, [key, scope]) => getConfig(ctx, key.evaluate(ctx), scope.evaluate(ctx))
-            ]
-        ]
-    },
     'feature-state': [
         ValueType,
         [StringType],
@@ -311,6 +294,11 @@ CompoundExpression.register(expressions, {
         NumberType,
         [],
         (ctx) => ctx.globals.rasterValue || 0
+    ],
+    'raster-particle-speed': [
+        NumberType,
+        [],
+        (ctx) => ctx.globals.rasterParticleSpeed || 0
     ],
     'sky-radial-progress': [
         NumberType,

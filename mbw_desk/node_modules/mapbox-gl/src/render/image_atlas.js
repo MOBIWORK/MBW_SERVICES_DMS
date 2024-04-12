@@ -80,7 +80,10 @@ export default class ImageAtlas {
         for (const id in icons) {
             const src = icons[id];
             const bin = iconPositions[id].paddedRect;
-            RGBAImage.copy(src.data, image, {x: 0, y: 0}, {x: bin.x + IMAGE_PADDING, y: bin.y + IMAGE_PADDING}, src.data);
+            // For SDF icons, we override the RGB channels with white.
+            // This is because we read the red channel in the shader and RGB channels will get alpha-premultiplied on upload.
+            const overrideRGB = src.sdf;
+            RGBAImage.copy(src.data, image, {x: 0, y: 0}, {x: bin.x + IMAGE_PADDING, y: bin.y + IMAGE_PADDING}, src.data, overrideRGB);
         }
 
         for (const id in patterns) {
@@ -138,7 +141,8 @@ export default class ImageAtlas {
 
         position.version = image.version;
         const [x, y] = position.tl;
-        texture.update(image.data, undefined, {x, y});
+        const hasPattern = !!Object.keys(this.patternPositions).length;
+        texture.update(image.data, {useMipmap: hasPattern}, {x, y});
     }
 
 }
