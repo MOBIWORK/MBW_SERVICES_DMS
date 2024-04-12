@@ -3,9 +3,11 @@ import "./SupervisoryStaffRealTime.css";
 import {TableCustom,RealtimeMap,WrapperCard, WrapperCardTable, WrapperCardMap} from "@/components";
 import { useEffect, useState } from 'react';
 import { AxiosService } from '@/services/server';
+import axios from "axios";
+import { useNavigate } from 'react-router-dom';
 
 export default function SupervisoryStaffRealTime() {
-
+  const navigate = useNavigate();
   const [summaryOver, setSummaryOver] = useState<
     {
       so_nv_online: number | 0,
@@ -19,7 +21,9 @@ export default function SupervisoryStaffRealTime() {
       luot_vt: 0,
       don_hang: 0,
       doanh_so: 0,
-    })
+    });
+    const [dataTopDistanceEmployee, setDataTopDistanceEmployee] = useState<any[]>([]);
+    const [dataCheckingEmployee, setDataCheckingEmployee] = useState<any[]>([]);
 
     useEffect(()=>{
       initDataSummaryOver();
@@ -31,41 +35,6 @@ export default function SupervisoryStaffRealTime() {
         setSummaryOver(rs.result);
       }
     }
-
-  // data di chuyển nhân viên
-  const dataDistanceEmployee = [
-    {
-      'stt': 1,
-      'pic_profile': "/user_demo/user_1.png",
-      'emp_name': "Khánh Hoàn",
-      'emp_id': "1234-4455",
-      'distance': "10km"
-    },{
-      'stt': 2,
-      'pic_profile': "/user_demo/user_2.png",
-      'emp_name': "Tường Vân",
-      'emp_id': "1234-4455",
-      'distance': "8km"
-    },{
-      'stt': 3,
-      'pic_profile': "/user_demo/user_3.png",
-      'emp_name': "Nghiêm Ngọc Trâm",
-      'emp_id': "1234-4455",
-      'distance': "7km"
-    },{
-      'stt': 4,
-      'pic_profile': "/user_demo/user_4.png",
-      'emp_name': "Đinh Thùy Linh",
-      'emp_id': "1234-4455",
-      'distance': "4km"
-    },{
-      'stt': 5,
-      'pic_profile': "/user_demo/user_5.png",
-      'emp_name': "Hà Nguyễn",
-      'emp_id': "1234-4455",
-      'distance': "2km"
-    }
-  ]
 
   // data nhân viên
   const dataEmployees = [
@@ -106,52 +75,6 @@ export default function SupervisoryStaffRealTime() {
       'boxing': 6
     }
   ]
-
-  //data checkin
-  const dataCheckingEmployee = [
-    {
-      'stt': 1,
-      'pic_profile': "/user_demo/user_1.png",
-      'emp_name': "Khánh Hoàn",
-      'emp_id': "1234-4455",
-      'moving': "60 phút",
-      'stopping': "10 phút",
-      'visiting': "10 phút"
-    },{
-      'stt': 2,
-      'pic_profile': "/user_demo/user_2.png",
-      'emp_name': "Tường Vân",
-      'emp_id': "1234-4455",
-      'moving': "60 phút",
-      'stopping': "10 phút",
-      'visiting': "10 phút"
-    },{
-      'stt': 3,
-      'pic_profile': "/user_demo/user_3.png",
-      'emp_name': "Nghiêm Ngọc Trâm",
-      'emp_id': "1234-4455",
-      'moving': "60 phút",
-      'stopping': "10 phút",
-      'visiting': "10 phút"
-    },{
-      'stt': 4,
-      'pic_profile': "/user_demo/user_4.png",
-      'emp_name': "Đinh Thùy Linh",
-      'emp_id': "1234-4455",
-      'moving': "60 phút",
-      'stopping': "10 phút",
-      'visiting': "10 phút"
-    },{
-      'stt': 5,
-      'pic_profile': "/user_demo/user_5.png",
-      'emp_name': "Hà Nguyễn",
-      'emp_id': "1234-4455",
-      'moving': "60 phút",
-      'stopping': "10 phút",
-      'visiting': "10 phút"
-    }
-  ]
-
   //bảng: cột nhân viên
   const columnsCheckingEmployee = [
     {
@@ -167,7 +90,9 @@ export default function SupervisoryStaffRealTime() {
                 </div>
                 <div className="mx-3">
                   <div style={{fontWeight: 500, fontSize: '14px', lineHeight: '21px'}}>{text}</div>
-                  <div style={{marginTop: '5px', fontWeight: 400, fontSize: '12px', lineHeight: '21px'}}>ID: {record.emp_id}</div>
+                  {record.emp_id != null && (
+                    <div style={{marginTop: '5px', fontWeight: 400, fontSize: '12px', lineHeight: '21px'}}>ID: {record.emp_id}</div>
+                  )}
                 </div>
           </div>
       )
@@ -193,6 +118,51 @@ export default function SupervisoryStaffRealTime() {
     return num.toLocaleString('en-US').replace(/,/g, '.');
   }
 
+  const formatDistance = (distance: number)=> {
+    if(distance < 1000) return `${Math.round(distance)} m`;
+    return `${Math.round(distance/1000)} km`;
+  }
+  const formatTime = (time: number) => {
+    if(time < 60) return `${Math.round(time)} giây`;
+    else if(time >= 60 && time < 3600) return `${Math.round(time/60)} phút`;
+    return `${Math.round(time/3600)} giờ`;
+  }
+
+  const handlerShowHistory = (evt) => {
+    navigate(`/employee-monitor-detail/${evt}`);
+
+  }
+  const renderDataMoveTopEmployee = (arrSummary) => {
+    let arrDataSort = arrSummary.sort((a, b) => b.summary.move.distance - a.summary.move.distance);
+    let dataMoveTopEmployee = [];
+    for(let i = 0; i < arrDataSort.length; i++){
+      if(i == 5) break;
+      dataMoveTopEmployee.push({
+        'stt': i+1,
+        'pic_profile': "/public/user_default.png",
+        'emp_name': arrDataSort[i].object.name,
+        'emp_id': arrDataSort[i].object.empl_id,
+        'distance': formatDistance(arrDataSort[i].summary.move.distance)
+      })
+    }
+    setDataTopDistanceEmployee(dataMoveTopEmployee);
+  }
+  const renderDataCheckingEmployee = (arrSummary) => {
+    let dataCheckingEmployee = [];
+    for(let i = 0; i < arrSummary.length; i++){
+      dataCheckingEmployee.push({
+        'stt': i+1,
+        'pic_profile': "/public/user_default.png",
+        'emp_name': arrSummary[i].object.name,
+        'emp_id': arrSummary[i].object.empl_id,
+        'moving': formatTime(arrSummary[i].summary.move.totalTime),
+        'stopping': formatTime(arrSummary[i].summary.stop.totalTime),
+        'visiting': formatTime(arrSummary[i].summary.checkin.totalTime)
+      })
+    }
+    setDataCheckingEmployee(dataCheckingEmployee);
+  }
+
   useEffect(() => {
     (async() => {
       const rs = await AxiosService.get('/api/method/mbw_dms.api.user.get_projectID');
@@ -201,8 +171,17 @@ export default function SupervisoryStaffRealTime() {
         ...prev,
         projectId: rs.result[ "Project ID"]
       }))
+      let urlSummary = `https://api.ekgis.vn/v2/tracking/locationHistory/summary/lastest/${rs.result[ "Project ID"]}/null?api_key=${options.apiKey}`;
+      let res = await axios.get(urlSummary);
+      if(res.statusText == "OK"){
+        let arrSummary = res["data"].results;
+        console.log(arrSummary);
+        renderDataMoveTopEmployee(arrSummary);
+        renderDataCheckingEmployee(arrSummary);
+      }
     })()
   },[])
+
   return (
     <>
       <Row className="flex flex-wrap justify-between items-center px-0 pt-5">
@@ -302,7 +281,7 @@ export default function SupervisoryStaffRealTime() {
                     <div style={{fontWeight: 500, fontSize: '14px',lineHeight: '28px'}}>Quãng đường di chuyển của nhân viên</div>
                     <List
                       itemLayout="horizontal"
-                      dataSource={dataDistanceEmployee}
+                      dataSource={dataTopDistanceEmployee}
                       renderItem={(item, index) => (
                         <List.Item>
                           <div className="flex items-center justify-between" style={{width: '100%'}}>
@@ -319,12 +298,14 @@ export default function SupervisoryStaffRealTime() {
                                 )}
                               </div>
                               <div className="mx-3">{item.stt}</div>
-                              <div className="flex items-center justify-center" style={{height: '48px', width: '48px', borderRadius: '12px'}}>
-                                <div style={{width: '48px', height: '48px', backgroundImage: `url("${item.pic_profile}")`, backgroundSize: 'Cover'}}></div>
+                              <div className="flex items-center justify-center" style={{height: '42px', width: '42px', borderRadius: '12px'}}>
+                                <div style={{width: '42px', height: '42px', backgroundImage: `url("${item.pic_profile}")`, backgroundSize: 'Cover'}}></div>
                               </div>
                               <div className="mx-3">
-                                <div style={{fontWeight: 500, fontSize: '14px', lineHeight: '21px'}}>{item.emp_name}</div>
-                                <div style={{marginTop: '5px', fontWeight: 400, fontSize: '12px', lineHeight: '21px'}}>ID: {item.emp_id}</div>
+                                  <div style={{fontWeight: 500, fontSize: '14px', lineHeight: '21px'}}>{item.emp_name}</div>
+                                  {item.emp_id != null && (
+                                    <div style={{marginTop: '5px', fontWeight: 400, fontSize: '12px', lineHeight: '21px'}}>ID: {item.emp_id}</div>
+                                  )}
                               </div>
                             </div>
                             <div style={{marginRight: '10px', fontWeight: 500, fontSize: '14px', lineHeight: '22px', color: '#1877F2'}}>
@@ -387,7 +368,7 @@ export default function SupervisoryStaffRealTime() {
             <Col span={24} className="card-container">
                 <WrapperCardTable>
                     <div style={{fontWeight: 500, fontSize: '14px',lineHeight: '28px', paddingLeft: '10px', paddingBottom: '10px', paddingTop: '10px'}}>Thống kê thời gian di chuyển, thời gian dừng, thời gian viếng thăm của nhân viên</div>
-                    <TableCustom style={{height:'100%'}}  pagination={false}
+                    <TableCustom style={{height:'100%'}}  pagination={false} scroll={{ y: 350 }}
                       columns={columnsCheckingEmployee}
                       dataSource={dataCheckingEmployee}
                       
@@ -400,7 +381,7 @@ export default function SupervisoryStaffRealTime() {
         <Col span={12} className="card-container">
           <WrapperCardMap>
             <div style={{height: '100%'}}>
-              {options.projectId && <RealtimeMap options={options} />}
+              {options.projectId && <RealtimeMap options={options} onClickPopup={handlerShowHistory} />}
             
             </div>
           </WrapperCardMap>

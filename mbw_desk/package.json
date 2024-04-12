@@ -18,6 +18,7 @@
     "@maptiler/sdk": "^1.2.1",
     "@turf/bbox": "^6.5.0",
     "@turf/rhumb-bearing": "^6.5.0",
+    "@turf/turf": "^6.5.0",
     "antd": "^5.12.8",
     "chart.js": "^4.4.2",
     "classnames": "^2.5.1",

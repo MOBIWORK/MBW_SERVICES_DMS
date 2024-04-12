@@ -243,13 +243,14 @@ function RealtimeMap({ options, onClickPopup }) {
                             } else return null;
                         })).then(features => features.filter(feature => feature !== null))
                     };
+                    // console.log(FeatureCollection);
                     if (!_map.getImage('marker-track')) {
-                        let iconTrack = await _map.loadImage(_options.iconTrack);
-                        _map.addImage('marker-track', iconTrack.data);
+                        const markerTrack = await _map.loadImage(_options.iconTrack);
+                        _map.addImage('marker-track', markerTrack.data)
                     }
                     if (!_map.getImage('marker-checkin')) {
-                        let iconCheckIn = await _map.loadImage(_options.iconCheckin);
-                        _map.addImage('marker-checkin', iconCheckIn.data);
+                        const markerCheckin = await _map.loadImage(_options.iconCheckin);
+                        _map.addImage('marker-checkin', markerCheckin.data)
                     }
 
                     if (_map.getSource(`ek-tracking-live-${_map_Container.id}-source`)) {

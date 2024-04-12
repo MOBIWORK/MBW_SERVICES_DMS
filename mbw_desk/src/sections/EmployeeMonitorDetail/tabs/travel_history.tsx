@@ -16,9 +16,12 @@ export default function TravelHistory({ employee }: { employee?: string }) {
   const [to_time, setTTime] = useState<string>(tmpToTimeZone(new Date().setHours(24, 0, 0).toString()))
   const [loading, setLoading] = useState<boolean>(true);
   const handleChangeTime = (value: any) => {
-    setTime(value)
-    setFTime(tmpToTimeZone(TodayLimit(value).today))
-    setTTime(tmpToTimeZone(TodayLimit(value).nextday))
+    setTimeout(()=> {
+      setTime(value)
+      setFTime(tmpToTimeZone(TodayLimit(value).today))
+      setTTime(tmpToTimeZone(TodayLimit(value).nextday))
+    }, 200)
+    
   }
   const [options, setOptions] = useState<
     {
@@ -46,6 +49,7 @@ export default function TravelHistory({ employee }: { employee?: string }) {
         details: resSummary.data["details"],
       }));
     }
+    console.log(options);
     setLoading(false);
   }
 

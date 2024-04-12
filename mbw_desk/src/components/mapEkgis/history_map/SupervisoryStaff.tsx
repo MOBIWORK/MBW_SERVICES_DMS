@@ -37,7 +37,7 @@ export default function SupervisoryStaff({options, loading}) {
         }else if(item.type == "move"){
           arrTimeLineHistory.push({
             dot: <ItemMovingTimeLineDot></ItemMovingTimeLineDot>,
-            children: <ItemMovingTimeLineContent data={{ 'time_moving': `${formatTimeUTC(item.startTime)} - ${formatTimeUTC(item.endTime)}`, 'total_distance': `${formatUnitDistance(item.distance)} km` }}></ItemMovingTimeLineContent>
+            children: <ItemMovingTimeLineContent data={{ 'time_moving': `${formatTimeUTC(item.startTime)} - ${formatTimeUTC(item.endTime)}`, 'total_distance': `${formatDistance(item.distance)}` }}></ItemMovingTimeLineContent>
           });
         }else if(item.type == "stop"){
           arrTimeLineHistory.push({
@@ -56,12 +56,12 @@ export default function SupervisoryStaff({options, loading}) {
   }, [options])
 
   const formatDistance = (distance: number)=> {
-    if(distance < 1000) return `${distance} m`;
+    if(distance < 1000) return `${Math.round(distance)} m`;
     return `${Math.round(distance/1000)} km`;
   }
   const formatTime = (time: number) => {
-    if(time < 60) return `${time} giây`;
-    else if(time >= 60 && time < 3600) return `${time/60} phút`;
+    if(time < 60) return `${Math.round(time)} giây`;
+    else if(time >= 60 && time < 3600) return `${Math.round(time/60)} phút`;
     return `${Math.round(time/3600)} giờ`;
   }
   const formatUnitSpeed = (speed: number) => {
@@ -198,10 +198,14 @@ export default function SupervisoryStaff({options, loading}) {
               <Col span={6} style={{ paddingTop: '1rem', paddingLeft: '1rem' }}>
                 <div style={{ fontWeight: 500, fontSize: '16px', color: '#000000', height: '45px' }}>Quãng đường di chuyển</div>
                 <div style={{ padding: '8px 16px 8px 16px', maxHeight: '530px', overflowY: 'auto' }}>
-                  <Timeline
+                  {timeLineHistory.length > 0? (
+                    <Timeline
                     mode="left"
                     items={timeLineHistory}
                   />
+                  ):(
+                    <div>Chưa có lộ trình</div>
+                  )}
                 </div>
               </Col>
               <Col span={18} style={{ height: '615px' }}>
