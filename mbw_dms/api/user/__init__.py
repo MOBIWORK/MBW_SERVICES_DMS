@@ -1,7 +1,10 @@
 import frappe
 from frappe import _
 from frappe.utils.password import update_password, check_password
-from mbw_dms.api.common import gen_response, exception_handle
+from mbw_dms.api.common import gen_response, exception_handle, current_month_week, get_value_child_doctype
+from mbw_dms.api.validators import validate_filter_timestamp
+import datetime
+from collections import defaultdict
 
 @frappe.whitelist(methods='PUT')
 def change_password(user, current_password, new_password):
@@ -25,24 +28,30 @@ def change_password(user, current_password, new_password):
 def get_projectID(**kwargs):
     try:
         projectID = ''
-        dms_settinngs = frappe.get_doc("DMS Settings").as_dict()
-        if dms_settinngs.get('ma_du_an'):
-            projectID = dms_settinngs.get('ma_du_an')
+        projectID = frappe.cache().get_value("ProjectID")
+        if projectID == None:
+            dms_settinngs = frappe.get_doc("DMS Settings").as_dict()
+            if dms_settinngs.get('ma_du_an'):
+                projectID = dms_settinngs.get('ma_du_an')
+                frappe.cache().set_value("ProjectID", projectID)
 
         return gen_response(200, 'Thành công', {
             'Project ID': projectID
         })
     except Exception as e:
         return exception_handle(e)
-    
+
 # Lấy project ID và Object ID
 @frappe.whitelist(methods='GET')
 def get_project_object_id(name):
     try:
         projectID = ''
-        dms_settinngs = frappe.get_doc("DMS Settings").as_dict()
-        if dms_settinngs.get('ma_du_an'):
-            projectID = dms_settinngs.get('ma_du_an')
+        projectID = frappe.cache().get_value("ProjectID")
+        if projectID == None:
+            dms_settinngs = frappe.get_doc("DMS Settings").as_dict()
+            if dms_settinngs.get('ma_du_an'):
+                projectID = dms_settinngs.get('ma_du_an')
+                frappe.cache().set_value("ProjectID", projectID)
 
         objectId = ''
         user_name = frappe.db.get_list('Employee', filters={'name': name}, fields=['object_id'])
@@ -53,5 +62,75 @@ def get_project_object_id(name):
             'Project ID': projectID,
             'Object ID': objectId
         })
+    except Exception as e:
+        return exception_handle(e)
+
+# Danh sách top 5 nhân viên 
+@frappe.whitelist(methods='GET')
+def get_list_top_employee(**kwargs):
+    try:
+        filters = {}
+        from_date = validate_filter_timestamp(type='start')(kwargs.get('from_date')) if kwargs.get('from_date') else None
+        to_date = validate_filter_timestamp(type='end')(kwargs.get('to_date')) if kwargs.get('to_date') else None
+        list_employee = []
+        employee = frappe.get_all('Employee', fields=['name', 'user_id'])
+
+        for i in employee:
+            if i['name'] not in list_employee:
+                list_employee.append(i['name'])
+
+        days = datetime.date.today()
+        date = days.weekday()
+        # Chuyển đổi sang tên của ngày trong tuần
+        date_in_week = ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ Nhật"]
+        name_date = date_in_week[date]
+        router_employee = frappe.get_all(
+            'DMS Router', 
+            filters = {
+                'employee': ('in', list_employee),
+                'travel_date': name_date
+            },
+            fields = ['name', 'employee']
+        )
+
+        customer_set = set()
+        for i in router_employee:
+            user_id = frappe.get_value('Employee', {'name': i['employee']}, 'user_id')
+            employee_name = frappe.get_value('Employee', {'name': i['employee']}, 'employee_name')
+            if from_date and to_date:
+                filters["creation"] = ["between",[from_date,to_date]]
+            filters['owner'] = user_id
+
+            i['employee_name'] = employee_name
+
+            data_sales_order = frappe.get_all('Sales Order', filters=filters, fields=['name'])
+            i['sales_order'] = len(data_sales_order)
+
+            data_checkin = frappe.get_all('DMS Checkin', filters=filters, fields=['name', 'kh_ten'])
+            if data_checkin:
+                for item in data_checkin:
+                    kh_ten = item['kh_ten']
+                    customer_set.add(kh_ten)
+                i['today_visit'] = len(customer_set)
+            else:
+                i['today_visit'] = 0
+            
+            customers = get_value_child_doctype('DMS Router', i['name'], 'customers')
+            cus = 0
+            for a in customers:
+                fre = a['frequency']
+                week_router = []
+                frequency = fre.split(';')
+                for j in frequency:
+                    week_router.append(int(j))
+                current_week = current_month_week()
+                if current_week in week_router:
+                    cus += 1
+            i['must_visit'] = cus
+            i.pop('name')
+
+        router_employee = sorted(router_employee, key=lambda x: x['sales_order'], reverse=True)[:5]
+
+        return gen_response(200, 'Thành công', router_employee)
     except Exception as e:
         return exception_handle(e)

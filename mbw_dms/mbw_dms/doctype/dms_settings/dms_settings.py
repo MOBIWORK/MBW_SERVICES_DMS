@@ -6,16 +6,18 @@ from frappe.model.document import Document
 from mbw_dms.api.validators import validate_not_none
 import requests
 from mbw_dms.api.common import exception_handle, gen_response
+from mbw_dms.api.ekgis.constant import API_URL_TRACKING
 
 class DMSSettings(Document):
     def on_update(self):
-        frappe.cache.delete_value('website-config')
+        frappe.cache.delete_value("website-config")
+        frappe.cache.delete_value("ProjectID")
     
     @frappe.whitelist(methods='POST')
     def config_web(self):
         try:
             # Gửi yêu cầu POST đến API để lấy thông tin mới
-            api_url = "https://api.ekgis.vn/tracking/project"
+            api_url = f"{API_URL_TRACKING}/project"
             data_post = {
                 'name': validate_not_none(frappe.local.site),
             }
