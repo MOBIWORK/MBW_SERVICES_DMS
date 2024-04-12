@@ -5,7 +5,10 @@ import { TodayLimit, tmpToTimeZone } from '../../../util'
 import { SupervisoryStaff } from '@/components'
 import { AxiosService } from '../../../services/server'
 import axios from "axios";
-import { message } from 'antd'
+import { message } from 'antd';
+import { HeaderPage } from '../../../components';
+import { BackIos } from '../../../icons';
+import { Link } from 'react-router-dom'
 // Thiết lập ngôn ngữ cho dayjs
 // import 'dayjs/locale/vi';
 // dayjs.locale('vi');
@@ -32,15 +35,16 @@ export default function TravelHistory({ employee }: { employee?: string }) {
       to_time: string | null,
     }>({
       apiKey: import.meta.env.VITE_API_KEY,
-      projectId: "6556e471178a1db24ac1a711",
-      objectId: "654c8a12d65d3e52f2d286de",
+      projectId: "",
+      objectId: "",
       from_time: from_time,
       to_time: to_time,
     })
   
-  const initDataSummary = async () => {
+  const initDataSummary = async (projectId: string, objectId: string) => {
     setLoading(true);
-    let urlSummary = `https://api.ekgis.vn/v2/tracking/locationHistory/summary/${options.projectId}/${options.objectId}?from_time=${from_time}&to_time=${to_time}&api_key=${options.apiKey}`;
+    let urlSummary = `https://api.ekgis.vn/v2/tracking/locationHistory/summary/${projectId}/${objectId}?from_time=${from_time}&to_time=${to_time}&api_key=${options.apiKey}`;
+    console.log(urlSummary);
     let resSummary = await axios.get(urlSummary);
     if(resSummary.statusText == "OK"){
       setOptions(prev => ({
@@ -49,22 +53,19 @@ export default function TravelHistory({ employee }: { employee?: string }) {
         details: resSummary.data["details"],
       }));
     }
-    console.log(options);
     setLoading(false);
   }
 
   useEffect(() => {
     (async () => {
       try {
-        initDataSummary();
-        // const rs = await AxiosService.get(`/api/method/mbw_dms.api.user.get_project_object_id?name=${employee}`,)
-        // setOptions(prev => ({
-        //   ...prev, 
-        //   projectId: rs.result["Project ID"],
-        //   objectId: rs.result["Object ID"],
-        // }))
-        // console.log(rs);
-        // console.log(options);
+        const rs = await AxiosService.get(`/api/method/mbw_dms.api.user.get_project_object_id?name=${employee}`)
+        setOptions(prev => ({
+          ...prev, 
+          projectId: rs.result["Project ID"],
+          objectId: rs.result["Object ID"],
+        }))
+        initDataSummary(rs.result["Project ID"], rs.result["Object ID"]);
       }catch(error){
         message.error(error?.message || "Something was wrong!!!")
       }
@@ -72,15 +73,22 @@ export default function TravelHistory({ employee }: { employee?: string }) {
   }, [employee])
 
   useEffect(() => {
-    initDataSummary();
+    initDataSummary(options.projectId, options.objectId);
   },[from_time,to_time])
-
+  //Goij dich vu lay thong tin nhan vien theo objectId
   return (
     <>
-      <div className='border border-solid border-[#F5F5F5] rounded-lg'>
+    <HeaderPage title={<div className="flex items-center">
+          <Link to="/employee-monitor" > <BackIos/></Link>
+          <span className='ml-4'>
+            Nhân viên Trần Đình Tùng - NV1234
+          </span>
+      </div>} customButton={
         <div className='p-4 border border-solid border-transparent border-b-[#F5F5F5]'>
           <DatePick defaultValue={dayjs(time)} format={"DD-MM-YYYY"} onChange={handleChangeTime} />
         </div>
+      }/>
+      <div className='border border-solid border-[#F5F5F5] rounded-lg'>
         <div id="travel" className='h-[70vh] relative'>
           {/* <MapEkgisHistory from_time={from_time} to_time={to_time} objectId='654c8a12d65d3e52f2d286de' projectId= '6556e471178a1db24ac1a711'/> */}
           {options.projectId && options.objectId && <SupervisoryStaff options={options} loading={loading}/> }

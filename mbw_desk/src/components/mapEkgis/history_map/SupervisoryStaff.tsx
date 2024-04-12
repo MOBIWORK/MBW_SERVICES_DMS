@@ -19,7 +19,6 @@ export default function SupervisoryStaff({options, loading}) {
   }, [loading]);
 
   useEffect(() => {
-    console.log(options);
     let arrTimeLineHistory = [];
     if(options.details != null){
       for(let i = 0; i < options.details.length; i++){

@@ -98,26 +98,11 @@ export const dashboardRoutes = [
             },
             {
                 path: "customers-map",element: <CustomersMap/>
-            }
-        ]
-        
-    }
-    ,
-    {
-        path: "/",
-        element: (
-            <MonitorLayout>
-                 <Suspense fallback={<LoadingScreen/>}>
-                    <Outlet/>
-                </Suspense>
-            </MonitorLayout>
-        ),
-        children: [
+            },
             {
                 path: 'employee-monitor-detail/:employee_id',element: <EmployeeMonitorDetailPage/>
             }
-
         ]
-
+        
     }
 ]
