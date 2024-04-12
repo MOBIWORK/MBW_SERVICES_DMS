@@ -99,7 +99,7 @@ export function ChooseCustomer({selected,handleAdd,closeModal}:Props) {
       let now2 = Number.parseInt(now)
       return ([...prev,...customerChoose[now2]])
     },[])    
-    handleAdd(chooseC)
+    handleAdd([...selected,...chooseC.filter(customer => !selected.map(cs => cs.customer_code).includes( customer.customer_code))])
     closeModal()
   }
   useEffect(()=> {
@@ -118,34 +118,34 @@ export function ChooseCustomer({selected,handleAdd,closeModal}:Props) {
       
     })()
   },[filter,page_number])
-  useEffect(() => {
-  if(customerList.length>0)     {
-    let csCode = customerList.map(cs => cs.customer_code)
-    let selectedPage = selected.filter(csSelect => csCode.includes(csSelect.customer_code))
-    console.log("selected",{csCode,selectedPage});
+  // useEffect(() => {
+  // if(customerList.length>0)     {
+  //   let csCode = customerList.map(cs => cs.customer_code)
+  //   let selectedPage = selected.filter(csSelect => csCode.includes(csSelect.customer_code))
+  //   console.log("selected",{csCode,selectedPage});
     
-    setCustomerChoose((prev)=> {
-      console.log("prev",prev);
+  //   setCustomerChoose((prev)=> {
+  //     console.log("prev",prev);
       
-      if(prev[page_number] && prev[page_number].length > 0){
-        console.log("chọn cũ");
+  //     if(prev[page_number] && prev[page_number].length > 0){
+  //       console.log("chọn cũ");
         
-        return prev
-      }else{
-        console.log("chọn mới",selectedPage);
+  //       return prev
+  //     }else{
+  //       console.log("chọn mới",selectedPage);
         
-        if(Object.keys(prev).length > 0) {
-          return {...prev,[page_number]: selectedPage}
+  //       if(Object.keys(prev).length > 0) {
+  //         return {...prev,[page_number]: selectedPage}
 
-        }else {
-          return {[page_number]: selectedPage}
-        }
-      }
+  //       }else {
+  //         return {[page_number]: selectedPage}
+  //       }
+  //     }
 
-    })
+  //   })
     
-  }
-  },[selected,page_number,customerList])
+  // }
+  // },[selected,page_number,customerList])
   
   return (
     <>
