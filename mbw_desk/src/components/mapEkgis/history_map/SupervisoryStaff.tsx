@@ -1,5 +1,4 @@
 import { Row, Col, DatePicker, Form, Timeline } from "antd";
-import { LeftOutlined } from "@ant-design/icons";
 import { useEffect, useState } from 'react'
 import "./SupervisoryStaff.css"
 import { WrapperCard, WrapperCardMap,HistoryMap } from "@/components";
@@ -10,7 +9,7 @@ import { ItemMovingTimeLineDot, ItemMovingTimeLineContent } from "./ItemMovingTi
 import { ItemStopTimeLineDot, ItemStopTimeLineContent } from "./ItemStopTimeLine";
 
 
-export default function SupervisoryStaff({options}) {
+export default function SupervisoryStaff({options}:{options:any}) {
 
   const [timeLineHistory, setTimeLineHistory] = useState<any[]>([]);
 
@@ -68,19 +67,6 @@ export default function SupervisoryStaff({options}) {
 
   return (
     <>
-      {/* <Row className="flex flex-wrap justify-between items-center px-0">
-        <div className="flex justify-center items-center">
-          <p className="mr-2 cursor-pointer">
-            <LeftOutlined />
-          </p>
-          <span className="text-2xl font-semibold leading-[21px]">Nhân viên Chu Quỳnh Anh - NV1234</span>
-        </div>
-        <div className="flex mb-2">
-          <Form.Item className="border-none" style={{ padding: '20px 0', margin: '0' }}>
-            <DatePicker />
-          </Form.Item>
-        </div>
-      </Row> */}
       <Row gutter={20}>
         <Col span={4} className="card-container">
           <WrapperCard>

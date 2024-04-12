@@ -31,7 +31,7 @@ export default function MenuLeft({
     <div>
       <Row className="justify-between items-center py-4 pl-4">
         <Col>
-          <Link to="/app/home" className="w-[32px] h-[32px]">
+          <Link to="app" className="w-[32px] h-[32px]">
             <img src={logo} className="object-contain w-[32px] h-[32px]" />
           </Link>
         </Col>

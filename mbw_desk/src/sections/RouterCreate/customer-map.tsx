@@ -11,9 +11,8 @@ type Props = {
 }
 export default function CustomerMap({data}:Props) { 
   const [locations,setLocation] = useState<locationType[]>([])
+  const [focusLocation,setFocusLocation] = useState<locationType >()
   useEffect(()=> {
-    console.log("data in map",data);
-    
     setLocation(getAttrInArray(data,["customer_name","long","lat"], {isNull: false}))
   },[data])
   return (
@@ -30,10 +29,21 @@ export default function CustomerMap({data}:Props) {
       }
           dataSource={data}
           pagination={false}
+          onRow={(record, rowIndex) => {
+            return {onClick:(event) => {
+              console.log(record);
+              
+              setFocusLocation({
+                lat:record.lat,
+                long:record.long,
+                customer_name:record.customer_name,
+              })
+            }}
+          }}
       />
         </Col>
         <Col span={16} className="overflow-hidden">
-          <Mapcustom locations={locations}/>
+          <Mapcustom locations={locations} focusLocation={focusLocation}/>
         </Col>
       </Row>
     </>

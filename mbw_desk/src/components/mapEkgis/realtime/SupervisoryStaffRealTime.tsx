@@ -1,10 +1,8 @@
-import { Button, Row, Col, List } from 'antd';
-import { FilterOutlined } from '@ant-design/icons';
+import { Row, Col, List } from 'antd';
 import "./SupervisoryStaffRealTime.css";
 import {TableCustom,RealtimeMap,WrapperCard, WrapperCardTable, WrapperCardMap} from "@/components";
 import { useEffect, useState } from 'react';
-import { AxiosService } from '../../../services/server';
-import { use } from 'i18next';
+import { AxiosService } from '@/services/server';
 
 export default function SupervisoryStaffRealTime() {
 

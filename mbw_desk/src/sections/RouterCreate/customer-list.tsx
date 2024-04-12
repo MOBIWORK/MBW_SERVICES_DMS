@@ -33,6 +33,13 @@ export default function CustomerList({data,handleData}:Props) {
                 placeholder="Chọn tần suất"
                 onChange={(frequency: string[]) => {                    
                     handleData(prev => {
+                        console.log({prev},prev.map(customer => {
+                            if(customer.customer_code == record.customer_code) {
+                                customer['frequency'] = frequency.toString().replaceAll(",",";")
+                            }
+                            return customer
+                        }));
+                        
                         return prev.map(customer => {
                             if(customer.customer_code == record.customer_code) {
                                 customer['frequency'] = frequency.toString().replaceAll(",",";")
@@ -41,7 +48,7 @@ export default function CustomerList({data,handleData}:Props) {
                         })
                     })
                 }}
-                defaultValue={value ? value.split(';') : []}
+                defaultValue={value ? value.split(';') : ['1','2',"3","4"]}
                 />
             }
         },{

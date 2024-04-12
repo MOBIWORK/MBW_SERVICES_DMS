@@ -25,15 +25,17 @@ export default function RouterCreate() {
     });
   };
 
-  const error = (mes) => {
+  const error = (mes?:string) => {
     messageApi.open({
       type: 'error',
       content: mes || 'Something was wrong',
     });
   };
   const handleCreateRouter = useCallback(async(value:any) => {
+    console.log({customerRouter});
+    
     value = {...value,customers: customerRouter.map((customer)=> {
-      let key_push = ["customer_id","customer_code","customer_name","display_address","phone_number","customer","frequency","latitude","longitude"]
+      let key_push = ["customer_id","customer_code","customer_name","display_address","phone_number","customer","frequency","lat","long"]
 
       for (let key in customer) {
         if(!key_push.includes(key)) {
@@ -42,15 +44,15 @@ export default function RouterCreate() {
       }
       return customer
     })}
+    console.log({value});
+    
     try {
       await AxiosService.post("/api/method/mbw_dms.api.router.create_router",value)
       success()
       navigate('/router-control')
     } catch (err) {
-      error(err)
-      console.log("error create",err);
-
-      
+      error(err as string)
+      console.log("error create",err);     
     }
   },[customerRouter])
 
@@ -67,9 +69,11 @@ export default function RouterCreate() {
     try {
       await AxiosService.patch("/api/method/mbw_dms.api.router.update_router",{name:type,...value})
       success()
-      navigate('/router-control')
+      setTimeout(() => {
+        navigate('/router-control')
+      },500)
     } catch (err) {
-      error(err || "Something was wrong")
+      error(err as string)
       console.log("error create",err);
 
       
@@ -100,7 +104,7 @@ export default function RouterCreate() {
     <>
     {contextHolder}
       <HeaderPage
-        title="Thêm tuyến"
+        title={type == 'create-dms-router' ? "Thêm tuyến" : detailRouter?.channel_name}
         buttons={[
           detailRouter ?
           {

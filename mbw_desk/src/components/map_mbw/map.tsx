@@ -1,19 +1,16 @@
 import React, { useState, useRef, useEffect, ReactNode } from "react";
 import ReactMapGL, {
-  NavigationControl,
-  FullscreenControl,
   Source,
   Layer,
-  GeolocateControl,
+  MapboxMap,
   Marker
 } from "react-map-gl";
 import maplibregl from "maplibre-gl";
-import { GeocodingControl } from "@maptiler/geocoding-control/react";
-import { createMapLibreGlMapController } from "@maptiler/geocoding-control/maplibregl-controller";
 import "@maptiler/geocoding-control/style.css";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { MartLocation } from "..";
 import { locationType } from "../../types/location";
+import mapboxgl from "mapbox-gl";
 
 interface Location {
   geometry: {
@@ -27,9 +24,40 @@ interface Location {
 
 
 export function Mapcustom(
-  {locations}: {locations: locationType[]}
+  {locations,focusLocation}: {locations: locationType[],focusLocation?:locationType}
 ) {
+  const mapRef = useRef<MapboxMap | null>(null)
   const [isFullscreen, setIsFullscreen] = useState(false);
+
+  useEffect(() => {
+    if (mapRef.current && locations.length > 0) {
+      console.log("map",mapRef.current);
+      
+      const bounds = locations.reduce(
+        (bounds, point) => bounds.extend([point.long, point.lat]),
+        new mapboxgl.LngLatBounds()
+      );
+
+      if (!bounds.isEmpty()) {
+        console.log("not empty");
+        
+        const [minLng, minLat] = bounds.getSouthWest().toArray();
+        const [maxLng, maxLat] = bounds.getNorthEast().toArray();
+        mapRef.current.setZoom(4)
+        mapRef.current.fitBounds([[minLng, minLat], [maxLng, maxLat]], { padding: 100, maxZoom: 14, duration: 1500 });
+      }
+      if(focusLocation){
+        mapRef.current.easeTo({
+          center: [focusLocation.long,focusLocation.lat],
+          zoom: 14
+        })
+      }
+
+
+    }
+
+
+  }, [locations,focusLocation]);
   return (
     <div
       className={
@@ -39,13 +67,15 @@ export function Mapcustom(
       }
     >
       <ReactMapGL
+        ref={mapRef}
         mapLib={maplibregl}
         style={{ width: "100%", height: " 100%", position: "relative" }}
         mapStyle={`https://api.ekgis.vn/v2/mapstyles/style/osmplus/standard/style.json?api_key=wtpM0U1ZmE2s87LEZNSHf63Osc1a2sboaozCQNsy`}
+        // {...focusLocation && {center: [focusLocation.long,focusLocation.lat]}}
       >
 
         {/* Các điểm mốc */}
-        {locations.map(point => (
+        {locations.map((point,index) => (
           <Marker
             key={point.customer_name}
             latitude={point.lat}
@@ -54,7 +84,7 @@ export function Mapcustom(
             offsetTop={-10}
           >
 
-            <MartLocation des={point?.customer_name} />
+            <MartLocation des={`${index+1}.${point?.customer_name}`} />
           </Marker>
         ))}
         {/* ve duong di giua cac diem */}

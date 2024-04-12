@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { memo, useCallback, useEffect, useState } from "react";
 import RowCustom from "./styled";
 import { Button, Col, Input, Modal, Radio, Row, Select, message, Space  } from "antd";
 import { FormItemCustom } from "../../components/form-item";
@@ -21,7 +21,7 @@ type Props = {
   handleCustomer: any
 }
 
-export default function Customer({listCustomer,handleCustomer}:Props) {
+export default memo(function Customer({listCustomer,handleCustomer}:Props) {
   const [messageApi, contextHolder] = message.useMessage();
   const [viewMode,setViewMode] = useState('list')
   const [openChoose,setOpenChoose] = useState<boolean>(false)
@@ -201,4 +201,4 @@ export default function Customer({listCustomer,handleCustomer}:Props) {
       </Modal>
     </>
   );
-}
+})

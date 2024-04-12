@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { memo, useEffect, useState } from "react";
 import { FormItemCustom } from "../../components/form-item/form-item";
 import { Col, DatePicker, Input, Select, TreeSelect } from "antd";
 import RowCustom from "./styled";
@@ -32,7 +32,7 @@ const fetch = (value: string, callback: Function) => {
     callback("");
   }
 };
-export default function GeneralInformation({form}:{form :any}) {
+export default memo(function GeneralInformation({form}:{form :any}) {
   console.log(form);
   
   // const { getFieldDecorator, setFieldsValue } = form;
@@ -138,4 +138,4 @@ export default function GeneralInformation({form}:{form :any}) {
       </RowCustom>
     </div>
   );
-}
+})

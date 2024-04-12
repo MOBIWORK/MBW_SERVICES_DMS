@@ -38,8 +38,6 @@ export const getAttrInArray = (array:any[], fields: any[], options = {}) => {
                 obj[key] = data[key]
             }            
         }
-        console.log("obj",obj);
-        
         if(options.isNull) {
             newArray.push(obj)
         }else{
