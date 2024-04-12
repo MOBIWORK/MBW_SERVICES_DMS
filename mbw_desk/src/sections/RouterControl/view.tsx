@@ -37,8 +37,9 @@ const columns = [
   },
   {
     title: "NVBH",
-    dataIndex: "employee",
-    key: "employee"
+    dataIndex: "employee_name",
+    key: "employee_name",
+    render: (value,record) => `${record?.employee}-${record?.employee_name}`
   },
   {
     title: "Trạng thái",
@@ -55,8 +56,8 @@ const columns = [
   },
   {
     title: "Người tạo",
-    dataIndex: "modified_by",
-    key: "modified_by"
+    dataIndex: "owner",
+    key: "owner"
   },
   {
     title: "Ngày cập nhật",
@@ -68,7 +69,11 @@ const columns = [
     title: "Người cập nhật",
     dataIndex: "modified_by",
     key: "modified_by"
-  },
+  },{
+  title: "Khách hàng",
+  dataIndex: "count_customer",
+  key: "count_customer"
+},
 ];
 
 
@@ -425,25 +430,13 @@ export default function RouterControl() {
                 <div className="w-full overflow-x-scroll ">
                   <TableCustom
                     rowSelection={rowSelection}
-                    columns={columns.map(column => {
-                      if(!["creation","modified","status"].includes(column.key)){
-                        return ({ ...column, render: (text:any, record:any, index:number) => <Link key={record?.name} className="!text-slate-900" to={`/dms-router/${record?.name}`}>{text}</Link> })
-
-                      }
-                      else if(["creation","modified"].includes(column.key)) {
-                        return ({ ...column, 
-                          render: (text:any, record:any, index:number) => <Link key={record?.name} className="!text-slate-900" to={`/dms-router/${record?.name}`}>
-                            {dayjs(text * 1000).format("DD/MM/YYYY")}
-                            </Link> })
-                      }
-                      else{
-                        return ({ ...column, 
-                          render: (text:any, record:any, index:number) => <Link key={record?.name} className="!text-slate-900" to={`/dms-router/${record?.name}`}>
-                            {text == "Active" ? <TagCustomStatus > Hoạt động</TagCustomStatus > : <TagCustomStatus type="Warning" > Khóa</TagCustomStatus >}
-                            </Link> })
-                          
-                    }
-                  })}
+                    onRow={(record, rowIndex) => {
+                      return {onClick:(event) => {
+                        console.log(record);
+                        navigate(`/dms-router/${record?.name}`)
+                      }}
+                    }}
+                    columns={columns}
                     dataSource={routersTable?.map(router => ({ key: router.name, ...router }))}
                     pagination={{
                       defaultPageSize: PAGE_SIZE,

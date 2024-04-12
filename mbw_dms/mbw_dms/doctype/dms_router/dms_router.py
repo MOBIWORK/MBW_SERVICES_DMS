@@ -58,13 +58,16 @@ def get_list_router(filters):
         if employee:
             queryFilters['employee'] = employee
         order_string = 'modified desc'
-        if order_by and sort:
+        if order_by and sort: 
             order_string = f"{order_by} {sort}"
-        print("queryFilters",queryFilters)
-        list_router = frappe.db.get_list('DMS Router',filters=queryFilters,fields=['*', 'UNIX_TIMESTAMP(travel_date) as travel_date','UNIX_TIMESTAMP(creation) as creation','UNIX_TIMESTAMP(modified) as modified'], 
+        list_router = frappe.db.get_list('DMS Router',filters=queryFilters,fields=['*', 'UNIX_TIMESTAMP(travel_date) as travel_date','UNIX_TIMESTAMP(creation) as creation','UNIX_TIMESTAMP(modified) as modified', "count(customers) as count_customers"], 
                                        order_by=order_string, 
                                        start=page_size*(page_number-1), page_length=page_size)
-        
+        for router in list_router:
+            if router['employee']:
+                router["employee_name"] = frappe.db.get_value("Employee",{"name": router['employee']},["employee_name"])
+            list_customers = frappe.get_doc('DMS Router',router["name"]).customers
+            router["count_customer"] =  len(list_customers)
         total = len(frappe.db.get_list('DMS Router',filters=queryFilters))
         return gen_response(200,'',{
             "data": list_router,
