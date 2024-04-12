@@ -227,7 +227,9 @@
     background-color: #0000004d;
     z-index: 9999;
 }
-
+.maplibregl-popup-content{
+    padding: 10px;
+} 
 .ek-tracking-his-popup {
     padding: 10px;
 }
@@ -239,6 +241,23 @@
     margin-bottom: 3px;
     justify-content: flex-start;
     align-items: flex-start;
+}
+
+.ek-tracking-his-popup-info .show-his{
+    display: inline-block;
+    padding: 4px 10px;
+    /* border: 1px solid; */
+    border-radius: 6px;
+    color: #1677ff;
+    border-color: #1677ff;
+    background-color: #fff;
+    cursor: pointer; 
+    text-decoration: underline;
+}
+
+.ek-tracking-his-popup-info .show-his:hover {
+    color: #69b1ff;
+    border-color: #69b1ff;
 }
 
 .ek-tracking-his-popup-icon {
@@ -481,18 +500,18 @@
     justify-content: center;
 }
 .marker-employee .marker-img {
-    background-image: url('https://files.ekgis.vn/sdks/tracking/assets/check-icon.png');
+    background-image: url(https://files.ekgis.vn/sdks/tracking/assets/check-icon.png);
     background-size: contain;
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
+    background-repeat: no-repeat;
+    width: 27px;
+    height: 27px;
 }
 .marker-employee .marker-name{
     background-color: #212B36;
     color: #fff;
-    padding: 3px 5px;
-    border-radius: 7px;
+    padding: 0px 6px;
+    border-radius: 6px;
     font-size: 12px;
-    margin-bottom: 3px;
+    margin-bottom: 2px;
 }
 /**/

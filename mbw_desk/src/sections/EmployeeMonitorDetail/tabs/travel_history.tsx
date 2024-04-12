@@ -4,6 +4,7 @@ import dayjs from 'dayjs'
 import { TodayLimit, tmpToTimeZone } from '../../../util'
 import { SupervisoryStaff } from '@/components'
 import { AxiosService } from '../../../services/server'
+import axios from "axios";
 import { message } from 'antd'
 // Thiết lập ngôn ngữ cho dayjs
 // import 'dayjs/locale/vi';
@@ -28,22 +29,36 @@ export default function TravelHistory({ employee }: { employee?: string }) {
       to_time: string | null,
     }>({
       apiKey: import.meta.env.VITE_API_KEY,
-      projectId: "65f08a14973f307f60fdd6f0",
-      objectId: "65ee9990973f307f60fdd6ef",
+      projectId: "6556e471178a1db24ac1a711",
+      objectId: "654c8a12d65d3e52f2d286de",
       from_time: from_time,
       to_time: to_time,
     })
+  
+  const initDataSummary = async () => {
+    let urlSummary = `https://api.ekgis.vn/v2/tracking/locationHistory/summary/${options.projectId}/${options.objectId}?from_time=${from_time}&to_time=${to_time}&api_key=${options.apiKey}`;
+    let resSummary = await axios.get(urlSummary);
+    if(resSummary.statusText == "OK"){
+      setOptions(prev => ({
+        ...prev, 
+        summary: resSummary.data["summary"],
+        details: resSummary.data["details"],
+      }));
+    }
+  }
 
   useEffect(() => {
     (async () => {
       try {
-        const rs = await AxiosService.get(`/api/method/mbw_dms.api.user.get_project_object_id?employee_id=${employee}`,)
-        setOptions(prev => ({
-          ...prev, 
-          projectId: rs.result["Project ID"],
-          objectId: rs.result["Object ID"],
-        }))
-
+        initDataSummary();
+        // const rs = await AxiosService.get(`/api/method/mbw_dms.api.user.get_project_object_id?name=${employee}`,)
+        // setOptions(prev => ({
+        //   ...prev, 
+        //   projectId: rs.result["Project ID"],
+        //   objectId: rs.result["Object ID"],
+        // }))
+        // console.log(rs);
+        // console.log(options);
       }catch(error){
         message.error(error?.message || "Something was wrong!!!")
       }
@@ -51,12 +66,7 @@ export default function TravelHistory({ employee }: { employee?: string }) {
   }, [employee])
 
   useEffect(() => {
-
-    setOptions(prev => ({
-      ...prev,
-      from_time,
-      to_time
-    }))
+    initDataSummary();
   },[from_time,to_time])
 
   return (
