@@ -63,9 +63,9 @@ export default function TravelHistory({ employee }: { employee?: string }) {
         setOptions(prev => ({
           ...prev, 
           projectId: rs.result["Project ID"],
-          objectId: rs.result["Object ID"],
+          objectId: employee,
         }))
-        initDataSummary(rs.result["Project ID"], rs.result["Object ID"]);
+        initDataSummary(rs.result["Project ID"], employee);
       }catch(error){
         message.error(error?.message || "Something was wrong!!!")
       }
@@ -89,7 +89,7 @@ export default function TravelHistory({ employee }: { employee?: string }) {
         </div>
       }/>
       <div className='border border-solid border-[#F5F5F5] rounded-lg'>
-        <div id="travel" className='h-[70vh] relative'>
+        <div id="travel" className='relative'>
           {/* <MapEkgisHistory from_time={from_time} to_time={to_time} objectId='654c8a12d65d3e52f2d286de' projectId= '6556e471178a1db24ac1a711'/> */}
           {options.projectId && options.objectId && <SupervisoryStaff options={options} loading={loading}/> }
           

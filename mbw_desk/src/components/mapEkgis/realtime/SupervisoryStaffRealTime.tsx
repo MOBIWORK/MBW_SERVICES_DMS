@@ -23,6 +23,7 @@ export default function SupervisoryStaffRealTime() {
       doanh_so: 0,
     });
     const [dataTopDistanceEmployee, setDataTopDistanceEmployee] = useState<any[]>([]);
+    const [dataEmployee, setDataEmployee] = useState<any[]>([]);
     const [dataCheckingEmployee, setDataCheckingEmployee] = useState<any[]>([]);
 
     useEffect(()=>{
@@ -147,6 +148,27 @@ export default function SupervisoryStaffRealTime() {
     }
     setDataTopDistanceEmployee(dataMoveTopEmployee);
   }
+  const renderDataEmployee = async () => {
+    let dateNow = new Date();
+    let timeStamp = dateNow.getTime()/1000;
+    let res = await AxiosService(`/api/method/mbw_dms.api.user.get_list_top_employee?from_date=${timeStamp}&to_date=${timeStamp}`);
+    let arrEmployee = [];
+    if(res.message == "Thành công"){
+      for(let i = 0; i < res.result.length; i++){
+        let item = res.result[i];
+        arrEmployee.push({
+          's1tt': i+1,
+          'pic_profile': item.employee_avatar != null && item.employee_avatar != ""? item.employee_avatar : "/public/user_default.png",
+          'emp_name': item.employee_name,
+          'emp_id': "1234-4455",
+          'visiting': "10/10",
+          'boxing': 2
+        })
+      }
+    }
+    
+    console.log(res);
+  }
   const renderDataCheckingEmployee = (arrSummary) => {
     let dataCheckingEmployee = [];
     for(let i = 0; i < arrSummary.length; i++){
@@ -179,6 +201,7 @@ export default function SupervisoryStaffRealTime() {
         renderDataMoveTopEmployee(arrSummary);
         renderDataCheckingEmployee(arrSummary);
       }
+      renderDataEmployee();
     })()
   },[])
 

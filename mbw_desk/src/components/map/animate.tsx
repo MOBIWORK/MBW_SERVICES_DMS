@@ -3,7 +3,7 @@ import { Button, Flex, Select, Checkbox } from "antd";
 import { PauseOutlined, CaretRightOutlined, RetweetOutlined, XFilled } from '@ant-design/icons';
 import * as turf from "@turf/turf";
 
-const Animate_And_Controls = ({ map, segmentData, options }) => {
+const Animate_And_Controls = ({ map, segmentData, options, animID, timeoutID }) => {
     // console.log(map);
     // console.log(segmentData);
 
@@ -80,8 +80,8 @@ const Animate_And_Controls = ({ map, segmentData, options }) => {
         //     console.log('gpxData', gpxData);
         //     console.log('segmentData', segmentData);
         //     console.log('summaryData', summaryData);
-        drawPath();
-        addCar();
+        // drawPath();
+        // addCar();
     }
 
 
@@ -305,74 +305,163 @@ const Animate_And_Controls = ({ map, segmentData, options }) => {
     //     return result;
     // }
 
-    function drawPath() {
-        var fcLocationHistory = {
-            "type": "FeatureCollection",
-            "features": []
-        };
+    // function drawPath() {
+    //     var fcLocationHistory = {
+    //         "type": "FeatureCollection",
+    //         "features": []
+    //     };
 
-        if (!map.getSource('LocationHistory')) {
-            map.addSource('LocationHistory', {
-                'type': 'geojson',
-                'data': fcLocationHistory
-            });
-            map.addLayer({
-                'id': 'LocationHistory',
-                'type': 'line',
-                'source': 'LocationHistory',
-                'layout': {
-                    'line-cap': 'round',
-                    'line-join': 'round'
-                },
-                'paint': {
-                    'line-color': options.route.lineCorlor,
-                    'line-width': options.route.lineWidth,
-                    'line-opacity': options.route.lineOpacity
-                },
-            });
-        } else
-        map.getSource('LocationHistory').setData(fcLocationHistory);
-    }
-    async function addCar() {
-        if (!map.getImage('marker-navigation')) {
-            const iconNavigation = await map.loadImage(options.icon.navigation);
-            map.addImage('marker-navigation', iconNavigation.data)
+    //     console.log(map);
+    //     if (map.getSource('LocationHistory')) {
+    //         map.getSource('LocationHistory').setData(fcLocationHistory);
+    //     } else {
+    //         map.addSource('LocationHistory', {
+    //             'type': 'geojson',
+    //             'data': fcLocationHistory
+    //         });
+    //         map.addLayer({
+    //             'id': 'LocationHistory',
+    //             'type': 'line',
+    //             'source': 'LocationHistory',
+    //             'layout': {
+    //                 'line-cap': 'round',
+    //                 'line-join': 'round'
+    //             },
+    //             'paint': {
+    //                 'line-color': options.route.lineCorlor,
+    //                 'line-width': options.route.lineWidth,
+    //                 'line-opacity': options.route.lineOpacity
+    //             },
+    //         });
+    //     }
+
+
+
+    // }
+    // async function addCar() {
+    //     if (!map.getImage('marker-navigation')) {
+    //         const iconNavigation = await map.loadImage(options.icon.navigation);
+    //         map.addImage('marker-navigation', iconNavigation.data)
+    //     }
+
+    //     var locationMarker = {
+    //         "type": "FeatureCollection",
+    //         "features": []
+    //     };
+
+    //     console.log(map.getSource('locationMarker'));
+    //     if (!map.getSource('locationMarker')) {
+    //         map.addSource('locationMarker', {
+    //             'type': 'geojson',
+    //             'data': locationMarker
+    //         });
+
+    //         map.addLayer({
+    //             'id': 'locationMarker',
+    //             'source': 'locationMarker',
+    //             'type': 'symbol',
+    //             'layout': {
+    //                 "icon-size": 0.7,
+    //                 "icon-offset": [0, -10],
+    //                 "icon-allow-overlap": true,
+    //                 "icon-image": 'marker-navigation',
+    //                 "icon-rotate": ["get", "bearing"],
+    //                 "icon-rotation-alignment": "map",
+    //                 'icon-overlap': 'always',
+    //                 'icon-ignore-placement': true,
+    //             }
+    //         });
+    //     } else
+    //         map.getSource('locationMarker').setData(locationMarker);
+    // }
+
+    // loadData();
+
+    function animate(i, speedData) {
+        if (!map) {
+            StopAnimation();
+            return;
         }
+        currentIndex = i;
+        if (i == 0) {
+            alongPath = [];
+            // drawPath();
+            // addCar();
+            if (map.getSource('LocationHistory')) {
+                map.getSource('LocationHistory').setData({
+                    'type': 'FeatureCollection',
+                    'features': []
+                })
+            }
+        }
+        const e = speedData[i];
+        // console.log(i);
+        if (!e) {
+            currentIndex = i - 1;
+            return;
+        }
+        if (e.computed.time) {
+            let timeoutFrame = (e.computed.time * 1000) / animationSpeed;
+            if (e.computed.speed) {
+                var start;
+                var firstPoint;
+                function frame(time) {
+                    if (!start) {
+                        firstPoint = e.loc1.loc;
+                        start = time;
+                    }
+                    const animationPhase = (time - start) / ((Number(e.computed.time?.toString()) * 1000) / animationSpeed);
+                    if (animationPhase > 1 || !isAnimation) {
+                        return;
+                    }
 
-        var locationMarker = {
-            "type": "FeatureCollection",
-            "features": []
-        };
+                    var path = turf.lineString([e.loc1.loc, e.loc2.loc]);
+                    var pathDistance = turf.lineDistance(path);
+                    var alongPathFrame = turf.along(path, pathDistance * animationPhase)
+                        .geometry.coordinates;
+                    var bearing = turf.bearing(
+                        turf.point(firstPoint),
+                        turf.point(alongPathFrame)
+                    );
 
-        if (!map.getSource('locationMarker')) {
-            map.addSource('locationMarker', {
-                'type': 'geojson',
-                'data': locationMarker
-            });
+                    if (firstPoint[0] !== alongPathFrame[0] && firstPoint[1] !== alongPathFrame[1]) {
+                        lastBearing = bearing;
+                    }
+                    firstPoint = alongPathFrame;
 
-            map.addLayer({
-                'id': 'locationMarker',
-                'source': 'locationMarker',
-                'type': 'symbol',
-                'layout': {
-                    "icon-size": 0.7,
-                    "icon-offset": [0, -10],
-                    "icon-allow-overlap": true,
-                    "icon-image": 'marker-navigation',
-                    "icon-rotate": ["get", "bearing"],
-                    "icon-rotation-alignment": "map",
-                    'icon-overlap': 'always',
-                    'icon-ignore-placement': true,
+                    if (isFollow) {
+                        map.panTo(alongPathFrame, { animate: true, essential: true, curve: 1.42, duration: 100, pitch: 60, bearing: lastBearing })
+                    }
+                    if (map.getSource('locationMarker')) {
+                        map.getSource("locationMarker").setData({
+                            type: "FeatureCollection",
+                            features: [turf.point(alongPathFrame, { bearing: lastBearing })]
+                        })
+                    }
+                    alongPath = alongPath.concat([alongPathFrame]);
+
+                    if (alongPath.length > 1)
+                        if (map.getSource('LocationHistory')) {
+                            map.getSource("LocationHistory").setData({
+                                type: "FeatureCollection",
+                                features: [turf.lineString(alongPath)]
+                            })
+                        }
+                    animationID.current = requestAnimationFrame(frame);
                 }
-            });
-        } else
-        map.getSource('locationMarker').setData(locationMarker);
+                animationID.current = requestAnimationFrame(frame);
+                animID(animationID.current);
+            }
+            i++;
+            if (isReplay && i == speedData.length) i = 0;
+            timeout.current = setTimeout(animate.bind(this), timeoutFrame, i, speedData);
+            timeoutID(timeout.current);
+        }
     }
-
-    loadData();
 
     useEffect(() => {
         if (isAnimation) {
+            // loadData();
             // if (segmentData[0].computed.time)
             //     timeout.current = setTimeout(animate.bind(this), (segmentData[0].computed.time * 1000) / animationSpeed, currentIndex, segmentData);
             animate(currentIndex, segmentData)
@@ -392,78 +481,10 @@ const Animate_And_Controls = ({ map, segmentData, options }) => {
             map.setLayoutProperty(`LocationHistory`, 'visibility', 'none');
         };
 
-        function animate(i, speedData) {
-            currentIndex = i;
-            if (i == 0) {
-                alongPath = [];
-                map.getSource('LocationHistory').setData({
-                    'type': 'FeatureCollection',
-                    'features': []
-                })
-            }
-            const e = speedData[i];
-            // console.log(i);
-            if (!e) {
-                currentIndex = i - 1;
-                return;
-            }
-            if (e.computed.time) {
-                let timeoutFrame = (e.computed.time * 1000) / animationSpeed;
-                if (e.computed.speed) {
-                    var start;
-                    var firstPoint;
-                    function frame(time) {
-                        if (!start) {
-                            firstPoint = e.loc1.loc;
-                            start = time;
-                        }
-                        const animationPhase = (time - start) / ((Number(e.computed.time?.toString()) * 1000) / animationSpeed);
-                        if (animationPhase > 1 || !isAnimation) {
-                            return;
-                        }
-
-                        var path = turf.lineString([e.loc1.loc, e.loc2.loc]);
-                        var pathDistance = turf.lineDistance(path);
-                        var alongPathFrame = turf.along(path, pathDistance * animationPhase)
-                            .geometry.coordinates;
-                        var bearing = turf.bearing(
-                            turf.point(firstPoint),
-                            turf.point(alongPathFrame)
-                        );
-
-                        if (firstPoint[0] !== alongPathFrame[0] && firstPoint[1] !== alongPathFrame[1]) {
-                            lastBearing = bearing;
-                        }
-                        firstPoint = alongPathFrame;
-
-                        if (isFollow) {
-                            map.panTo(alongPathFrame, { animate: true, essential: true, curve: 1.42, duration: 100, pitch: 60, bearing: lastBearing })
-                        }
-
-                        map.getSource("locationMarker").setData({
-                            type: "FeatureCollection",
-                            features: [turf.point(alongPathFrame, { bearing: lastBearing })]
-                        })
-                        alongPath = alongPath.concat([alongPathFrame]);
-
-                        if (alongPath.length > 1)
-                            map.getSource("LocationHistory").setData({
-                                type: "FeatureCollection",
-                                features: [turf.lineString(alongPath)]
-                            })
-                        animationID.current = requestAnimationFrame(frame);
-                    }
-                    animationID.current = requestAnimationFrame(frame);
-                }
-                i++;
-                if (isReplay && i == speedData.length) i = 0;
-                timeout.current = setTimeout(animate.bind(this), timeoutFrame, i, speedData);
-            }
-        }
 
         return () => {
-            cancelAnimationFrame(animationID.current);
-            clearTimeout(timeout.current);
+            if (animationID.current) cancelAnimationFrame(animationID.current);
+            if (timeout.current) clearTimeout(timeout.current);
         };
     }, [map, segmentData, options, isFollow, isAnimation, animationSpeed]);
 
