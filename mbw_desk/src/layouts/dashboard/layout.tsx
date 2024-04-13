@@ -18,7 +18,7 @@ const SiderCustome = styled(Sider)`
 export default function DashboardLayout({ children }: Props) {
   const [collapsed, setCollapsed] = useState(false);
   return (
-    <Layout>
+    <Layout style={{  overflow: "hidden ",height: `calc(100vh - 60px)`}}>
         <SiderCustome style={{ background: "#fff" }} width={!collapsed ? 250 : 78} collapsible collapsed={collapsed} >            
             <MenuLeft handleCollapsed = {setCollapsed} collapsed={collapsed}/>
           </SiderCustome>
