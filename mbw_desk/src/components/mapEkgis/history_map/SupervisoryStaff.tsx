@@ -31,17 +31,17 @@ export default function SupervisoryStaff({options, loading}) {
         }else if(item.type == "checkin"){
           arrTimeLineHistory.push({
             'dot': <ItemCheckInTimeLineDot></ItemCheckInTimeLineDot>,
-            'children': <ItemCheckInTimeLineContent data={{ 'time_checking': `${formatTimeUTC(item.startTime)} - ${formatTimeUTC(item.endTime)}`, 'retail_name': item.storeName, 'address': item.address }}></ItemCheckInTimeLineContent>
+            'children': <ItemCheckInTimeLineContent data={{ 'time_checking': `${formatTimeUTC(item.startTime)} - ${formatTimeUTC(item.endTime)}`, 'retail_name': item.storeName, 'address': item.address, 'total_time':`${formatTotalTime(item.startTime, item.endTime)}` }}></ItemCheckInTimeLineContent>
           });
         }else if(item.type == "move"){
           arrTimeLineHistory.push({
             dot: <ItemMovingTimeLineDot></ItemMovingTimeLineDot>,
-            children: <ItemMovingTimeLineContent data={{ 'time_moving': `${formatTimeUTC(item.startTime)} - ${formatTimeUTC(item.endTime)}`, 'total_distance': `${formatDistance(item.distance)}` }}></ItemMovingTimeLineContent>
+            children: <ItemMovingTimeLineContent data={{ 'time_moving': `${formatTimeUTC(item.startTime)} - ${formatTimeUTC(item.endTime)}`, 'total_distance': `${formatDistance(item.distance)}`, 'total_time':`${formatTotalTime(item.startTime, item.endTime)}` }}></ItemMovingTimeLineContent>
           });
         }else if(item.type == "stop"){
           arrTimeLineHistory.push({
             'dot': <ItemStopTimeLineDot></ItemStopTimeLineDot>,
-            'children': <ItemStopTimeLineContent data={{ 'time_stop': `${formatTimeUTC(item.startTime)} - ${formatTimeUTC(item.endTime)}`, 'address': item.address }}></ItemStopTimeLineContent>
+            'children': <ItemStopTimeLineContent data={{ 'time_stop': `${formatTimeUTC(item.startTime)} - ${formatTimeUTC(item.endTime)}`, 'address': item.address, 'total_time':`${formatTotalTime(item.startTime, item.endTime)}` }}></ItemStopTimeLineContent>
           });
         }else if(item.type == "end"){
           arrTimeLineHistory.push({
@@ -53,6 +53,19 @@ export default function SupervisoryStaff({options, loading}) {
     }
     setTimeLineHistory(arrTimeLineHistory);
   }, [options])
+  const formatTotalTime = (startTimeStr: string, endTimeStr: string) => {
+    const startTime = new Date(startTimeStr);
+    const endTime = new Date(endTimeStr);
+    const timeDiffMilliseconds = endTime - startTime;
+    console.log(timeDiffMilliseconds);
+    if(timeDiffMilliseconds < 60000) return `${Math.round(timeDiffMilliseconds/1000)} giây`;
+    else if(timeDiffMilliseconds >= 60000 && timeDiffMilliseconds < 60000*60) return `${Math.round(timeDiffMilliseconds/(60000))} phút`;
+    else{
+      const hoursDiff = Math.floor(timeDiffMilliseconds / (1000 * 60 * 60));
+      const minutesDiff = Math.floor((timeDiffMilliseconds % (1000 * 60 * 60)) / (1000 * 60));
+      return `${hoursDiff} giờ ${minutesDiff} phút`;
+    }
+  }
 
   const formatDistance = (distance: number)=> {
     if(distance < 1000) return `${Math.round(distance)} m`;
@@ -123,7 +136,7 @@ export default function SupervisoryStaff({options, loading}) {
             <div className="wrap-card-container">
               <div className="flex items-center">
                 <div className="flex items-center justify-center" style={{ width: '64px', height: '64px', backgroundColor: '#FFAB001F', gap: '8px', borderRadius: '15px' }}>
-                  <div style={{ width: '44px', height: '44px', backgroundSize: 'Cover' }} className="icon_speeding"></div>
+                  <div style={{ width: '44px', height: '30px', backgroundSize: 'contain' }} className="icon_speeding"></div>
                 </div>
                 <div style={{ marginLeft: '10px' }}>
                   <div style={{ opacity: '70%', color: '#212B36', fontSize: '14px', fontWeight: 500 }}>Tốc độ trung bình</div>
