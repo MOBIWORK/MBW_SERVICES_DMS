@@ -1,5 +1,7 @@
 import frappe
 from datetime import datetime
+from mbw_dms.api.ekgis.constant import API_URL_TRACKING
+import requests
 
 def create_employee_and_sales_team(doc, method):
     # Tạo một bản ghi Employee mới
@@ -14,10 +16,24 @@ def create_employee_and_sales_team(doc, method):
     employee.status = "Active"
     employee.insert()
 
-    # Tạo một Sales Person mới
-    # sales_person = frappe.new_doc("Sales Person")
-    # sales_person.sales_person_name = employee.employee_name
-    # sales_person.employee = employee.name
-    # sales_person.is_group = 0
-    # sales_person.insert()
-        
+# Tạo mới ObjectID
+def create_objid_employee(doc, method):
+    projectId = frappe.get_doc('DMS Settings').ma_du_an
+    if projectId is None:
+        frappe.throw("Chưa có Project ID")
+        return
+    api_key = frappe.get_doc('DMS Settings').api_key
+    api_url = f'{API_URL_TRACKING}/{projectId}/object'
+    params = {"api_key": api_key}
+    data_post = {
+        'name': frappe.session.user,
+        'type': 'driver'
+    }
+    response = requests.post(api_url, params=params, json=data_post)
+    if response.status_code == 200:
+        new_info = response.json()
+        doc.object_id = new_info['results'].get('_id')
+        doc.save()
+    else:
+        frappe.msgprint(f"Lỗi khi gọi API tạo mới object ID: {response.status_code}")
+        return
