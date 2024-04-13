@@ -8,7 +8,7 @@ import MapLegend from './maplegend_realtime';
 
 const ekmapplf = window.ekmapplf;
 
-function RealtimeMap({ options, onClickPopup }) {
+function RealtimeMap({ options, onClickPopup , status}) {
     const mapContainer = useRef(null);
     const map = useRef(null);
     const intervalIdRef = useRef(null);
@@ -17,12 +17,8 @@ function RealtimeMap({ options, onClickPopup }) {
         center: [105, 17],
         zoom: 4.5,
         reloadTime: 60000,
-        iconTrack: '/public/assets/custom_marker.png',
-        iconNavigation: '/public/assets/arrow.png',
-        iconCheckin: '/public/assets/check-icon.png',
-        iconStart: '/public/assets/start-icon.png',
-        iconEnd: '/public/assets/end-icon.png',
-        iconStop: '/public/assets/stop-icon.png',
+        iconOnline: 'https://files.ekgis.vn/sdks/tracking/assets/check-icon.png',
+        iconOffline: 'https://files.ekgis.vn/sdks/tracking/assets/offline-marker.png',
     };
     const _options = extend({}, defaultOptions, options);
     if (_options.apiKey == "" || !_options.apiKey) throw new Error("Parameter apiKey not valid");
@@ -167,7 +163,8 @@ function RealtimeMap({ options, onClickPopup }) {
                     try {
                         let fc = await setMap();
                         let bounds = bbox(fc);
-                        _map.fitBounds(bounds, { padding: 100, maxZoom: 14, duration: 1500 });
+                        // console.log(bounds);
+                        if (bounds) _map.fitBounds(bounds, { padding: 100, maxZoom: 14, duration: 1000 });
 
                         if (intervalIdRef.current) clearInterval(intervalIdRef.current);
                         intervalIdRef.current = setInterval(() => {
@@ -203,31 +200,59 @@ function RealtimeMap({ options, onClickPopup }) {
                             const DataTracking = await responseTracking.json();
                             const DataCheckin = await responseCheckin.json();
                             if (!DataTracking.position && !DataCheckin.length) {
-                                return {
-                                    '_id': DataTracking.summary._id,
-                                    'name': DataTracking.summary.name,
-                                };
+                                return null;
                             }
                             const TrackTimestamp = DataTracking.position ? Date.parse(DataTracking.position.timestamp) : 0;
                             const CheckinTimestamp = DataCheckin.length ? Date.parse(DataCheckin[0].timestamp) : 0;
                             const isTracking = TrackTimestamp > CheckinTimestamp;
-                            const coords = isTracking ? [DataTracking.position.coords.longitude, DataTracking.position.coords.latitude] : DataCheckin[0].coordinates.split(',').map(coord => parseFloat(coord));
-                            const address = await reverseGeocode(coords);
-                            return {
-                                '_id': DataTracking.summary._id,
-                                'name': DataTracking.summary.name,
-                                'type': isTracking ? 'tracking' : 'checkin',
-                                'position': isTracking ? DataTracking.position : DataCheckin[0],
-                                'coordinates': coords,
-                                'address': address,
-                            };
+                            var timestamp = isTracking ? TrackTimestamp : CheckinTimestamp
+
+                            if (isToday(timestamp)) {
+                                var status = 'offline'
+                                const coords = isTracking ? [DataTracking.position.coords.longitude, DataTracking.position.coords.latitude] : DataCheckin[0].coordinates.split(',').map(coord => parseFloat(coord));
+                                const address = await reverseGeocode(coords);
+
+                                if (isTracking) {
+                                    if (Date.parse(new Date()) - timestamp <= 600 * 1000) status = 'online';
+                                } else {
+                                    if (DataCheckin[0].timestamp.time_checkout = '') status = 'online'
+                                    else if (Date.parse(new Date()) - Date.parse(DataCheckin[0].timestamp.time_checkout) <= 600 * 1000) status = 'online';
+                                }
+                                return {
+                                    '_id': DataTracking.summary._id,
+                                    'name': DataTracking.summary.name,
+                                    'type': isTracking ? 'tracking' : 'checkin',
+                                    'position': isTracking ? DataTracking.position : DataCheckin[0],
+                                    'coordinates': coords,
+                                    'address': address,
+                                    'status': status,
+                                    'timestamp' : timestamp
+                                };
+                            } else return null
+
+                            function isToday(timestamp) {
+                                const todayTimestamp = new Date().setHours(0, 0, 0, 0);
+                                const dateTimestamp = new Date(timestamp).setHours(0, 0, 0, 0);
+                                return dateTimestamp === todayTimestamp;
+                            }
+
                         } catch (error) {
                             console.error('Error getting last position:', error);
                             throw error;
                         }
                     };
-                    const DataObjs = await Promise.all(objectIds.map(item => getLastPos(item).catch(error => null)));
+                    var DataObjs = await Promise.all(objectIds.map(item => getLastPos(item).catch(error => null)));
+                    DataObjs = DataObjs.filter(item => item !== null);
                     // console.log(DataObjs);
+                    const statusCount = DataObjs.reduce((acc, cur) => {
+                        if (cur.status === "offline") {
+                            acc.offline++;
+                        } else if (cur.status === "online") {
+                            acc.online++;
+                        }
+                        return acc;
+                    }, { offline: 0, online: 0 });
+                    status(statusCount);
                     const FeatureCollection = {
                         'type': 'FeatureCollection',
                         'features': await Promise.all(DataObjs.map((data) => {
@@ -244,14 +269,6 @@ function RealtimeMap({ options, onClickPopup }) {
                         })).then(features => features.filter(feature => feature !== null))
                     };
                     // console.log(FeatureCollection);
-                    if (!_map.getImage('marker-track')) {
-                        const markerTrack = await _map.loadImage(_options.iconTrack);
-                        _map.addImage('marker-track', markerTrack.data)
-                    }
-                    if (!_map.getImage('marker-checkin')) {
-                        const markerCheckin = await _map.loadImage(_options.iconCheckin);
-                        _map.addImage('marker-checkin', markerCheckin.data)
-                    }
 
                     if (_map.getSource(`ek-tracking-live-${_map_Container.id}-source`)) {
                         _map.getSource(`ek-tracking-live-${_map_Container.id}-source`).setData(FeatureCollection);
@@ -342,7 +359,7 @@ function RealtimeMap({ options, onClickPopup }) {
                                     el.className = 'marker-employee';
                                     el.innerHTML = `
                                         <div class="marker-name">${props.name}</div>
-                                        <div class="marker-img"></div>`;
+                                        <div class="marker-img-${props.status == 'online' ? 'online' : 'offline'}"></div>`;
                                     let popup = new maplibregl.Popup({ offset: [0, -27], closeButton: false })
                                         .setHTML(
                                             `<div class="ek-tracking-his-popup-info">
@@ -359,7 +376,7 @@ function RealtimeMap({ options, onClickPopup }) {
                                     popup.on('open', () => {
                                         el.querySelector('.marker-name').style.display = 'none';
                                         popup.getElement().querySelector('.show-his').addEventListener('click', () => {
-                                            onClickPopup(props._id)
+                                            onClickPopup({ _id: props._id, name: props.name })
                                         })
                                     })
                                     popup.on('close', () => {

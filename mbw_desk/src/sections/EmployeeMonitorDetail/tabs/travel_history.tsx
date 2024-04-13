@@ -18,6 +18,7 @@ export default function TravelHistory({ employee }: { employee?: string }) {
   const [from_time, setFTime] = useState<string>(tmpToTimeZone(new Date().setHours(0, 0, 0).toString()))
   const [to_time, setTTime] = useState<string>(tmpToTimeZone(new Date().setHours(24, 0, 0).toString()))
   const [loading, setLoading] = useState<boolean>(true);
+  const [nameEmployee, setNameEmployee] = useState<string>("");
   const handleChangeTime = (value: any) => {
     setTimeout(()=> {
       setTime(value)
@@ -42,9 +43,9 @@ export default function TravelHistory({ employee }: { employee?: string }) {
     })
   
   const initDataSummary = async (projectId: string, objectId: string) => {
+
     setLoading(true);
     let urlSummary = `https://api.ekgis.vn/v2/tracking/locationHistory/summary/${projectId}/${objectId}?from_time=${from_time}&to_time=${to_time}&api_key=${options.apiKey}`;
-    console.log(urlSummary);
     let resSummary = await axios.get(urlSummary);
     if(resSummary.statusText == "OK"){
       setOptions(prev => ({
@@ -65,7 +66,14 @@ export default function TravelHistory({ employee }: { employee?: string }) {
           projectId: rs.result["Project ID"],
           objectId: employee,
         }))
+        console.log(rs.result["Project ID"], employee)
         initDataSummary(rs.result["Project ID"], employee);
+        const infoEmployee = await AxiosService.get(`/api/method/mbw_dms.api.user.get_employee_info_by_objid?object_id=${employee}`);
+        if(infoEmployee.message == "Thành công"){
+          if(infoEmployee.result.length > 0){
+            setNameEmployee(infoEmployee.result[0].employee_name);
+          }
+        }
       }catch(error){
         message.error(error?.message || "Something was wrong!!!")
       }
@@ -81,7 +89,7 @@ export default function TravelHistory({ employee }: { employee?: string }) {
     <HeaderPage title={<div className="flex items-center">
           <Link to="/employee-monitor" > <BackIos/></Link>
           <span className='ml-4'>
-            Nhân viên Trần Đình Tùng - NV1234
+            {nameEmployee}
           </span>
       </div>} customButton={
         <div className='p-4 border border-solid border-transparent border-b-[#F5F5F5]'>

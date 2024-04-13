@@ -8,11 +8,8 @@ function MapLegend() {
     };
 
     const options = {
-        iconTrack: 'https://files.ekgis.vn/sdks/tracking/assets/custom_marker.png',
-        iconStart: 'https://files.ekgis.vn/sdks/tracking/assets/start-icon.png',
-        iconEnd: 'https://files.ekgis.vn/sdks/tracking/assets/end-icon.png',
-        iconCheckin: 'https://files.ekgis.vn/sdks/tracking/assets/check-icon.png',
-        iconStop: 'https://files.ekgis.vn/sdks/tracking/assets/stop-icon.png',
+        iconOnline: 'https://files.ekgis.vn/sdks/tracking/assets/check-icon.png',
+        iconOffline: 'https://files.ekgis.vn/sdks/tracking/assets/offline-marker.png',
     };
 
     return (
@@ -24,13 +21,13 @@ function MapLegend() {
             <div className={`ekmapplf_tracking-legend-body ${isOpen ? 'open' : ''}`} style={{ maxHeight: isOpen ? 'none' : '0' }}>
                 <ul>
                     <li>
-                        <span className='ekmapplf_tracking-legend-icon' style={{ backgroundImage: `url(${options.iconCheckin})` }}></span>
-                        Vị trí nhân viên
+                        <span className='ekmapplf_tracking-legend-icon' style={{ backgroundImage: `url(${options.iconOnline})` }}></span>
+                        Vị trí nhân viên Online
                     </li>
-                    {/* <li>
-                        <span className='ekmapplf_tracking-legend-icon' style={{ backgroundImage: `url(${options.iconTrack})` }}></span>
-                        Vị trí di chuyển
-                    </li> */}
+                    <li>
+                        <span className='ekmapplf_tracking-legend-icon' style={{ backgroundImage: `url(${options.iconOffline})` }}></span>
+                        Vị trí nhân viên Offline
+                    </li>
                 </ul>
             </div>
         </div>

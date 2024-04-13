@@ -10,17 +10,22 @@ export default function SupervisoryStaffRealTime() {
   const navigate = useNavigate();
   const [summaryOver, setSummaryOver] = useState<
     {
-      so_nv_online: number | 0,
-      so_nv_offline: number | 0,
       luot_vt: number | 0,
       don_hang: number | 0,
       doanh_so: number | 0,
     }>({
-      so_nv_online: 0,
-      so_nv_offline: 0,
       luot_vt: 0,
       don_hang: 0,
       doanh_so: 0,
+    });
+    const [summaryOnlineAndOffline, setSummaryOnlineAndOffline] = useState<
+      {
+        so_nv_online: number,
+        so_nv_offline: number
+      }
+    >({
+      so_nv_online: 0,
+      so_nv_offline: 0
     });
     const [dataTopDistanceEmployee, setDataTopDistanceEmployee] = useState<any[]>([]);
     const [dataEmployee, setDataEmployee] = useState<any[]>([]);
@@ -36,46 +41,6 @@ export default function SupervisoryStaffRealTime() {
         setSummaryOver(rs.result);
       }
     }
-
-  // data nhân viên
-  const dataEmployees = [
-    {
-      'stt': 1,
-      'pic_profile': "/user_demo/user_1.png",
-      'emp_name': "Khánh Hoàn",
-      'emp_id': "1234-4455",
-      'visiting': "10/10",
-      'boxing': 2
-    },{
-      'stt': 2,
-      'pic_profile': "/user_demo/user_2.png",
-      'emp_name': "Tường Vân",
-      'emp_id': "1234-4455",
-      'visiting': "8/10",
-      'boxing': 1
-    },{
-      'stt': 3,
-      'pic_profile': "/user_demo/user_3.png",
-      'emp_name': "Nghiêm Ngọc Trâm",
-      'emp_id': "1234-4455",
-      'visiting': "2/10",
-      'boxing': 0
-    },{
-      'stt': 4,
-      'pic_profile': "/user_demo/user_4.png",
-      'emp_name': "Đinh Thùy Linh",
-      'emp_id': "1234-4455",
-      'visiting': "7/14",
-      'boxing': 3
-    },{
-      'stt': 5,
-      'pic_profile': "/user_demo/user_5.png",
-      'emp_name': "Hà Nguyễn",
-      'emp_id': "1234-4455",
-      'visiting': "8/16",
-      'boxing': 6
-    }
-  ]
   //bảng: cột nhân viên
   const columnsCheckingEmployee = [
     {
@@ -108,6 +73,13 @@ export default function SupervisoryStaffRealTime() {
       'dataIndex': "visiting"
     }
   ]
+
+  const handleSummaryOnlienAndOffline = (res) => {
+    setSummaryOnlineAndOffline({
+      so_nv_online: res.online,
+      so_nv_offline: res.offline
+    });
+  }
 
   // option hiển thị map
   const [options,setOptions] =  useState<{apiKey:string | null,projectId:string | null}>({
@@ -160,14 +132,13 @@ export default function SupervisoryStaffRealTime() {
           's1tt': i+1,
           'pic_profile': item.employee_avatar != null && item.employee_avatar != ""? item.employee_avatar : "/public/user_default.png",
           'emp_name': item.employee_name,
-          'emp_id': "1234-4455",
-          'visiting': "10/10",
-          'boxing': 2
+          'emp_id': item.employee,
+          'visiting': `${item.today_visit}/${item.must_visit}`,
+          'boxing': item.sales_order
         })
       }
     }
-    
-    console.log(res);
+    setDataEmployee(arrEmployee);
   }
   const renderDataCheckingEmployee = (arrSummary) => {
     let dataCheckingEmployee = [];
@@ -188,7 +159,6 @@ export default function SupervisoryStaffRealTime() {
   useEffect(() => {
     (async() => {
       const rs = await AxiosService.get('/api/method/mbw_dms.api.user.get_projectID');
-      console.log(rs);
       setOptions(prev => ({
         ...prev,
         projectId: rs.result[ "Project ID"]
@@ -197,7 +167,6 @@ export default function SupervisoryStaffRealTime() {
       let res = await axios.get(urlSummary);
       if(res.statusText == "OK"){
         let arrSummary = res["data"].results;
-        console.log(arrSummary);
         renderDataMoveTopEmployee(arrSummary);
         renderDataCheckingEmployee(arrSummary);
       }
@@ -228,7 +197,7 @@ export default function SupervisoryStaffRealTime() {
                       </div>
                       <div style={{marginLeft: '10px'}}>
                         <div className='title_card'>Số nhân viên online</div>
-                        <div className='content_card'>{summaryOver.so_nv_online}</div>
+                        <div className='content_card'>{summaryOnlineAndOffline.so_nv_online}</div>
                       </div>
                     </div>
                   </div>
@@ -243,7 +212,7 @@ export default function SupervisoryStaffRealTime() {
                       </div>
                       <div style={{marginLeft: '10px'}}>
                         <div className='title_card'>Số nhân viên offline</div>
-                        <div className='content_card'>{summaryOver.so_nv_offline}</div>
+                        <div className='content_card'>{summaryOnlineAndOffline.so_nv_offline}</div>
                       </div>
                     </div>
                   </div>
@@ -302,6 +271,7 @@ export default function SupervisoryStaffRealTime() {
                 <WrapperCard>
                   <div className="wrap-card-container">
                     <div style={{fontWeight: 500, fontSize: '14px',lineHeight: '28px'}}>Quãng đường di chuyển của nhân viên</div>
+                    <div style={{height: 210, overflow: 'auto'}}>
                     <List
                       itemLayout="horizontal"
                       dataSource={dataTopDistanceEmployee}
@@ -338,6 +308,8 @@ export default function SupervisoryStaffRealTime() {
                         </List.Item>
                       )}
                     />
+                    </div>
+                    
                   </div>
                 </WrapperCard>
               </Col>
@@ -345,9 +317,10 @@ export default function SupervisoryStaffRealTime() {
                 <WrapperCard>
                   <div className="wrap-card-container">
                     <div style={{fontWeight: 500, fontSize: '14px',lineHeight: '28px'}}>Danh sách nhân viên</div>
+                    <div style={{height: 210, overflow: 'auto'}}>
                     <List
                       itemLayout="horizontal"
-                      dataSource={dataEmployees}
+                      dataSource={dataEmployee}
                       renderItem={(item) => (
                         <List.Item>
                           <div className="flex items-center justify-between" style={{width: '100%'}}>
@@ -383,6 +356,8 @@ export default function SupervisoryStaffRealTime() {
                         </List.Item>
                       )}
                     />
+                    </div>
+                    
                   </div>
                 </WrapperCard>
               </Col>
@@ -404,8 +379,7 @@ export default function SupervisoryStaffRealTime() {
         <Col span={12} className="card-container">
           <WrapperCardMap>
             <div style={{height: '100%'}}>
-              {options.projectId && <RealtimeMap options={options} onClickPopup={handlerShowHistory} />}
-            
+              {options.projectId && <RealtimeMap options={options} onClickPopup={handlerShowHistory} status={handleSummaryOnlienAndOffline}/>}
             </div>
           </WrapperCardMap>
         </Col>

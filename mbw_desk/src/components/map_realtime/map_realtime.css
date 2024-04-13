@@ -499,8 +499,15 @@
     justify-items: center;
     justify-content: center;
 }
-.marker-employee .marker-img {
+.marker-employee .marker-img-online {
     background-image: url(https://files.ekgis.vn/sdks/tracking/assets/check-icon.png);
+    background-size: contain;
+    background-repeat: no-repeat;
+    width: 27px;
+    height: 27px;
+}
+.marker-employee .marker-img-offline {
+    background-image: url(https://files.ekgis.vn/sdks/tracking/assets/offline-marker.png);
     background-size: contain;
     background-repeat: no-repeat;
     width: 27px;
