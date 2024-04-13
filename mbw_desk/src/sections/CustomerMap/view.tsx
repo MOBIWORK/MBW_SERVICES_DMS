@@ -41,12 +41,12 @@ function CustomerMapView() {
     }, [apiKey, mapConfig, lstCustomer]);
 
     const getConfigApi = async () => {
-        let res = await AxiosService.get('/api/method/map_customers.api.api.get_config_api');
+        let res = await AxiosService.get('/api/method/mbw_dms.api.vgm.map_customer.get_config_api');
         setApiKey(res.result)
         
     }
     const getConfigMap = async () => {
-        let res = await AxiosService.get('/api/method/map_customers.api.api.get_config_map?type_industry=fertilizer_store');
+        let res = await AxiosService.get('/api/method/map_customers.api.vgm.map_customer.get_config_map?type_industry=fertilizer_store');
         setMapConfig(res.result)
     }
     const getLstCustomer = async () => {

@@ -38,7 +38,7 @@ export default function DashboardLayout({ children }: Props) {
           
             <Content
               className="round"
-              style={{ padding: "0 24px", minHeight: "90vh" ,background:"#F4F6F8" }}
+              style={{ padding: "0px 24px 20px", maxHeight: "85vh", overflow: "auto" ,background:"#F4F6F8" }}
             >
               <div>{children}</div>
             </Content>

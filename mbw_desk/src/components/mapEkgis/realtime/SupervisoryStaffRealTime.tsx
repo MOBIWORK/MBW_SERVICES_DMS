@@ -33,7 +33,7 @@ export default function SupervisoryStaffRealTime() {
 
     useEffect(()=>{
       initDataSummaryOver();
-    })
+    },[])
   
     const initDataSummaryOver = async () => {
       const rs = await AxiosService.get(`/api/method/mbw_dms.api.report.real_time_monitoring_report`);
@@ -161,6 +161,7 @@ export default function SupervisoryStaffRealTime() {
   useEffect(() => {
     (async() => {
       const rs = await AxiosService.get('/api/method/mbw_dms.api.user.get_projectID');
+      rs.result[ "Project ID"] = "6556e471178a1db24ac1a711";
       setOptions(prev => ({
         ...prev,
         projectId: rs.result[ "Project ID"]

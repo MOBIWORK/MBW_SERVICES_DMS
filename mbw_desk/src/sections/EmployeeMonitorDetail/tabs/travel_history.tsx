@@ -99,9 +99,9 @@ export default function TravelHistory({ employee }: { employee?: string }) {
           projectId: "6556e471178a1db24ac1a711", //rs.result["Project ID"]
           objectId: employee,
         }))
-        initDataEmployee(rs.result["Project ID"]);
+        initDataEmployee("6556e471178a1db24ac1a711"); //rs.result["Project ID"]
         if(employee != null && employee != "") setDefaultEmployeeSelect(employee);
-        initDataSummary(rs.result["Project ID"], employee);
+        initDataSummary("6556e471178a1db24ac1a711", employee); //rs.result["Project ID"]
         const infoEmployee = await AxiosService.get(`/api/method/mbw_dms.api.user.get_employee_info_by_objid?object_id=${employee}`);
         if(infoEmployee.message == "Thành công"){
           if(infoEmployee.result.length > 0){
