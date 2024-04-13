@@ -1,0 +1,32 @@
+{
+ "allow_roles": [
+  {
+   "role": "All"
+  }
+ ],
+ "creation": "2024-04-13 08:14:26.359786",
+ "docstatus": 0,
+ "doctype": "Module Onboarding",
+ "documentation_url": "https://docsdms.mbwcloud.com/HDSD_MBWDMS/s%E1%BB%AD-d%E1%BB%A5ng-dms-tr%C3%AAn-erpnext",
+ "idx": 0,
+ "is_complete": 0,
+ "modified": "2024-04-13 08:14:26.359786",
+ "modified_by": "Administrator",
+ "module": "MBW DMS",
+ "name": "DMS",
+ "owner": "Administrator",
+ "steps": [
+  {
+   "step": "T\u1ea1o Tuy\u1ebfn B\u00e1n H\u00e0ng"
+  },
+  {
+   "step": "Ch\u1ea5m \u0110i\u1ec3m Tr\u01b0ng B\u00e0y"
+  },
+  {
+   "step": "\u0110\u00e1nh Gi\u00e1 Th\u1ecb Tr\u01b0\u1eddng"
+  }
+ ],
+ "subtitle": "T\u1ea1o Tuy\u1ebfn B\u00e1n H\u00e0ng, Ch\u1ea5m \u0111i\u1ec3m tr\u01b0ng b\u00e0y (AI), \u0110\u00e1nh Gi\u00e1 Th\u1ecb Tr\u01b0\u1eddng...",
+ "success_message": "Ch\u00fac m\u1eebng b\u1ea1n \u0111\u00e3 t\u00ecm hi\u1ec3u xong c\u00e1c ch\u1ee9c n\u0103ng ch\u00ednh c\u1ee7a DMS !",
+ "title": " H\u00e3y kh\u00e1m ph\u00e1 nh\u1eefng t\u00ednh n\u0103ng tuy\u1ec7t v\u1eddi c\u1ee7a DMS c\u00f9ng ch\u00fang t\u00f4i!"
+}

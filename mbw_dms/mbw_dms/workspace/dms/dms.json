@@ -1,23 +1,24 @@
 {
- "charts": [],
- "content": "[{\"id\":\"_nSxNWRA8q\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Ti\u1ec7n \u00edch</span>\",\"col\":12}},{\"id\":\"b4LL9JiWhB\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"S\u1ea3n ph\u1ea9m\",\"col\":4}},{\"id\":\"RmuoTAL7Na\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Kh\u00e1ch h\u00e0ng\",\"col\":4}},{\"id\":\"pEBpMowZaV\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Dashboard\",\"col\":4}},{\"id\":\"arS5LV6rZs\",\"type\":\"paragraph\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>DMS</b></span>\",\"col\":12}},{\"id\":\"XKoomAWe51\",\"type\":\"custom_block\",\"data\":{\"custom_block_name\":\"DMS Router Web\",\"col\":4}},{\"id\":\"tamz6WfXOA\",\"type\":\"custom_block\",\"data\":{\"custom_block_name\":\"DMS\",\"col\":4}},{\"id\":\"Zgn9mbCmXQ\",\"type\":\"paragraph\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>AUDIT</b></span>\",\"col\":12}},{\"id\":\"HaGZzFRHkL\",\"type\":\"custom_block\",\"data\":{\"custom_block_name\":\"Audit\",\"col\":12}},{\"id\":\"Bi8St4I1VO\",\"type\":\"paragraph\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Danh m\u1ee5c</b></span>\",\"col\":12}},{\"id\":\"Ew5UE5UXiU\",\"type\":\"card\",\"data\":{\"card_name\":\"Ph\u00e2n Quy\u1ec1n, ch\u1ec9 ti\u00eau\",\"col\":4}},{\"id\":\"lLxzbBbd5l\",\"type\":\"card\",\"data\":{\"card_name\":\"Danh m\u1ee5c kh\u00e1c\",\"col\":4}},{\"id\":\"3_4fP5aVPm\",\"type\":\"paragraph\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>B\u00e1o c\u00e1o</b></span>\",\"col\":12}},{\"id\":\"hRwabUd5UV\",\"type\":\"card\",\"data\":{\"card_name\":\"B\u00e1o c\u00e1o k\u1ebft qu\u1ea3 \u0111i tuy\u1ebfn\",\"col\":4}},{\"id\":\"usJ7WC_lAa\",\"type\":\"card\",\"data\":{\"card_name\":\"B\u00e1o c\u00e1o k\u1ebft qu\u1ea3 b\u00e1n h\u00e0ng\",\"col\":4}},{\"id\":\"oEbqX1IFMZ\",\"type\":\"card\",\"data\":{\"card_name\":\"B\u00e1o c\u00e1o c\u00f4ng n\u1ee3\",\"col\":4}},{\"id\":\"kWa-TA3jlb\",\"type\":\"custom_block\",\"data\":{\"custom_block_name\":\"Report\",\"col\":4}},{\"id\":\"eYxZF2m0iX\",\"type\":\"paragraph\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Tr\u1ee3 gi\u00fap</b></span>\",\"col\":12}},{\"id\":\"7wTzcDmKFF\",\"type\":\"card\",\"data\":{\"card_name\":\"Tr\u1ee3 gi\u00fap\",\"col\":4}}]",
- "creation": "2024-03-01 14:34:32.313943",
+ "charts": [
+  {
+   "chart_name": "Top Customers",
+   "label": "Kh\u00e1ch h\u00e0ng doanh s\u1ed1 cao nh\u1ea5t"
+  },
+  {
+   "chart_name": "Sales Order Trends",
+   "label": "Doanh s\u1ed1"
+  },
+  {
+   "chart_name": "Profit and Loss",
+   "label": "L\u00e3i & L\u1ed7"
+  }
+ ],
+ "content": "[{\"id\":\"_LKEBuivWr\",\"type\":\"onboarding\",\"data\":{\"onboarding_name\":\"DMS\",\"col\":12}},{\"id\":\"kB7wjE6nMV\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"\u0110\u01a1n H\u00e0ng\",\"col\":3}},{\"id\":\"vkK4KOtlTu\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Gi\u00e1 tr\u1ecb t\u1ed3n kho\",\"col\":3}},{\"id\":\"7RS_Yx6cNi\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Doanh Thu\",\"col\":3}},{\"id\":\"ehwMiMcEOi\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Nh\u00e2n vi\u00ean\",\"col\":3}},{\"id\":\"Mhz4unYSpm\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Kh\u00e1ch h\u00e0ng doanh s\u1ed1 cao nh\u1ea5t\",\"col\":12}},{\"id\":\"KCHHZuZmKr\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Doanh s\u1ed1\",\"col\":6}},{\"id\":\"Y0S0j-3pKT\",\"type\":\"chart\",\"data\":{\"chart_name\":\"L\u00e3i & L\u1ed7\",\"col\":6}},{\"id\":\"X3_s1a8hqy\",\"type\":\"paragraph\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Your Shortcut</span>\",\"col\":12}},{\"id\":\"FfNze3DCzh\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Sales Order\",\"col\":4}},{\"id\":\"rhmv7Megti\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Item\",\"col\":4}},{\"id\":\"a2J4I86bYe\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Customer\",\"col\":4}},{\"id\":\"U-fT3n3tWH\",\"type\":\"paragraph\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Report &amp; Masters</span>\",\"col\":12}},{\"id\":\"D06bWLNFkz\",\"type\":\"custom_block\",\"data\":{\"custom_block_name\":\"DMS Router Web\",\"col\":4}},{\"id\":\"8mTBqrsAyp\",\"type\":\"card\",\"data\":{\"card_name\":\"Danh m\u1ee5c kh\u00e1c\",\"col\":4}},{\"id\":\"p0j0M9QJKr\",\"type\":\"card\",\"data\":{\"card_name\":\"C\u1ea5u h\u00ecnh\",\"col\":4}},{\"id\":\"4S3r7ZKW7P\",\"type\":\"card\",\"data\":{\"card_name\":\"Key Reports\",\"col\":4}},{\"id\":\"vE9N32WLLI\",\"type\":\"card\",\"data\":{\"card_name\":\"Other Reports\",\"col\":4}}]",
+ "creation": "2024-04-13 08:43:09.840522",
  "custom_blocks": [
-  {
-   "custom_block_name": "DMS",
-   "label": "DMS"
-  },
-  {
-   "custom_block_name": "Audit",
-   "label": "Audit"
-  },
   {
    "custom_block_name": "DMS Router Web",
    "label": "DMS Router Web"
-  },
-  {
-   "custom_block_name": "Report",
-   "label": "Report"
   }
  ],
  "docstatus": 0,
@@ -82,8 +83,8 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Tr\u1ee3 gi\u00fap",
-   "link_count": 1,
+   "label": "C\u1ea5u h\u00ecnh",
+   "link_count": 2,
    "link_type": "DocType",
    "onboard": 0,
    "type": "Card Break"
@@ -91,7 +92,7 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "C\u1ea5u h\u00ecnh h\u1ec7 th\u1ed1ng dms mobile",
+   "label": "C\u1ea5u h\u00ecnh h\u1ec7 th\u1ed1ng",
    "link_count": 0,
    "link_to": "DMS Settings",
    "link_type": "DocType",
@@ -101,8 +102,18 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Ph\u00e2n Quy\u1ec1n, ch\u1ec9 ti\u00eau",
-   "link_count": 2,
+   "label": "M\u00f4 h\u00ecnh t\u1ed5 ch\u1ee9c (Sale Person)",
+   "link_count": 0,
+   "link_to": "Sales Person",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Key Reports",
+   "link_count": 9,
    "link_type": "DocType",
    "onboard": 0,
    "type": "Card Break"
@@ -110,28 +121,98 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Quy\u1ec1n b\u00e1n s\u1ea3n ph\u1ea9m",
+   "label": "Sales Analytics",
    "link_count": 0,
-   "link_to": "User",
-   "link_type": "DocType",
+   "link_to": "Sales Analytics",
+   "link_type": "Report",
    "onboard": 0,
    "type": "Link"
   },
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Ch\u1ec9 ti\u00eau KPI",
+   "label": "Sales Order Analysis",
    "link_count": 0,
-   "link_to": "DMS KPI",
-   "link_type": "DocType",
+   "link_to": "Sales Order Analysis",
+   "link_type": "Report",
    "onboard": 0,
    "type": "Link"
   },
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "B\u00e1o c\u00e1o k\u1ebft qu\u1ea3 \u0111i tuy\u1ebfn",
-   "link_count": 3,
+   "label": "Sales Funnel",
+   "link_count": 0,
+   "link_to": "sales-funnel",
+   "link_type": "Page",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Sales Order Trends",
+   "link_count": 0,
+   "link_to": "Sales Order Trends",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Quotation Trends",
+   "link_count": 0,
+   "link_to": "Quotation Trends",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Customer Acquisition and Loyalty",
+   "link_count": 0,
+   "link_to": "Customer Acquisition and Loyalty",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Inactive Customers",
+   "link_count": 0,
+   "link_to": "Inactive Customers",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Sales Person-wise Transaction Summary",
+   "link_count": 0,
+   "link_to": "Sales Person-wise Transaction Summary",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Item-wise Sales History",
+   "link_count": 0,
+   "link_to": "Item-wise Sales History",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Other Reports",
+   "link_count": 9,
    "link_type": "DocType",
    "onboard": 0,
    "type": "Card Break"
@@ -139,97 +220,116 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Nh\u1eadt k\u00ed di chuy\u1ec3n",
+   "label": "Address And Contacts",
    "link_count": 0,
-   "link_to": "Employee",
-   "link_type": "DocType",
+   "link_to": "Address And Contacts",
+   "link_type": "Report",
    "onboard": 0,
    "type": "Link"
   },
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "K\u1ebft qu\u1ea3 \u0111i tuy\u1ebfn",
+   "label": "Available Stock for Packing Items",
    "link_count": 0,
-   "link_to": "Employee",
-   "link_type": "DocType",
+   "link_to": "Available Stock for Packing Items",
+   "link_type": "Report",
    "onboard": 0,
    "type": "Link"
   },
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "B\u00e1o c\u00e1o vi\u1ebfng th\u0103m",
+   "label": "Pending SO Items For Purchase Request",
    "link_count": 0,
-   "link_to": "Employee",
-   "link_type": "DocType",
+   "link_to": "Pending SO Items For Purchase Request",
+   "link_type": "Report",
    "onboard": 0,
    "type": "Link"
   },
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "B\u00e1o c\u00e1o k\u1ebft qu\u1ea3 b\u00e1n h\u00e0ng",
-   "link_count": 3,
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Th\u1ed1ng k\u00ea phi\u1ebfu \u0111\u1eb7t h\u00e0ng",
+   "label": "Delivery Note Trends",
    "link_count": 0,
-   "link_to": "Employee",
-   "link_type": "DocType",
+   "link_to": "Delivery Note Trends",
+   "link_type": "Report",
    "onboard": 0,
    "type": "Link"
   },
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Ch\u1ec9 ti\u00eau KPI",
+   "label": "Sales Invoice Trends",
    "link_count": 0,
-   "link_to": "Employee",
-   "link_type": "DocType",
+   "link_to": "Sales Invoice Trends",
+   "link_type": "Report",
    "onboard": 0,
    "type": "Link"
   },
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Kh\u00e1ch h\u00e0ng m\u1edbi",
+   "label": "Customer Credit Balance",
    "link_count": 0,
-   "link_to": "Employee",
-   "link_type": "DocType",
+   "link_to": "Customer Credit Balance",
+   "link_type": "Report",
    "onboard": 0,
    "type": "Link"
   },
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "B\u00e1o c\u00e1o c\u00f4ng n\u1ee3",
-   "link_count": 1,
-   "link_type": "DocType",
+   "label": "Customers Without Any Sales Transactions",
+   "link_count": 0,
+   "link_to": "Customers Without Any Sales Transactions",
+   "link_type": "Report",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "C\u00f4ng n\u1ee3 kh\u00e1ch h\u00e0ng",
+   "label": "Territory Target Variance Based On Item Group",
    "link_count": 0,
-   "link_to": "Employee",
-   "link_type": "DocType",
+   "link_to": "Territory Target Variance Based On Item Group",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Sales Person Target Variance Based On Item Group",
+   "link_count": 0,
+   "link_to": "Sales Person Target Variance Based On Item Group",
+   "link_type": "Report",
    "onboard": 0,
    "type": "Link"
   }
  ],
- "modified": "2024-04-03 10:06:18.396634",
+ "modified": "2024-04-13 08:57:46.809041",
  "modified_by": "Administrator",
  "module": "MBW DMS",
  "name": "DMS",
- "number_cards": [],
+ "number_cards": [
+  {
+   "label": "\u0110\u01a1n H\u00e0ng",
+   "number_card_name": "Sales Orders to Bill"
+  },
+  {
+   "label": "Gi\u00e1 tr\u1ecb t\u1ed3n kho",
+   "number_card_name": "Total Stock Value"
+  },
+  {
+   "label": "Doanh Thu",
+   "number_card_name": "Total Outgoing Bills"
+  },
+  {
+   "label": "Nh\u00e2n vi\u00ean",
+   "number_card_name": "Total Employees"
+  }
+ ],
  "owner": "Administrator",
  "parent_page": "",
  "public": 1,
@@ -240,7 +340,15 @@
   {
    "color": "Grey",
    "doc_view": "List",
-   "label": "S\u1ea3n ph\u1ea9m",
+   "label": "Sales Order",
+   "link_to": "Sales Order",
+   "stats_filter": "[]",
+   "type": "DocType"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Item",
    "link_to": "Item",
    "stats_filter": "[]",
    "type": "DocType"
@@ -248,17 +356,10 @@
   {
    "color": "Grey",
    "doc_view": "List",
-   "label": "Kh\u00e1ch h\u00e0ng",
+   "label": "Customer",
    "link_to": "Customer",
    "stats_filter": "[]",
    "type": "DocType"
-  },
-  {
-   "color": "Grey",
-   "doc_view": "List",
-   "label": "Dashboard",
-   "link_to": "Selling",
-   "type": "Dashboard"
   }
  ],
  "title": "DMS"
