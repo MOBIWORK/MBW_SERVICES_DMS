@@ -259,7 +259,7 @@ doc_events = {
         "on_update": "mbw_dms.controllers.dms_sales_person.create_user_permission"
     },
     "Employee": {
-        "after_insert": "mbw_dms.controllers.dms_users.create_objid_employee"
+        "on_update": "mbw_dms.controllers.dms_users.create_objid_employee"
     }
 }
 
