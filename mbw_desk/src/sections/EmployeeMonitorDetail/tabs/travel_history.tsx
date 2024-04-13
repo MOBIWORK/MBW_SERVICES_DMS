@@ -5,7 +5,7 @@ import { TodayLimit, tmpToTimeZone } from '../../../util'
 import { SupervisoryStaff } from '@/components'
 import { AxiosService } from '../../../services/server'
 import axios from "axios";
-import { message } from 'antd';
+import { message, Select } from 'antd';
 import { HeaderPage } from '../../../components';
 import { BackIos } from '../../../icons';
 import { Link } from 'react-router-dom'
@@ -14,11 +14,13 @@ import { Link } from 'react-router-dom'
 // dayjs.locale('vi');
 export default function TravelHistory({ employee }: { employee?: string }) {
 
-  const [time, setTime] = useState<any>(Date.now())
-  const [from_time, setFTime] = useState<string>(tmpToTimeZone(new Date().setHours(0, 0, 0).toString()))
-  const [to_time, setTTime] = useState<string>(tmpToTimeZone(new Date().setHours(24, 0, 0).toString()))
+  const [time, setTime] = useState<any>(new Date("03-27-2024")) //Date.now()
+  const [from_time, setFTime] = useState<string>(tmpToTimeZone(new Date("03-27-2024").setHours(0, 0, 0).toString()))
+  const [to_time, setTTime] = useState<string>(tmpToTimeZone(new Date("03-27-2024").setHours(24, 0, 0).toString()))
   const [loading, setLoading] = useState<boolean>(true);
   const [nameEmployee, setNameEmployee] = useState<string>("");
+  const [arrEmployee,setArrEmployee] = useState<any[]>([]);
+  const [defaultEmployeeSelect, setDefaultEmployeeSelect] = useState<string>("");
   const handleChangeTime = (value: any) => {
     setTimeout(()=> {
       setTime(value)
@@ -43,7 +45,6 @@ export default function TravelHistory({ employee }: { employee?: string }) {
     })
   
   const initDataSummary = async (projectId: string, objectId: string) => {
-
     setLoading(true);
     let urlSummary = `https://api.ekgis.vn/v2/tracking/locationHistory/summary/${projectId}/${objectId}?from_time=${from_time}&to_time=${to_time}&api_key=${options.apiKey}`;
     let resSummary = await axios.get(urlSummary);
@@ -56,17 +57,50 @@ export default function TravelHistory({ employee }: { employee?: string }) {
     }
     setLoading(false);
   }
+  const initDataEmployee = async (projectId: string) => {
+    let urlSummary = `https://api.ekgis.vn/tracking/${projectId}/objects?api_key=${options.apiKey}`;
+    let resSummary = await axios.get(urlSummary);
+    if(resSummary.statusText == "OK"){
+      let arrEmployee = resSummary["data"].results.objects.map(function(item){
+        return {value: item["_id"], label: item["name"]};
+      });
+      setArrEmployee(arrEmployee);
+    }
+  }
+  const handleChangeEmployee = async (item) => {
+    setOptions(prev => ({
+      ...prev, 
+      objectId: item,
+    }))
+    initDataSummary(options.projectId, item);
+    const infoEmployee = await AxiosService.get(`/api/method/mbw_dms.api.user.get_employee_info_by_objid?object_id=${item}`);
+    if(infoEmployee.message == "Thành công"){
+      if(infoEmployee.result.length > 0){
+        setNameEmployee(infoEmployee.result[0].employee_name);
+      }
+    }
+  }
 
   useEffect(() => {
     (async () => {
+      if(employee == null || employee == ""){
+        setOptions(prev => ({
+          ...prev, 
+          projectId: "6556e471178a1db24ac1a711", //rs.result["Project ID"]
+        }))
+        initDataEmployee("6556e471178a1db24ac1a711");
+        return;
+      }
+      employee = "654c8a12d65d3e52f2d286de";
       try {
         const rs = await AxiosService.get(`/api/method/mbw_dms.api.user.get_project_object_id?name=${employee}`)
         setOptions(prev => ({
           ...prev, 
-          projectId: rs.result["Project ID"],
+          projectId: "6556e471178a1db24ac1a711", //rs.result["Project ID"]
           objectId: employee,
         }))
-        console.log(rs.result["Project ID"], employee)
+        initDataEmployee(rs.result["Project ID"]);
+        if(employee != null && employee != "") setDefaultEmployeeSelect(employee);
         initDataSummary(rs.result["Project ID"], employee);
         const infoEmployee = await AxiosService.get(`/api/method/mbw_dms.api.user.get_employee_info_by_objid?object_id=${employee}`);
         if(infoEmployee.message == "Thành công"){
@@ -95,11 +129,20 @@ export default function TravelHistory({ employee }: { employee?: string }) {
         <div className='p-4 border border-solid border-transparent border-b-[#F5F5F5]'>
           <DatePick defaultValue={dayjs(time)} format={"DD-MM-YYYY"} onChange={handleChangeTime} />
         </div>
+      } customSlect={
+        <div className='py-4 border border-solid border-transparent border-b-[#F5F5F5]'>
+          <Select
+              defaultValue={defaultEmployeeSelect}
+              style={{ width: 120 }}
+              onChange={handleChangeEmployee}
+              options={arrEmployee}
+            />
+        </div>
       }/>
       <div className='border border-solid border-[#F5F5F5] rounded-lg'>
         <div id="travel" className='relative'>
           {/* <MapEkgisHistory from_time={from_time} to_time={to_time} objectId='654c8a12d65d3e52f2d286de' projectId= '6556e471178a1db24ac1a711'/> */}
-          {options.projectId && options.objectId && <SupervisoryStaff options={options} loading={loading}/> }
+          {options.projectId && <SupervisoryStaff options={options} loading={loading}/> }
           
         </div>
 

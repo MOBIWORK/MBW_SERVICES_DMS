@@ -13,10 +13,11 @@ type button = {
 type Props = {
   title: string | ReactNode;
   buttons?: button[];
-  customButton ?: ReactNode
+  customButton ?: ReactNode;
+  customSlect?: ReactNode;
 };
 
-export function HeaderPage({ title, buttons ,customButton}: Props) {
+export function HeaderPage({ title, buttons ,customButton, customSlect}: Props) {
   return (
     <>
       <Row className="flex flex-wrap justify-between items-center px-0 py-5 flex-nowrap">
@@ -37,6 +38,7 @@ export function HeaderPage({ title, buttons ,customButton}: Props) {
                 {button.label}
               </Button>
             ))}
+            {customSlect}
             {customButton}
         </div>
       </Row>

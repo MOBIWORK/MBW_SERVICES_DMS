@@ -2,26 +2,29 @@ import React, { useRef, useEffect, useState } from 'react';
 import maplibregl from 'maplibre-gl';
 import extend from 'xtend';
 import bbox from '@turf/bbox';
+import { Flex } from "antd";
 
 import './map.css';
 import MapLegend from './maplegend';
 import Animate_And_Controls from './animate'
-// import Animate_And_Controls_v2 from './animate_v2'
 
 const ekmapplf = window.ekmapplf;
 
 function HistoryMap({ options }) {
     const mapContainer = useRef(null);
     const map = useState(null);
-    const segmentData = useState([]);
-    const HistoryData = useState([]);
     const [showControls, setShowControls] = useState({
         map: null,
         Data: [],
         options: null
     });
+    const [Stage, setStage] = useState({
+        date: null,
+        time: null,
+        speed: 0
+    });
     const animationID = useRef(null);
-    const timeoutAnimation = useRef(null);
+    const timeoutAnimationID = useRef(null);
 
 
     const defaultOptions = {
@@ -49,15 +52,11 @@ function HistoryMap({ options }) {
         }
     };
     const _options = extend({}, defaultOptions, options);
-    if (_options.apiKey === "" || !_options.apiKey) throw new Error("Parameter apiKey not valid");
-    if (_options.projectId === "" || !_options.projectId) throw new Error("Parameter projectId not valid");
-    if (_options.objectId === "" || !_options.objectId) throw new Error("Parameter objectId not valid");
-    if (_options.from_time === "" || !_options.from_time) throw new Error("Parameter from_time not valid");
-    if (_options.to_time === "" || !_options.to_time) throw new Error("Parameter to_time not valid");
 
     const initializeMap = () => {
         try {
             var _popup;
+            if (map.current) map.current.remove();
             map.current = new maplibregl.Map({
                 container: mapContainer.current,
                 center: _options.center,
@@ -235,8 +234,10 @@ function HistoryMap({ options }) {
 
             _map.addControl(new maplibregl.FullscreenControl(), 'bottom-right');
 
+
             _map.on('load', () => {
                 try {
+                    if (!_options.objectId || _options.objectId === '' || _options.objectId === 'null') return;
                     setMap(_options.from_time, _options.to_time, _options.pageNumber, _options.pageSize);
                 } catch (error) {
                     console.error('Error:', error);
@@ -250,12 +251,12 @@ function HistoryMap({ options }) {
                 let segmentData = await preAnimation(dataHistory);
                 // console.log(dataHistory);
                 if (dataHistory.length && dataHistory[0].coordinates) _map.easeTo({ center: dataHistory[0].coordinates, duration: 100, zoom: 16 })
-                console.log(map.current);
+                // console.log(map.current);
                 setTimeout(() => setShowControls({
                     map: map.current,
                     Data: segmentData,
                     options: _options
-                }), 1000);
+                }), 500);
             }
 
 
@@ -266,7 +267,7 @@ function HistoryMap({ options }) {
                 const Data = await response.json();
                 // console.log(Data);
                 var arrData = Data.details
-                return arrData;
+                return arrData || [];
             };
 
 
@@ -782,7 +783,7 @@ function HistoryMap({ options }) {
                 // console.log('segmentData', segmentData);
                 // console.log('summaryData', summaryData);
 
-                return segmentData
+                return segmentData || []
                 //Data
                 function parseGpxData(fc) {
                     var result = {
@@ -1082,30 +1083,54 @@ function HistoryMap({ options }) {
 
     useEffect(() => {
         initializeMap();
-        // setTimeout(() => setShowControls(true), 1000);
         return () => {
-            if (animationID.current) window.cancelAnimationFrame(animationID.current);
-            if (timeoutAnimation.current) window.clearTimeout(timeoutAnimation.current);
-            // if (map.current) {
-            //     map.current.remove();
-            //     showControls.map = null;
-            // }
+            if (animationID.current) cancelAnimationFrame(animationID.current);
+            if (timeoutAnimationID.current) clearTimeout(timeoutAnimationID.current);
+            if (map.current) map.current.remove();
         };
     }, [options]);
 
-    const setAnimationID = (data) => {
-        console.log('animationID', data);
-        animationID.current = data
-    }
-    const setTimeoutID = (data) => {
-        console.log('timeoutAnimation', data);
-        timeoutAnimation.current = data
+    // const setAnimation = (data) => {
+    //     // console.log('animationID', data);
+    //     animationID.current = requestAnimationFrame(data)
+    // }
+    // const setTimeoutID = (data) => {
+    //     // console.log('timeoutAnimation', data);
+    //     timeoutAnimation.current = data
+    // }
+
+    const setInfo = (data) => {
+        // console.log('info', data);
+        const date = new Date(data.loc1.time);
+        date.setHours(date.getHours());
+        const day = date.getDate();
+        const month = date.getMonth() + 1;
+        const year = date.getFullYear();
+        const hours = date.getHours();
+        const minutes = date.getMinutes();
+        const formattedDate = `${day}/${month}/${year}`;
+        const formattedTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+
+        setStage({
+            date: formattedDate,
+            time: formattedTime,
+            speed: data.computed.time
+        })
     }
     return (
         <div ref={mapContainer} id='ekmap-tracking-his-map'>
-            {/* {showControls.map != null && <Animate_And_Controls map={showControls.map} HistoryData={showControls.Data} options={showControls.options} />} */}
-            {showControls.map != null && <Animate_And_Controls map={showControls.map} segmentData={showControls.Data} options={showControls.options} animID={setAnimationID} timeoutID={setTimeoutID} />}
+            {showControls.map != null && <Animate_And_Controls map={showControls.map} segmentData={showControls.Data} options={showControls.options} animation={showControls.map? true: false} currentInfo={setInfo} />}
             <MapLegend />
+            {Stage.date != null && <div className='ekmapplf_tracking-map-legend-his'>
+                <Flex gap="small" align="center" justify='center' wrap='wrap' style={{ 'width': '50%', 'borderRight': '1px solid' }}>
+                    <span style={{ 'fontWeight': 600, 'color': 'rgb(132, 132, 132)', 'textAlign': 'center', 'width': '100%' }}>{Stage.date}</span>
+                    <span style={{ 'fontWeight': 600, 'color': 'rgb(68, 68, 68)', 'textAlign': 'center' }}>{Stage.time}</span>
+                </Flex>
+                <Flex gap="small" align="center" justify='center' wrap='wrap' style={{ 'width': '49%' }}>
+                    <span style={{ 'fontWeight': 600, 'color': 'rgb(132, 132, 132)', 'textAlign': 'center', 'width': '100%' }}>km/h</span>
+                    <span style={{ 'fontWeight': 600, 'color': 'rgb(54, 153, 255)', 'textAlign': 'center' }}>{Stage.speed}</span>
+                </Flex>
+            </div>}
         </div>
     );
 }

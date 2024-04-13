@@ -1,4 +1,4 @@
-import { Row, Col, List } from 'antd';
+import { Row, Col, List, Button } from 'antd';
 import "./SupervisoryStaffRealTime.css";
 import {TableCustom,RealtimeMap,WrapperCard, WrapperCardTable, WrapperCardMap} from "@/components";
 import { useEffect, useState } from 'react';
@@ -102,8 +102,10 @@ export default function SupervisoryStaffRealTime() {
   }
 
   const handlerShowHistory = (evt) => {
-    navigate(`/employee-monitor-detail/${evt}`);
-
+    navigate(`/employee-monitor-detail/${evt["_id"]}`);
+  }
+  const handlerShowHistoryForAnyOne = () => {
+    navigate("/employee-monitor-detail");
   }
   const renderDataMoveTopEmployee = (arrSummary) => {
     let arrDataSort = arrSummary.sort((a, b) => b.summary.move.distance - a.summary.move.distance);
@@ -180,9 +182,9 @@ export default function SupervisoryStaffRealTime() {
         <div className="flex justify-center items-center">
           <span className="text-2xl font-semibold leading-[21px]">Giám sát thời gian thực</span>
         </div>
-        {/* <div className="flex mb-2">
-          <Button icon={<FilterOutlined />}>Bộ lọc</Button>
-        </div> */}
+        <div className="flex">
+          <Button onClick={handlerShowHistoryForAnyOne}>Xem dữ liệu lịch sử</Button>
+        </div>
       </Row>
       <Row style={{ marginTop: "20px" }} gutter={5}>
         <Col span={12} className="card-container">

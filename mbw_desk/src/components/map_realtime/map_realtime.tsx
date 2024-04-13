@@ -200,7 +200,11 @@ function RealtimeMap({ options, onClickPopup , status}) {
                             const DataTracking = await responseTracking.json();
                             const DataCheckin = await responseCheckin.json();
                             if (!DataTracking.position && !DataCheckin.length) {
-                                return null;
+                                return {
+                                    '_id': DataTracking.summary._id,
+                                    'name': DataTracking.summary.name,
+                                    'status': 'offline',
+                                };
                             }
                             const TrackTimestamp = DataTracking.position ? Date.parse(DataTracking.position.timestamp) : 0;
                             const CheckinTimestamp = DataCheckin.length ? Date.parse(DataCheckin[0].timestamp) : 0;
@@ -228,7 +232,11 @@ function RealtimeMap({ options, onClickPopup , status}) {
                                     'status': status,
                                     'timestamp' : timestamp
                                 };
-                            } else return null
+                            } else return {
+                                '_id': DataTracking.summary._id,
+                                'name': DataTracking.summary.name,
+                                'status': 'offline',
+                            };
 
                             function isToday(timestamp) {
                                 const todayTimestamp = new Date().setHours(0, 0, 0, 0);

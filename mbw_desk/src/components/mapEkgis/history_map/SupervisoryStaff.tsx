@@ -110,7 +110,12 @@ export default function SupervisoryStaff({options, loading}) {
                 </div>
                 <div style={{ marginLeft: '10px' }}>
                   <div style={{ opacity: '70%', color: '#212B36', fontSize: '14px', fontWeight: 500 }}>Quãng đường di chuyển</div>
-                  <div style={{ fontWeight: 600, fontSize: '22px', color: '#212B36', marginTop: '8px' }}>{options.summary && formatDistance(options.summary.move.distance)}</div>
+                  {options.summary != null ? (
+                    <div style={{ fontWeight: 600, fontSize: '22px', color: '#212B36', marginTop: '8px' }}>{options.summary && formatDistance(options.summary.move.distance)}</div>
+                  ):(
+                    <div style={{ fontWeight: 600, fontSize: '22px', color: '#212B36', marginTop: '8px' }}>0 m</div>
+                  )}
+                  
                 </div>
               </div>
             </div>
@@ -125,7 +130,12 @@ export default function SupervisoryStaff({options, loading}) {
                 </div>
                 <div style={{ marginLeft: '10px' }}>
                   <div style={{ opacity: '70%', color: '#212B36', fontSize: '14px', fontWeight: 500 }}>Thời gian di chuyển</div>
-                  <div style={{ fontWeight: 600, fontSize: '22px', color: '#212B36', marginTop: '8px' }}>{options.summary && formatTime(options.summary.move.totalTime)}</div>
+                  {options.summary != null ? (
+                    <div style={{ fontWeight: 600, fontSize: '22px', color: '#212B36', marginTop: '8px' }}>{options.summary && formatTime(options.summary.move.totalTime)}</div>
+                  ):(
+                    <div style={{ fontWeight: 600, fontSize: '22px', color: '#212B36', marginTop: '8px' }}>0 giây</div>
+                  )}
+                  
                 </div>
               </div>
             </div>
@@ -140,7 +150,11 @@ export default function SupervisoryStaff({options, loading}) {
                 </div>
                 <div style={{ marginLeft: '10px' }}>
                   <div style={{ opacity: '70%', color: '#212B36', fontSize: '14px', fontWeight: 500 }}>Tốc độ trung bình</div>
-                  <div style={{ fontWeight: 600, fontSize: '22px', color: '#212B36', marginTop: '8px' }}>{options.summary && formatUnitSpeed(options.summary.move.avgSpeed)} km/h</div>
+                  {options.summary != null ? (
+                    <div style={{ fontWeight: 600, fontSize: '22px', color: '#212B36', marginTop: '8px' }}>{options.summary && formatUnitSpeed(options.summary.move.avgSpeed)} km/h</div>
+                  ):(
+                    <div style={{ fontWeight: 600, fontSize: '22px', color: '#212B36', marginTop: '8px' }}>0 km/h</div>
+                  )}
                 </div>
               </div>
             </div>
@@ -158,7 +172,7 @@ export default function SupervisoryStaff({options, loading}) {
                       Số lần dừng
                     </div>
                     <div style={{ fontWeight: 600, fontSize: '22px', color: '#212B36', marginTop: '8px' }}>
-                      {options.summary && options.summary.stop.count}
+                      {options.summary && options.summary.stop.count ? (options.summary.stop.count):(0)}
                     </div>
                   </div>
                   <div style={{ border: '1px solid #D9D9D9', height: '100%' }}></div>
@@ -167,7 +181,7 @@ export default function SupervisoryStaff({options, loading}) {
                       Thời gian dừng
                     </div>
                     <div style={{ fontWeight: 600, fontSize: '22px', color: '#212B36', marginTop: '8px' }}>
-                      {options.summary && formatTime(options.summary.stop.totalTime)}
+                      {options.summary && formatTime(options.summary.stop.totalTime)? (formatTime(options.summary.stop.totalTime)):(<span>0 giây</span>)}
                     </div>
                   </div>
                 </div>
@@ -186,7 +200,7 @@ export default function SupervisoryStaff({options, loading}) {
                     Số lần viếng thăm
                     </div>
                     <div style={{ fontWeight: 600, fontSize: '22px', color: '#212B36', marginTop: '8px' }}>
-                      {options.summary && options.summary.checkin.count}
+                      {options.summary && options.summary.checkin.count? (options.summary.checkin.count):(0)}
                     </div>
                   </div>
                   <div style={{ border: '1px solid #D9D9D9', height: '100%' }}></div>
@@ -195,7 +209,7 @@ export default function SupervisoryStaff({options, loading}) {
                     Thời gian viếng thăm
                     </div>
                     <div style={{ fontWeight: 600, fontSize: '22px', color: '#212B36', marginTop: '8px' }}>
-                    {options.summary && formatTime(options.summary.checkin.totalTime)}
+                    {options.summary && formatTime(options.summary.checkin.totalTime)?(formatTime(options.summary.checkin.totalTime)): (<span>0 giây</span>)}
                     </div>
                   </div>
                 </div>

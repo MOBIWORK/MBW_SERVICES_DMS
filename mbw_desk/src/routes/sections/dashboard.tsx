@@ -101,6 +101,9 @@ export const dashboardRoutes = [
             },
             {
                 path: 'employee-monitor-detail/:employee_id',element: <EmployeeMonitorDetailPage/>
+            },
+            {
+                path: 'employee-monitor-detail',element: <EmployeeMonitorDetailPage/>
             }
         ]
         
