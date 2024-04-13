@@ -65,6 +65,18 @@ def get_project_object_id(name):
     except Exception as e:
         return exception_handle(e)
 
+# Lấy thông tin nhân viên từ Object ID
+@frappe.whitelist(methods='GET')
+def get_employee_info_by_objid(object_id):
+    try:
+        employee = frappe.get_all('Employee', filters={'object_id': object_id}, fields=['employee_name', 'image as avatar'])
+        if employee:
+            return gen_response(200, 'Thành công', employee)
+        else:
+            return gen_response(200, 'Thành công', [])
+    except Exception as e:
+        return exception_handle(e)
+
 # Danh sách top 5 nhân viên 
 @frappe.whitelist(methods='GET')
 def get_list_top_employee(**kwargs):
