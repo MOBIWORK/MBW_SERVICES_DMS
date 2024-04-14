@@ -31,14 +31,19 @@ function CustomerMapView() {
 
     useEffect(() => {
         getConfigApi();
-        getConfigMap();
-        getLstCustomer();
     }, []);
     useEffect(() => {
-        if (apiKey != null && apiKey !== '') {
+        if (apiKey != null && apiKey != '') {
             renderMap();
         }
-    }, [apiKey, mapConfig, lstCustomer]);
+    }, [apiKey]);
+
+    useEffect(() => {
+        renderClusterMap();
+    }, [lstCustomer]);
+    useEffect(() => {
+        addLayerIndustry();
+    }, [mapConfig]);
 
     const getConfigApi = async () => {
         let res = await AxiosService.get('/api/method/mbw_dms.api.vgm.map_customer.get_config_api');
@@ -56,106 +61,93 @@ function CustomerMapView() {
         }
         // let objRes = JSON.parse('{"message":"Thành công","result":[{"name":"A Lâm","customer_name":"A Lâm","customer_code":"BH0123111115","customer_type":"Company","customer_group":"Khách lẻ","territory":"Thành phố Hà Nội","customer_primary_contact":"A Lâm","customer_primary_address":"395 Xuân Đỉnh, phường Xuân Đỉnh, Từ Liêm, Hà Nội, Việt Nam-Billing","customer_location_primary":"{\\"lat\\":20.7894317,\\"long\\":105.70448}"},{"name":"A Phương","customer_name":"A Phương","customer_code":"BH0120235252","customer_type":"Company","customer_group":"Khách lẻ","territory":"Thành phố Hà Nội","customer_primary_contact":"A Phương-A Phương","customer_primary_address":"538 Xuân Đỉnh, phường Xuân Đỉnh, Tây Hồ, Hà Nội, Việt Nam-Billing","customer_location_primary":"{\\"lat\\":21.0763504,\\"long\\":105.7869008}"},{"name":"A thuật","customer_name":"A thuật","customer_code":"HN11402","customer_type":"Company","customer_group":"Khách lẻ","territory":"Thành phố Hà Nội","customer_primary_contact":null,"customer_primary_address":"Đình Vĩnh Xương Trung, Mỹ Thành, Mỹ Đức, Hà Nội-Billing","customer_location_primary":"{\\"lat\\":20.6903959,\\"long\\":105.7689993}"},{"name":"A Toản","customer_name":"A Toản","customer_code":"BH0050608072022","customer_type":"Company","customer_group":"Khách lẻ","territory":"Thành phố Hà Nội","customer_primary_contact":"A Toản","customer_primary_address":"408 Trần Cung, Cổ Nhuế 1, Cầu Giấy, Hà Nội, Việt Nam-Billing","customer_location_primary":"{\\"lat\\":21.0555955,\\"long\\":105.7855697}"},{"name":"Anh  Hạnh","customer_name":"Anh  Hạnh","customer_code":"BH0057110022023","customer_type":"Company","customer_group":"Khách lẻ","territory":"Thành phố Hà Nội","customer_primary_contact":"Anh  Hạnh","customer_primary_address":"440 Cổ Nhuế, Cổ Nhuế 2, Từ Liêm, Hà Nội, Vietnam-Billing","customer_location_primary":"{\\"lat\\":21.069679,\\"long\\":105.7781418}"},{"name":"Xuyến  ngũ","customer_name":"Xuyến  ngũ","customer_code":"HN9251","customer_type":"Company","customer_group":"Khách lẻ","territory":"Thành phố Hà Nội","customer_primary_contact":null,"customer_primary_address":"Huyện Ứng Hòa, Hà Nội, VNM-Billing-2","customer_location_primary":"{\\"lat\\":20.7192067,\\"long\\":105.8028217}"},{"name":"Yến  Hiệp","customer_name":"Yến  Hiệp","customer_code":"HN8847","customer_type":"Company","customer_group":"Khách lẻ","territory":"Thành phố Hà Nội","customer_primary_contact":null,"customer_primary_address":"Tảo Khê  tảo  Dương  văn  ứng  hòa hà Nội-Billing","customer_location_primary":"{\\"lat\\":20.7082736,\\"long\\":105.7821972}"}]}');
         // console.log(objRes);
-        //setLstCustomer(objRes.result);
+        // setLstCustomer(objRes.result);
     }
     const renderMap = () => {
-        if(map.current == null ){
-            map.current = new maplibregl.Map({
-                container: 'map',
-                center: [108.485, 16.449],
-                zoom: 5.43
-            });
-            let mapOSMBright = new ekmapplf.VectorBaseMap(
-                'OSM:Bright',
-                apiKey
-            ).addTo(map.current);
-            var basemap = new ekmapplf.control.BaseMap({
-                id: 'basemap_control',
-                baseLayers: [
-                    {
-                        id: "OSM:Bright",
-                        title: 'Bản đồ nền Sáng',
-                        thumbnail: "https://docs.ekgis.vn/assets/map-sang.png",
-                        width: "50px",
-                        height: "50px"
-                    },
-                    {
-                        id: "OSM:Standard",
-                        title: 'Bản đồ nền Tiêu chuẩn',
-                        thumbnail: "https://docs.ekgis.vn/assets/map-chuan.png",
-                        width: "50px",
-                        height: "50px"
-                    },
-                    {
-                        id: "OSM:Night",
-                        title: 'Bản đồ nền Đêm',
-                        thumbnail: "https://docs.ekgis.vn/assets/dem-map.png",
-                        width: "50px",
-                        height: "50px"
-                    }
-                ],
-            });
-            map.current.addControl(basemap, 'bottom-left');
-            basemap.on('changeBaseLayer', async function (response) {
-                await new ekmapplf.VectorBaseMap(response.layer, apiKey).addTo(map.current);
-            });
-            map.current.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'bottom-right');
-            var is3DMap = false;
-            if (map.current.getPitch() > 0) is3DMap = true;
-            else is3DMap = false;
-            var cl = 'maplibregl-terrain2d-control';
-            var tl = 'Hiển thị 2D'
-            if (!is3DMap) {
-                cl = 'maplibregl-terrain3d-control';
-                tl = 'Bản đồ 3D'
-            }
-            let btn3D = new ekmapplf.control.Button({
-                className: 'btn-ctl-group ' + cl,
-                icon: 'none',
-                tooltip: tl
-            });
-            btn3D.on('click', (btn) => {
-                is3DMap = !is3DMap;
-                if (is3DMap) {
-                    btn._div.className = btn._div.className.replaceAll(
-                        'maplibregl-terrain3d-control',
-                        'maplibregl-terrain2d-control'
-                    );
-                    btn._div.title = "Hiển thị 2D";
+        map.current = new maplibregl.Map({
+            container: 'map',
+            center: [108.485, 16.449],
+            zoom: 5.43
+        });
+        let mapOSMBright = new ekmapplf.VectorBaseMap(
+            'OSM:Bright',
+            apiKey
+        ).addTo(map.current);
+        var basemap = new ekmapplf.control.BaseMap({
+            id: 'basemap_control',
+            baseLayers: [
+                {
+                    id: "OSM:Bright",
+                    title: 'Bản đồ nền Sáng',
+                    thumbnail: "https://docs.ekgis.vn/assets/map-sang.png",
+                    width: "50px",
+                    height: "50px"
+                },
+                {
+                    id: "OSM:Standard",
+                    title: 'Bản đồ nền Tiêu chuẩn',
+                    thumbnail: "https://docs.ekgis.vn/assets/map-chuan.png",
+                    width: "50px",
+                    height: "50px"
+                },
+                {
+                    id: "OSM:Night",
+                    title: 'Bản đồ nền Đêm',
+                    thumbnail: "https://docs.ekgis.vn/assets/dem-map.png",
+                    width: "50px",
+                    height: "50px"
                 }
-                else {
-                    btn._div.className = btn._div.className.replaceAll(
-                        'maplibregl-terrain2d-control',
-                        'maplibregl-terrain3d-control'
-                    );
-                    btn._div.title = "Hiển thị 3D";
-                }
-                if (is3DMap) {
-                    map.current.easeTo({ pitch: 60 });
-                    map.current.setLayoutProperty('building-3d', 'visibility', 'visible');
-                } else {
-                    map.current.easeTo({ pitch: 0 });
-                    map.current.setLayoutProperty('building-3d', 'visibility', 'none');
-                }
-            });
-            map.current.addControl(btn3D, 'bottom-right');
-            map.current.addControl(new maplibregl.FullscreenControl(), 'top-right');
-            map.current.on('load', async () => {
-                addLayerIndustry();
-                renderClusterMap();
-            });
-        }else{
-            if(map.current.isStyleLoaded()){
-                addLayerIndustry();
-                renderClusterMap();
-            }else{
-                map.current.on('load', async () => {
-                    addLayerIndustry();
-                    renderClusterMap();
-                });
-            }
-            
+            ],
+        });
+        map.current.addControl(basemap, 'bottom-left');
+        basemap.on('changeBaseLayer', async function (response) {
+            await new ekmapplf.VectorBaseMap(response.layer, apiKey).addTo(map.current);
+        });
+        map.current.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'bottom-right');
+        var is3DMap = false;
+        if (map.current.getPitch() > 0) is3DMap = true;
+        else is3DMap = false;
+        var cl = 'maplibregl-terrain2d-control';
+        var tl = 'Hiển thị 2D'
+        if (!is3DMap) {
+            cl = 'maplibregl-terrain3d-control';
+            tl = 'Bản đồ 3D'
         }
+        let btn3D = new ekmapplf.control.Button({
+            className: 'btn-ctl-group ' + cl,
+            icon: 'none',
+            tooltip: tl
+        });
+        btn3D.on('click', (btn) => {
+            is3DMap = !is3DMap;
+            if (is3DMap) {
+                btn._div.className = btn._div.className.replaceAll(
+                    'maplibregl-terrain3d-control',
+                    'maplibregl-terrain2d-control'
+                );
+                btn._div.title = "Hiển thị 2D";
+            }
+            else {
+                btn._div.className = btn._div.className.replaceAll(
+                    'maplibregl-terrain2d-control',
+                    'maplibregl-terrain3d-control'
+                );
+                btn._div.title = "Hiển thị 3D";
+            }
+            if (is3DMap) {
+                map.current.easeTo({ pitch: 60 });
+                map.current.setLayoutProperty('building-3d', 'visibility', 'visible');
+            } else {
+                map.current.easeTo({ pitch: 0 });
+                map.current.setLayoutProperty('building-3d', 'visibility', 'none');
+            }
+        });
+        map.current.addControl(btn3D, 'bottom-right');
+        map.current.addControl(new maplibregl.FullscreenControl(), 'top-right');
+        map.current.on('load', async () => {
+            await getConfigMap();
+            getLstCustomer();
+        });
     }
     const addLayerIndustry = () => {
         for (let i = 0; i < mapConfig.length; i++) {
@@ -190,6 +182,8 @@ function CustomerMapView() {
             }
             dataGeo.features.push(feature);
         }
+        if(map.current == null) return;
+        if(!map.current.isStyleLoaded()) return;
         if(map.current.getSource('customer_clus')){
             map.current.getSource('customer_clus').setData(dataGeo);
         }else{
