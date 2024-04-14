@@ -46,7 +46,7 @@ function CustomerMapView() {
         
     }
     const getConfigMap = async () => {
-        let res = await AxiosService.get('/api/method/map_customers.api.vgm.map_customer.get_config_map?type_industry=fertilizer_store');
+        let res = await AxiosService.get('/api/method/mbw_dms.api.vgm.map_customer.get_config_map?type_industry=fertilizer_store');
         setMapConfig(res.result)
     }
     const getLstCustomer = async () => {
@@ -54,59 +54,9 @@ function CustomerMapView() {
         if (res.message == "Thành công") {
             setLstCustomer(res.result);
         }
-        // setLstCustomer([
-        //     {
-        //         "name": "A Lâm",
-        //         "customer_name": "A Lâm",
-        //         "customer_code": "BH0123111115",
-        //         "customer_type": "Company",
-        //         "customer_group": "Commercial",
-        //         "territory": "Vietnam",
-        //         "customer_primary_contact": "0124587961",
-        //         "customer_primary_address": "538 Xuân Đỉnh,Phường Xuân Đỉnh,Quận Tây Hồ,Thành phố Hà Nội,Vietnam",
-        //         "customer_location_primary": "{\"long\": 105.7894042, \"lat\": 21.0725648}"
-        //     },{
-        //         "name": "A Phương",
-        //         "customer_name": "A Phương",
-        //         "customer_code": "BH0120235252",
-        //         "customer_type": "Individual",
-        //         "customer_group": "Commercial",
-        //         "territory": "Vietnam",
-        //         "customer_primary_contact": "0124587961",
-        //         "customer_primary_address": "538 Xuân Đỉnh,Phường Xuân Đỉnh,Quận Tây Hồ,Thành phố Hà Nội,Vietnam",
-        //         "customer_location_primary": "{\"long\": 105.7883842, \"lat\": 21.0760971}"
-        //     },{
-        //         "name": "A Toản",
-        //         "customer_name": "A Toản",
-        //         "customer_code": "BH0050608072022",
-        //         "customer_type": "Individual",
-        //         "customer_group": "Commercial",
-        //         "territory": "Vietnam",
-        //         "customer_primary_contact": "0981265412",
-        //         "customer_primary_address": "408 Trần Cung,Phường Cổ Nhuế 2,Quận Cầu Giấy,Thành phố Hà Nội,Vietnam",
-        //         "customer_location_primary": "{\"long\": 105.7855697, \"lat\": 21.0555955}"
-        //     },{
-        //         "name": "Anh Bính",
-        //         "customer_name": "Anh Bính",
-        //         "customer_code": "BH0120235262",
-        //         "customer_type": "Individual",
-        //         "customer_group": "Commercial",
-        //         "territory": "Vietnam",
-        //         "customer_primary_contact": "0981264567",
-        //         "customer_primary_address": "440 Cổ Nhuế,Phường Cổ Nhuế 2,Quận Bắc Từ Liêm,Thành phố Hà Nội,Vietnam",
-        //         "customer_location_primary": "{\"long\": 105.7781418, \"lat\": 21.069679}"
-        //     },{
-        //         "name": "Anh Ân",
-        //         "customer_name": "Anh Ân",
-        //         "customer_code": "BH113",
-        //         "customer_type": "Company",
-        //         "customer_group": "Commercial",
-        //         "territory": "Vietnam",
-        //         "customer_primary_contact": "0234635454",
-        //         "customer_primary_address": "48 hùng vương,Phường Quán Thánh,Quận Ba Đình,Thành phố Hà Nội,Vietnam",
-        //         "customer_location_primary": "{\"long\": 105.8341849, \"lat\": 21.0319976}"
-        //     }
-        // ])
+        // let objRes = JSON.parse('{"message":"Thành công","result":[{"name":"A Lâm","customer_name":"A Lâm","customer_code":"BH0123111115","customer_type":"Company","customer_group":"Khách lẻ","territory":"Thành phố Hà Nội","customer_primary_contact":"A Lâm","customer_primary_address":"395 Xuân Đỉnh, phường Xuân Đỉnh, Từ Liêm, Hà Nội, Việt Nam-Billing","customer_location_primary":"{\\"lat\\":20.7894317,\\"long\\":105.70448}"},{"name":"A Phương","customer_name":"A Phương","customer_code":"BH0120235252","customer_type":"Company","customer_group":"Khách lẻ","territory":"Thành phố Hà Nội","customer_primary_contact":"A Phương-A Phương","customer_primary_address":"538 Xuân Đỉnh, phường Xuân Đỉnh, Tây Hồ, Hà Nội, Việt Nam-Billing","customer_location_primary":"{\\"lat\\":21.0763504,\\"long\\":105.7869008}"},{"name":"A thuật","customer_name":"A thuật","customer_code":"HN11402","customer_type":"Company","customer_group":"Khách lẻ","territory":"Thành phố Hà Nội","customer_primary_contact":null,"customer_primary_address":"Đình Vĩnh Xương Trung, Mỹ Thành, Mỹ Đức, Hà Nội-Billing","customer_location_primary":"{\\"lat\\":20.6903959,\\"long\\":105.7689993}"},{"name":"A Toản","customer_name":"A Toản","customer_code":"BH0050608072022","customer_type":"Company","customer_group":"Khách lẻ","territory":"Thành phố Hà Nội","customer_primary_contact":"A Toản","customer_primary_address":"408 Trần Cung, Cổ Nhuế 1, Cầu Giấy, Hà Nội, Việt Nam-Billing","customer_location_primary":"{\\"lat\\":21.0555955,\\"long\\":105.7855697}"},{"name":"Anh  Hạnh","customer_name":"Anh  Hạnh","customer_code":"BH0057110022023","customer_type":"Company","customer_group":"Khách lẻ","territory":"Thành phố Hà Nội","customer_primary_contact":"Anh  Hạnh","customer_primary_address":"440 Cổ Nhuế, Cổ Nhuế 2, Từ Liêm, Hà Nội, Vietnam-Billing","customer_location_primary":"{\\"lat\\":21.069679,\\"long\\":105.7781418}"},{"name":"Xuyến  ngũ","customer_name":"Xuyến  ngũ","customer_code":"HN9251","customer_type":"Company","customer_group":"Khách lẻ","territory":"Thành phố Hà Nội","customer_primary_contact":null,"customer_primary_address":"Huyện Ứng Hòa, Hà Nội, VNM-Billing-2","customer_location_primary":"{\\"lat\\":20.7192067,\\"long\\":105.8028217}"},{"name":"Yến  Hiệp","customer_name":"Yến  Hiệp","customer_code":"HN8847","customer_type":"Company","customer_group":"Khách lẻ","territory":"Thành phố Hà Nội","customer_primary_contact":null,"customer_primary_address":"Tảo Khê  tảo  Dương  văn  ứng  hòa hà Nội-Billing","customer_location_primary":"{\\"lat\\":20.7082736,\\"long\\":105.7821972}"}]}');
+        // console.log(objRes);
+        //setLstCustomer(objRes.result);
     }
     const renderMap = () => {
         if(map.current == null ){
@@ -244,7 +194,7 @@ function CustomerMapView() {
             map.current.getSource('customer_clus').setData(dataGeo);
         }else{
             if(!map.current.getImage('marker-customer')){
-                const iconCustomer = await map.current.loadImage("/public/check-icon.png");
+                const iconCustomer = await map.current.loadImage("https://sfademo.mbwcloud.com/files/check-icon.png");
                 map.current.addImage('marker-customer', iconCustomer.data);
             }
             map.current.addSource('customer_clus', {
@@ -355,8 +305,6 @@ function CustomerMapView() {
                     'text-halo-blur': 0.5
                   }
             });
-            console.log(map.current);
-
             map.current.on('click', 'customer_clus-uncluster', function (e) {
                 var coordinates = e.features[0].geometry.coordinates.slice();
                 var properties = e.features[0].properties;

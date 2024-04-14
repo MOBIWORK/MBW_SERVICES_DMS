@@ -38,8 +38,8 @@ export default function TravelHistory({ employee }: { employee?: string }) {
       to_time: string | null,
     }>({
       apiKey: import.meta.env.VITE_API_KEY,
-      projectId: "",
-      objectId: "",
+      projectId: "6556e471178a1db24ac1a711",
+      objectId: "654c8a12d65d3e52f2d286de",
       from_time: from_time,
       to_time: to_time,
     })
