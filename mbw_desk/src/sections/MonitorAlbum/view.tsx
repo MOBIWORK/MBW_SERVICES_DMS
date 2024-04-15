@@ -293,7 +293,7 @@ export default function MonitorAlbum() {
                     hoverable
                     // setModal({ open: true, id: data?.name })
                     onClick={() => setModal({ open: true, id: data })}
-                    cover={<img alt={data?.image_url} src={data?.image_url} />}
+                    cover={<img className="!object-cover" alt={data?.image_url} src={data?.image_url} />}
                   >
                     <div className="flex items-center h-3">
                       <UserIcon />
