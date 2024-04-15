@@ -13,7 +13,9 @@ class DMSSalesInvoice(SalesInvoice):
         year = int(nowdate().split('-')[0])
 
         # Lấy id của nhân viên
-        user_name = frappe.get_value('Employee',{ 'user_id': self.owner}, 'name')
+        name_sal_order = self.get('items')[0].sales_order
+        employee = frappe.get_value('Sales Order', {'name': name_sal_order}, 'owner')
+        user_name = frappe.get_value('Employee',{ 'user_id': employee}, 'name')
         sales_team = frappe.get_value("DMS KPI", {'nhan_vien_ban_hang': user_name}, "nhom_ban_hang")
 
         # Kiểm tra đã tồn tại bản ghi KPI của tháng này chưa
@@ -49,7 +51,9 @@ class DMSSalesInvoice(SalesInvoice):
         year = int(nowdate().split('-')[0])
         
         # Lấy id của nhân viên
-        user_name = frappe.get_value('Employee',{ 'user_id': self.owner}, 'name')
+        name_sal_order = self.get('items')[0].sales_order
+        employee = frappe.get_value('Sales Order', {'name': name_sal_order}, 'owner')
+        user_name = frappe.get_value('Employee',{ 'user_id': employee}, 'name')
 
         # Kiểm tra đã tồn tại bản ghi KPI của tháng này chưa
         existing_monthly_summary = frappe.get_all(
