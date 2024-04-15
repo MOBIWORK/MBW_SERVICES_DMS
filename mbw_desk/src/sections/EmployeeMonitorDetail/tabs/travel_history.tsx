@@ -51,13 +51,11 @@ export default function TravelHistory({ employee }: { employee?: string }) {
       let resSummary = await axios.get(urlSummary);
       console.log(resSummary);
       resSummary = resSummary.data
-      if(resSummary.statusText == "OK"){
-        setOptions(prev => ({
-          ...prev, 
-          summary: resSummary.data["summary"],
-          details: resSummary.data["details"],
-        }));
-      }
+      setOptions(prev => ({
+        ...prev, 
+        summary: resSummary?.summary,
+        details: resSummary?.details,
+      }));
     }else{
       setOptions(prev => ({
         ...prev, 

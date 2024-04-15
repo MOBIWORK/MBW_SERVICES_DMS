@@ -223,8 +223,8 @@ export default function SupervisoryStaffRealTime() {
       let urlSummary = `https://api.ekgis.vn/v2/tracking/locationHistory/summary/lastest/${rs.result[ "Project ID"]}/null?api_key=${options.apiKey}`;
       let res = await axios.get(urlSummary);
       res= res.data;
-      if(res.statusText == "OK"){
-        let arrSummary = res["data"].results;
+      if(res?.results.length > 0){
+        let arrSummary = res?.results;
         renderDataMoveTopEmployee(arrSummary, JSON.parse(JSON.stringify(arrEmployee)));
         renderDataCheckingEmployee(arrSummary, JSON.parse(JSON.stringify(arrEmployee)));
       }
