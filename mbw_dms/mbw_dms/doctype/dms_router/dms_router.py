@@ -225,6 +225,10 @@ def create_router(body):
         "travel_date":body.get('travel_date'),
         "status": "Active"
         })
+        print("is_has_travel_date",is_has_travel_date,body.get("travel_date"))
+
+        if body.get("travel_date") == "Không giới hạn":
+            is_has_travel_date = False
         if is_has_travel_date:
             return gen_response(500,body.get('employee')+  _(" have Router in this weekday"))
         field_validate= ["travel_date","status", "customers", "channel_code", "team_sale","channel_name","employee"]
@@ -255,12 +259,17 @@ def update_router(body):
     try:
         body = dict(body)
         name = validate_filter(type_check='require',value=body.get('name'))
-        is_has_travel_date = frappe.db.get_value("DMS Router",filters={
+        is_has_travel_date = frappe.db.get_value("DMS Router",{
             "employee": body.get('employee'),
             "travel_date":body.get('travel_date'),
             "status": "Active",
             "name": ["!=",name]
-        })
+        },
+        ["travel_date"]
+        )
+        print("is_has_travel_date",is_has_travel_date)
+        if body.get("travel_date") == "Không giới hạn":
+            is_has_travel_date = False
         if is_has_travel_date:
             return gen_response(500,body.get('employee')+  _(" have Router in this weekday"))
         if body['cmd'] :
