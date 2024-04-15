@@ -48,7 +48,7 @@ export default function CustomerList({data,handleData}:Props) {
                         })
                     })
                 }}
-                defaultValue={value ? value.split(';') : ['1','2',"3","4"]}
+                defaultValue={ value ? value.split(';') : ['1','2',"3","4"]}
                 />
             }
         },{

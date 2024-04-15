@@ -50,6 +50,7 @@ export default function TravelHistory({ employee }: { employee?: string }) {
       let urlSummary = `https://api.ekgis.vn/v2/tracking/locationHistory/summary/${projectId}/${objectId}?from_time=${from_time}&to_time=${to_time}&api_key=${options.apiKey}`;
       let resSummary = await axios.get(urlSummary);
       console.log(resSummary);
+      resSummary = resSummary.data
       if(resSummary.statusText == "OK"){
         setOptions(prev => ({
           ...prev, 

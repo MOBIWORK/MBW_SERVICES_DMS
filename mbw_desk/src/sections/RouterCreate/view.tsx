@@ -43,7 +43,12 @@ export default function RouterCreate() {
         }
       }
       return customer
-    })}
+    }).map(customer => {
+      if(!customer.frequency) customer.frequency= "1;2;3;4"
+
+      return customer
+    })
+  }
     console.log({value});
     
     try {
@@ -64,6 +69,9 @@ export default function RouterCreate() {
           delete customer[key]
         }
       }
+      return customer
+    }).map(customer => {
+      if(!customer.frequency) customer.frequency= "1;2;3;4"
       return customer
     })}
     try {
