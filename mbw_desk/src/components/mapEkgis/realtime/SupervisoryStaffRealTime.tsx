@@ -222,6 +222,7 @@ export default function SupervisoryStaffRealTime() {
       }
       let urlSummary = `https://api.ekgis.vn/v2/tracking/locationHistory/summary/lastest/${rs.result[ "Project ID"]}/null?api_key=${options.apiKey}`;
       let res = await axios.get(urlSummary);
+      console.log(res);
       res= res.data;
       if(res?.results.length > 0){
         let arrSummary = res?.results;
