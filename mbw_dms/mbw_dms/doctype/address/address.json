@@ -56,6 +56,7 @@
   {
    "fieldname": "address_line2",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "Address Line 2"
   },
   {
@@ -151,11 +152,10 @@
  "icon": "fa fa-map-marker",
  "idx": 5,
  "links": [],
- "modified": "2024-01-24 15:19:20.203616",
+ "modified": "2024-04-13 11:07:23.494368",
  "modified_by": "Administrator",
  "module": "MBW DMS",
  "name": "Address",
- "name_case": "Title Case",
  "owner": "Administrator",
  "permissions": [
   {
@@ -208,7 +208,6 @@
    "read": 1,
    "report": 1,
    "role": "System Manager",
-   "set_user_permissions": 1,
    "share": 1,
    "write": 1
   },
