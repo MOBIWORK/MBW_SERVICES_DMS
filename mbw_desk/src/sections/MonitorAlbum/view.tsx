@@ -161,7 +161,7 @@ export default function MonitorAlbum() {
   useEffect(() => {
     (async () => {
       const rsAlbum = await AxiosService.get(
-        "/api/method/mbw_dms.api.album.list_album_name"
+        "/api/method/mbw_dms.api.album.list_album"
       );
       setCreation(dateNow);
       setDataFilterAlbum(rsAlbum.result);
@@ -266,8 +266,8 @@ export default function MonitorAlbum() {
               options={[
                 { label: "Tất cả Album", value: "" },
                 ...dataFilterAlbum.map((album: any) => ({
-                  label: album.album_name,
-                  value: album.album_name,
+                  label: album.ten_album,
+                  value: album.ten_album,
                 })),
               ]}
               onSearch={(value: string) => setKeyS(value)}
