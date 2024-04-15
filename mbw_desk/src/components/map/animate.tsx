@@ -3,14 +3,14 @@ import { Button, Flex, Select, Checkbox } from "antd";
 import { PauseOutlined, CaretRightOutlined, RetweetOutlined, XFilled, CloseSquareFilled } from '@ant-design/icons';
 import * as turf from "@turf/turf";
 
-const Animate_And_Controls = ({ map, segmentData, options, currentInfo, animation }) => {
+const Animate_And_Controls = ({ map, segmentData, options, currentInfo }) => {
     // console.log(map);
     // console.log(segmentData);
 
     const animationID = useRef(null);
     const timeout = useRef(null);
     const [isFollow, setFollow] = useState(options.animation.follow)
-    const [isAnimation, setAnimation] = useState(options.animation.animate)
+    const [isAnimation, setAnimation] = useState(true)
     const [animationSpeed, setanimationSpeed] = useState(10);
     const [isReplay, setReplay] = useState(true)
     const listSpeeds = [
@@ -113,6 +113,7 @@ const Animate_And_Controls = ({ map, segmentData, options, currentInfo, animatio
         // console.log(i);
         if (!e) {
             currentIndex = i - 1;
+            currentInfo(speedData[currentIndex])
             return;
         }
         currentInfo(speedData[currentIndex])
@@ -146,54 +147,64 @@ const Animate_And_Controls = ({ map, segmentData, options, currentInfo, animatio
                         lastBearing = bearing;
                     }
                     firstPoint = alongPathFrame;
-
-                    if (isFollow) {
-                        map.panTo(alongPathFrame, { animate: true, essential: true, curve: 1.42, duration: 100, pitch: 60, bearing: lastBearing })
-                    }
-                    if (map.getSource('locationMarker')) {
-                        map.getSource("locationMarker").setData({
-                            type: "FeatureCollection",
-                            features: [turf.point(alongPathFrame, { bearing: lastBearing })]
-                        })
-                    }
-                    alongPath = alongPath.concat([alongPathFrame]);
-
-                    if (alongPath.length > 1)
-                        if (map.getSource('LocationHistory')) {
-                            map.getSource("LocationHistory").setData({
+                    try {
+                        if (map && isFollow) {
+                            map.panTo(alongPathFrame, { animate: true, essential: true, curve: 1.42, duration: 100, pitch: 60, bearing: lastBearing })
+                        }
+                        if (map && map.getSource('locationMarker')) {
+                            map.getSource("locationMarker").setData({
                                 type: "FeatureCollection",
-                                features: [turf.lineString(alongPath)]
+                                features: [turf.point(alongPathFrame, { bearing: lastBearing })]
                             })
                         }
-                    // animation(frame);
-                    animationID.current = requestAnimationFrame(frame);
+                        alongPath = alongPath.concat([alongPathFrame]);
+
+                        if (map && alongPath.length > 1)
+                            if (map.getSource('LocationHistory')) {
+                                map.getSource("LocationHistory").setData({
+                                    type: "FeatureCollection",
+                                    features: [turf.lineString(alongPath)]
+                                })
+                            }
+                        // animation(frame);
+                        animationID.current = requestAnimationFrame(frame);
+                        map.animation_current = animationID.current
+                    } catch (ex) {
+                        console.log(ex)
+                    }
                 }
                 // animation(frame);
                 animationID.current = requestAnimationFrame(frame);
+                map.animation_current = animationID.current
                 // animID(animationID.current);
             }
             i++;
             if (isReplay && i === speedData.length) i = 0;
             timeout.current = setTimeout(animate.bind(this), timeoutFrame, i, speedData)
+            map.timeout_current = timeout.current
         }
     }
 
-    useEffect(()=>{
-        setAnimation(options.animation.animate)
-    },[options])
+    useEffect(() => {
+        // setAnimation(false)
+        if (animationID.current) cancelAnimationFrame(animationID.current);
+        if (timeout.current) clearTimeout(timeout.current);
+    }, [map, options, segmentData])
 
     useEffect(() => {
         // if (!isAnimation) setAnimation(true);
-        console.log(options.animation);
-        console.log(isAnimation);
+        // console.log(options.animation);
+        // console.log(isAnimation);
 
         if (animationID.current) cancelAnimationFrame(animationID.current);
         if (timeout.current) clearTimeout(timeout.current);
 
         if (isAnimation) {
             currentIndex = 0;
-            if (segmentData[0].computed.time)
+            if (segmentData.length && segmentData[0].computed.time) {
                 timeout.current = setTimeout(animate.bind(this), (segmentData[0].computed.time * 1000) / animationSpeed, currentIndex, segmentData);
+                map.timeout_current = timeout.current
+            }
             map.setPaintProperty(`ek-tracking-his-${_map_Container.id}-LineString`, 'line-color', '#b5b5b5');
             map.setPaintProperty(`ek-tracking-his-${_map_Container.id}-LineString`, 'line-opacity', 0.5);
             map.setLayoutProperty(`ek-tracking-his-${_map_Container.id}-LineString-arrow`, 'visibility', 'none');
@@ -201,6 +212,7 @@ const Animate_And_Controls = ({ map, segmentData, options, currentInfo, animatio
             map.setLayoutProperty(`locationMarker`, 'visibility', 'visible');
             map.setLayoutProperty(`LocationHistory`, 'visibility', 'visible');
         } else {
+            currentInfo(null)
             if (animationID.current) cancelAnimationFrame(animationID.current);
             if (timeout.current) clearTimeout(timeout.current);
             map.setPaintProperty(`ek-tracking-his-${_map_Container.id}-LineString`, 'line-color', options.route.lineCorlor);
@@ -215,7 +227,7 @@ const Animate_And_Controls = ({ map, segmentData, options, currentInfo, animatio
             if (animationID.current) cancelAnimationFrame(animationID.current);
             if (timeout.current) clearTimeout(timeout.current);
         };
-    }, [map, segmentData, isFollow, isAnimation, animationSpeed]);
+    }, [isFollow, isAnimation, animationSpeed]);
 
 
     const toggleAnimation = () => {

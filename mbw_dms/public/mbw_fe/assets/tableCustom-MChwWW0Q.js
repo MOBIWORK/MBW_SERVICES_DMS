@@ -1,4 +1,8 @@
+<<<<<<<< HEAD:mbw_dms/public/mbw_fe/assets/tableCustom-MChwWW0Q.js
 import{bl as t,by as e}from"./index-1V10OnT5.js";const n=t(e)`
+========
+import{bl as t,by as e}from"./index-5lGd2kZH.js";const n=t(e)`
+>>>>>>>> 85a7bb0c (fix map history and build app):mbw_dms/public/mbw_fe/assets/tableCustom-XC82UqB7.js
   & .ant-table-container .ant-table-cell {
     font-size: 14px !important;
     font-weight: 500;

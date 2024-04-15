@@ -38,72 +38,89 @@ export default function TravelHistory({ employee }: { employee?: string }) {
       to_time: string | null,
     }>({
       apiKey: import.meta.env.VITE_API_KEY,
-      projectId: "6556e471178a1db24ac1a711",
-      objectId: "654c8a12d65d3e52f2d286de",
+      projectId: "",
+      objectId: "",
       from_time: from_time,
       to_time: to_time,
     })
   
   const initDataSummary = async (projectId: string, objectId: string) => {
     setLoading(true);
-    let urlSummary = `https://api.ekgis.vn/v2/tracking/locationHistory/summary/${projectId}/${objectId}?from_time=${from_time}&to_time=${to_time}&api_key=${options.apiKey}`;
-    let resSummary = await axios.get(urlSummary);
-    if(resSummary.statusText == "OK"){
+    if(objectId != null && objectId != ""){
+      let urlSummary = `https://api.ekgis.vn/v2/tracking/locationHistory/summary/${projectId}/${objectId}?from_time=${from_time}&to_time=${to_time}&api_key=${options.apiKey}`;
+      let resSummary = await axios.get(urlSummary);
+      console.log(resSummary);
+      if(resSummary.statusText == "OK"){
+        setOptions(prev => ({
+          ...prev, 
+          summary: resSummary.data["summary"],
+          details: resSummary.data["details"],
+        }));
+      }
+    }else{
       setOptions(prev => ({
         ...prev, 
-        summary: resSummary.data["summary"],
-        details: resSummary.data["details"],
+        summary: {
+          move: {
+            avgSpeed: 0,
+            count: 0,
+            distance: 0,
+            totalTime: 0
+          },
+          stop: {
+            count: 0,
+            totalTime: 0
+          },
+          checkin: {
+            count: 0,
+            totalTime: 0
+          }
+        },
+        details: [],
       }));
     }
     setLoading(false);
   }
   const initDataEmployee = async (projectId: string) => {
-    let urlSummary = `https://api.ekgis.vn/tracking/${projectId}/objects?api_key=${options.apiKey}`;
-    let resSummary = await axios.get(urlSummary);
-    if(resSummary.statusText == "OK"){
-      let arrEmployee = resSummary["data"].results.objects.map(function(item){
-        return {value: item["_id"], label: item["name"]};
+    let resSummary = await AxiosService.get("/api/method/mbw_dms.api.user.get_list_employees");
+    if(resSummary.message == "Thành công"){
+      let arrEmployee = resSummary["result"].map(function(item){
+        return {value: item["object_id"], label: item["employee_name"]};
       });
       setArrEmployee(arrEmployee);
     }
   }
-  const handleChangeEmployee = async (item) => {
+  const handleChangeEmployee = async (item, option) => {
     setOptions(prev => ({
       ...prev, 
       objectId: item,
     }))
     initDataSummary(options.projectId, item);
-    const infoEmployee = await AxiosService.get(`/api/method/mbw_dms.api.user.get_employee_info_by_objid?object_id=${item}`);
-    if(infoEmployee.message == "Thành công"){
-      if(infoEmployee.result.length > 0){
-        setNameEmployee(infoEmployee.result[0].employee_name);
-      }
-    }
+    setNameEmployee(option.label);
   }
 
   useEffect(() => {
     (async () => {
       if(employee == null || employee == ""){
+        const rs = await AxiosService.get(`/api/method/mbw_dms.api.user.get_project_object_id?name=${employee}`)
         setOptions(prev => ({
           ...prev, 
-          projectId: "6556e471178a1db24ac1a711", //rs.result["Project ID"],
-          objectId: "654c8a12d65d3e52f2d286de" //Fix cứng dữ liệu để demo
+          projectId: rs.result["Project ID"], //,
+          objectId: "" //Fix cứng dữ liệu để demo
         }))
-        initDataEmployee("6556e471178a1db24ac1a711");
-
+        initDataEmployee(rs.result["Project ID"]);
         return;
       }
-      employee = "654c8a12d65d3e52f2d286de";
       try {
         const rs = await AxiosService.get(`/api/method/mbw_dms.api.user.get_project_object_id?name=${employee}`)
         setOptions(prev => ({
           ...prev, 
-          projectId: "6556e471178a1db24ac1a711", //rs.result["Project ID"]
+          projectId: rs.result["Project ID"], //rs.result["Project ID"]
           objectId: employee,
         }))
-        initDataEmployee("6556e471178a1db24ac1a711"); //rs.result["Project ID"]
+        initDataEmployee(rs.result["Project ID"]); //rs.result["Project ID"]
         if(employee != null && employee != "") setDefaultEmployeeSelect(employee);
-        initDataSummary("6556e471178a1db24ac1a711", employee); //rs.result["Project ID"]
+        initDataSummary(rs.result["Project ID"], employee); //rs.result["Project ID"]
         const infoEmployee = await AxiosService.get(`/api/method/mbw_dms.api.user.get_employee_info_by_objid?object_id=${employee}`);
         if(infoEmployee.message == "Thành công"){
           if(infoEmployee.result.length > 0){
@@ -135,7 +152,7 @@ export default function TravelHistory({ employee }: { employee?: string }) {
         <div className='py-4 border border-solid border-transparent border-b-[#F5F5F5]'>
           <Select
               defaultValue={defaultEmployeeSelect}
-              style={{ width: 120 }}
+              style={{ width: 150 }}
               onChange={handleChangeEmployee}
               options={arrEmployee}
             />

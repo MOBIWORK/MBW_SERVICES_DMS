@@ -107,52 +107,99 @@ export default function SupervisoryStaffRealTime() {
   const handlerShowHistoryForAnyOne = () => {
     navigate("/employee-monitor-detail");
   }
-  const renderDataMoveTopEmployee = (arrSummary) => {
-    let arrDataSort = arrSummary.sort((a, b) => b.summary.move.distance - a.summary.move.distance);
+  const renderDataMoveTopEmployee = (arrSummary, arrEmployee) => {
+    for(let i = 0; i < arrEmployee.length; i++){
+      for(let j = 0; j < arrSummary.length; j++){
+        if(arrEmployee[i].object_id != null && arrEmployee[i].object_id == arrSummary[j].object["_id"]){
+          arrEmployee[i].summary = arrEmployee[i].summary;
+          break;
+        }else{
+          arrEmployee[i].summary = {};
+        }
+      }
+    }
+    let arrDataSort = arrEmployee.sort((a, b) => {
+      if(a.summary != null && a.summary.move != null && b.summary != null && b.summary.move != null) return b.summary.move.distance - a.summary.move.distance;
+    });
     let dataMoveTopEmployee = [];
     for(let i = 0; i < arrDataSort.length; i++){
       if(i == 5) break;
       dataMoveTopEmployee.push({
         'stt': i+1,
-        'pic_profile': "/public/user_default.png",
-        'emp_name': arrDataSort[i].object.name,
-        'emp_id': arrDataSort[i].object.empl_id,
-        'distance': formatDistance(arrDataSort[i].summary.move.distance)
+        'pic_profile': arrDataSort[i].avatar != null? arrDataSort[i].avatar : "/public/user_default.png",
+        'emp_name': arrDataSort[i].employee_name,
+        'emp_id': arrDataSort[i].name,
+        'distance': arrDataSort[i].summary != null && arrDataSort[i].summary.move != null? formatDistance(arrDataSort[i].summary.move.distance) : formatDistance(0)
       })
     }
     setDataTopDistanceEmployee(dataMoveTopEmployee);
   }
-  const renderDataEmployee = async () => {
+  const renderDataEmployee = async (arrEmployeeInput) => {
     let dateNow = new Date();
     let timeStamp = dateNow.getTime()/1000;
     let res = await AxiosService(`/api/method/mbw_dms.api.user.get_list_top_employee?from_date=${timeStamp}&to_date=${timeStamp}`);
     let arrEmployee = [];
     if(res.message == "Thành công"){
-      for(let i = 0; i < res.result.length; i++){
-        let item = res.result[i];
-        arrEmployee.push({
-          's1tt': i+1,
-          'pic_profile': item.employee_avatar != null && item.employee_avatar != ""? item.employee_avatar : "/public/user_default.png",
-          'emp_name': item.employee_name,
-          'emp_id': item.employee,
-          'visiting': `${item.today_visit}/${item.must_visit}`,
-          'boxing': item.sales_order
-        })
+      arrEmployee = res.result;
+    }
+    for(let i = 0; i < arrEmployeeInput.length; i++){
+      if(arrEmployee.length > 0){
+        for(let j = 0; j < arrEmployee.length; j++){
+          if(arrEmployeeInput[i].name == arrEmployee[j].employee){
+            arrEmployeeInput[i].today_visit = arrEmployee[j].today_visit;
+            arrEmployeeInput[i].must_visit = arrEmployee[j].must_visit;
+            arrEmployeeInput[i].sales_order = arrEmployee[j].sales_order;
+            break;
+          }else{
+            arrEmployeeInput[i].today_visit = 0;
+            arrEmployeeInput[i].must_visit = 0;
+            arrEmployeeInput[i].sales_order = 0;
+          }
+        }
+      }else{
+        arrEmployeeInput[i].today_visit = 0;
+        arrEmployeeInput[i].must_visit = 0;
+        arrEmployeeInput[i].sales_order = 0;
       }
     }
-    setDataEmployee(arrEmployee);
+    let arrDataSort = arrEmployeeInput.sort((a, b) => {
+      return b.sales_order - a.sales_order;
+    });
+    let arrEmployeeOut = [];
+    for(let i = 0; i < arrDataSort.length; i++){
+      let item = arrDataSort[i];
+      arrEmployeeOut.push({
+        's1tt': i+1,
+        'pic_profile': item.avatar != null && item.avatar != ""? item.avatar : "/public/user_default.png",
+        'emp_name': item.employee_name,
+        'emp_id': item.name,
+        'visiting': `${item.today_visit}/${item.must_visit}`,
+        'boxing': item.sales_order
+      })
+    }
+    setDataEmployee(arrEmployeeOut);
   }
-  const renderDataCheckingEmployee = (arrSummary) => {
+  const renderDataCheckingEmployee = (arrSummary, arrEmployee) => {
+    for(let i = 0; i < arrEmployee.length; i++){
+      for(let j = 0; j < arrSummary.length; j++){
+        if(arrEmployee[i].object_id != null && arrEmployee[i].object_id == arrSummary[j].object["_id"]){
+          arrEmployee[i].summary = arrEmployee[i].summary;
+          break;
+        }else{
+          arrEmployee[i].summary = {};
+        }
+      }
+    }
     let dataCheckingEmployee = [];
-    for(let i = 0; i < arrSummary.length; i++){
+    for(let i = 0; i < arrEmployee.length; i++){
       dataCheckingEmployee.push({
         'stt': i+1,
-        'pic_profile': "/public/user_default.png",
-        'emp_name': arrSummary[i].object.name,
-        'emp_id': arrSummary[i].object.empl_id,
-        'moving': formatTime(arrSummary[i].summary.move.totalTime),
-        'stopping': formatTime(arrSummary[i].summary.stop.totalTime),
-        'visiting': formatTime(arrSummary[i].summary.checkin.totalTime)
+        'pic_profile': arrEmployee[i].avatar != null? arrEmployee[i].avatar : "/public/user_default.png",
+        'emp_name': arrEmployee[i].employee_name,
+        'emp_id': arrEmployee[i].name,
+        'moving': arrEmployee[i].summary != null && arrEmployee[i].summary.move != null? formatTime(arrEmployee[i].summary.move.totalTime) : formatTime(0),
+        'stopping': arrEmployee[i].summary != null && arrEmployee[i].summary.stop != null? formatTime(arrEmployee[i].summary.stop.totalTime) : formatTime(0),
+        'visiting': arrEmployee[i].summary != null && arrEmployee[i].summary.checkin != null? formatTime(arrEmployee[i].summary.checkin.totalTime) : formatTime(0)
       })
     }
     setDataCheckingEmployee(dataCheckingEmployee);
@@ -161,19 +208,23 @@ export default function SupervisoryStaffRealTime() {
   useEffect(() => {
     (async() => {
       const rs = await AxiosService.get('/api/method/mbw_dms.api.user.get_projectID');
-      rs.result[ "Project ID"] = "6556e471178a1db24ac1a711";
       setOptions(prev => ({
         ...prev,
         projectId: rs.result[ "Project ID"]
       }))
+      let responseAllEmployee = await AxiosService("/api/method/mbw_dms.api.user.get_list_employees")
+      let arrEmployee = [];
+      if(responseAllEmployee.message == "Thành công"){
+        arrEmployee = responseAllEmployee.result;
+      }
       let urlSummary = `https://api.ekgis.vn/v2/tracking/locationHistory/summary/lastest/${rs.result[ "Project ID"]}/null?api_key=${options.apiKey}`;
       let res = await axios.get(urlSummary);
       if(res.statusText == "OK"){
         let arrSummary = res["data"].results;
-        renderDataMoveTopEmployee(arrSummary);
-        renderDataCheckingEmployee(arrSummary);
+        renderDataMoveTopEmployee(arrSummary, JSON.parse(JSON.stringify(arrEmployee)));
+        renderDataCheckingEmployee(arrSummary, JSON.parse(JSON.stringify(arrEmployee)));
       }
-      renderDataEmployee();
+      renderDataEmployee(JSON.parse(JSON.stringify(arrEmployee)));
     })()
   },[])
 

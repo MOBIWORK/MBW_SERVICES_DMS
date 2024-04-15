@@ -10,7 +10,7 @@ import Animate_And_Controls from './animate'
 
 const ekmapplf = window.ekmapplf;
 
-function HistoryMap({ options }) {
+function HistoryMap({ options, onLoad }) {
     const mapContainer = useRef(null);
     const map = useState(null);
     const [showControls, setShowControls] = useState({
@@ -48,7 +48,7 @@ function HistoryMap({ options }) {
         },
         animation: {
             follow: true,
-            animate: false,
+            animate: true,
         }
     };
     const _options = extend({}, defaultOptions, options);
@@ -56,7 +56,12 @@ function HistoryMap({ options }) {
     const initializeMap = () => {
         try {
             var _popup;
-            if (map.current) map.current.remove();
+            if (map.current) {
+                // console.log('exist')
+                if (map.animation_current) cancelAnimationFrame(map.animation_current);
+                if (map.timeout_current) clearTimeout(map.timeout_current);
+                map.current.remove();
+            }
             map.current = new maplibregl.Map({
                 container: mapContainer.current,
                 center: _options.center,
@@ -235,7 +240,8 @@ function HistoryMap({ options }) {
             _map.addControl(new maplibregl.FullscreenControl(), 'bottom-right');
 
 
-            _map.on('load', () => {
+            _map.once('load', () => {
+                // console.log('loaded')
                 try {
                     if (!_options.objectId || _options.objectId === '' || _options.objectId === 'null') return;
                     setMap(_options.from_time, _options.to_time, _options.pageNumber, _options.pageSize);
@@ -265,7 +271,7 @@ function HistoryMap({ options }) {
                 let url = `https://api.ekgis.vn/v2/tracking/locationHistory/summary/${_options.projectId}/${_options.objectId}?api_key=${_options.apiKey}&from_time=${from_time}&to_time=${to_time}`;
                 const response = await fetch(url);
                 const Data = await response.json();
-                // console.log(Data);
+                // onLoad(Data)
                 var arrData = Data.details
                 return arrData || [];
             };
@@ -296,9 +302,15 @@ function HistoryMap({ options }) {
                     };
                     LineSource.features.push(feature)
                     // item.type === "move" ? LineSource.features.push(feature) :
-                    item.type === "checkin" ? CheckSource.features.push(feature) : TrackSource.features.push(feature);
+                    if (item.type !== "move") {
+                        if (item.type === "checkin") CheckSource.features.push(feature)
+                        else TrackSource.features.push(feature);
+                    }
                 });
                 // console.log(LineSource);
+                // console.log(CheckSource);
+                // console.log(TrackSource);
+
                 setLine(LineSource);
                 setPoints(CheckSource, TrackSource);
                 // setNavigation(data);
@@ -1088,6 +1100,11 @@ function HistoryMap({ options }) {
             time: null,
             speed: 0
         })
+        setShowControls({
+            map: null,
+            Data: [],
+            options: null
+        })
         initializeMap();
         return () => {
             if (animationID.current) cancelAnimationFrame(animationID.current);
@@ -1107,21 +1124,29 @@ function HistoryMap({ options }) {
 
     const setInfo = (data) => {
         // console.log('info', data);
-        const date = new Date(data.loc1.time);
-        date.setHours(date.getHours());
-        const day = date.getDate();
-        const month = date.getMonth() + 1;
-        const year = date.getFullYear();
-        const hours = date.getHours();
-        const minutes = date.getMinutes();
-        const formattedDate = `${day}/${month}/${year}`;
-        const formattedTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+        if (data) {
+            const date = new Date(data.loc1.time);
+            date.setHours(date.getHours());
+            const day = date.getDate();
+            const month = date.getMonth() + 1;
+            const year = date.getFullYear();
+            const hours = date.getHours();
+            const minutes = date.getMinutes();
+            const formattedDate = `${day}/${month}/${year}`;
+            const formattedTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+            setStage({
+                date: formattedDate,
+                time: formattedTime,
+                speed: data.computed.time
+            })
+        } else {
+            setStage({
+                date: null,
+                time: null,
+                speed: 0
+            })
+        }
 
-        setStage({
-            date: formattedDate,
-            time: formattedTime,
-            speed: data.computed.time
-        })
     }
     return (
         <div ref={mapContainer} id='ekmap-tracking-his-map'>
