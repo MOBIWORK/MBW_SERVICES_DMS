@@ -48,7 +48,7 @@ function HistoryMap({ options }) {
         },
         animation: {
             follow: true,
-            animate: true,
+            animate: false,
         }
     };
     const _options = extend({}, defaultOptions, options);
@@ -294,10 +294,11 @@ function HistoryMap({ options }) {
                             coordinates: item.coordinates
                         }
                     };
-                    item.type === "move" ? LineSource.features.push(feature) :
-                        item.type === "checkin" ? CheckSource.features.push(feature) : TrackSource.features.push(feature);
+                    LineSource.features.push(feature)
+                    // item.type === "move" ? LineSource.features.push(feature) :
+                    item.type === "checkin" ? CheckSource.features.push(feature) : TrackSource.features.push(feature);
                 });
-
+                // console.log(LineSource);
                 setLine(LineSource);
                 setPoints(CheckSource, TrackSource);
                 // setNavigation(data);
@@ -1082,6 +1083,11 @@ function HistoryMap({ options }) {
     };
 
     useEffect(() => {
+        setStage({
+            date: null,
+            time: null,
+            speed: 0
+        })
         initializeMap();
         return () => {
             if (animationID.current) cancelAnimationFrame(animationID.current);
@@ -1119,7 +1125,7 @@ function HistoryMap({ options }) {
     }
     return (
         <div ref={mapContainer} id='ekmap-tracking-his-map'>
-            {showControls.map != null && <Animate_And_Controls map={showControls.map} segmentData={showControls.Data} options={showControls.options} animation={showControls.map? true: false} currentInfo={setInfo} />}
+            {showControls.map != null && <Animate_And_Controls map={showControls.map} segmentData={showControls.Data} options={showControls.options} currentInfo={setInfo} />}
             <MapLegend />
             {Stage.date != null && <div className='ekmapplf_tracking-map-legend-his'>
                 <Flex gap="small" align="center" justify='center' wrap='wrap' style={{ 'width': '50%', 'borderRight': '1px solid' }}>
@@ -1127,8 +1133,8 @@ function HistoryMap({ options }) {
                     <span style={{ 'fontWeight': 600, 'color': 'rgb(68, 68, 68)', 'textAlign': 'center' }}>{Stage.time}</span>
                 </Flex>
                 <Flex gap="small" align="center" justify='center' wrap='wrap' style={{ 'width': '49%' }}>
-                    <span style={{ 'fontWeight': 600, 'color': 'rgb(132, 132, 132)', 'textAlign': 'center', 'width': '100%' }}>km/h</span>
-                    <span style={{ 'fontWeight': 600, 'color': 'rgb(54, 153, 255)', 'textAlign': 'center' }}>{Stage.speed}</span>
+                    <span style={{ 'fontWeight': 600, 'color': 'rgb(132, 132, 132)', 'textAlign': 'center', 'width': '100%' }}>Tốc độ</span>
+                    <span style={{ 'fontWeight': 600, 'color': 'rgb(54, 153, 255)', 'textAlign': 'center' }}>{Stage.speed} km/h</span>
                 </Flex>
             </div>}
         </div>

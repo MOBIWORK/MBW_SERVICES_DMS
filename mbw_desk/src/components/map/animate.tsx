@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { Button, Flex, Select, Checkbox } from "antd";
-import { PauseOutlined, CaretRightOutlined, RetweetOutlined, XFilled } from '@ant-design/icons';
+import { PauseOutlined, CaretRightOutlined, RetweetOutlined, XFilled, CloseSquareFilled } from '@ant-design/icons';
 import * as turf from "@turf/turf";
 
 const Animate_And_Controls = ({ map, segmentData, options, currentInfo, animation }) => {
@@ -10,7 +10,7 @@ const Animate_And_Controls = ({ map, segmentData, options, currentInfo, animatio
     const animationID = useRef(null);
     const timeout = useRef(null);
     const [isFollow, setFollow] = useState(options.animation.follow)
-    const [isAnimation, setAnimation] = useState(false)
+    const [isAnimation, setAnimation] = useState(options.animation.animate)
     const [animationSpeed, setanimationSpeed] = useState(10);
     const [isReplay, setReplay] = useState(true)
     const listSpeeds = [
@@ -122,7 +122,8 @@ const Animate_And_Controls = ({ map, segmentData, options, currentInfo, animatio
                 var start;
                 var firstPoint;
                 function frame(time) {
-                    // console.log('map');
+                    // console.log(map);
+                    // console.log('frame', time);
                     if (!start) {
                         firstPoint = e.loc1.loc;
                         start = time;
@@ -177,14 +178,20 @@ const Animate_And_Controls = ({ map, segmentData, options, currentInfo, animatio
         }
     }
 
+    useEffect(()=>{
+        setAnimation(options.animation.animate)
+    },[options])
+
     useEffect(() => {
-        if (animation) setAnimation(true);
-        // console.log(isAnimation);
+        // if (!isAnimation) setAnimation(true);
+        console.log(options.animation);
+        console.log(isAnimation);
 
         if (animationID.current) cancelAnimationFrame(animationID.current);
         if (timeout.current) clearTimeout(timeout.current);
 
         if (isAnimation) {
+            currentIndex = 0;
             if (segmentData[0].computed.time)
                 timeout.current = setTimeout(animate.bind(this), (segmentData[0].computed.time * 1000) / animationSpeed, currentIndex, segmentData);
             map.setPaintProperty(`ek-tracking-his-${_map_Container.id}-LineString`, 'line-color', '#b5b5b5');
@@ -208,7 +215,7 @@ const Animate_And_Controls = ({ map, segmentData, options, currentInfo, animatio
             if (animationID.current) cancelAnimationFrame(animationID.current);
             if (timeout.current) clearTimeout(timeout.current);
         };
-    }, [map, segmentData, options, , isFollow, isAnimation, animationSpeed]);
+    }, [map, segmentData, isFollow, isAnimation, animationSpeed]);
 
 
     const toggleAnimation = () => {

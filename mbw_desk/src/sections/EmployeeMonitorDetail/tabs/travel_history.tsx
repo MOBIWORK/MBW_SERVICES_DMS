@@ -86,9 +86,11 @@ export default function TravelHistory({ employee }: { employee?: string }) {
       if(employee == null || employee == ""){
         setOptions(prev => ({
           ...prev, 
-          projectId: "6556e471178a1db24ac1a711", //rs.result["Project ID"]
+          projectId: "6556e471178a1db24ac1a711", //rs.result["Project ID"],
+          objectId: "654c8a12d65d3e52f2d286de" //Fix cứng dữ liệu để demo
         }))
         initDataEmployee("6556e471178a1db24ac1a711");
+
         return;
       }
       employee = "654c8a12d65d3e52f2d286de";
