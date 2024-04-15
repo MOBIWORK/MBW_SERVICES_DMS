@@ -109,7 +109,8 @@ def get_list_top_employee(**kwargs):
             'DMS Router', 
             filters = {
                 'employee': ('in', list_employee),
-                'travel_date': name_date
+                'travel_date': name_date,
+                'status': 'Active'
             },
             fields = ['name', 'employee']
         )
@@ -152,7 +153,6 @@ def get_list_top_employee(**kwargs):
             i.pop('name')
 
         router_employee = sorted(router_employee, key=lambda x: x['sales_order'], reverse=True)[:5]
-
         return gen_response(200, 'Thành công', router_employee)
     except Exception as e:
         return exception_handle(e)

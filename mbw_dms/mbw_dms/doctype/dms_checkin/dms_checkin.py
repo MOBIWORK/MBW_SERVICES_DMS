@@ -247,7 +247,7 @@ def create_checkin(kwargs):
             "checkinvalidate_khoangcachcheckout", "createdbyemail", "createbyname", 
         ]
         datetime_keys = ["checkin_timegps"]
-        date_keys = ["createddate", "checkin_giovao"]
+        date_keys = ["createddate", "checkin_giovao", "checkin_giora"]
         for key, value in kwargs.items():
             if key in normal_keys:
                 new_checkin.set(key, value)
@@ -262,27 +262,6 @@ def create_checkin(kwargs):
     except Exception as e:
         return exception_handle(e)
 
-
-# Update checkin
-@frappe.whitelist(methods='PUT')
-def update_checkin(name_checkin, kwargs):
-    try:
-        if frappe.db.exists('DMS Checkin', name_checkin, cache=True):
-            checkin = frappe.get_doc('DMS Checkin', name_checkin)
-            # if kwargs.get('faceimage'):
-            #     checkin.append('checkin_hinhanh', {
-            #         'url_image': post_image(name_image='', faceimage=kwargs.get('faceimage'), doc_type='DMS Checkin', doc_name=name_checkin)
-            #     })
-            checkin.checkin_id = name_checkin
-            if kwargs.get('checkin_giora'):
-                checkin.checkin_giora = validate_datetime(kwargs.get('checkin_giora'))
-                checkin.is_checkout = 1
-            checkin.save()
-            return gen_response(201, 'Successful', [])
-        else:
-            return gen_response(406, f"Không tồn tại check in {name_checkin}")
-    except Exception as e:
-        return exception_handle(e)
 
 # Tạo mới checkin tồn kho
 @frappe.whitelist(methods='POST')

@@ -6,12 +6,6 @@ def create_checkin(**kwargs):
     from mbw_dms.mbw_dms.doctype.dms_checkin.dms_checkin import create_checkin
     return create_checkin(kwargs=kwargs)
 
-# Thêm ảnh checkin
-@frappe.whitelist()
-def update_checkin(name_checkin, **kwargs):
-    from mbw_dms.mbw_dms.doctype.dms_checkin.dms_checkin import update_checkin
-    return update_checkin(name_checkin=name_checkin, kwargs=kwargs)
-    
 # Tạo mới checkin tồn kho
 @frappe.whitelist()
 def create_checkin_inventory(**kwargs):
