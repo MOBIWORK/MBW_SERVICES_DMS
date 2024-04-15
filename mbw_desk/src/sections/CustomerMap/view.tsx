@@ -3,6 +3,7 @@ import { HeaderPage } from "../../components";
 import maplibregl from "maplibre-gl";
 import { AxiosService } from "../../services/server";
 import "./map_customer.css"
+import { Checkbox } from "antd";
 
 declare var ekmapplf: any;
 
@@ -24,9 +25,23 @@ function CustomerMapView() {
     const [lstCustomer, setLstCustomer] = useState<TypeCustomer[]>([]);
     const map = useRef(null);
     const [isOpen, setIsOpen] = useState(false);
+    const [isOpenCheckBox, setIsOpenCheckBox] = useState(true);
 
     const toggleLegend = () => {
         setIsOpen(!isOpen);
+    };
+    const toggleLegendCheckbox = () => {
+        setIsOpenCheckBox(!isOpenCheckBox);
+        toggleCustomerLayersVisibility();
+    };
+    
+    const toggleCustomerLayersVisibility = () => {
+        const visibility = isOpenCheckBox ? 'none' : 'visible';
+        map.current.getStyle().layers.forEach(layer => {
+            if (layer.id.includes('customer')) {
+                map.current.setLayoutProperty(layer.id, 'visibility', visibility);
+            }
+        });
     };
 
     useEffect(() => {
@@ -55,13 +70,13 @@ function CustomerMapView() {
         setMapConfig(res.result)
     }
     const getLstCustomer = async () => {
-        let res = await AxiosService.get('/api/method/mbw_dms.api.selling.customer.get_customer_has_location');
-        if (res.message == "Thành công") {
-            setLstCustomer(res.result);
-        }
-        // let objRes = JSON.parse('{"message":"Thành công","result":[{"name":"A Lâm","customer_name":"A Lâm","customer_code":"BH0123111115","customer_type":"Company","customer_group":"Khách lẻ","territory":"Thành phố Hà Nội","customer_primary_contact":"A Lâm","customer_primary_address":"395 Xuân Đỉnh, phường Xuân Đỉnh, Từ Liêm, Hà Nội, Việt Nam-Billing","customer_location_primary":"{\\"lat\\":20.7894317,\\"long\\":105.70448}"},{"name":"A Phương","customer_name":"A Phương","customer_code":"BH0120235252","customer_type":"Company","customer_group":"Khách lẻ","territory":"Thành phố Hà Nội","customer_primary_contact":"A Phương-A Phương","customer_primary_address":"538 Xuân Đỉnh, phường Xuân Đỉnh, Tây Hồ, Hà Nội, Việt Nam-Billing","customer_location_primary":"{\\"lat\\":21.0763504,\\"long\\":105.7869008}"},{"name":"A thuật","customer_name":"A thuật","customer_code":"HN11402","customer_type":"Company","customer_group":"Khách lẻ","territory":"Thành phố Hà Nội","customer_primary_contact":null,"customer_primary_address":"Đình Vĩnh Xương Trung, Mỹ Thành, Mỹ Đức, Hà Nội-Billing","customer_location_primary":"{\\"lat\\":20.6903959,\\"long\\":105.7689993}"},{"name":"A Toản","customer_name":"A Toản","customer_code":"BH0050608072022","customer_type":"Company","customer_group":"Khách lẻ","territory":"Thành phố Hà Nội","customer_primary_contact":"A Toản","customer_primary_address":"408 Trần Cung, Cổ Nhuế 1, Cầu Giấy, Hà Nội, Việt Nam-Billing","customer_location_primary":"{\\"lat\\":21.0555955,\\"long\\":105.7855697}"},{"name":"Anh  Hạnh","customer_name":"Anh  Hạnh","customer_code":"BH0057110022023","customer_type":"Company","customer_group":"Khách lẻ","territory":"Thành phố Hà Nội","customer_primary_contact":"Anh  Hạnh","customer_primary_address":"440 Cổ Nhuế, Cổ Nhuế 2, Từ Liêm, Hà Nội, Vietnam-Billing","customer_location_primary":"{\\"lat\\":21.069679,\\"long\\":105.7781418}"},{"name":"Xuyến  ngũ","customer_name":"Xuyến  ngũ","customer_code":"HN9251","customer_type":"Company","customer_group":"Khách lẻ","territory":"Thành phố Hà Nội","customer_primary_contact":null,"customer_primary_address":"Huyện Ứng Hòa, Hà Nội, VNM-Billing-2","customer_location_primary":"{\\"lat\\":20.7192067,\\"long\\":105.8028217}"},{"name":"Yến  Hiệp","customer_name":"Yến  Hiệp","customer_code":"HN8847","customer_type":"Company","customer_group":"Khách lẻ","territory":"Thành phố Hà Nội","customer_primary_contact":null,"customer_primary_address":"Tảo Khê  tảo  Dương  văn  ứng  hòa hà Nội-Billing","customer_location_primary":"{\\"lat\\":20.7082736,\\"long\\":105.7821972}"}]}');
-        // console.log(objRes);
-        // setLstCustomer(objRes.result);
+        // let res = await AxiosService.get('/api/method/mbw_dms.api.selling.customer.get_customer_has_location');
+        // if (res.message == "Thành công") {
+        //     setLstCustomer(res.result);
+        // }
+        let objRes = JSON.parse('{"message":"Thành công","result":[{"name":"A Lâm","customer_name":"A Lâm","customer_code":"BH0123111115","customer_type":"Company","customer_group":"Khách lẻ","territory":"Thành phố Hà Nội","customer_primary_contact":"A Lâm","customer_primary_address":"395 Xuân Đỉnh, phường Xuân Đỉnh, Từ Liêm, Hà Nội, Việt Nam-Billing","customer_location_primary":"{\\"lat\\":20.7894317,\\"long\\":105.70448}"},{"name":"A Phương","customer_name":"A Phương","customer_code":"BH0120235252","customer_type":"Company","customer_group":"Khách lẻ","territory":"Thành phố Hà Nội","customer_primary_contact":"A Phương-A Phương","customer_primary_address":"538 Xuân Đỉnh, phường Xuân Đỉnh, Tây Hồ, Hà Nội, Việt Nam-Billing","customer_location_primary":"{\\"lat\\":21.0763504,\\"long\\":105.7869008}"},{"name":"A thuật","customer_name":"A thuật","customer_code":"HN11402","customer_type":"Company","customer_group":"Khách lẻ","territory":"Thành phố Hà Nội","customer_primary_contact":null,"customer_primary_address":"Đình Vĩnh Xương Trung, Mỹ Thành, Mỹ Đức, Hà Nội-Billing","customer_location_primary":"{\\"lat\\":20.6903959,\\"long\\":105.7689993}"},{"name":"A Toản","customer_name":"A Toản","customer_code":"BH0050608072022","customer_type":"Company","customer_group":"Khách lẻ","territory":"Thành phố Hà Nội","customer_primary_contact":"A Toản","customer_primary_address":"408 Trần Cung, Cổ Nhuế 1, Cầu Giấy, Hà Nội, Việt Nam-Billing","customer_location_primary":"{\\"lat\\":21.0555955,\\"long\\":105.7855697}"},{"name":"Anh  Hạnh","customer_name":"Anh  Hạnh","customer_code":"BH0057110022023","customer_type":"Company","customer_group":"Khách lẻ","territory":"Thành phố Hà Nội","customer_primary_contact":"Anh  Hạnh","customer_primary_address":"440 Cổ Nhuế, Cổ Nhuế 2, Từ Liêm, Hà Nội, Vietnam-Billing","customer_location_primary":"{\\"lat\\":21.069679,\\"long\\":105.7781418}"},{"name":"Xuyến  ngũ","customer_name":"Xuyến  ngũ","customer_code":"HN9251","customer_type":"Company","customer_group":"Khách lẻ","territory":"Thành phố Hà Nội","customer_primary_contact":null,"customer_primary_address":"Huyện Ứng Hòa, Hà Nội, VNM-Billing-2","customer_location_primary":"{\\"lat\\":20.7192067,\\"long\\":105.8028217}"},{"name":"Yến  Hiệp","customer_name":"Yến  Hiệp","customer_code":"HN8847","customer_type":"Company","customer_group":"Khách lẻ","territory":"Thành phố Hà Nội","customer_primary_contact":null,"customer_primary_address":"Tảo Khê  tảo  Dương  văn  ứng  hòa hà Nội-Billing","customer_location_primary":"{\\"lat\\":20.7082736,\\"long\\":105.7821972}"}]}');
+        console.log(objRes);
+        setLstCustomer(objRes.result);
     }
     const renderMap = () => {
         map.current = new maplibregl.Map({
@@ -188,7 +203,7 @@ function CustomerMapView() {
             map.current.getSource('customer_clus').setData(dataGeo);
         }else{
             if(!map.current.getImage('marker-customer')){
-                const iconCustomer = await map.current.loadImage("https://sfademo.mbwcloud.com/files/check-icon.png");
+                const iconCustomer = await map.current.loadImage("/public/check-icon.png"); //https://sfademo.mbwcloud.com/files/check-icon.png
                 map.current.addImage('marker-customer', iconCustomer.data);
             }
             map.current.addSource('customer_clus', {
@@ -328,7 +343,7 @@ function CustomerMapView() {
             });
         }
     }
-   
+ 
     return (
         <>
             <HeaderPage title="Bản đồ khách hàng" />
@@ -341,6 +356,10 @@ function CustomerMapView() {
                 <div className={`ekmapplf_tracking-legend-body ${isOpen ? 'open' : ''}`} style={{ maxHeight: isOpen ? 'none' : '0' }}>
                     <ul>
                         <li>
+                        <Checkbox
+                        checked={isOpenCheckBox}
+                        onChange={toggleLegendCheckbox}
+                        />
                             <span className='ekmapplf_tracking-legend-icon' style={{ backgroundImage: `url('/checking.png')` }}></span>
                             Vị trí khách hàng
                         </li>
