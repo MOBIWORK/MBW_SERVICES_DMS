@@ -1,1 +1,0 @@
-import{L as s,a7 as t,bx as e}from"./index-AZ27Xb26.js";function n(){return s.jsxs(s.Fragment,{children:[s.jsx(t,{children:s.jsx("title",{children:"Progress"})}),s.jsx(e,{status:"500",title:"500",subTitle:"Trang đang tiến hành."})]})}export{n as default};
