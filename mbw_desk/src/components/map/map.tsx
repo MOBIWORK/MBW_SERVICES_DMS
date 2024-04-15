@@ -1137,7 +1137,7 @@ function HistoryMap({ options, onLoad }) {
             setStage({
                 date: formattedDate,
                 time: formattedTime,
-                speed: data.computed.time
+                speed: data.computed.speed.toFixed(1)
             })
         } else {
             setStage({
