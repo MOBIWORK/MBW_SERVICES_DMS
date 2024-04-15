@@ -137,11 +137,11 @@ export default function SupervisoryStaffRealTime() {
   const renderDataEmployee = async (arrEmployeeInput) => {
     let dateNow = new Date();
     let timeStamp = dateNow.getTime()/1000;
-    //let res = await AxiosService(`/api/method/mbw_dms.api.user.get_list_top_employee?from_date=${timeStamp}&to_date=${timeStamp}`);
+    let res = await AxiosService(`/api/method/mbw_dms.api.user.get_list_top_employee?from_date=${timeStamp}&to_date=${timeStamp}`);
     let arrEmployee = [];
-    // if(res.message == "Thành công"){
-    //   arrEmployee = res.result;
-    // }
+    if(res.message == "Thành công"){
+      arrEmployee = res.result;
+    }
     for(let i = 0; i < arrEmployeeInput.length; i++){
       if(arrEmployee.length > 0){
         for(let j = 0; j < arrEmployee.length; j++){
