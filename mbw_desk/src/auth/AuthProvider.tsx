@@ -20,7 +20,7 @@ export function AuthProvider({children}:Props) {
   
     if(!isLoading && !currentUser && window.location.pathname != `${BASE_URL || ""}/auth/login` )
       window.location.href = `${BASE_URL||""}/auth/login`
-    else if(currentUser && window.location.pathname != '/') {
+    else if(currentUser && window.location.pathname == '/') {
       window.location.href = `/app`
     }
     return <>{children}</>
