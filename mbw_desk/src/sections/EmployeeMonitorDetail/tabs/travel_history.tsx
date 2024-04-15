@@ -14,9 +14,9 @@ import { Link } from 'react-router-dom'
 // dayjs.locale('vi');
 export default function TravelHistory({ employee }: { employee?: string }) {
 
-  const [time, setTime] = useState<any>(new Date("03-27-2024")) //Date.now()
-  const [from_time, setFTime] = useState<string>(tmpToTimeZone(new Date("03-27-2024").setHours(0, 0, 0).toString()))
-  const [to_time, setTTime] = useState<string>(tmpToTimeZone(new Date("03-27-2024").setHours(24, 0, 0).toString()))
+  const [time, setTime] = useState<any>(new Date("03-29-2024")) //Date.now()
+  const [from_time, setFTime] = useState<string>(tmpToTimeZone(new Date("03-29-2024").setHours(0, 0, 0).toString()))
+  const [to_time, setTTime] = useState<string>(tmpToTimeZone(new Date("03-29-2024").setHours(24, 0, 0).toString()))
   const [loading, setLoading] = useState<boolean>(true);
   const [nameEmployee, setNameEmployee] = useState<string>("");
   const [arrEmployee,setArrEmployee] = useState<any[]>([]);

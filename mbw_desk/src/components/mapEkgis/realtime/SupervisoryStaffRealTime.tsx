@@ -105,7 +105,7 @@ export default function SupervisoryStaffRealTime() {
     navigate(`/employee-monitor-detail/${evt["_id"]}`);
   }
   const handlerShowHistoryForAnyOne = () => {
-    navigate("/employee-monitor-detail");
+    navigate("/employee-monitor-detail/654c8a12d65d3e52f2d286de");
   }
   const renderDataMoveTopEmployee = (arrSummary, arrEmployee) => {
     for(let i = 0; i < arrEmployee.length; i++){
@@ -137,11 +137,11 @@ export default function SupervisoryStaffRealTime() {
   const renderDataEmployee = async (arrEmployeeInput) => {
     let dateNow = new Date();
     let timeStamp = dateNow.getTime()/1000;
-    let res = await AxiosService(`/api/method/mbw_dms.api.user.get_list_top_employee?from_date=${timeStamp}&to_date=${timeStamp}`);
+    //let res = await AxiosService(`/api/method/mbw_dms.api.user.get_list_top_employee?from_date=${timeStamp}&to_date=${timeStamp}`);
     let arrEmployee = [];
-    if(res.message == "Thành công"){
-      arrEmployee = res.result;
-    }
+    // if(res.message == "Thành công"){
+    //   arrEmployee = res.result;
+    // }
     for(let i = 0; i < arrEmployeeInput.length; i++){
       if(arrEmployee.length > 0){
         for(let j = 0; j < arrEmployee.length; j++){
@@ -162,9 +162,11 @@ export default function SupervisoryStaffRealTime() {
         arrEmployeeInput[i].sales_order = 0;
       }
     }
+    console.log(arrEmployeeInput);
     let arrDataSort = arrEmployeeInput.sort((a, b) => {
       return b.sales_order - a.sales_order;
     });
+    console.log(arrDataSort)
     let arrEmployeeOut = [];
     for(let i = 0; i < arrDataSort.length; i++){
       let item = arrDataSort[i];
@@ -190,6 +192,7 @@ export default function SupervisoryStaffRealTime() {
         }
       }
     }
+    console.log(arrEmployee);
     let dataCheckingEmployee = [];
     for(let i = 0; i < arrEmployee.length; i++){
       dataCheckingEmployee.push({
