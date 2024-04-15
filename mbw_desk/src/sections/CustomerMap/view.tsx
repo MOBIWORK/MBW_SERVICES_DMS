@@ -34,7 +34,7 @@ function CustomerMapView() {
         setIsOpenCheckBox(!isOpenCheckBox);
         toggleCustomerLayersVisibility();
     };
-    
+
     const toggleCustomerLayersVisibility = () => {
         const visibility = isOpenCheckBox ? 'none' : 'visible';
         map.current.getStyle().layers.forEach(layer => {
@@ -63,10 +63,12 @@ function CustomerMapView() {
     const getConfigApi = async () => {
         let res = await AxiosService.get('/api/method/mbw_dms.api.vgm.map_customer.get_config_api');
         setApiKey(res.result)
-        
+
     }
     const getConfigMap = async () => {
         let res = await AxiosService.get('/api/method/mbw_dms.api.vgm.map_customer.get_config_map?type_industry=fertilizer_store');
+        console.log(res);
+
         setMapConfig(res.result)
     }
     const getLstCustomer = async () => {
@@ -180,7 +182,7 @@ function CustomerMapView() {
             }
         }
     }
-    const renderClusterMap = async () => {  
+    const renderClusterMap = async () => {
         let dataGeo = {
             'type': "FeatureCollection",
             'features': []
@@ -197,12 +199,12 @@ function CustomerMapView() {
             }
             dataGeo.features.push(feature);
         }
-        if(map.current == null) return;
-        if(!map.current.isStyleLoaded()) return;
-        if(map.current.getSource('customer_clus')){
+        if (map.current == null) return;
+        if (!map.current.isStyleLoaded()) return;
+        if (map.current.getSource('customer_clus')) {
             map.current.getSource('customer_clus').setData(dataGeo);
-        }else{
-            if(!map.current.getImage('marker-customer')){
+        } else {
+            if (!map.current.getImage('marker-customer')) {
                 const iconCustomer = await map.current.loadImage("/public/check-icon.png"); //https://sfademo.mbwcloud.com/files/check-icon.png
                 map.current.addImage('marker-customer', iconCustomer.data);
             }
@@ -277,12 +279,12 @@ function CustomerMapView() {
                     'icon-image': 'marker-customer',
                     'icon-allow-overlap': true,
                     'icon-size': {
-                      'stops': [
-                        [15, 0.7],
-                        [18, 1]
-                      ]
+                        'stops': [
+                            [15, 0.7],
+                            [18, 1]
+                        ]
                     }
-                  }
+                }
             });
             map.current.addLayer({
                 'id': 'customer_clus-title',
@@ -293,26 +295,26 @@ function CustomerMapView() {
                     'text-field': ['get', 'customer_name'],
                     'text-font': ["Roboto Medium"],
                     'text-size': {
-                      'stops': [
-                        [12, 10],
-                        [13, 11],
-                        [14, 11],
-                        [15, 11.5],
-                        [16, 12.5],
-                        [20, 16]
-                      ]
+                        'stops': [
+                            [12, 10],
+                            [13, 11],
+                            [14, 11],
+                            [15, 11.5],
+                            [16, 12.5],
+                            [20, 16]
+                        ]
                     },
                     'text-anchor': "top",
                     'text-max-width': 9,
                     'text-offset': [0, 1.5],
                     'text-padding': 5
-                  },
-                  'paint': {
+                },
+                'paint': {
                     'text-color': "#ff5532",
                     'text-halo-color': "#ffffff",
                     'text-halo-width': 1,
                     'text-halo-blur': 0.5
-                  }
+                }
             });
             map.current.on('click', 'customer_clus-uncluster', function (e) {
                 var coordinates = e.features[0].geometry.coordinates.slice();
@@ -322,20 +324,20 @@ function CustomerMapView() {
                     <b>${properties.customer_name}</b>
                 </div>
             `;
-            if(properties.customer_primary_address != null && properties.customer_primary_address != ""){
-                popupContent += `
+                if (properties.customer_primary_address != null && properties.customer_primary_address != "") {
+                    popupContent += `
                 <div class="customer-popup-info">
                     <span class="customer-popup-icon customer-icon-marker customer-icon-default-color"></span>
                     <span>${properties.customer_primary_address}</span>
                 </div>`;
-            }
-            if(properties.customer_primary_contact != null && properties.customer_primary_contact != ""){
-                popupContent += `
+                }
+                if (properties.customer_primary_contact != null && properties.customer_primary_contact != "") {
+                    popupContent += `
                 <div class="customer-popup-info">
                     <span class="customer-popup-icon customer-icon-phone customer-icon-default-color"></span>
                     <span>${properties.customer_primary_contact}</span>
                 </div>`;
-            }
+                }
                 new maplibregl.Popup()
                     .setLngLat(coordinates)
                     .setHTML(popupContent)
@@ -343,28 +345,53 @@ function CustomerMapView() {
             });
         }
     }
- 
+    const [defaultCheckboxStates, setDefaultCheckboxStates] = useState([]);
+     
+    const handleCheckboxChange =(index:any) => {
+        const newCheckboxStates = [...defaultCheckboxStates];
+        newCheckboxStates[index] = !newCheckboxStates[index];
+        setDefaultCheckboxStates(newCheckboxStates);
+    };
+    useEffect(() => {
+        setDefaultCheckboxStates(mapConfig.map(item => item.visible));
+    }, [mapConfig]);
+    useEffect(() => {
+        console.log(defaultCheckboxStates,'defaulCheckbox');
+        
+    }, [defaultCheckboxStates]);
     return (
         <>
             <HeaderPage title="Bản đồ khách hàng" />
             <div id="map" style={{ width: "100%", height: "80vh", borderRadius: "20px" }}>
                 <div id='ekmapplf_tracking_legend' className='ekmapplf_tracking-map-legend'>
-                <div className='ekmapplf_tracking-legend-title' onClick={toggleLegend}>
-                    <span className={`icon ${isOpen ? 'ekmapplf_tracking-icon-square-minus' : 'ekmapplf_tracking-icon-square-plus'}`} style={{ filter: 'invert(100%) sepia(100%) saturate(0%) hue-rotate(187deg) brightness(105%) contrast(103%)' }}></span>
-                    <span>Chú giải bản đồ</span>
-                </div>
-                <div className={`ekmapplf_tracking-legend-body ${isOpen ? 'open' : ''}`} style={{ maxHeight: isOpen ? 'none' : '0' }}>
-                    <ul>
-                        <li>
-                        <Checkbox
-                        checked={isOpenCheckBox}
-                        onChange={toggleLegendCheckbox}
-                        />
-                            <span className='ekmapplf_tracking-legend-icon' style={{ backgroundImage: `url('/checking.png')` }}></span>
-                            Vị trí khách hàng
-                        </li>
-                    </ul>
-                </div>
+                    <div className='ekmapplf_tracking-legend-title' onClick={toggleLegend}>
+                        <span className={`icon ${isOpen ? 'ekmapplf_tracking-icon-square-minus' : 'ekmapplf_tracking-icon-square-plus'}`} style={{ filter: 'invert(100%) sepia(100%) saturate(0%) hue-rotate(187deg) brightness(105%) contrast(103%)' }}></span>
+                        <span>Chú giải bản đồ</span>
+                    </div>
+                    <div className={`ekmapplf_tracking-legend-body ${isOpen ? 'open' : ''}`} style={{ maxHeight: isOpen ? 'none' : '0' }}>
+                        <ul>
+                            <li>
+                                <Checkbox
+                                    checked={isOpenCheckBox}
+                                    onChange={toggleLegendCheckbox}
+                                />
+                                <span className='ekmapplf_tracking-legend-icon' style={{ backgroundImage: `url('/checking.png')` }}></span>
+                                Vị trí khách hàng
+                            </li>
+                            {mapConfig.map((item, index) => {
+                                const label = item.label || `${mapConfig[0].label} - ${item.type}`;
+                                return (
+                                    <li key={index}>
+                                        <Checkbox
+                                            checked={defaultCheckboxStates[index]}
+                                            onChange={() => handleCheckboxChange(index)}
+                                        />
+                                        {label}
+                                    </li>
+                                );
+                            })}
+                        </ul>
+                    </div>
                 </div>
             </div>
         </>
