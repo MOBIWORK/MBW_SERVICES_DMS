@@ -70,9 +70,6 @@ export default function RouterCreate() {
         }
       }
       return customer
-    }).map(customer => {
-      if(!customer.frequency) customer.frequency= "1;2;3;4"
-      return customer
     })}
     try {
       await AxiosService.patch("/api/method/mbw_dms.api.router.update_router",{name:type,...value})

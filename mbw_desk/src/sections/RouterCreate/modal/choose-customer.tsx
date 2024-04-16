@@ -99,7 +99,10 @@ export function ChooseCustomer({selected,handleAdd,closeModal}:Props) {
       let now2 = Number.parseInt(now)
       return ([...prev,...customerChoose[now2]])
     },[])    
-    handleAdd([...selected,...chooseC.filter(customer => !selected.map(cs => cs.customer_code).includes( customer.customer_code))])
+    handleAdd([...selected,...chooseC.filter(customer => !selected.map(cs => cs.customer_code).includes( customer.customer_code))].map(customer => {
+      if(!customer.frequency) customer.frequency = "1;2;3;4"
+      return customer
+    }))
     closeModal()
   }
   useEffect(()=> {

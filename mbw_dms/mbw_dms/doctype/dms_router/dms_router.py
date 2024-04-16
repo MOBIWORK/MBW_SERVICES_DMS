@@ -238,15 +238,20 @@ def create_router(body):
             return gen_response(500,body.get('employee')+  _(" have Router in this weekday"))
         field_validate= ["travel_date","status", "customers", "channel_code", "team_sale","channel_name","employee"]
         field_customers_validate = ["customer_code","customer_name","display_address","phone_number","customer","frequency","lat","long"]
+        field_customers_validate_require = ["customer_code","customer_name","frequency"]
+
         # check_validate fields
         for key_router,value in body.items():
             if isinstance(body[key_router], list):
                 for customer in body[key_router]:
+                    customer_name = customer["customer_name"]
                     for key_cs in customer:
                         # if key_cs not in field_customers_validate or (key_cs in field_customers_validate and not customer[key_cs]) :
-                        if key_cs not in field_customers_validate  :
+                        if key_cs not in field_customers_validate :
                             gen_response(406,f"Field {key_cs} not validate",None)
                             return 
+                        if key_cs in field_customers_validate_require and not customer[key_cs]:
+                            return gen_response(406,f"{customer_name}: Field {key_cs} not found",None)
             else:
                 #  if key_router not in field_validate or ( key_router in field_validate and not body[key_router] ) :
                  if key_router not in field_validate :
@@ -281,13 +286,18 @@ def update_router(body):
             del body['cmd']
         field_validate= ["name","travel_date","status", "customers", "channel_code", "team_sale","channel_name","employee"]
         field_customers_validate = ["customer_code","customer_name","display_address","phone_number","customer","frequency","lat","long"]
+        field_customers_validate_require = ["customer_code","customer_name","frequency"]
         # check_validate fields
         for key_router,value in body.items():
             if isinstance(body[key_router], list):
                 for customer in body[key_router]:
+                    customer_name = customer["customer_name"]
+
                     for key_cs in customer:
-                        if key_cs not in field_customers_validate  :
+                        if key_cs not in field_customers_validate :
                             return gen_response(406,f"Field {key_cs} not validate",None)
+                        if  key_cs in field_customers_validate_require and not customer[key_cs]:
+                            return gen_response(406,f"{customer_name}: Field {key_cs} not found",None)
             else:
                  if key_router not in field_validate :
                         return gen_response(406,f"Field {key_router} not validate",None)

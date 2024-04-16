@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { CustomerType } from './type'
 import type { ColumnsType } from 'antd/es/table'
 import { baseCustomers, commonColumnCustomer, commonTable, optionsFrequency } from './data'
@@ -32,14 +32,7 @@ export default function CustomerList({data,handleData}:Props) {
                 style={{ width: '100%' }}
                 placeholder="Chọn tần suất"
                 onChange={(frequency: string[]) => {                    
-                    handleData(prev => {
-                        console.log({prev},prev.map(customer => {
-                            if(customer.customer_code == record.customer_code) {
-                                customer['frequency'] = frequency.toString().replaceAll(",",";")
-                            }
-                            return customer
-                        }));
-                        
+                    handleData(prev => {                        
                         return prev.map(customer => {
                             if(customer.customer_code == record.customer_code) {
                                 customer['frequency'] = frequency.toString().replaceAll(",",";")
@@ -48,7 +41,8 @@ export default function CustomerList({data,handleData}:Props) {
                         })
                     })
                 }}
-                defaultValue={ value ? value.split(';') : ['1','2',"3","4"]}
+                defaultValue={ value && value.split(';')}
+                // value={value && value.split(';')}
                 />
             }
         },{
