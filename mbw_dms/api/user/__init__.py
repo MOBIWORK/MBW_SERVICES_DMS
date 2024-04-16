@@ -7,7 +7,7 @@ import datetime
 from collections import defaultdict
 
 @frappe.whitelist(methods='PUT')
-def change_password(user, current_password, new_password):
+def change_password(user, current_password, new_password, new_pass_again):
     # Kiểm tra mật khẩu cũ của người dùng
     try:
         user = check_password(user, current_password)
@@ -17,6 +17,12 @@ def change_password(user, current_password, new_password):
     # Kiểm tra mật khẩu mới không được rỗng
     if not new_password:
         return {"error": _("Mật khẩu mới không được để trống")}
+    
+    if not new_pass_again:
+        return {"error": _("Bạn phải nhập lại mật khẩu mới")}
+    
+    if new_pass_again and new_password and new_password != new_pass_again:
+        return {"error": _("Mật khẩu nhập lại phải trùng mật khẩu mới")}
 
     # Cập nhật mật khẩu mới
     update_password(user, new_password)
