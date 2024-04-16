@@ -1,10 +1,11 @@
-import { Row, Col, List, Button } from 'antd';
+import { Row, Col, List, Button, Spin } from 'antd';
 import "./SupervisoryStaffRealTime.css";
 import {TableCustom,RealtimeMap,WrapperCard, WrapperCardTable, WrapperCardMap} from "@/components";
 import { useEffect, useState } from 'react';
 import { AxiosService } from '@/services/server';
 import axios from "axios";
 import { useNavigate } from 'react-router-dom';
+import { LoadingOutlined } from '@ant-design/icons';
 
 export default function SupervisoryStaffRealTime() {
   const navigate = useNavigate();
@@ -30,11 +31,8 @@ export default function SupervisoryStaffRealTime() {
     const [dataTopDistanceEmployee, setDataTopDistanceEmployee] = useState<any[]>([]);
     const [dataEmployee, setDataEmployee] = useState<any[]>([]);
     const [dataCheckingEmployee, setDataCheckingEmployee] = useState<any[]>([]);
+    const [loadingPage, setLoadingPape] = useState<boolean>(true);
 
-    useEffect(()=>{
-      initDataSummaryOver();
-    },[])
-  
     const initDataSummaryOver = async () => {
       const rs = await AxiosService.get(`/api/method/mbw_dms.api.report.real_time_monitoring_report`);
       if(rs.message == "Thành công"){
@@ -52,9 +50,13 @@ export default function SupervisoryStaffRealTime() {
       'render': (text: any, record: any) => (
         <div className="flex items-center">
                 <div className="flex items-center justify-center" style={{height: '48px', width: '48px', borderRadius: '12px'}}>
-                  <div style={{width: '48px', height: '48px', backgroundImage: `url("${record.pic_profile}")`, backgroundSize: 'Cover'}}></div>
+                  {record.pic_profile != null? (
+                    <div style={{width: '48px', height: '48px', backgroundImage: `url("${record.pic_profile}")`, backgroundSize: 'Cover'}}></div>
+                  ):(
+                    <div style={{width: '48px', height: '48px', backgroundSize: 'Cover'}} className='icon_user_default'></div>
+                  )}
                 </div>
-                <div className="mx-3">
+                <div className="mx-3" style={{cursor: 'pointer'}} onClick={() => handleShowHistoryEmployee(record)}>
                   <div style={{fontWeight: 500, fontSize: '14px', lineHeight: '21px'}}>{text}</div>
                   {record.emp_id != null && (
                     <div style={{marginTop: '5px', fontWeight: 400, fontSize: '12px', lineHeight: '21px'}}>ID: {record.emp_id}</div>
@@ -107,6 +109,10 @@ export default function SupervisoryStaffRealTime() {
   const handlerShowHistoryForAnyOne = () => {
     navigate("/employee-monitor-detail/654c8a12d65d3e52f2d286de");
   }
+  const handleShowHistoryEmployee = (employee) => {
+    if(employee.objectId != null) navigate(`/employee-monitor-detail/${employee.objectId}`);
+    else navigate(`/employee-monitor-detail`);
+  }
   const renderDataMoveTopEmployee = (arrSummary, arrEmployee) => {
     for(let i = 0; i < arrEmployee.length; i++){
       for(let j = 0; j < arrSummary.length; j++){
@@ -126,12 +132,14 @@ export default function SupervisoryStaffRealTime() {
       if(i == 5) break;
       dataMoveTopEmployee.push({
         'stt': i+1,
-        'pic_profile': arrDataSort[i].avatar != null? arrDataSort[i].avatar : "/public/user_default.png",
+        'pic_profile': arrDataSort[i].avatar != null? arrDataSort[i].avatar : null,
         'emp_name': arrDataSort[i].employee_name,
         'emp_id': arrDataSort[i].name,
-        'distance': arrDataSort[i].summary != null && arrDataSort[i].summary.move != null? formatDistance(arrDataSort[i].summary.move.distance) : formatDistance(0)
+        'distance': arrDataSort[i].summary != null && arrDataSort[i].summary.move != null? formatDistance(arrDataSort[i].summary.move.distance) : formatDistance(0),
+        'objectId': arrDataSort[i].object_id
       })
     }
+    console.log(dataMoveTopEmployee);
     setDataTopDistanceEmployee(dataMoveTopEmployee);
   }
   const renderDataEmployee = async (arrEmployeeInput) => {
@@ -169,16 +177,19 @@ export default function SupervisoryStaffRealTime() {
     console.log(arrDataSort)
     let arrEmployeeOut = [];
     for(let i = 0; i < arrDataSort.length; i++){
+      if(i == 5) break;
       let item = arrDataSort[i];
       arrEmployeeOut.push({
         's1tt': i+1,
-        'pic_profile': item.avatar != null && item.avatar != ""? item.avatar : "/public/user_default.png",
+        'pic_profile': item.avatar != null && item.avatar != ""? item.avatar : null,
         'emp_name': item.employee_name,
         'emp_id': item.name,
         'visiting': `${item.today_visit}/${item.must_visit}`,
-        'boxing': item.sales_order
+        'boxing': item.sales_order,
+        'objectId': item.object_id
       })
     }
+    console.log(arrEmployeeOut);
     setDataEmployee(arrEmployeeOut);
   }
   const renderDataCheckingEmployee = (arrSummary, arrEmployee) => {
@@ -192,17 +203,17 @@ export default function SupervisoryStaffRealTime() {
         }
       }
     }
-    console.log(arrEmployee);
     let dataCheckingEmployee = [];
     for(let i = 0; i < arrEmployee.length; i++){
       dataCheckingEmployee.push({
         'stt': i+1,
-        'pic_profile': arrEmployee[i].avatar != null? arrEmployee[i].avatar : "/public/user_default.png",
+        'pic_profile': arrEmployee[i].avatar != null? arrEmployee[i].avatar : null,
         'emp_name': arrEmployee[i].employee_name,
         'emp_id': arrEmployee[i].name,
         'moving': arrEmployee[i].summary != null && arrEmployee[i].summary.move != null? formatTime(arrEmployee[i].summary.move.totalTime) : formatTime(0),
         'stopping': arrEmployee[i].summary != null && arrEmployee[i].summary.stop != null? formatTime(arrEmployee[i].summary.stop.totalTime) : formatTime(0),
-        'visiting': arrEmployee[i].summary != null && arrEmployee[i].summary.checkin != null? formatTime(arrEmployee[i].summary.checkin.totalTime) : formatTime(0)
+        'visiting': arrEmployee[i].summary != null && arrEmployee[i].summary.checkin != null? formatTime(arrEmployee[i].summary.checkin.totalTime) : formatTime(0),
+        'objectId': arrEmployee[i].object_id
       })
     }
     setDataCheckingEmployee(dataCheckingEmployee);
@@ -210,6 +221,8 @@ export default function SupervisoryStaffRealTime() {
 
   useEffect(() => {
     (async() => {
+      setLoadingPape(true);
+      initDataSummaryOver();
       const rs = await AxiosService.get('/api/method/mbw_dms.api.user.get_projectID');
       setOptions(prev => ({
         ...prev,
@@ -220,20 +233,39 @@ export default function SupervisoryStaffRealTime() {
       if(responseAllEmployee.message == "Thành công"){
         arrEmployee = responseAllEmployee.result;
       }
+      console.log(arrEmployee);
       let urlSummary = `https://api.ekgis.vn/v2/tracking/locationHistory/summary/lastest/${rs.result[ "Project ID"]}/null?api_key=${options.apiKey}`;
       let res = await axios.get(urlSummary);
-      console.log("Du lieu thuc ",res)
+      if(import.meta.env.VITE_BASE_URL){
+        res = res.data;
+      }
+      console.log("Realtime ", import.meta.env.VITE_BASE_URL);
       if(res?.results.length > 0){
         let arrSummary = res?.results;
         renderDataMoveTopEmployee(arrSummary, JSON.parse(JSON.stringify(arrEmployee)));
         renderDataCheckingEmployee(arrSummary, JSON.parse(JSON.stringify(arrEmployee)));
       }
       renderDataEmployee(JSON.parse(JSON.stringify(arrEmployee)));
+      setLoadingPape(false);
     })()
   },[])
 
   return (
     <>
+      {loadingPage && (
+        <div style={{
+          position: 'fixed',
+          width: '100%',
+          height: '85%',
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          zIndex: 9999,
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}>
+          <Spin indicator={<LoadingOutlined style={{ fontSize: 30, color: '#fff' }} spin />} />
+        </div>
+      )}
       <Row className="flex flex-wrap justify-between items-center px-0 pt-5">
         <div className="flex justify-center items-center">
           <span className="text-2xl font-semibold leading-[21px]">Giám sát thời gian thực</span>
@@ -350,9 +382,14 @@ export default function SupervisoryStaffRealTime() {
                               </div>
                               <div className="mx-3">{item.stt}</div>
                               <div className="flex items-center justify-center" style={{height: '42px', width: '42px', borderRadius: '12px'}}>
-                                <div style={{width: '42px', height: '42px', backgroundImage: `url("${item.pic_profile}")`, backgroundSize: 'Cover'}}></div>
+                                {item.pic_profile != null? (
+                                  <div style={{width: '42px', height: '42px', backgroundImage: `url("${item.pic_profile}")`, backgroundSize: 'Cover'}}></div>
+                                ): (
+                                  <div style={{width: '42px', height: '42px', backgroundSize: 'Cover'}} className='icon_user_default'></div>
+                                )}
+                                
                               </div>
-                              <div className="mx-3">
+                              <div className="mx-3" style={{cursor: 'pointer'}} onClick={() => handleShowHistoryEmployee(item)}>
                                   <div style={{fontWeight: 500, fontSize: '14px', lineHeight: '21px'}}>{item.emp_name}</div>
                                   {item.emp_id != null && (
                                     <div style={{marginTop: '5px', fontWeight: 400, fontSize: '12px', lineHeight: '21px'}}>ID: {item.emp_id}</div>
@@ -383,11 +420,15 @@ export default function SupervisoryStaffRealTime() {
                         <List.Item>
                           <div className="flex items-center justify-between" style={{width: '100%'}}>
                             <div className="flex items-center" style={{width: '70%'}}>
-                              <div className="mx-3">{item.stt}</div>
                               <div className="flex items-center justify-center" style={{height: '48px', width: '48px', borderRadius: '12px'}}>
-                                <div style={{width: '48px', height: '48px', backgroundImage: `url("${item.pic_profile}")`, backgroundSize: 'Cover'}}></div>
+                                {item.pic_profile != null? (
+                                  <div style={{width: '48px', height: '48px', backgroundImage: `url("${item.pic_profile}")`, backgroundSize: 'Cover'}}></div>
+                                ):(
+                                  <div style={{width: '48px', height: '48px', backgroundSize: 'Cover'}} className='icon_user_default'></div>
+                                )}
+                                
                               </div>
-                              <div className="mx-3">
+                              <div className="mx-3" style={{cursor: 'pointer'}} onClick={() => handleShowHistoryEmployee(item)}>
                                 <div style={{fontWeight: 500, fontSize: '14px', lineHeight: '21px'}}>{item.emp_name}</div>
                                 <div style={{marginTop: '5px', fontWeight: 400, fontSize: '12px', lineHeight: '21px'}}>ID: {item.emp_id}</div>
                               </div>

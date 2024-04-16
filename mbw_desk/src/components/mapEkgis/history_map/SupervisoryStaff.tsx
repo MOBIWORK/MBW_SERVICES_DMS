@@ -9,14 +9,9 @@ import { ItemMovingTimeLineDot, ItemMovingTimeLineContent } from "./ItemMovingTi
 import { ItemStopTimeLineDot, ItemStopTimeLineContent } from "./ItemStopTimeLine";
 
 
-export default function SupervisoryStaff({options, loading}) {
+export default function SupervisoryStaff({options}) {
 
   const [timeLineHistory, setTimeLineHistory] = useState<any[]>([]);
-  const [loadingPage, setLoadingPage] = useState<boolean>(false);
-
-  useEffect(() => {
-    setLoadingPage(loading);
-  }, [loading]);
 
   useEffect(() => {
     let arrTimeLineHistory = [];

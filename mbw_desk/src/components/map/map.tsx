@@ -13,7 +13,7 @@ const ekmapplf = window.ekmapplf;
 function HistoryMap({ options, onLoad }) {
     const mapContainer = useRef(null);
     const map = useState(null);
-    const [showControls, setShowControls] = useState({
+    const [Controls, setControls] = useState({
         map: null,
         Data: [],
         options: null
@@ -25,11 +25,11 @@ function HistoryMap({ options, onLoad }) {
     });
     const animationID = useRef(null);
     const timeoutAnimationID = useRef(null);
-
+    const HistoryData = useRef(null);
 
     const defaultOptions = {
         center: [105, 17],
-        zoom: 4.5,
+        zoom: 5,
         pageNumber: 1,
         pageSize: 5000,
         icon: {
@@ -57,7 +57,6 @@ function HistoryMap({ options, onLoad }) {
         try {
             var _popup;
             if (map.current) {
-                // console.log('exist')
                 if (map.animation_current) cancelAnimationFrame(map.animation_current);
                 if (map.timeout_current) clearTimeout(map.timeout_current);
                 map.current.remove();
@@ -237,13 +236,14 @@ function HistoryMap({ options, onLoad }) {
             // })
             // _map.addControl(btnLayer, 'bottom-right');
 
-            _map.addControl(new maplibregl.FullscreenControl(), 'bottom-right');
+            _map.addControl(new maplibregl.FullscreenControl(), 'top-right');
 
 
-            _map.once('load', () => {
-                // console.log('loaded')
+            _map.on('load', () => {
                 try {
                     if (!_options.objectId || _options.objectId === '' || _options.objectId === 'null') return;
+                    if (!_options.from_time || _options.from_time === '' || _options.from_time === 'null') return;
+                    if (!_options.to_time || _options.to_time === '' || _options.to_time === 'null') return;
                     setMap(_options.from_time, _options.to_time, _options.pageNumber, _options.pageSize);
                 } catch (error) {
                     console.error('Error:', error);
@@ -253,16 +253,14 @@ function HistoryMap({ options, onLoad }) {
             const setMap = async (from_time, to_time, pageNumber, pageSize) => {
                 let dataHistory = await getData(from_time, to_time, pageNumber, pageSize);
                 await initDataToMap(dataHistory);
-                // HistoryData.current = dataHistory;
                 let segmentData = await preAnimation(dataHistory);
-                // console.log(dataHistory);
                 if (dataHistory.length && dataHistory[0].coordinates) _map.easeTo({ center: dataHistory[0].coordinates, duration: 100, zoom: 16 })
-                // console.log(map.current);
-                setTimeout(() => setShowControls({
+                setTimeout(() => setControls({
                     map: map.current,
                     Data: segmentData,
                     options: _options
-                }), 500);
+                }), 200)
+                onLoad(dataHistory)
             }
 
 
@@ -271,14 +269,13 @@ function HistoryMap({ options, onLoad }) {
                 let url = `https://api.ekgis.vn/v2/tracking/locationHistory/summary/${_options.projectId}/${_options.objectId}?api_key=${_options.apiKey}&from_time=${from_time}&to_time=${to_time}`;
                 const response = await fetch(url);
                 const Data = await response.json();
-                // onLoad(Data)
                 var arrData = Data.details
                 return arrData || [];
             };
 
 
             //Map
-            const initDataToMap = (data) => {
+            const initDataToMap = async (data) => {
                 let LineSource = {
                     "type": "FeatureCollection",
                     "features": []
@@ -310,16 +307,15 @@ function HistoryMap({ options, onLoad }) {
                 // console.log(LineSource);
                 // console.log(CheckSource);
                 // console.log(TrackSource);
-
-                setLine(LineSource);
-                setPoints(CheckSource, TrackSource);
-                // setNavigation(data);
                 if (data.length) {
                     var boundbox = bbox(LineSource);
                     _map.fitBounds(boundbox, { padding: 100, maxZoom: 14, duration: 1000 });
                 }
-                drawPath();
-                addCar();
+
+                await setLine(LineSource);
+                await setPoints(CheckSource, TrackSource);
+                await drawPath();
+                await addCar();
             }
             const setLine = (LineSource) => {
                 try {
@@ -653,95 +649,69 @@ function HistoryMap({ options, onLoad }) {
                     console.error("Error setPoints:", error);
                 }
             };
-            const setNavigation = async (Data) => {
-                try {
-                    let coords = []
-                    Data.forEach(item => {
-                        if (item.type === "move") {
-                            coords = coords.concat(item.route.geometry.coordinates);
-                        }
+            function drawPath() {
+                var fcLocationHistory = {
+                    "type": "FeatureCollection",
+                    "features": []
+                };
+
+                if (!_map.getSource('LocationHistory')) {
+                    _map.addSource('LocationHistory', {
+                        'type': 'geojson',
+                        'data': fcLocationHistory
+                    });
+                    _map.addLayer({
+                        'id': 'LocationHistory',
+                        'type': 'line',
+                        'source': 'LocationHistory',
+                        'layout': {
+                            'line-cap': 'round',
+                            'line-join': 'round'
+                        },
+                        'paint': {
+                            'line-color': _options.route.lineCorlor,
+                            'line-width': _options.route.lineWidth,
+                            'line-opacity': _options.route.lineOpacity
+                        },
+                    });
+                } else
+                    _map.getSource('LocationHistory').setData(fcLocationHistory);
+            }
+            async function addCar() {
+                if (!_map.getImage('marker-navigation')) {
+                    const iconNavigation = await _map.loadImage(_options.icon.navigation);
+                    _map.addImage('marker-navigation', iconNavigation.data)
+                }
+
+                var locationMarker = {
+                    "type": "FeatureCollection",
+                    "features": []
+                };
+
+                if (!_map.getSource('locationMarker')) {
+                    _map.addSource('locationMarker', {
+                        'type': 'geojson',
+                        'data': locationMarker
                     });
 
-                    if (!_map.getImage('marker-navigation')) {
-                        const iconNavigation = await _map.loadImage(_options.icon.navigation);
-                        _map.addImage('marker-navigation', iconNavigation.data)
-                    }
-
-                    var NavigationPoint = {
-                        'type': 'FeatureCollection',
-                        'features': [
-                            {
-                                'type': 'Feature',
-                                'properties': {},
-                                'geometry': {
-                                    'type': 'Point',
-                                    'coordinates': coords[0]
-                                }
-                            }
-                        ]
-                    };
-                    var Navigationline = {
-                        'type': 'FeatureCollection',
-                        'features': [
-                            {
-                                'type': 'Feature',
-                                'geometry': {
-                                    'type': 'LineString',
-                                    'coordinates': [coords[0]]
-                                }
-                            }
-                        ]
-                    };
-
-                    if (!_map.getSource(`ek-tracking-his-${_map_Container.id}-navigation-line-source`)) {
-                        _map.addSource(`ek-tracking-his-${_map_Container.id}-navigation-line-source`, {
-                            'type': 'geojson',
-                            'data': Navigationline
-                        });
-                        _map.addLayer({
-                            'id': `ek-tracking-his-${_map_Container.id}-navigation-line-animation`,
-                            'source': `ek-tracking-his-${_map_Container.id}-navigation-line-source`,
-                            'type': 'line',
-                            'layout': {
-                                'line-cap': 'round',
-                                'line-join': 'round'
-                            },
-                            'paint': {
-                                'line-color': _options.route.lineCorlor,
-                                'line-width': _options.route.lineWidth,
-                                'line-opacity': 0.8
-                            }
-                        });
-                    } else {
-                        _map.getSource(`ek-tracking-his-${_map_Container.id}-navigation-line-source`).setData(Navigationline)
-                    }
-
-                    if (!_map.getSource(`ek-tracking-his-${_map_Container.id}-navigation-point-source`)) {
-                        _map.addSource(`ek-tracking-his-${_map_Container.id}-navigation-point-source`, {
-                            'type': 'geojson',
-                            'data': NavigationPoint
-                        });
-                        _map.addLayer({
-                            'id': `ek-tracking-his-${_map_Container.id}-navigation-point-animation`,
-                            'source': `ek-tracking-his-${_map_Container.id}-navigation-point-source`,
-                            'type': 'symbol',
-                            'layout': {
-                                'icon-image': 'marker-navigation',
-                                'icon-rotate': ['get', 'bearing'],
-                                'icon-rotation-alignment': 'map',
-                                'icon-allow-overlap': true,
-                                'icon-overlap': 'always',
-                                'icon-ignore-placement': true,
-                                'icon-size': 0.7,
-                            }
-                        });
-                    } else {
-                        _map.getSource(`ek-tracking-his-${_map_Container.id}-navigation-point-source`).setData(NavigationPoint)
-                    }
-                } catch (error) {
-                    console.error("Error setNavigation:", error);
-                }
-            };
+                    _map.addLayer({
+                        'id': 'locationMarker',
+                        'source': 'locationMarker',
+                        'type': 'symbol',
+                        'layout': {
+                            "icon-size": 0.7,
+                            "icon-offset": [0, -10],
+                            "icon-allow-overlap": true,
+                            "icon-image": 'marker-navigation',
+                            "icon-rotate": ["get", "bearing"],
+                            "icon-rotation-alignment": "map",
+                            'icon-overlap': 'always',
+                            'icon-ignore-placement': true,
+                        }
+                    });
+                } else
+                    _map.getSource('locationMarker').setData(locationMarker);
+            }
 
             const preAnimation = async (Data) => {
                 var gpxData, segmentData, summaryData
@@ -755,29 +725,56 @@ function HistoryMap({ options, onLoad }) {
                     if (data.type === 'move') {
                         for (let i = 0; i < data.route.locations.length; i++) {
                             let location = data.route.locations[i];
-                            let point = {
-                                'type': 'Feature',
-                                'properties': {
-                                    time: location.timestamp,
-                                    ele: 0,
-                                    speed: location.speed,
-                                    // odometer: data.odometer,
-                                },
-                                'geometry': {
-                                    'type': 'Point',
-                                    'coordinates': location.coordinates
-                                }
-                            };
-                            fc.features.push(point);
+                            if (new Date(location.timestamp).getTime() >= new Date(data.startTime).getTime()
+                                && new Date(location.timestamp).getTime() <= new Date(data.endTime).getTime()) {
+                                let point = {
+                                    'type': 'Feature',
+                                    'properties': {
+                                        time: location.timestamp,
+                                        ele: 0,
+                                        type: data.type
+                                    },
+                                    'geometry': {
+                                        'type': 'Point',
+                                        'coordinates': location.coordinates
+                                    }
+                                };
+                                fc.features.push(point);
+                            }
                         }
                     } else if (data.type === 'stop' || data.type === 'checkin') {
+                        let pointStart = {
+                            'type': 'Feature',
+                            'properties': {
+                                time: data.startTime,
+                                ele: 0,
+                                type: data.type
+                            },
+                            'geometry': {
+                                'type': 'Point',
+                                'coordinates': data.coordinates
+                            }
+                        };
+                        let pointEnd = {
+                            'type': 'Feature',
+                            'properties': {
+                                time: data.endTime,
+                                ele: 0,
+                                type: data.type
+                            },
+                            'geometry': {
+                                'type': 'Point',
+                                'coordinates': data.coordinates
+                            }
+                        };
+                        fc.features.push(pointStart, pointEnd);
+                    } else {
                         let point = {
                             'type': 'Feature',
                             'properties': {
                                 time: data.timestamp,
                                 ele: 0,
-                                speed: -1,
-                                // odometer: 0,
+                                type: data.type
                             },
                             'geometry': {
                                 'type': 'Point',
@@ -792,11 +789,14 @@ function HistoryMap({ options, onLoad }) {
                 segmentData = computeData(gpxData);
                 // summaryData = computeHighlights(segmentData);
 
+                // console.log('fc', fc);
                 // console.log('gpxData', gpxData);
                 // console.log('segmentData', segmentData);
                 // console.log('summaryData', summaryData);
 
                 return segmentData || []
+
+
                 //Data
                 function parseGpxData(fc) {
                     var result = {
@@ -847,8 +847,7 @@ function HistoryMap({ options, onLoad }) {
                             if (locData1.ele && locData2.ele) {
                                 tsegment.computed.ele = locData2.ele;
                             }
-
-                            if (locData1.time && locData2.time) {
+                            if (locData1.time && locData2.time && (locData1.time !== locData2.time)) {
                                 const { speed, time } = getSegSpeed(d, locData1.time, locData2.time);
                                 const filteredSpeed = speed;
 
@@ -892,9 +891,8 @@ function HistoryMap({ options, onLoad }) {
                 }
                 function getSegSpeed(d, time1, time2) {
                     const Δt = time2 / 1000 - time1 / 1000; // Time in seconds
-                    const v = d / Δt; // Speed in m/s
+                    const v = (d / Δt) || 0; // Speed in m/s
                     const kph = v * 3.6; // Speed in km/h
-
                     return {
                         speed: kph,
                         time: Δt,
@@ -1016,79 +1014,7 @@ function HistoryMap({ options, onLoad }) {
 
                     return result;
                 }
-
-                // drawPath();
-                // addCar();
             }
-
-            function drawPath() {
-                var fcLocationHistory = {
-                    "type": "FeatureCollection",
-                    "features": []
-                };
-
-                if (!_map.getSource('LocationHistory')) {
-                    _map.addSource('LocationHistory', {
-                        'type': 'geojson',
-                        'data': fcLocationHistory
-                    });
-                    _map.addLayer({
-                        'id': 'LocationHistory',
-                        'type': 'line',
-                        'source': 'LocationHistory',
-                        'layout': {
-                            'line-cap': 'round',
-                            'line-join': 'round'
-                        },
-                        'paint': {
-                            'line-color': _options.route.lineCorlor,
-                            'line-width': _options.route.lineWidth,
-                            'line-opacity': _options.route.lineOpacity
-                        },
-                    });
-                } else
-                    _map.getSource('LocationHistory').setData(fcLocationHistory);
-            }
-            async function addCar() {
-                if (!_map.getImage('marker-navigation')) {
-                    const iconNavigation = await _map.loadImage(_options.icon.navigation);
-                    _map.addImage('marker-navigation', iconNavigation.data)
-                }
-
-                var locationMarker = {
-                    "type": "FeatureCollection",
-                    "features": []
-                };
-
-                if (!_map.getSource('locationMarker')) {
-                    _map.addSource('locationMarker', {
-                        'type': 'geojson',
-                        'data': locationMarker
-                    });
-
-                    _map.addLayer({
-                        'id': 'locationMarker',
-                        'source': 'locationMarker',
-                        'type': 'symbol',
-                        'layout': {
-                            "icon-size": 0.7,
-                            "icon-offset": [0, -10],
-                            "icon-allow-overlap": true,
-                            "icon-image": 'marker-navigation',
-                            "icon-rotate": ["get", "bearing"],
-                            "icon-rotation-alignment": "map",
-                            'icon-overlap': 'always',
-                            'icon-ignore-placement': true,
-                        }
-                    });
-                } else
-                    _map.getSource('locationMarker').setData(locationMarker);
-            }
-
-            const visibleRouteLayer = (visible) => {
-                _map.setLayoutProperty(`ek-tracking-his-${_map_Container.id}-LineString`, 'visibility', visible);
-            }
-
         } catch (error) {
             console.error('Error initializing map:', error);
         };
@@ -1100,7 +1026,7 @@ function HistoryMap({ options, onLoad }) {
             time: null,
             speed: 0
         })
-        setShowControls({
+        setControls({
             map: null,
             Data: [],
             options: null
@@ -1134,10 +1060,11 @@ function HistoryMap({ options, onLoad }) {
             const minutes = date.getMinutes();
             const formattedDate = `${day}/${month}/${year}`;
             const formattedTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+
             setStage({
                 date: formattedDate,
                 time: formattedTime,
-                speed: data.computed.speed.toFixed(1)
+                speed: Math.ceil(data.computed.speed * 10) / 10
             })
         } else {
             setStage({
@@ -1148,22 +1075,22 @@ function HistoryMap({ options, onLoad }) {
         }
 
     }
-    return (
+    return (<>
         <div ref={mapContainer} id='ekmap-tracking-his-map'>
-            {showControls.map != null && <Animate_And_Controls map={showControls.map} segmentData={showControls.Data} options={showControls.options} currentInfo={setInfo} />}
+            {Controls.map != null && <Animate_And_Controls _map={Controls.map} segmentData={Controls.Data} options={Controls.options} currentInfo={setInfo} />}
             <MapLegend />
-            {Stage.date != null && <div className='ekmapplf_tracking-map-legend-his'>
-                <Flex gap="small" align="center" justify='center' wrap='wrap' style={{ 'width': '50%', 'borderRight': '1px solid' }}>
-                    <span style={{ 'fontWeight': 600, 'color': 'rgb(132, 132, 132)', 'textAlign': 'center', 'width': '100%' }}>{Stage.date}</span>
-                    <span style={{ 'fontWeight': 600, 'color': 'rgb(68, 68, 68)', 'textAlign': 'center' }}>{Stage.time}</span>
+            {(Stage.date != null && Stage.time != null) && <div className='ekmapplf_tracking-map-legend-his'>
+                <Flex vertical="true" align="center" justify='center' wrap='wrap' style={{ 'width': '50%', 'fontWeight': 600, 'textAlign': 'center', 'borderRight': '1px solid' }}>
+                    <span style={{ 'color': 'rgb(132, 132, 132)' }}>{Stage.date}</span>
+                    <span style={{ 'color': 'rgb(68, 68, 68)' }}>{Stage.time}</span>
                 </Flex>
-                <Flex gap="small" align="center" justify='center' wrap='wrap' style={{ 'width': '49%' }}>
-                    <span style={{ 'fontWeight': 600, 'color': 'rgb(132, 132, 132)', 'textAlign': 'center', 'width': '100%' }}>Tốc độ</span>
-                    <span style={{ 'fontWeight': 600, 'color': 'rgb(54, 153, 255)', 'textAlign': 'center' }}>{Stage.speed} km/h</span>
+                <Flex vertical="true" align="center" justify='center' wrap='wrap' style={{ 'width': '49%', 'fontWeight': 600, 'textAlign': 'center', }}>
+                    <span style={{ 'color': 'rgb(132, 132, 132)' }}>Tốc độ</span>
+                    <span style={{ 'color': 'rgb(54, 153, 255)' }}>{Stage.speed} km/h</span>
                 </Flex>
             </div>}
         </div>
-    );
+    </>);
 }
 
 export default HistoryMap;

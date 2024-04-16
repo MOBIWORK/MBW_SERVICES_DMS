@@ -446,7 +446,7 @@
     padding: 10px;
     background-color: #fff;
     bottom: 25px;
-    right: 43%;
+    right: 40%;
     box-shadow: 0 0 0 2px rgba(0, 0, 0, .1);
     border-radius: 5px;
 }
@@ -474,6 +474,6 @@
     display: flex;
     font-size: 13px;
     padding: 10px;
-    width: 170px;
+    width: 175px;
 }
 /**/

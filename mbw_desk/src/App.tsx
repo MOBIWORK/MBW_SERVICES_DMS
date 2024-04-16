@@ -11,10 +11,11 @@ function App() {
     
   }
   return (
-    <AuthProvider>
-      <Router />
-      {contextHolder}
-    </AuthProvider>
+    <Router />
+    // <AuthProvider>
+    //   <Router />
+    //   {contextHolder}
+    // </AuthProvider>
   )
 }
 

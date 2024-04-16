@@ -1,16 +1,13 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { Button, Flex, Select, Checkbox } from "antd";
-import { PauseOutlined, CaretRightOutlined, RetweetOutlined, XFilled, CloseSquareFilled } from '@ant-design/icons';
+import { Button, Flex, Select, Checkbox, Tooltip } from "antd";
+import { PauseOutlined, CaretRightOutlined, RetweetOutlined, XFilled } from '@ant-design/icons';
 import * as turf from "@turf/turf";
 
-const Animate_And_Controls = ({ map, segmentData, options, currentInfo }) => {
-    // console.log(map);
-    // console.log(segmentData);
-
+const Animate_And_Controls = ({ _map, segmentData, options, currentInfo }) => {
     const animationID = useRef(null);
     const timeout = useRef(null);
     const [isFollow, setFollow] = useState(options.animation.follow)
-    const [isAnimation, setAnimation] = useState(true)
+    const [isAnimation, setAnimation] = useState(false)
     const [animationSpeed, setanimationSpeed] = useState(10);
     const [isReplay, setReplay] = useState(true)
     const listSpeeds = [
@@ -21,118 +18,55 @@ const Animate_And_Controls = ({ map, segmentData, options, currentInfo }) => {
         { value: 20, label: 'x20' },
         { value: 100, label: 'x100' },
     ]
+    const [isTabActive, setTabActive] = useState(true);
+    const lastBearing = useRef(0);
+    const currentIndex = useRef(0);
+    const alongPath = useRef([]);
+    const map = useRef(_map);
+    var _map_Container = map.current.getContainer();
 
-    var lastBearing = 0;
-    var _map_Container = map.getContainer();
-    var currentIndex = 0;
-    var alongPath = [];
-
-    // function loadData() {
-    //     drawPath();
-    //     addCar();
-    // }
-    // function drawPath() {
-    //     var fcLocationHistory = {
-    //         "type": "FeatureCollection",
-    //         "features": []
-    //     };
-    //     if (map.getSource('LocationHistory')) {
-    //         map.getSource('LocationHistory').setData(fcLocationHistory);
-    //     } else {
-    //         map.addSource('LocationHistory', {
-    //             'type': 'geojson',
-    //             'data': fcLocationHistory
-    //         });
-    //         map.addLayer({
-    //             'id': 'LocationHistory',
-    //             'type': 'line',
-    //             'source': 'LocationHistory',
-    //             'layout': {
-    //                 'line-cap': 'round',
-    //                 'line-join': 'round'
-    //             },
-    //             'paint': {
-    //                 'line-color': options.route.lineCorlor,
-    //                 'line-width': options.route.lineWidth,
-    //                 'line-opacity': options.route.lineOpacity
-    //             },
-    //         });
-    //     }
-    // }
-    // async function addCar() {
-    //     if (!map.getImage('marker-navigation')) {
-    //         const iconNavigation = await map.loadImage(options.icon.navigation);
-    //         map.addImage('marker-navigation', iconNavigation.data)
-    //     }
-
-    //     var locationMarker = {
-    //         "type": "FeatureCollection",
-    //         "features": []
-    //     };
-
-    //     console.log(map.getSource('locationMarker'));
-    //     if (!map.getSource('locationMarker')) {
-    //         map.addSource('locationMarker', {
-    //             'type': 'geojson',
-    //             'data': locationMarker
-    //         });
-
-    //         map.addLayer({
-    //             'id': 'locationMarker',
-    //             'source': 'locationMarker',
-    //             'type': 'symbol',
-    //             'layout': {
-    //                 "icon-size": 0.7,
-    //                 "icon-offset": [0, -10],
-    //                 "icon-allow-overlap": true,
-    //                 "icon-image": 'marker-navigation',
-    //                 "icon-rotate": ["get", "bearing"],
-    //                 "icon-rotation-alignment": "map",
-    //                 'icon-overlap': 'always',
-    //                 'icon-ignore-placement': true,
-    //             }
-    //         });
-    //     } else
-    //         map.getSource('locationMarker').setData(locationMarker);
-    // }
-
-    // loadData();
+    // console.log(map.current);
+    // console.log(segmentData);
 
     function animate(i, speedData) {
-        currentIndex = i;
-        if (i == 0) {
-            alongPath = [];
-            if (map.getSource('LocationHistory')) {
-                map.getSource('LocationHistory').setData({
-                    'type': 'FeatureCollection',
-                    'features': []
-                })
-            }
-        }
+        currentIndex.current = i;
+
         const e = speedData[i];
-        // console.log(i);
         if (!e) {
-            currentIndex = i - 1;
-            currentInfo(speedData[currentIndex])
+            if (isReplay) {
+                currentIndex.current = 0;
+                alongPath.current = [];
+                try {
+                    if (map.current && map.current.getSource('LocationHistory'))
+                        map.current.getSource('LocationHistory').setData({
+                            'type': 'FeatureCollection',
+                            'features': []
+                        })
+                } catch (ex) {
+                    setAnimation(false)
+                    console.log(ex);
+                }
+                if (segmentData.length && segmentData[0].computed.time)
+                    timeout.current = setTimeout(animate.bind(this), 1000, currentIndex.current, segmentData);
+            } else {
+                currentIndex.current = i - 1;
+                StopAnimation();
+            };
+            currentInfo(speedData[currentIndex.current]);
             return;
         }
-        currentInfo(speedData[currentIndex])
+        currentInfo(e)
         if (e.computed.time) {
             let timeoutFrame = (e.computed.time * 1000) / animationSpeed;
             if (e.computed.speed) {
-                var start;
-                var firstPoint;
+                var start, firstPoint;
                 function frame(time) {
-                    // console.log(map);
-                    // console.log('frame', time);
                     if (!start) {
                         firstPoint = e.loc1.loc;
                         start = time;
                     }
                     const animationPhase = (time - start) / ((Number(e.computed.time?.toString()) * 1000) / animationSpeed);
-                    if (animationPhase > 1 || !isAnimation) {
-                        return;
-                    }
+                    if (animationPhase > 1 || !isAnimation) return;
 
                     var path = turf.lineString([e.loc1.loc, e.loc2.loc]);
                     var pathDistance = turf.lineDistance(path);
@@ -143,129 +77,178 @@ const Animate_And_Controls = ({ map, segmentData, options, currentInfo }) => {
                         turf.point(alongPathFrame)
                     );
 
-                    if (firstPoint[0] !== alongPathFrame[0] && firstPoint[1] !== alongPathFrame[1]) {
-                        lastBearing = bearing;
-                    }
+                    if (firstPoint[0] !== alongPathFrame[0] && firstPoint[1] !== alongPathFrame[1]) lastBearing.current = bearing;
                     firstPoint = alongPathFrame;
-                    try {
-                        if (map && isFollow) {
-                            map.panTo(alongPathFrame, { animate: true, essential: true, curve: 1.42, duration: 100, pitch: 60, bearing: lastBearing })
-                        }
-                        if (map && map.getSource('locationMarker')) {
-                            map.getSource("locationMarker").setData({
-                                type: "FeatureCollection",
-                                features: [turf.point(alongPathFrame, { bearing: lastBearing })]
-                            })
-                        }
-                        alongPath = alongPath.concat([alongPathFrame]);
 
-                        if (map && alongPath.length > 1)
-                            if (map.getSource('LocationHistory')) {
-                                map.getSource("LocationHistory").setData({
+                    alongPath.current = alongPath.current.concat([alongPathFrame]);
+
+                    try {
+                        if (map.current && isFollow)
+                            map.current.panTo(alongPathFrame, { animate: true, essential: true, curve: 1.42, duration: 100, pitch: 60, bearing: lastBearing.current })
+
+                        if (map.current && map.current.getSource('locationMarker'))
+                            map.current.getSource("locationMarker").setData({
+                                type: "FeatureCollection",
+                                features: [turf.point(alongPathFrame, { bearing: lastBearing.current })]
+                            })
+
+                        if (map.current && alongPath.current.length > 1)
+                            if (map.current.getSource('LocationHistory'))
+                                map.current.getSource("LocationHistory").setData({
                                     type: "FeatureCollection",
-                                    features: [turf.lineString(alongPath)]
+                                    features: [turf.lineString(alongPath.current)]
                                 })
-                            }
-                        // animation(frame);
-                        animationID.current = requestAnimationFrame(frame);
-                        map.animation_current = animationID.current
+
+                        animationID.current = window.requestAnimationFrame(frame);
                     } catch (ex) {
-                        console.log(ex)
+                        setAnimation(false)
+                        console.log(ex);
                     }
                 }
-                // animation(frame);
-                animationID.current = requestAnimationFrame(frame);
-                map.animation_current = animationID.current
-                // animID(animationID.current);
+                animationID.current = window.requestAnimationFrame(frame);
             }
             i++;
-            if (isReplay && i === speedData.length) i = 0;
+            alongPath.current = speedData.slice(0, i).map(gpx => gpx.loc1.loc)
             timeout.current = setTimeout(animate.bind(this), timeoutFrame, i, speedData)
-            map.timeout_current = timeout.current
         }
     }
 
     useEffect(() => {
-        // setAnimation(false)
+        // console.log(isAnimation);
+        setAnimation(false)
         if (animationID.current) cancelAnimationFrame(animationID.current);
         if (timeout.current) clearTimeout(timeout.current);
-    }, [map, options, segmentData])
+        currentIndex.current = 0;
+        if (!segmentData.length) return
+        if (options.animation.animate) setAnimation(true)
+    }, [_map, segmentData, options])
 
     useEffect(() => {
-        // if (!isAnimation) setAnimation(true);
-        // console.log(options.animation);
-        // console.log(isAnimation);
-
-        if (animationID.current) cancelAnimationFrame(animationID.current);
-        if (timeout.current) clearTimeout(timeout.current);
-
         if (isAnimation) {
-            currentIndex = 0;
-            if (segmentData.length && segmentData[0].computed.time) {
-                timeout.current = setTimeout(animate.bind(this), (segmentData[0].computed.time * 1000) / animationSpeed, currentIndex, segmentData);
-                map.timeout_current = timeout.current
+            if (currentIndex.current === 0) {
+                alongPath.current = [];
+                map.current.getSource('LocationHistory').setData({
+                    'type': 'FeatureCollection',
+                    'features': []
+                })
             }
-            map.setPaintProperty(`ek-tracking-his-${_map_Container.id}-LineString`, 'line-color', '#b5b5b5');
-            map.setPaintProperty(`ek-tracking-his-${_map_Container.id}-LineString`, 'line-opacity', 0.5);
-            map.setLayoutProperty(`ek-tracking-his-${_map_Container.id}-LineString-arrow`, 'visibility', 'none');
-            map.setLayoutProperty(`ek-tracking-his-${_map_Container.id}-LineString`, 'visibility', 'none');
-            map.setLayoutProperty(`locationMarker`, 'visibility', 'visible');
-            map.setLayoutProperty(`LocationHistory`, 'visibility', 'visible');
+            if (segmentData.length && segmentData[0].computed.time) {
+                timeout.current = setTimeout(animate.bind(this), 500, currentIndex.current, segmentData);
+                // timeout.current = setTimeout(animate.bind(this), 300, currentIndex.current, segmentData);
+            }
+            try {
+                map.current.setPaintProperty(`ek-tracking-his-${_map_Container.id}-LineString`, 'line-color', '#b5b5b5');
+                map.current.setPaintProperty(`ek-tracking-his-${_map_Container.id}-LineString`, 'line-opacity', 0.5);
+                map.current.setLayoutProperty(`ek-tracking-his-${_map_Container.id}-LineString-arrow`, 'visibility', 'none');
+                map.current.setLayoutProperty(`ek-tracking-his-${_map_Container.id}-LineString`, 'visibility', 'none');
+                map.current.setLayoutProperty(`locationMarker`, 'visibility', 'visible');
+                map.current.setLayoutProperty(`LocationHistory`, 'visibility', 'visible');
+            } catch (ex) {
+                console.log(ex);
+            }
         } else {
-            currentInfo(null)
+            currentInfo(null);
             if (animationID.current) cancelAnimationFrame(animationID.current);
-            if (timeout.current) clearTimeout(timeout.current);
-            map.setPaintProperty(`ek-tracking-his-${_map_Container.id}-LineString`, 'line-color', options.route.lineCorlor);
-            map.setPaintProperty(`ek-tracking-his-${_map_Container.id}-LineString`, 'line-opacity', options.route.lineOpacity);
-            map.setLayoutProperty(`ek-tracking-his-${_map_Container.id}-LineString`, 'visibility', 'visible');
-            map.setLayoutProperty(`ek-tracking-his-${_map_Container.id}-LineString-arrow`, 'visibility', 'visible');
-            map.setLayoutProperty(`locationMarker`, 'visibility', 'none');
-            map.setLayoutProperty(`LocationHistory`, 'visibility', 'none');
+            try {
+                map.current.setPaintProperty(`ek-tracking-his-${_map_Container.id}-LineString`, 'line-color', options.route.lineCorlor);
+                map.current.setPaintProperty(`ek-tracking-his-${_map_Container.id}-LineString`, 'line-opacity', options.route.lineOpacity);
+                map.current.setLayoutProperty(`ek-tracking-his-${_map_Container.id}-LineString`, 'visibility', 'visible');
+                map.current.setLayoutProperty(`ek-tracking-his-${_map_Container.id}-LineString-arrow`, 'visibility', 'visible');
+                map.current.setLayoutProperty(`locationMarker`, 'visibility', 'none');
+                map.current.setLayoutProperty(`LocationHistory`, 'visibility', 'none');
+            } catch (ex) {
+                console.log(ex);
+            }
         };
 
         return () => {
             if (animationID.current) cancelAnimationFrame(animationID.current);
             if (timeout.current) clearTimeout(timeout.current);
         };
-    }, [isFollow, isAnimation, animationSpeed]);
+    }, [isAnimation, animationSpeed, isFollow, isReplay]);
 
-
-    const toggleAnimation = () => {
-        setAnimation(!isAnimation);
-    };
-
-    const replayAnimation = () => {
-        setReplay(!isReplay);
-    };
-
-    const StopAnimation = () => {
-        setAnimation(false);
-        currentIndex = 0;
-    };
+    const [currentAnimation, setCurrentAnimation] = useState(options.animation.animate);
+    useEffect(() => {
+        const handleVisibilityChange = () => {
+            setTabActive(document.visibilityState === 'visible');
+        };
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+        return () => {
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
+        };
+    }, []);
+    useEffect(() => {
+        if (isTabActive) {
+            if (currentAnimation === options.animation.animate) setAnimation(true);
+            else setAnimation(false);
+        } else {
+            setCurrentAnimation(isAnimation);
+            setAnimation(false);
+        }
+    }, [isTabActive]);
 
     const handleSpeedChange = (value) => {
         setanimationSpeed(value);
     };
 
     const handleFollowChange = (value) => {
-        if (value.target.checked) map.setZoom(17);
+        if (value.target.checked) map.current.setZoom(17);
         setFollow(!isFollow);
+    };
+
+    const StartAnimation = () => {
+        setAnimation(true)
+    };
+
+    const PauseAnimation = () => {
+        setAnimation(false)
+    }
+
+    const StopAnimation = () => {
+        PauseAnimation()
+        try {
+            map.current.getSource("locationMarker").setData({
+                type: "FeatureCollection",
+                features: []
+            })
+            map.current.getSource('LocationHistory').setData({
+                'type': 'FeatureCollection',
+                'features': []
+            })
+            map.current.panTo(segmentData[0].loc1.loc);
+        } catch (ex) {
+            console.log(ex);
+        }
+        currentIndex.current = 0;
+    };
+
+    const ReplayAnimation = () => {
+        setReplay(!isReplay);
     };
 
     return (
         <div id='ekmapplf_tracking_control' className='ekmapplf_tracking-map-control'>
             <Flex gap="small" align="center" justify="center">
-                <Button icon={<CaretRightOutlined />} disabled={isAnimation} onClick={toggleAnimation} />
-                <Button icon={<PauseOutlined />} disabled={!isAnimation} onClick={toggleAnimation} />
-                {/* <Button icon={!isAnimation ? <CaretRightOutlined /> : <PauseOutlined />} onClick={toggleAnimation} /> */}
-                {/* <Button icon={<XFilled />} onClick={StopAnimation} ></Button> */}
-                {/* <Button type={isReplay ? 'primary' : 'default'} icon={<RetweetOutlined />} onClick={replayAnimation}></Button> */}
-                <Select
-                    defaultValue={animationSpeed}
-                    style={{ width: '75px' }}
-                    onChange={handleSpeedChange}
-                    options={listSpeeds}
-                />
+                <Tooltip title="Play">
+                    <Button icon={<CaretRightOutlined />} disabled={isAnimation} onClick={StartAnimation} />
+                </Tooltip>
+                <Tooltip title="Pause">
+                    <Button icon={<PauseOutlined />} disabled={!isAnimation} onClick={PauseAnimation} />
+                </Tooltip>
+                <Tooltip title="Stop">
+                    <Button icon={<XFilled />} onClick={StopAnimation} ></Button>
+                </Tooltip>
+                <Tooltip title="Replay">
+                    <Button type={isReplay ? 'primary' : 'default'} icon={<RetweetOutlined />} onClick={ReplayAnimation}></Button>
+                </Tooltip>
+                <Tooltip title="Speed">
+                    <Select
+                        defaultValue={animationSpeed}
+                        style={{ width: '75px' }}
+                        onChange={handleSpeedChange}
+                        options={listSpeeds}
+                    />
+                </Tooltip>
                 <Checkbox onChange={handleFollowChange} checked={isFollow}>Theo dõi lộ trình</Checkbox>
             </Flex>
         </div>

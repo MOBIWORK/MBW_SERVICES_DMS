@@ -5,10 +5,11 @@ import { TodayLimit, tmpToTimeZone } from '../../../util'
 import { SupervisoryStaff } from '@/components'
 import { AxiosService } from '../../../services/server'
 import axios from "axios";
-import { message, Select } from 'antd';
+import { message, Select, Spin } from 'antd';
 import { HeaderPage } from '../../../components';
 import { BackIos } from '../../../icons';
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router-dom';
+import { LoadingOutlined } from '@ant-design/icons';
 // Thiết lập ngôn ngữ cho dayjs
 // import 'dayjs/locale/vi';
 // dayjs.locale('vi');
@@ -17,7 +18,6 @@ export default function TravelHistory({ employee }: { employee?: string }) {
   const [time, setTime] = useState<any>(new Date("03-29-2024")) //Date.now()
   const [from_time, setFTime] = useState<string>(tmpToTimeZone(new Date("03-29-2024").setHours(0, 0, 0).toString()))
   const [to_time, setTTime] = useState<string>(tmpToTimeZone(new Date("03-29-2024").setHours(24, 0, 0).toString()))
-  const [loading, setLoading] = useState<boolean>(true);
   const [nameEmployee, setNameEmployee] = useState<string>("");
   const [arrEmployee,setArrEmployee] = useState<any[]>([]);
   const [defaultEmployeeSelect, setDefaultEmployeeSelect] = useState<string>("");
@@ -27,8 +27,8 @@ export default function TravelHistory({ employee }: { employee?: string }) {
       setFTime(tmpToTimeZone(TodayLimit(value).today))
       setTTime(tmpToTimeZone(TodayLimit(value).nextday))
     }, 200)
-    
   }
+  const [loadingPage, setLoadingPage] = useState<boolean>(true);
   const [options, setOptions] = useState<
     {
       apiKey: string | null,
@@ -45,10 +45,12 @@ export default function TravelHistory({ employee }: { employee?: string }) {
     })
   
   const initDataSummary = async (projectId: string, objectId: string) => {
-    setLoading(true);
     if(objectId != null && objectId != ""){
       let urlSummary = `https://api.ekgis.vn/v2/tracking/locationHistory/summary/${projectId}/${objectId}?from_time=${from_time}&to_time=${to_time}&api_key=${options.apiKey}`;
       let resSummary = await axios.get(urlSummary);
+      if(import.meta.env.VITE_BASE_URL){
+        resSummary = resSummary.data;
+      }
       console.log("Dữ liệu lịch swr ", resSummary);
       setOptions(prev => ({
         ...prev, 
@@ -77,13 +79,12 @@ export default function TravelHistory({ employee }: { employee?: string }) {
         details: [],
       }));
     }
-    setLoading(false);
   }
   const initDataEmployee = async (projectId: string) => {
     let resSummary = await AxiosService.get("/api/method/mbw_dms.api.user.get_list_employees");
     if(resSummary.message == "Thành công"){
       let arrEmployee = resSummary["result"].map(function(item){
-        return {value: item["object_id"], label: item["employee_name"]};
+        return {value: item["name"], label: item["employee_name"]};
       });
       setArrEmployee(arrEmployee);
     }
@@ -91,40 +92,45 @@ export default function TravelHistory({ employee }: { employee?: string }) {
   const handleChangeEmployee = async (item, option) => {
     setOptions(prev => ({
       ...prev, 
-      objectId: item,
+      objectId: option.object_id,
     }))
-    initDataSummary(options.projectId, item);
-    setNameEmployee(option.label);
+    initDataSummary(options.projectId, option.object_id);
+    setNameEmployee(`${option.label} - ${item}`);
   }
 
   useEffect(() => {
     (async () => {
+      setLoadingPage(true);
       if(employee == null || employee == ""){
-        const rs = await AxiosService.get(`/api/method/mbw_dms.api.user.get_project_object_id?name=${employee}`)
+        const rs = await AxiosService.get(`/api/method/mbw_dms.api.user.get_projectID`)
         setOptions(prev => ({
           ...prev, 
-          projectId: rs.result["Project ID"], //,
+          projectId: rs.result["Project ID"], //
           objectId: "" //Fix cứng dữ liệu để demo
         }))
         initDataEmployee(rs.result["Project ID"]);
+        setLoadingPage(false);
         return;
       }
       try {
-        const rs = await AxiosService.get(`/api/method/mbw_dms.api.user.get_project_object_id?name=${employee}`)
+        const rs = await AxiosService.get(`/api/method/mbw_dms.api.user.get_projectID`);
+        console.log(rs);
         setOptions(prev => ({
           ...prev, 
           projectId: rs.result["Project ID"], //rs.result["Project ID"]
           objectId: employee,
         }))
         initDataEmployee(rs.result["Project ID"]); //rs.result["Project ID"]
-        if(employee != null && employee != "") setDefaultEmployeeSelect(employee);
-        initDataSummary(rs.result["Project ID"], employee); //rs.result["Project ID"]
+        initDataSummary(rs.result["Project ID"], emnameployee); //rs.result["Project ID"]
+        console.log(options);
         const infoEmployee = await AxiosService.get(`/api/method/mbw_dms.api.user.get_employee_info_by_objid?object_id=${employee}`);
         if(infoEmployee.message == "Thành công"){
           if(infoEmployee.result.length > 0){
             setNameEmployee(infoEmployee.result[0].employee_name);
+            setDefaultEmployeeSelect(infoEmployee.result[0].name);
           }
         }
+        setLoadingPage(false);
       }catch(error){
         message.error(error?.message || "Something was wrong!!!")
       }
@@ -132,37 +138,54 @@ export default function TravelHistory({ employee }: { employee?: string }) {
   }, [employee])
 
   useEffect(() => {
-    initDataSummary(options.projectId, options.objectId);
+    (
+      async ()=> {
+        setLoadingPage(true);
+        await initDataSummary(options.projectId, options.objectId);
+        setLoadingPage(false);
+      }
+    )()
   },[from_time,to_time])
   //Goij dich vu lay thong tin nhan vien theo objectId
   return (
     <>
-    <HeaderPage title={<div className="flex items-center">
-          <Link to="/employee-monitor" > <BackIos/></Link>
-          <span className='ml-4'>
-            {nameEmployee}
-          </span>
-      </div>} customButton={
-        <div className='p-4 border border-solid border-transparent border-b-[#F5F5F5]'>
-          <DatePick defaultValue={dayjs(time)} format={"DD-MM-YYYY"} onChange={handleChangeTime} />
+      {loadingPage && (
+        <div style={{
+          position: 'fixed',
+          width: '100%',
+          height: '85%',
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          zIndex: 9999,
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}>
+          <Spin indicator={<LoadingOutlined style={{ fontSize: 30, color: '#fff' }} spin />} />
         </div>
-      } customSlect={
-        <div className='py-4 border border-solid border-transparent border-b-[#F5F5F5]'>
-          <Select
-              defaultValue={defaultEmployeeSelect}
-              style={{ width: 150 }}
-              onChange={handleChangeEmployee}
-              options={arrEmployee}
-            />
-        </div>
-      }/>
+      )}
+      <HeaderPage title={<div className="flex items-center">
+            <Link to="/employee-monitor" > <BackIos/></Link>
+            <span className='ml-4'>
+              {nameEmployee}
+            </span>
+        </div>} customButton={
+          <div className='p-4 border border-solid border-transparent border-b-[#F5F5F5]'>
+            <DatePick defaultValue={dayjs(time)} format={"DD-MM-YYYY"} onChange={handleChangeTime} />
+          </div>
+        } customSlect={
+          <div className='py-4 border border-solid border-transparent border-b-[#F5F5F5]'>
+            <Select
+                defaultValue={defaultEmployeeSelect}
+                style={{ width: 150 }}
+                onChange={handleChangeEmployee}
+                options={arrEmployee}
+              />
+          </div>
+        }/>
       <div className='border border-solid border-[#F5F5F5] rounded-lg'>
         <div id="travel" className='relative'>
-          {/* <MapEkgisHistory from_time={from_time} to_time={to_time} objectId='654c8a12d65d3e52f2d286de' projectId= '6556e471178a1db24ac1a711'/> */}
-          {options.projectId && <SupervisoryStaff options={options} loading={loading}/> }
-          
+          {options.projectId && <SupervisoryStaff options={options}/> }
         </div>
-
       </div>
     </>
   )
