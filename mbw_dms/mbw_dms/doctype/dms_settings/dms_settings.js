@@ -16,10 +16,26 @@ function setDefaultViewMap(frm) {
 	frm.set_value("address_company", address);
   }
 frappe.ui.form.on('DMS Settings', {
-	async lay_thong_tin(frm) {
-		await frm.call('config_web');
-		frm.reload_doc();
+	onload(frm) {
+		if (frm.doc.ma_du_an) {
+			frm.fields_dict.lay_thong_tin.$wrapper.hide();
+		}
 	},
+
+	lay_thong_tin(frm) {
+        frappe.call({
+            method: 'config_web',
+            args: {},
+            callback: function(r) {
+                if (r.message) {
+                    frm.reload_doc();
+                    frappe.show_alert("Thông tin đã được cập nhật thành công.");
+                } else {
+                    frappe.show_alert("Lỗi khi gọi API", 5);
+                }
+            }
+        });
+    },
 
 	refresh: function (frm) {
 		setDefaultViewMap(frm);
