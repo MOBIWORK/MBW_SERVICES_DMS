@@ -260,6 +260,9 @@ doc_events = {
     },
     "Employee": {
         "after_insert": "mbw_dms.controllers.dms_users.create_objid_employee"
+    },
+    "Doctype": {
+        "after_insert": "mbw_dms.controllers.role_permissions.add_sales_roles_permissions"
     }
 }
 

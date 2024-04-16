@@ -12,17 +12,17 @@ def change_password(user, current_password, new_password, new_pass_again):
     try:
         user = check_password(user, current_password)
     except frappe.AuthenticationError:
-        return {"error": _("Mật khẩu cũ không chính xác")}
+        return _("Mật khẩu cũ không chính xác")
 
     # Kiểm tra mật khẩu mới không được rỗng
     if not new_password:
-        return {"error": _("Mật khẩu mới không được để trống")}
+        return _("Mật khẩu mới không được để trống")
     
     if not new_pass_again:
-        return {"error": _("Bạn phải nhập lại mật khẩu mới")}
+        return _("Bạn phải nhập lại mật khẩu mới")
     
     if new_pass_again and new_password and new_password != new_pass_again:
-        return {"error": _("Mật khẩu nhập lại phải trùng mật khẩu mới")}
+        return _("Mật khẩu nhập lại phải trùng mật khẩu mới")
 
     # Cập nhật mật khẩu mới
     update_password(user, new_password)
