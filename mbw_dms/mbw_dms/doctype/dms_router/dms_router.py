@@ -24,7 +24,6 @@ class DMSRouter(Document):
 @frappe.whitelist(methods='GET')
 def get_list_router(filters):
     try:
-
         status = filters.get('status')
         employee = filters.get('employee')
         modified_by = filters.get('modified_by')
@@ -109,10 +108,7 @@ def get_router(id):
 # danh sach khach hang cham soc
 @frappe.whitelist(methods="GET")
 def get_customer_router(data):
-    try:
-
-       
-
+    try:     
         search_key = data.get("search_key")
         view_mode = validate_filter(value=data.get('view_mode'),type=['list','map'],type_check='enum') if data.get('view_mode') else 'list'
         # phan trang
@@ -512,11 +508,17 @@ def get_all_router():
     try:
         from mbw_dms.api.common import weekday
         thu_trong_tuan, week = weekday(datetime.now())
-        print(thu_trong_tuan, week )
         filter  = {
             "frequency": ["like", f"%{int(week)}%"]
         }
-        list_router = frappe.db.get_list('DMS Router',filters=filter,fields=['name','channel_name',"channel_code","travel_date"],distinct=True)
+        user_id = get_user_id()
+        if user_id.name != "Administrator":
+            employee = get_employee_by_user(user = user_id.email)
+            if not employee:
+                return gen_response("404", _("Employee not registered"))
+            filter['employee'] = employee.name
+
+        list_router = frappe.db.get_all('DMS Router',filters=filter,fields=['name','channel_name',"channel_code","travel_date"],distinct=True)
         for value in list_router:
             value["is_today"] = False
 
