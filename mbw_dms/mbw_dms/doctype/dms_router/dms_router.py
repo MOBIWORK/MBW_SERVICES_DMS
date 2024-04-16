@@ -7,7 +7,7 @@ import json
 from frappe.model.document import Document
 from pypika import CustomFunction
 
-from mbw_dms.api.common import exception_handle, gen_response,get_language
+from mbw_dms.api.common import exception_handle, gen_response,get_language,get_user_id,get_employee_by_user
 from frappe.desk.reportview import get_filters_cond, get_match_cond
 from erpnext.controllers.queries import get_fields
 from mbw_dms.api.validators import validate_filter 
@@ -110,6 +110,10 @@ def get_router(id):
 @frappe.whitelist(methods="GET")
 def get_customer_router(data):
     try:
+
+       
+
+        search_key = data.get("search_key")
         view_mode = validate_filter(value=data.get('view_mode'),type=['list','map'],type_check='enum') if data.get('view_mode') else 'list'
         # phan trang
         page_size =  int(data.get('page_size', 20))
@@ -125,7 +129,7 @@ def get_customer_router(data):
         birthday_to =validate_filter(type_check='timestamp',type='end',value=data.get('birthday_to'))  if data.get('birthday_to') else False
         customer_group = data.get('customer_group')
         customer_type = data.get('customer_type')
-        queryFilters = {"is_deleted": False}
+        queryFilters = {"is_deleted": 0}
         if router:
             queryFilters['channel_code'] = ["in",router]
         if status: 
@@ -137,8 +141,7 @@ def get_customer_router(data):
         if view_mode == "map":
             queryFilters.update({"travel_date": ["between",["Không giới hạn",thu_trong_tuan]]})
             queryFilters.update({"frequency": ["like",tuan_trong_thang]})  
-        print("queryFilters",queryFilters)  
-        list_router = frappe.db.get_list('DMS Router',filters=queryFilters, pluck='name',distinct=True)
+        list_router = frappe.db.get_list('DMS Router',filters=queryFilters, pluck='name',distinct=True,)
         list_customer = []
         for router_name in list_router:
             detail_router = frappe.get_doc("DMS Router",{"name":router_name})
@@ -160,6 +163,8 @@ def get_customer_router(data):
             FiltersCustomer['customer_group'] =customer_group
         if customer_type:
             FiltersCustomer['customer_type'] =customer_type
+        if search_key:
+            FiltersCustomer['customer_name'] =["like",f"%{search_key}%"]
         fields_customer = [
             'name','customer_primary_address'
             ,'customer_code','customer_location_primary','mobile_no'
