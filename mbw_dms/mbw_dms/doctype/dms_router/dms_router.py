@@ -130,6 +130,13 @@ def get_customer_router(data):
         customer_group = data.get('customer_group')
         customer_type = data.get('customer_type')
         queryFilters = {"is_deleted": 0}
+        user_id = get_user_id()
+        if user_id.name != "Administrator":
+            employee = get_employee_by_user(user = user_id.email)
+            if not employee:
+                return gen_response("404", _("Employee not registered"))
+            queryFilters['employee'] = employee.name
+
         if router:
             queryFilters['channel_code'] = ["in",router]
         if status: 
@@ -141,7 +148,8 @@ def get_customer_router(data):
         if view_mode == "map":
             queryFilters.update({"travel_date": ["between",["Không giới hạn",thu_trong_tuan]]})
             queryFilters.update({"frequency": ["like",tuan_trong_thang]})  
-        list_router = frappe.db.get_list('DMS Router',filters=queryFilters, pluck='name',distinct=True,)
+        
+        list_router = frappe.db.get_all('DMS Router',filters=queryFilters, pluck='name',distinct=True,)
         list_customer = []
         for router_name in list_router:
             detail_router = frappe.get_doc("DMS Router",{"name":router_name})
