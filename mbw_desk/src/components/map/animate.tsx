@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { Button, Flex, Select, Checkbox, Tooltip } from "antd";
-import { PauseOutlined, CaretRightOutlined, RetweetOutlined, XFilled } from '@ant-design/icons';
+import { PauseOutlined, CaretRightOutlined, RetweetOutlined, BorderOutlined  } from '@ant-design/icons';
 import * as turf from "@turf/turf";
 
 const Animate_And_Controls = ({ _map, segmentData, options, currentInfo }) => {
@@ -236,7 +236,7 @@ const Animate_And_Controls = ({ _map, segmentData, options, currentInfo }) => {
                     <Button icon={<PauseOutlined />} disabled={!isAnimation} onClick={PauseAnimation} />
                 </Tooltip>
                 <Tooltip title="Stop">
-                    <Button icon={<XFilled />} onClick={StopAnimation} ></Button>
+                    <Button icon={<BorderOutlined  />} onClick={StopAnimation} ></Button>
                 </Tooltip>
                 <Tooltip title="Replay">
                     <Button type={isReplay ? 'primary' : 'default'} icon={<RetweetOutlined />} onClick={ReplayAnimation}></Button>
