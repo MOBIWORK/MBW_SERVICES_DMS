@@ -5,11 +5,11 @@ import { TodayLimit, tmpToTimeZone } from '../../../util'
 import { SupervisoryStaff } from '@/components'
 import { AxiosService } from '../../../services/server'
 import axios from "axios";
-import { message, Select, Spin } from 'antd';
+import { message, Select } from 'antd';
 import { HeaderPage } from '../../../components';
 import { BackIos } from '../../../icons';
 import { Link } from 'react-router-dom';
-import { LoadingOutlined } from '@ant-design/icons';
+
 // Thiết lập ngôn ngữ cho dayjs
 // import 'dayjs/locale/vi';
 // dayjs.locale('vi');
@@ -28,7 +28,7 @@ export default function TravelHistory({ employee }: { employee?: string }) {
       setTTime(tmpToTimeZone(TodayLimit(value).nextday))
     }, 200)
   }
-  const [loadingPage, setLoadingPage] = useState<boolean>(true);
+  //const [loadingPage, setLoadingPage] = useState<boolean>(true);
   const [options, setOptions] = useState<
     {
       apiKey: string | null,
@@ -94,13 +94,13 @@ export default function TravelHistory({ employee }: { employee?: string }) {
       ...prev, 
       objectId: option.object_id,
     }))
-    initDataSummary(options.projectId, option.object_id);
+    //initDataSummary(options.projectId, option.object_id);
     setNameEmployee(`${option.label} - ${item}`);
   }
 
   useEffect(() => {
     (async () => {
-      setLoadingPage(true);
+      //setLoadingPage(true);
       if(employee == null || employee == ""){
         const rs = await AxiosService.get(`/api/method/mbw_dms.api.user.get_projectID`)
         setOptions(prev => ({
@@ -109,7 +109,7 @@ export default function TravelHistory({ employee }: { employee?: string }) {
           objectId: "" //Fix cứng dữ liệu để demo
         }))
         initDataEmployee(rs.result["Project ID"]);
-        setLoadingPage(false);
+        //setLoadingPage(false);
         return;
       }
       try {
@@ -121,7 +121,7 @@ export default function TravelHistory({ employee }: { employee?: string }) {
           objectId: employee,
         }))
         initDataEmployee(rs.result["Project ID"]); //rs.result["Project ID"]
-        initDataSummary(rs.result["Project ID"], emnameployee); //rs.result["Project ID"]
+        //initDataSummary(rs.result["Project ID"], emnameployee); //rs.result["Project ID"]
         console.log(options);
         const infoEmployee = await AxiosService.get(`/api/method/mbw_dms.api.user.get_employee_info_by_objid?object_id=${employee}`);
         if(infoEmployee.message == "Thành công"){
@@ -130,7 +130,7 @@ export default function TravelHistory({ employee }: { employee?: string }) {
             setDefaultEmployeeSelect(infoEmployee.result[0].name);
           }
         }
-        setLoadingPage(false);
+        //setLoadingPage(false);
       }catch(error){
         message.error(error?.message || "Something was wrong!!!")
       }
@@ -140,29 +140,20 @@ export default function TravelHistory({ employee }: { employee?: string }) {
   useEffect(() => {
     (
       async ()=> {
-        setLoadingPage(true);
-        await initDataSummary(options.projectId, options.objectId);
-        setLoadingPage(false);
+        //setLoadingPage(true);
+        //await initDataSummary(options.projectId, options.objectId);
+        //setLoadingPage(false);
+        setOptions(prev => ({
+          ...prev, 
+          from_time: from_time,
+          to_time: to_time
+        }));
       }
     )()
   },[from_time,to_time])
   //Goij dich vu lay thong tin nhan vien theo objectId
   return (
     <>
-      {loadingPage && (
-        <div style={{
-          position: 'fixed',
-          width: '100%',
-          height: '85%',
-          backgroundColor: 'rgba(0, 0, 0, 0.5)',
-          zIndex: 9999,
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-        }}>
-          <Spin indicator={<LoadingOutlined style={{ fontSize: 30, color: '#fff' }} spin />} />
-        </div>
-      )}
       <HeaderPage title={<div className="flex items-center">
             <Link to="/employee-monitor" > <BackIos/></Link>
             <span className='ml-4'>

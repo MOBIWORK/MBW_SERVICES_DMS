@@ -1,4 +1,4 @@
-import { Row, Col, DatePicker, Form, Timeline } from "antd";
+import { Row, Col, DatePicker, Form, Timeline, Spin } from "antd";
 import { useEffect, useState } from 'react'
 import "./SupervisoryStaff.css"
 import { WrapperCard, WrapperCardMap,HistoryMap } from "@/components";
@@ -7,17 +7,31 @@ import { ItemEndTimeLineDot, ItemEndTimeLineContent } from "./ItemEndTimeLine";
 import { ItemCheckInTimeLineDot, ItemCheckInTimeLineContent } from "./ItemCheckInTimeLine";
 import { ItemMovingTimeLineDot, ItemMovingTimeLineContent } from "./ItemMovingTimeLine";
 import { ItemStopTimeLineDot, ItemStopTimeLineContent } from "./ItemStopTimeLine";
+import { LoadingOutlined } from '@ant-design/icons';
 
 
 export default function SupervisoryStaff({options}) {
 
   const [timeLineHistory, setTimeLineHistory] = useState<any[]>([]);
+  const [summaryData, setSummaryData] = useState<
+    {
+      summary: any | null,
+      details: Array<any> | null
+    }>({
+      summary: null,
+      details: []
+    });
+  const [loadingPage, setLoadingPage] = useState<boolean>(true);
+
+  useEffect(()=>{
+    setLoadingPage(true);
+  }, [options])
 
   useEffect(() => {
     let arrTimeLineHistory = [];
-    if(options.details != null){
-      for(let i = 0; i < options.details.length; i++){
-        let item = options.details[i];
+    if(summaryData.details != null){
+      for(let i = 0; i < summaryData.details.length; i++){
+        let item = summaryData.details[i];
         if(item.type == "start"){
           arrTimeLineHistory.push({
             'dot': <ItemStartTimeLineDot></ItemStartTimeLineDot>,
@@ -47,12 +61,20 @@ export default function SupervisoryStaff({options}) {
       }
     }
     setTimeLineHistory(arrTimeLineHistory);
-  }, [options])
+  }, [summaryData])
+
+  const onLoadData = (evt) => {
+    if(evt != null) setSummaryData(evt);
+    else{
+      setSummaryData({summary: null, details: []});
+    }
+    setLoadingPage(false);
+  }
+
   const formatTotalTime = (startTimeStr: string, endTimeStr: string) => {
     const startTime = new Date(startTimeStr);
     const endTime = new Date(endTimeStr);
     const timeDiffMilliseconds = endTime - startTime;
-    console.log(timeDiffMilliseconds);
     if(timeDiffMilliseconds < 60000) return `${Math.round(timeDiffMilliseconds/1000)} giây`;
     else if(timeDiffMilliseconds >= 60000 && timeDiffMilliseconds < 60000*60) return `${Math.round(timeDiffMilliseconds/(60000))} phút`;
     else{
@@ -82,19 +104,20 @@ export default function SupervisoryStaff({options}) {
 
   return (
     <>
-      {/* <Row className="flex flex-wrap justify-between items-center px-0">
-        <div className="flex justify-center items-center">
-          <p className="mr-2 cursor-pointer">
-            <LeftOutlined />
-          </p>
-          <span className="text-2xl font-semibold leading-[21px]">Nhân viên Chu Quỳnh Anh - NV1234</span>
+      {loadingPage && (
+        <div style={{
+          position: 'fixed',
+          width: '100%',
+          height: '85%',
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          zIndex: 9999,
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}>
+          <Spin indicator={<LoadingOutlined style={{ fontSize: 30, color: '#fff' }} spin />} />
         </div>
-        <div className="flex mb-2">
-          <Form.Item className="border-none" style={{ padding: '20px 0', margin: '0' }}>
-            <DatePicker />
-          </Form.Item>
-        </div>
-      </Row> */}
+      )}
       <Row gutter={20}>
         <Col span={4} className="card-container">
           <WrapperCard>
@@ -105,8 +128,8 @@ export default function SupervisoryStaff({options}) {
                 </div>
                 <div style={{ marginLeft: '10px' }}>
                   <div style={{ opacity: '70%', color: '#212B36', fontSize: '14px', fontWeight: 500 }}>Quãng đường di chuyển</div>
-                  {options.summary != null ? (
-                    <div style={{ fontWeight: 600, fontSize: '22px', color: '#212B36', marginTop: '8px' }}>{options.summary && formatDistance(options.summary.move.distance)}</div>
+                  {summaryData.summary != null ? (
+                    <div style={{ fontWeight: 600, fontSize: '22px', color: '#212B36', marginTop: '8px' }}>{summaryData.summary && formatDistance(summaryData.summary.move.distance)}</div>
                   ):(
                     <div style={{ fontWeight: 600, fontSize: '22px', color: '#212B36', marginTop: '8px' }}>0 m</div>
                   )}
@@ -125,8 +148,8 @@ export default function SupervisoryStaff({options}) {
                 </div>
                 <div style={{ marginLeft: '10px' }}>
                   <div style={{ opacity: '70%', color: '#212B36', fontSize: '14px', fontWeight: 500 }}>Thời gian di chuyển</div>
-                  {options.summary != null ? (
-                    <div style={{ fontWeight: 600, fontSize: '22px', color: '#212B36', marginTop: '8px' }}>{options.summary && formatTime(options.summary.move.totalTime)}</div>
+                  {summaryData.summary != null ? (
+                    <div style={{ fontWeight: 600, fontSize: '22px', color: '#212B36', marginTop: '8px' }}>{summaryData.summary && formatTime(summaryData.summary.move.totalTime)}</div>
                   ):(
                     <div style={{ fontWeight: 600, fontSize: '22px', color: '#212B36', marginTop: '8px' }}>0 giây</div>
                   )}
@@ -145,8 +168,8 @@ export default function SupervisoryStaff({options}) {
                 </div>
                 <div style={{ marginLeft: '10px' }}>
                   <div style={{ opacity: '70%', color: '#212B36', fontSize: '14px', fontWeight: 500 }}>Tốc độ trung bình</div>
-                  {options.summary != null ? (
-                    <div style={{ fontWeight: 600, fontSize: '22px', color: '#212B36', marginTop: '8px' }}>{options.summary && formatUnitSpeed(options.summary.move.avgSpeed)} km/h</div>
+                  {summaryData.summary != null ? (
+                    <div style={{ fontWeight: 600, fontSize: '22px', color: '#212B36', marginTop: '8px' }}>{summaryData.summary && formatUnitSpeed(summaryData.summary.move.avgSpeed)} km/h</div>
                   ):(
                     <div style={{ fontWeight: 600, fontSize: '22px', color: '#212B36', marginTop: '8px' }}>0 km/h</div>
                   )}
@@ -167,7 +190,7 @@ export default function SupervisoryStaff({options}) {
                       Số lần dừng
                     </div>
                     <div style={{ fontWeight: 600, fontSize: '22px', color: '#212B36', marginTop: '8px' }}>
-                      {options.summary && options.summary.stop.count ? (options.summary.stop.count):(0)}
+                      {summaryData.summary && summaryData.summary.stop.count ? (summaryData.summary.stop.count):(0)}
                     </div>
                   </div>
                   <div style={{ border: '1px solid #D9D9D9', height: '100%' }}></div>
@@ -176,7 +199,7 @@ export default function SupervisoryStaff({options}) {
                       Thời gian dừng
                     </div>
                     <div style={{ fontWeight: 600, fontSize: '22px', color: '#212B36', marginTop: '8px' }}>
-                      {options.summary && formatTime(options.summary.stop.totalTime)? (formatTime(options.summary.stop.totalTime)):(<span>0 giây</span>)}
+                      {summaryData.summary && formatTime(summaryData.summary.stop.totalTime)? (formatTime(summaryData.summary.stop.totalTime)):(<span>0 giây</span>)}
                     </div>
                   </div>
                 </div>
@@ -195,7 +218,7 @@ export default function SupervisoryStaff({options}) {
                     Số lần viếng thăm
                     </div>
                     <div style={{ fontWeight: 600, fontSize: '22px', color: '#212B36', marginTop: '8px' }}>
-                      {options.summary && options.summary.checkin.count? (options.summary.checkin.count):(0)}
+                      {summaryData.summary && summaryData.summary.checkin.count? (summaryData.summary.checkin.count):(0)}
                     </div>
                   </div>
                   <div style={{ border: '1px solid #D9D9D9', height: '100%' }}></div>
@@ -204,7 +227,7 @@ export default function SupervisoryStaff({options}) {
                     Thời gian viếng thăm
                     </div>
                     <div style={{ fontWeight: 600, fontSize: '22px', color: '#212B36', marginTop: '8px' }}>
-                    {options.summary && formatTime(options.summary.checkin.totalTime)?(formatTime(options.summary.checkin.totalTime)): (<span>0 giây</span>)}
+                    {summaryData.summary && formatTime(summaryData.summary.checkin.totalTime)?(formatTime(summaryData.summary.checkin.totalTime)): (<span>0 giây</span>)}
                     </div>
                   </div>
                 </div>
@@ -230,7 +253,7 @@ export default function SupervisoryStaff({options}) {
                 </div>
               </Col>
               <Col span={18} style={{ height: '615px' }}>
-                <HistoryMap options={options} />
+                <HistoryMap options={options} onLoad={onLoadData}/>
               </Col>
             </Row>
           </WrapperCardMap>

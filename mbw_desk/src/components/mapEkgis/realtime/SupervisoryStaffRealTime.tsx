@@ -107,7 +107,7 @@ export default function SupervisoryStaffRealTime() {
     navigate(`/employee-monitor-detail/${evt["_id"]}`);
   }
   const handlerShowHistoryForAnyOne = () => {
-    navigate("/employee-monitor-detail/654c8a12d65d3e52f2d286de");
+    navigate("/employee-monitor-detail");  //654c8a12d65d3e52f2d286de
   }
   const handleShowHistoryEmployee = (employee) => {
     if(employee.objectId != null) navigate(`/employee-monitor-detail/${employee.objectId}`);
