@@ -7,10 +7,7 @@ from mbw_dms.api.common import (
     get_employee_by_name,
     validate_image,
     BASE_URL,
-    get_language
 )
-from frappe.query_builder import DocType
-from frappe.query_builder.functions import Count
 from datetime import datetime
 from pypika import Order, CustomFunction
 import json
@@ -26,7 +23,7 @@ def get_list_notification(**kwargs):
         page = 1 if not kwargs.get('page') or int(kwargs.get('page')) <= 0 else int(kwargs.get('page'))
         start = (page - 1) * page_size
 
-        NoticeBoard = DocType("Notice Board")
+        NoticeBoard = frappe.qb.DocType("Notice Board")
         EmployeeJoin = frappe.qb.DocType('Notice Board Employee')
         Employee = frappe.qb.DocType('Employee')
         UNIX_TIMESTAMP = CustomFunction('UNIX_TIMESTAMP', ['day'])
@@ -82,8 +79,8 @@ def get_info_notification(**kwargs):
         employee_id = get_employee_id()
         name_doc = kwargs.get("name")
 
-        NoticeBoard = DocType("Notice Board")
-        FileDoc = DocType("File")
+        NoticeBoard = frappe.qb.DocType("Notice Board")
+        FileDoc = frappe.qb.DocType("File")
         Employee = frappe.qb.DocType('Employee')
         UNIX_TIMESTAMP = CustomFunction('UNIX_TIMESTAMP', ['day'])
         Concat = CustomFunction('CONCAT', ['str_root', 'str_concat'])
@@ -162,7 +159,7 @@ def get_list_notification_system(**kwargs):
             kwargs.get('page')) <= 0 else int(kwargs.get('page'))
         start = (page - 1) * page_size
 
-        NotificationLog = DocType("Notification Log")
+        NotificationLog = frappe.qb.DocType("Notification Log")
         Employee = frappe.qb.DocType('Employee')
         UNIX_TIMESTAMP = CustomFunction('UNIX_TIMESTAMP', ['day'])
         
