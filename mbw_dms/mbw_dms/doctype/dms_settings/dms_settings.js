@@ -22,20 +22,10 @@ frappe.ui.form.on('DMS Settings', {
 		}
 	},
 
-	lay_thong_tin(frm) {
-        frappe.call({
-            method: 'config_web',
-            args: {},
-            callback: function(r) {
-                if (r.message) {
-                    frm.reload_doc();
-                    frappe.show_alert("Thông tin đã được cập nhật thành công.");
-                } else {
-                    frappe.show_alert("Lỗi khi gọi API", 5);
-                }
-            }
-        });
-    },
+	async lay_thong_tin(frm) {
+		await frm.call('config_web');
+		frm.reload_doc();
+	},
 
 	refresh: function (frm) {
 		setDefaultViewMap(frm);

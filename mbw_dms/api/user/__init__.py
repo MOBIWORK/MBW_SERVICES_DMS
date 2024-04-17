@@ -4,7 +4,6 @@ from frappe.utils.password import update_password, check_password
 from mbw_dms.api.common import gen_response, exception_handle, current_month_week, get_value_child_doctype
 from mbw_dms.api.validators import validate_filter_timestamp
 import datetime
-from collections import defaultdict
 
 @frappe.whitelist(methods='PUT')
 def change_password(user, current_password, new_password, new_pass_again):
@@ -12,22 +11,26 @@ def change_password(user, current_password, new_password, new_pass_again):
     try:
         user = check_password(user, current_password)
     except frappe.AuthenticationError:
-        return _("Mật khẩu cũ không chính xác")
+        return get_response(False, "Mật khẩu cũ không chính xác")
 
     # Kiểm tra mật khẩu mới không được rỗng
     if not new_password:
-        return _("Mật khẩu mới không được để trống")
+        return get_response(False, "Mật khẩu mới không được để trống")
     
     if not new_pass_again:
-        return _("Bạn phải nhập lại mật khẩu mới")
+        return get_response(False, "Bạn phải nhập lại mật khẩu mới")
     
     if new_pass_again and new_password and new_password != new_pass_again:
-        return _("Mật khẩu nhập lại phải trùng mật khẩu mới")
+        return get_response(False, "Mật khẩu nhập lại phải trùng mật khẩu mới")
 
     # Cập nhật mật khẩu mới
     update_password(user, new_password)
 
-    return gen_response(200, "Cập nhật thành công")
+    return get_response(True, "Cập nhật thành công")
+
+def get_response(status, message):
+    frappe.response["status"] = status
+    frappe.response["message"] = message
 
 # Lấy project ID
 @frappe.whitelist(methods='GET')

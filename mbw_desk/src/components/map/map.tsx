@@ -241,9 +241,12 @@ function HistoryMap({ options, onLoad }) {
 
             _map.on('load', () => {
                 try {
-                    if (!_options.objectId || _options.objectId === '' || _options.objectId === 'null') return;
-                    if (!_options.from_time || _options.from_time === '' || _options.from_time === 'null') return;
-                    if (!_options.to_time || _options.to_time === '' || _options.to_time === 'null') return;
+                    if ((!_options.objectId || _options.objectId === '' || _options.objectId === 'null') ||
+                        (!_options.from_time || _options.from_time === '' || _options.from_time === 'null') ||
+                        (!_options.to_time || _options.to_time === '' || _options.to_time === 'null')) {
+                        onLoad(null);
+                        return
+                    }
                     setMap(_options.from_time, _options.to_time, _options.pageNumber, _options.pageSize);
                 } catch (error) {
                     console.error('Error:', error);
@@ -260,7 +263,6 @@ function HistoryMap({ options, onLoad }) {
                     Data: segmentData,
                     options: _options
                 }), 200)
-                onLoad(dataHistory)
             }
 
 
@@ -269,6 +271,7 @@ function HistoryMap({ options, onLoad }) {
                 let url = `https://api.ekgis.vn/v2/tracking/locationHistory/summary/${_options.projectId}/${_options.objectId}?api_key=${_options.apiKey}&from_time=${from_time}&to_time=${to_time}`;
                 const response = await fetch(url);
                 const Data = await response.json();
+                onLoad(Data)
                 var arrData = Data.details
                 return arrData || [];
             };

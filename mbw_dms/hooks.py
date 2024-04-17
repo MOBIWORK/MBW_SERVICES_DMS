@@ -252,19 +252,20 @@ doc_events = {
     "Customer": {
         "on_update": "mbw_dms.controllers.dms_customer.update_location"
     },
-    "User": {
-        "after_insert": "mbw_dms.controllers.dms_users.create_employee_and_sales_team"
-    },
+    # "User": {
+    #     "after_insert": "mbw_dms.controllers.dms_users.create_employee_and_sales_team"
+    # },
     "Sales Person": {
         "on_update": "mbw_dms.controllers.dms_sales_person.create_user_permission"
     },
     "Employee": {
         "after_insert": "mbw_dms.controllers.dms_users.create_objid_employee"
     },
-    # "Doctype": {
-    #     "on_update": "mbw_dms.controllers.role_permissions.add_sales_roles_permissions"
-    # }
 }
+
+on_session_creation = [
+    "mbw_dms.controllers.role_permissions.update_sales_roles_permissions"
+]
 
 import frappe
 import csv
