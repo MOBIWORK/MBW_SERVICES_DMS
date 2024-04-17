@@ -261,10 +261,11 @@ doc_events = {
     "Employee": {
         "after_insert": "mbw_dms.controllers.dms_users.create_objid_employee"
     },
-    # "Doctype": {
-    #     "on_update": "mbw_dms.controllers.role_permissions.add_sales_roles_permissions"
-    # }
 }
+
+on_session_creation = [
+    "mbw_dms.controllers.role_permissions.update_sales_roles_permissions"
+]
 
 import frappe
 import csv

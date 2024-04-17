@@ -31,7 +31,7 @@ def this_week() :
 
 # return definition
 def gen_response(status, message, result=[]):
-    frappe.response["http_status_code"] = status
+    frappe.response["status"] = status
     if status == 500:
         frappe.response["message"] = BeautifulSoup(
             str(message), features="lxml").get_text()
