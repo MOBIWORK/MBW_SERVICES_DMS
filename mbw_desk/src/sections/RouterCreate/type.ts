@@ -6,6 +6,6 @@ export type CustomerType = {
     display_address?: string,
     phone_number?: string,
     frequency?: string,
-    longitude?: string,
-    latitude?: string
+    long?: string,
+    lat?: string
 }

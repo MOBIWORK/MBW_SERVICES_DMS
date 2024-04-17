@@ -83,25 +83,7 @@ def get_list_router(filters):
 def get_router(id):
     try:
         name = validate_filter(type_check='require',value=id)
-        
-        queryFilters = {"is_deleted": 0,"name": name}
-        
-        routers = frappe.db.get_list(doctype='DMS Router',filters=queryFilters,fields=['*','customers'])
-        router = None
-        if len(routers) > 0 :
-            Router = frappe.qb.DocType("DMS Router")
-            RouterCustomer = frappe.qb.DocType("DMS Router Customer")
-            customer = (frappe.qb.from_(Router)
-                      .inner_join(RouterCustomer)
-                      .on(Router.name == RouterCustomer.parent)
-                      .where(Router.name == name)
-                      .select(RouterCustomer.customer,RouterCustomer.customer_code,RouterCustomer.customer_name,RouterCustomer.display_address,
-                              RouterCustomer.phone_number,RouterCustomer.frequency,RouterCustomer.long,RouterCustomer.lat
-                              )                        
-                      ).run(as_dict = 1)
-            router = routers[0]
-            router['customers'] = customer
-        return gen_response(200,'',router)
+        return gen_response(200,'',frappe.get_doc('DMS Router',{"is_deleted": 0,"name": name}))
     except Exception as e: 
         exception_handle(e)
 
@@ -145,10 +127,11 @@ def get_customer_router(data):
             queryFilters.update({"travel_date": ["between",["Không giới hạn",thu_trong_tuan]]})
             queryFilters.update({"frequency": ["like",tuan_trong_thang]})  
         
-        list_router = frappe.db.get_all('DMS Router',filters=queryFilters, pluck='name',distinct=True,)
+        list_router = frappe.db.get_all('DMS Router',filters=queryFilters, pluck='name',distinct=True)
+        print("list_router",list_router)
         list_customer = []
         for router_name in list_router:
-            detail_router = frappe.get_doc("DMS Router",{"name":router_name})
+            detail_router = frappe.get_doc("DMS Router",{"name":router_name}).as_dict()
             customer = detail_router.get('customers')
             if view_mode == "map":
                 customer = pydash.filter_(detail_router.get('customers'),lambda value: value.frequency.find(str(tuan_trong_thang)))
@@ -160,6 +143,8 @@ def get_customer_router(data):
         list_customer_name = []
         for customer in list_customer:
             list_customer_name.append(customer.get('customer_code'))
+        print(list_customer_name)
+        
         FiltersCustomer = {"customer_code": ["in",list_customer_name]}
         if birthday_from and birthday_to:
             FiltersCustomer["birthday"] =["between",[birthday_from,birthday_to]]
@@ -175,8 +160,11 @@ def get_customer_router(data):
             ,'customer_name'
             ,'UNIX_TIMESTAMP(custom_birthday) as birthday'
             ]
+        print("review",FiltersCustomer)
         if(view_mode == 'list'):
-            detail_customer = frappe.db.get_list('Customer',filters= FiltersCustomer,fields=fields_customer,start=page_size*(page_number-1), page_length=page_size,order_by=sort)
+            print("list")
+            detail_customer = frappe.db.get_all('Customer',filters= FiltersCustomer,fields=fields_customer,start=page_size*(page_number-1), page_length=page_size,order_by=sort,distinct=True)
+            print(detail_customer)
         else:
             fields_customer= [
             'name'
@@ -185,13 +173,13 @@ def get_customer_router(data):
             ]
             FiltersCustomer.update({"customer_location_primary": ["is", "set"]})
               
-            detail_customer = frappe.db.get_list('Customer',filters= FiltersCustomer,fields=fields_customer)    
+            detail_customer = frappe.db.get_all('Customer',filters= FiltersCustomer,fields=fields_customer)    
         for customer in detail_customer:
             customer['is_checkin'] = False
             checkin = frappe.db.get_value("DMS Checkin",{"kh_ma":customer.get('customer_code')})
             if checkin != None:
                 customer['is_checkin'] = True
-        total_customer= len(frappe.db.get_list('Customer',filters= FiltersCustomer))
+        total_customer= len(frappe.db.get_all('Customer',filters= FiltersCustomer))
         return gen_response(200,"", {
             "data": detail_customer,
             "total": total_customer,

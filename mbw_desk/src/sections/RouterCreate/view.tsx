@@ -1,6 +1,6 @@
 // @mui
 
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {Tabs, Form,notification, message } from "antd";
 import GeneralInformation from "./general-information";
 import Customer from "./customer";
@@ -9,8 +9,13 @@ import { AxiosService } from "../../services/server";
 import { useNavigate, useParams } from "react-router-dom";
 import { customer, router } from "../../types/router";
 import { rsData } from "../../types/response";
+import { createContext, useContext } from 'react';
+import { CustomerType } from "./type";
+
+
 // ----------------------------------------------------------------------
 
+export const CustomerContext = createContext<any>(null);
 export default function RouterCreate() {
   const [form] = Form.useForm();
   const navigate = useNavigate()
@@ -140,7 +145,7 @@ export default function RouterCreate() {
               {
                 label: <p className="px-4 mb-0">Khách hàng</p>,
                 key: "2",
-                children: <Customer handleCustomer={setCustomerRouter} listCustomer={customerRouter} />,
+                children: <CustomerContext.Provider value={{setCustomerRouter,customerRouter}}><Customer /></CustomerContext.Provider>,
               },
             ]}
             indicatorSize={(origin) => origin - 18}

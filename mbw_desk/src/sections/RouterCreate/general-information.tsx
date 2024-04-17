@@ -1,6 +1,6 @@
 import React, { memo, useEffect, useState } from "react";
 import { FormItemCustom } from "../../components/form-item/form-item";
-import { Col, DatePicker, Input, Select, TreeSelect } from "antd";
+import { Col, Input, Select, TreeSelect } from "antd";
 import RowCustom from "./styled";
 import { optionsTravel_date, statusOption } from "./data";
 import { rsData, rsDataFrappe } from "../../types/response";
@@ -10,28 +10,28 @@ import { employee } from "../../types/employeeFilter";
 import useDebounce from "../../hooks/useDebount"
 import { treeArray } from "../../util";
 
-let timeout: ReturnType<typeof setTimeout> | null;
-let currentValue: string;
+// let timeout: ReturnType<typeof setTimeout> | null;
+// let currentValue: string;
 
-const fetch = (value: string, callback: Function) => {
-  console.log(value);
+// const fetch = (value: string, callback: Function) => {
+//   console.log(value);
   
-  if (timeout) {
-    clearTimeout(timeout);
-    timeout = null;
-  }
-  currentValue = value;
+//   if (timeout) {
+//     clearTimeout(timeout);
+//     timeout = null;
+//   }
+//   currentValue = value;
 
-  const fake = () => {
-    //call api tại đây 
-    callback(value)
-  };
-  if (value) {
-    timeout = setTimeout(fake, 300);
-  } else {
-    callback("");
-  }
-};
+//   const fake = () => {
+//     //call api tại đây 
+//     callback(value)
+//   };
+//   if (value) {
+//     timeout = setTimeout(fake, 300);
+//   } else {
+//     callback("");
+//   }
+// };
 export default memo(function GeneralInformation({form}:{form :any}) {
   console.log(form);
   
@@ -41,7 +41,7 @@ export default memo(function GeneralInformation({form}:{form :any}) {
   const [listSales, setListSales] = useState<any[]>([]);
   const [listEmployees, setListEmployees] = useState<any[]>([]);
   const [teamSale,setTeamSale] = useState<string>()
-  const [saleEmp,setSaleEmp] = useState<string>()
+  // const [saleEmp,setSaleEmp] = useState<string>()
   useEffect(() => {
     (async () => {
       try {

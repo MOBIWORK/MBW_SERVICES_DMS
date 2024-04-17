@@ -1,17 +1,16 @@
-import React, { useEffect } from 'react'
+import React, { useContext, useEffect } from 'react'
 import { CustomerType } from './type'
 import type { ColumnsType } from 'antd/es/table'
 import { baseCustomers, commonColumnCustomer, commonTable, optionsFrequency } from './data'
 import { TableCustom } from '../../components'
 import {DeleteOutlined} from '@ant-design/icons'
 import { Select, Table } from 'antd'
+import { CustomerContext } from './view'
+import { GlobalContext } from '@/App'
 
-type Props = {
-    data?: CustomerType[],
-    handleData: any
-}
+export default function CustomerList({search}: {search:string}) {
+    const {setCustomerRouter,customerRouter,refCustomer} = useContext(CustomerContext)
 
-export default function CustomerList({data,handleData}:Props) {
     const columnsCustomer:ColumnsType<CustomerType> = [
         {
             title: "Stt",
@@ -32,8 +31,8 @@ export default function CustomerList({data,handleData}:Props) {
                 style={{ width: '100%' }}
                 placeholder="Chọn tần suất"
                 onChange={(frequency: string[]) => {                    
-                    handleData(prev => {                        
-                        return prev.map(customer => {
+                    setCustomerRouter((prev:any) => {                        
+                        return prev.map((customer:CustomerType) => {
                             if(customer.customer_code == record.customer_code) {
                                 customer['frequency'] = frequency.toString().replaceAll(",",";")
                             }
@@ -41,8 +40,7 @@ export default function CustomerList({data,handleData}:Props) {
                         })
                     })
                 }}
-                defaultValue={ value && value.split(';')}
-                // value={value && value.split(';')}
+                defaultValue={value.split(';')}
                 />
             }
         },{
@@ -51,7 +49,7 @@ export default function CustomerList({data,handleData}:Props) {
             key: "action",
             render: (_:any,customer:CustomerType) => {
                 return <div className='flex justify-center' onClick={() => {
-                    handleData((prev:any[]) => {
+                    setCustomerRouter((prev:any[]) => {
                         return [...prev.filter((cs) => cs.customer_code != customer.customer_code )]
                     })
                 }}><DeleteOutlined /></div>
@@ -59,11 +57,14 @@ export default function CustomerList({data,handleData}:Props) {
         },
     
     ] 
+
+    
   return (
     <div className=''>
     <TableCustom 
         columns={columnsCustomer}
-        dataSource={data}
+        dataSource={customerRouter.filter((cus: CustomerType) => 
+            cus.customer_name?.toLocaleLowerCase()?.includes(search.toLocaleLowerCase()) || cus.customer_code?.toLocaleLowerCase()?.includes(search.toLocaleLowerCase()))}
         pagination={false}
     />
     </div>

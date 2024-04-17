@@ -1,20 +1,20 @@
-import {useState,useEffect}from 'react'
-import { CustomerType } from './type'
+import {useState,useEffect, useContext}from 'react'
 import { Col, Row } from 'antd'
 import {  commonTable } from './data'
 import {  Mapcustom ,TableCustom} from '@/components'
 import {locationType} from '@/types/location'
 import {getAttrInArray} from "@/util"
+import { CustomerContext } from './view'
 
-type Props = {
-    data?: CustomerType[] | false
-}
-export default function CustomerMap({data}:Props) { 
+
+export default function CustomerMap() { 
+  const {customerRouter} = useContext(CustomerContext)
+
   const [locations,setLocation] = useState<locationType[]>([])
   const [focusLocation,setFocusLocation] = useState<locationType >()
   useEffect(()=> {
-    setLocation(getAttrInArray(data,["customer_name","long","lat"], {isNull: false}))
-  },[data])
+    setLocation(getAttrInArray(customerRouter,["customer_name","long","lat"], {isNull: false}))
+  },[customerRouter])
   return (
     <>
       <Row className='h-[500px]'>
@@ -27,7 +27,7 @@ export default function CustomerMap({data}:Props) {
             render: (_,record,index) => index +1
         },...commonTable]
       }
-          dataSource={data}
+          dataSource={customerRouter}
           pagination={false}
           onRow={(record, rowIndex) => {
             return {onClick:(event) => {

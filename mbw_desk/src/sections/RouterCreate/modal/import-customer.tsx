@@ -1,14 +1,11 @@
-import React from 'react'
 import { InboxOutlined } from '@ant-design/icons';
 import type { UploadProps } from 'antd';
 import { message, Upload } from 'antd';
 
 const { Dragger } = Upload;
 
-
-
 interface importProps {
-  handleFile: () => file 
+  handleFile: any
 }
 export function ImportCustomer({handleFile}: importProps) {
   const props: UploadProps = {

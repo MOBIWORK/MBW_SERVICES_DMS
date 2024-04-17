@@ -1,5 +1,5 @@
 import { Button, Col, Input, Modal, Pagination, Row } from "antd";
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { FormItemCustom, TableCustom, TagCustom } from "@/components";
 import { CloseOutlined, SearchOutlined } from "@ant-design/icons";
 import { LuFilter, LuFilterX } from "react-icons/lu";
@@ -14,6 +14,9 @@ import {
 import FilterCustomer from "./filter";
 import { useForm } from "antd/es/form/Form";
 import { AxiosService } from "../../../services/server";
+import { CustomerContext } from "../view";
+type key = "customer_type"| "customer_group"| "city"| "district"|"ward"
+type filterType = key[]
 
 const columnSelectCustomer: ColumnsType<CustomerType> = [
   ...commonTable,
@@ -31,13 +34,13 @@ const columnSelectCustomer: ColumnsType<CustomerType> = [
   ...commonColumnCustomer,
 ];
 
-const handleFilter = (filters: any): Array<any> => {
+const handleFilter = (filters:filterType): Array<any> => {
   let arrayFilter: any[] = [];
   for (let key_search in filters) {
     if (filters[key_search]) {
       arrayFilter = [
         ...arrayFilter,
-        { key: [FilterForm[key_search]], value: filters[key_search],key2: key_search},
+        { key: [FilterForm[key_search as key]], value: filters[key_search],key2: key_search},
       ];
     }
   }
@@ -45,12 +48,11 @@ const handleFilter = (filters: any): Array<any> => {
 };
 
 type Props = {
-  selected : any[],
-  handleAdd: any,
   closeModal:() => void
 }
 
-export function ChooseCustomer({selected,handleAdd,closeModal}:Props) {
+export function ChooseCustomer({closeModal}:Props) {
+  const {setCustomerRouter,customerRouter} = useContext(CustomerContext)
   const [form] = useForm();
   const [page_number,setPageNumber] = useState<number>(1)
   const [customerChoose, setCustomerChoose] = useState<{[key:number]:CustomerType[]}>({1: []});
@@ -61,7 +63,7 @@ export function ChooseCustomer({selected,handleAdd,closeModal}:Props) {
   const PAGE_SIZE=20
   const [total_Customer,setTotalNumber] = useState<number>(40)
   const rowSelection = {
-    selectedRowKeys: customerChoose[page_number] && customerChoose[page_number].map(value => value.customer_code) ,
+    selectedRowKeys: customerChoose[page_number] ? customerChoose[page_number].map(value => value.customer_code) : [],
     onChange: (selectedRowKeys: React.Key[], selectedRows: CustomerType[]) => {
       setCustomerChoose((prev) => {
           return ({
@@ -99,10 +101,11 @@ export function ChooseCustomer({selected,handleAdd,closeModal}:Props) {
       let now2 = Number.parseInt(now)
       return ([...prev,...customerChoose[now2]])
     },[])    
-    handleAdd([...selected,...chooseC.filter(customer => !selected.map(cs => cs.customer_code).includes( customer.customer_code))].map(customer => {
+    setCustomerRouter([...customerRouter,...chooseC.filter(customer => !customerRouter.map((cs:CustomerType) => cs.customer_code).includes( customer.customer_code))].map(customer => {
       if(!customer.frequency) customer.frequency = "1;2;3;4"
       return customer
     }))
+    
     closeModal()
   }
   useEffect(()=> {
@@ -114,8 +117,6 @@ export function ChooseCustomer({selected,handleAdd,closeModal}:Props) {
           page_number
         }
       })
-      console.log(rsCustomer?.result?.data);
-      
       setCustomerList(rsCustomer?.result?.data)
       setTotalNumber(rsCustomer.result?.total)
       
@@ -178,7 +179,7 @@ export function ChooseCustomer({selected,handleAdd,closeModal}:Props) {
         </Col>
         <Col className="inline-flex items-center">
           <span className="mr-4">
-            Đã chọn {Object.keys(customerChoose).reduce((prev,now) => prev + customerChoose[now].length,0)} khách hàng
+            Đã chọn {Object.keys(customerChoose).reduce((prev,now:any) => prev + customerChoose[now].length,0)} khách hàng
 
           </span>
           <Button type="primary" onClick={handleAddCustomer}>Thêm</Button>
@@ -186,9 +187,9 @@ export function ChooseCustomer({selected,handleAdd,closeModal}:Props) {
       </Row>
       <div className="py-5 px-4">
         <span>{customerList.length} kết quả hiển thị</span>
-        {handleFilter(filter).length > 0 && (
+        {handleFilter(filter as any).length > 0 && (
           <Row className="items-center">
-            {handleFilter(filter).map((fil: any) => (
+            {handleFilter(filter  as any).map((fil: any) => (
               <TagCustom closeIcon={<CloseOutlined />} onClose={() => {
                 handleClearFilter(fil)
               }}>
