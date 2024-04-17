@@ -108,7 +108,7 @@ def get_sale_order(name):
                 for key_item, value in detail[0].items() :
                     if key_item in field_detail_sales:                    
                         detail_order.setdefault(key_item,value)
-                detail_order['list_items'] = get_items_in_sales_order(name)
+                detail_order['list_items'] = get_items_in_sales_order(master_doc='Sales Order', master_name=name)
             if len(detail_taxes) > 0 :
                 detail_order = {**detail_order,**detail_taxes[0]}
             
@@ -467,7 +467,6 @@ def get_sale_order_by_checkin_id(doctype, **data):
             SalesOrder = frappe.qb.DocType(doctype)
             Customer = frappe.qb.DocType("Customer")
             SalesOrderTaxes = frappe.qb.DocType("Sales Taxes and Charges")
-            field_detail_items = ['name', 'item_name','item_code','qty',"uom",'amount','discount_amount','discount_percentage']
             field_detail_sales = []
             if doctype == "Sales Order":
                 SalesOrderItem = frappe.qb.DocType("Sales Order Item")
@@ -511,13 +510,10 @@ def get_sale_order_by_checkin_id(doctype, **data):
                             ).run(as_dict =1)
             detail_order = {"list_items": []}
             if len(detail) > 0 :
-                items_list = {}
                 for key_item, value in detail[0].items() :
                     if key_item in field_detail_sales:  
                         detail_order.setdefault(key_item,value)
-                    elif key_item in field_detail_items:
-                        items_list.setdefault(key_item,value)
-                detail_order['list_items'].append(items_list)
+                    detail_order['list_items'] = get_items_in_sales_order(master_doc=doctype, master_name=detail_sales_order[0].get('name'))
             if len(detail_taxes) > 0 :
                 detail_order = {**detail_order,**detail_taxes[0]}
 
@@ -528,10 +524,10 @@ def get_sale_order_by_checkin_id(doctype, **data):
         exception_handle(e)
 
 
-def get_items_in_sales_order(master_name):
+def get_items_in_sales_order(master_doc, master_name):
     if not master_name:
         return
-    master_doc = frappe.get_doc('Sales Order', master_name)
+    master_doc = frappe.get_doc(master_doc, master_name)
 
     items = master_doc.get('items')
 

@@ -41,6 +41,7 @@ class DMSSettings(Document):
 @frappe.whitelist(methods='GET')
 def get_list_config():
     try:
+        list_configs = None
         list_configs = frappe.cache().get_value("website-config")
         if list_configs == None:
             list_configs = frappe.get_doc('DMS Settings')
