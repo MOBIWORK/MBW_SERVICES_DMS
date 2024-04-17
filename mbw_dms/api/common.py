@@ -31,7 +31,7 @@ def this_week() :
 
 # return definition
 def gen_response(status, message, result=[]):
-    frappe.response["status"] = status
+    frappe.response["http_status_code"] = status
     if status == 500:
         frappe.response["message"] = BeautifulSoup(
             str(message), features="lxml").get_text()
@@ -324,24 +324,3 @@ def get_child_values_doc(doctype, master_name, fields_to_get, chil_name):
         result.append(item_dict)
 
     return result
-
-def exception_handel(e):
-    frappe.log_error(title="ESS Mobile App Error",
-                     message=frappe.get_traceback())
-    return gen_response(406, cstr(e))
-    
-    if hasattr(e, "http_status_code"):
-        return gen_response(e.http_status_code, cstr(e))
-    else:
-        return gen_response(406, cstr(e))
-    
-def get_employee_by_name(name, fields=["name"]):
-    if isinstance(fields, str):
-        fields = [fields]
-    emp_data = frappe.db.get_value(
-        "Employee",
-        {"name": name},
-        fields,
-        as_dict=1,
-    )
-    return emp_data

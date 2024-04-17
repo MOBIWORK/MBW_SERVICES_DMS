@@ -44,6 +44,15 @@ def update_permissions(doctype_name, sales_user_role, sales_manager_role):
             "doctype": "Custom DocPerm",
             "parent": doctype_name,
             "role": sales_manager_role,
+            "select": 1,
+            "create": 1,
+            "email": 1,
+            "export": 1,
             "read": 1,
+            "delete": 1,
+            "report": 1,
+            "share": 1,
             "write": 1,
+            "print": 1,
+            "import": 1
         }).insert(ignore_permissions=True)
