@@ -61,6 +61,23 @@
     position: absolute;
     left: 7px;
 }
+.ekmapplf_tracking-legend-title-layers {
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 13px;
+    color: #000000;
+    border: 0;
+    border-radius: inherit;
+    display: flex;
+    justify-content: flex-start;
+}
+
+.ekmapplf_tracking-legend-title-layers .icon {
+    display: inline-block;
+    width: 17px;
+    height: 17px;
+    margin: 3.5px 5px 0 5px;
+}
 
 .ekmapplf_tracking-legend-body {
     font-size: 12.5px;
@@ -85,13 +102,4 @@
     display: flex;
     flex-wrap: wrap;
     align-content: center;
-}
-
-.ekmapplf_tracking-legend-icon {
-    display: inline-block;
-    width: 20px;
-    height: 20px;
-    background-size: contain;
-    background-position: center;
-    background-repeat: no-repeat;
 }

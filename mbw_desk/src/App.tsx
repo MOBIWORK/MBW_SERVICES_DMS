@@ -1,9 +1,8 @@
 import {AuthProvider} from '@/auth'
 import { useFrappeGetDocList } from 'frappe-react-sdk';
 import Router from './routes/sections'
-import { createContext, useEffect } from 'react'
-import {Modal, message} from 'antd'
-export const GlobalContext = createContext<any>(null)
+import { useEffect } from 'react'
+import {Modal} from 'antd'
 function App() {
   const [_,contextHolder] = Modal.useModal()
   const [messageApi,contextHolderMsg] = message.useMessage();
@@ -34,15 +33,8 @@ function App() {
   };
   return (
     <AuthProvider>
-      <GlobalContext.Provider value={{
-        warningMsg,
-        errorMsg,
-        successMsg
-      }}>
-        <Router />
-        {contextHolder}
-        {contextHolderMsg}
-      </GlobalContext.Provider>
+      <Router />
+      {contextHolder}
     </AuthProvider>
   )
 }
