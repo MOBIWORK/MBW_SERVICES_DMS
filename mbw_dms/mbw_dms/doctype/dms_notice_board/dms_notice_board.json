@@ -71,7 +71,7 @@
    "fieldtype": "Table MultiSelect",
    "label": "List Employee",
    "mandatory_depends_on": "eval:doc.apply_for == \"Specific Employees\"",
-   "options": "Notice Board Employee"
+   "options": "DMS Notice Board Employee"
   },
   {
    "fieldname": "section_break_yeir6",
@@ -94,10 +94,10 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-04-17 09:57:39.275831",
+ "modified": "2024-04-19 10:30:20.883855",
  "modified_by": "Administrator",
  "module": "MBW DMS",
- "name": "Notice Board",
+ "name": "DMS Notice Board",
  "naming_rule": "Expression (old style)",
  "owner": "Administrator",
  "permissions": [

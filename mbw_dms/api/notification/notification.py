@@ -24,8 +24,8 @@ def get_list_notification(**kwargs):
         page = 1 if not kwargs.get('page') or int(kwargs.get('page')) <= 0 else int(kwargs.get('page'))
         start = (page - 1) * page_size
 
-        NoticeBoard = frappe.qb.DocType("Notice Board")
-        EmployeeJoin = frappe.qb.DocType('Notice Board Employee')
+        NoticeBoard = frappe.qb.DocType("DMS Notice Board")
+        EmployeeJoin = frappe.qb.DocType('DMS Notice Board Employee')
         Employee = frappe.qb.DocType('Employee')
         UNIX_TIMESTAMP = CustomFunction('UNIX_TIMESTAMP', ['day'])
         
@@ -79,7 +79,7 @@ def get_info_notification(**kwargs):
         employee_id = get_employee_id()
         name_doc = kwargs.get("name")
 
-        NoticeBoard = frappe.qb.DocType("Notice Board")
+        NoticeBoard = frappe.qb.DocType("DMS Notice Board")
         FileDoc = frappe.qb.DocType("File")
         Employee = frappe.qb.DocType('Employee')
         UNIX_TIMESTAMP = CustomFunction('UNIX_TIMESTAMP', ['day'])
@@ -120,7 +120,7 @@ def get_info_notification(**kwargs):
                 employee_watched_json = json.dumps(employee_watched)
 
                 # Viewed employee updates for notifications
-                doc = frappe.get_doc('Notice Board', name_doc)
+                doc = frappe.get_doc('DMS Notice Board', name_doc)
                 doc.employee_watched = employee_watched_json
                 doc.save(ignore_permissions=True)
                 frappe.db.commit()

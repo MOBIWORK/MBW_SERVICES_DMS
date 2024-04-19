@@ -5,5 +5,5 @@
 from frappe.model.document import Document
 
 
-class NoticeBoard(Document):
+class DMSNoticeBoard(Document):
 	pass
