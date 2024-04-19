@@ -1,13 +1,14 @@
 import frappe
 from mbw_dms.api.common import (
     gen_response,
-    exception_handel,
+    exception_handle,
     get_employee_id,
     get_user_id,
     get_employee_by_name,
     validate_image,
     BASE_URL,
 )
+from mbw_dms.api.validators import validate_filter_timestamp
 from datetime import datetime
 from pypika import Order, CustomFunction
 import json
@@ -19,7 +20,7 @@ def get_list_notification(**kwargs):
         start_time = kwargs.get("start_time")
         end_time = kwargs.get("end_time")
 
-        page_size = 20 if not kwargs.get('page_size') else int(kwargs.get('page_size'))
+        page_size = kwargs.get('page_size', 20)
         page = 1 if not kwargs.get('page') or int(kwargs.get('page')) <= 0 else int(kwargs.get('page'))
         start = (page - 1) * page_size
 
@@ -30,8 +31,8 @@ def get_list_notification(**kwargs):
         
         query_code = (EmployeeJoin.employee == employee_id) | (NoticeBoard.apply_for == "All Employee")
         if start_time and end_time:
-            start_day = datetime.fromtimestamp(int(start_time))
-            end_day = datetime.fromtimestamp(int(end_time))
+            start_day = validate_filter_timestamp(type='start')(start_time)
+            end_day = validate_filter_timestamp(type='end')(end_time)
             query_code = query_code & (NoticeBoard.creation <= end_day) & (NoticeBoard.creation >= start_day)
 
         list_doc = (
@@ -67,10 +68,9 @@ def get_list_notification(**kwargs):
         result = {
             "data": list_doc,
         }
-        gen_response(200, "Thành công", result)
+        return gen_response(200, "Thành công", result)
     except Exception as e:
-        exception_handel(e)
-        # gen_response(500, i18n.t('translate.error', locale=get_language()), [])
+        exception_handle(e)
 
 
 @frappe.whitelist(methods="GET")
@@ -136,14 +136,11 @@ def get_info_notification(**kwargs):
             info['user_image'] = validate_image(user_image)
             del info['image']
 
-            gen_response(200, "Thành công", info)
+            return gen_response(200, "Thành công", info)
         else:
-            message = "Không tồn tại tài liệu"
-            gen_response(404, "Thành công", list_doc)
-            return None
+            return gen_response(404, "Không tồn tại tài liệu", list_doc)
     except Exception as e:
-        exception_handel(e)
-        # gen_response(500, i18n.t('translate.error', locale=get_language()), [])
+        exception_handle(e)
 
 
 @frappe.whitelist(methods="GET")
@@ -199,7 +196,6 @@ def get_list_notification_system(**kwargs):
         result = {
             "data": list_doc,
         }
-        gen_response(200, "Thành công", result)
+        return gen_response(200, "Thành công", result)
     except Exception as e:
-        exception_handel(e)
-        # gen_response(500, i18n.t('translate.error', locale=get_language()), [])
+        exception_handle(e)
