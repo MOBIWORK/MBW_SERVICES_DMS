@@ -96,7 +96,7 @@ def get_user_id():
 def get_employee_id():
     try:
         user_id = get_user_id()
-        return get_employee_by_user(user_id).get("name")
+        return get_employee_by_user(user_id.get('name')).get('name')
     except:
         return ""
 
@@ -107,7 +107,16 @@ def get_employee_info():
     except:
         return ""
 
-
+def get_employee_by_name(name, fields=["name"]):
+    if isinstance(fields, str):
+        fields = [fields]
+    emp_data = frappe.db.get_value(
+        "Employee",
+        {"name": name},
+        fields,
+        as_dict=1,
+    )
+    return emp_data
 
 
 def validate_image(user_image):
