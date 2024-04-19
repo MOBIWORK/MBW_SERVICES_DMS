@@ -4,6 +4,7 @@ interface DataMovingTimeLine{
     time_moving: string;
     total_distance: string;
     total_time: string;
+    index_item: number;
 }
 
 export function  ItemMovingTimeLineDot(){
@@ -14,9 +15,13 @@ export function  ItemMovingTimeLineDot(){
     </>
 }
 
-export function ItemMovingTimeLineContent({ data }: { data: DataMovingTimeLine }){
+export function ItemMovingTimeLineContent({ data, onEventClickItem }: { data: DataMovingTimeLine, onEventClickItem: any }){
+    const handldeClickItem = () => {
+        onEventClickItem(data.index_item);
+    }
+
     return <>
-        <div className="flex items-center">
+        <div className="flex items-center" style={{cursor: "pointer"}} onClick={handldeClickItem}>
             <div style={{color: '#212B36', fontWeight: 500, fontSize: '15px', lineHeight: '21px', marginLeft: '5px'}}>Di chuyển</div>
             <div className="mx-3 h-2 w-2 rounded-full bg-black"></div>
             <div style={{color: '#212B36', fontWeight: 400, fontSize:'14px', lineHeight: '21px'}}>{data.total_time}</div>

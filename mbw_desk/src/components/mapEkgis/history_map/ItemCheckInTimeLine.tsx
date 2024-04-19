@@ -5,6 +5,7 @@ interface DataCheckInTimeLine{
     retail_name: string;
     address: string;
     total_time: string;
+    index_item: number;
 }
 
 export function  ItemCheckInTimeLineDot(){
@@ -15,9 +16,14 @@ export function  ItemCheckInTimeLineDot(){
     </>
 }
 
-export function ItemCheckInTimeLineContent({ data }: { data: DataCheckInTimeLine }){
+export function ItemCheckInTimeLineContent({ data, onEventClickItem }: { data: DataCheckInTimeLine, onEventClickItem: any }){
+
+    const handldeClickItem = () => {
+        onEventClickItem(data.index_item);
+    }
+
     return <>
-        <div className="flex items-center">
+        <div className="flex items-center" style={{cursor: "pointer"}} onClick={handldeClickItem}>
             <div style={{color: '#212B36', fontWeight: 500, fontSize: '15px', lineHeight: '21px', marginLeft: '5px'}}>Viếng thăm</div>
             <div className="mx-3 h-2 w-2 rounded-full bg-black"></div>
             <div style={{color: '#212B36', fontWeight: 400, fontSize:'14px', lineHeight: '21px'}}>{data.total_time}</div>

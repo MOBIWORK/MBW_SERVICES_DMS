@@ -4,6 +4,7 @@ import './SupervisoryStaff.css';
 interface DataStartTimeLine{
     time_start: string;
     address: string;
+    index_item: number;
 }
 
 export function  ItemStartTimeLineDot(){
@@ -14,9 +15,13 @@ export function  ItemStartTimeLineDot(){
     </>
 }
 
-export function ItemStartTimeLineContent({ data }: { data: DataStartTimeLine }){
+export function ItemStartTimeLineContent({ data, onEventClickItem }: { data: DataStartTimeLine, onEventClickItem: any }){
+    const handldeClickItem = () => {
+        onEventClickItem(data.index_item);
+    }
+
     return <>
-        <div className="flex items-center">
+        <div className="flex items-center" style={{cursor: "pointer"}} onClick={handldeClickItem}>
             <div style={{color: '#212B36', fontWeight: 500, fontSize: '15px', lineHeight: '21px', marginLeft: '5px'}}>Bắt đầu</div>
         </div>
         <div className="flex" style={{marginTop: '5px'}}>

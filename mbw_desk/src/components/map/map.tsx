@@ -10,11 +10,12 @@ import Animate_And_Controls from './animate'
 
 const ekmapplf = window.ekmapplf;
 
-function HistoryMap({ options, onLoad }) {
+function HistoryMap({ options, onLoad, HistoryIndex }) {
     const mapContainer = useRef(null);
     const map = useState(null);
+    const [HisMap, setHisMap] = useState(null);
     const [Controls, setControls] = useState({
-        map: null,
+        ready: false,
         Data: [],
         options: null
     });
@@ -26,6 +27,8 @@ function HistoryMap({ options, onLoad }) {
     const animationID = useRef(null);
     const timeoutAnimationID = useRef(null);
     const HistoryData = useRef(null);
+    const [Animation, setAnimation] = useState(false);
+    const popupHis = useRef(null);
 
     const defaultOptions = {
         center: [105, 17],
@@ -55,7 +58,6 @@ function HistoryMap({ options, onLoad }) {
 
     const initializeMap = () => {
         try {
-            var _popup;
             if (map.current) {
                 if (map.animation_current) cancelAnimationFrame(map.animation_current);
                 if (map.timeout_current) clearTimeout(map.timeout_current);
@@ -68,6 +70,7 @@ function HistoryMap({ options, onLoad }) {
                 minZoom: 1,
             });
             var _map = map.current;
+            setHisMap(_map)
             // console.log(_map);
             const _map_Container = _map.getContainer();
 
@@ -254,15 +257,15 @@ function HistoryMap({ options, onLoad }) {
             });
 
             const setMap = async (from_time, to_time, pageNumber, pageSize) => {
-                let dataHistory = await getData(from_time, to_time, pageNumber, pageSize);
-                await initDataToMap(dataHistory);
-                let segmentData = await preAnimation(dataHistory);
-                if (dataHistory.length && dataHistory[0].coordinates) _map.easeTo({ center: dataHistory[0].coordinates, duration: 100, zoom: 16 })
+                let detailsHis = await getData(from_time, to_time, pageNumber, pageSize);
+                await initDataToMap(detailsHis);
+                let segmentData = await preAnimation(detailsHis);
+                if (detailsHis.length && detailsHis[0].coordinates) _map.easeTo({ center: detailsHis[0].coordinates, duration: 100, zoom: 16 })
                 setTimeout(() => setControls({
-                    map: map.current,
+                    ready: true,
                     Data: segmentData,
                     options: _options
-                }), 200)
+                }), 500)
             }
 
 
@@ -271,7 +274,8 @@ function HistoryMap({ options, onLoad }) {
                 let url = `https://api.ekgis.vn/v2/tracking/locationHistory/summary/${_options.projectId}/${_options.objectId}?api_key=${_options.apiKey}&from_time=${from_time}&to_time=${to_time}`;
                 const response = await fetch(url);
                 const Data = await response.json();
-                onLoad(Data)
+                HistoryData.current = Data
+                onLoad(HistoryData.current)
                 var arrData = Data.details
                 return arrData || [];
             };
@@ -332,18 +336,18 @@ function HistoryMap({ options, onLoad }) {
                         icon_arrow.src = 'data:image/svg+xml;charset=utf-8;base64,' + btoa(svg_arrow);
                     }
 
-                    if (_map.getSource(`ek-tracking-his-${_map_Container.id}-line-source`)) {
-                        _map.getSource(`ek-tracking-his-${_map_Container.id}-line-source`).setData(LineSource)
+                    if (_map.getSource(`ek-tracking-his-line-source`)) {
+                        _map.getSource(`ek-tracking-his-line-source`).setData(LineSource)
                     } else {
-                        _map.addSource(`ek-tracking-his-${_map_Container.id}-line-source`, {
+                        _map.addSource(`ek-tracking-his-line-source`, {
                             'type': 'geojson',
                             'data': LineSource,
                         });
 
                         _map.addLayer({
-                            'id': `ek-tracking-his-${_map_Container.id}-LineString`,
+                            'id': `ek-tracking-his-LineString`,
                             'type': 'line',
-                            'source': `ek-tracking-his-${_map_Container.id}-line-source`,
+                            'source': `ek-tracking-his-line-source`,
                             'layout': {
                                 'line-join': 'round',
                                 'line-cap': 'round',
@@ -358,9 +362,9 @@ function HistoryMap({ options, onLoad }) {
                         });
 
                         _map.addLayer({
-                            'id': `ek-tracking-his-${_map_Container.id}-LineString-arrow`,
+                            'id': `ek-tracking-his-LineString-arrow`,
                             'type': 'symbol',
-                            'source': `ek-tracking-his-${_map_Container.id}-line-source`,
+                            'source': `ek-tracking-his-line-source`,
                             'layout': {
                                 'symbol-placement': 'line',
                                 'icon-ignore-placement': true,
@@ -412,18 +416,18 @@ function HistoryMap({ options, onLoad }) {
                         _map.addImage('marker-stop', iconStop.data)
                     }
 
-                    if (_map.getSource(`ek-tracking-his-${_map_Container.id}-track-source`)) {
-                        _map.getSource(`ek-tracking-his-${_map_Container.id}-track-source`).setData(TrackSource)
+                    if (_map.getSource(`ek-tracking-his-track-source`)) {
+                        _map.getSource(`ek-tracking-his-track-source`).setData(TrackSource)
                     } else {
-                        _map.addSource(`ek-tracking-his-${_map_Container.id}-track-source`, {
+                        _map.addSource(`ek-tracking-his-track-source`, {
                             'type': 'geojson',
                             'data': TrackSource,
                         });
 
                         _map.addLayer({
-                            'id': `ek-tracking-his-${_map_Container.id}-track-point`,
+                            'id': `ek-tracking-his-track-point`,
                             'type': 'symbol',
-                            'source': `ek-tracking-his-${_map_Container.id}-track-source`,
+                            'source': `ek-tracking-his-track-source`,
                             "layout": {
                                 "icon-image": [
                                     "match",
@@ -449,22 +453,22 @@ function HistoryMap({ options, onLoad }) {
                             // ]
                         });
 
-                        _map.on('mouseenter', `ek-tracking-his-${_map_Container.id}-track-point`, (e) => {
+                        _map.on('mouseenter', `ek-tracking-his-track-point`, (e) => {
                             _map.getCanvas().style.cursor = 'pointer';
                             const bbox = [
                                 [e.point.x - 5, e.point.y - 5],
                                 [e.point.x + 5, e.point.y + 5],
                             ];
                             const selectedFeatures = _map.queryRenderedFeatures(bbox, {
-                                layers: [`ek-tracking-his-${_map_Container.id}-track-point`],
+                                layers: [`ek-tracking-his-track-point`],
                             });
                             let features = selectedFeatures[0]
 
                             let color = `default`;
                             if (features.properties.type != 'stop') color = features.properties.type;
 
-                            if (_popup) _popup.remove();
-                            _popup = new maplibregl.Popup({ className: 'ek-tracking-his-popup', closeButton: false, anchor: 'bottom', })
+                            if (popupHis.current) popupHis.current.remove();
+                            popupHis.current = new maplibregl.Popup({ className: 'ek-tracking-his-popup', closeButton: false, anchor: 'bottom', })
                                 .setLngLat(features.geometry.coordinates)
                                 .setHTML(`
                                         <div class="ek-tracking-his-popup-info">
@@ -472,41 +476,41 @@ function HistoryMap({ options, onLoad }) {
                                             <span>${features.properties.address}</span>
                                         </div>
                                         ${features.properties.type !== 'stop' ? `
-                                            <div class="ek-tracking-his-popup-info">
-                                                <span class="ek-tracking-his-popup-icon ekmapplf_tracking-icon-clock ekmapplf_tracking-icon-${color}-color"></span>
-                                                <span>${formatTimestamp(features.properties.timestamp)}</span>
-                                            </div>` : `
+                                        <div class="ek-tracking-his-popup-info">
+                                            <span class="ek-tracking-his-popup-icon ekmapplf_tracking-icon-clock ekmapplf_tracking-icon-${color}-color"></span>
+                                            <span>${formatTimestamp(features.properties.timestamp)}</span>
+                                        </div>` : `
+                                        <div class="ek-tracking-his-popup-info">
+                                            <span class="ek-tracking-his-popup-icon">
+                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+                                                    <path d="M464 256A208 208 0 1 1 48 256a208 208 0 1 1 416 0zM0 256a256 256 0 1 0 512 0A256 256 0 1 0 0 256zM232 120V256c0 8 4 15.5 10.7 20l96 64c11 7.4 25.9 4.4 33.3-6.7s4.4-25.9-6.7-33.3L280 243.2V120c0-13.3-10.7-24-24-24s-24 10.7-24 24z" fill="#51CF66"/>
+                                                </svg>
+                                            </span>
+                                            <span>${formatTimestamp(features.properties.startTime)}</span>
+                                        </div>
+                                        ${features.properties.endTime !== '' ? `
                                             <div class="ek-tracking-his-popup-info">
                                                 <span class="ek-tracking-his-popup-icon">
                                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-                                                        <path d="M464 256A208 208 0 1 1 48 256a208 208 0 1 1 416 0zM0 256a256 256 0 1 0 512 0A256 256 0 1 0 0 256zM232 120V256c0 8 4 15.5 10.7 20l96 64c11 7.4 25.9 4.4 33.3-6.7s4.4-25.9-6.7-33.3L280 243.2V120c0-13.3-10.7-24-24-24s-24 10.7-24 24z" fill="#51CF66"/>
+                                                        <path d="M464 256A208 208 0 1 1 48 256a208 208 0 1 1 416 0zM0 256a256 256 0 1 0 512 0A256 256 0 1 0 0 256zM232 120V256c0 8 4 15.5 10.7 20l96 64c11 7.4 25.9 4.4 33.3-6.7s4.4-25.9-6.7-33.3L280 243.2V120c0-13.3-10.7-24-24-24s-24 10.7-24 24z" fill="#FF6B6B"/>
                                                     </svg>
                                                 </span>
-                                                <span>${formatTimestamp(features.properties.startTime)}</span>
-                                            </div>
-                                            ${features.properties.endTime !== '' ? `
-                                                <div class="ek-tracking-his-popup-info">
-                                                    <span class="ek-tracking-his-popup-icon">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-                                                            <path d="M464 256A208 208 0 1 1 48 256a208 208 0 1 1 416 0zM0 256a256 256 0 1 0 512 0A256 256 0 1 0 0 256zM232 120V256c0 8 4 15.5 10.7 20l96 64c11 7.4 25.9 4.4 33.3-6.7s4.4-25.9-6.7-33.3L280 243.2V120c0-13.3-10.7-24-24-24s-24 10.7-24 24z" fill="#FF6B6B"/>
-                                                        </svg>
-                                                    </span>
-                                                    <span>${formatTimestamp(features.properties.endTime)}</span>
-                                                </div>` : ``} `}
+                                                <span>${formatTimestamp(features.properties.endTime)}</span>
+                                            </div>` : ``} `}
                                     `)
                                 .setOffset([0, -20])
-                                .addTo(_map);
+                                .addTo(_map)
                         });
-                        _map.on('mouseleave', `ek-tracking-his-${_map_Container.id}-track-point`, () => {
+                        _map.on('mouseleave', `ek-tracking-his-track-point`, () => {
                             _map.getCanvas().style.cursor = '';
-                            if (_popup) _popup.remove();
+                            if (popupHis.current) popupHis.current.remove();
                         })
                     }
 
-                    if (_map.getSource(`ek-tracking-his-${_map_Container.id}-check-source`)) {
-                        _map.getSource(`ek-tracking-his-${_map_Container.id}-check-source`).setData(CheckSource)
+                    if (_map.getSource(`ek-tracking-his-check-source`)) {
+                        _map.getSource(`ek-tracking-his-check-source`).setData(CheckSource)
                     } else {
-                        _map.addSource(`ek-tracking-his-${_map_Container.id}-check-source`, {
+                        _map.addSource(`ek-tracking-his-check-source`, {
                             'type': 'geojson',
                             'data': CheckSource,
                             'cluster': true,
@@ -515,9 +519,9 @@ function HistoryMap({ options, onLoad }) {
                         });
 
                         _map.addLayer({
-                            id: `ek-tracking-his-${_map_Container.id}-check-clusters`,
+                            id: `ek-tracking-his-check-clusters`,
                             type: 'circle',
-                            source: `ek-tracking-his-${_map_Container.id}-check-source`,
+                            source: `ek-tracking-his-check-source`,
                             paint: {
                                 'circle-color': [
                                     'step',
@@ -547,9 +551,9 @@ function HistoryMap({ options, onLoad }) {
                             ]
                         });
                         _map.addLayer({
-                            id: `ek-tracking-his-${_map_Container.id}-check-cluster-count`,
+                            id: `ek-tracking-his-check-cluster-count`,
                             type: 'symbol',
-                            source: `ek-tracking-his-${_map_Container.id}-check-source`,
+                            source: `ek-tracking-his-check-source`,
                             layout: {
                                 'text-field': '{point_count_abbreviated}',
                                 'text-size': 12
@@ -560,9 +564,9 @@ function HistoryMap({ options, onLoad }) {
                             ]
                         });
                         _map.addLayer({
-                            'id': `ek-tracking-his-${_map_Container.id}-check-point`,
+                            'id': `ek-tracking-his-check-point`,
                             'type': 'symbol',
-                            'source': `ek-tracking-his-${_map_Container.id}-check-source`,
+                            'source': `ek-tracking-his-check-source`,
                             'layout': {
                                 'icon-image': 'marker-check',
                                 'icon-overlap': 'always',
@@ -575,35 +579,35 @@ function HistoryMap({ options, onLoad }) {
                             ]
                         });
 
-                        _map.on('mouseenter', `ek-tracking-his-${_map_Container.id}-check-clusters`, () => {
+                        _map.on('mouseenter', `ek-tracking-his-check-clusters`, () => {
                             _map.getCanvas().style.cursor = 'pointer';
                         });
-                        _map.on('mouseleave', `ek-tracking-his-${_map_Container.id}-check-clusters`, () => {
+                        _map.on('mouseleave', `ek-tracking-his-check-clusters`, () => {
                             _map.getCanvas().style.cursor = '';
                         });
-                        _map.on('click', `ek-tracking-his-${_map_Container.id}-check-clusters`, async (e) => {
+                        _map.on('click', `ek-tracking-his-check-clusters`, async (e) => {
                             const features = _map.queryRenderedFeatures(e.point, {
-                                layers: [`ek-tracking-his-${_map_Container.id}-check-clusters`]
+                                layers: [`ek-tracking-his-check-clusters`]
                             });
                             const clusterId = features[0].properties.cluster_id;
-                            const zoom = await _map.getSource(`ek-tracking-his-${_map_Container.id}-check-source`).getClusterExpansionZoom(clusterId);
+                            const zoom = await _map.getSource(`ek-tracking-his-check-source`).getClusterExpansionZoom(clusterId);
                             _map.easeTo({
                                 center: features[0].geometry.coordinates,
                                 zoom: zoom,
                             });
                         });
 
-                        _map.on('mouseenter', `ek-tracking-his-${_map_Container.id}-check-point`, (e) => {
+                        _map.on('mouseenter', `ek-tracking-his-check-point`, (e) => {
                             _map.getCanvas().style.cursor = 'pointer';
                             const bbox = [
                                 [e.point.x - 5, e.point.y - 5],
                                 [e.point.x + 5, e.point.y + 5],
                             ];
                             const selectedFeatures = _map.queryRenderedFeatures(bbox, {
-                                layers: [`ek-tracking-his-${_map_Container.id}-check-point`],
+                                layers: [`ek-tracking-his-check-point`],
                             });
-                            if (_popup) _popup.remove();
-                            _popup = new maplibregl.Popup({ className: 'ek-tracking-his-popup', closeButton: false, anchor: 'bottom', })
+                            if (popupHis.current) popupHis.current.remove();
+                            popupHis.current = new maplibregl.Popup({ className: 'ek-tracking-his-popup', closeButton: false, anchor: 'bottom', })
                                 .setLngLat(selectedFeatures[0].geometry.coordinates)
                                 .setHTML(
                                     `<div class="ek-tracking-his-popup-info">
@@ -623,31 +627,16 @@ function HistoryMap({ options, onLoad }) {
                                         </span>
                                         <span>${formatTimestamp(selectedFeatures[0].properties.endTime)}</span>
                                     </div>`: ``}
-                                `
-                                )
+                                `)
                                 .setOffset([0, -20])
                                 .addTo(_map);
                         });
-                        _map.on('mouseleave', `ek-tracking-his-${_map_Container.id}-check-point`, () => {
+                        _map.on('mouseleave', `ek-tracking-his-check-point`, () => {
                             _map.getCanvas().style.cursor = '';
-                            if (_popup) _popup.remove();
+                            if (popupHis.current) popupHis.current.remove();
                         })
                     }
 
-                    function formatTimestamp(timestamp) {
-                        if (timestamp || timestamp != '') {
-                            const dateObj = new Date(timestamp);
-                            const formatter = new Intl.DateTimeFormat('en-GB', {
-                                day: '2-digit',
-                                month: '2-digit',
-                                year: 'numeric',
-                                hour: '2-digit',
-                                minute: '2-digit',
-                                timeZone: 'Asia/Ho_Chi_Minh'
-                            });
-                            return formatter.format(dateObj);
-                        } else return 'Không có thông tin';
-                    }
                 } catch (error) {
                     console.error("Error setPoints:", error);
                 }
@@ -676,6 +665,7 @@ function HistoryMap({ options, onLoad }) {
                             'line-width': _options.route.lineWidth,
                             'line-opacity': _options.route.lineOpacity
                         },
+                        'filter': ['==', '$type', 'LineString']
                     });
                 } else
                     _map.getSource('LocationHistory').setData(fcLocationHistory);
@@ -716,321 +706,323 @@ function HistoryMap({ options, onLoad }) {
                     _map.getSource('locationMarker').setData(locationMarker);
             }
 
-            const preAnimation = async (Data) => {
-                var gpxData, segmentData, summaryData
-
-                var fc = {
-                    type: "FeatureCollection",
-                    features: []
-                };
-
-                Data.forEach(data => {
-                    if (data.type === 'move') {
-                        for (let i = 0; i < data.route.locations.length; i++) {
-                            let location = data.route.locations[i];
-                            if (new Date(location.timestamp).getTime() >= new Date(data.startTime).getTime()
-                                && new Date(location.timestamp).getTime() <= new Date(data.endTime).getTime()) {
-                                let point = {
-                                    'type': 'Feature',
-                                    'properties': {
-                                        time: location.timestamp,
-                                        ele: 0,
-                                        type: data.type
-                                    },
-                                    'geometry': {
-                                        'type': 'Point',
-                                        'coordinates': location.coordinates
-                                    }
-                                };
-                                fc.features.push(point);
-                            }
-                        }
-                    } else if (data.type === 'stop' || data.type === 'checkin') {
-                        let pointStart = {
-                            'type': 'Feature',
-                            'properties': {
-                                time: data.startTime,
-                                ele: 0,
-                                type: data.type
-                            },
-                            'geometry': {
-                                'type': 'Point',
-                                'coordinates': data.coordinates
-                            }
-                        };
-                        let pointEnd = {
-                            'type': 'Feature',
-                            'properties': {
-                                time: data.endTime,
-                                ele: 0,
-                                type: data.type
-                            },
-                            'geometry': {
-                                'type': 'Point',
-                                'coordinates': data.coordinates
-                            }
-                        };
-                        fc.features.push(pointStart, pointEnd);
-                    } else {
-                        let point = {
-                            'type': 'Feature',
-                            'properties': {
-                                time: data.timestamp,
-                                ele: 0,
-                                type: data.type
-                            },
-                            'geometry': {
-                                'type': 'Point',
-                                'coordinates': data.coordinates
-                            }
-                        };
-                        fc.features.push(point);
-                    }
-                });
-
-                gpxData = parseGpxData(fc);
-                segmentData = computeData(gpxData);
-                // summaryData = computeHighlights(segmentData);
-
-                // console.log('fc', fc);
-                // console.log('gpxData', gpxData);
-                // console.log('segmentData', segmentData);
-                // console.log('summaryData', summaryData);
-
-                return segmentData || []
-
-
-                //Data
-                function parseGpxData(fc) {
-                    var result = {
-                        segments: [],
-                        id: options.objectId
-                    };
-                    let segments = [];
-                    result.segments.push(segments);
-
-                    for (let i = 0; i < fc.features.length; i++) {
-                        var feature = fc.features[i];
-                        let trkpt = {
-                            loc: feature.geometry.coordinates,
-                            time: new Date(feature.properties.time).getTime(),
-                            ele: feature.properties.ele,
-                        };
-                        segments.push(trkpt);
-                    }
-                    return result;
-                }
-                function computeData(gpxData) {
-                    const result = [];
-
-                    for (let i = 0; i < gpxData.segments.length; i++) {
-                        const segment = gpxData.segments[i];
-
-                        for (let j = 1; j < segment.length; j++) {
-                            const locData1 = segment[j - 1];
-                            const locData2 = segment[j];
-                            var time1 = locData1.time;
-                            var time2 = locData2.time;
-                            var loc1Time = new Date(time1);
-                            var loc2Time = new Date(time2);
-                            let d = 0;
-
-                            if (loc1Time.getDate() === loc2Time.getDate() && loc1Time.getMonth() === loc2Time.getMonth() && loc1Time.getFullYear() === loc2Time.getFullYear()) {
-                                d = getSegDistance(locData1.loc[1], locData1.loc[0], locData2.loc[1], locData2.loc[0], locData1.ele, locData2.ele);
-                            }
-
-                            const tsegment = {
-                                computed: {
-                                    distance: d
-                                },
-                                loc1: locData1,
-                                loc2: locData2
-                            };
-
-                            if (locData1.ele && locData2.ele) {
-                                tsegment.computed.ele = locData2.ele;
-                            }
-                            if (locData1.time && locData2.time && (locData1.time !== locData2.time)) {
-                                const { speed, time } = getSegSpeed(d, locData1.time, locData2.time);
-                                const filteredSpeed = speed;
-
-                                tsegment.computed.speed = speed;
-                                tsegment.computed.time = time;
-                                tsegment.computed.filteredSpeed = filteredSpeed;
-                            }
-
-                            if (locData1.temp && locData2.temp) tsegment.computed.temp = (locData1.temp + locData2.temp) / 2;
-
-                            if (locData2.hr) tsegment.computed.hr = locData2.hr;
-
-                            if (locData2.cad) tsegment.computed.cad = locData2.cad;
-
-                            if (tsegment.computed.speed) result.push(tsegment);
-                        }
-                    };
-
-                    return result;
-                }
-                function getSegDistance(lat1, lon1, lat2, lon2, ele1, ele2) {
-                    const R = 6371e3; // meters
-                    const φ1 = (lat1 * Math.PI) / 180; // φ, λ in radians
-                    const φ2 = (lat2 * Math.PI) / 180;
-                    const Δφ = ((lat2 - lat1) * Math.PI) / 180;
-                    const Δλ = ((lon2 - lon1) * Math.PI) / 180;
-
-                    const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) + Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
-                    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-                    let d = R * c; // in meters
-
-                    if (ele1 !== undefined && ele2 !== undefined) {
-                        const Δh = ele2 - ele1;
-
-                        if (Δh !== 0) {
-                            d = Math.sqrt(Math.pow(d, 2) + Math.pow(Δh, 2));
-                        }
-                    }
-
-                    return d;
-                }
-                function getSegSpeed(d, time1, time2) {
-                    const Δt = time2 / 1000 - time1 / 1000; // Time in seconds
-                    const v = (d / Δt) || 0; // Speed in m/s
-                    const kph = v * 3.6; // Speed in km/h
-                    return {
-                        speed: kph,
-                        time: Δt,
-                    };
-                }
-                function computeHighlights(segmentData) {
-                    let result = {};
-
-                    result.distance = 0;
-
-                    for (let i = 0; i < segmentData.length; i++) {
-                        const seg = segmentData[i].computed;
-                        let sseg;
-
-                        if (segmentData[i - 1]) sseg = segmentData[i - 1].computed;
-
-                        result.distance += seg.distance;
-
-                        if (seg.ele) {
-                            result.maxEle = result.maxEle || 0;
-                            result.minEle = result.minEle || 0;
-                            result.gainEle = result.gainEle || 0;
-                            result.totEle = result.totEle || 0;
-
-                            if (seg.ele > result.maxEle) result.maxEle = seg.ele;
-                            if (seg.ele < result.minEle) result.minEle = seg.ele;
-
-                            if (sseg && sseg.ele) {
-                                let eleDiff = seg.ele - sseg.ele;
-
-                                if (eleDiff > 0) {
-                                    result.gainEle += eleDiff;
-                                    result.totEle += eleDiff;
-                                } else if (eleDiff < 0) {
-                                    result.totEle += eleDiff;
-                                }
-                            }
-                        }
-
-                        if (seg.time) {
-                            result.totalTime = result.totalTime || 0;
-                            result.totalTime += seg.time;
-
-                            if (seg.speed && seg.filteredSpeed) {
-                                result.avgSpeed = result.avgSpeed || 0;
-                                result.avgMovingSpeed = result.avgMovingSpeed || 0;
-                                result.movingTime = result.movingTime || 0;
-                                result.maxSpeed = result.maxSpeed || 0;
-
-                                result.avgSpeed += seg.speed * seg.time;
-
-                                if (seg.speed > 5) {
-                                    result.avgMovingSpeed += seg.speed * seg.time;
-                                    result.movingTime += seg.time;
-                                }
-
-                                if (seg.filteredSpeed > result.maxSpeed && seg.filteredSpeed < 200) {
-                                    result.maxSpeed = seg.filteredSpeed;
-                                    result.maxSpeedIndex = i;
-                                }
-                            }
-
-                            if (seg.temp) {
-                                result.avgTemp = result.avgTemp || 0;
-                                result.maxTemp = result.maxTemp || 0;
-
-                                result.avgTemp += seg.temp * seg.time;
-
-                                if (seg.temp > result.maxTemp) {
-                                    result.maxTemp = seg.temp;
-                                }
-                            }
-
-                            if (seg.hr) {
-                                result.avgHr = result.avgHr || 0;
-                                result.maxHr = result.maxHr || 0;
-
-                                result.avgHr += seg.hr * seg.time;
-
-                                if (seg.hr > result.maxHr) {
-                                    result.maxHr = seg.hr;
-                                    result.maxHrIndex = i;
-                                }
-                            }
-
-                            if (seg.cad) {
-                                result.avgCad = result.avgCad || 0;
-                                result.maxCad = result.maxCad || 0;
-
-                                result.avgCad += seg.cad * seg.time;
-
-                                if (seg.cad > result.maxCad) {
-                                    result.maxCad = seg.cad;
-                                    result.maxCadIndex = i;
-                                }
-                            }
-                        }
-                    }
-
-                    if (result.totalTime) {
-                        result.avgSpeed = result.avgSpeed || 0;
-                        result.avgCad = result.avgCad || 0;
-                        result.avgHr = result.avgHr || 0;
-                        result.avgTemp = result.avgTemp || 0;
-
-                        result.avgSpeed /= result.totalTime;
-                        result.avgCad /= result.totalTime;
-                        result.avgHr /= result.totalTime;
-                        result.avgTemp /= result.totalTime;
-
-                        result.totalTime /= 3600;
-                    }
-
-                    if (result.movingTime) {
-                        result.avgMovingSpeed = result.avgMovingSpeed || 0;
-                        result.avgMovingSpeed /= result.movingTime;
-                        result.movingTime /= 3600;
-                    }
-
-                    return result;
-                }
-            }
         } catch (error) {
             console.error('Error initializing map:', error);
         };
     };
 
+    const preAnimation = async (Data) => {
+        var gpxData, segmentData, summaryData
+
+        var fc = {
+            type: "FeatureCollection",
+            features: []
+        };
+
+        Data.forEach(data => {
+            if (data.type === 'move') {
+                for (let i = 0; i < data.route.locations.length; i++) {
+                    let location = data.route.locations[i];
+                    if (new Date(location.timestamp).getTime() >= new Date(data.startTime).getTime()
+                        && new Date(location.timestamp).getTime() <= new Date(data.endTime).getTime()) {
+                        let point = {
+                            'type': 'Feature',
+                            'properties': {
+                                time: location.timestamp,
+                                ele: 0,
+                                type: data.type
+                            },
+                            'geometry': {
+                                'type': 'Point',
+                                'coordinates': location.coordinates
+                            }
+                        };
+                        fc.features.push(point);
+                    }
+                }
+            } else if (data.type === 'stop' || data.type === 'checkin') {
+                let pointStart = {
+                    'type': 'Feature',
+                    'properties': {
+                        time: data.startTime,
+                        ele: 0,
+                        type: data.type
+                    },
+                    'geometry': {
+                        'type': 'Point',
+                        'coordinates': data.coordinates
+                    }
+                };
+                let pointEnd = {
+                    'type': 'Feature',
+                    'properties': {
+                        time: data.endTime,
+                        ele: 0,
+                        type: data.type
+                    },
+                    'geometry': {
+                        'type': 'Point',
+                        'coordinates': data.coordinates
+                    }
+                };
+                fc.features.push(pointStart, pointEnd);
+            } else {
+                let point = {
+                    'type': 'Feature',
+                    'properties': {
+                        time: data.timestamp,
+                        ele: 0,
+                        type: data.type
+                    },
+                    'geometry': {
+                        'type': 'Point',
+                        'coordinates': data.coordinates
+                    }
+                };
+                fc.features.push(point);
+            }
+        });
+
+        gpxData = parseGpxData(fc);
+        segmentData = computeData(gpxData);
+        // summaryData = computeHighlights(segmentData);
+
+        // console.log('fc', fc);
+        // console.log('gpxData', gpxData);
+        // console.log('segmentData', segmentData);
+        // console.log('summaryData', summaryData);
+
+        return segmentData || []
+
+
+        //Data
+        function parseGpxData(fc) {
+            var result = {
+                segments: [],
+                id: options.objectId
+            };
+            let segments = [];
+            result.segments.push(segments);
+
+            for (let i = 0; i < fc.features.length; i++) {
+                var feature = fc.features[i];
+                let trkpt = {
+                    loc: feature.geometry.coordinates,
+                    time: new Date(feature.properties.time).getTime(),
+                    ele: feature.properties.ele,
+                };
+                segments.push(trkpt);
+            }
+            return result;
+        }
+        function computeData(gpxData) {
+            const result = [];
+
+            for (let i = 0; i < gpxData.segments.length; i++) {
+                const segment = gpxData.segments[i];
+
+                for (let j = 1; j < segment.length; j++) {
+                    const locData1 = segment[j - 1];
+                    const locData2 = segment[j];
+                    var time1 = locData1.time;
+                    var time2 = locData2.time;
+                    var loc1Time = new Date(time1);
+                    var loc2Time = new Date(time2);
+                    let d = 0;
+
+                    if (loc1Time.getDate() === loc2Time.getDate() && loc1Time.getMonth() === loc2Time.getMonth() && loc1Time.getFullYear() === loc2Time.getFullYear()) {
+                        d = getSegDistance(locData1.loc[1], locData1.loc[0], locData2.loc[1], locData2.loc[0], locData1.ele, locData2.ele);
+                    }
+
+                    const tsegment = {
+                        computed: {
+                            distance: d
+                        },
+                        loc1: locData1,
+                        loc2: locData2
+                    };
+
+                    if (locData1.ele && locData2.ele) {
+                        tsegment.computed.ele = locData2.ele;
+                    }
+                    if (locData1.time && locData2.time && (locData1.time !== locData2.time)) {
+                        const { speed, time } = getSegSpeed(d, locData1.time, locData2.time);
+                        const filteredSpeed = speed;
+
+                        tsegment.computed.speed = speed;
+                        tsegment.computed.time = time;
+                        tsegment.computed.filteredSpeed = filteredSpeed;
+                    }
+
+                    if (locData1.temp && locData2.temp) tsegment.computed.temp = (locData1.temp + locData2.temp) / 2;
+
+                    if (locData2.hr) tsegment.computed.hr = locData2.hr;
+
+                    if (locData2.cad) tsegment.computed.cad = locData2.cad;
+
+                    if (tsegment.computed.speed) result.push(tsegment);
+                }
+            };
+
+            return result;
+        }
+        function getSegDistance(lat1, lon1, lat2, lon2, ele1, ele2) {
+            const R = 6371e3; // meters
+            const φ1 = (lat1 * Math.PI) / 180; // φ, λ in radians
+            const φ2 = (lat2 * Math.PI) / 180;
+            const Δφ = ((lat2 - lat1) * Math.PI) / 180;
+            const Δλ = ((lon2 - lon1) * Math.PI) / 180;
+
+            const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) + Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            let d = R * c; // in meters
+
+            if (ele1 !== undefined && ele2 !== undefined) {
+                const Δh = ele2 - ele1;
+
+                if (Δh !== 0) {
+                    d = Math.sqrt(Math.pow(d, 2) + Math.pow(Δh, 2));
+                }
+            }
+
+            return d;
+        }
+        function getSegSpeed(d, time1, time2) {
+            const Δt = time2 / 1000 - time1 / 1000; // Time in seconds
+            const v = (d / Δt) || 0; // Speed in m/s
+            const kph = v * 3.6; // Speed in km/h
+            return {
+                speed: kph,
+                time: Δt,
+            };
+        }
+        function computeHighlights(segmentData) {
+            let result = {};
+
+            result.distance = 0;
+
+            for (let i = 0; i < segmentData.length; i++) {
+                const seg = segmentData[i].computed;
+                let sseg;
+
+                if (segmentData[i - 1]) sseg = segmentData[i - 1].computed;
+
+                result.distance += seg.distance;
+
+                if (seg.ele) {
+                    result.maxEle = result.maxEle || 0;
+                    result.minEle = result.minEle || 0;
+                    result.gainEle = result.gainEle || 0;
+                    result.totEle = result.totEle || 0;
+
+                    if (seg.ele > result.maxEle) result.maxEle = seg.ele;
+                    if (seg.ele < result.minEle) result.minEle = seg.ele;
+
+                    if (sseg && sseg.ele) {
+                        let eleDiff = seg.ele - sseg.ele;
+
+                        if (eleDiff > 0) {
+                            result.gainEle += eleDiff;
+                            result.totEle += eleDiff;
+                        } else if (eleDiff < 0) {
+                            result.totEle += eleDiff;
+                        }
+                    }
+                }
+
+                if (seg.time) {
+                    result.totalTime = result.totalTime || 0;
+                    result.totalTime += seg.time;
+
+                    if (seg.speed && seg.filteredSpeed) {
+                        result.avgSpeed = result.avgSpeed || 0;
+                        result.avgMovingSpeed = result.avgMovingSpeed || 0;
+                        result.movingTime = result.movingTime || 0;
+                        result.maxSpeed = result.maxSpeed || 0;
+
+                        result.avgSpeed += seg.speed * seg.time;
+
+                        if (seg.speed > 5) {
+                            result.avgMovingSpeed += seg.speed * seg.time;
+                            result.movingTime += seg.time;
+                        }
+
+                        if (seg.filteredSpeed > result.maxSpeed && seg.filteredSpeed < 200) {
+                            result.maxSpeed = seg.filteredSpeed;
+                            result.maxSpeedIndex = i;
+                        }
+                    }
+
+                    if (seg.temp) {
+                        result.avgTemp = result.avgTemp || 0;
+                        result.maxTemp = result.maxTemp || 0;
+
+                        result.avgTemp += seg.temp * seg.time;
+
+                        if (seg.temp > result.maxTemp) {
+                            result.maxTemp = seg.temp;
+                        }
+                    }
+
+                    if (seg.hr) {
+                        result.avgHr = result.avgHr || 0;
+                        result.maxHr = result.maxHr || 0;
+
+                        result.avgHr += seg.hr * seg.time;
+
+                        if (seg.hr > result.maxHr) {
+                            result.maxHr = seg.hr;
+                            result.maxHrIndex = i;
+                        }
+                    }
+
+                    if (seg.cad) {
+                        result.avgCad = result.avgCad || 0;
+                        result.maxCad = result.maxCad || 0;
+
+                        result.avgCad += seg.cad * seg.time;
+
+                        if (seg.cad > result.maxCad) {
+                            result.maxCad = seg.cad;
+                            result.maxCadIndex = i;
+                        }
+                    }
+                }
+            }
+
+            if (result.totalTime) {
+                result.avgSpeed = result.avgSpeed || 0;
+                result.avgCad = result.avgCad || 0;
+                result.avgHr = result.avgHr || 0;
+                result.avgTemp = result.avgTemp || 0;
+
+                result.avgSpeed /= result.totalTime;
+                result.avgCad /= result.totalTime;
+                result.avgHr /= result.totalTime;
+                result.avgTemp /= result.totalTime;
+
+                result.totalTime /= 3600;
+            }
+
+            if (result.movingTime) {
+                result.avgMovingSpeed = result.avgMovingSpeed || 0;
+                result.avgMovingSpeed /= result.movingTime;
+                result.movingTime /= 3600;
+            }
+
+            return result;
+        }
+    }
+
     useEffect(() => {
+        if (!Animation) setAnimation(true)
         setStage({
             date: null,
             time: null,
             speed: 0
         })
         setControls({
-            map: null,
+            ready: false,
             Data: [],
             options: null
         })
@@ -1038,18 +1030,200 @@ function HistoryMap({ options, onLoad }) {
         return () => {
             if (animationID.current) cancelAnimationFrame(animationID.current);
             if (timeoutAnimationID.current) clearTimeout(timeoutAnimationID.current);
+            if (popupHis.current) popupHis.current.remove();
             if (map.current) map.current.remove();
         };
     }, [options]);
 
-    // const setAnimation = (data) => {
-    //     // console.log('animationID', data);
-    //     animationID.current = requestAnimationFrame(data)
-    // }
-    // const setTimeoutID = (data) => {
-    //     // console.log('timeoutAnimation', data);
-    //     timeoutAnimation.current = data
-    // }
+    useEffect(() => {
+        if (HistoryIndex !== null) {
+            setAnimation(false)
+            const HisDetails = HistoryData.current.details;
+            const detail = HisDetails[HistoryIndex]
+            if (!detail) return;
+            if (detail.type === 'move') {
+                setTimeout(async () => {
+                    HisMap.setPaintProperty(`ek-tracking-his-LineString`, 'line-color', '#b5b5b5');
+                    HisMap.setPaintProperty(`ek-tracking-his-LineString`, 'line-opacity', 0.5);
+                    HisMap.setLayoutProperty(`ek-tracking-his-LineString-arrow`, 'visibility', 'none');
+
+                    var fcRouteHistory = {
+                        'type': 'FeatureCollection',
+                        'features': [{
+                            type: "Feature",
+                            geometry: detail.route.geometry
+                        }]
+                    }
+                    if (!HisMap.getImage('icon_arrow') && !HisMap.hasImage('icon_arrow')) {
+                        var svg_arrow = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M19.2901 9.1698L7.70015 3.0698C4.95015 1.6198 1.96015 4.5498 3.35015 7.3298L4.97015 10.5698C5.42015 11.4698 5.42015 12.5298 4.97015 13.4298L3.35015 16.6698C1.96015 19.4498 4.95015 22.3698 7.70015 20.9298L19.2901 14.8298C21.5701 13.6298 21.5701 10.3698 19.2901 9.1698Z" stroke="#292D32" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" fill="#e50027"/></svg>';
+                        var icon_arrow = new Image();
+                        icon_arrow.onload = function () {
+                            if (!HisMap.hasImage('icon_arrow'))
+                                HisMap.addImage('icon_arrow', icon_arrow);
+                        };
+                        icon_arrow.src = 'data:image/svg+xml;charset=utf-8;base64,' + btoa(svg_arrow);
+                    }
+                    if (!HisMap.getSource('RouteHistory')) {
+                        HisMap.addSource('RouteHistory', {
+                            'type': 'geojson',
+                            'data': fcRouteHistory
+                        });
+                        HisMap.addLayer({
+                            'id': 'RouteHistory',
+                            'type': 'line',
+                            'source': 'RouteHistory',
+                            'layout': {
+                                'line-cap': 'round',
+                                'line-join': 'round'
+                            },
+                            'paint': {
+                                'line-color': _options.route.lineCorlor,
+                                'line-width': _options.route.lineWidth,
+                                'line-opacity': _options.route.lineOpacity
+                            },
+                        });
+                        HisMap.addLayer({
+                            'id': `RouteHistory-arrow`,
+                            'type': 'symbol',
+                            'source': `RouteHistory`,
+                            'layout': {
+                                'symbol-placement': 'line',
+                                'icon-ignore-placement': true,
+                                'symbol-spacing': 100,
+                                'icon-image': 'icon_arrow',
+                                'icon-size': {
+                                    "stops": [
+                                        [
+                                            13,
+                                            0.35
+                                        ],
+                                        [
+                                            16,
+                                            0.5
+                                        ],
+                                        [
+                                            18,
+                                            0.625
+                                        ],
+                                        [
+                                            21,
+                                            0.75
+                                        ]
+                                    ]
+                                }
+                            }
+                        });
+                    } else HisMap.getSource('RouteHistory').setData(fcRouteHistory);
+
+                    if (detail.route.geometry.coordinates.length) {
+                        var boundbox = bbox(fcRouteHistory);
+                        HisMap.fitBounds(boundbox, { padding: 100, maxZoom: 16, duration: 1000 });
+                    }
+
+                    // var gpx = await preAnimation([detail])
+                    // setTimeout( () => {
+                    //     setControls({
+                    //         ready: true,
+                    //         Data: gpx,
+                    //         options: _options
+                    //     })
+                    // }, 300)
+                }, 300)
+            } else if (detail.type === 'start' || detail.type === 'end' || detail.type === 'stop' || detail.type === 'checkin') {
+                HisMap.easeTo({ center: detail.coordinates, duration: 100, zoom: 16, bearing: 0 })
+
+                var html;
+                if (detail.type === 'start' || detail.type === 'end') {
+                    let color = `default`;
+                    if (detail.type != 'stop') color = detail.type;
+                    html = `<div class="ek-tracking-his-popup-info">
+                                <span class="ek-tracking-his-popup-icon ekmapplf_tracking-icon-marker ekmapplf_tracking-icon-${color}-color"></span>
+                                <span>${detail.address}</span>
+                            </div>
+                            ${detail.type !== 'stop' ? `
+                            <div class="ek-tracking-his-popup-info">
+                                <span class="ek-tracking-his-popup-icon ekmapplf_tracking-icon-clock ekmapplf_tracking-icon-${color}-color"></span>
+                                <span>${formatTimestamp(detail.timestamp)}</span>
+                            </div>` : `
+                            <div class="ek-tracking-his-popup-info">
+                                <span class="ek-tracking-his-popup-icon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+                                        <path d="M464 256A208 208 0 1 1 48 256a208 208 0 1 1 416 0zM0 256a256 256 0 1 0 512 0A256 256 0 1 0 0 256zM232 120V256c0 8 4 15.5 10.7 20l96 64c11 7.4 25.9 4.4 33.3-6.7s4.4-25.9-6.7-33.3L280 243.2V120c0-13.3-10.7-24-24-24s-24 10.7-24 24z" fill="#51CF66"/>
+                                    </svg>
+                                </span>
+                                <span>${formatTimestamp(detail.startTime)}</span>
+                            </div>
+                            ${detail.endTime !== '' ? `
+                                <div class="ek-tracking-his-popup-info">
+                                    <span class="ek-tracking-his-popup-icon">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+                                            <path d="M464 256A208 208 0 1 1 48 256a208 208 0 1 1 416 0zM0 256a256 256 0 1 0 512 0A256 256 0 1 0 0 256zM232 120V256c0 8 4 15.5 10.7 20l96 64c11 7.4 25.9 4.4 33.3-6.7s4.4-25.9-6.7-33.3L280 243.2V120c0-13.3-10.7-24-24-24s-24 10.7-24 24z" fill="#FF6B6B"/>
+                                        </svg>
+                                    </span>
+                                    <span>${formatTimestamp(detail.endTime)}</span>
+                                </div>` : ``} `} `
+                }
+
+                if (detail.type === 'stop' || detail.type === 'checkin') {
+                    html = `<div class="ek-tracking-his-popup-info">
+                                <span class="ek-tracking-his-popup-icon ekmapplf_tracking-icon-marker ekmapplf_tracking-icon-default-color"></span>
+                                <span>${detail.address}</span>
+                            </div>
+                            <div class="ek-tracking-his-popup-info">
+                                <span class="ek-tracking-his-popup-icon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M464 256A208 208 0 1 1 48 256a208 208 0 1 1 416 0zM0 256a256 256 0 1 0 512 0A256 256 0 1 0 0 256zM232 120V256c0 8 4 15.5 10.7 20l96 64c11 7.4 25.9 4.4 33.3-6.7s4.4-25.9-6.7-33.3L280 243.2V120c0-13.3-10.7-24-24-24s-24 10.7-24 24z" fill="#51CF66"/></svg>
+                                </span>
+                                <span>${formatTimestamp(detail.startTime)}</span>
+                            </div>
+                            ${detail.endTime != '' ? `
+                                <div class="ek-tracking-his-popup-info">
+                                    <span class="ek-tracking-his-popup-icon">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M464 256A208 208 0 1 1 48 256a208 208 0 1 1 416 0zM0 256a256 256 0 1 0 512 0A256 256 0 1 0 0 256zM232 120V256c0 8 4 15.5 10.7 20l96 64c11 7.4 25.9 4.4 33.3-6.7s4.4-25.9-6.7-33.3L280 243.2V120c0-13.3-10.7-24-24-24s-24 10.7-24 24z" fill="#FF6B6B"/></svg>
+                                    </span>
+                                    <span>${formatTimestamp(detail.endTime)}</span>
+                                </div>`: ``}`
+                }
+                popupHis.current = new maplibregl.Popup({ className: 'ek-tracking-his-popup', closeButton: true, anchor: 'bottom', focusAfterOpen: false })
+                    .setLngLat(detail.coordinates)
+                    .setHTML(html)
+                    .setOffset([0, -20])
+                    .addTo(HisMap)
+            }
+        }
+
+        return () => {
+            try {
+                if (popupHis.current) popupHis.current.remove();
+                if (HisMap) {
+                    HisMap.setPaintProperty(`ek-tracking-his-LineString`, 'line-color', _options.route.lineCorlor);
+                    HisMap.setPaintProperty(`ek-tracking-his-LineString`, 'line-opacity', _options.route.lineOpacity);
+                    HisMap.setLayoutProperty(`ek-tracking-his-LineString-arrow`, 'visibility', 'visible');
+                    if (HisMap.getSource(`RouteHistory`)) {
+                        HisMap.removeLayer(`RouteHistory`)
+                        HisMap.removeLayer(`RouteHistory-arrow`)
+                        HisMap.removeSource(`RouteHistory`)
+                    }
+                }
+            } catch (ex) {
+                console.log(ex);
+            }
+        };
+    }, [HistoryIndex])
+
+    function formatTimestamp(timestamp) {
+        if (timestamp || timestamp != '') {
+            const dateObj = new Date(timestamp);
+            const formatter = new Intl.DateTimeFormat('en-GB', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                timeZone: 'Asia/Ho_Chi_Minh'
+            });
+            return formatter.format(dateObj);
+        } else return 'Không có thông tin';
+    }
 
     const setInfo = (data) => {
         // console.log('info', data);
@@ -1080,9 +1254,9 @@ function HistoryMap({ options, onLoad }) {
     }
     return (<>
         <div ref={mapContainer} id='ekmap-tracking-his-map'>
-            {Controls.map != null && <Animate_And_Controls _map={Controls.map} segmentData={Controls.Data} options={Controls.options} currentInfo={setInfo} />}
+            {Controls.ready !== false && <Animate_And_Controls map={HisMap} segmentData={Controls.Data} options={Controls.options} Animation={Animation} currentInfo={setInfo} />}
             <MapLegend />
-            {(Stage.date != null && Stage.time != null) && <div className='ekmapplf_tracking-map-legend-his'>
+            {(Stage.date !== null && Stage.time !== null) && <div className='ekmapplf_tracking-map-legend-his'>
                 <Flex vertical="true" align="center" justify='center' wrap='wrap' style={{ 'width': '50%', 'fontWeight': 600, 'textAlign': 'center', 'borderRight': '1px solid' }}>
                     <span style={{ 'color': 'rgb(132, 132, 132)' }}>{Stage.date}</span>
                     <span style={{ 'color': 'rgb(68, 68, 68)' }}>{Stage.time}</span>

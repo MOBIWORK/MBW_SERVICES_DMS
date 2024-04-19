@@ -3,6 +3,7 @@ import './SupervisoryStaff.css';
 interface DataEndTimeLine{
     time_end: string;
     address: string;
+    index_item: number;
 }
 
 
@@ -14,9 +15,13 @@ export function  ItemEndTimeLineDot(){
     </>
 }
 
-export function ItemEndTimeLineContent({ data }: { data: DataEndTimeLine }){
+export function ItemEndTimeLineContent({ data, onEventClickItem }: { data: DataEndTimeLine, onEventClickItem: any }){
+    const handldeClickItem = () => {
+        onEventClickItem(data.index_item);
+    }
+
     return <>
-        <div className="flex items-center">
+        <div className="flex items-center" style={{cursor: "pointer"}} onClick={handldeClickItem}>
             <div style={{color: '#212B36', fontWeight: 500, fontSize: '15px', lineHeight: '21px', marginLeft: '5px'}}>Kết thúc</div>
         </div>
         <div className="flex" style={{marginTop: '5px'}}>
