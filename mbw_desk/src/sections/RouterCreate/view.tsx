@@ -60,9 +60,8 @@ export default function RouterCreate() {
       await AxiosService.post("/api/method/mbw_dms.api.router.create_router",value)
       success()
       navigate('/router-control')
-    } catch (err) {
-      error(err as string)
-      console.log("error create",err);     
+    } catch (err:any) {
+      error(err||'Something was wrong')
     }
   },[customerRouter])
 
