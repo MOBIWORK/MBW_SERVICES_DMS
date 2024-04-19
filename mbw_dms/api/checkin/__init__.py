@@ -18,7 +18,7 @@ def create_checkin_image(**kwargs):
     return create_checkin_image(body=kwargs)
 
 # Cập nhật địa chỉ khách hàng
-@frappe.whitelist()
+@frappe.whitelist(methods="PATCH")
 def update_address_customer(**kwargs):
     from mbw_dms.mbw_dms.doctype.dms_checkin.dms_checkin import update_address_customer
     return update_address_customer(body=kwargs)

@@ -9,6 +9,7 @@ class Address(Document):
 
 
 def update_address(doc,method=None):
+	print("doc",doc)
 	for link in doc.links:
 		if link.link_doctype == "Customer":
 			customer = frappe.get_doc("Customer",{
