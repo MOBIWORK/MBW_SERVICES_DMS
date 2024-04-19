@@ -14,13 +14,11 @@ def get_config_api():
         return gen_response(500, "Error")
 
 @frappe.whitelist(methods='GET')
-def get_config_map(**kwargs):
+def get_config_map():
     try:
-        type_industry = frappe.form_dict.get('type_industry')
-        config_map_str = frappe.get_doc('DMS Settings').config_map_by_industry
-        config_map = json.loads(config_map_str) if config_map_str else {}
-        config_map_by_industry = config_map.get(type_industry, [])
-        return gen_response(200, 'Thành công', config_map_by_industry)
+        config_map_str = frappe.get_doc('DMS Settings').config_map_by_vgm
+        config_map = json.loads(config_map_str) if config_map_str else []
+        return gen_response(200, 'Thành công', config_map)
     except Exception as e:
         return gen_response(500, "Error", str(e))
     

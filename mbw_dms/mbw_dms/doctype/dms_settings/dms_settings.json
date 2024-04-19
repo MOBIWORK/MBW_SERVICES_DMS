@@ -29,7 +29,7 @@
   "company_long",
   "company_lat",
   "industrys",
-  "config_map_by_industry",
+  "config_map_by_vgm",
   "aws_tab",
   "access_key_s3",
   "key_secret_s3",
@@ -186,15 +186,15 @@
    "label": "BUCKET NAME S3"
   },
   {
-   "fieldname": "config_map_by_industry",
+   "fieldname": "config_map_by_vgm",
    "fieldtype": "JSON",
-   "label": "B\u1ea3n \u0111\u1ed3 ph\u00e2n ph\u1ed1i theo ng\u00e0nh"
+   "label": "C\u1ea5u h\u00ecnh b\u1ea3n \u0111\u1ed3 VGM"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-04-17 15:03:55.752012",
+ "modified": "2024-04-19 16:17:50.291462",
  "modified_by": "Administrator",
  "module": "MBW DMS",
  "name": "DMS Settings",
