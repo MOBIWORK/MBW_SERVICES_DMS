@@ -91,6 +91,8 @@ def get_router(id):
 @frappe.whitelist(methods="GET")
 def get_customer_router(data):
     try:     
+        # cho phep ngoai tuyen, lay o settting nhung gio se fix cung
+        is_ngoai_tuyen=False
         search_key = data.get("search_key")
         view_mode = validate_filter(value=data.get('view_mode'),type=['list','map'],type_check='enum') if data.get('view_mode') else 'list'
         # phan trang
@@ -133,7 +135,7 @@ def get_customer_router(data):
         for router_name in list_router:
             detail_router = frappe.get_doc("DMS Router",{"name":router_name}).as_dict()
             customer = detail_router.get('customers')
-            if view_mode == "map":
+            if view_mode == "map" or (router and is_ngoai_tuyen):
                 customer = pydash.filter_(detail_router.get('customers'),lambda value: value.frequency.find(str(tuan_trong_thang)))
             list_customer += customer
         sort = "customer_name desc"
@@ -176,8 +178,8 @@ def get_customer_router(data):
             detail_customer = frappe.db.get_all('Customer',filters= FiltersCustomer,fields=fields_customer)    
         for customer in detail_customer:
             customer['is_checkin'] = False
-            checkin = frappe.db.get_value("DMS Checkin",{"kh_ma":customer.get('customer_code')})
-            if checkin != None:
+            checkin = frappe.db.get_value("DMS Checkin",{"kh_ma":customer.get('customer_code')},["is_checkout"],as_dict=1)
+            if checkin != None and checkin.is_checkout:
                 customer['is_checkin'] = True
         total_customer= len(frappe.db.get_all('Customer',filters= FiltersCustomer))
         return gen_response(200,"", {
