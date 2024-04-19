@@ -107,7 +107,7 @@ def get_customer_router(data):
         birthday_to =validate_filter(type_check='timestamp',type='end',value=data.get('birthday_to'))  if data.get('birthday_to') else False
         customer_group = data.get('customer_group')
         customer_type = data.get('customer_type')
-        queryFilters = {"is_deleted": 0}
+        queryFilters = {"is_deleted": 0,"status":"Active"}
         user_id = get_user_id()
         if user_id.name != "Administrator":
             employee = get_employee_by_user(user = user_id.email)
@@ -117,8 +117,8 @@ def get_customer_router(data):
 
         if router:
             queryFilters['channel_code'] = ["in",router]
-        if status: 
-            queryFilters['status'] = status
+        # if status: 
+        #     queryFilters['status'] = status
         #lay danh sach theo ngay
         from mbw_dms.api.common import weekday
         today= datetime.now()
