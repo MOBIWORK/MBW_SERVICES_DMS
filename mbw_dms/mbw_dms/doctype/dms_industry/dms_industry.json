@@ -8,7 +8,10 @@
  "engine": "InnoDB",
  "field_order": [
   "name_industry",
-  "industry_name"
+  "industry_name",
+  "url",
+  "type",
+  "text_color"
  ],
  "fields": [
   {
@@ -20,11 +23,26 @@
    "fieldtype": "Data",
    "label": "T\u00ean ng\u00e0nh h\u00e0ng",
    "unique": 1
+  },
+  {
+   "fieldname": "url",
+   "fieldtype": "Data",
+   "label": "Url"
+  },
+  {
+   "fieldname": "type",
+   "fieldtype": "Data",
+   "label": "Type"
+  },
+  {
+   "fieldname": "text_color",
+   "fieldtype": "Data",
+   "label": "Text Color"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-04-11 09:33:00.464378",
+ "modified": "2024-04-19 15:38:51.771654",
  "modified_by": "Administrator",
  "module": "MBW DMS",
  "name": "DMS Industry",
