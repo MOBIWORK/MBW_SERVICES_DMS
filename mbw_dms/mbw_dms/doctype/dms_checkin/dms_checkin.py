@@ -2,6 +2,7 @@
 # For license information, please see license.txt
 
 import frappe
+from frappe import  _
 from frappe.model.document import Document
 import datetime
 from frappe.utils.data import get_time
@@ -346,7 +347,7 @@ def create_checkin_image(body):
         exception_handle(e)
 
 # Cập nhật địa chỉ khách hàng
-# @frappe.whitelist()
+@frappe.whitelist()
 def update_address_customer(body):
     try:
         customer = validate_filter(type_check='require',value=body.get('customer'))
@@ -364,15 +365,17 @@ def update_address_customer(body):
         doc_customer.primary_address = f"{address_line1}<br>{address_line1}<br>\n{county}\n<br>{city}<br>\n"
         doc_customer.save()
         if customer_info:
-            city_info = frappe.db.get_value(doctype="DMS Province",filters={"ma_tinh": city},fieldname=['ten_tinh'])
-            district_info = frappe.db.get_value(doctype="DMS District",filters={"ma_huyen":county},fieldname=['ten_huyen'])
-            ward_info = frappe.db.get_value(doctype="DMS Ward",filters={"ma_xa": state},fieldname=['ten_xa'])
+            city_info = frappe.db.get_value(doctype="DMS Province",filters={"ten_tinh": ["like",f"%{city}%"]},fieldname=['ma_tinh'])
+            district_info = frappe.db.get_value(doctype="DMS District",filters={"ten_huyen": ["like",f"%{county}%"]},fieldname=['ma_huyen'])
+            ward_info = frappe.db.get_value(doctype="DMS Ward",filters={"ten_xa": ["like",f"%{state}%"]},fieldname=['name'])
+            if not city_info : 
+                return gen_response(404,_("Couldn't find city"))
             new_address = {
-                    "address_title": f"{address_line1}, {ward_info}, {district_info}, {city_info}",
+                    "address_title": f"{address_line1}, {state}, {county}, {city}",
                     "address_line1":address_line1,                    
-                    "state": state,
-                    "county": county,
-                    "city": city,   
+                    "state": ward_info,
+                    "county": district_info,
+                    "city": city_info,   
                     "address_location":address_location               
                 }
             if customer_info.get("customer_primary_address"):
