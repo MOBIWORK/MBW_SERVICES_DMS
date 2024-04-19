@@ -16,8 +16,9 @@ class DMSSalesOrder(SalesOrder):
                     "docstatus": 1,
                     "creation": (">=", start_date), 
                     "creation": ("<=", end_date), 
-                    "customer": customer_name, 
-                    "owner": current_user},
+                    "customer_name": customer_name, 
+                    "owner": current_user
+                    },
             fields=['name']
         )
         return existing_cus
@@ -42,17 +43,17 @@ class DMSSalesOrder(SalesOrder):
         uom = {item.get('uom') for item in items}
 
         # Kiểm tra đã tồn tại bản ghi KPI của tháng này chưa
-        existing_monthly_summary = frappe.get_all(
+        existing_monthly_summary = frappe.get_value(
             'DMS Summary KPI Monthly',
-            filters={'thang': month, 'nam': year, 'nhan_vien_ban_hang': user_name},
-            fields=['name']
+            {'thang': month, 'nam': year, 'nhan_vien_ban_hang': user_name},
+            'name'
         )
         grand_totals = self.grand_total
         cus_name = self.customer
         existing_cus = self.existing_customer(customer_name=cus_name, start_date=start_date, end_date=end_date, current_user=self.owner)
 
         if existing_monthly_summary:
-            monthly_summary_doc = frappe.get_doc('DMS Summary KPI Monthly', existing_monthly_summary[0]['name'])
+            monthly_summary_doc = frappe.get_doc('DMS Summary KPI Monthly', existing_monthly_summary)
             if len(existing_cus) > 1:
                 monthly_summary_doc.so_don_hang += 1
                 monthly_summary_doc.doanh_so_thang += grand_totals
@@ -74,7 +75,9 @@ class DMSSalesOrder(SalesOrder):
                 'nhom_ban_hang': sales_team,
                 'so_don_hang': 1,
                 'doanh_so_thang': grand_totals,
-                'so_kh_dat_hang': 1
+                'so_kh_dat_hang': 1,
+                'sku': len(uom),
+                'san_luong': len(qty)
             })
             monthly_summary_doc.insert(ignore_permissions=True)
 
@@ -99,18 +102,18 @@ class DMSSalesOrder(SalesOrder):
         uom = {item.get('uom') for item in items}
 
         # Kiểm tra đã tồn tại bản ghi KPI của tháng này chưa
-        existing_monthly_summary = frappe.get_all(
+        existing_monthly_summary = frappe.get_value(
             'DMS Summary KPI Monthly',
-            filters={'thang': month, 'nam': year, 'nhan_vien_ban_hang': user_name},
-            fields=['name']
+            {'thang': month, 'nam': year, 'nhan_vien_ban_hang': user_name},
+            'name'
         )
 
         if existing_monthly_summary:
-            monthly_summary_doc = frappe.get_doc('DMS Summary KPI Monthly', existing_monthly_summary[0]['name'])
+            monthly_summary_doc = frappe.get_doc('DMS Summary KPI Monthly', existing_monthly_summary)
             grand_totals = self.grand_total
             cus_name = self.customer
             existing_cus = self.existing_customer(customer_name=cus_name, start_date=start_date, end_date=end_date, current_user=self.owner)
-            if len(existing_cus) == 1:
+            if len(existing_cus) == 0:
                 monthly_summary_doc.so_don_hang -= 1
                 monthly_summary_doc.doanh_so_thang -= grand_totals
                 monthly_summary_doc.san_luong -= sum(qty)
