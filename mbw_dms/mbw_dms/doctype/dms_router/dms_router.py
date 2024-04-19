@@ -130,13 +130,14 @@ def get_customer_router(data):
             queryFilters.update({"frequency": ["like",tuan_trong_thang]})  
         
         list_router = frappe.db.get_all('DMS Router',filters=queryFilters, pluck='name',distinct=True)
-        print("list_router",list_router)
         list_customer = []
         for router_name in list_router:
             detail_router = frappe.get_doc("DMS Router",{"name":router_name}).as_dict()
             customer = detail_router.get('customers')
-            if view_mode == "map" or (router and is_ngoai_tuyen):
-                customer = pydash.filter_(detail_router.get('customers'),lambda value: value.frequency.find(str(tuan_trong_thang)))
+            print("trong tuyen",(router and not is_ngoai_tuyen))
+            if view_mode == "map" or (router and not is_ngoai_tuyen):
+                print("in",str(tuan_trong_thang))
+                customer = pydash.filter_(detail_router.get('customers'),lambda value: (value.frequency.find(str(int(tuan_trong_thang))) != -1))
             list_customer += customer
         sort = "customer_name desc"
         if order_by: 
@@ -145,7 +146,7 @@ def get_customer_router(data):
         list_customer_name = []
         for customer in list_customer:
             list_customer_name.append(customer.get('customer_code'))
-        print(list_customer_name)
+        # print(list_customer_name)
         
         FiltersCustomer = {"customer_code": ["in",list_customer_name]}
         if birthday_from and birthday_to:
@@ -166,7 +167,7 @@ def get_customer_router(data):
         if(view_mode == 'list'):
             print("list")
             detail_customer = frappe.db.get_all('Customer',filters= FiltersCustomer,fields=fields_customer,start=page_size*(page_number-1), page_length=page_size,order_by=sort,distinct=True)
-            print(detail_customer)
+            # print(detail_customer)
         else:
             fields_customer= [
             'name'
