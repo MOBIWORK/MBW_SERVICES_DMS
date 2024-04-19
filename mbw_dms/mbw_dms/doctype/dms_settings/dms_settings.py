@@ -10,9 +10,9 @@ from mbw_dms.api.ekgis.constant import API_URL_TRACKING
 
 class DMSSettings(Document):
     def on_update(self):
+        print("dc::",self.industrys)
         frappe.cache.delete_value("website-config")
         frappe.cache.delete_value("ProjectID")
-    
     @frappe.whitelist(methods='POST')
     def config_web(self):
         try:
