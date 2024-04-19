@@ -121,7 +121,7 @@ def list_warehouse(**kwargs):
         company = kwargs.get('company')
         if name:
             warehouse_filter['name'] = ['like', f'%{name}%']
-        warehouse_filter['compamy'] = company
+        warehouse_filter['company'] = company
         list_warehouse = frappe.db.get_list('Warehouse', filters=warehouse_filter, fields=['name', 'warehouse_name'])
         return gen_response(200, 'Thành công', list_warehouse)
     except Exception as e:
