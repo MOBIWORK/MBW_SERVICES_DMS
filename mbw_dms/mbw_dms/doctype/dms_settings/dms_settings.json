@@ -117,8 +117,7 @@
   {
    "fieldname": "ma_du_an",
    "fieldtype": "Data",
-   "label": "M\u00e3 d\u1ef1 \u00e1n",
-   "read_only": 1
+   "label": "M\u00e3 d\u1ef1 \u00e1n"
   },
   {
    "fieldname": "lay_thong_tin",
@@ -195,7 +194,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-04-16 16:48:17.643949",
+ "modified": "2024-04-17 15:03:55.752012",
  "modified_by": "Administrator",
  "module": "MBW DMS",
  "name": "DMS Settings",

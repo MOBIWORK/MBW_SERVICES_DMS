@@ -118,8 +118,10 @@ def list_warehouse(**kwargs):
         kwargs = frappe._dict(kwargs)
         warehouse_filter = {}
         name = kwargs.get('name')
+        company = kwargs.get('company')
         if name:
             warehouse_filter['name'] = ['like', f'%{name}%']
+        warehouse_filter['compamy'] = company
         list_warehouse = frappe.db.get_list('Warehouse', filters=warehouse_filter, fields=['name', 'warehouse_name'])
         return gen_response(200, 'Thành công', list_warehouse)
     except Exception as e:
@@ -131,12 +133,13 @@ def list_vat(**kwargs):
     try:
         kwargs = frappe._dict(kwargs)
         title = kwargs.get('title') if kwargs.get('title') else ''
+        company = kwargs.get('company') if kwargs.get('company') else ''
         Taxes = frappe.qb.DocType("Sales Taxes and Charges Template")
         TaxesCharges = frappe.qb.DocType("Sales Taxes and Charges")
         detail_taxes = (frappe.qb.from_(Taxes)
                             .inner_join(TaxesCharges)
                             .on(Taxes.name == TaxesCharges.parent)
-                            .where(Taxes.name.like(f"%{title}%"))
+                            .where(Taxes.name.like(f"%{title}%") and Taxes.company == company)
                             .select(Taxes.name, Taxes.title, TaxesCharges.account_head, TaxesCharges.rate, TaxesCharges.charge_type)
                             ).run(as_dict =1)
         return gen_response(200, 'Thành công', detail_taxes)

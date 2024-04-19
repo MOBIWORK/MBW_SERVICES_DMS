@@ -61,7 +61,7 @@ def get_list_sales_order(**filters):
 # Chi tiết sales order
 @frappe.whitelist(methods='GET')
 def get_sale_order(name):
-    # try:
+    try:
         if frappe.db.exists("Sales Order", name, cache=True):
             SalesOrder = frappe.qb.DocType("Sales Order")
             Customer = frappe.qb.DocType("Customer")
@@ -108,7 +108,7 @@ def get_sale_order(name):
                 for key_item, value in detail[0].items() :
                     if key_item in field_detail_sales:                    
                         detail_order.setdefault(key_item,value)
-                detail_order['list_items'] = get_items_in_sales_order(master_doc='Sales Order', master_name=name)
+                detail_order['list_items'] = get_items(master_doc='Sales Order', master_name=name)
             if len(detail_taxes) > 0 :
                 detail_order = {**detail_order,**detail_taxes[0]}
             
@@ -118,8 +118,8 @@ def get_sale_order(name):
             return gen_response(200,'Thành công', detail_order)
         else:
             return gen_response(406, f"Không tồn tại đơn hàng {name}")
-    # except Exception as e: 
-    #     exception_handle(e)
+    except Exception as e: 
+        exception_handle(e)
 
 # Tạo mới đơn hàng
 @frappe.whitelist(methods='POST')
@@ -459,10 +459,10 @@ def delete_item(name_return_order, item_code):
 
 # Chi tiết đơn hàng theo checkin_id
 @frappe.whitelist(methods='GET')
-def get_sale_order_by_checkin_id(doctype, **data):
+def get_sale_order_by_checkin_id(doctype, **kwargs):
     try:
-        checkin_id = data.get('checkin_id')
-        detail_sales_order = frappe.db.get_list(doctype, filters={"checkin_id": checkin_id}, fields=['name'])
+        checkin_id = kwargs.get('checkin_id')
+        detail_sales_order = frappe.get_value(doctype, {'checkin_id': checkin_id}, 'name')
         if detail_sales_order:
             SalesOrder = frappe.qb.DocType(doctype)
             Customer = frappe.qb.DocType("Customer")
@@ -477,7 +477,7 @@ def get_sale_order_by_checkin_id(doctype, **data):
                         
                         .inner_join(Customer)
                         .on(Customer.name == SalesOrder.customer)
-                        .where(SalesOrder.name == detail_sales_order[0].get('name'))
+                        .where(SalesOrder.name == detail_sales_order)
                         .select(
                             Customer.customer_code
                             ,SalesOrder.customer,SalesOrder.customer_name,SalesOrder.address_display,UNIX_TIMESTAMP(SalesOrder.delivery_date).as_('delivery_date'),SalesOrder.set_warehouse,SalesOrder.total,SalesOrder.grand_total
@@ -494,7 +494,7 @@ def get_sale_order_by_checkin_id(doctype, **data):
                         
                         .inner_join(Customer)
                         .on(Customer.name == SalesOrder.customer)
-                        .where(SalesOrder.name == detail_sales_order[0].get('name'))
+                        .where(SalesOrder.name == detail_sales_order)
                         .select(
                             Customer.customer_code
                             ,SalesOrder.customer,SalesOrder.customer_name,SalesOrder.address_display,UNIX_TIMESTAMP(SalesOrder.posting_date).as_('posting_date'),SalesOrder.set_warehouse,SalesOrder.total,SalesOrder.grand_total
@@ -505,7 +505,7 @@ def get_sale_order_by_checkin_id(doctype, **data):
             detail_taxes = (frappe.qb.from_(SalesOrder)
                             .inner_join(SalesOrderTaxes)
                             .on(SalesOrder.name == SalesOrderTaxes.parent)
-                            .where(SalesOrder.name == detail_sales_order[0].get('name'))
+                            .where(SalesOrder.name == detail_sales_order)
                             .select(SalesOrderTaxes.tax_amount,SalesOrderTaxes.rate,SalesOrderTaxes.account_head,SalesOrderTaxes.charge_type,)
                             ).run(as_dict =1)
             detail_order = {"list_items": []}
@@ -513,7 +513,7 @@ def get_sale_order_by_checkin_id(doctype, **data):
                 for key_item, value in detail[0].items() :
                     if key_item in field_detail_sales:  
                         detail_order.setdefault(key_item,value)
-                    detail_order['list_items'] = get_items_in_sales_order(master_doc=doctype, master_name=detail_sales_order[0].get('name'))
+                    detail_order['list_items'] = get_items(master_doc=doctype, master_name=detail_sales_order)
             if len(detail_taxes) > 0 :
                 detail_order = {**detail_order,**detail_taxes[0]}
 
@@ -524,7 +524,7 @@ def get_sale_order_by_checkin_id(doctype, **data):
         exception_handle(e)
 
 
-def get_items_in_sales_order(master_doc, master_name):
+def get_items(master_doc, master_name):
     if not master_name:
         return
     master_doc = frappe.get_doc(master_doc, master_name)

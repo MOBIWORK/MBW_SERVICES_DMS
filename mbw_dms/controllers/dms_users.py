@@ -5,16 +5,17 @@ import requests
 
 def create_employee_and_sales_team(doc, method):
     # Tạo một bản ghi Employee mới
-    employee = frappe.new_doc("Employee")
-    employee.first_name = doc.first_name
-    employee.middle_name = doc.middle_name
-    employee.last_name = doc.last_name
-    employee.user_id = doc.name
-    employee.date_of_birth = doc.birth_date
-    employee.gender = doc.gender
-    employee.date_of_joining = datetime.today()
-    employee.status = "Active"
-    employee.insert()
+    if doc.birth_date and doc.gender:
+        employee = frappe.new_doc("Employee")
+        employee.first_name = doc.first_name
+        employee.middle_name = doc.middle_name
+        employee.last_name = doc.last_name
+        employee.user_id = doc.name
+        employee.date_of_birth = doc.birth_date
+        employee.gender = doc.gender
+        employee.date_of_joining = datetime.today()
+        employee.status = "Active"
+        employee.insert()
 
 # Tạo mới ObjectID
 def create_objid_employee(doc, method):
