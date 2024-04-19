@@ -499,7 +499,9 @@ def get_all_router():
         from mbw_dms.api.common import weekday
         thu_trong_tuan, week = weekday(datetime.now())
         filter  = {
-            "frequency": ["like", f"%{int(week)}%"]
+            "frequency": ["like", f"%{int(week)}%"],
+            "is_deleted":0,
+            "status":"Active"
         }
         user_id = get_user_id()
         if user_id.name != "Administrator":
