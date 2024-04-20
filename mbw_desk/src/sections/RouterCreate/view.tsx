@@ -7,10 +7,10 @@ import Customer from "./customer";
 import { HeaderPage } from "../../components";
 import { AxiosService } from "../../services/server";
 import { useNavigate, useParams } from "react-router-dom";
-import { customer, router } from "../../types/router";
+import {  router } from "../../types/router";
 import { rsData } from "../../types/response";
 import { createContext, useContext } from 'react';
-import { CustomerType } from "./type";
+import { GlobalContext } from "@/App";
 
 
 // ----------------------------------------------------------------------
@@ -21,21 +21,8 @@ export default function RouterCreate() {
   const navigate = useNavigate()
   const { type } = useParams();
   const [customerRouter,setCustomerRouter] = useState<any[]>([])
-  const [messageApi, contextHolder] = message.useMessage();
   const [detailRouter,setDetailRouter] = useState<router>()
-  const success = () => {
-    messageApi.open({
-      type: 'success',
-      content: 'Success!!',
-    });
-  };
-
-  const error = (mes?:string) => {
-    messageApi.open({
-      type: 'error',
-      content: mes || 'Something was wrong',
-    });
-  };
+  const {errorMsg,successMsg} = useContext(GlobalContext)
   const handleCreateRouter = useCallback(async(value:any) => {
     console.log({customerRouter});
     
@@ -58,10 +45,12 @@ export default function RouterCreate() {
     
     try {
       await AxiosService.post("/api/method/mbw_dms.api.router.create_router",value)
-      success()
+      successMsg()
       navigate('/router-control')
     } catch (err:any) {
-      error(err||'Something was wrong')
+      console.error(err);
+      errorMsg()
+      // error(err||'Something was wrong')
     }
   },[customerRouter])
 
@@ -111,7 +100,6 @@ export default function RouterCreate() {
   },[type])
   return (
     <>
-    {contextHolder}
       <HeaderPage
         title={type == 'create-dms-router' ? "Thêm tuyến" : detailRouter?.channel_name}
         buttons={[

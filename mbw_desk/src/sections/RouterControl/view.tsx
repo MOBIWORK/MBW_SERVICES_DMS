@@ -310,8 +310,8 @@ export default function RouterControl() {
       />
 
       <div className="bg-[#f9fafa]">
-        <div className="mx-2 pt-5 pb-10">
-          <div className="pt-5">
+        <div className="mx-2 pb-10">
+          <div className="">
             <div className="h-auto bg-white py-7 rounded-lg border border-solid border-[#DFE3E8]">
               {/* header  */}
               <Row className="justify-between w-full  px-4">

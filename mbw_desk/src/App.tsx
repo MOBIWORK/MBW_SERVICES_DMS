@@ -1,8 +1,10 @@
 import {AuthProvider} from '@/auth'
 import { useFrappeGetDocList } from 'frappe-react-sdk';
 import Router from './routes/sections'
-import { useEffect } from 'react'
-import {Modal} from 'antd'
+import { createContext, useEffect } from 'react'
+import {Modal,message} from 'antd'
+
+export const GlobalContext = createContext<any>(null)
 function App() {
   const [_,contextHolder] = Modal.useModal()
   const [messageApi,contextHolderMsg] = message.useMessage();
@@ -12,7 +14,7 @@ function App() {
     
   }
 
-  const warningMsg = (message: string) => {
+  const warningMsg = (message: string="warning") => {
     messageApi.open({
       type: 'warning',
       content: message,
@@ -33,8 +35,11 @@ function App() {
   };
   return (
     <AuthProvider>
-      <Router />
-      {contextHolder}
+     <GlobalContext.Provider value={{warningMsg,errorMsg,successMsg}}>
+        <Router />
+        {contextHolder}
+        {contextHolderMsg}
+     </GlobalContext.Provider>
     </AuthProvider>
   )
 }
