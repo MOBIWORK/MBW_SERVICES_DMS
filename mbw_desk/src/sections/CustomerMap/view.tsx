@@ -53,7 +53,7 @@ function CustomerMapView() {
     renderClusterMap();
   }, [lstCustomer]);
   useEffect(() => {
-    if (mapConfig != null && mapConfig.length > 0) addLayerIndustry();
+    //if (mapConfig != null && mapConfig.length > 0) addLayerIndustry();
   }, [mapConfig]);
 
   const getConfigApi = async () => {
@@ -81,6 +81,7 @@ function CustomerMapView() {
     // setLstCustomer(objRes.result);
   };
   const renderMap = () => {
+    console.log(apiKey);
     map.current = new maplibregl.Map({
       container: "map",
       center: [108.485, 16.449],

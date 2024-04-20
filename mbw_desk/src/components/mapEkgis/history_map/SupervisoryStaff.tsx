@@ -26,6 +26,7 @@ export default function SupervisoryStaff({options}) {
 
   useEffect(()=>{
     setLoadingPage(true);
+    setIndexTimeLine(null);
   }, [options])
 
   const handleClickItem = (indexItem) => {
