@@ -8,6 +8,8 @@ from frappe import _
 from mbw_dms.api.common import (
     exception_handle,
     gen_response,
+    get_employee_id,
+    get_value_child_doctype
 )
 from mbw_dms.api.validators import validate_not_none, validate_choice
 from mbw_dms.api import configs
@@ -91,8 +93,20 @@ def create_album(kwargs):
 @frappe.whitelist(methods="GET")
 def list_album():
     try:
-        album_image = frappe.db.get_list('DMS Album', fields=["name", "ma_album", "ten_album", "so_anh_toi_thieu", "trang_thai"])
-        gen_response(200, "Thành công", album_image)
+        employee_id = get_employee_id()
+        # album_image = frappe.db.get_list('DMS Album', fields=["name", "ma_album", "ten_album", "so_anh_toi_thieu", "trang_thai"])
+        DMSAlbum = frappe.qb.DocType("DMS Album")
+        SalesPerson = frappe.qb.DocType("Sales Person")
+        Employee = frappe.qb.DocType('Employee')
+        MultiSale = frappe.qb.DocType('MultiPerson')
+        query = (frappe.qb.from_(MultiSale)
+                              .inner_join(DMSAlbum)
+                              .on(DMSAlbum.name == MultiSale.parent)
+                              .inner_join(SalesPerson)
+                              .on(MultiSale.nhom_ban_hang == SalesPerson.parent_sales_person)
+                              .where(SalesPerson.employee == employee_id)
+                              .select(DMSAlbum.ma_album, DMSAlbum.ten_album, DMSAlbum.so_anh_toi_thieu, DMSAlbum.trang_thai).run(as_dict=True))
+        gen_response(200, "Thành công", query)
     except Exception as e:
         return exception_handle(e)
     
