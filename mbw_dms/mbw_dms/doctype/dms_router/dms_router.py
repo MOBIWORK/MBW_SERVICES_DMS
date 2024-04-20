@@ -223,7 +223,8 @@ def create_router(body):
         is_has_travel_date = frappe.db.get_value("DMS Router",filters={
         "employee": body.get('employee'),
         "travel_date":body.get('travel_date'),
-        "status": "Active"
+        "status": "Active",
+        "is_deleted": 0
         })
         print("is_has_travel_date",is_has_travel_date,body.get("travel_date"))
 
@@ -268,7 +269,8 @@ def update_router(body):
             "employee": body.get('employee'),
             "travel_date":body.get('travel_date'),
             "status": "Active",
-            "name": ["!=",name]
+            "name": ["!=",name],
+            "is_deleted": 0
         },
         ["travel_date"]
         )
