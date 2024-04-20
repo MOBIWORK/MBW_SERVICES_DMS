@@ -15,5 +15,5 @@ def get_info(**kwarg):
 @frappe.whitelist(allow_guest=True)
 def get_setting_industrys():
     list_industrys = frappe.get_doc("DMS Settings").as_dict().industrys
-    list_industrys_name = pydash.map_(list_industrys,lambda x:x.ngang_hang)
+    list_industrys_name = pydash.map_(list_industrys,lambda x:x.industry_type)
     return list_industrys_name
