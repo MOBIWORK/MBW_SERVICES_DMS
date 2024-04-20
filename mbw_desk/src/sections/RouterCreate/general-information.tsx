@@ -91,7 +91,7 @@ export default memo(function GeneralInformation({form}:{form :any}) {
     })()
   },[teamSale,seachbykey])
   return (
-    <div className="p-4 pt-[43px] pb-[58px]">
+    <div className="p-4 pb-[58px]">
       <RowCustom>
         <Col span={12}>
           <FormItemCustom label="Mã tuyến" name="channel_code" required>

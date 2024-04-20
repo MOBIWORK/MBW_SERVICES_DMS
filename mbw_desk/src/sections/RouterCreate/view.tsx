@@ -49,8 +49,7 @@ export default function RouterCreate() {
       navigate('/router-control')
     } catch (err:any) {
       console.error(err);
-      errorMsg()
-      // error(err||'Something was wrong')
+      errorMsg(typeof err == 'string' ? err : err.toString())
     }
   },[customerRouter])
 

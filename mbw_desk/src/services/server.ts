@@ -15,10 +15,8 @@ if (import.meta.env.VITE_BASE_URL) {
       return config;
     },
     function (error) {
-      console.log(error);
-      
       // Do something with request error
-      return Promise.reject(error?.response?.data?.message || error);
+      return Promise.reject(error?.response?.data?.message || error?.response || error);
     }
   );
   
@@ -30,11 +28,9 @@ AxiosService.interceptors.response.use(
     return response.data;
   },
   function (error) {
-    console.log(error);
-
     // Any status codes that falls outside the range of 2xx cause this function to trigger
     // Do something with response error
-    return Promise.reject(error?.response?.data?.message || error);
+    return Promise.reject(error?.response?.data?.message || error?.response?.data?.exception || error);
   }
 );
 

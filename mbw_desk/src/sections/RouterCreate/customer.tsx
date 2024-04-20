@@ -91,7 +91,7 @@ export default memo(function Customer() {
 
   return (
     <>
-      <Row gutter={16} className={"justify-between p-4 pb-5 pt-10 mt-0"}>
+      <Row gutter={16} className={"justify-between p-4 pb-5 mt-0"}>
         <Col className="flex-1">
           <Row gutter={8}>
             <Col span={6} className="text-[#1677ff]">

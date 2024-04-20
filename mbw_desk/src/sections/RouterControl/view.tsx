@@ -6,8 +6,8 @@ import { LuUploadCloud } from "react-icons/lu";
 import { LiaDownloadSolid } from "react-icons/lia";
 import { LuFilter, LuFilterX } from "react-icons/lu";
 import { PiSortAscendingBold, PiSortDescendingBold } from "react-icons/pi";
-import { Button, Select, Row, Col, Dropdown, Modal, message } from "antd";
-import React, { useCallback, useEffect, useState } from "react";
+import { Button, Select, Row, Col, Dropdown, Modal, message, TreeSelect } from "antd";
+import React, { useCallback, useContext, useEffect, useState } from "react";
 import { FormItemCustom } from "../../components/form-item";
 import { DropDownCustom, HeaderPage, TableCustom, } from "../../components";
 import { rsData, rsDataFrappe } from "../../types/response";
@@ -22,6 +22,7 @@ import { orderFields } from "./data";
 import { useForm } from "antd/lib/form/Form";
 import { MdKeyboardArrowDown } from "react-icons/md";
 import { router } from "../../types/router";
+import { GlobalContext } from "@/App";
 // ----------------------------------------------------------------------
 
 const columns = [
@@ -39,7 +40,7 @@ const columns = [
     title: "NVBH",
     dataIndex: "employee_name",
     key: "employee_name",
-    render: (value,record) => `${record?.employee}-${record?.employee_name}`
+    render: (value, record) => `${record?.employee}-${record?.employee_name}`
   },
   {
     title: "Trạng thái",
@@ -69,11 +70,11 @@ const columns = [
     title: "Người cập nhật",
     dataIndex: "modified_by",
     key: "modified_by"
-  },{
-  title: "Khách hàng",
-  dataIndex: "count_customer",
-  key: "count_customer"
-},
+  }, {
+    title: "Khách hàng",
+    dataIndex: "count_customer",
+    key: "count_customer"
+  },
 ];
 
 
@@ -81,9 +82,10 @@ const columns = [
 export default function RouterControl() {
   const navigate = useNavigate();
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
+  const {warningMsg,errorMsg,successMsg} = useContext(GlobalContext)
   const [form] = useForm()
   const [keyS, setKeyS] = useState<string | false>("");
-  const [isdeletedField,setDelete] = useState<boolean>(false)
+  const [isdeletedField, setDelete] = useState<boolean>(false)
   const [keySRouter, setKeySRouter] = useState("");
   let keySearch = useDebounce(keyS, 500);
   let keySearchRouter = useDebounce(keySRouter, 500);
@@ -97,12 +99,12 @@ export default function RouterControl() {
   const [routersTable, setRouterTable] = useState<any[]>([])
   const [total, setTotal] = useState<number>(0)
   const [filter, setFilter] = useState({})
+  const [listSales, setListSales] = useState<any[]>([]);
   const [orderBy, setOrder] = useState<"desc" | "asc">("desc")
   const [orderField, setOrderField] = useState<any>({
     "label": "Thời gian cập nhật",
     "value": "modified"
   },)
-  const [messageApi, contextHolder] = message.useMessage();
   const [action, setAction] = useState<{
     isOpen: boolean,
     data: any,
@@ -113,19 +115,6 @@ export default function RouterControl() {
     action: false
   })
 
-  const success = () => {
-    messageApi.open({
-      type: 'success',
-      content: 'Cập nhật router thành công',
-    });
-  };
-
-  const error = () => {
-    messageApi.open({
-      type: 'error',
-      content: 'Cập nhật router thất bại',
-    });
-  }
   const onSelectChange = (newSelectedRowKeys: React.Key[]) => {
     // console.log("selectedRowKeys changed: ", newSelectedRowKeys);
     setSelectedRowKeys(newSelectedRowKeys);
@@ -150,7 +139,7 @@ export default function RouterControl() {
   ) => (option?.label ?? "").toLowerCase().includes(input.toLowerCase());
   useEffect(() => {
     console.log(keySearch);
-    
+
     (async () => {
       let rsEmployee: rsDataFrappe<employee[]> = await AxiosService.get(
         "/api/method/frappe.desk.search.search_link",
@@ -172,7 +161,7 @@ export default function RouterControl() {
         }))
       );
     })();
-  }, [keySearch,isdeletedField]);
+  }, [keySearch, isdeletedField]);
 
   useEffect(() => {
     (async () => {
@@ -225,30 +214,29 @@ export default function RouterControl() {
   }, [router, employee, status, page, filter, orderBy, orderField])
   const handleUpdate = useCallback(async (type: string, value: string) => {
     try {
-      let rsUpdate:rsData<router[]> =  await AxiosService.patch("/api/method/mbw_dms.api.router.update_routers", {
+      let rsUpdate: rsData<router[]> = await AxiosService.patch("/api/method/mbw_dms.api.router.update_routers", {
         name: selectedRowKeys,
         [type]: value
       })
-      success()
-      setRouterTable(prev =>{
+      successMsg("Cập nhật router thành công")
+      setRouterTable(prev => {
         let arrNameUpdate = rsUpdate.result.map(rt => rt.name)
         const routerNotUpdate = prev.filter(router => !arrNameUpdate.includes(router.name))
-        
-        return  [...rsUpdate.result,...routerNotUpdate].filter(vl => !vl.is_deleted)
+
+        return [...rsUpdate.result, ...routerNotUpdate].filter(vl => !vl.is_deleted)
       })
       setAction({
-        isOpen:false,
+        isOpen: false,
         action: false,
         data: null
       })
     } catch (err) {
-      error()
+      errorMsg("Cập nhật router thất bại")
     }
   }, [selectedRowKeys])
-  
+
   return (
     <>
-    {contextHolder}
       <HeaderPage
         title="Quản lý tuyến"
         buttons={[
@@ -281,24 +269,30 @@ export default function RouterControl() {
               dropdownRender={(menu) => (
                 <DropDownCustom >
                   <div className="-m-2">
-                    <div className="py-2 px-4 cursor-pointer hover:bg-[#f5f5f5] w-[168px]" 
-                    onClick={setAction.bind(null,{isOpen: true, action:"Khoá",data: {
-                        type: "status",
-                        value:"Lock"
-                      }})
-                    }
+                    <div className="py-2 px-4 cursor-pointer hover:bg-[#f5f5f5] w-[168px]"
+                      onClick={setAction.bind(null, {
+                        isOpen: true, action: "Khoá", data: {
+                          type: "status",
+                          value: "Lock"
+                        }
+                      })
+                      }
                     >Khóa tuyến</div>
-                    <div className="py-2 px-4 cursor-pointer hover:bg-[#f5f5f5] w-[168px]" onClick={setAction.bind(null,{isOpen: true, action:"Khoá",data: {
+                    <div className="py-2 px-4 cursor-pointer hover:bg-[#f5f5f5] w-[168px]" onClick={setAction.bind(null, {
+                      isOpen: true, action: "Khoá", data: {
                         type: "status",
-                        value:"Active"
-                      }})
+                        value: "Active"
+                      }
+                    })
                     }>Mở tuyến </div>
                     <div className="py-2 px-4 cursor-pointer hover:bg-[#f5f5f5] w-[168px]"
-                    onClick={setAction.bind(null,{isOpen: true, action:"Khoá",data: {
-                      type: "is_deleted",
-                      value:"set"
-                    }})
-                  }
+                      onClick={setAction.bind(null, {
+                        isOpen: true, action: "Khoá", data: {
+                          type: "is_deleted",
+                          value: "set"
+                        }
+                      })
+                      }
                     >Xóa Tuyến</div>
                   </div>
                 </DropDownCustom>
@@ -317,7 +311,8 @@ export default function RouterControl() {
               <Row className="justify-between w-full  px-4">
                 <Col span={14} className="hidden lg:block">
                   <Row gutter={8}>
-                    <Col span={8}>
+                    {/* bộ lọc tuyến  */}
+                    <Col span={6}>
                       <FormItemCustom name="router">
                         <Select
                           // labelInValue
@@ -347,7 +342,8 @@ export default function RouterControl() {
                         />
                       </FormItemCustom>
                     </Col>
-                    <Col span={8}>
+                    {/* lọc nhân viên cũ */}
+                    {/* <Col span={8}>
                       <FormItemCustom name="employee">
                         <Select                          
                           placeholder="Tất cả nhân viên"
@@ -369,21 +365,56 @@ export default function RouterControl() {
                           
                         />
                       </FormItemCustom>
+                    </Col> */}
+                    {/* lọc nhân viên mới */}
+                    <Col span={6}>
+                      <FormItemCustom className="w-full border-none mr-2">
+                        <TreeSelect
+                          showSearch
+                          placeholder="Nhóm bán hàng"
+                          allowClear
+                          treeData={[
+                            ...listSales,
+                          ]}
+                          onChange={(value: string) => {
+                            // setTeamSale(value);
+                          }}
+                        />
+                      </FormItemCustom>
                     </Col>
-                    <Col span={8}>
+
+                   <Col span={6}>
+                      <FormItemCustom className="w-full border-none mr-2">
+                        <Select
+                          className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
+                          options={[
+                            ...listEmployees,
+                          ]}
+                          showSearch
+                          placeholder="Nhân viên chăm sóc"
+                          defaultValue={""}
+                          notFoundContent={null}
+                          // onSearch={setKeySearch4}
+                          onChange={(value) => {
+                            setEmployee(value);
+                          }}
+                          allowClear
+                        />
+                      </FormItemCustom>
+                   </Col>
+                    {/* lọc trạng thái */}
+                    <Col span={6}>
                       <FormItemCustom className="w-[150px] border-none">
                         <Select
                           className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
                           optionFilterProp="children"
+                          placeholder="Trạng thái"
                           onChange={onChange}
                           onSearch={onSearch}
                           filterOption={filterOption}
+                          onClear={() => setStatus(undefined)}
                           defaultValue=""
                           options={[
-                            {
-                              value: "",
-                              label: "Trạng thái",
-                            },
                             {
                               value: "Active",
                               label: "Hoạt động",
@@ -393,6 +424,7 @@ export default function RouterControl() {
                               label: "Khóa",
                             },
                           ]}
+                          allowClear
                         />
                       </FormItemCustom>
                     </Col>
@@ -421,7 +453,7 @@ export default function RouterControl() {
                         <LuFilterX style={{ fontSize: "20px" }} />
                       </Button>
                     </div>
-                   
+
                   </div>
                 </Col>
               </Row>
@@ -431,10 +463,12 @@ export default function RouterControl() {
                   <TableCustom
                     rowSelection={rowSelection}
                     onRow={(record, rowIndex) => {
-                      return {onClick:(event) => {
-                        console.log(record);
-                        navigate(`/dms-router/${record?.name}`)
-                      }}
+                      return {
+                        onClick: (event) => {
+                          console.log(record);
+                          navigate(`/dms-router/${record?.name}`)
+                        }
+                      }
                     }}
                     columns={columns}
                     dataSource={routersTable?.map(router => ({ key: router.name, ...router }))}
@@ -457,10 +491,10 @@ export default function RouterControl() {
         data: null,
         action: false
       })}
-      cancelText="Huỷ"
-      okText="Đồng ý"
-      onOk={handleUpdate.bind(null,action.data?.type,action.data?.value)}
-      title={`${action.action} tuyến`}
+        cancelText="Huỷ"
+        okText="Đồng ý"
+        onOk={handleUpdate.bind(null, action.data?.type, action.data?.value)}
+        title={`${action.action} tuyến`}
       >
         <span>
           {action.action} {selectedRowKeys.length} đã chọn ?
