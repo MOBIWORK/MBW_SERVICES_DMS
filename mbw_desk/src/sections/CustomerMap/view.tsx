@@ -3,8 +3,7 @@ import { HeaderPage } from "../../components";
 import maplibregl from "maplibre-gl";
 import { AxiosService } from "../../services/server";
 import "./map_customer.css";
-import { Checkbox } from "antd";
-import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
+import MapConfigTree from "./mapConfig_tree";
 
 declare var ekmapplf: any;
 
@@ -26,41 +25,20 @@ function CustomerMapView() {
   const [lstCustomer, setLstCustomer] = useState<TypeCustomer[]>([]);
   const map = useRef(null);
   const [isOpen, setIsOpen] = useState(false);
-  const [isOpenLayers, setIsOpenLayers] = useState(
-    Array(mapConfig.length).fill(false)
-  );
-  const [isOpenChildLayers, setIsOpenChildLayers] = useState(mapConfig.map(item => Array(item.children.length).fill(false)));
-
-  const [isOpenCheckBox, setIsOpenCheckBox] = useState(true);
-  const [defaultCheckboxStates, setDefaultCheckboxStates] = useState([]);
 
   const toggleLegend = () => {
     setIsOpen(!isOpen);
   };
-  const toggleLegendlayers = (index: any) => {
-    const newIsOpenLayers = [...isOpenLayers];
-    newIsOpenLayers[index] = !newIsOpenLayers[index];
-    setIsOpenLayers(newIsOpenLayers);
-  };
-  const toggleChildLayers = (childIndex:any) => {
-    const updatedOpenChildLayers = [...isOpenChildLayers];
-    updatedOpenChildLayers[childIndex] = !updatedOpenChildLayers[childIndex];
-    setIsOpenChildLayers(updatedOpenChildLayers);
-  };
-  
-  const toggleLegendCheckbox = () => {
-    setIsOpenCheckBox(!isOpenCheckBox);
-    toggleCustomerLayersVisibility();
-  };
 
-  const toggleCustomerLayersVisibility = () => {
-    const visibility = isOpenCheckBox ? "none" : "visible";
-    map.current.getStyle().layers.forEach((layer) => {
-      if (layer.id.includes("customer")) {
-        map.current.setLayoutProperty(layer.id, "visibility", visibility);
-      }
-    });
-  };
+  //movelayer
+  // const toggleCustomerLayersVisibility = () => {
+  //   const visibility = isOpenCheckBox ? "none" : "visible";
+  //   map.current.getStyle().layers.forEach((layer) => {
+  //     if (layer.id.includes("customer")) {
+  //       map.current.setLayoutProperty(layer.id, "visibility", visibility);
+  //     }
+  //   });
+  // };
 
   useEffect(() => {
     getConfigApi();
@@ -75,7 +53,7 @@ function CustomerMapView() {
     renderClusterMap();
   }, [lstCustomer]);
   useEffect(() => {
-    // addLayerIndustry();
+    if (mapConfig != null && mapConfig.length > 0) addLayerIndustry();
   }, [mapConfig]);
 
   const getConfigApi = async () => {
@@ -85,294 +63,11 @@ function CustomerMapView() {
     setApiKey(res.result);
   };
   const getConfigMap = async () => {
+
     let res = await AxiosService.get(
-      "/api/method/mbw_dms.api.vgm.map_customer.get_config_map?type_industry=fertilizer_store"
+      "/api/method/mbw_dms.api.vgm.map_customer.get_config_map"
     );
-    //let configMap = [];
-    let configMapTem = [
-      {
-        'id': "fertilizer_store",
-        'group': true,
-        'label': "Cửa hàng phân bón",
-        'visible': true,
-        'children': [
-          {
-            "id": "fertilizer_store_symbol",
-            "label": "Cửa hàng phân bón",
-            "sources": {
-              "vector_fertilizer_store": {
-                "maxzoom": 14,
-                "type": "vector",
-                "tiles": [
-                  "https://api.ekgis.vn/datasetquery/fertilizer_store/vector/tile/{z}/{x}/{y}.pdf?api_key=MVmxkcu8F2QYTuL3hWiNfzsLhUsdGBsFmqaDTnuX"
-                ]
-              }
-            },
-            "layers": [
-              {
-                "id": "vector_fertilizer_store",
-                "type": "circle",
-                "source": "vector_fertilizer_store",
-                "source-layer": "hits",
-                "minzoom": 4,
-                "paint": {
-                  "circle-color": "blue",
-                  "circle-radius": 4
-                }
-              },
-              {
-                "id": "vector_fertilizer_store_label",
-                "type": "symbol",
-                "source": "vector_fertilizer_store",
-                "source-layer": "hits",
-                "minzoom": 12,
-                "layout": {
-                  "text-anchor": "top",
-                  "text-field": "{name}",
-                  "text-font": [
-                    "Roboto Medium"
-                  ],
-                  "text-max-width": 9,
-                  "text-padding": 2,
-                  "text-size": {
-                    "stops": [
-                      [
-                        17,
-                        13
-                      ],
-                      [
-                        20,
-                        14
-                      ]
-                    ]
-                  },
-                  "visibility": "visible",
-                  "text-offset": [
-                    0,
-                    1
-                  ]
-                },
-                "paint": {
-                  "text-color": "blue",
-                  "text-halo-blur": 0.5,
-                  "text-halo-color": "#ffffff",
-                  "text-halo-width": 1
-                }
-              }
-            ],
-            "visible": false,
-            "type": "symbol",
-            "legend": null
-          }, {
-            "id": "fertilizer_store_heatmap",
-            'label': "Cửa hàng tap hoa",
-            "sources": {
-              "vector_fertilizer_store": {
-                "maxzoom": 14,
-                "type": "vector",
-                "tiles": [
-                  "https://api.ekgis.vn/datasetquery/fertilizer_store/vector/tile/{z}/{x}/{y}.pdf?api_key=MVmxkcu8F2QYTuL3hWiNfzsLhUsdGBsFmqaDTnuX"
-                ]
-              },
-              "fertilizer_store_heatmap": {
-                "maxzoom": 14,
-                "type": "vector",
-                "tiles": [
-                  "https://api.ekgis.vn/datasetquery/fertilizer_store/heatmap/tile/{z}/{x}/{y}.pdf?api_key=MVmxkcu8F2QYTuL3hWiNfzsLhUsdGBsFmqaDTnuX"
-                ]
-              }
-            },
-            "layers": [
-              {
-                "id": "heatmap_fertilizer_store_heatmap",
-                "type": "heatmap",
-                "source": "fertilizer_store_heatmap",
-                "source-layer": "aggs",
-                "minzoom": 4,
-                "maxzoom": 14,
-                "paint": {
-                  "heatmap-weight": [
-                    "get",
-                    "_count"
-                  ],
-                  "heatmap-intensity": [
-                    "interpolate",
-                    [
-                      "linear"
-                    ],
-                    [
-                      "zoom"
-                    ],
-                    0,
-                    1,
-                    9,
-                    3
-                  ],
-                  "heatmap-radius": [
-                    "interpolate",
-                    [
-                      "linear"
-                    ],
-                    [
-                      "zoom"
-                    ],
-                    4,
-                    3,
-                    9,
-                    4
-                  ],
-                  "heatmap-color": [
-                    "interpolate",
-                    [
-                      "linear"
-                    ],
-                    [
-                      "heatmap-density"
-                    ],
-                    0,
-                    "rgba(0, 0, 255, 0)",
-                    0.1,
-                    "rgb(65, 105, 225)",
-                    0.28,
-                    "rgb(0, 256, 256)",
-                    0.45999999999999999,
-                    "rgb(0, 256, 0)",
-                    0.64,
-                    "rgb(256, 256, 0)",
-                    0.82,
-                    "rgb(256, 0, 0)"
-                  ],
-                  "heatmap-opacity": 0.7
-                }
-              }, {
-                "id": "vector_fertilizer_store",
-                "type": "circle",
-                "source": "vector_fertilizer_store",
-                "source-layer": "hits",
-                "minzoom": 14,
-                "paint": {
-                  "circle-color": "blue",
-                  "circle-radius": 4
-                }
-              },
-              {
-                "id": "vector_fertilizer_store_label",
-                "type": "symbol",
-                "source": "vector_fertilizer_store",
-                "source-layer": "hits",
-                "minzoom": 14,
-                "layout": {
-                  "text-anchor": "top",
-                  "text-field": "{name}",
-                  "text-font": [
-                    "Roboto Medium"
-                  ],
-                  "text-max-width": 9,
-                  "text-padding": 2,
-                  "text-size": {
-                    "stops": [
-                      [
-                        17,
-                        13
-                      ],
-                      [
-                        20,
-                        14
-                      ]
-                    ]
-                  },
-                  "visibility": "visible",
-                  "text-offset": [
-                    0,
-                    1
-                  ]
-                },
-                "paint": {
-                  "text-color": "blue",
-                  "text-halo-blur": 0.5,
-                  "text-halo-color": "#ffffff",
-                  "text-halo-width": 1
-                }
-              }
-            ],
-            "visible": false,
-            "type": "heatmap",
-            "legend": null
-          }
-        ]
-      }, {
-        'id': "demographic",
-        'group': true,
-        'visible': false,
-        'label': "Quy hoạch đất đai",
-        'children': [
-          {
-            'id': "landuse_raster",
-            'label': "Quy hoạch sử dụng đất",
-            'sources': {
-              "landuse_raster": {
-                "type": "raster",
-                "tileSize": 256,
-                "maxzoom": 16,
-                "tiles": [
-                  "https://api.ekgis.vn/v2/maps/raster/landuse/{z}/{x}/{y}.png?api_key=MVmxkcu8F2QYTuL3hWiNfzsLhUsdGBsFmqaDTnuX"
-                ]
-              }
-            },
-            'layers': [
-              {
-                "id": "landuse_raster",
-                "type": "raster",
-                "source": "landuse_raster",
-                "maxzoom": 22,
-                "paint": {
-                  "raster-opacity": 0.5
-                }
-              }
-            ],
-            "visible": false,
-            "legend": "https://bandobatdongsan.ekgis.vn/assets/image/QHSDD_legend.png"
-          },
-          {
-            'id': "zoning_raster",
-            'label': "Bản đồ Quy hoạch xây dựng cấp quy hoạch phân khu",
-            'sources': {
-              "zoning_raster": {
-                "type": "raster",
-                "tileSize": 256,
-                "maxzoom": 16,
-                "tiles": [
-                  "https://api.ekgis.vn/v2/maps/raster/zoning/{z}/{x}/{y}.png?api_key=MVmxkcu8F2QYTuL3hWiNfzsLhUsdGBsFmqaDTnuX"
-                ]
-              }
-            },
-            'layers': [
-              {
-                "id": "zoning_raster",
-                "type": "raster",
-                "source": "zoning_raster",
-                "maxzoom": 22,
-                "paint": {
-                  "raster-opacity": 0.5
-                }
-              }
-            ],
-            "visible": false,
-            "legend": "https://bandobatdongsan.ekgis.vn/assets/image/QHPK_legend.png"
-          }
-        ]
-      }
-    ]
-    // configMapTem.unshift({
-    //   'id': "customer",
-    //   'group': false,
-    //   'label': "Vị trí khách hàng",
-    //   'visible': true,
-    //   'children': [],
-    //   // 'legend': "/public/check-icon.png"
-    // });
-    setMapConfig(configMapTem);
-    // setMapConfig(res.result);
+    setMapConfig(res.result);
   };
   const getLstCustomer = async () => {
     let res = await AxiosService.get(
@@ -637,81 +332,63 @@ function CustomerMapView() {
       });
     }
   }
-  const addLayerIndustry = () => {
-    console.log(mapConfig, 'mapConfig');
-
-    mapConfig.forEach((config) => {
-      const sources = config.sources;
-      const layers = config.layers;
-
-      for (let propertySource in sources) {
-        if (!map.current.getSource(propertySource)) {
-          map.current.addSource(propertySource, sources[propertySource]);
-        }
+  const addLayerIndustry = (checkedKeys: React.Key[]) => {
+    mapConfig.forEach((group) => {
+      //group
+      if(group.group){
+        group.children.forEach((child) => {
+          const sources = child.sources;
+          const layers = child.layers;
+  
+          for (let propertySource in sources) {
+            if (!map.current.getSource(propertySource)) {
+              map.current.addSource(propertySource, sources[propertySource]);
+            }
+          }
+          layers.forEach((layer) => {
+            if (!map.current.getLayer(layer.id)) {
+              map.current.addLayer(layer);
+            }
+            const visibility = child.visible ? 'visible' : 'none';
+            map.current.setLayoutProperty(layer.id, 'visibility', visibility);
+          });
+        });
+      }else{
+        group.forEach((child) => {
+          const sources = child.sources;
+          const layers = child.layers;
+  
+          for (let propertySource in sources) {
+            if (!map.current.getSource(propertySource)) {
+              map.current.addSource(propertySource, sources[propertySource]);
+            }
+          }
+          layers.forEach((layer) => {
+            if (!map.current.getLayer(layer.id)) {
+              map.current.addLayer(layer);
+            }
+            const visibility = child.visible ? 'visible' : 'none';
+            map.current.setLayoutProperty(layer.id, 'visibility', visibility);
+          });
+        });
       }
-
-      layers.forEach((layer) => {
-        // Kiểm tra xem layer đã tồn tại trên bản đồ chưa
-        if (!map.current.getLayer(layer.id)) {
-          map.current.addLayer(layer);
-        }
-      });
-
-      const visibility = config.visible ? "visible" : "none";
-      layers.forEach((layer) => {
-        map.current.setLayoutProperty(layer.id, "visibility", visibility);
-      });
     });
   };
+  
+  const handleCheck = (checkedKeys: React.Key[]) => {
+    mapConfig.forEach((group) => {
+        group.children.forEach((child) => {
+            const layers = child.layers;
 
-  const handleCheckboxChange = (index: any) => {
-    const newCheckboxStates = [...defaultCheckboxStates];
-    newCheckboxStates[index] = !newCheckboxStates[index];
-    setDefaultCheckboxStates(newCheckboxStates);
-    mapConfig.forEach((config, i) => {
-      const layers = config.layers;
-      const visibility = newCheckboxStates[i] ? "visible" : "none";
-      layers.forEach((layer) => {
-        map.current.setLayoutProperty(layer.id, "visibility", visibility);
-      });
+            layers.forEach((layer) => {
+                const isVisible = checkedKeys.includes(layer.id);
+                const visibility = isVisible ? 'visible' : 'none';
+                map.current.setLayoutProperty(layer.id, 'visibility', visibility);
+            });
+        });
     });
-  };
-  useEffect(() => {
-    setDefaultCheckboxStates(mapConfig.map((item) => item.visible));
-  }, [mapConfig]);
+};
 
-  const [items, setItems] = useState([
-    { id: "1", content: "Item 1" },
-    { id: "2", content: "Item 2" },
-    { id: "3", content: "Item 3" },
-  ]);
-  const onDragEnd = (result: any) => {
-    if (!result.destination) return;
-
-    const reorderedItems = Array.from(items);
-    const [reorderedItem] = reorderedItems.splice(result.source.index, 1);
-    reorderedItems.splice(result.destination.index, 0, reorderedItem);
-
-    setItems(reorderedItems);
-  };
-  const handleOnDragEnd = (result: any) => {
-    if (!result.destination) return;
-
-    const reorderedItems = Array.from(mapConfig);
-    const [reorderedItem] = reorderedItems.splice(result.source.index, 1);
-    reorderedItems.splice(result.destination.index, 0, reorderedItem);
-
-    setMapConfig(reorderedItems);
-    reorderedItems.forEach((config, index) => {
-      config.layers.forEach((layer) => {
-        // Sử dụng moveLayer để di chuyển lớp layer
-        const beforeId = reorderedItems[index + 1] ? reorderedItems[index + 1].layers[0].id : undefined;
-        map.current.moveLayer(layer.id, beforeId);
-      });
-    });
-    const newCheckboxStates = reorderedItems.map((item) => item.visible);
-    setDefaultCheckboxStates(newCheckboxStates);
-  };
   return (
     <>
       <HeaderPage title="Bản đồ khách hàng" />
@@ -719,188 +396,16 @@ function CustomerMapView() {
         id="map"
         style={{ width: "100%", height: "80vh", borderRadius: "20px" }}
       >
-        <div
-          id="ekmapplf_tracking_legend"
-          className="ekmapplf_tracking-map-legend"
-        >
-          <div
-            className="ekmapplf_tracking-legend-title"
-            onClick={toggleLegend}
-          >
-            <span
-              className={`icon ${isOpen
-                ? "ekmapplf_tracking-icon-square-minus"
-                : "ekmapplf_tracking-icon-square-plus"
-                }`}
-              style={{
-                filter:
-                  "invert(100%) sepia(100%) saturate(0%) hue-rotate(187deg) brightness(105%) contrast(103%)",
-              }}
-            ></span>
-            <span>Chú giải bản đồ</span>
-          </div>
-          <DragDropContext onDragEnd={handleOnDragEnd}>
-            <div
-              className={`ekmapplf_tracking-legend-body ${isOpen ? "open" : ""
-                }`}
-              style={{ maxHeight: isOpen ? "none" : "0" }}
-            >
-              <Droppable droppableId="droppable-list-map">
-                {(provided: any) => (
-                  <ul {...provided.droppableProps} ref={provided.innerRef}>
-                    <li>
-                      <Checkbox
-                        checked={isOpenCheckBox}
-                        onChange={toggleLegendCheckbox}
-                      />
-                      <span
-                        className="ekmapplf_tracking-legend-icon"
-                        style={{ backgroundImage: `url('/checking.png')` }}
-                      ></span>
-                      Vị trí khách hàng
-                    </li>
-                    {mapConfig.map((item, index) => {
-
-                      return (
-                        <div>
-                          <Draggable
-                            key={item.id}
-                            draggableId={item.id}
-                            index={index}
-                          >
-                            {(provided: any) => (
-                              <li key={index} ref={provided.innerRef}
-                                {...provided.draggableProps}
-                                {...provided.dragHandleProps}>
-                                <span>
-                                  <Checkbox
-                                  // checked={defaultCheckboxStates[index]}
-                                  // onChange={() => handleCheckboxChange(index)}
-                                  />
-                                </span>
-                                <div
-                                  className="ekmapplf_tracking-legend-title-layers"
-                                  onClick={() => toggleLegendlayers(index)}
-                                >
-                                  <span
-                                    className={`icon ${isOpenLayers[index]
-                                      ? "ekmapplf_tracking-icon-square-minus"
-                                      : "ekmapplf_tracking-icon-square-plus"
-                                      }`}
-                                    style={{ filter: "brightness(0%)" }}
-                                  ></span>
-                                </div>
-                                <span>{item.label}</span>
-                              </li>
-                            )}
-                          </Draggable>
-
-                          <DragDropContext onDragEnd={onDragEnd}>
-                            <div
-                              className={`ekmapplf_tracking-legend-body ${isOpenLayers[index] ? "open" : ""
-                                }`}
-                              style={{
-                                maxHeight: isOpenLayers[index] ? "none" : "0",
-                                marginLeft: "36px",
-                              }}
-                            >
-                              <Droppable droppableId="droppable-list">
-                                {(provided: any) => (
-                                  <ul
-                                    {...provided.droppableProps}
-                                    ref={provided.innerRef}
-                                  >
-                                    {item.children.map((child, childIndex) => (
-                                      <Draggable
-                                        key={child.id}
-                                        draggableId={child.id}
-                                        index={childIndex}
-                                      >
-                                        {(provided: any) => (
-
-                                          <li
-                                            ref={provided.innerRef}
-                                            {...provided.draggableProps}
-                                            {...provided.dragHandleProps}
-                                          >
-                                            <span>
-                                              <Checkbox
-                                              // checked={defaultCheckboxStates[index]}
-                                              // onChange={() => handleCheckboxChange(index)}
-                                              />
-                                            </span>
-                                            <div
-                                              className="ekmapplf_tracking-legend-title-layers"
-                                              onClick={() => toggleChildLayers( childIndex)}
-                                            >
-                                              <span
-                                                className={`icon ${isOpenChildLayers[childIndex]
-                                                  ? "ekmapplf_tracking-icon-square-minus"
-                                                  : "ekmapplf_tracking-icon-square-plus"
-                                                  }`}
-                                                style={{ filter: "brightness(0%)" }}
-                                              ></span>
-                                            </div>
-                                            <span>{child.label}</span>
-                                          </li>
-                                        )}
-                                      </Draggable>
-
-                                    ))}
-                                    <DragDropContext onDragEnd={onDragEnd}>
-                                      <div
-                                        className={`ekmapplf_tracking-legend-body ${isOpenChildLayers[index] ? "open" : ""
-                                          }`}
-                                        style={{
-                                          maxHeight: isOpenChildLayers[index] ? "none" : "0",
-                                          marginLeft: "36px",
-                                        }}
-                                      >
-                                        <Droppable droppableId="droppable-list">
-                                          {(provided: any) => (
-                                            <ul
-                                              {...provided.droppableProps}
-                                              ref={provided.innerRef}
-                                            >
-                                              {items.map((item, index) => (
-                                                <Draggable
-                                                  key={item.id}
-                                                  draggableId={item.id}
-                                                  index={index}
-                                                >
-                                                  {(provided: any) => (
-                                                    <li
-                                                      ref={provided.innerRef}
-                                                      {...provided.draggableProps}
-                                                      {...provided.dragHandleProps}
-                                                    >
-                                                      <span>{item.content}</span>
-                                                    </li>
-                                                  )}
-                                                </Draggable>
-                                              ))}
-                                              {provided.placeholder}
-                                            </ul>
-                                          )}
-                                        </Droppable>
-                                      </div>
-                                    </DragDropContext>
-                                    {provided.placeholder}
-                                  </ul>
-                                )}
-                              </Droppable>
-                            </div>
-                          </DragDropContext>
-                        </div>
-                      );
-                    })}
-                    {provided.placeholder}
-                  </ul>
-                )}
-              </Droppable>
+      <div id='ekmapplf_tracking_legend' className='ekmapplf_tracking-map-legend'>
+            <div className='ekmapplf_tracking-legend-title' onClick={toggleLegend}>
+                <span className={`icon ${isOpen ? 'ekmapplf_tracking-icon-square-minus' : 'ekmapplf_tracking-icon-square-plus'}`} style={{ filter: 'invert(100%) sepia(100%) saturate(0%) hue-rotate(187deg) brightness(105%) contrast(103%)' }}></span>
+                <span>Chú giải bản đồ</span>
             </div>
-          </DragDropContext>
+            <div className={`ekmapplf_tracking-legend-body ${isOpen ? 'open' : ''}`} style={{ maxHeight: isOpen ? 'none' : '0' }}>
+             <MapConfigTree mapConfig={mapConfig} onCheck={handleCheck}/>
+            </div>
         </div>
+
       </div>
     </>
   );
