@@ -10,7 +10,8 @@
   "ma_album",
   "ten_album",
   "so_anh_toi_thieu",
-  "trang_thai"
+  "trang_thai",
+  "nhom_ban_hang"
  ],
  "fields": [
   {
@@ -33,53 +34,59 @@
    "fieldtype": "Select",
    "label": "Tr\u1ea1ng th\u00e1i",
    "options": "Ho\u1ea1t \u0111\u1ed9ng\nKh\u00f4ng ho\u1ea1t \u0111\u1ed9ng"
+  },
+  {
+   "fieldname": "nhom_ban_hang",
+   "fieldtype": "Table MultiSelect",
+   "label": "Nh\u00f3m b\u00e1n h\u00e0ng",
+   "options": "MultiPerson"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-01-22 11:35:44.306361",
+ "modified": "2024-04-20 08:54:15.373765",
  "modified_by": "Administrator",
  "module": "MBW DMS",
  "name": "DMS Album",
  "owner": "Administrator",
  "permissions": [
-    {
-     "create": 1,
-     "delete": 1,
-     "email": 1,
-     "export": 1,
-     "print": 1,
-     "read": 1,
-     "report": 1,
-     "role": "System Manager",
-     "select": 1,
-     "share": 1,
-     "write": 1
-    },
-    {
-     "create": 1,
-     "delete": 1,
-     "email": 1,
-     "export": 1,
-     "print": 1,
-     "read": 1,
-     "report": 1,
-     "role": "Sales Manager",
-     "select": 1,
-     "share": 1,
-     "write": 1
-    },
-    {
-     "email": 1,
-     "export": 1,
-     "print": 1,
-     "read": 1,
-     "report": 1,
-     "role": "Sales User",
-     "select": 1,
-     "share": 1
-    }
-   ],
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "select": 1,
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales Manager",
+   "select": 1,
+   "share": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales User",
+   "select": 1,
+   "share": 1
+  }
+ ],
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": []
