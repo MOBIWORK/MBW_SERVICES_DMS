@@ -193,7 +193,7 @@ function CustomerMapView() {
       map.current.getSource('customer_clus').setData(dataGeo);
     } else {
       if (!map.current.getImage('marker-customer')) {
-        const iconCustomer = await map.current.loadImage("https://sfademo.mbwcloud.com/files/check-icon.png"); //https://sfademo.mbwcloud.com/files/check-icon.png
+        const iconCustomer = await map.current.loadImage("https://files.ekgis.vn/sdks/tracking/assets/check-icon.png"); //https://sfademo.mbwcloud.com/files/check-icon.png
         map.current.addImage('marker-customer', iconCustomer.data);
       }
       map.current.addSource('customer_clus', {
