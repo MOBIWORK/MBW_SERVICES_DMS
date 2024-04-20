@@ -272,7 +272,7 @@
    "is_query_report": 0,
    "label": "Album \u1ea3nh",
    "link_count": 0,
-   "link_to": "DMS Album Image",
+   "link_to": "DMS Album",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
@@ -318,8 +318,8 @@
    "type": "Link"
   }
  ],
- "modified": "2024-04-19 14:57:11.632038",
- "modified_by": "Administrator",
+ "modified": "2024-04-20 11:06:22.238829",
+ "modified_by": "tungda@mobiwork.vn",
  "module": "MBW DMS",
  "name": "DMS",
  "number_cards": [
