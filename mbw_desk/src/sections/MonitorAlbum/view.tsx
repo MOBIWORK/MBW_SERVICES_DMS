@@ -39,8 +39,8 @@ export default function MonitorAlbum() {
   const [listSales, setListSales] = useState<any[]>([]);
 
   const [keySearch4, setKeySearch4] = useState("");
-  const [team_sale, setTeamSale] = useState<string>();
   let seachbykey = useDebounce(keySearch4);
+  const [team_sale, setTeamSale] = useState<string>();
   const [album_name, setAlbumName] = useState<string>();
   const [modal, setModal] = useState<{
     open: boolean;

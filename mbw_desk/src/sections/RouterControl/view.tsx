@@ -23,6 +23,8 @@ import { useForm } from "antd/lib/form/Form";
 import { MdKeyboardArrowDown } from "react-icons/md";
 import { router } from "../../types/router";
 import { GlobalContext } from "@/App";
+import { treeArray } from "@/util";
+import { listSale } from "@/types/listSale";
 // ----------------------------------------------------------------------
 
 const columns = [
@@ -82,7 +84,7 @@ const columns = [
 export default function RouterControl() {
   const navigate = useNavigate();
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
-  const {warningMsg,errorMsg,successMsg} = useContext(GlobalContext)
+  const {errorMsg,successMsg} = useContext(GlobalContext)
   const [form] = useForm()
   const [keyS, setKeyS] = useState<string | false>("");
   const [isdeletedField, setDelete] = useState<boolean>(false)
@@ -101,10 +103,14 @@ export default function RouterControl() {
   const [filter, setFilter] = useState({})
   const [listSales, setListSales] = useState<any[]>([]);
   const [orderBy, setOrder] = useState<"desc" | "asc">("desc")
+  const [team_sale, setTeamSale] = useState<string>();
   const [orderField, setOrderField] = useState<any>({
     "label": "Thời gian cập nhật",
     "value": "modified"
   },)
+
+  const [keySearch4, setKeySearch4] = useState("");
+  let seachbykey = useDebounce(keySearch4);
   const [action, setAction] = useState<{
     isOpen: boolean,
     data: any,
@@ -235,6 +241,60 @@ export default function RouterControl() {
     }
   }, [selectedRowKeys])
 
+  //thêm nhóm bán hàng
+  useEffect(() => {
+    (async () => {
+      let rsSales: rsData<listSale[]> = await AxiosService.get(
+        "/api/method/mbw_dms.api.router.get_team_sale"
+      );
+      console.log(
+        "tree",
+        treeArray({
+          data: rsSales.result.map((team_sale: listSale) => ({
+            title: team_sale.name,
+            value: team_sale.name,
+            ...team_sale,
+          })),
+          keyValue: "value",
+          parentField: "parent_sales_person",
+        })
+      );
+
+      setListSales(
+        treeArray({
+          data: rsSales.result.map((team_sale: listSale) => ({
+            title: team_sale.name,
+            value: team_sale.name,
+            ...team_sale,
+          })),
+          keyValue: "value",
+          parentField: "parent_sales_person",
+        })
+      );
+    })();
+  }, []);
+
+  useEffect(() => {
+    (async () => {
+      let rsEmployee: rsDataFrappe<employee[]> = await AxiosService.get(
+        "/api/method/mbw_dms.api.router.get_sale_person",
+        {
+          params: {
+            team_sale: team_sale,
+            key_search: seachbykey,
+          },
+        }
+      );
+      let { message: results } = rsEmployee;
+      setListEmployees(
+        results.map((employee_filter: employee) => ({
+          value: employee_filter.employee_code,
+          label: employee_filter.employee_name || employee_filter.employee_code,
+        }))
+      );
+    })();
+  }, [team_sale, seachbykey]);
+
   return (
     <>
       <HeaderPage
@@ -342,30 +402,6 @@ export default function RouterControl() {
                         />
                       </FormItemCustom>
                     </Col>
-                    {/* lọc nhân viên cũ */}
-                    {/* <Col span={8}>
-                      <FormItemCustom name="employee">
-                        <Select                          
-                          placeholder="Tất cả nhân viên"
-                          showSearch
-                          filterOption={false}
-                          notFoundContent={null}
-                          allowClear
-                          onSearch={(value: string) => {
-                            setKeyS(value)
-                          }}
-                          options={listEmployees}
-                          onSelect={(value) => {
-                            setEmployee(value)
-                          }}
-                          onClear={()=> {
-                            setDelete(prev => !prev)
-                            setEmployee(undefined)
-                          }}
-                          
-                        />
-                      </FormItemCustom>
-                    </Col> */}
                     {/* lọc nhân viên mới */}
                     <Col span={6}>
                       <FormItemCustom className="w-full border-none mr-2">
@@ -373,12 +409,11 @@ export default function RouterControl() {
                           showSearch
                           placeholder="Nhóm bán hàng"
                           allowClear
-                          treeData={[
-                            ...listSales,
-                          ]}
+                          treeData={listSales}
                           onChange={(value: string) => {
-                            // setTeamSale(value);
+                            setTeamSale(value);
                           }}
+                          dropdownStyle={{ maxHeight: 400, overflow: 'auto', minWidth: 400 }}
                         />
                       </FormItemCustom>
                     </Col>
@@ -387,14 +422,12 @@ export default function RouterControl() {
                       <FormItemCustom className="w-full border-none mr-2">
                         <Select
                           className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
-                          options={[
-                            ...listEmployees,
-                          ]}
+                          options={listEmployees}
                           showSearch
                           placeholder="Nhân viên chăm sóc"
                           defaultValue={""}
                           notFoundContent={null}
-                          // onSearch={setKeySearch4}
+                          onSearch={setKeySearch4}
                           onChange={(value) => {
                             setEmployee(value);
                           }}
