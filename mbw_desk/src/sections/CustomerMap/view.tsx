@@ -1,10 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import { HeaderPage } from "../../components";
+import { ModalView } from "./view_modal/view_modal";
 import maplibregl from "maplibre-gl";
 import { AxiosService } from "../../services/server";
 import "./map_customer.css";
 import MapConfigTree from "./mapConfig_tree";
-
+import { Dropdown } from 'antd';
+import { DownOutlined } from '@ant-design/icons';
+import type { MenuProps } from 'antd';
 declare var ekmapplf: any;
 
 interface TypeCustomer {
@@ -20,6 +23,26 @@ interface TypeCustomer {
 }
 
 function CustomerMapView() {
+  const items: MenuProps['items'] = [
+    {
+      label: 'Đánh giá độ phủ đại lý',
+      key: '1',
+      onClick: ()=> {
+        setOpen(true);
+      }
+    },
+  ];
+  const [open, setOpen] = useState(false);
+
+
+  const handleCloseModal = () => {
+    setOpen(false);
+  };
+
+  const handleOk = () => {
+    console.log('Submitted');
+    setOpen(false);
+  };
   const [apiKey, setApiKey] = useState("");
   const [mapConfig, setMapConfig] = useState([]);
   const [lstCustomer, setLstCustomer] = useState<TypeCustomer[]>([]);
@@ -397,6 +420,16 @@ function CustomerMapView() {
         id="map"
         style={{ width: "100%", height: "80vh", borderRadius: "20px" }}
       >
+      <div className='ekmapplf_map-ananyltic'>
+      <Dropdown.Button
+        type="primary"
+        icon={<DownOutlined />}
+        menu={{ items }}
+      >
+        Công cụ phân tích
+      </Dropdown.Button>
+
+      </div>
       <div id='ekmapplf_tracking_legend' className='ekmapplf_tracking-map-legend'>
             <div className='ekmapplf_tracking-legend-title' onClick={toggleLegend}>
                 <span className={`icon ${isOpen ? 'ekmapplf_tracking-icon-square-minus' : 'ekmapplf_tracking-icon-square-plus'}`} style={{ filter: 'invert(100%) sepia(100%) saturate(0%) hue-rotate(187deg) brightness(105%) contrast(103%)' }}></span>
@@ -408,6 +441,12 @@ function CustomerMapView() {
         </div>
 
       </div>
+      <ModalView 
+       open={open}
+       title="Đánh giá độ phủ"
+       onCancel={handleCloseModal}
+       onOk={handleOk}>
+      </ModalView>
     </>
   );
 }
