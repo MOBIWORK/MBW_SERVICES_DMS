@@ -34,13 +34,14 @@ function App() {
     });
   };
   return (
-    <AuthProvider>
-     <GlobalContext.Provider value={{warningMsg,errorMsg,successMsg}}>
-        <Router />
-        {contextHolder}
-        {contextHolderMsg}
-     </GlobalContext.Provider>
-    </AuthProvider>
+    <Router />
+    // <AuthProvider>
+    //  <GlobalContext.Provider value={{warningMsg,errorMsg,successMsg}}>
+        
+    //     {contextHolder}
+    //     {contextHolderMsg}
+    //  </GlobalContext.Provider>
+    // </AuthProvider>
   )
 }
 

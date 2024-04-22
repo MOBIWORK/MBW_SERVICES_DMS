@@ -15,7 +15,7 @@
 }
 .custom-svg {
     width: 2rem; /* Kích thước tương đương với fontsize 16 */
-    height: 2rem; /* Kích thước tương đương với fontsize 16 */
+    height: 2.4rem; /* Kích thước tương đương với fontsize 16 */
     vertical-align: middle; /* Canh giữa dọc */
     fill: '#3b82f6'; /* Sử dụng màu của phần tử bao bọc (currentColor) */
   }

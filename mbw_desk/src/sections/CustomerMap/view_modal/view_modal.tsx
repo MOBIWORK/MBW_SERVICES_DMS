@@ -14,10 +14,19 @@ type Props = {
 };
 import { message, Steps, theme } from 'antd';
 export function ModalView ({ open, title, onCancel, onOk }: Props) {
+  const [scopeResult, setScopeResult] = useState(null);
+  const [industryResult, setIndustryResult] = useState(null);
+  const handleScopeResult = (result) => {
+    console.log(result);
+    setScopeResult(result);
+  };
+  const handleIndustryResult = (result) => {
+    setIndustryResult(result);
+  };
   const steps = [
     {
       title: 'Phạm vi đánh giá độ phủ đại lý',
-      content: <ScopeAnalysis></ScopeAnalysis>,
+      content: <ScopeAnalysis onResult={handleScopeResult} scopeResult={scopeResult}></ScopeAnalysis>,
     },
     {
       title: 'Ngành hàng đánh giá độ phủ',

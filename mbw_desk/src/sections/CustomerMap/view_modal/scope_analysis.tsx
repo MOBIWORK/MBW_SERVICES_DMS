@@ -8,15 +8,18 @@ import maplibregl from "maplibre-gl";
 
 import "./style.css";
 declare var ekmapplf: any;
-export function ScopeAnalysis() {
+export function ScopeAnalysis({ onResult,scopeResult }) {
   const [selectedOption, setSelectedOption] = useState("user1");
   const handleOptionChange = (value) => {
     setSelectedOption(value); // Cập nhật giá trị hiện tại của Segmented khi thay đổi lựa chọn
   };
+  console.log(scopeResult);
   const [mapConfig, setMapConfig] = useState([]);
   const [apiKey, setApiKey] = useState("");
   const [arrTinh, setArrTinh] = useState([]);
   const [selectTinh, setSelectTinh] = useState(null);
+  const [arrHuyen, setArrHuyen] = useState([]);
+  const [selectHuyen, setSelectHuyen] = useState(null);
   const arr_region = JSON.parse(ARR_REGIONSTR).map((item) => {
     return {
       ...item,
@@ -25,7 +28,7 @@ export function ScopeAnalysis() {
     };
   });
 
-  
+
   const filterOption = (input: string, option?: { label: string; value: string }) =>
   (option?.label ?? '').toLowerCase().includes(input.toLowerCase());
   const onChangeKhuvuc = (value) => {
@@ -45,7 +48,11 @@ export function ScopeAnalysis() {
             'zoom': 4.2
           })
     }
-    
+    let result = {
+        option : selectedOption,
+        khuvuc: value
+    }
+    onResult(result);
   }
  
    // Lấy mảng arrProvince từ đối tượng đầu tiên trong kết quả lọc
@@ -57,7 +64,7 @@ export function ScopeAnalysis() {
   }));
   setArrTinh(modifiedTinh)
   }
-  const onChangeTinh = (value) => {
+  const onChangeTinh = async (value) => {
     const filteredProvince = arrTinh.filter((item) => item.value === value)
     if(filteredProvince.length > 0){
         if (filteredProvince[0].bbox != null) {
@@ -70,9 +77,37 @@ export function ScopeAnalysis() {
         }
         
       }
-    setSelectTinh(value)
+   setSelectTinh(value)
+   let urlAPI_district = `https://api.ekgis.vn/data/administrative/province/${value}/district?api_key=${apiKey}`
+
+   let response = await fetch(urlAPI_district);
+   const data = await response.json();
+   if(data && data.length > 0 ) {
+    let dataHuyen = data.map((item) => ({
+        ...item,
+        value: item.districtid, // Thay đổi trường value thành item.code
+        label: item.name, // Thay đổi trường label thành item.name
+      }));
+    setArrHuyen(dataHuyen)
+   }
+   
 }
-const getConfigApi = async () => {
+const onChangeHuyen = (value) => {
+    const filteredDistrict= arrHuyen.filter((item) => item.value === value)
+    if(filteredDistrict.length > 0){
+        if (filteredDistrict[0].bbox != null) {
+            let bboxSplit = filteredDistrict[0].bbox.split(",");
+            let bbox = [
+              [Number(bboxSplit[0]), Number(bboxSplit[1])],
+              [Number(bboxSplit[2]), Number(bboxSplit[3])]
+            ];
+            map.current.fitBounds(bbox);
+        }
+        
+      }
+    setSelectHuyen(value)
+}
+const getConfigApi = async () => {  
     let res = await AxiosService.get(
       "/api/method/mbw_dms.api.vgm.map_customer.get_config_api"
     );
@@ -260,7 +295,7 @@ const renderMap = () => {
                   <Select showSearch placeholder="Chọn khu vực hành chính cấp tỉnh/thành phố" value={selectTinh} onChange={onChangeTinh} options={arrTinh} filterOption={filterOption}></Select>
                 </Form.Item>
                 <Form.Item  label="Đơn vị hành chính cấp huyện" name="huyen">
-                  <Select showSearch placeholder="Chọn khu vực hành chính cấp quận/huyện" filterOption={filterOption}></Select>
+                  <Select showSearch placeholder="Chọn khu vực hành chính cấp quận/huyện" onChange={onChangeHuyen} options={arrHuyen} filterOption={filterOption}></Select>
                 </Form.Item>
               </Form>
             </div>
