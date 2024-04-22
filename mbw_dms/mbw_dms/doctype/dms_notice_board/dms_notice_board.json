@@ -1,7 +1,7 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "NB.#####",
+ "autoname": "field:notice_title",
  "creation": "2023-10-12 10:27:12.760230",
  "default_view": "List",
  "doctype": "DocType",
@@ -16,6 +16,7 @@
   "priority_level",
   "apply_for",
   "employees",
+  "salesteams",
   "section_break_yeir6",
   "message",
   "employee_watched"
@@ -26,7 +27,8 @@
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Title",
-   "reqd": 1
+   "reqd": 1,
+   "unique": 1
   },
   {
    "fieldname": "description",
@@ -63,7 +65,7 @@
    "fieldname": "apply_for",
    "fieldtype": "Select",
    "label": "Apply to",
-   "options": "All Employee\nSpecific Employees"
+   "options": "All Employee\nSpecific Employees\nSpecific Salesteam"
   },
   {
    "depends_on": "eval:doc.apply_for == \"Specific Employees\"",
@@ -90,15 +92,23 @@
    "hidden": 1,
    "label": "Viewers",
    "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.apply_for == \"Specific Salesteam\"",
+   "fieldname": "salesteams",
+   "fieldtype": "Table MultiSelect",
+   "label": "List SalesTeam",
+   "mandatory_depends_on": "eval:doc.apply_for == \"Specific Salesteam\"",
+   "options": "MultiPerson"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-04-19 10:30:20.883855",
+ "modified": "2024-04-22 14:16:11.882675",
  "modified_by": "Administrator",
  "module": "MBW DMS",
  "name": "DMS Notice Board",
- "naming_rule": "Expression (old style)",
+ "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [
   {
