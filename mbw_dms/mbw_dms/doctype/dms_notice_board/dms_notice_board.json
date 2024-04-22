@@ -1,7 +1,6 @@
 {
  "actions": [],
- "allow_rename": 1,
- "autoname": "field:notice_title",
+ "autoname": "autoincrement",
  "creation": "2023-10-12 10:27:12.760230",
  "default_view": "List",
  "doctype": "DocType",
@@ -15,7 +14,6 @@
   "to_date",
   "priority_level",
   "apply_for",
-  "employees",
   "salesteams",
   "section_break_yeir6",
   "message",
@@ -65,15 +63,7 @@
    "fieldname": "apply_for",
    "fieldtype": "Select",
    "label": "Apply to",
-   "options": "All Employee\nSpecific Employees\nSpecific Salesteam"
-  },
-  {
-   "depends_on": "eval:doc.apply_for == \"Specific Employees\"",
-   "fieldname": "employees",
-   "fieldtype": "Table MultiSelect",
-   "label": "List Employee",
-   "mandatory_depends_on": "eval:doc.apply_for == \"Specific Employees\"",
-   "options": "DMS Notice Board Employee"
+   "options": "All Employee\nSpecific Salesteam"
   },
   {
    "fieldname": "section_break_yeir6",
@@ -104,11 +94,11 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-04-22 14:16:11.882675",
+ "modified": "2024-04-22 16:24:43.567257",
  "modified_by": "Administrator",
  "module": "MBW DMS",
  "name": "DMS Notice Board",
- "naming_rule": "By fieldname",
+ "naming_rule": "Autoincrement",
  "owner": "Administrator",
  "permissions": [
   {

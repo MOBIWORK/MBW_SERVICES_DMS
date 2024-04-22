@@ -7,6 +7,7 @@ from mbw_dms.api.common import (
     get_employee_by_name,
     validate_image,
     BASE_URL,
+    get_value_child_doctype
 )
 from mbw_dms.api.validators import validate_filter_timestamp
 from datetime import datetime
@@ -199,3 +200,44 @@ def get_list_notification_system(**kwargs):
         return gen_response(200, "Thành công", result)
     except Exception as e:
         exception_handle(e)
+
+
+@frappe.whitelist(methods="GET")
+def get_notifi(**kwargs):
+    try:
+        employee_id = get_employee_id()
+        start_time = kwargs.get("start_time")
+        end_time = kwargs.get("end_time")
+        name = kwargs.get("name")
+        data = []
+        saleperson = frappe.get_value('Sales Person', {'employee': employee_id}, 'sales_person_name')
+        notis =  frappe.get_all('DMS Notice Board', {}, ['name', 'owner', 'notice_title', 'description', 'from_date', 'to_date', 'priority_level', 'apply_for', 'message', 'employee_watched'])
+        for i in notis:
+            if i.apply_for == 'All Employee':
+                info_employee = frappe.db.get_value("Employee", {"user_id": i.owner}, ['employee_name', 'image'], as_dict=True)
+                i['employee_name'] = info_employee.employee_name
+                i['image'] = validate_image(info_employee.image)
+                data.append(i)
+            elif i.apply_for == 'Specific Salesteam':
+                sale_team = get_value_child_doctype("DMS Notice Board", i['name'], 'salesteams')
+                info_employee = frappe.db.get_value("Employee", {"user_id": i.owner}, ['employee_name', 'image'], as_dict=True)
+                i['employee_name'] = info_employee.employee_name
+                i['image'] = validate_image(info_employee.image)
+                for salein in sale_team:
+                    if salein.nhom_ban_hang in get_all_parent_sales_persons(saleperson):
+                        data.append(i)
+        return gen_response(200, "Thành công", data)
+    except Exception as e:
+        exception_handle(e)
+
+def get_all_parent_sales_persons(sales_person):
+    parent_sales_persons = []
+    parent = frappe.get_value("Sales Person", sales_person, "parent_sales_person")
+
+    while parent:
+        is_group = frappe.get_value("Sales Person", parent, "is_group")
+        if is_group == 1:
+            parent_sales_persons.append(parent)
+        parent = frappe.get_value("Sales Person", parent, "parent_sales_person")
+
+    return parent_sales_persons
