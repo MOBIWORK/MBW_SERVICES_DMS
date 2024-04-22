@@ -11,24 +11,25 @@ def change_password(user, current_password, new_password, new_pass_again):
     try:
         user = check_password(user, current_password)
     except frappe.AuthenticationError:
-        return get_response(False, "Mật khẩu cũ không chính xác")
+        return get_response(400, False, "Mật khẩu cũ không chính xác")
 
     # Kiểm tra mật khẩu mới không được rỗng
     if not new_password:
-        return get_response(False, "Mật khẩu mới không được để trống")
+        return get_response(400, False, "Mật khẩu mới không được để trống")
     
     if not new_pass_again:
-        return get_response(False, "Bạn phải nhập lại mật khẩu mới")
+        return get_response(400, False, "Bạn phải nhập lại mật khẩu mới")
     
     if new_pass_again and new_password and new_password != new_pass_again:
-        return get_response(False, "Mật khẩu nhập lại phải trùng mật khẩu mới")
+        return get_response(400, False, "Mật khẩu nhập lại phải trùng mật khẩu mới")
 
     # Cập nhật mật khẩu mới
     update_password(user, new_password)
 
     return get_response(True, "Cập nhật thành công")
 
-def get_response(status, message):
+def get_response(http_status_code, status, message):
+    frappe.response["http_status_code"] = http_status_code
     frappe.response["status"] = status
     frappe.response["message"] = message
 
