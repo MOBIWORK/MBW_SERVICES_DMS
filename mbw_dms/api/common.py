@@ -75,7 +75,7 @@ def get_language():
 def exception_handle(e):
     frappe.log_error(title="DMS Mobile App Error",
                      message=frappe.get_traceback())
-    return gen_response(406, cstr(e))
+    return gen_response(406, cstr(e),{})
     
 
 def get_user_id():

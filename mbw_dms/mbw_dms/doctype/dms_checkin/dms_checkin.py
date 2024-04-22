@@ -371,7 +371,7 @@ def update_address_customer(body):
             district_info = frappe.db.get_value(doctype="DMS District",filters={"ten_huyen": ["like",f"%{county}%"]},fieldname=['ma_huyen'])
             ward_info = frappe.db.get_value(doctype="DMS Ward",filters={"ten_xa": ["like",f"%{state}%"]},fieldname=['ma_xa'])
             if not city_info : 
-                return gen_response(404,_("Couldn't find city"))
+                return gen_response(404,_("Couldn't find city"),{})
             new_address = {
                     "address_title": f"{address_line1}, {state}, {county}, {city}",
                     "address_line1":address_line1,                    
@@ -404,7 +404,7 @@ def update_address_customer(body):
             frappe.db.commit()
             return gen_response(200,"",doc_address.get('address_title') )
         else:
-            return gen_response(406,i18n.t('translate.not_found', locale=get_language()),False)             
+            return gen_response(406,i18n.t('translate.not_found', locale=get_language()),{})             
         
     except Exception as e:
         exception_handle(e)
