@@ -15,16 +15,19 @@ def create_user_permission(doc, method=None):
         
         # Tạo phân quyền cho danh sách sales person cha
         list_parent_sp = get_all_parent_sales_persons(sales_person=doc.name)
-        user_permission_pr = frappe.new_doc("User Permission")
-        for i in list_parent_sp:
-            sales_team = frappe.get_doc("Sales Person", i).as_dict()
-            for sale_mng in sales_team.sales_manager:
-                u_id = frappe.get_value("Employee", {"name": sale_mng.employee}, "user_id")
-                if not frappe.db.exists("User Permission", {"user": u_id, "allow": allow, "for_value": doc.name}):
-                    user_permission_pr.user = u_id
-                    user_permission_pr.allow = allow
-                    user_permission_pr.for_value = doc.name
-                    user_permission_pr.insert()
+        if list_parent_sp:
+            user_permission_pr = frappe.new_doc("User Permission")
+            for i in list_parent_sp:
+                sales_team = frappe.get_doc("Sales Person", i).as_dict()
+                for sale_mng in sales_team.sales_manager:
+                    u_id = frappe.get_value("Employee", {"name": sale_mng.employee}, "user_id")
+                    if not frappe.db.exists("User Permission", {"user": u_id, "allow": allow, "for_value": doc.name}):
+                        user_permission_pr.user = u_id
+                        user_permission_pr.allow = allow
+                        user_permission_pr.for_value = doc.name
+                        user_permission_pr.insert()
+        else:
+            pass
     else:
         return
 

@@ -55,7 +55,7 @@ def list_product(**kwargs):
         count = len(frappe.db.get_list("Item",filters=my_filter))
         for item in items:
             item['image'] = validate_image(item.get("image"))
-            item['details'] = frappe.get_all("Item Price", filters={"item_code": item.get('item_code')}, fields=['uom', 'price_list_rate', 'valid_from', 'currency'])
+            item['details'] = frappe.get_all("Item Price", filters={"item_code": item.get('item_code')}, fields=['uom', 'price_list', 'price_list_rate', 'valid_from', 'currency'])
             item['unit'] = frappe.db.get_all("UOM Conversion Detail", {"parent" : item.get('name')}, ['uom', 'conversion_factor'])
             item['stock'] = frappe.db.get_all("Stock Entry Detail", {"item_code": item.get('item_code')}, ['t_warehouse', 'qty'])
 

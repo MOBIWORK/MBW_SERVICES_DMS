@@ -9,7 +9,6 @@ import base64
 from frappe.core.doctype.file.utils import delete_file
 from frappe.utils.file_manager import save_file
 
-# comment lại thì đẩy lên nhớ mở ra/ không thì chạy bench setup requirements chứ .
 from mbw_dms.api.file import create_my_minio
 from PIL import Image
 from PIL import ImageDraw
@@ -26,7 +25,6 @@ def this_week() :
     week_number = int(today.strftime("%U")) +1
     week  = week_number % 5 if week_number % 5 != 0 or week_number % 5 != 1 else 1
     return week
-
 
 
 # return definition
@@ -79,10 +77,6 @@ def exception_handle(e):
                      message=frappe.get_traceback())
     return gen_response(406, cstr(e))
     
-    if hasattr(e, "http_status_code"):
-        return gen_response(e.http_status_code, cstr(e))
-    else:
-        return gen_response(406, cstr(e))
 
 def get_user_id():
     headers = frappe.local.request.headers.get("Authorization")
