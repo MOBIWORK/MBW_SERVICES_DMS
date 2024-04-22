@@ -94,19 +94,15 @@ def create_album(kwargs):
 def list_album():
     try:
         employee_id = get_employee_id()
-        # album_image = frappe.db.get_list('DMS Album', fields=["name", "ma_album", "ten_album", "so_anh_toi_thieu", "trang_thai"])
-        DMSAlbum = frappe.qb.DocType("DMS Album")
-        SalesPerson = frappe.qb.DocType("Sales Person")
-        Employee = frappe.qb.DocType('Employee')
-        MultiSale = frappe.qb.DocType('MultiPerson')
-        query = (frappe.qb.from_(MultiSale)
-                              .inner_join(DMSAlbum)
-                              .on(DMSAlbum.name == MultiSale.parent)
-                              .inner_join(SalesPerson)
-                              .on(MultiSale.nhom_ban_hang == SalesPerson.parent_sales_person)
-                              .where(SalesPerson.employee == employee_id)
-                              .select(DMSAlbum.ma_album, DMSAlbum.ten_album, DMSAlbum.so_anh_toi_thieu, DMSAlbum.trang_thai).run(as_dict=True))
-        gen_response(200, "Thành công", query)
+        saleperson = frappe.get_value('Sales Person', {'employee': employee_id}, 'sales_person_name')
+        data = []
+        dms_albums = frappe.db.get_all('DMS Album', fields=['name', 'ma_album', 'ten_album', 'so_anh_toi_thieu', 'trang_thai'])
+        for i in dms_albums:
+            sale_team = get_value_child_doctype("DMS Album", i['name'], 'nhom_ban_hang')
+            for salein in sale_team:
+                if salein.nhom_ban_hang in get_all_parent_sales_persons(saleperson):
+                    data.append(i)
+        return gen_response(200, "Thành công", data)
     except Exception as e:
         return exception_handle(e)
     
@@ -117,3 +113,15 @@ def list_album_name():
         gen_response(200, "Thành công", album_image)
     except Exception as e:
         return exception_handle(e)
+  
+def get_all_parent_sales_persons(sales_person):
+    parent_sales_persons = []
+    parent = frappe.get_value("Sales Person", sales_person, "parent_sales_person")
+
+    while parent:
+        is_group = frappe.get_value("Sales Person", parent, "is_group")
+        if is_group == 1:
+            parent_sales_persons.append(parent)
+        parent = frappe.get_value("Sales Person", parent, "parent_sales_person")
+
+    return parent_sales_persons
