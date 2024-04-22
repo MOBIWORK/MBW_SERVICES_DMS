@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_import": 1,
  "allow_rename": 1,
  "creation": "2024-01-05 16:39:18.524262",
  "default_view": "List",
@@ -96,49 +97,49 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-04-09 16:15:10.341717",
+ "modified": "2024-04-22 09:11:04.022697",
  "modified_by": "Administrator",
  "module": "MBW DMS",
  "name": "DMS Router",
  "owner": "Administrator",
  "permissions": [
-    {
-     "create": 1,
-     "delete": 1,
-     "email": 1,
-     "export": 1,
-     "print": 1,
-     "read": 1,
-     "report": 1,
-     "role": "System Manager",
-     "select": 1,
-     "share": 1,
-     "write": 1
-    },
-    {
-     "create": 1,
-     "delete": 1,
-     "email": 1,
-     "export": 1,
-     "print": 1,
-     "read": 1,
-     "report": 1,
-     "role": "Sales Manager",
-     "select": 1,
-     "share": 1,
-     "write": 1
-    },
-    {
-     "email": 1,
-     "export": 1,
-     "print": 1,
-     "read": 1,
-     "report": 1,
-     "role": "Sales User",
-     "select": 1,
-     "share": 1
-    }
-   ],
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "select": 1,
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales Manager",
+   "select": 1,
+   "share": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales User",
+   "select": 1,
+   "share": 1
+  }
+ ],
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": []
