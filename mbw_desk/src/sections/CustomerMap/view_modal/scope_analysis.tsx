@@ -1,16 +1,22 @@
-import React, { useState } from "react";
+import React, { useState ,useEffect,useRef} from "react";
+import { AxiosService } from "../../../services/server";
 import { Col, Row } from "antd";
 import { RadiusUpleftOutlined } from "@ant-design/icons";
 import { ARR_REGIONSTR } from "./AppConst";
-import { Avatar, Flex, Segmented, Form, Select } from "antd";
+import { Flex, Segmented, Form, Select } from "antd";
+import maplibregl from "maplibre-gl";
+
 import "./style.css";
+declare var ekmapplf: any;
 export function ScopeAnalysis() {
   const [selectedOption, setSelectedOption] = useState("user1");
   const handleOptionChange = (value) => {
     setSelectedOption(value); // Cập nhật giá trị hiện tại của Segmented khi thay đổi lựa chọn
   };
+  const [mapConfig, setMapConfig] = useState([]);
+  const [apiKey, setApiKey] = useState("");
   const [arrTinh, setArrTinh] = useState([]);
-  const [selectTinh, setSelectTinh] = useState({});
+  const [selectTinh, setSelectTinh] = useState(null);
   const arr_region = JSON.parse(ARR_REGIONSTR).map((item) => {
     return {
       ...item,
@@ -18,11 +24,30 @@ export function ScopeAnalysis() {
       label: item.name,
     };
   });
+
+  
   const filterOption = (input: string, option?: { label: string; value: string }) =>
   (option?.label ?? '').toLowerCase().includes(input.toLowerCase());
   const onChangeKhuvuc = (value) => {
   const filteredRegion = arr_region
   .filter((item) => item.value === value)
+  if(filteredRegion.length > 0){
+    if (filteredRegion[0].bbox != null) {
+        let bboxSplit = filteredRegion[0].bbox.split(",");
+        let bbox = [
+          [Number(bboxSplit[0]), Number(bboxSplit[1])],
+          [Number(bboxSplit[2]), Number(bboxSplit[3])]
+        ];
+        map.current.fitBounds(bbox);
+    }else{
+        map.current.flyTo({
+            'center': [107.9426393217799, 16.92300264959944],
+            'zoom': 4.2
+          })
+    }
+    
+  }
+ 
    // Lấy mảng arrProvince từ đối tượng đầu tiên trong kết quả lọc
    const arrProvince = filteredRegion.length > 0 ? filteredRegion[0].arrProvince : [];
    const modifiedTinh =  arrProvince.map((item) => ({
@@ -31,15 +56,139 @@ export function ScopeAnalysis() {
     label: item.name, // Thay đổi trường label thành item.name
   }));
   setArrTinh(modifiedTinh)
-
   }
   const onChangeTinh = (value) => {
+    const filteredProvince = arrTinh.filter((item) => item.value === value)
+    if(filteredProvince.length > 0){
+        if (filteredProvince[0].bbox != null) {
+            let bboxSplit = filteredProvince[0].bbox.split(",");
+            let bbox = [
+              [Number(bboxSplit[0]), Number(bboxSplit[1])],
+              [Number(bboxSplit[2]), Number(bboxSplit[3])]
+            ];
+            map.current.fitBounds(bbox);
+        }
+        
+      }
     setSelectTinh(value)
 }
+const getConfigApi = async () => {
+    let res = await AxiosService.get(
+      "/api/method/mbw_dms.api.vgm.map_customer.get_config_api"
+    );
+    setApiKey(res.result);
+  };
+  const map = useRef(null);
+const renderMap = () => {
+    map.current = new maplibregl.Map({
+      container: "map_cf",
+      center: [108.485, 16.449],
+      zoom: 5.43,
+    });
+    let mapOSMBright = new ekmapplf.VectorBaseMap("OSM:Bright", apiKey).addTo(
+      map.current
+    );
+    var basemap = new ekmapplf.control.BaseMap({
+      id: "basemap_control",
+      baseLayers: [
+        {
+          id: "OSM:Bright",
+          title: "Bản đồ nền Sáng",
+          thumbnail: "https://docs.ekgis.vn/assets/map-sang.png",
+          width: "50px",
+          height: "50px",
+        },
+        {
+          id: "OSM:Standard",
+          title: "Bản đồ nền Tiêu chuẩn",
+          thumbnail: "https://docs.ekgis.vn/assets/map-chuan.png",
+          width: "50px",
+          height: "50px",
+        },
+        {
+          id: "OSM:Night",
+          title: "Bản đồ nền Đêm",
+          thumbnail: "https://docs.ekgis.vn/assets/dem-map.png",
+          width: "50px",
+          height: "50px",
+        },
+      ],
+    });
+    map.current.addControl(basemap, "bottom-left");
+    basemap.on("changeBaseLayer", async function (response) {
+      await new ekmapplf.VectorBaseMap(response.layer, apiKey).addTo(
+        map.current
+      );
+    });
+    map.current.addControl(
+      new maplibregl.NavigationControl({ visualizePitch: true }),
+      "bottom-right"
+    );
+    var is3DMap = false;
+    if (map.current.getPitch() > 0) is3DMap = true;
+    else is3DMap = false;
+    var cl = "maplibregl-terrain2d-control";
+    var tl = "Hiển thị 2D";
+    if (!is3DMap) {
+      cl = "maplibregl-terrain3d-control";
+      tl = "Bản đồ 3D";
+    }
+    let btn3D = new ekmapplf.control.Button({
+      className: "btn-ctl-group " + cl,
+      icon: "none",
+      tooltip: tl,
+    });
+    btn3D.on("click", (btn) => {
+      is3DMap = !is3DMap;
+      if (is3DMap) {
+        btn._div.className = btn._div.className.replaceAll(
+          "maplibregl-terrain3d-control",
+          "maplibregl-terrain2d-control"
+        );
+        btn._div.title = "Hiển thị 2D";
+      } else {
+        btn._div.className = btn._div.className.replaceAll(
+          "maplibregl-terrain2d-control",
+          "maplibregl-terrain3d-control"
+        );
+        btn._div.title = "Hiển thị 3D";
+      }
+      if (is3DMap) {
+        map.current.easeTo({ pitch: 60 });
+        map.current.setLayoutProperty("building-3d", "visibility", "visible");
+      } else {
+        map.current.easeTo({ pitch: 0 });
+        map.current.setLayoutProperty("building-3d", "visibility", "none");
+      }
+    });
+    map.current.addControl(btn3D, "bottom-right");
+    map.current.addControl(new maplibregl.FullscreenControl(), "top-right");
+    // map.current.on("load", async () => {
+    //   await getConfigMap();
+    // });
+  };
+  const getConfigMap = async () => {
+
+    let res = await AxiosService.get(
+      "/api/method/mbw_dms.api.vgm.map_customer.get_config_map"
+    );
+    setMapConfig(res.result);
+  };
+  useEffect(() => {
+    getConfigApi();
+  }, []);
+  useEffect(() => {
+    if(apiKey != null && apiKey != ""){
+        renderMap();
+    }
+  }, [apiKey]);
+  useEffect(() => {
+    //if (mapConfig != null && mapConfig.length > 0) addLayerIndustry();
+  }, [mapConfig]);
   return (
     <>
       <Row>
-        <Col span={12}>
+        <Col span={12} style={{paddingRight:'10px'}}>
           <Flex
             gap="small"
             align="flex-start"
@@ -117,7 +266,12 @@ export function ScopeAnalysis() {
             </div>
           )}
         </Col>
-        <Col span={12}>col-12</Col>
+        <Col span={12}>
+        <div
+        id="map_cf"
+        style={{ width: "100%", height: "450px" }}
+      ></div>
+        </Col>
       </Row>
     </>
   );

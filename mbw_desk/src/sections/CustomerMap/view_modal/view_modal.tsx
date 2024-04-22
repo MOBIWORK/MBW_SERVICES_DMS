@@ -4,6 +4,7 @@ import { Modal,Button } from 'antd';
 import { DownOutlined } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import  {ScopeAnalysis} from './scope_analysis';
+import  {TypeIndustry} from './type_industry';
 import  { ReactNode } from "react";
 type Props = {
   open: string | ReactNode;
@@ -20,12 +21,12 @@ export function ModalView ({ open, title, onCancel, onOk }: Props) {
     },
     {
       title: 'Ngành hàng đánh giá độ phủ',
-      content: <ScopeAnalysis></ScopeAnalysis>,
+      content: <TypeIndustry></TypeIndustry>,
     },
-    {
-      title: 'Thiết lập kết quả phân tích',
-      content: <ScopeAnalysis></ScopeAnalysis>,
-    },
+    // {
+    //   title: 'Thiết lập kết quả phân tích',
+    //   content: <ScopeAnalysis></ScopeAnalysis>,
+    // },
   ];
   const { token } = theme.useToken();
   const [current, setCurrent] = useState(0);
@@ -41,7 +42,7 @@ export function ModalView ({ open, title, onCancel, onOk }: Props) {
   const items = steps.map((item) => ({ key: item.title, title: item.title }));
   const contentStyle: React.CSSProperties = {
     lineHeight: '260px',
-    textAlign: 'center',
+    textAlign: 'left',
     color: token.colorTextTertiary,
     backgroundColor: token.colorFillAlter,
     borderRadius: token.borderRadiusLG,
