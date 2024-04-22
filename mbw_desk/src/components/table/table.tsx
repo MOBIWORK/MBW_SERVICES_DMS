@@ -13,9 +13,8 @@ export const TableCustom = styled(Table)<{$border?: boolean}>`
   letter-spacing: normal!important;
 }
 
-& thead .ant-table-cell {
+& .ant-table-cell {
   white-space: nowrap!important;
-
 }
 &:not(:has(.ant-table-cell)) .ant-table-thead {
   &>tr {

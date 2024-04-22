@@ -257,6 +257,8 @@ def create_checkin(kwargs):
             elif key in date_keys:
                 created_date = validate_datetime(value)
                 new_checkin.set(key, created_date)
+        if kwargs.get("checkin_giora"):
+            new_checkin.set("is_checkout",1)
         new_checkin.insert(ignore_permissions=True)
         frappe.db.commit()
         return gen_response(201, "Thành công", {"name": new_checkin.name})

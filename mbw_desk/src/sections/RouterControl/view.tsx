@@ -29,6 +29,11 @@ import { listSale } from "@/types/listSale";
 
 const columns = [
   {
+    title: "Khách hàng",
+    dataIndex: "count_customer",
+    key: "count_customer"
+  },
+  {
     title: "Mã tuyến",
     dataIndex: "channel_code",
     key: "channel_code"
@@ -50,6 +55,7 @@ const columns = [
     key: "status",
     render: (value: string) => value == "Active" ? <TagCustomStatus > Hoạt động</TagCustomStatus > : <TagCustomStatus type="Warning" > Khóa</TagCustomStatus >
   },
+  
   {
     title: "Ngày tạo",
     dataIndex: "creation",
@@ -72,11 +78,7 @@ const columns = [
     title: "Người cập nhật",
     dataIndex: "modified_by",
     key: "modified_by"
-  }, {
-    title: "Khách hàng",
-    dataIndex: "count_customer",
-    key: "count_customer"
-  },
+  }, 
 ];
 
 
