@@ -28,11 +28,7 @@ import { listSale } from "@/types/listSale";
 // ----------------------------------------------------------------------
 
 const columns = [
-  {
-    title: "Khách hàng",
-    dataIndex: "count_customer",
-    key: "count_customer"
-  },
+ 
   {
     title: "Mã tuyến",
     dataIndex: "channel_code",
@@ -48,6 +44,11 @@ const columns = [
     dataIndex: "employee_name",
     key: "employee_name",
     render: (value, record) => `${record?.employee}-${record?.employee_name}`
+  },
+  {
+    title: "Khách hàng",
+    dataIndex: "count_customer",
+    key: "count_customer"
   },
   {
     title: "Trạng thái",
