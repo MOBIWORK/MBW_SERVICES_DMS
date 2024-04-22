@@ -125,10 +125,11 @@ def get_sale_order(name):
 @frappe.whitelist(methods='POST')
 def create_sale_order(**kwargs):
     try:
-        from erpnext.accounts.party import get_party_details
+        # from erpnext.accounts.party import get_party_details
         kwargs = frappe._dict(kwargs)
         new_order = frappe.new_doc('Sales Order')
         user_name = frappe.get_value('Employee',{ 'user_id': frappe.session.user}, 'name')
+        sales_person = frappe.get_value('Sales Person', {'employee': user_name}, 'name')
 
         # Dữ liệu bắn lên để tạo sale order mới
         discount_percent = float(kwargs.get('additional_discount_percentage', 0))
@@ -151,15 +152,10 @@ def create_sale_order(**kwargs):
         new_order.checkin_id = kwargs.get('checkin_id')
 
         # Thêm mới sales team
-        sales_team = get_party_details(party=kwargs.get('customer'), party_type='Customer', price_list='Standard Selling', posting_date=kwargs.get('delivery_date'), fetch_payment_terms_template=1, currency='VND',
-                              company=kwargs.get('company'), doctype='Sales Order')
-        if sales_team.get('sales_team') != []:
-            new_order.append('sales_team', sales_team['sales_team'][0])
-        if sales_team.get('sales_team') == []:
-            new_order.append('sales_team', {
-                'sales_person': user_name,
-                'allocated_percentage': 100
-            })
+        new_order.append('sales_team', {
+            'sales_person': sales_person,
+            'allocated_percentage': 100
+        })
 
         # Thêm mới items trong đơn hàng
         items = kwargs.get('items')
@@ -215,9 +211,9 @@ def create_sale_order(**kwargs):
             
             new_order.insert()
             frappe.db.commit()
-            gen_response(201, 'Thành công',  {"name": new_order.name})
+            return gen_response(201, 'Thành công',  {"name": new_order.name})
         else:
-            return gen_response(400, i18n.t('translate.invalid_grand_total', locale=get_language()), {"grand_total": grand_total})
+            return gen_response(400, 'Tổng tiền chưa khớp với tính toán', {"grand_total": grand_total})
     except Exception as e:
         return exception_handle(e)
 

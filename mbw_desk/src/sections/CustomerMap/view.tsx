@@ -435,7 +435,7 @@ function CustomerMapView() {
                 <span className={`icon ${isOpen ? 'ekmapplf_tracking-icon-square-minus' : 'ekmapplf_tracking-icon-square-plus'}`} style={{ filter: 'invert(100%) sepia(100%) saturate(0%) hue-rotate(187deg) brightness(105%) contrast(103%)' }}></span>
                 <span>Chú giải bản đồ</span>
             </div>
-            <div className={`ekmapplf_tracking-legend-body ${isOpen ? 'open' : ''}`} style={{ maxHeight: isOpen ? 'none' : '0' }}>
+            <div className={`ekmapplf_tracking-legend-body ${isOpen ? 'open' : ''}`} style={{ maxHeight: isOpen ? '250px' : '0' , overflow: 'auto'}}>
              <MapConfigTree mapConfig={mapConfig} onCheck={handleCheck}/>
             </div>
         </div>

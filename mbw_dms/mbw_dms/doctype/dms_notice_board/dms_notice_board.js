@@ -6,3 +6,12 @@
 
 // 	},
 // });
+frappe.ui.form.on("DMS Notice Board", {
+    setup: function (frm) {
+      frm.set_query("salesteams", function () {
+        return {
+          filters: { is_group: 1 },
+        };
+      });
+    },
+  });
