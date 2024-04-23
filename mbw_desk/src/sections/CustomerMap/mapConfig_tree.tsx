@@ -1,18 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import { Tree } from 'antd';
 import type { TreeDataNode, TreeProps } from 'antd';
+import { AxiosService } from '@/services/server';
 
 interface MapConfigTreeProps {
-  mapConfig: any[];
   onCheck: (checkedKeys: React.Key[]) => void;
-  onUpdateMapConfig: (newMapConfig: any[]) => void;
 }
 
-const MapConfigTree: React.FC<MapConfigTreeProps> = ({ mapConfig, onCheck, onUpdateMapConfig }) => {
+const MapConfigTree: React.FC<MapConfigTreeProps> = ({ onCheck }) => {
   const [expandedKeys, setExpandedKeys] = useState<React.Key[]>([]);
   const [checkedKeys, setCheckedKeys] = useState<React.Key[]>([]);
   const [selectedKeys, setSelectedKeys] = useState<React.Key[]>([]);
   const [autoExpandParent, setAutoExpandParent] = useState<boolean>(true);
+  const [mapConfig, setMapConfig] = useState<TreeDataNode[]>([]);
+
   const generateTreeData = (data: any[]): TreeDataNode[] =>
     {
       return data.map((item, index) => ({
@@ -22,16 +23,17 @@ const MapConfigTree: React.FC<MapConfigTreeProps> = ({ mapConfig, onCheck, onUpd
       }));
     }
 
-  const [treeData, setTreeData] = useState<TreeDataNode[]>([])
+  const getConfigMap = async () => {
+    let res = await AxiosService.get(
+      "/api/method/mbw_dms.api.vgm.map_customer.get_config_map"
+    );
+    let dataMapConfig = generateTreeData(res.result)
+    setMapConfig(dataMapConfig);
+  };
 
-  useEffect(() => {
-    if(mapConfig != null) {
-      let dataTree = generateTreeData(mapConfig);
-      console.log(dataTree);
-      setTreeData(dataTree);
-    }
-    
-  }, [mapConfig])
+  useEffect(()=>{
+    getConfigMap();
+  },[])
 
   const onExpand: TreeProps['onExpand'] = (expandedKeysValue) => {
     console.log('onExpand', expandedKeysValue);
@@ -75,7 +77,7 @@ const MapConfigTree: React.FC<MapConfigTreeProps> = ({ mapConfig, onCheck, onUpd
     };
   
     // Clone the original tree data
-    const data = [...treeData];
+    const data = [...mapConfig];
   
     let dragObj: TreeDataNode;
   
@@ -107,8 +109,7 @@ const MapConfigTree: React.FC<MapConfigTreeProps> = ({ mapConfig, onCheck, onUpd
     
     console.log(data);
     // Update the map configuration with the modified tree data
-    onUpdateMapConfig(data);
-    setTreeData(data);
+    setMapConfig(data)
   };
   
   
@@ -128,7 +129,7 @@ const MapConfigTree: React.FC<MapConfigTreeProps> = ({ mapConfig, onCheck, onUpd
       selectedKeys={selectedKeys}
       onDragEnter={onDragEnter}
       onDrop={onDrop}
-      treeData={treeData}
+      treeData={mapConfig}
     />
   );
 };

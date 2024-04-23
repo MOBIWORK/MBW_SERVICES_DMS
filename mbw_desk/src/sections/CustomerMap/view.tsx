@@ -412,9 +412,7 @@ function CustomerMapView() {
       });
     });
   };
-  const updateMapConfig = (newMapConfig: any[]) => {
-    setMapConfig(newMapConfig);
-  };
+
   return (
     <>
       <HeaderPage title="Bản đồ khách hàng" />
@@ -438,7 +436,7 @@ function CustomerMapView() {
             <span>Chú giải bản đồ</span>
           </div>
           <div className={`ekmapplf_tracking-legend-body ${isOpen ? 'open' : ''}`} style={{ maxHeight: isOpen ? '250px' : '0', overflow: 'auto' }}>
-            <MapConfigTree mapConfig={mapConfig} onCheck={handleCheck} onUpdateMapConfig={updateMapConfig} />
+            <MapConfigTree onCheck={handleCheck} />
           </div>
         </div>
 
