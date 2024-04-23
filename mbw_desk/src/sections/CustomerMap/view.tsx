@@ -112,7 +112,7 @@ function CustomerMapView() {
       center: [108.485, 16.449],
       zoom: 5.43,
     });
-    let mapOSMBright = new ekmapplf.VectorBaseMap("OSM:Bright", apiKey).addTo(
+    let mapOSMNight = new ekmapplf.VectorBaseMap("OSM:Night", apiKey).addTo(
       map.current
     );
     var basemap = new ekmapplf.control.BaseMap({
