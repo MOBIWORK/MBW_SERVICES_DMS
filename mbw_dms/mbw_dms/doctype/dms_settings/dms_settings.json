@@ -41,19 +41,19 @@
    "default": "0",
    "fieldname": "vt_ngoaituyen",
    "fieldtype": "Check",
-   "label": "V\u1ecb tr\u00ed ngo\u1ea1i tuy\u1ebfn"
+   "label": "Vi\u1ebfng th\u0103m ngo\u1ea1i tuy\u1ebfn"
   },
   {
    "default": "0",
    "fieldname": "kb_vitringoaisaiso",
    "fieldtype": "Check",
-   "label": "Khai b\u00e1o v\u1ecb tr\u00ed ngo\u00e0i sai s\u1ed1"
+   "label": " Checkin ngo\u00e0i sai s\u1ed1"
   },
   {
    "depends_on": "eval:doc.kb_vitringoaisaiso == 1;",
    "fieldname": "saiso_chophep_kb_vitringoaisaiso",
    "fieldtype": "Float",
-   "label": "Sai s\u1ed1 cho ph\u00e9p"
+   "label": "Sai s\u1ed1 cho ph\u00e9p (m\u00e9t)"
   },
   {
    "default": "0",
@@ -107,7 +107,7 @@
    "depends_on": "eval:doc.tgcheckin_toithieu == 1;",
    "fieldname": "thoigian_toithieu",
    "fieldtype": "Float",
-   "label": "Th\u1eddi gian t\u1ed1i thi\u1ec3u"
+   "label": "Th\u1eddi gian t\u1ed1i thi\u1ec3u (ph\u00fat)"
   },
   {
    "fieldname": "c\u1ea5u_h\u00ecnh_mobile_tab",
@@ -195,7 +195,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-04-20 08:36:26.386355",
+ "modified": "2024-04-23 15:25:40.905999",
  "modified_by": "Administrator",
  "module": "MBW DMS",
  "name": "DMS Settings",
