@@ -257,8 +257,6 @@ export default function ReportCustomNew() {
 
       let { message: results } = rsDepartment;
 
-      console.log("Customer Group", results);
-
       setListDepartment(
         results.map((dtDepartment: any) => ({
           value: dtDepartment.value.trim(),
@@ -283,8 +281,6 @@ export default function ReportCustomNew() {
       );
 
       let { message: results } = rsCustomerGroup;
-
-      console.log("Customer Group", results);
 
       setListCustomerGroup(
         results.map((dtCustomerGroup: any) => ({
