@@ -8,7 +8,7 @@ import maplibregl from "maplibre-gl";
 import classNames from 'classnames';
 import "./style.css";
 declare var ekmapplf: any;
-export function ScopeAnalysis({ onResult,form, scopeResult }) {
+export function ScopeAnalysis({ onResult, scopeResult }) {
   const [selectedOption, setSelectedOption] = useState("hanhchinh");
   const handleOptionChange = (value) => {
     setSelectedOption(value); // Cập nhật giá trị hiện tại của Segmented khi thay đổi lựa chọn

@@ -6,8 +6,9 @@ import { AxiosService } from "../../services/server";
 import "./map_customer.css";
 import MapConfigTree from "./mapConfig_tree";
 import { Dropdown } from 'antd';
-import { DownOutlined } from '@ant-design/icons';
+import { DownOutlined,CloseOutlined } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
+import {TableCustom} from '../../components'
 declare var ekmapplf: any;
 
 interface TypeCustomer {
@@ -34,14 +35,34 @@ function CustomerMapView() {
   ];
   const [open, setOpen] = useState(false);
 
+  const columns = [
+    {
+      title: 'Tên đơn vị hành chính',
+      dataIndex: 'name',
+      key: 'name',
+    },
+    {
+      title: 'Tỷ lệ độ phủ',
+      dataIndex: 'ratio_coverage',
+      key: 'ratio_coverage',
+      render: (ratio) => `${(ratio * 100).toFixed(2)}%`, // Format hiển thị phần trăm
+    },
+  ];
 
   const handleCloseModal = () => {
     setOpen(false);
   };
-
+  const handleClose = () => {
+    setMapHeight('80vh');
+    setVisibleTable(false)
+  }
+  const [dataSource, setDataSource] = useState([]);
+  const [mapHeight, setMapHeight] = useState('80vh');
+  const [visibleTable, setVisibleTable] = useState(false);
   const handleOk = (data) => {
-    console.log(data);
-    console.log('data');
+    setDataSource(data)
+    setMapHeight('40vh');
+    setVisibleTable(true)
     setOpen(false);
   };
   const [apiKey, setApiKey] = useState("");
@@ -449,7 +470,7 @@ function CustomerMapView() {
       <HeaderPage title="Bản đồ khách hàng" />
       <div
         id="map"
-        style={{ width: "100%", height: "80vh", borderRadius: "20px" }}
+        style={{ width: "100%", height: mapHeight, borderRadius: "20px" }}
       >
         <div className='ekmapplf_map-ananyltic'>
           <Dropdown.Button
@@ -472,6 +493,19 @@ function CustomerMapView() {
         </div>
 
       </div>
+      {visibleTable && (
+        <div style={{position:'relative'}}>
+<TableCustom
+        columns={columns}
+        dataSource={dataSource}
+        pagination={false}
+      />
+      <div onClick={handleClose} style={{position:'absolute',top:'10px',right:'10px',cursor:'pointer'}}><CloseOutlined  /></div>
+      
+        </div>
+        
+      )}
+      
       <ModalView
         open={open}
         title="Đánh giá độ phủ"
