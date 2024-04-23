@@ -114,7 +114,7 @@ def list_note(kwargs):
 def list_note_type():
     try:
         my_filter = {}
-        list_note_type = frappe.db.get_list('DMS Note Type',filters=my_filter ,fields=["name", "ma_ghi_chu", "loai_ghi_chu"])
+        list_note_type = frappe.db.get_all('DMS Note Type',filters=my_filter ,fields=["name", "ma_ghi_chu", "loai_ghi_chu"])
         return gen_response(200, "Thành công", list_note_type)
     except Exception as e:
         return exception_handle(e)
