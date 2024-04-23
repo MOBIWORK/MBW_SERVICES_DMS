@@ -57,8 +57,6 @@ export function ModalView ({ open, title, onCancel, onOk }: Props) {
     let type_categories = "agricultural_supplies"
     let type_area = ''
     let value_area = []
-    console.log(formIndustry);
-    console.log(formIndustry.getFieldValue('nganhhang'));
     if(formIndustry.getFieldValue('nganhhang')){
       type_categories = formIndustry.getFieldValue('nganhhang')
     }else{
