@@ -27,7 +27,7 @@ function CustomerMapView() {
     {
       label: 'Đánh giá độ phủ đại lý',
       key: '1',
-      onClick: ()=> {
+      onClick: () => {
         setOpen(true);
       }
     },
@@ -44,7 +44,7 @@ function CustomerMapView() {
     setOpen(false);
   };
   const [apiKey, setApiKey] = useState("");
-  const [mapConfig, setMapConfig] = useState([]);
+  const [mapConfig, setMapConfig] = useState<any[]>([]);
   const [lstCustomer, setLstCustomer] = useState<TypeCustomer[]>([]);
   const map = useRef(null);
   const [isOpen, setIsOpen] = useState(false);
@@ -76,7 +76,7 @@ function CustomerMapView() {
     renderClusterMap();
   }, [lstCustomer]);
   useEffect(() => {
-    //if (mapConfig != null && mapConfig.length > 0) addLayerIndustry();
+    if (mapConfig != null && mapConfig.length > 0) addLayerIndustry();
   }, [mapConfig]);
 
   const getConfigApi = async () => {
@@ -359,11 +359,11 @@ function CustomerMapView() {
   const addLayerIndustry = (checkedKeys: React.Key[]) => {
     mapConfig.forEach((group) => {
       //group
-      if(group.group){
+      if (group.group) {
         group.children.forEach((child) => {
           const sources = child.sources;
           const layers = child.layers;
-  
+
           for (let propertySource in sources) {
             if (!map.current.getSource(propertySource)) {
               map.current.addSource(propertySource, sources[propertySource]);
@@ -377,11 +377,11 @@ function CustomerMapView() {
             map.current.setLayoutProperty(layer.id, 'visibility', visibility);
           });
         });
-      }else{
+      } else {
         group.forEach((child) => {
           const sources = child.sources;
           const layers = child.layers;
-  
+
           for (let propertySource in sources) {
             if (!map.current.getSource(propertySource)) {
               map.current.addSource(propertySource, sources[propertySource]);
@@ -398,21 +398,23 @@ function CustomerMapView() {
       }
     });
   };
-  
+
   const handleCheck = (checkedKeys: React.Key[]) => {
     mapConfig.forEach((group) => {
-        group.children.forEach((child) => {
-            const layers = child.layers;
+      group.children.forEach((child:any) => {
+        const layers = child.layers;
 
-            layers.forEach((layer) => {
-                const isVisible = checkedKeys.includes(layer.id);
-                const visibility = isVisible ? 'visible' : 'none';
-                map.current.setLayoutProperty(layer.id, 'visibility', visibility);
-            });
+        layers.forEach((layer:any) => {
+          const isVisible = checkedKeys.includes(layer.id);
+          const visibility = isVisible ? 'visible' : 'none';
+          map.current.setLayoutProperty(layer.id, 'visibility', visibility);
         });
+      });
     });
-};
-
+  };
+  const updateMapConfig = (newMapConfig: any[]) => {
+    setMapConfig(newMapConfig);
+  };
   return (
     <>
       <HeaderPage title="Bản đồ khách hàng" />
@@ -420,32 +422,32 @@ function CustomerMapView() {
         id="map"
         style={{ width: "100%", height: "80vh", borderRadius: "20px" }}
       >
-      <div className='ekmapplf_map-ananyltic'>
-      <Dropdown.Button
-        type="primary"
-        icon={<DownOutlined />}
-        menu={{ items }}
-      >
-        Công cụ phân tích
-      </Dropdown.Button>
+        <div className='ekmapplf_map-ananyltic'>
+          <Dropdown.Button
+            type="primary"
+            icon={<DownOutlined />}
+            menu={{ items }}
+          >
+            Công cụ phân tích
+          </Dropdown.Button>
 
-      </div>
-      <div id='ekmapplf_tracking_legend' className='ekmapplf_tracking-map-legend'>
-            <div className='ekmapplf_tracking-legend-title' onClick={toggleLegend}>
-                <span className={`icon ${isOpen ? 'ekmapplf_tracking-icon-square-minus' : 'ekmapplf_tracking-icon-square-plus'}`} style={{ filter: 'invert(100%) sepia(100%) saturate(0%) hue-rotate(187deg) brightness(105%) contrast(103%)' }}></span>
-                <span>Chú giải bản đồ</span>
-            </div>
-            <div className={`ekmapplf_tracking-legend-body ${isOpen ? 'open' : ''}`} style={{ maxHeight: isOpen ? '250px' : '0' , overflow: 'auto'}}>
-             <MapConfigTree mapConfig={mapConfig} onCheck={handleCheck}/>
-            </div>
+        </div>
+        <div id='ekmapplf_tracking_legend' className='ekmapplf_tracking-map-legend'>
+          <div className='ekmapplf_tracking-legend-title' onClick={toggleLegend}>
+            <span className={`icon ${isOpen ? 'ekmapplf_tracking-icon-square-minus' : 'ekmapplf_tracking-icon-square-plus'}`} style={{ filter: 'invert(100%) sepia(100%) saturate(0%) hue-rotate(187deg) brightness(105%) contrast(103%)' }}></span>
+            <span>Chú giải bản đồ</span>
+          </div>
+          <div className={`ekmapplf_tracking-legend-body ${isOpen ? 'open' : ''}`} style={{ maxHeight: isOpen ? '250px' : '0', overflow: 'auto' }}>
+            <MapConfigTree mapConfig={mapConfig} onCheck={handleCheck} onUpdateMapConfig={updateMapConfig} />
+          </div>
         </div>
 
       </div>
-      <ModalView 
-       open={open}
-       title="Đánh giá độ phủ"
-       onCancel={handleCloseModal}
-       onOk={handleOk}>
+      <ModalView
+        open={open}
+        title="Đánh giá độ phủ"
+        onCancel={handleCloseModal}
+        onOk={handleOk}>
       </ModalView>
     </>
   );
