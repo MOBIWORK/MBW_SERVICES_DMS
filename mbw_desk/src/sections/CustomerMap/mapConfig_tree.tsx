@@ -5,9 +5,10 @@ import { AxiosService } from '@/services/server';
 
 interface MapConfigTreeProps {
   onCheck: (checkedKeys: React.Key[]) => void;
+  onMoveLayer: (layerIds: React.Key,beforeIds: React.Key) => void;
 }
 
-const MapConfigTree: React.FC<MapConfigTreeProps> = ({ onCheck }) => {
+const MapConfigTree: React.FC<MapConfigTreeProps> = ({ onCheck, onMoveLayer }) => {
   const [expandedKeys, setExpandedKeys] = useState<React.Key[]>([]);
   const [checkedKeys, setCheckedKeys] = useState<React.Key[]>([]);
   const [selectedKeys, setSelectedKeys] = useState<React.Key[]>([]);
@@ -60,60 +61,62 @@ const MapConfigTree: React.FC<MapConfigTreeProps> = ({ onCheck }) => {
     const dragKey = info.dragNode.key;
     const dropPos = info.node.pos.split('-');
     const dropPosition = info.dropPosition - Number(dropPos[dropPos.length - 1]);
-  
-    const loop = (
-      data: TreeDataNode[],
-      key: React.Key,
-      callback: (node: TreeDataNode, i: number, data: TreeDataNode[]) => void
-    ) => {
-      for (let i = 0; i < data.length; i++) {
-        if (data[i].key === key) {
-          return callback(data[i], i, data);
+    const dragPos = info.dragNode.pos.split('-');
+    if (dropPos.length === dragPos.length){
+      const loop = (
+        data: TreeDataNode[],
+        key: React.Key,
+        callback: (node: TreeDataNode, i: number, data: TreeDataNode[]) => void
+      ) => {
+        for (let i = 0; i < data.length; i++) {
+          if (data[i].key === key) {
+            return callback(data[i], i, data);
+          }
+          if (data[i].children) {
+            loop(data[i].children!, key, callback);
+          }
         }
-        if (data[i].children) {
-          loop(data[i].children!, key, callback);
-        }
-      }
-    };
-  
-    // Clone the original tree data
-    const data = [...mapConfig];
-  
-    let dragObj: TreeDataNode;
-  
-    // Find the dragObject and remove it from the original data
-    loop(data, dragKey, (item, index, arr) => {
-      arr.splice(index, 1);
-      dragObj = item;
-    });
-  
-    // Continue processing to add the new node to the tree
-    if (!info.dropToGap) {
-      loop(data, dropKey, (item) => {
-        item.children = item.children || [];
-        item.children.unshift(dragObj);
+      };
+    
+      const data = [...mapConfig];
+    
+      let dragObj: TreeDataNode;
+    
+      loop(data, dragKey, (item, index, arr) => {
+        arr.splice(index, 1);
+        dragObj = item;
       });
-    } else {
-      let ar: TreeDataNode[] = [];
-      let i: number;
-      loop(data, dropKey, (_item, index, arr) => {
-        ar = arr;
-        i = index;
-      });
-      if (dropPosition === -1) {
-        ar.splice(i!, 0, dragObj!);
+    
+      if (!info.dropToGap) {
+        loop(data, dropKey, (item) => {
+          item.children = item.children || [];
+          item.children.unshift(dragObj);
+        });
       } else {
-        ar.splice(i! + 1, 0, dragObj!);
+        let ar: TreeDataNode[] = [];
+        let i: number;
+        loop(data, dropKey, (_item, index, arr) => {
+          ar = arr;
+          i = index;
+        });
+        if (dropPosition === -1) {
+          ar.splice(i!, 0, dragObj!);
+        } else {
+          ar.splice(i! + 1, 0, dragObj!);
+        }
       }
+      setMapConfig(data)
+      const layerIds = dragKey; 
+      const beforeId = info.dropToGap ? dropKey : undefined;
+      if (beforeId !== undefined) {
+        onMoveLayer(layerIds, beforeId);
+    } 
+    }else{
+      return;
     }
     
-    console.log(data);
-    // Update the map configuration with the modified tree data
-    setMapConfig(data)
   };
   
-  
-
   return (
     <Tree
       className="draggable-tree"

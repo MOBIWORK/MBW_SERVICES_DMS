@@ -401,16 +401,45 @@ function CustomerMapView() {
 
   const handleCheck = (checkedKeys: React.Key[]) => {
     mapConfig.forEach((group) => {
-      group.children.forEach((child:any) => {
+      group.children.forEach((child: any) => {
         const layers = child.layers;
 
-        layers.forEach((layer:any) => {
+        layers.forEach((layer: any) => {
           const isVisible = checkedKeys.includes(layer.id);
           const visibility = isVisible ? 'visible' : 'none';
           map.current.setLayoutProperty(layer.id, 'visibility', visibility);
         });
       });
     });
+  };
+  //moveLayers
+  const handleMoveLayer = (layerIds: any, beforeIds: any) => {
+    if (isParentId(layerIds)) {
+      const layerChildIds = getChildLayerIds(mapConfig, [layerIds]);
+      const beforeChildIds = getChildLayerIds(mapConfig, [beforeIds]);
+      layerChildIds.forEach((layerChildId, index) => {
+        const beforeChildId = beforeChildIds[index];
+        map.current.moveLayer(layerChildId, beforeChildId);
+      });
+    } else {
+      map.current.moveLayer(layerIds.toString(), beforeIds.toString());
+    }
+  };
+  const isParentId = (id: any) => {
+    const item = mapConfig.find((item) => item.id === id);
+    return item && item.children && item.children.length > 0;
+  };
+  const getChildLayerIds = (config: any[], layerIds: string[]) => {
+    const childIds: string[] = [];
+    layerIds.forEach(id => {
+      const item = config.find(item => item.id === id);
+      if (item && item.children) {
+        item.children.forEach(child => {
+          childIds.push(child.id);
+        });
+      }
+    });
+    return childIds;
   };
 
   return (
@@ -436,7 +465,7 @@ function CustomerMapView() {
             <span>Chú giải bản đồ</span>
           </div>
           <div className={`ekmapplf_tracking-legend-body ${isOpen ? 'open' : ''}`} style={{ maxHeight: isOpen ? '250px' : '0', overflow: 'auto' }}>
-            <MapConfigTree onCheck={handleCheck} />
+            <MapConfigTree onCheck={handleCheck} onMoveLayer={handleMoveLayer} />
           </div>
         </div>
 
