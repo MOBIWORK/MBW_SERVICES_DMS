@@ -129,3 +129,12 @@ export const TodayLimit = (day:any) => {
   
   return {today,nextday}
 }
+
+export const ExportExcel = (query:any) => {
+  const params = new URLSearchParams(query);
+window.location.href = (import.meta.env.VITE_BASE_URL || "") + `/api/method/frappe.core.doctype.data_import.data_import.download_template?${params.toString()}`
+}
+
+export const translationUrl = (url:string) => {
+  window.location.href = url
+}

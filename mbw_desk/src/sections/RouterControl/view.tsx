@@ -18,74 +18,21 @@ import { Link, useNavigate } from "react-router-dom";
 import { TagCustomStatus } from "../../components/tag/tag";
 import dayjs from "dayjs";
 import Filter from "./components/filter";
-import { orderFields } from "./data";
+import { columns, orderFields } from "./data";
 import { useForm } from "antd/lib/form/Form";
 import { MdKeyboardArrowDown } from "react-icons/md";
 import { router } from "../../types/router";
 import { GlobalContext } from "@/App";
-import { treeArray } from "@/util";
+import { translationUrl, treeArray } from "@/util";
 import { listSale } from "@/types/listSale";
 // ----------------------------------------------------------------------
 
-const columns = [
- 
-  {
-    title: "Mã tuyến",
-    dataIndex: "channel_code",
-    key: "channel_code"
-  },
-  {
-    title: "Tên tuyến",
-    dataIndex: "channel_name",
-    key: "channel_name"
-  },
-  {
-    title: "NVBH",
-    dataIndex: "employee_name",
-    key: "employee_name",
-    render: (value, record) => `${record?.employee}-${record?.employee_name}`
-  },
-  {
-    title: "Khách hàng",
-    dataIndex: "count_customer",
-    key: "count_customer"
-  },
-  {
-    title: "Trạng thái",
-    dataIndex: "status",
-    key: "status",
-    render: (value: string) => value == "Active" ? <TagCustomStatus > Hoạt động</TagCustomStatus > : <TagCustomStatus type="Warning" > Khóa</TagCustomStatus >
-  },
-  
-  {
-    title: "Ngày tạo",
-    dataIndex: "creation",
-    key: "creation",
-    render: (value: number) => dayjs(value * 1000).format("DD/MM/YYYY")
-
-  },
-  {
-    title: "Người tạo",
-    dataIndex: "owner",
-    key: "owner"
-  },
-  {
-    title: "Ngày cập nhật",
-    dataIndex: "modified",
-    key: "modified",
-    render: (value: number) => dayjs(value * 1000).format("DD/MM/YYYY")
-  },
-  {
-    title: "Người cập nhật",
-    dataIndex: "modified_by",
-    key: "modified_by"
-  }, 
-];
 
 
 
 export default function RouterControl() {
   const navigate = useNavigate();
+  const PAGE_SIZE = 20
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const {errorMsg,successMsg} = useContext(GlobalContext)
   const [form] = useForm()
@@ -100,13 +47,13 @@ export default function RouterControl() {
   const [employee, setEmployee] = useState<string>()
   const [status, setStatus] = useState<string>()
   const [page, setPage] = useState<number>(1)
-  const PAGE_SIZE = 20
   const [routersTable, setRouterTable] = useState<any[]>([])
   const [total, setTotal] = useState<number>(0)
   const [filter, setFilter] = useState({})
   const [listSales, setListSales] = useState<any[]>([]);
   const [orderBy, setOrder] = useState<"desc" | "asc">("desc")
   const [team_sale, setTeamSale] = useState<string>();
+  const [rfRouter,setRfRouter] = useState<boolean>(false)
   const [orderField, setOrderField] = useState<any>({
     "label": "Thời gian cập nhật",
     "value": "modified"
@@ -146,6 +93,8 @@ export default function RouterControl() {
     input: string,
     option?: { label: string; value: string }
   ) => (option?.label ?? "").toLowerCase().includes(input.toLowerCase());
+
+
   useEffect(() => {
     console.log(keySearch);
 
@@ -220,7 +169,7 @@ export default function RouterControl() {
 
     })()
 
-  }, [router, employee, status, page, filter, orderBy, orderField])
+  }, [router, employee, status, page, filter, orderBy, orderField,rfRouter])
   const handleUpdate = useCallback(async (type: string, value: string) => {
     try {
       let rsUpdate: rsData<router[]> = await AxiosService.patch("/api/method/mbw_dms.api.router.update_routers", {
@@ -308,12 +257,18 @@ export default function RouterControl() {
             icon: <LiaDownloadSolid className="text-xl" />,
             size: "20px",
             className: "flex items-center mr-2",
+            action: () => {
+              translationUrl("/app/data-export/Data%20Export")
+            }
           },
           {
             label: "Nhập excel",
             icon: <LuUploadCloud className="text-xl" />,
             size: "20px",
             className: "flex items-center mr-2",
+            action: () => {
+              translationUrl(`/app/data-import/new-data-import`)
+            }
           },
           {
             label: "Thêm mới",
@@ -435,6 +390,7 @@ export default function RouterControl() {
                             setEmployee(value);
                           }}
                           allowClear
+                          dropdownStyle={{ maxHeight: 400, overflow: 'auto', minWidth: 300 }}
                         />
                       </FormItemCustom>
                    </Col>
@@ -536,6 +492,7 @@ export default function RouterControl() {
           {action.action} {selectedRowKeys.length} đã chọn ?
         </span>
       </Modal>
+      
     </>
   )
 }
