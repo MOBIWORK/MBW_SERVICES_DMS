@@ -15,7 +15,8 @@
   "create_by",
   "items",
   "total_cost",
-  "total_qty"
+  "total_qty",
+  "checkin_id"
  ],
  "fields": [
   {
@@ -71,66 +72,71 @@
    "fieldname": "customer_type",
    "fieldtype": "Data",
    "label": "Lo\u1ea1i kh\u00e1ch h\u00e0ng"
+  },
+  {
+   "fieldname": "checkin_id",
+   "fieldtype": "Data",
+   "label": "Checkin ID"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-03-11 22:20:54.875123",
+ "modified": "2024-04-23 13:31:32.530613",
  "modified_by": "Administrator",
  "module": "MBW DMS",
  "name": "DMS Inventory",
  "owner": "Administrator",
  "permissions": [
-    {
-     "create": 1,
-     "delete": 1,
-     "email": 1,
-     "export": 1,
-     "print": 1,
-     "read": 1,
-     "report": 1,
-     "role": "System Manager",
-     "share": 1,
-     "write": 1
-    },
-    {
-     "email": 1,
-     "export": 1,
-     "print": 1,
-     "read": 1,
-     "report": 1,
-     "role": "All",
-     "select": 1,
-     "share": 1
-    },
-    {
-     "create": 1,
-     "delete": 1,
-     "email": 1,
-     "export": 1,
-     "print": 1,
-     "read": 1,
-     "report": 1,
-     "role": "Sales Manager",
-     "select": 1,
-     "share": 1,
-     "write": 1
-    },
-    {
-     "create": 1,
-     "delete": 1,
-     "email": 1,
-     "export": 1,
-     "if_owner": 1,
-     "print": 1,
-     "read": 1,
-     "report": 1,
-     "role": "Sales User",
-     "select": 1,
-     "share": 1,
-     "write": 1
-    }
-   ],
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "All",
+   "select": 1,
+   "share": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales Manager",
+   "select": 1,
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "if_owner": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales User",
+   "select": 1,
+   "share": 1,
+   "write": 1
+  }
+ ],
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": []

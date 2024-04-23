@@ -206,27 +206,43 @@ def get_list_notification_system(**kwargs):
 def get_notifi(**kwargs):
     try:
         employee_id = get_employee_id()
-        start_time = kwargs.get("start_time")
-        end_time = kwargs.get("end_time")
-        name = kwargs.get("name")
+        my_filter = {}
         data = []
+        from_date = validate_filter_timestamp(type='start')(kwargs.get('from_date')) if kwargs.get('from_date') else None
+        to_date = validate_filter_timestamp(type='end')(kwargs.get('to_date')) if kwargs.get('to_date') else None
+        page_size =  int(kwargs.get('page_size', 20))
+        page_number = int(kwargs.get('page_number')) if kwargs.get('page_number') and int(kwargs.get('page_number')) >= 1 else 1
+        name = kwargs.get('album')
+        if name:
+            my_filter['name'] = name
+        if from_date and to_date:
+            my_filter["date_checkin"] = ["between", [from_date, to_date]]
+        elif from_date:
+            my_filter["date_checkin"] = [">=",from_date]
+        elif to_date:
+            my_filter["date_checkin"] = ["<=", to_date]
         saleperson = frappe.get_value('Sales Person', {'employee': employee_id}, 'sales_person_name')
-        notis =  frappe.get_all('DMS Notice Board', {}, ['name', 'owner', 'notice_title', 'description', 'from_date', 'to_date', 'priority_level', 'apply_for', 'message', 'employee_watched'])
+        notis =  frappe.get_all('DMS Notice Board', filters=my_filter, fields=['name', 'owner', 'notice_title', 'description', 'from_date', 'to_date', 'priority_level', 'apply_for', 'message', 'employee_watched'],
+                                start=page_size*(page_number-1), page_length=page_size)
         for i in notis:
             if i.apply_for == 'All Employee':
-                info_employee = frappe.db.get_value("Employee", {"user_id": i.owner}, ['employee_name', 'image'], as_dict=True)
-                i['employee_name'] = info_employee.employee_name
-                i['image'] = validate_image(info_employee.image)
+                info_user = frappe.db.get_value("User", {"name": i.owner}, ['full_name', 'user_image'], as_dict=True)
+                i['full_name'] = info_user.full_name
+                i['user_image'] = validate_image(info_user.user_image)
                 data.append(i)
             elif i.apply_for == 'Specific Salesteam':
                 sale_team = get_value_child_doctype("DMS Notice Board", i['name'], 'salesteams')
-                info_employee = frappe.db.get_value("Employee", {"user_id": i.owner}, ['employee_name', 'image'], as_dict=True)
-                i['employee_name'] = info_employee.employee_name
-                i['image'] = validate_image(info_employee.image)
+                info_user = frappe.db.get_value("User", {"name": i.owner}, ['full_name', 'user_image'], as_dict=True)
+                i['full_name'] = info_user.full_name
+                i['user_image'] = validate_image(info_user.user_image)
                 for salein in sale_team:
                     if salein.nhom_ban_hang in get_all_parent_sales_persons(saleperson):
                         data.append(i)
-        return gen_response(200, "Thành công", data)
+        return gen_response(200, "Thành công", {
+            "data": data,
+            "page_number": page_number,
+            "page_size": page_size
+            })
     except Exception as e:
         exception_handle(e)
 

@@ -28,3 +28,8 @@ def update_address_customer(**kwargs):
 def cancel_checkout(**kwargs):
     from mbw_dms.mbw_dms.doctype.dms_checkin.dms_checkin import cancel_checkout
     return cancel_checkout(data=kwargs)
+
+@frappe.whitelist()
+def list_inventory(**kwargs):
+    from mbw_dms.mbw_dms.doctype.dms_checkin.dms_checkin import list_inventory
+    return list_inventory(kwargs=kwargs)

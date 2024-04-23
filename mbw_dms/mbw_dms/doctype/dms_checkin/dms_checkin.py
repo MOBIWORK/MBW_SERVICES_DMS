@@ -272,7 +272,7 @@ def create_checkin_inventory(body):
     try:
         user = get_user_id()
         normal_keys = [
-            "customer_code", "customer_name", "customer_type", "customer_address"
+            "customer_code", "customer_name", "customer_type", "customer_address", "checkin_id"
         ]
         del body['cmd']
         for key, value in body.items():
@@ -448,4 +448,16 @@ def create_checkin_ek(doc, method=None):
         data_checkin.update({"time_checkin": doc.checkin_giora})
     requests.post(url = api_checkin,data= data_checkin)
 
-    
+@frappe.whitelist(methods="GET")
+def list_inventory(kwargs):
+    try:
+        checkin_id = kwargs.get('checkin_id')
+        print('========================= value: ', checkin_id, flush=True)
+        inventory = frappe.db.get_all('DMS Inventory', filters={'checkin_id': checkin_id} ,fields=['name', 'checkin_id'])
+        for i in inventory:
+            i['items'] = get_value_child_doctype("DMS Inventory", i['name'], 'items')
+            
+            # data.append(sale_team)
+        return gen_response(200, "Thành công", inventory)
+    except Exception as e:
+        return exception_handle(e)
