@@ -10,7 +10,7 @@ import CustomerList from "./customer-list";
 import CustomerMap from "./customer-map";
 import { ChooseCustomer, ImportCustomer } from "./modal";
 import * as XLSX from 'xlsx';
-import { getAttrInArray } from "../../util";
+import { ExportExcel, getAttrInArray } from "../../util";
 import { AxiosService } from "../../services/server";
 import { CustomerContext } from "./view";
 import Optimize from "./components/optimize";
@@ -138,7 +138,15 @@ export default memo(function Customer() {
         cancelText='Hủy'
         title={<>
           <strong className="text-xl">Nhập dữ liệu khách hàng</strong><br />
-          <Button type="link" className="px-0">
+          <Button type="link" className="px-0" onClick={() => {
+            ExportExcel({
+              doctype:'DMS Router Customer',
+              export_fields: '{"DMS Router Customer":["name","display_address","customer","long","customer_code","phone_number","frequency","customer_name","lat"]}', 
+              export_records: 'blank_template', 
+              export_filters: null, 
+              file_type: 'Excel'
+            })
+          }} >
             Tải về file mẫu <DownloadOutlined />
           </Button>
         </>}
