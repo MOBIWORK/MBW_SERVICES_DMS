@@ -17,8 +17,6 @@
   "thoigian_toithieu",
   "batbuoc_kiemton",
   "batbuoc_chupanh",
-  "soluong_album",
-  "soluong_anh",
   "batbuoc_ghichu",
   "c\u1ea5u_h\u00ecnh_t\u00edch_h\u1ee3p_tab",
   "ma_du_an",
@@ -84,18 +82,6 @@
    "fieldname": "batbuoc_chupanh",
    "fieldtype": "Check",
    "label": "B\u1eaft bu\u1ed9c ch\u1ee5p \u1ea3nh"
-  },
-  {
-   "depends_on": "eval:doc.batbuoc_chupanh == 1;",
-   "fieldname": "soluong_album",
-   "fieldtype": "Int",
-   "label": "S\u1ed1 l\u01b0\u1ee3ng album"
-  },
-  {
-   "depends_on": "eval:doc.batbuoc_chupanh == 1;",
-   "fieldname": "soluong_anh",
-   "fieldtype": "Int",
-   "label": "S\u1ed1 l\u01b0\u1ee3ng \u1ea3nh"
   },
   {
    "default": "0",
@@ -195,7 +181,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-04-23 15:25:40.905999",
+ "modified": "2024-04-23 16:30:46.649609",
  "modified_by": "Administrator",
  "module": "MBW DMS",
  "name": "DMS Settings",
