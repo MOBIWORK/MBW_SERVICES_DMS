@@ -1,7 +1,7 @@
 import React, { useState ,useEffect,useRef} from "react";
 import { AxiosService } from "../../../services/server";
-import { Form, Select } from "antd";
-export function TypeIndustry () {
+import { Form, Select,Input } from "antd";
+export function TypeIndustry ({ onResult,form, industryResult }) {
     const [typeIndustry, setTypeIndustry] = useState(null);
     const storeTypes = [
         { value: 'restaurant', label: 'Nhà hàng' },
@@ -22,11 +22,14 @@ export function TypeIndustry () {
   }
     return (
         <>
- <Form layout="vertical" style={{ padding: "10px" }}>
+
                 <Form.Item label="Chọn ngành hàng : " name="nganhhang">
                   <Select showSearch placeholder="Chọn ngành hàng" onChange={onChangeTypeIndustry} options={storeTypes} filterOption={filterOption}></Select>
                 </Form.Item>
-              </Form>
+                <Form.Item label="Tên bản đồ: " name="namBando">
+                  <Input />
+                </Form.Item>
+              
         </>
     );
 }

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { AxiosService } from "../../services/server";
-import { Modal,Button } from 'antd';
+import { Modal,Button ,Form} from 'antd';
 import { DownOutlined } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import  {ScopeAnalysis} from './scope_analysis';
@@ -14,10 +14,11 @@ type Props = {
 };
 import { message, Steps, theme } from 'antd';
 export function ModalView ({ open, title, onCancel, onOk }: Props) {
+  const [formScope] = Form.useForm();
+  const [formIndustry] = Form.useForm();
   const [scopeResult, setScopeResult] = useState(null);
   const [industryResult, setIndustryResult] = useState(null);
   const handleScopeResult = (result) => {
-    console.log(result);
     setScopeResult(result);
   };
   const handleIndustryResult = (result) => {
@@ -26,11 +27,15 @@ export function ModalView ({ open, title, onCancel, onOk }: Props) {
   const steps = [
     {
       title: 'Phạm vi đánh giá độ phủ đại lý',
-      content: <ScopeAnalysis onResult={handleScopeResult} scopeResult={scopeResult}></ScopeAnalysis>,
+      content: <Form layout="vertical" form={formScope} style={{padding: "10px"}}>
+        <ScopeAnalysis onResult={handleScopeResult} form={formScope} scopeResult={scopeResult}></ScopeAnalysis>
+      </Form> ,
     },
     {
       title: 'Ngành hàng đánh giá độ phủ',
-      content: <TypeIndustry></TypeIndustry>,
+      content:<Form layout="vertical" form={formIndustry} style={{padding: "10px"}}>
+         <TypeIndustry onResult={handleIndustryResult} form={formIndustry} industryResult={industryResult}> </TypeIndustry>
+      </Form> ,
     },
     // {
     //   title: 'Thiết lập kết quả phân tích',
@@ -47,10 +52,71 @@ export function ModalView ({ open, title, onCancel, onOk }: Props) {
   const prev = () => {
     setCurrent(current - 1);
   };
+  const handleSubmit = async () => {
+    let type_categories = "agricultural_supplies"
+    let type_area = ''
+    let value_area = []
+    if(formScope.getFieldValue('huyen')){
+      type_area = 'administrative_district'
+      value_area = formScope.getFieldValue('huyen')
+    }else if(formScope.getFieldValue('tinh')){
+      type_area = 'administrative_province'
+      value_area = formScope.getFieldValue('tinh')
+    }else if(formScope.getFieldValue('khuvuc')){
+      type_area = 'administrative_region'
+      value_area = formScope.getFieldValue('khuvuc')
+    }else{
+      message.error('Chưa chọn khu vực giới hạn')
+      return
+    }
+    const apiUrl = `https://api.ekgis.vn/v1/analytic_market/determine_coverage?api_key=w1Dlh2wRon7mE6sL196TgvLS45fw02uon74pJ0rc`;
+    let dataPost  = {
+    "type_categories": "agricultural_supplies",
+    "type_area": "administrative_region",
+    "value_area": "[\"1\",\"2\",\"3\"]",
+    "locations": [[105.8343722805368, 21.02965447233156],[105.80653774526628, 20.974347940803487]]
+  }
+  // const response = await fetch(apiUrl, {
+  //   method: 'POST',
+  //   mode: "no-cors", // no-cors, *cors, same-origin
+  //   headers: {
+  //     'Content-Type': 'application/json',
 
+  //   },
+  //   body: JSON.stringify(dataPost)
+  // });
+  // const responseData = await response.json();
+  // console.log(responseData);
+  message.success('Phân tích thành công')
+  onOk([
+    {
+        "code": "1",
+        "name": "Trung du và miền núi phía Bắc",
+        "bbox": "102.14458466,20.30520058,108.06887054,23.39243698",
+        "sum_vgm": 561,
+        "sum_user": 0,
+        "ratio_coverage": 0
+    },
+    {
+        "code": "2",
+        "name": "Đồng Bằng Sông Hồng",
+        "bbox": "105.28813171,19.93569565,107.74571228,21.5738411",
+        "sum_vgm": 485,
+        "sum_user": 2,
+        "ratio_coverage": 0
+    },
+    {
+        "code": "3",
+        "name": "Bắc Trung Bộ",
+        "bbox": "103.87521362,15.99489307,108.19450378,20.67055702",
+        "sum_vgm": 288,
+        "sum_user": 0,
+        "ratio_coverage": 0
+    }
+])
+  }
   const items = steps.map((item) => ({ key: item.title, title: item.title }));
   const contentStyle: React.CSSProperties = {
-    lineHeight: '260px',
     textAlign: 'left',
     color: token.colorTextTertiary,
     backgroundColor: token.colorFillAlter,
@@ -58,7 +124,28 @@ export function ModalView ({ open, title, onCancel, onOk }: Props) {
     border: `1px dashed ${token.colorBorder}`,
     marginTop: 16,
   };
-
+  async function postData(url = '', data = {}) {
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+      });
+  
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+  
+      const responseData = await response.json();
+      console.log('POST request successful. Response data:', responseData);
+      return responseData; // Trả về dữ liệu từ phản hồi
+    } catch (error) {
+      console.error('Error posting data:', error);
+      throw error; // Ném lỗi để xử lý ở bên ngoài (nếu cần)
+    }
+  }
   return (
     <>
       <Modal
@@ -93,7 +180,7 @@ export function ModalView ({ open, title, onCancel, onOk }: Props) {
           </Button>
         )}
         {current === steps.length - 1 && (
-          <Button type="primary" onClick={() => message.success('Processing complete!')}>
+          <Button type="primary" onClick={handleSubmit}>
             Hoàn thành
           </Button>
         )}

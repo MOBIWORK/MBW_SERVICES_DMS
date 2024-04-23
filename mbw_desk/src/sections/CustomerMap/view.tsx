@@ -39,8 +39,9 @@ function CustomerMapView() {
     setOpen(false);
   };
 
-  const handleOk = () => {
-    console.log('Submitted');
+  const handleOk = (data) => {
+    console.log(data);
+    console.log('data');
     setOpen(false);
   };
   const [apiKey, setApiKey] = useState("");
@@ -68,6 +69,7 @@ function CustomerMapView() {
   }, []);
   useEffect(() => {
     if (apiKey != null && apiKey != "") {
+      console.log(apiKey);
       renderMap();
     }
   }, [apiKey]);
