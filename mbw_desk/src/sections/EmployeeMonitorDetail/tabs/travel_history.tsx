@@ -5,7 +5,7 @@ import { TodayLimit, tmpToTimeZone } from '../../../util'
 import { SupervisoryStaff } from '@/components'
 import { AxiosService } from '../../../services/server'
 import axios from "axios";
-import { message, Select } from 'antd';
+import { message, Select, Row, Button } from 'antd';
 import { HeaderPage } from '../../../components';
 import { BackIos } from '../../../icons';
 import { Link } from 'react-router-dom';
@@ -154,17 +154,15 @@ export default function TravelHistory({ employee }: { employee?: string }) {
   //Goij dich vu lay thong tin nhan vien theo objectId
   return (
     <>
-      <HeaderPage title={<div className="flex items-center">
-            <Link to="/employee-monitor" > <BackIos/></Link>
-            <span className='ml-4'>
+      <Row className="flex flex-wrap justify-between items-center px-0">
+        <div className="flex justify-center items-center">
+          <Link to="/employee-monitor" > <BackIos/></Link>
+            <span className="text-2xl font-semibold leading-[21px] mx-5">
               {nameEmployee}
             </span>
-        </div>} customButton={
-          <div className='p-4 border border-solid border-transparent border-b-[#F5F5F5]'>
-            <DatePick defaultValue={dayjs(time)} format={"DD-MM-YYYY"} onChange={handleChangeTime} />
-          </div>
-        } customSlect={
-          <div className='py-4 border border-solid border-transparent border-b-[#F5F5F5]'>
+        </div>
+        <div className="flex">
+        <div className='py-4 border border-solid border-transparent border-b-[#F5F5F5]'>
             <Select
                 defaultValue={defaultEmployeeSelect}
                 style={{ width: 150 }}
@@ -172,7 +170,12 @@ export default function TravelHistory({ employee }: { employee?: string }) {
                 options={arrEmployee}
               />
           </div>
-        }/>
+          <div className='p-4 border border-solid border-transparent border-b-[#F5F5F5]'>
+            <DatePick defaultValue={dayjs(time)} format={"DD-MM-YYYY"} onChange={handleChangeTime} />
+          </div>
+        </div>
+      </Row>
+
       <div className='border border-solid border-[#F5F5F5] rounded-lg'>
         <div id="travel" className='relative'>
           {options.projectId && <SupervisoryStaff options={options}/> }

@@ -59,8 +59,6 @@ function HistoryMap({ options, onLoad, HistoryIndex }) {
     const initializeMap = () => {
         try {
             if (map.current) {
-                if (map.animation_current) cancelAnimationFrame(map.animation_current);
-                if (map.timeout_current) clearTimeout(map.timeout_current);
                 map.current.remove();
             }
             map.current = new maplibregl.Map({
@@ -142,6 +140,7 @@ function HistoryMap({ options, onLoad, HistoryIndex }) {
             });
             _map.addControl(basemap, 'bottom-left');
             basemap.on('changeBaseLayer', async function (response) {
+                setAnimation(false)
                 await new ekmapplf.VectorBaseMap(response.layer, _options.apiKey).addTo(_map);
                 setTimeout(() => {
                     setMap(_options.from_time, _options.to_time, _options.pageNumber, _options.pageSize);
@@ -260,12 +259,15 @@ function HistoryMap({ options, onLoad, HistoryIndex }) {
                 let detailsHis = await getData(from_time, to_time, pageNumber, pageSize);
                 await initDataToMap(detailsHis);
                 let segmentData = await preAnimation(detailsHis);
-                if (detailsHis.length && detailsHis[0].coordinates) _map.easeTo({ center: detailsHis[0].coordinates, duration: 100, zoom: 16 })
-                setTimeout(() => setControls({
-                    ready: true,
-                    Data: segmentData,
-                    options: _options
-                }), 500)
+                if (detailsHis.length && detailsHis[0].coordinates && _options.animation.animate)
+                    _map.easeTo({ center: detailsHis[0].coordinates, duration: 100, zoom: 16 })
+                setTimeout(() => {
+                    setControls({
+                        ready: true,
+                        Data: segmentData,
+                        options: _options
+                    })
+                }, 500)
             }
 
 
@@ -305,7 +307,6 @@ function HistoryMap({ options, onLoad, HistoryIndex }) {
                         }
                     };
                     LineSource.features.push(feature)
-                    // item.type === "move" ? LineSource.features.push(feature) :
                     if (item.type !== "move") {
                         if (item.type === "checkin") CheckSource.features.push(feature)
                         else TrackSource.features.push(feature);
@@ -1176,12 +1177,12 @@ function HistoryMap({ options, onLoad, HistoryIndex }) {
                                 <span>${formatTimestamp(detail.startTime)}</span>
                             </div>
                             ${detail.endTime != '' ? `
-                                <div class="ek-tracking-his-popup-info">
-                                    <span class="ek-tracking-his-popup-icon">
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M464 256A208 208 0 1 1 48 256a208 208 0 1 1 416 0zM0 256a256 256 0 1 0 512 0A256 256 0 1 0 0 256zM232 120V256c0 8 4 15.5 10.7 20l96 64c11 7.4 25.9 4.4 33.3-6.7s4.4-25.9-6.7-33.3L280 243.2V120c0-13.3-10.7-24-24-24s-24 10.7-24 24z" fill="#FF6B6B"/></svg>
-                                    </span>
-                                    <span>${formatTimestamp(detail.endTime)}</span>
-                                </div>`: ``}`
+                            <div class="ek-tracking-his-popup-info">
+                                <span class="ek-tracking-his-popup-icon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M464 256A208 208 0 1 1 48 256a208 208 0 1 1 416 0zM0 256a256 256 0 1 0 512 0A256 256 0 1 0 0 256zM232 120V256c0 8 4 15.5 10.7 20l96 64c11 7.4 25.9 4.4 33.3-6.7s4.4-25.9-6.7-33.3L280 243.2V120c0-13.3-10.7-24-24-24s-24 10.7-24 24z" fill="#FF6B6B"/></svg>
+                                </span>
+                                <span>${formatTimestamp(detail.endTime)}</span>
+                            </div>`: ``}`
                 }
                 popupHis.current = new maplibregl.Popup({ className: 'ek-tracking-his-popup', closeButton: true, anchor: 'bottom', focusAfterOpen: false })
                     .setLngLat(detail.coordinates)
@@ -1250,8 +1251,8 @@ function HistoryMap({ options, onLoad, HistoryIndex }) {
                 speed: 0
             })
         }
-
     }
+
     return (<>
         <div ref={mapContainer} id='ekmap-tracking-his-map'>
             {Controls.ready !== false && <Animate_And_Controls map={HisMap} segmentData={Controls.Data} options={Controls.options} Animation={Animation} currentInfo={setInfo} />}

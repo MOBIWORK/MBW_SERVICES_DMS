@@ -27,7 +27,6 @@ function RealtimeMap({ options, onClickPopup, status }) {
 
     const initializeMap = async () => {
         try {
-            if (!map.current) { }
             map.current = new maplibregl.Map({
                 container: mapContainer.current,
                 center: _options.center,
@@ -152,7 +151,7 @@ function RealtimeMap({ options, onClickPopup, status }) {
                     _map.setLayoutProperty('building-3d', 'visibility', 'none');
                 }
             });
-            _map.addControl(btn3D, 'bottom-right');
+            _map.addControl(btn3D, 'top-right');
 
             _map.addControl(new maplibregl.FullscreenControl(), 'top-right');
 
