@@ -2,7 +2,7 @@ import { Table } from "antd";
 import styled from "styled-components";
 
 
-export const TableCustom = styled(Table)<{$border?: boolean}>`
+export const TableCustom = styled(Table)<{$border?: boolean,$wrap?: boolean}>`
 & table {
   border-left: ${props => props.$border ? "" : "none"}!important;
   border-right: ${props => props.$border ? "" : "none"}!important;
@@ -15,6 +15,10 @@ export const TableCustom = styled(Table)<{$border?: boolean}>`
 
 & .ant-table-cell {
   white-space: nowrap!important;
+}
+
+& tbody .ant-table-cell {
+  white-space: ${props => props?.$wrap ? "wrap":"nowrap"}!important;
 }
 &:not(:has(.ant-table-cell)) .ant-table-thead {
   &>tr {

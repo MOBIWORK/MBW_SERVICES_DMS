@@ -62,6 +62,7 @@ export default function CustomerList({search}: {search:string}) {
   return (
     <div className=''>
     <TableCustom 
+        $wrap={true}
         columns={columnsCustomer}
         dataSource={customerRouter.filter((cus: CustomerType) => 
             cus.customer_name?.toLocaleLowerCase()?.includes(search.toLocaleLowerCase()) || cus.customer_code?.toLocaleLowerCase()?.includes(search.toLocaleLowerCase()))}
