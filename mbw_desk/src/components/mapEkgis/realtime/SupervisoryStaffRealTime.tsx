@@ -228,6 +228,12 @@ export default function SupervisoryStaffRealTime() {
         ...prev,
         projectId: rs.result[ "Project ID"]
       }))
+      const res_apikey = await AxiosService.get("/api/method/mbw_dms.api.vgm.map_customer.get_config_api");
+      console.log(res_apikey);
+      setOptions(prev => ({
+        ...prev,
+        apiKey: res_apikey.result
+      }))
       let responseAllEmployee = await AxiosService("/api/method/mbw_dms.api.user.get_list_employees")
       let arrEmployee = [];
       if(responseAllEmployee.message == "Thành công"){

@@ -24,9 +24,8 @@ function HistoryMap({ options, onLoad, HistoryIndex }) {
         time: null,
         speed: 0
     });
-    const animationID = useRef(null);
-    const timeoutAnimationID = useRef(null);
     const HistoryData = useRef(null);
+    const GpxData = useRef(null);
     const [Animation, setAnimation] = useState(false);
     const popupHis = useRef(null);
 
@@ -45,13 +44,13 @@ function HistoryMap({ options, onLoad, HistoryIndex }) {
         },
         route: {
             visible: true,
-            lineCorlor: '#01579B',
-            lineWidth: 4,
-            lineOpacity: 0.8,
+            lineCorlor: '#0F53FF',
+            lineWidth: 6.5,
+            lineOpacity: 0.9,
         },
         animation: {
             follow: true,
-            animate: true,
+            animate: false,
         }
     };
     const _options = extend({}, defaultOptions, options);
@@ -75,11 +74,18 @@ function HistoryMap({ options, onLoad, HistoryIndex }) {
             // _map.setPadding({ top: 100, bottom: 100, left: 250, right: 70 });
             _map.setPadding({ top: 100, bottom: 100, left: 100, right: 100 });
 
-            new ekmapplf.VectorBaseMap('OSM:Bright', _options.apiKey).addTo(_map);
+            new ekmapplf.VectorBaseMap('OSM:Night', _options.apiKey).addTo(_map);
 
             var basemap = new ekmapplf.control.BaseMap({
                 id: 'ekmapplf_tracking_ctrl_basemap_' + _map_Container.id,
                 baseLayers: [
+                    {
+                        id: "OSM:Night",
+                        title: 'Bản đồ nền Đêm',
+                        thumbnail: "https://docs.ekgis.vn/assets/dem-map.png",
+                        width: "50px",
+                        height: "50px"
+                    },
                     {
                         id: "OSM:Bright",
                         title: 'Bản đồ nền Sáng',
@@ -98,13 +104,6 @@ function HistoryMap({ options, onLoad, HistoryIndex }) {
                         id: "OSM:Gray",
                         title: 'Bản đồ nền Xám',
                         thumbnail: "https://docs.ekgis.vn/assets/xam-map.png",
-                        width: "50px",
-                        height: "50px"
-                    },
-                    {
-                        id: "OSM:Night",
-                        title: 'Bản đồ nền Đêm',
-                        thumbnail: "https://docs.ekgis.vn/assets/dem-map.png",
                         width: "50px",
                         height: "50px"
                     },
@@ -141,10 +140,10 @@ function HistoryMap({ options, onLoad, HistoryIndex }) {
             _map.addControl(basemap, 'bottom-left');
             basemap.on('changeBaseLayer', async function (response) {
                 setAnimation(false)
-                await new ekmapplf.VectorBaseMap(response.layer, _options.apiKey).addTo(_map);
-                setTimeout(() => {
-                    setMap(_options.from_time, _options.to_time, _options.pageNumber, _options.pageSize);
-                }, 500)
+                new ekmapplf.VectorBaseMap(response.layer, _options.apiKey).addTo(_map);
+                setTimeout(async () => {
+                    await setMap(_options.from_time, _options.to_time, _options.pageNumber, _options.pageSize);
+                }, 1000)
             });
 
             _map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'bottom-right');
@@ -256,9 +255,11 @@ function HistoryMap({ options, onLoad, HistoryIndex }) {
             });
 
             const setMap = async (from_time, to_time, pageNumber, pageSize) => {
+                setAnimation(false)
                 let detailsHis = await getData(from_time, to_time, pageNumber, pageSize);
                 await initDataToMap(detailsHis);
                 let segmentData = await preAnimation(detailsHis);
+                GpxData.current = segmentData;
                 if (detailsHis.length && detailsHis[0].coordinates && _options.animation.animate)
                     _map.easeTo({ center: detailsHis[0].coordinates, duration: 100, zoom: 16 })
                 setTimeout(() => {
@@ -267,19 +268,21 @@ function HistoryMap({ options, onLoad, HistoryIndex }) {
                         Data: segmentData,
                         options: _options
                     })
-                }, 500)
+                    // setAnimation(true)
+                }, 300)
             }
 
 
             //Data
             const getData = async (from_time, to_time, pageNumber, pageSize) => {
-                let url = `https://api.ekgis.vn/v2/tracking/locationHistory/summary/${_options.projectId}/${_options.objectId}?api_key=${_options.apiKey}&from_time=${from_time}&to_time=${to_time}`;
-                const response = await fetch(url);
-                const Data = await response.json();
-                HistoryData.current = Data
-                onLoad(HistoryData.current)
-                var arrData = Data.details
-                return arrData || [];
+                if (!HistoryData.current) {
+                    let url = `https://api.ekgis.vn/v2/tracking/locationHistory/summary/${_options.projectId}/${_options.objectId}?api_key=${_options.apiKey}&from_time=${from_time}&to_time=${to_time}`;
+                    const response = await fetch(url);
+                    const Data = await response.json();
+                    HistoryData.current = Data
+                    onLoad(HistoryData.current)
+                }
+                return HistoryData.current.details || [];
             };
 
 
@@ -307,6 +310,16 @@ function HistoryMap({ options, onLoad, HistoryIndex }) {
                         }
                     };
                     LineSource.features.push(feature)
+                    if (item.type === "move" && item.route.geometry.coordinates.length === 0) {
+                        let coords = item.route.locations.map(item => item.coordinates)
+                        LineSource.features.push({
+                            type: "Feature",
+                            geometry: {
+                                type: "LineString",
+                                coordinates: coords
+                            }
+                        })
+                    }
                     if (item.type !== "move") {
                         if (item.type === "checkin") CheckSource.features.push(feature)
                         else TrackSource.features.push(feature);
@@ -317,7 +330,7 @@ function HistoryMap({ options, onLoad, HistoryIndex }) {
                 // console.log(TrackSource);
                 if (data.length) {
                     var boundbox = bbox(LineSource);
-                    _map.fitBounds(boundbox, { padding: 100, maxZoom: 14, duration: 1000 });
+                    _map.fitBounds(boundbox, { maxZoom: 16, duration: 1000 });
                 }
 
                 await setLine(LineSource);
@@ -390,7 +403,10 @@ function HistoryMap({ options, onLoad, HistoryIndex }) {
                                             0.75
                                         ]
                                     ]
-                                }
+                                },
+                            },
+                            'paint': {
+                                'icon-opacity': 0.9
                             }
                         });
                     }
@@ -1016,7 +1032,7 @@ function HistoryMap({ options, onLoad, HistoryIndex }) {
     }
 
     useEffect(() => {
-        if (!Animation) setAnimation(true)
+        // if (!Animation) setAnimation(true)
         setStage({
             date: null,
             time: null,
@@ -1027,18 +1043,19 @@ function HistoryMap({ options, onLoad, HistoryIndex }) {
             Data: [],
             options: null
         })
+        HistoryData.current = null;
+        GpxData.current = null;
         initializeMap();
         return () => {
-            if (animationID.current) cancelAnimationFrame(animationID.current);
-            if (timeoutAnimationID.current) clearTimeout(timeoutAnimationID.current);
             if (popupHis.current) popupHis.current.remove();
             if (map.current) map.current.remove();
         };
     }, [options]);
 
     useEffect(() => {
+        setAnimation(null)
         if (HistoryIndex !== null) {
-            setAnimation(false)
+            if (!HistoryData.current) return
             const HisDetails = HistoryData.current.details;
             const detail = HisDetails[HistoryIndex]
             if (!detail) return;
@@ -1049,12 +1066,18 @@ function HistoryMap({ options, onLoad, HistoryIndex }) {
                     HisMap.setLayoutProperty(`ek-tracking-his-LineString-arrow`, 'visibility', 'none');
 
                     var fcRouteHistory = {
-                        'type': 'FeatureCollection',
-                        'features': [{
-                            type: "Feature",
-                            geometry: detail.route.geometry
-                        }]
+                        type: "Feature",
+                        geometry: detail.route.geometry
                     }
+
+                    if (detail.route.geometry.coordinates.length === 0) {
+                        let coords = detail.route.locations.map(item => item.coordinates)
+                        fcRouteHistory.geometry = {
+                            type: "LineString",
+                            coordinates: coords
+                        }
+                    }
+
                     if (!HisMap.getImage('icon_arrow') && !HisMap.hasImage('icon_arrow')) {
                         var svg_arrow = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M19.2901 9.1698L7.70015 3.0698C4.95015 1.6198 1.96015 4.5498 3.35015 7.3298L4.97015 10.5698C5.42015 11.4698 5.42015 12.5298 4.97015 13.4298L3.35015 16.6698C1.96015 19.4498 4.95015 22.3698 7.70015 20.9298L19.2901 14.8298C21.5701 13.6298 21.5701 10.3698 19.2901 9.1698Z" stroke="#292D32" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" fill="#e50027"/></svg>';
                         var icon_arrow = new Image();
@@ -1116,22 +1139,23 @@ function HistoryMap({ options, onLoad, HistoryIndex }) {
                         });
                     } else HisMap.getSource('RouteHistory').setData(fcRouteHistory);
 
-                    if (detail.route.geometry.coordinates.length) {
-                        var boundbox = bbox(fcRouteHistory);
-                        HisMap.fitBounds(boundbox, { padding: 100, maxZoom: 16, duration: 1000 });
-                    }
+                    var boundbox = bbox(fcRouteHistory);
+                    HisMap.fitBounds(boundbox, { padding: 100, maxZoom: 16, duration: 1000 });
 
-                    // var gpx = await preAnimation([detail])
-                    // setTimeout( () => {
-                    //     setControls({
-                    //         ready: true,
-                    //         Data: gpx,
-                    //         options: _options
-                    //     })
-                    // }, 300)
+                    var gpx = await preAnimation([detail])
+                    setTimeout( () => {
+                        setControls({
+                            ready: true,
+                            Data: gpx,
+                            options: _options
+                        })
+                    }, 200)
                 }, 300)
             } else if (detail.type === 'start' || detail.type === 'end' || detail.type === 'stop' || detail.type === 'checkin') {
-                HisMap.easeTo({ center: detail.coordinates, duration: 100, zoom: 16, bearing: 0 })
+                HisMap.setPaintProperty(`ek-tracking-his-LineString`, 'line-color', '#b5b5b5');
+                HisMap.setPaintProperty(`ek-tracking-his-LineString`, 'line-opacity', 0.5);
+                HisMap.setLayoutProperty(`ek-tracking-his-LineString-arrow`, 'visibility', 'none');
+                HisMap.easeTo({ center: detail.coordinates, duration: 100, zoom: 17, bearing: 0 })
 
                 var html;
                 if (detail.type === 'start' || detail.type === 'end') {
@@ -1190,6 +1214,13 @@ function HistoryMap({ options, onLoad, HistoryIndex }) {
                     .setOffset([0, -20])
                     .addTo(HisMap)
             }
+        } else{
+            if(GpxData.current)
+                setControls({
+                    ready: true,
+                    Data: GpxData.current,
+                    options: _options
+                })
         }
 
         return () => {

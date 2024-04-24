@@ -20,6 +20,7 @@ function RealtimeMap({ options, onClickPopup, status }) {
         center: [105, 17],
         zoom: 4.5,
         reloadTime: 60000,
+        stopTime: 600,
         iconOnline: 'https://files.ekgis.vn/sdks/tracking/assets/check-icon.png',
         iconOffline: 'https://files.ekgis.vn/sdks/tracking/assets/offline-marker.png',
     };
@@ -39,11 +40,18 @@ function RealtimeMap({ options, onClickPopup, status }) {
             // console.log(_map);
             _map.setPadding({ top: 100, bottom: 100, left: 100, right: 100 });
 
-            new ekmapplf.VectorBaseMap('OSM:Bright', _options.apiKey).addTo(_map);
+            new ekmapplf.VectorBaseMap('OSM:Night', _options.apiKey).addTo(_map);
 
             var basemap = new ekmapplf.control.BaseMap({
                 id: 'ekmapplf_tracking_ctrl_basemap',
                 baseLayers: [
+                    {
+                        id: "OSM:Night",
+                        title: 'Bản đồ nền Đêm',
+                        thumbnail: "https://docs.ekgis.vn/assets/dem-map.png",
+                        width: "50px",
+                        height: "50px"
+                    },
                     {
                         id: "OSM:Bright",
                         title: 'Bản đồ nền Sáng',
@@ -62,13 +70,6 @@ function RealtimeMap({ options, onClickPopup, status }) {
                         id: "OSM:Gray",
                         title: 'Bản đồ nền Xám',
                         thumbnail: "https://docs.ekgis.vn/assets/xam-map.png",
-                        width: "50px",
-                        height: "50px"
-                    },
-                    {
-                        id: "OSM:Night",
-                        title: 'Bản đồ nền Đêm',
-                        thumbnail: "https://docs.ekgis.vn/assets/dem-map.png",
                         width: "50px",
                         height: "50px"
                     },
@@ -151,14 +152,14 @@ function RealtimeMap({ options, onClickPopup, status }) {
                     _map.setLayoutProperty('building-3d', 'visibility', 'none');
                 }
             });
-            _map.addControl(btn3D, 'top-right');
+            _map.addControl(btn3D, 'bottom-right');
 
             _map.addControl(new maplibregl.FullscreenControl(), 'top-right');
 
             _map.on('load', async () => {
                 try {
                     let fc = await setMap();
-                    if (fc.features.length) {
+                    if (fc && fc.features.length) {
                         let bounds = bbox(fc);
                         _map.fitBounds(bounds, { padding: 100, maxZoom: 14, duration: 1000 });
                     }
@@ -173,80 +174,14 @@ function RealtimeMap({ options, onClickPopup, status }) {
             });
 
             const setMap = async () => {
-                const getAllObjs = async () => {
-                    let url = `https://api.ekgis.vn/tracking/${_options.projectId}/objects?api_key=${_options.apiKey}`;
-                    let response = await fetch(url);
-                    let responseData = await response.json();
-                    return responseData.results.objects.map(item => item._id) || [];
-                }
-                if (!_options.objectId) _options.objectId = await getAllObjs(_options.projectId);
+                if (!_options.objectId) _options.objectId = null;
+                if (Array.isArray(_options.objectId) && _options.objectId.length === 0) return;
                 return await loadMap(_options.objectId);
             }
 
             const loadMap = async (objectIds) => {
-                if (!Array.isArray(objectIds)) return;
-
-                const getLastPos = async (objectId) => {
-                    try {
-                        const urlTracking = `https://api.ekgis.vn/v2/tracking/locationHistory/position/${_options.projectId}/${objectId}/lastest?api_key=${_options.apiKey}`;
-                        const urlCheckin = `https://api.ekgis.vn/v1/checkin/${_options.projectId}/${objectId}/lastcheckin?api_key=${_options.apiKey}`;
-                        const responseTracking = await fetch(urlTracking);
-                        const responseCheckin = await fetch(urlCheckin);
-                        const DataTracking = await responseTracking.json();
-                        const DataCheckin = await responseCheckin.json();
-                        if (!DataTracking.position && !DataCheckin.length) {
-                            return {
-                                '_id': DataTracking.summary._id,
-                                'name': DataTracking.summary.name,
-                                'status': 'offline',
-                            };
-                        }
-                        const TrackTimestamp = DataTracking.position ? Date.parse(DataTracking.position.timestamp) : 0;
-                        const CheckinTimestamp = DataCheckin.length ? Date.parse(DataCheckin[0].timestamp) : 0;
-                        const isTracking = TrackTimestamp > CheckinTimestamp;
-                        var timestamp = isTracking ? TrackTimestamp : CheckinTimestamp
-
-                        if (isToday(timestamp)) {
-                            var status = 'offline'
-                            const coords = isTracking ? [DataTracking.position.coords.longitude, DataTracking.position.coords.latitude] : DataCheckin[0].coordinates.split(',').map(coord => parseFloat(coord));
-                            const address = await reverseGeocode(coords);
-
-                            if (isTracking) {
-                                if (Date.parse(new Date()) - timestamp <= 600 * 1000) status = 'online';
-                            } else {
-                                if (DataCheckin[0].timestamp.time_checkout == '') status = 'online'
-                                else if (Date.parse(new Date()) - Date.parse(DataCheckin[0].timestamp.time_checkout) <= 600 * 1000) status = 'online';
-                            }
-                            return {
-                                '_id': DataTracking.summary._id,
-                                'name': DataTracking.summary.name,
-                                'type': isTracking ? 'tracking' : 'checkin',
-                                'position': isTracking ? DataTracking.position : DataCheckin[0],
-                                'coordinates': coords,
-                                'address': address,
-                                'status': status,
-                                'timestamp': timestamp
-                            };
-                        } else return {
-                            '_id': DataTracking.summary._id,
-                            'name': DataTracking.summary.name,
-                            'status': 'offline',
-                        };
-
-                        function isToday(timestamp) {
-                            const todayTimestamp = new Date().setHours(0, 0, 0, 0);
-                            const dateTimestamp = new Date(timestamp).setHours(0, 0, 0, 0);
-                            return dateTimestamp === todayTimestamp;
-                        }
-
-                    } catch (error) {
-                        console.error('Error getting last position:', error);
-                        throw error;
-                    }
-                };
-
-                var DataObjs = await Promise.all(objectIds.map(item => getLastPos(item).catch(error => null)));
-                DataObjs = DataObjs.filter(item => item !== null);
+                var DataObjs = await getLastPos(objectIds)
+                // DataObjs = DataObjs.filter(item => item !== null);
                 // console.log(DataObjs);
                 const statusCount = DataObjs.reduce((acc, cur) => {
                     if (cur.status === "offline") {
@@ -255,8 +190,9 @@ function RealtimeMap({ options, onClickPopup, status }) {
                         acc.online++;
                     }
                     return acc;
-                }, { offline: 0, online: 0 });
+                }, { online: 0, offline: 0 });
                 status(statusCount);
+
                 const FeatureCollection = {
                     'type': 'FeatureCollection',
                     'features': await Promise.all(DataObjs.map((data) => {
@@ -347,7 +283,7 @@ function RealtimeMap({ options, onClickPopup, status }) {
                     });
 
                     //uncluster
-                    async function updateMarkers() {;
+                    async function updateMarkers() {
                         const newMarkers = {};
                         const features = _map.querySourceFeatures(`ek-tracking-live-source`);
                         for (let i = 0; i < features.length; i++) {
@@ -418,7 +354,84 @@ function RealtimeMap({ options, onClickPopup, status }) {
                 return FeatureCollection;
             }
 
-            const reverseGeocode = async (position) => {
+            async function getLastPos(objectIds) {
+                try {
+                    var str_ids = objectIds === null ? 'null' : objectIds.toString().replaceAll(',', ';');
+                    const urlTracking = `https://api.ekgis.vn/v2/tracking/locationHistory/position/${_options.projectId}/latest/${str_ids}?api_key=${_options.apiKey}`;
+                    const urlCheckin = `https://api.ekgis.vn/v1/checkin/${_options.projectId}/latest/${str_ids}?api_key=${_options.apiKey}`;
+
+                    const [responseTracking, responseCheckin] = await Promise.all([
+                        fetch(urlTracking),
+                        fetch(urlCheckin)
+                    ]);
+
+                    const DataTracking = await responseTracking.json();
+                    const DataCheckin = await responseCheckin.json();
+
+                    let obj2Map = {};
+                    DataTracking.forEach(item => {
+                        obj2Map[item.object._id] = item;
+                    });
+
+                    let mergedArray = DataCheckin.map(item1 => ({
+                        object: item1.object,
+                        position: obj2Map[item1.object._id] ? obj2Map[item1.object._id].position : null,
+                        checkin: item1.checkin
+                    }));
+
+                    var results = []
+                    for (const item of mergedArray) {
+                        if (!item.position && !item.checkin) {
+                            results.push({
+                                '_id': item.object._id,
+                                'name': item.object.name,
+                                'status': 'offline',
+                            });
+                        } else {
+                            const TrackTimestamp = item.position ? Date.parse(item.position.timestamp) : 0;
+                            const CheckinTimestamp = item.checkin ? Date.parse(item.checkin.timestamp) : 0;
+                            const isTracking = TrackTimestamp > CheckinTimestamp;
+                            const timestamp = isTracking ? TrackTimestamp : CheckinTimestamp;
+                            const today = await isToday(timestamp);
+
+                            if (today) {
+                                var status = 'offline';
+                                const coords = isTracking ? [item.position.coords.longitude, item.position.coords.latitude] : item.checkin.coordinates.split(',').map(coord => parseFloat(coord));
+                                const address = await reverseGeocode(coords);
+
+                                if (isTracking) {
+                                    if (Date.parse(new Date()) - timestamp <= (_options.stopTime * 1000)) status = 'online';
+                                } else {
+                                    if (item.checkin.time_checkout == '') status = 'online';
+                                    else if (Date.parse(new Date()) - Date.parse(item.checkin.time_checkout) <= (_options.stopTime * 1000)) status = 'online';
+                                }
+                                results.push({
+                                    '_id': item.object._id,
+                                    'name': item.object.name,
+                                    'type': isTracking ? 'tracking' : 'checkin',
+                                    'position': isTracking ? item.position : item.checkin,
+                                    'coordinates': coords,
+                                    'address': address,
+                                    'status': status,
+                                    'timestamp': timestamp
+                                });
+                            } else {
+                                results.push({
+                                    '_id': item.object._id,
+                                    'name': item.object.name,
+                                    'status': 'offline',
+                                });
+                            }
+                        }
+                    }
+                    return results;
+                } catch (error) {
+                    console.error('Error getting last position:', error);
+                    throw error;
+                }
+            };
+
+            async function reverseGeocode(position) {
                 return new Promise((resolve, reject) => {
                     const param = {
                         'point.lon': position[0],
@@ -435,6 +448,12 @@ function RealtimeMap({ options, onClickPopup, status }) {
                     });
                 });
             };
+
+            function isToday(timestamp) {
+                const date = new Date(timestamp);
+                const today = new Date();
+                return date.getDate() === today.getDate() && date.getMonth() === today.getMonth() && date.getFullYear() === today.getFullYear();
+            }
 
         } catch (error) {
             console.error('Error initializing map:', error);
