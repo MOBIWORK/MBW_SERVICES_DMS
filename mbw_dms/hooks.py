@@ -7,6 +7,7 @@ app_description = "API MBW DMS"
 app_email = "dev@mbw.vn"
 app_license = "MIT"
 
+setup_wizard_stages = "mbw_dms.setup_wizard.setup_wizard.get_setup_stages"
 website_route_rules = [
 	{
 		"from_route": "/mbw_desk/<path:app_path>",
