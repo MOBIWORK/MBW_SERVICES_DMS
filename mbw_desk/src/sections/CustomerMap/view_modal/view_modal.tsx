@@ -34,8 +34,8 @@ export function ModalView ({ open, title, onCancel, onOk }: Props) {
     {
       title: 'Ngành hàng đánh giá độ phủ',
       content:<Form layout="vertical" form={formIndustry} style={{padding: "10px"}}>
-         <TypeIndustry onResult={handleIndustryResult} industryResult={industryResult}> </TypeIndustry>
-      </Form> ,
+      <TypeIndustry></TypeIndustry>
+    </Form>,
     },
     // {
     //   title: 'Thiết lập kết quả phân tích',
@@ -53,16 +53,16 @@ export function ModalView ({ open, title, onCancel, onOk }: Props) {
     setCurrent(current - 1);
   };
   const handleSubmit = async () => {
-   
     let type_categories = "agricultural_supplies"
     let type_area = ''
     let value_area = []
-    if(formIndustry.getFieldValue('nganhhang')){
-      type_categories = formIndustry.getFieldValue('nganhhang')
-    }else{
-      message.error('Chưa chọn ngành hàng ')
-      return
-    }
+    // console.log(formIndustry.getFieldValue('nganhhang'));
+    // if(formIndustry.getFieldValue('nganhhang')){
+    //   type_categories = formIndustry.getFieldValue('nganhhang')
+    // }else{
+    //   message.error('Chưa chọn ngành hàng ')
+    //   return
+    // }
     if(formScope.getFieldValue('huyen')){
       type_area = 'administrative_district'
       value_area = formScope.getFieldValue('huyen')

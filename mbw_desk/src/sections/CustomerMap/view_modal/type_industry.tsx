@@ -1,7 +1,7 @@
 import React, { useState ,useEffect,useRef} from "react";
 import { AxiosService } from "../../../services/server";
 import { Form, Select,Input } from "antd";
-export function TypeIndustry ({ onResult, industryResult }) {
+export function TypeIndustry () {
     const [typeIndustry, setTypeIndustry] = useState(null);
     const storeTypes = [
       {
@@ -92,9 +92,8 @@ export function TypeIndustry ({ onResult, industryResult }) {
   }
     return (
         <>
-
                 <Form.Item label="Chọn ngành hàng : " name="nganhhang">
-                  <Select showSearch placeholder="Chọn ngành hàng" onChange={onChangeTypeIndustry} options={transformedStoreTypes} filterOption={filterOption}></Select>
+                  <Select showSearch placeholder="Chọn ngành hàng" value={typeIndustry} onChange={onChangeTypeIndustry} options={transformedStoreTypes} filterOption={filterOption}></Select>
                 </Form.Item>
                 <Form.Item label="Tên bản đồ: " name="namBando">
                   <Input />
