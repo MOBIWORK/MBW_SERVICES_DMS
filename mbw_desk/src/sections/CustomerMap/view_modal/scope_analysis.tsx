@@ -355,12 +355,6 @@ export function ScopeAnalysis({ onResult, scopeResult,api }) {
     //   await getConfigMap();
     // });
   };
-  const getConfigMap = async () => {
-    let res = await AxiosService.get(
-      "/api/method/mbw_dms.api.vgm.map_customer.get_config_map"
-    );
-    setMapConfig(res.result);
-  };
   // useEffect(() => {
   //   getConfigApi();
   // }, []);

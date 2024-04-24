@@ -120,7 +120,7 @@ function CustomerMapView() {
     // });
     // Lưu file Excel
     const buffer = await workbook.xlsx.writeBuffer();
-    saveAsExcelFile(buffer, "report_check_image");
+    saveAsExcelFile(buffer, "report_");
   };
   const saveAsExcelFile = (buffer: any, fileName: string) => {
     let EXCEL_TYPE =
@@ -138,6 +138,7 @@ function CustomerMapView() {
   const [mapHeight, setMapHeight] = useState('74.5vh');
   const [visibleTable, setVisibleTable] = useState(false);
   const handleOk = (data) => {
+    console.log(data);
     setDataSource(data)
     setMapHeight('40vh');
     setVisibleTable(true)
