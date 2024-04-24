@@ -135,7 +135,7 @@ function CustomerMapView() {
     );
   };
   const [dataSource, setDataSource] = useState([]);
-  const [mapHeight, setMapHeight] = useState('80vh');
+  const [mapHeight, setMapHeight] = useState('74.5vh');
   const [visibleTable, setVisibleTable] = useState(false);
   const handleOk = (data) => {
     setDataSource(data)
@@ -147,21 +147,11 @@ function CustomerMapView() {
   const [mapConfig, setMapConfig] = useState<any[]>([]);
   const [lstCustomer, setLstCustomer] = useState<TypeCustomer[]>([]);
   const map = useRef(null);
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(true);
 
   const toggleLegend = () => {
     setIsOpen(!isOpen);
   };
-
-  //movelayer
-  // const toggleCustomerLayersVisibility = () => {
-  //   const visibility = isOpenCheckBox ? "none" : "visible";
-  //   map.current.getStyle().layers.forEach((layer) => {
-  //     if (layer.id.includes("customer")) {
-  //       map.current.setLayoutProperty(layer.id, "visibility", visibility);
-  //     }
-  //   });
-  // };
 
   useEffect(() => {
     getConfigApi();
@@ -175,6 +165,7 @@ function CustomerMapView() {
 
   useEffect(() => {
     renderClusterMap();
+    renderHeatMap();
   }, [lstCustomer]);
   useEffect(() => {
     if (mapConfig != null && mapConfig.length > 0) addLayerIndustry();
@@ -245,6 +236,7 @@ function CustomerMapView() {
       await new ekmapplf.VectorBaseMap(response.layer, apiKey).addTo(
         map.current
       );
+
     });
     map.current.addControl(
       new maplibregl.NavigationControl({ visualizePitch: true }),
@@ -287,8 +279,45 @@ function CustomerMapView() {
         map.current.setLayoutProperty("building-3d", "visibility", "none");
       }
     });
+    //ban do heatMap
+    var isHeatMap = false;
+    if (map.current.getPitch() > 0) isHeatMap = true;
+    else isHeatMap = false;
+    var cl = "earthquakes";
+    var tl = "Bản đồ nhiệt";
+    if (!isHeatMap) {
+      cl = "customer_clus";
+      tl = "Bản đồ ban đầu";
+    }
+    let btnHeatMap = new ekmapplf.control.Button({
+      className: "btn-ctl-group " + cl,
+      icon: "map",
+      tooltip: tl,
+    });
+    btnHeatMap.on("click", (btn) => {
+      isHeatMap = !isHeatMap;
+      if (isHeatMap) {
+        btn._div.className = btn._div.className.replaceAll(
+          "customer_clus",
+          "earthquakes"
+        );
+        btn._div.title = "Bản đồ nhiệt";
+      } else {
+        btn._div.className = btn._div.className.replaceAll(
+          "earthquakes",
+          "customer_clus"
+        );
+        btn._div.title = "Bản đồ ban đầu";
+      }
+      if (isHeatMap) {
+        map.current.setLayoutProperty("earthquakes", "visibility", "visible");
+      } else {
+        map.current.setLayoutProperty("customer_clus", "visibility", "none");
+      }
+    })
     map.current.addControl(btn3D, "bottom-right");
     map.current.addControl(new maplibregl.FullscreenControl(), "top-right");
+    map.current.addControl(btnHeatMap, "top-right");
     map.current.on("load", async () => {
       await getConfigMap();
       getLstCustomer();
@@ -317,7 +346,7 @@ function CustomerMapView() {
       map.current.getSource('customer_clus').setData(dataGeo);
     } else {
       if (!map.current.getImage('marker-customer')) {
-        const iconCustomer = await map.current.loadImage("https://files.ekgis.vn/sdks/tracking/assets/check-icon.png"); //https://sfademo.mbwcloud.com/files/check-icon.png
+        const iconCustomer = await map.current.loadImage("public/assets/check-icon.png"); //https://sfademo.mbwcloud.com/files/check-icon.png
         map.current.addImage('marker-customer', iconCustomer.data);
       }
       map.current.addSource('customer_clus', {
@@ -457,6 +486,102 @@ function CustomerMapView() {
       });
     }
   }
+
+const renderHeatMap = async () => {
+    let dataGeo = {
+        'type': "FeatureCollection",
+        'features': []
+    };
+    for (let i = 0; i < lstCustomer.length; i++) {
+        let lngLat = JSON.parse(lstCustomer[i].customer_location_primary);
+        let feature = {
+            'type': "Feature",
+            'geometry': {
+                'type': "Point",
+                'coordinates': [lngLat.long, lngLat.lat]
+            },
+            'properties': lstCustomer[i]
+        };
+        dataGeo.features.push(feature);
+    }
+    if (map.current == null || !map.current.isStyleLoaded()) return;
+
+    if (map.current.getSource('earthquakes')) {
+        map.current.getSource('earthquakes').setData(dataGeo);
+    } else {
+        if (!map.current.getImage('marker-customer')) {
+            const iconCustomer = await map.current.loadImage("public/assets/check-icon.png");
+            map.current.addImage('marker-customer', iconCustomer.data);
+        }
+        map.current.addSource('earthquakes', {
+            'type': 'geojson',
+            'data': dataGeo
+        });
+
+        map.current.addLayer({
+            'id': 'earthquakes-heat',
+            'type': 'heatmap',
+            'source': 'earthquakes',
+            'maxzoom': 9,
+            'paint': {
+                'heatmap-weight': [
+                    'interpolate',
+                    ['linear'],
+                    ['get', 'mag'],
+                    0,
+                    0,
+                    6,
+                    1
+                ],
+                'heatmap-intensity': [
+                    'interpolate',
+                    ['linear'],
+                    ['zoom'],
+                    0,
+                    1,
+                    9,
+                    3
+                ],
+                'heatmap-color': [
+                    'interpolate',
+                    ['linear'],
+                    ['heatmap-density'],
+                    0,
+                    'rgba(33,102,172,0)',
+                    0.2,
+                    'rgb(103,169,207)',
+                    0.4,
+                    'rgb(209,229,240)',
+                    0.6,
+                    'rgb(253,219,199)',
+                    0.8,
+                    'rgb(239,138,98)',
+                    1,
+                    'rgb(178,24,43)'
+                ],
+                'heatmap-radius': [
+                    'interpolate',
+                    ['linear'],
+                    ['zoom'],
+                    0,
+                    2,
+                    9,
+                    20
+                ],
+                'heatmap-opacity': [
+                    'interpolate',
+                    ['linear'],
+                    ['zoom'],
+                    7,
+                    1,
+                    9,
+                    0
+                ]
+            }
+        });
+    }
+};
+
   const addLayerIndustry = (checkedKeys: React.Key[]) => {
     mapConfig.forEach((group) => {
       //group
@@ -563,7 +688,7 @@ function CustomerMapView() {
         <div id='ekmapplf_tracking_legend' className='ekmapplf_tracking-map-legend'>
           <div className='ekmapplf_tracking-legend-title' onClick={toggleLegend}>
             <span className={`icon ${isOpen ? 'ekmapplf_tracking-icon-square-minus' : 'ekmapplf_tracking-icon-square-plus'}`} style={{ filter: 'invert(100%) sepia(100%) saturate(0%) hue-rotate(187deg) brightness(105%) contrast(103%)' }}></span>
-            <span>Chú giải bản đồ</span>
+            <span>Danh sách bản đồ</span>
           </div>
           <div className={`ekmapplf_tracking-legend-body ${isOpen ? 'open' : ''}`} style={{ maxHeight: isOpen ? '250px' : '0', overflow: 'auto' }}>
             <MapConfigTree onCheck={handleCheck} onMoveLayer={handleMoveLayer} />
@@ -589,7 +714,7 @@ function CustomerMapView() {
         
         
       )}
-      
+
       <ModalView
         open={open}
         title="Đánh giá độ phủ"
