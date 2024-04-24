@@ -165,7 +165,6 @@ def get_customer_router(data):
             ]
         print("review",FiltersCustomer)
         if(view_mode == 'list'):
-            print("list")
             detail_customer = frappe.db.get_all('Customer',filters= FiltersCustomer,fields=fields_customer,start=page_size*(page_number-1), page_length=page_size,order_by=sort,distinct=True)
             # print(detail_customer)
         else:
@@ -178,6 +177,8 @@ def get_customer_router(data):
               
             detail_customer = frappe.db.get_all('Customer',filters= FiltersCustomer,fields=fields_customer)    
         for customer in detail_customer:
+            address_name = customer["customer_primary_address"]
+            customer["customer_primary_address"]=frappe.db.get_value("Address",{"name": address_name},["address_title"])
             customer['is_checkin'] = False
             checkin = frappe.db.get_value("DMS Checkin",{"kh_ma":customer.get('customer_code')},["is_checkout"],as_dict=1)
             if checkin != None and checkin.is_checkout:

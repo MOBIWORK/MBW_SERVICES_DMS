@@ -75,8 +75,54 @@ def get_language():
 def exception_handle(e):
     frappe.log_error(title="DMS Mobile App Error",
                      message=frappe.get_traceback())
+    print(frappe.response)
     return gen_response(406, cstr(e),{})
+
+def routers_name_of_customer(router=False, thisWeek = False,view_mode='list'):
+    queryFilters = {"is_deleted": 0,"status":"Active"}
+    user_id = get_user_id()
+    if user_id.name != "Administrator":
+        employee = get_employee_by_user(user = user_id.email)
+        if not employee:
+            return gen_response("404", _("Employee not registered"))
+        queryFilters['employee'] = employee.name
+
+    if router:
+        queryFilters['channel_code'] = ["in",router]
+    # if status: 
+    #     queryFilters['status'] = status
+    #lay danh sach theo ngay
+    if thisWeek or view_mode=="map":
+        from mbw_dms.api.common import weekday
+        today= datetime.now()
+        thu_trong_tuan, tuan_trong_thang = weekday(today)
+        queryFilters.update({"travel_date": ["between",["Không giới hạn",thu_trong_tuan]]})
+        queryFilters.update({"frequency": ["like",tuan_trong_thang]})  
     
+    list_router = frappe.db.get_all('DMS Router',filters=queryFilters, pluck='name',distinct=True)
+    return list_router
+
+def customers_code_router(router=False,routersName=[],thisWeek = False,view_mode='list'):
+    import pydash
+    list_customer = []
+    for router_name in routersName:
+        detail_router = frappe.get_doc("DMS Router",{"name":router_name}).as_dict()
+        customer = detail_router.get('customers')
+        if view_mode == "map" or (router and not thisWeek):
+            from mbw_dms.api.common import weekday
+            today= datetime.now()
+            thu_trong_tuan, tuan_trong_thang = weekday(today)
+            customer = pydash.filter_(detail_router.get('customers'),lambda value: (value.frequency.find(str(int(tuan_trong_thang))) != -1))
+        list_customer += customer
+    sort = "customer_name desc"
+    # if order_by: 
+    #     sort = f"customer_name {order_by}"
+    #     list_customer = sorted(list_customer, key= lambda x: x.customer_name.split(' ')[-1],reverse=True if order_by == 'desc' else False)
+    list_customer_name = []
+    for customer in list_customer:
+        list_customer_name.append(customer.get('customer_code'))   
+    return list_customer_name 
+
 
 def get_user_id():
     headers = frappe.local.request.headers.get("Authorization")

@@ -8,7 +8,9 @@ from mbw_dms.api.common import (
     gen_response,
     validate_image,
     post_image,
-    get_value_child_doctype
+    get_value_child_doctype,
+    routers_name_of_customer,
+    customers_code_router
 )
 from mbw_dms.api.validators import (
     validate_date, 
@@ -30,7 +32,14 @@ def list_customer(**kwargs):
         customer_group = kwargs.get('customer_group')
         from_date = validate_filter_timestamp('start')(kwargs.get('from_date')) if kwargs.get('from_date') else None
         to_date = validate_filter_timestamp('end')(kwargs.get('to_date')) if kwargs.get('to_date') else None
-        my_filter = {}
+        routers = routers_name_of_customer()
+        print("routers",routers)
+        if len(routers) ==0 :
+            return gen_response(200,"",[])
+        customers_name = customers_code_router(routersName=routers)
+        my_filter = {
+            "customer_code": ["in",customers_name]
+        }
 
         page_size = int(kwargs.get('page_size', 20))
         page_number = 1 if not kwargs.get('page') or int(kwargs.get('page')) <= 0 else int(kwargs.get('page'))
@@ -45,13 +54,21 @@ def list_customer(**kwargs):
             my_filter["customer_group"] = ['like', f'%{customer_group}%']
         if from_date and to_date:
             my_filter["custom_birthday"] = ['between', [from_date, to_date]]
-        customers = frappe.db.get_list("Customer",
+        print("filter",my_filter)
+        customers = frappe.db.get_all("Customer",
                                 filters= my_filter,
-                                fields=["name", "customer_name","customer_code","customer_type", "customer_group", "territory", "industry", "image","website", "customer_primary_contact", "customer_primary_address", "custom_birthday","customer_location_primary", "customer_details"],
+                                fields=["name", "customer_name",
+                                        "customer_code","customer_type", 
+                                        "customer_group", "territory",
+                                        "industry", "image","website", 
+                                        "customer_primary_contact", "customer_primary_address",
+                                        "custom_birthday","customer_location_primary",
+                                        "customer_details"],
                                 start=page_size*(page_number-1), 
                                 page_length=page_size)
                                 
-        record = frappe.db.count('Customer', filters= my_filter)
+        record = len(frappe.db.get_all("Customer",
+                                filters= my_filter,))
 
         for customer in customers:
             if customer['custom_birthday'] is not None:
@@ -233,7 +250,7 @@ def update_customer(name, **kwargs):
     
 @frappe.whitelist(methods="GET")
 def get_customer_addresses(customer_name):
-    addresses = frappe.get_all(
+    addresses = frappe.db.get_all(
         "Address",
         filters={"link_name": customer_name},
         fields=["name", "address_line1", "address_line2", "city", "state", "is_primary_address", "is_shipping_address", "county"]

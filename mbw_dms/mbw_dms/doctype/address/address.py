@@ -9,7 +9,7 @@ class Address(Document):
 
 
 def update_address(doc,method=None):
-	print("doc",doc)
+
 	for link in doc.links:
 		if link.link_doctype == "Customer":
 			customer = frappe.get_doc("Customer",{
@@ -18,4 +18,15 @@ def update_address(doc,method=None):
 			if customer and customer.customer_primary_address == doc.name :
 				customer.customer_location_primary = doc.address_location
 				customer.save()
+	from  frappe.model.rename_doc import update_document_title
+	update_document_title(doctype= "Address",
+							docname= doc.name,
+							name= doc.address_title,
+							title= doc.address_title,
+							enqueue= True,
+							merge= 0,
+							freeze= True,
+							freeze_message= "Updating related fields..."
+						)
+	frappe.db.commit()
 	pass
