@@ -752,7 +752,7 @@ function CustomerMapView() {
         <div id='ekmapplf_tracking_legend' className='ekmapplf_tracking-map-legend'>
           <div className='ekmapplf_tracking-legend-title' onClick={toggleLegend}>
             <span className={`icon ${isOpen ? 'ekmapplf_tracking-icon-square-minus' : 'ekmapplf_tracking-icon-square-plus'}`} style={{ filter: 'invert(100%) sepia(100%) saturate(0%) hue-rotate(187deg) brightness(105%) contrast(103%)' }}></span>
-            <span>Danh sách bản đồ</span>
+            <span style={{marginLeft:'8px'}}>Danh sách bản đồ</span>
           </div>
           <div className={`ekmapplf_tracking-legend-body ${isOpen ? 'open' : ''}`} style={{ maxHeight: isOpen ? '250px' : '0', overflow: 'auto' }}>
             <MapConfigTree onCheck={handleCheck} onMoveLayer={handleMoveLayer} />
