@@ -6,7 +6,8 @@ from mbw_dms.api.common import (
     exception_handle,
     gen_response,
     get_language,
-    get_value_child_doctype
+    get_value_child_doctype,
+    get_employee_id
 )
 from mbw_dms.api.validators import (
     validate_filter_timestamp,
@@ -27,7 +28,9 @@ def get_list_sales_order(**filters):
         to_date = validate_filter_timestamp('end')(filters.get('to_date')) if filters.get('to_date') else None
         page_size =  int(filters.get('page_size', 20))
         page_number = int(filters.get('page_number')) if filters.get('page_number') and int(filters.get('page_number')) > 0 else 1
+        employee = get_employee_id()
         query = {}
+        # query = {"customer":"sdvbsahfeliuka"}
         if from_date and to_date:
             query["creation"] = ["between",[from_date,to_date]]
         if status is not None and status != "All":
@@ -38,11 +41,22 @@ def get_list_sales_order(**filters):
             query['customer'] = filters.get('customer')
         if filters.get('name'):
             query['name'] = filters.get('name')
+        print(query)
         sale_orders =frappe.db.get_list('Sales Order', 
                                        filters=query, 
-                                       fields=['customer', 'customer_name', 'name','(customer_address) as address_display','UNIX_TIMESTAMP(po_date) as po_date','UNIX_TIMESTAMP(delivery_date) as delivery_date','UNIX_TIMESTAMP(creation) as creation','grand_total','rounding_adjustment','rounded_total','status'], 
+                                       fields=[
+                                            'customer', 'customer_name', 'name',
+                                               '(customer_address) as address_display',
+                                               'UNIX_TIMESTAMP(po_date) as po_date',
+                                               'UNIX_TIMESTAMP(delivery_date) as delivery_date',
+                                               'UNIX_TIMESTAMP(creation) as creation','grand_total',
+                                               'rounding_adjustment','rounded_total','status',
+                                               "sales_person"
+                                               ], 
                                        order_by='delivery_date desc', 
-                                       start=page_size*(page_number-1), page_length=page_size,
+                                       start=page_size*(page_number-1), 
+                                       page_length=page_size,
+                                       parent_doctype="Sales Order",
                                         )
         for sale_order in sale_orders :
             sale_order['custom_id'] = frappe.db.get_value("Customer",filters={'name': sale_order['customer']},fieldname=['customer_code'])
