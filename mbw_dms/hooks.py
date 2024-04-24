@@ -121,7 +121,6 @@ website_route_rules = [
 override_doctype_class = {
 	"Customer": "mbw_dms.controllers.dms_customer.DMSCustomer",
     "Sales Order": "mbw_dms.controllers.dms_sales_order.DMSSalesOrder",
-    # "Sales Invoice": "mbw_dms.controllers.dms_sales_invoice.DMSSalesInvoice",
     "Item": "mbw_dms.controllers.dms_item.DMS_Item"
 }
 
@@ -262,6 +261,10 @@ doc_events = {
     "Employee": {
         "after_insert": "mbw_dms.controllers.dms_users.create_objid_employee"
     },
+    "Sales Invoice": {
+        "on_submit": "mbw_dms.controllers.dms_sales_invoice.update_kpi_monthly",
+        "on_cancel": "mbw_dms.controllers.dms_sales_invoice.update_kpi_monthly_on_cancel"
+    }
 }
 
 on_session_creation = [
