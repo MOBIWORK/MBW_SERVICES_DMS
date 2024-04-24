@@ -8,13 +8,13 @@ import maplibregl from "maplibre-gl";
 import classNames from 'classnames';
 import "./style.css";
 declare var ekmapplf: any;
-export function ScopeAnalysis({ onResult, scopeResult }) {
+export function ScopeAnalysis({ onResult, scopeResult,api }) {
   const [selectedOption, setSelectedOption] = useState("hanhchinh");
   const handleOptionChange = (value) => {
     setSelectedOption(value); // Cập nhật giá trị hiện tại của Segmented khi thay đổi lựa chọn
   };
   const [mapConfig, setMapConfig] = useState([]);
-  const [apiKey, setApiKey] = useState("");
+  // const [apiKey, setApiKey] = useState("");
   const [selectRegion, setSelectRegion] = useState([]);
   const [arrTinh, setArrTinh] = useState([]);
   const [selectTinh, setSelectTinh] = useState([]);
@@ -56,13 +56,32 @@ export function ScopeAnalysis({ onResult, scopeResult }) {
   };
 
   useEffect(() => {
-    console.log('123');
-    
     if(scopeResult){
-      console.log('222');
-      console.log(scopeResult);
-      setSelectRegion(scopeResult.region)
-      setSelectTinh(scopeResult.tinh)
+      let modifiedTinh = []
+      if(scopeResult.region){
+        setSelectRegion(scopeResult.region)
+        const filteredArr = arr_region.filter((item) => {
+          return scopeResult.region.includes(item.value);
+        });
+        
+        for(let i = 0; i < filteredArr.length; i++) {
+           let obj = {
+             label: <span>{filteredArr[i].label}</span>,
+             title: filteredArr[i].label,
+             options : filteredArr[i].arrProvince.map((item) => ({
+                 ...item,
+                 value: item.provinceid, // Thay đổi trường value thành item.code
+                 label: item.name, // Thay đổi trường label thành item.name
+               }))
+           }
+           modifiedTinh.push(obj)
+        }
+        setArrTinh(modifiedTinh);
+       }
+      if(scopeResult.tinh){
+        getarrTinh(scopeResult.tinh,modifiedTinh)
+      }
+     
       setSelectHuyen(scopeResult.huyen)
     }
   }, []);
@@ -116,6 +135,7 @@ export function ScopeAnalysis({ onResult, scopeResult }) {
    onResultChange()
   
   };
+
   const onChangeTinh = async (value) => {
     let filteredItems = [];
     setArrHuyen([])
@@ -138,7 +158,7 @@ export function ScopeAnalysis({ onResult, scopeResult }) {
         title: filteredItems[i].label,
         options : []
       }
-     let urlAPI_district = `https://api.ekgis.vn/data/administrative/province/${filteredItems[i].value}/district?api_key=${apiKey}`;
+     let urlAPI_district = `https://api.ekgis.vn/data/administrative/province/${filteredItems[i].value}/district?api_key=${api}`;
      let response = await fetch(urlAPI_district);
      const data = await response.json();
      if (data && data.length > 0) {
@@ -202,11 +222,49 @@ export function ScopeAnalysis({ onResult, scopeResult }) {
       }
       onResult(obj)
   }
-  const getConfigApi = async () => {
-    let res = await AxiosService.get(
-      "/api/method/mbw_dms.api.vgm.map_customer.get_config_api"
-    );
-    setApiKey(res.result);
+  // const getConfigApi = async () => {
+  //   let res = await AxiosService.get(
+  //     "/api/method/mbw_dms.api.vgm.map_customer.get_config_api"
+  //   );
+  //   setApiKey(res.result);
+  // };
+  const getarrTinh= async (result,arrTinh) => {
+    setSelectTinh(result)
+    let filteredItems = [];
+    let modifiedHuyen = []
+    
+    // Duyệt qua từng phần tử trong mảng arrTinh
+    for (let i = 0; i < arrTinh.length; i++) {
+      // Lọc các phần tử trong mảng options của phần tử arrTinh[i]
+      let filteredArr = arrTinh[i].options.filter((item) => {
+        // Kiểm tra xem giá trị item.value có nằm trong mảng value không
+        return result.includes(item.value);
+      });
+    
+      // Thêm các phần tử đã lọc vào mảng kết quả filteredItems
+      filteredItems.push(...filteredArr);
+    }
+    for(let i = 0; i < filteredItems.length;i++){
+      let obj = {
+        label: <span>{filteredItems[i].label}</span>,
+        title: filteredItems[i].label,
+        options : []
+      }
+     let urlAPI_district = `https://api.ekgis.vn/data/administrative/province/${filteredItems[i].value}/district?api_key=${api}`;
+     let response = await fetch(urlAPI_district);
+     
+     const data = await response.json();
+     if (data && data.length > 0) {
+      obj.options = data.map((item) => ({
+        ...item,
+        value: item.districtid, // Thay đổi trường value thành item.code
+        label: item.name, // Thay đổi trường label thành item.name
+      }));
+     }
+      modifiedHuyen.push(obj)
+    }
+    setArrHuyen(modifiedHuyen)
+    
   };
   const map = useRef(null);
   const renderMap = () => {
@@ -215,7 +273,7 @@ export function ScopeAnalysis({ onResult, scopeResult }) {
       center: [108.485, 16.449],
       zoom: 5.43,
     });
-    let mapOSMBright = new ekmapplf.VectorBaseMap("OSM:Bright", apiKey).addTo(
+    let mapOSMBright = new ekmapplf.VectorBaseMap("OSM:Bright", api).addTo(
       map.current
     );
     var basemap = new ekmapplf.control.BaseMap({
@@ -246,7 +304,7 @@ export function ScopeAnalysis({ onResult, scopeResult }) {
     });
     map.current.addControl(basemap, "bottom-left");
     basemap.on("changeBaseLayer", async function (response) {
-      await new ekmapplf.VectorBaseMap(response.layer, apiKey).addTo(
+      await new ekmapplf.VectorBaseMap(response.layer, api).addTo(
         map.current
       );
     });
@@ -303,15 +361,14 @@ export function ScopeAnalysis({ onResult, scopeResult }) {
     );
     setMapConfig(res.result);
   };
+  // useEffect(() => {
+  //   getConfigApi();
+  // }, []);
   useEffect(() => {
-    getConfigApi();
-  }, []);
-  useEffect(() => {
-    if (apiKey != null && apiKey != "") {
+    if (api != null && api != "") {
       renderMap();
-   
     }
-  }, [apiKey]);
+  }, [api]);
   useEffect(() => {
     //if (mapConfig != null && mapConfig.length > 0) addLayerIndustry();
   }, [mapConfig]);

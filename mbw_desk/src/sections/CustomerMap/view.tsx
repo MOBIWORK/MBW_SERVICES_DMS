@@ -6,9 +6,12 @@ import { AxiosService } from "../../services/server";
 import "./map_customer.css";
 import MapConfigTree from "./mapConfig_tree";
 import { Dropdown } from 'antd';
-import { DownOutlined,CloseOutlined } from '@ant-design/icons';
+import { DownOutlined,CloseOutlined ,FileExcelOutlined,BackwardOutlined} from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import {TableCustom} from '../../components'
+import * as ExcelJS from "exceljs";
+import * as XLSX from "xlsx";
+import * as FileSaver from "file-saver";
 declare var ekmapplf: any;
 
 interface TypeCustomer {
@@ -45,7 +48,7 @@ function CustomerMapView() {
       title: 'Tỷ lệ độ phủ',
       dataIndex: 'ratio_coverage',
       key: 'ratio_coverage',
-      render: (ratio) => `${(ratio * 100).toFixed(2)}%`, // Format hiển thị phần trăm
+      render: (ratio) => `${ratio}%`, // Format hiển thị phần trăm
     },
   ];
 
@@ -56,6 +59,81 @@ function CustomerMapView() {
     setMapHeight('80vh');
     setVisibleTable(false)
   }
+  const exportExcel = async () => {
+    const workbook = new ExcelJS.Workbook();
+    const sheet = workbook.addWorksheet("Sheet1");
+
+    sheet.properties.defaultColWidth = 20;
+    sheet.getColumn("A").width = 30;
+    sheet.mergeCells("A2:J2");
+    sheet.getCell("A2").value = "Bảng đánh giá độ phủ";
+    sheet.getCell("A2").style = {
+      font: { bold: true, name: "Times New Roman", size: 12 },
+    };
+    sheet.getCell("A2").alignment = { vertical: "middle", horizontal: "left" };
+    let rowHeader = sheet.getRow(4);
+    let rowHeader_Next = sheet.getRow(5);
+    // Thêm dữ liệu cột
+    let fieldsMerge = [
+      { title: "Tên đơn vị hành chính", field: "name" },
+      { title: "Tỷ lệ độ phủ", field: "ratio_coverage" },
+    ];
+    for (let i = 0; i < fieldsMerge.length; i++) {
+      let cellStart = rowHeader.getCell(i + 1);
+      let cellEnd = rowHeader_Next.getCell(i + 1);
+      sheet.mergeCells(`${cellStart._address}:${cellEnd._address}`);
+      rowHeader.getCell(i + 1).style = {
+        font: { bold: true, name: "Times New Roman", size: 12, italic: true },
+      };
+      rowHeader.getCell(i + 1).alignment = {
+        vertical: "middle",
+        horizontal: "center",
+      };
+      rowHeader.getCell(i + 1).value = fieldsMerge[i].title;
+    }
+    for (let i = 0; i < dataSource.length; i++) {
+      let rowStart = 6;
+      let row = sheet.getRow(i + rowStart);
+      let cellStart = 1;
+      for (let j = 0; j < fieldsMerge.length; j++) {
+        row.getCell(cellStart).style = {
+          font: { name: "Times New Roman", size: 12, italic: true },
+        };
+        let valCell = "";
+        valCell = dataSource[i][fieldsMerge[j].field];
+        if(fieldsMerge[j].field == 'ratio_coverage'){
+          valCell = valCell + '%'
+        }
+        row.getCell(cellStart).value = valCell;
+        cellStart += 1;
+      }
+    }
+    // sheet.columns = columns;
+
+    // // Thêm dữ liệu từ bảng vào file Excel
+    // resultProductCheck.forEach((row, index) => {
+    //   sheet.addRow({
+    //     product_code: row.product_code,
+    //     product_name: row.product_name,
+    //     product_count: row.product_count,
+    //   });
+    // });
+    // Lưu file Excel
+    const buffer = await workbook.xlsx.writeBuffer();
+    saveAsExcelFile(buffer, "report_check_image");
+  };
+  const saveAsExcelFile = (buffer: any, fileName: string) => {
+    let EXCEL_TYPE =
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
+    let EXCEL_EXTENSION = ".xlsx";
+    const data: Blob = new Blob([buffer], {
+      type: EXCEL_TYPE,
+    });
+    FileSaver.saveAs(
+      data,
+      fileName + "_export_" + new Date().getTime() + EXCEL_EXTENSION
+    );
+  };
   const [dataSource, setDataSource] = useState([]);
   const [mapHeight, setMapHeight] = useState('80vh');
   const [visibleTable, setVisibleTable] = useState(false);
@@ -499,10 +577,16 @@ function CustomerMapView() {
         columns={columns}
         dataSource={dataSource}
         pagination={false}
+        scroll={{ y: 450 }}
       />
-      <div onClick={handleClose} style={{position:'absolute',top:'10px',right:'10px',cursor:'pointer'}}><CloseOutlined  /></div>
-      
+      <div  onClick={handleClose} style={{display:'flex',position:'absolute',top:'10px',right:'10px',cursor:'pointer'}}>
+        
+        <CloseOutlined style={{ fontSize: '0.75rem' }} onClick={handleClose} /> </div>
+        <div onClick={exportExcel} style={{display:'flex',position:'absolute',top:'15px',right:'35px',cursor:'pointer'}}>
+        <FileExcelOutlined style={{color:'green', fontSize: '1.3rem'}}/>
         </div>
+        </div>
+        
         
       )}
       
@@ -511,7 +595,9 @@ function CustomerMapView() {
         title="Đánh giá độ phủ"
         onCancel={handleCloseModal}
         onOk={handleOk}
-        lstCustomer={lstCustomer}>
+        lstCustomer={lstCustomer}
+        api={apiKey}>
+        
       </ModalView>
     </>
   );

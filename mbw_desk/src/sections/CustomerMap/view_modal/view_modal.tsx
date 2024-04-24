@@ -13,7 +13,7 @@ type Props = {
   onOk: ReactNode;
 };
 import { message, Steps, theme } from 'antd';
-export function ModalView ({ open, title, onCancel, onOk , lstCustomer}: Props) {
+export function ModalView ({ open, title, onCancel, onOk , lstCustomer,api}: Props) {
   const [formScope] = Form.useForm();
   const [formIndustry] = Form.useForm();
   const [scopeResult, setScopeResult] = useState(null);
@@ -30,7 +30,7 @@ export function ModalView ({ open, title, onCancel, onOk , lstCustomer}: Props) 
     {
       title: 'Phạm vi đánh giá độ phủ đại lý',
       content: <Form layout="vertical" form={formScope} style={{padding: "10px"}}>
-        <ScopeAnalysis onResult={handleScopeResult} scopeResult={scopeResult}></ScopeAnalysis>
+        <ScopeAnalysis onResult={handleScopeResult} scopeResult={scopeResult} api={api}></ScopeAnalysis>
       </Form> ,
     },
     {
