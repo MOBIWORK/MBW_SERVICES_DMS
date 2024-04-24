@@ -13,11 +13,13 @@ type Props = {
   onOk: ReactNode;
 };
 import { message, Steps, theme } from 'antd';
-export function ModalView ({ open, title, onCancel, onOk }: Props) {
+export function ModalView ({ open, title, onCancel, onOk , lstCustomer}: Props) {
   const [formScope] = Form.useForm();
   const [formIndustry] = Form.useForm();
   const [scopeResult, setScopeResult] = useState(null);
   const [industryResult, setIndustryResult] = useState(null);
+  const [loadingSubmit, setLoadingSubmit] = useState(false);
+  
   const handleScopeResult = (result) => {
     setScopeResult(result);
   };
@@ -34,7 +36,7 @@ export function ModalView ({ open, title, onCancel, onOk }: Props) {
     {
       title: 'Ngành hàng đánh giá độ phủ',
       content:<Form layout="vertical" form={formIndustry} style={{padding: "10px"}}>
-      <TypeIndustry></TypeIndustry>
+      <TypeIndustry form={formIndustry} ></TypeIndustry>
     </Form>,
     },
     // {
@@ -53,16 +55,26 @@ export function ModalView ({ open, title, onCancel, onOk }: Props) {
     setCurrent(current - 1);
   };
   const handleSubmit = async () => {
+    setLoadingSubmit(true)
+    let locations = []
     let type_categories = "agricultural_supplies"
     let type_area = ''
     let value_area = []
-    // console.log(formIndustry.getFieldValue('nganhhang'));
-    // if(formIndustry.getFieldValue('nganhhang')){
-    //   type_categories = formIndustry.getFieldValue('nganhhang')
-    // }else{
-    //   message.error('Chưa chọn ngành hàng ')
-    //   return
-    // }
+    if(lstCustomer && lstCustomer.length > 0){
+      for (let i = 0; i < lstCustomer.length; i++) {
+        let lngLat = JSON.parse(lstCustomer[i].customer_location_primary)
+        let coordinates = [lngLat.long, lngLat.lat]
+        locations.push(coordinates)
+      }
+    }
+    console.log(formIndustry.getFieldValue('nganhhang'));
+    if(formIndustry.getFieldValue('nganhhang')){
+      type_categories = formIndustry.getFieldValue('nganhhang')
+    }else{
+      setLoadingSubmit(false)
+      message.error('Chưa chọn ngành hàng ')
+      return
+    }
     if(formScope.getFieldValue('huyen')){
       type_area = 'administrative_district'
       value_area = formScope.getFieldValue('huyen')
@@ -74,6 +86,7 @@ export function ModalView ({ open, title, onCancel, onOk }: Props) {
       value_area = formScope.getFieldValue('khuvuc')
     }else{
       message.error('Chưa chọn khu vực giới hạn')
+      setLoadingSubmit(false)
       return
     }
     const apiUrl = `https://api.ekgis.vn/v1/analytic_market/determine_coverage?api_key=w1Dlh2wRon7mE6sL196TgvLS45fw02uon74pJ0rc`;
@@ -81,7 +94,7 @@ export function ModalView ({ open, title, onCancel, onOk }: Props) {
     "type_categories": type_categories,
     "type_area": type_area,
     "value_area": JSON.stringify(value_area),
-    "locations": [[105.8343722805368, 21.02965447233156],[105.80653774526628, 20.974347940803487]]
+    "locations": locations
   }
   const response = await fetch(apiUrl, {
     method: 'POST',
@@ -92,34 +105,16 @@ export function ModalView ({ open, title, onCancel, onOk }: Props) {
     body: JSON.stringify(dataPost)
   });
   const responseData = await response.json();
-  console.log(responseData);
-  message.success('Phân tích thành công')
-  onOk([
-    {
-        "code": "1",
-        "name": "Trung du và miền núi phía Bắc",
-        "bbox": "102.14458466,20.30520058,108.06887054,23.39243698",
-        "sum_vgm": 561,
-        "sum_user": 0,
-        "ratio_coverage": 0
-    },
-    {
-        "code": "2",
-        "name": "Đồng Bằng Sông Hồng",
-        "bbox": "105.28813171,19.93569565,107.74571228,21.5738411",
-        "sum_vgm": 485,
-        "sum_user": 2,
-        "ratio_coverage": 0
-    },
-    {
-        "code": "3",
-        "name": "Bắc Trung Bộ",
-        "bbox": "103.87521362,15.99489307,108.19450378,20.67055702",
-        "sum_vgm": 288,
-        "sum_user": 0,
-        "ratio_coverage": 0
-    }
-])
+  if(responseData){
+    setLoadingSubmit(false)
+    message.success('Phân tích thành công')
+    onOk(responseData)
+  }else{
+    setLoadingSubmit(false)
+    message.success('Phân tích thất bại')
+    return
+  }
+
   }
   const items = steps.map((item) => ({ key: item.title, title: item.title }));
   const contentStyle: React.CSSProperties = {
@@ -186,7 +181,7 @@ export function ModalView ({ open, title, onCancel, onOk }: Props) {
           </Button>
         )}
         {current === steps.length - 1 && (
-          <Button type="primary" onClick={handleSubmit}>
+          <Button type="primary" onClick={handleSubmit} loading={loadingSubmit}>
             Hoàn thành
           </Button>
         )}
