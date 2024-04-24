@@ -138,9 +138,31 @@ function CustomerMapView() {
   const [dataSource, setDataSource] = useState([]);
   const [mapHeight, setMapHeight] = useState('74.5vh');
   const [visibleTable, setVisibleTable] = useState(false);
-  const handleOk = (data) => {
-    console.log(data);
-    console.log("Dòng 142");
+  const handleOk = async (data, configConverage) => {
+    let sourceAndLayer = await renderLayerDistributorByAdministrative(data, configConverage);
+    for(let source in sourceAndLayer.sources){
+      if(!map.current.getSource(source)) map.current.addSource(source, sourceAndLayer.sources[source]);
+    }
+    for(let i = 0; i < sourceAndLayer.layers.length; i++){
+      if(!map.current.getLayer(sourceAndLayer.layers[i].id)) map.current.addLayer(sourceAndLayer.layers[i]);
+    }
+    setMapConfig(prevConfig => {
+      let propertySources = Object.getOwnPropertyNames(sourceAndLayer.sources);
+      let mapConverage = {
+        "id": propertySources[0],
+        "label": "Bản đồ độ phủ khách hàng theo đơn vị hành chính",
+        "sources": sourceAndLayer.sources,
+        "layers": sourceAndLayer.layers,
+        "visible": true,
+        "legend": null
+      }
+      for(let i = 0 ; i < prevConfig.length;i++){
+        if(prevConfig[i].id == "map_analytic_converage"){
+          prevConfig[i].children.push(mapConverage);
+        }
+      }
+      return prevConfig;
+    })
     setDataSource(data)
     setMapHeight('40vh');
     setVisibleTable(true)
@@ -169,9 +191,6 @@ function CustomerMapView() {
   useEffect(() => {
     renderMapForCustomer()
   }, [lstCustomer]);
-  useEffect(() => {
-    if (mapConfig != null && mapConfig.length > 0) addLayerIndustry();
-  }, [mapConfig]);
 
   const getConfigApi = async () => {
     let res = await AxiosService.get(
@@ -180,11 +199,21 @@ function CustomerMapView() {
     setApiKey(res.result);
   };
   const getConfigMap = async () => {
-
     let res = await AxiosService.get(
       "/api/method/mbw_dms.api.vgm.map_customer.get_config_map"
     );
+    let objMapAnalyticCoverage = {
+      "id": "map_analytic_converage",
+      "group": true,
+      "visible": false,
+      "label": "Bản đồ độ phủ khách hàng",
+      "children": []
+    }
+    if(res.result == null) res.result = [];
+    res.result.push(objMapAnalyticCoverage);
+    console.log(res.result);
     setMapConfig(res.result);
+    addLayerIndustry(res.result);
   };
   const getLstCustomer = async () => {
     let res = await AxiosService.get(
@@ -644,12 +673,12 @@ function CustomerMapView() {
     }
     if (map.current == null) return;
     if (!map.current.isStyleLoaded()) return;
-    renderClusterForCustomer(dataGeo);
+    await renderClusterForCustomer(dataGeo);
     renderHeatMapForCustomer(dataGeo);
   }
 
-  const addLayerIndustry = (checkedKeys: React.Key[]) => {
-    mapConfig.forEach((group) => {
+  const addLayerIndustry = (configMap) => {
+    configMap.forEach((group) => {
       //group
       if (group.group) {
         group.children.forEach((child) => {

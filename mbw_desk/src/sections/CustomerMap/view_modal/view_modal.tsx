@@ -113,7 +113,7 @@ export function ModalView ({ open, title, onCancel, onOk , lstCustomer,api}: Pro
     setLoadingSubmit(false)
     message.success('Phân tích thành công')
     saveConfigMap(dataPost,responseData)
-    onOk(responseData)
+    onOk(responseData, dataPost)
     
     
   }else{
