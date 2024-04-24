@@ -12,6 +12,7 @@ import {TableCustom} from '../../components'
 import * as ExcelJS from "exceljs";
 import * as XLSX from "xlsx";
 import * as FileSaver from "file-saver";
+import { ARR_REGIONSTR } from "./view_modal/AppConst";
 declare var ekmapplf: any;
 
 interface TypeCustomer {
@@ -139,6 +140,7 @@ function CustomerMapView() {
   const [visibleTable, setVisibleTable] = useState(false);
   const handleOk = (data) => {
     console.log(data);
+    console.log("Dòng 142");
     setDataSource(data)
     setMapHeight('40vh');
     setVisibleTable(true)
@@ -731,6 +733,183 @@ function CustomerMapView() {
     });
     return childIds;
   };
+
+  const renderLayerDistributorByAdministrative = async (objResult, objSetting) => {
+    let arrRangeColor = ["rgb(254, 217, 118)", "rgb(254, 178, 76)", "rgb(253, 141, 60)", "rgb(252, 78, 42)", "rgb(227, 26, 28)", "rgb(177, 0, 38)"];
+    let min = 0;
+    let max = 100;
+    let trungBinh = (max - min) / 6;
+    let arrCode = [];
+    let fill_color_province: any = ['case'];
+    if(objSetting["type_area"] == "administrative_region"){
+      let valueArea = JSON.parse(objSetting["value_area"]);
+      let arrRegion = JSON.parse(ARR_REGIONSTR);
+      for(let i = 0; i < valueArea.length; i++){
+        let ratio_distributor = objResult[i].ratio_coverage;
+        for(let j = 0; j < arrRegion.length; j++){
+          if(arrRegion[j].code == valueArea[i]){
+            let arrProvince = arrRegion[j].arrProvince;
+            for(let t = 0; t < arrProvince.length; t++){
+              arrCode.push(arrProvince[i].provinceid);
+              fill_color_province.push(['==', ['get', 'code'], arrProvince[i].provinceid]);
+              if (min <= ratio_distributor && ratio_distributor < (min + trungBinh)) {
+                fill_color_province.push(arrRangeColor[0]);
+              } else if ((min + trungBinh) <= ratio_distributor && ratio_distributor < (min + 2 * trungBinh)) {
+                fill_color_province.push(arrRangeColor[1]);
+              } else if ((min + 2 * trungBinh) <= ratio_distributor && ratio_distributor < (min + 3 * trungBinh)) {
+                fill_color_province.push(arrRangeColor[2]);
+              } else if ((min + 3 * trungBinh) <= ratio_distributor && ratio_distributor < (min + 4 * trungBinh)) {
+                fill_color_province.push(arrRangeColor[3]);
+              } else if ((min + 4 * trungBinh) <= ratio_distributor && ratio_distributor < (min + 5 * trungBinh)) {
+                fill_color_province.push(arrRangeColor[4]);
+              } else if ((min + 5 * trungBinh) <= ratio_distributor && ratio_distributor <= max) {
+                fill_color_province.push(arrRangeColor[5]);
+              }
+            }
+            break;
+          }
+        }
+      }
+    }else if(objSetting["type_area"] == "administrative_province" || objSetting["type_area"] == "administrative_district"){
+      for(let i = 0; i < objResult.length; i++){
+        let ratio_distributor = objResult[i].ratio_coverage;
+        arrCode.push(objResult[i].code);
+        fill_color_province.push(['==', ['get', 'code'], objResult[i].code]);
+        if (min <= ratio_distributor && ratio_distributor < (min + trungBinh)) {
+          fill_color_province.push(arrRangeColor[0]);
+        } else if ((min + trungBinh) <= ratio_distributor && ratio_distributor < (min + 2 * trungBinh)) {
+          fill_color_province.push(arrRangeColor[1]);
+        } else if ((min + 2 * trungBinh) <= ratio_distributor && ratio_distributor < (min + 3 * trungBinh)) {
+          fill_color_province.push(arrRangeColor[2]);
+        } else if ((min + 3 * trungBinh) <= ratio_distributor && ratio_distributor < (min + 4 * trungBinh)) {
+          fill_color_province.push(arrRangeColor[3]);
+        } else if ((min + 4 * trungBinh) <= ratio_distributor && ratio_distributor < (min + 5 * trungBinh)) {
+          fill_color_province.push(arrRangeColor[4]);
+        } else if ((min + 5 * trungBinh) <= ratio_distributor && ratio_distributor <= max) {
+          fill_color_province.push(arrRangeColor[5]);
+        }
+      }
+    }
+    fill_color_province.push('#ded9f5');
+    let sourceAndLayer = {
+      'sources': {},
+      'layers': []
+    }
+    let id = guid12();
+    sourceAndLayer.sources[`s_${id}_bdm`] = {
+      "maxzoom": 8,
+      "type": "vector",
+      "tiles": [
+        "https://api.ekgis.vn/maps/bdm/2022/{z}/{x}/{y}.pbf?api_key=" + apiKey
+      ]
+    }
+    sourceAndLayer.layers.push({
+      "id": `l_${id}_bdm`,
+      "type": "fill",
+      "source": `s_${id}_bdm`,
+      "source-layer": "bdm_polygon",
+      "layout": {
+        "visibility": "visible"
+      },
+      "paint": {
+        "fill-opacity": 0.7,
+        "fill-color": arrCode.length > 0 ? fill_color_province : "rgba(33,102,172,0)"
+      },
+      "filter": ['in', 'code', ...arrCode]
+    })
+    sourceAndLayer.layers.push({
+      "id": `l_${id}_bdm_line`,
+      "type": "line",
+      "source": `s_${id}_bdm`,
+      "source-layer": "bdm_line",
+      "minzoom": 3,
+      "maxzoom": 23,
+      "filter": [
+        "all",
+        [
+          "in",
+          "level",
+          "2"
+        ]
+      ],
+      "layout": {
+        "visibility": 'visible'
+      },
+      "paint": {
+        "line-opacity": {
+          "stops": [
+            [
+              4,
+              0
+            ],
+            [
+              7,
+              1
+            ]
+          ]
+        },
+        "line-color": "rgba(110, 110, 110, 1)",
+        "line-dasharray": [
+          5,
+          2,
+          5,
+          2,
+          0.8,
+          2
+        ],
+        "line-width": {
+          "stops": [
+            [
+              5,
+              0.5
+            ],
+            [
+              7,
+              0.7
+            ],
+            [
+              8,
+              1
+            ],
+            [
+              9,
+              1.3
+            ],
+            [
+              11,
+              2
+            ],
+            [
+              13,
+              2.5
+            ],
+            [
+              15,
+              4
+            ],
+            [
+              17,
+              5
+            ],
+            [
+              20,
+              8
+            ]
+          ]
+        }
+      }
+    })
+    return sourceAndLayer;
+  }
+
+  const guid12 = () => {
+    function s4() {
+      return Math.floor((1 + Math.random()) * 0x10000)
+          .toString(16)
+          .substring(1);
+    }
+    return s4() + s4() + s4();
+  }
 
   return (
     <>
