@@ -16,13 +16,18 @@ const MapConfigTree: React.FC<MapConfigTreeProps> = ({ onCheck, onMoveLayer }) =
   const [mapConfig, setMapConfig] = useState<TreeDataNode[]>([]);
 
   const generateTreeData = (data: any[]): TreeDataNode[] =>
-    {
-      return data.map((item, index) => ({
-        title: item.label,
-        key: item.id,
-        children: item.children ? generateTreeData(item.children) : [],
-      }));
-    }
+    data.map((item, index) => ({
+      title: (
+        <div>
+          {item.label}
+          {item.legend && (
+            <img src={item.legend} alt="legend" style={{marginLeft:10, width: 100, height: 'auto' }} />
+          )}
+        </div>
+      ),
+      key: item.id,
+      children: item.children ? generateTreeData(item.children) : [],
+    }));
 
   const getConfigMap = async () => {
     let res = await AxiosService.get(

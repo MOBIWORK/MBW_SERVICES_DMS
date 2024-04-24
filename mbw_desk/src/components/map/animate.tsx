@@ -114,17 +114,18 @@ const Animate_And_Controls = ({ map, segmentData, options, currentInfo, Animatio
 
     useEffect(() => {
         // console.log(isAnimation);
-        StopAnimation()
+        setAnimation(false)
         if (animationID.current) cancelAnimationFrame(animationID.current);
         if (timeout.current) clearTimeout(timeout.current);
         currentIndex.current = 0;
         if (!segmentData.length) return
-        if (options.animation.animate) setAnimation(true)
+        // if (options.animation.animate) setAnimation(true)
     }, [segmentData, options])
 
     useEffect(() => {
-        if (Animation) StartAnimation()
-        else StopAnimation()
+        if (Animation === true) StartAnimation(true)
+        if (Animation === false) PauseAnimation(false)
+        if (Animation === null) StopAnimation()
     }, [Animation]);
 
     useEffect(() => {
@@ -136,6 +137,7 @@ const Animate_And_Controls = ({ map, segmentData, options, currentInfo, Animatio
                     'features': []
                 })
                 if (segmentData.length) map.panTo(segmentData[0].loc1.loc)
+                // if (isFollow) map.setZoom(17);
             }
             if (segmentData.length && segmentData[0].computed.time) {
                 timeout.current = setTimeout(animate.bind(this), 500, currentIndex.current, segmentData);
@@ -143,9 +145,9 @@ const Animate_And_Controls = ({ map, segmentData, options, currentInfo, Animatio
             }
             try {
                 map.setPaintProperty(`ek-tracking-his-LineString`, 'line-color', '#b5b5b5');
-                map.setPaintProperty(`ek-tracking-his-LineString`, 'line-opacity', 0.5);
+                map.setPaintProperty(`ek-tracking-his-LineString`, 'line-opacity', 0.4);
                 map.setLayoutProperty(`ek-tracking-his-LineString-arrow`, 'visibility', 'none');
-                map.setLayoutProperty(`ek-tracking-his-LineString`, 'visibility', 'none');
+                // map.setLayoutProperty(`ek-tracking-his-LineString`, 'visibility', 'none');
                 map.setLayoutProperty(`locationMarker`, 'visibility', 'visible');
                 map.setLayoutProperty(`LocationHistory`, 'visibility', 'visible');
                 if (map.getSource(`RouteHistory`)) {
@@ -163,7 +165,7 @@ const Animate_And_Controls = ({ map, segmentData, options, currentInfo, Animatio
                 map.setPaintProperty(`ek-tracking-his-LineString`, 'line-color', options.route.lineCorlor);
                 map.setPaintProperty(`ek-tracking-his-LineString`, 'line-opacity', options.route.lineOpacity);
                 map.setLayoutProperty(`ek-tracking-his-LineString`, 'visibility', 'visible');
-                map.setLayoutProperty(`ek-tracking-his-LineString-arrow`, 'visibility', 'visible');
+                // map.setLayoutProperty(`ek-tracking-his-LineString-arrow`, 'visibility', 'visible');
                 map.setLayoutProperty(`locationMarker`, 'visibility', 'none');
                 map.setLayoutProperty(`LocationHistory`, 'visibility', 'none');
             } catch (ex) {
@@ -177,7 +179,7 @@ const Animate_And_Controls = ({ map, segmentData, options, currentInfo, Animatio
         };
     }, [isAnimation, animationSpeed, isFollow, isReplay]);
 
-    const [currentAnimation, setCurrentAnimation] = useState(options.animation.animate);
+    const [currentAnimation, setCurrentAnimation] = useState(null);
     useEffect(() => {
         const handleVisibilityChange = () => {
             setTabActive(document.visibilityState === 'visible');
@@ -189,7 +191,7 @@ const Animate_And_Controls = ({ map, segmentData, options, currentInfo, Animatio
     }, []);
     useEffect(() => {
         if (isTabActive) {
-            if (currentAnimation === options.animation.animate) setAnimation(true);
+            if (currentAnimation && currentAnimation === true) setAnimation(true);
             else setAnimation(false);
         } else {
             setCurrentAnimation(isAnimation);

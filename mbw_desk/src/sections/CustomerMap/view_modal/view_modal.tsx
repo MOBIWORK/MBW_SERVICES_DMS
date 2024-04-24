@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { AxiosService } from "../../services/server";
+import { AxiosService } from "../../../services/server";
 import { Modal,Button ,Form} from 'antd';
 import { DownOutlined } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
@@ -13,7 +13,7 @@ type Props = {
   onOk: ReactNode;
 };
 import { message, Steps, theme } from 'antd';
-export function ModalView ({ open, title, onCancel, onOk , lstCustomer}: Props) {
+export function ModalView ({ open, title, onCancel, onOk , lstCustomer,api}: Props) {
   const [formScope] = Form.useForm();
   const [formIndustry] = Form.useForm();
   const [scopeResult, setScopeResult] = useState(null);
@@ -30,7 +30,7 @@ export function ModalView ({ open, title, onCancel, onOk , lstCustomer}: Props) 
     {
       title: 'Phạm vi đánh giá độ phủ đại lý',
       content: <Form layout="vertical" form={formScope} style={{padding: "10px"}}>
-        <ScopeAnalysis onResult={handleScopeResult} scopeResult={scopeResult}></ScopeAnalysis>
+        <ScopeAnalysis onResult={handleScopeResult} scopeResult={scopeResult} api={api}></ScopeAnalysis>
       </Form> ,
     },
     {
@@ -83,14 +83,18 @@ export function ModalView ({ open, title, onCancel, onOk , lstCustomer}: Props) 
       value_area = formScope.getFieldValue('tinh')
     }else if(formScope.getFieldValue('khuvuc')){
       type_area = 'administrative_region'
-      value_area = formScope.getFieldValue('khuvuc')
+      if(formScope.getFieldValue('khuvuc').includes('all')){
+        value_area = ['1','2','3','4','5','6','7']
+      }else{
+        value_area = formScope.getFieldValue('khuvuc')
+      }
     }else{
       message.error('Chưa chọn khu vực giới hạn')
       setLoadingSubmit(false)
       return
     }
     const apiUrl = `https://api.ekgis.vn/v1/analytic_market/determine_coverage?api_key=w1Dlh2wRon7mE6sL196TgvLS45fw02uon74pJ0rc`;
-    let dataPost  = {
+    const dataPost  = {
     "type_categories": type_categories,
     "type_area": type_area,
     "value_area": JSON.stringify(value_area),
@@ -108,13 +112,36 @@ export function ModalView ({ open, title, onCancel, onOk , lstCustomer}: Props) 
   if(responseData){
     setLoadingSubmit(false)
     message.success('Phân tích thành công')
+    saveConfigMap(dataPost,responseData)
     onOk(responseData)
+    
+    
   }else{
     setLoadingSubmit(false)
-    message.success('Phân tích thất bại')
+    message.error('Phân tích thất bại')
     return
   }
 
+  }
+  const saveConfigMap = async (dataPost, responseData) => {
+    try {
+      const dataPostSave = {
+        doc: JSON.stringify({
+          doctype: "VGM_Map_Converage",
+          map_name:'',
+          map_setting:JSON.stringify(dataPost),
+          map_sequence: JSON.stringify(responseData),
+        }),
+        action: "Save",
+      };
+      let res = await AxiosService.post(
+        "api/method/frappe.desk.form.save.savedocs",dataPostSave
+      );
+      
+    }catch (error) {
+      
+    }
+ 
   }
   const items = steps.map((item) => ({ key: item.title, title: item.title }));
   const contentStyle: React.CSSProperties = {

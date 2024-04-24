@@ -7,6 +7,7 @@ app_description = "API MBW DMS"
 app_email = "dev@mbw.vn"
 app_license = "MIT"
 
+setup_wizard_stages = "mbw_dms.setup_wizard.setup_wizard.get_setup_stages"
 website_route_rules = [
 	{
 		"from_route": "/mbw_desk/<path:app_path>",
@@ -120,7 +121,7 @@ website_route_rules = [
 override_doctype_class = {
 	"Customer": "mbw_dms.controllers.dms_customer.DMSCustomer",
     "Sales Order": "mbw_dms.controllers.dms_sales_order.DMSSalesOrder",
-    "Sales Invoice": "mbw_dms.controllers.dms_sales_invoice.DMSSalesInvoice",
+    # "Sales Invoice": "mbw_dms.controllers.dms_sales_invoice.DMSSalesInvoice",
     "Item": "mbw_dms.controllers.dms_item.DMS_Item"
 }
 

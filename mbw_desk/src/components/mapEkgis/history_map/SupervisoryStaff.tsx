@@ -30,7 +30,8 @@ export default function SupervisoryStaff({options}) {
   }, [options])
 
   const handleClickItem = (indexItem) => {
-    setIndexTimeLine(indexItem);
+    if(indexTimeLine == indexItem) setIndexTimeLine(null);
+    else setIndexTimeLine(indexItem);
   }
 
   useEffect(() => {

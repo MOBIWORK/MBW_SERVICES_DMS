@@ -62,7 +62,7 @@
     border: 0;
     border-radius: inherit;
     display: flex;
-    justify-content: space-evenly;
+    justify-content: flex-start;
 }
 
 .ekmapplf_tracking-legend-title .icon {

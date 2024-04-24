@@ -17,3 +17,4 @@ node_modules
 /mbw_dms/public/css/styles.output.css
 node_modules
 mbw_desk/.env.development
+mbw_desk/.env.development
