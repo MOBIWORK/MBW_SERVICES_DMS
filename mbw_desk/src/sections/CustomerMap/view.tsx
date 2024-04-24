@@ -165,8 +165,7 @@ function CustomerMapView() {
   }, [apiKey]);
 
   useEffect(() => {
-    renderClusterMap();
-    renderHeatMap();
+    renderMapForCustomer()
   }, [lstCustomer]);
   useEffect(() => {
     if (mapConfig != null && mapConfig.length > 0) addLayerIndustry();
@@ -186,15 +185,15 @@ function CustomerMapView() {
     setMapConfig(res.result);
   };
   const getLstCustomer = async () => {
-    // let res = await AxiosService.get(
-    //   "/api/method/mbw_dms.api.selling.customer.get_customer_has_location"
-    // );
-    // if (res.message == "Thành công") {
-    //   setLstCustomer(res.result);
-    // }
-    let objRes = JSON.parse('{"message":"Thành công","result":[{"name":"A Lâm","customer_name":"A Lâm","customer_code":"BH0123111115","customer_type":"Company","customer_group":"Khách lẻ","territory":"Thành phố Hà Nội","customer_primary_contact":"A Lâm","customer_primary_address":"395 Xuân Đỉnh, phường Xuân Đỉnh, Từ Liêm, Hà Nội, Việt Nam-Billing","customer_location_primary":"{\\"lat\\":20.7894317,\\"long\\":105.70448}"},{"name":"A Phương","customer_name":"A Phương","customer_code":"BH0120235252","customer_type":"Company","customer_group":"Khách lẻ","territory":"Thành phố Hà Nội","customer_primary_contact":"A Phương-A Phương","customer_primary_address":"538 Xuân Đỉnh, phường Xuân Đỉnh, Tây Hồ, Hà Nội, Việt Nam-Billing","customer_location_primary":"{\\"lat\\":21.0763504,\\"long\\":105.7869008}"},{"name":"A thuật","customer_name":"A thuật","customer_code":"HN11402","customer_type":"Company","customer_group":"Khách lẻ","territory":"Thành phố Hà Nội","customer_primary_contact":null,"customer_primary_address":"Đình Vĩnh Xương Trung, Mỹ Thành, Mỹ Đức, Hà Nội-Billing","customer_location_primary":"{\\"lat\\":20.6903959,\\"long\\":105.7689993}"},{"name":"A Toản","customer_name":"A Toản","customer_code":"BH0050608072022","customer_type":"Company","customer_group":"Khách lẻ","territory":"Thành phố Hà Nội","customer_primary_contact":"A Toản","customer_primary_address":"408 Trần Cung, Cổ Nhuế 1, Cầu Giấy, Hà Nội, Việt Nam-Billing","customer_location_primary":"{\\"lat\\":21.0555955,\\"long\\":105.7855697}"},{"name":"Anh  Hạnh","customer_name":"Anh  Hạnh","customer_code":"BH0057110022023","customer_type":"Company","customer_group":"Khách lẻ","territory":"Thành phố Hà Nội","customer_primary_contact":"Anh  Hạnh","customer_primary_address":"440 Cổ Nhuế, Cổ Nhuế 2, Từ Liêm, Hà Nội, Vietnam-Billing","customer_location_primary":"{\\"lat\\":21.069679,\\"long\\":105.7781418}"},{"name":"Xuyến  ngũ","customer_name":"Xuyến  ngũ","customer_code":"HN9251","customer_type":"Company","customer_group":"Khách lẻ","territory":"Thành phố Hà Nội","customer_primary_contact":null,"customer_primary_address":"Huyện Ứng Hòa, Hà Nội, VNM-Billing-2","customer_location_primary":"{\\"lat\\":20.7192067,\\"long\\":105.8028217}"},{"name":"Yến  Hiệp","customer_name":"Yến  Hiệp","customer_code":"HN8847","customer_type":"Company","customer_group":"Khách lẻ","territory":"Thành phố Hà Nội","customer_primary_contact":null,"customer_primary_address":"Tảo Khê  tảo  Dương  văn  ứng  hòa hà Nội-Billing","customer_location_primary":"{\\"lat\\":20.7082736,\\"long\\":105.7821972}"}]}');
-    console.log(objRes);
-    setLstCustomer(objRes.result);
+    let res = await AxiosService.get(
+      "/api/method/mbw_dms.api.selling.customer.get_customer_has_location"
+    );
+    if (res.message == "Thành công") {
+      setLstCustomer(res.result);
+    }
+    // let objRes = JSON.parse('{"message":"Thành công","result":[{"name":"A Lâm","customer_name":"A Lâm","customer_code":"BH0123111115","customer_type":"Company","customer_group":"Khách lẻ","territory":"Thành phố Hà Nội","customer_primary_contact":"A Lâm","customer_primary_address":"395 Xuân Đỉnh, phường Xuân Đỉnh, Từ Liêm, Hà Nội, Việt Nam-Billing","customer_location_primary":"{\\"lat\\":20.7894317,\\"long\\":105.70448}"},{"name":"A Phương","customer_name":"A Phương","customer_code":"BH0120235252","customer_type":"Company","customer_group":"Khách lẻ","territory":"Thành phố Hà Nội","customer_primary_contact":"A Phương-A Phương","customer_primary_address":"538 Xuân Đỉnh, phường Xuân Đỉnh, Tây Hồ, Hà Nội, Việt Nam-Billing","customer_location_primary":"{\\"lat\\":21.0763504,\\"long\\":105.7869008}"},{"name":"A thuật","customer_name":"A thuật","customer_code":"HN11402","customer_type":"Company","customer_group":"Khách lẻ","territory":"Thành phố Hà Nội","customer_primary_contact":null,"customer_primary_address":"Đình Vĩnh Xương Trung, Mỹ Thành, Mỹ Đức, Hà Nội-Billing","customer_location_primary":"{\\"lat\\":20.6903959,\\"long\\":105.7689993}"},{"name":"A Toản","customer_name":"A Toản","customer_code":"BH0050608072022","customer_type":"Company","customer_group":"Khách lẻ","territory":"Thành phố Hà Nội","customer_primary_contact":"A Toản","customer_primary_address":"408 Trần Cung, Cổ Nhuế 1, Cầu Giấy, Hà Nội, Việt Nam-Billing","customer_location_primary":"{\\"lat\\":21.0555955,\\"long\\":105.7855697}"},{"name":"Anh  Hạnh","customer_name":"Anh  Hạnh","customer_code":"BH0057110022023","customer_type":"Company","customer_group":"Khách lẻ","territory":"Thành phố Hà Nội","customer_primary_contact":"Anh  Hạnh","customer_primary_address":"440 Cổ Nhuế, Cổ Nhuế 2, Từ Liêm, Hà Nội, Vietnam-Billing","customer_location_primary":"{\\"lat\\":21.069679,\\"long\\":105.7781418}"},{"name":"Xuyến  ngũ","customer_name":"Xuyến  ngũ","customer_code":"HN9251","customer_type":"Company","customer_group":"Khách lẻ","territory":"Thành phố Hà Nội","customer_primary_contact":null,"customer_primary_address":"Huyện Ứng Hòa, Hà Nội, VNM-Billing-2","customer_location_primary":"{\\"lat\\":20.7192067,\\"long\\":105.8028217}"},{"name":"Yến  Hiệp","customer_name":"Yến  Hiệp","customer_code":"HN8847","customer_type":"Company","customer_group":"Khách lẻ","territory":"Thành phố Hà Nội","customer_primary_contact":null,"customer_primary_address":"Tảo Khê  tảo  Dương  văn  ứng  hòa hà Nội-Billing","customer_location_primary":"{\\"lat\\":20.7082736,\\"long\\":105.7821972}"}]}');
+    // console.log(objRes);
+    // setLstCustomer(objRes.result);
   };
   const renderMap = () => {
     console.log(apiKey);
@@ -282,72 +281,53 @@ function CustomerMapView() {
     });
     //ban do heatMap
     var isHeatMap = false;
-    if (map.current.getPitch() > 0) isHeatMap = true;
-    else isHeatMap = false;
-    var cl = "earthquakes";
-    var tl = "Bản đồ nhiệt";
-    if (!isHeatMap) {
-      cl = "customer_clus";
-      tl = "Bản đồ ban đầu";
-    }
-    let btnHeatMap = new ekmapplf.control.Button({
+    var cl = ""; //icon banr do nhiet
+    var tl = "Bản đồ nhiệt phân bố khách hàng";
+    let btnSwichMap = new ekmapplf.control.Button({
       className: "btn-ctl-group " + cl,
-      icon: "map",
+      icon: "",
       tooltip: tl,
     });
-    btnHeatMap.on("click", (btn) => {
+    btnSwichMap.on("click", (btn) => {
       isHeatMap = !isHeatMap;
       if (isHeatMap) {
         btn._div.className = btn._div.className.replaceAll(
           "customer_clus",
           "earthquakes"
-        );
-        btn._div.title = "Bản đồ nhiệt";
+        ); //Thay doi icon tu heat sang cluster
+        btn._div.title = "Bản đồ cụm phân bố khách hàng";
       } else {
         btn._div.className = btn._div.className.replaceAll(
           "earthquakes",
           "customer_clus"
-        );
-        btn._div.title = "Bản đồ ban đầu";
+        ); //Thay doi icon cluster sang heat
+        btn._div.title = "Bản đồ nhiệt phân bố khách hàng";
       }
       if (isHeatMap) {
-        map.current.setLayoutProperty("earthquakes", "visibility", "visible");
+        map.current.setLayoutProperty("customer_heat", "visibility", "visible");
+        map.current.setLayoutProperty("customer_clus-cluster", "visibility", "none"); 
       } else {
-        map.current.setLayoutProperty("customer_clus", "visibility", "none");
+        map.current.setLayoutProperty("customer_clus", "visibility", "visible");
+        map.current.setLayoutProperty("customer_clus-cluster", "visibility", "visible"); 
+        map.current.setLayoutProperty("customer_heat", "visibility", "none");
+     
       }
     })
     map.current.addControl(btn3D, "bottom-right");
     map.current.addControl(new maplibregl.FullscreenControl(), "top-right");
-    map.current.addControl(btnHeatMap, "top-right");
+    map.current.addControl(btnSwichMap, "top-right");
     map.current.on("load", async () => {
       await getConfigMap();
       getLstCustomer();
     });
   };
-  const renderClusterMap = async () => {
-    let dataGeo = {
-      'type': "FeatureCollection",
-      'features': []
-    }
-    for (let i = 0; i < lstCustomer.length; i++) {
-      let lngLat = JSON.parse(lstCustomer[i].customer_location_primary)
-      let feature = {
-        'type': "Feature",
-        'geometry': {
-          'type': "Point",
-          'coordinates': [lngLat.long, lngLat.lat]
-        },
-        'properties': lstCustomer[i]
-      }
-      dataGeo.features.push(feature);
-    }
-    if (map.current == null) return;
-    if (!map.current.isStyleLoaded()) return;
+
+  const renderClusterForCustomer = async (dataGeo) => {
     if (map.current.getSource('customer_clus')) {
       map.current.getSource('customer_clus').setData(dataGeo);
     } else {
       if (!map.current.getImage('marker-customer')) {
-        const iconCustomer = await map.current.loadImage("public/assets/check-icon.png"); //https://sfademo.mbwcloud.com/files/check-icon.png
+        const iconCustomer = await map.current.loadImage("https://files.ekgis.vn/sdks/tracking/assets/check-icon.png"); //https://sfademo.mbwcloud.com/files/check-icon.png
         map.current.addImage('marker-customer', iconCustomer.data);
       }
       map.current.addSource('customer_clus', {
@@ -384,6 +364,9 @@ function CustomerMapView() {
           ],
           'circle-stroke-opacity': 0.7,
           'circle-stroke-width': 5
+        },
+        'layout': {
+          'visibility': "visible"
         }
       });
       map.current.addLayer({
@@ -485,103 +468,183 @@ function CustomerMapView() {
           .setHTML(popupContent)
           .addTo(map.current);
       });
-    }
   }
+}
+  const renderHeatMapForCustomer = async (dataGeo) => {
+    if (map.current.getSource('customer_heat')) {
+      map.current.getSource('customer_heat').setData(dataGeo);
+  } else {
+      if (!map.current.getImage('marker-customer')) {
+          const iconCustomer = await map.current.loadImage("public/assets/check-icon.png");
+          map.current.addImage('marker-customer', iconCustomer.data);
+      }
+      map.current.addSource('customer_heat', {
+          'type': 'geojson',
+          'data': dataGeo
+      });
 
-const renderHeatMap = async () => {
-    let dataGeo = {
-        'type': "FeatureCollection",
-        'features': []
-    };
-    for (let i = 0; i < lstCustomer.length; i++) {
-        let lngLat = JSON.parse(lstCustomer[i].customer_location_primary);
-        let feature = {
-            'type': "Feature",
-            'geometry': {
-                'type': "Point",
-                'coordinates': [lngLat.long, lngLat.lat]
-            },
-            'properties': lstCustomer[i]
-        };
-        dataGeo.features.push(feature);
-    }
-    if (map.current == null || !map.current.isStyleLoaded()) return;
-
-    if (map.current.getSource('earthquakes')) {
-        map.current.getSource('earthquakes').setData(dataGeo);
-    } else {
-        if (!map.current.getImage('marker-customer')) {
-            const iconCustomer = await map.current.loadImage("public/assets/check-icon.png");
-            map.current.addImage('marker-customer', iconCustomer.data);
+      map.current.addLayer({
+          'id': 'customer_heat',
+          'type': 'heatmap',
+          'source': 'customer_heat',
+          'maxzoom': 9,
+          'paint': {
+              'heatmap-weight': [
+                  'interpolate',
+                  ['linear'],
+                  ['get', 'mag'],
+                  0,
+                  0,
+                  6,
+                  1
+              ],
+              'heatmap-intensity': [
+                  'interpolate',
+                  ['linear'],
+                  ['zoom'],
+                  0,
+                  1,
+                  9,
+                  3
+              ],
+              'heatmap-color': [
+                  'interpolate',
+                  ['linear'],
+                  ['heatmap-density'],
+                  0,
+                  'rgba(33,102,172,0)',
+                  0.2,
+                  'rgb(103,169,207)',
+                  0.4,
+                  'rgb(209,229,240)',
+                  0.6,
+                  'rgb(253,219,199)',
+                  0.8,
+                  'rgb(239,138,98)',
+                  1,
+                  'rgb(178,24,43)'
+              ],
+              'heatmap-radius': [
+                  'interpolate',
+                  ['linear'],
+                  ['zoom'],
+                  0,
+                  2,
+                  9,
+                  20
+              ],
+              'heatmap-opacity': [
+                  'interpolate',
+                  ['linear'],
+                  ['zoom'],
+                  7,
+                  1,
+                  9,
+                  0
+              ]
+          },
+          'layout': {
+            'visibility': "none"
+          }
+      });
+      map.current.addLayer({
+        'id': 'customer_heat_icon',
+        'type': 'symbol',
+        'source': "customer_heat",
+        'minzoom': 16,
+        'layout': {
+          'icon-image': 'marker-customer',
+          'icon-allow-overlap': true,
+          'icon-size': {
+            'stops': [
+              [15, 0.7],
+              [18, 1]
+            ]
+          }
         }
-        map.current.addSource('earthquakes', {
-            'type': 'geojson',
-            'data': dataGeo
-        });
-
-        map.current.addLayer({
-            'id': 'earthquakes-heat',
-            'type': 'heatmap',
-            'source': 'earthquakes',
-            'maxzoom': 9,
-            'paint': {
-                'heatmap-weight': [
-                    'interpolate',
-                    ['linear'],
-                    ['get', 'mag'],
-                    0,
-                    0,
-                    6,
-                    1
-                ],
-                'heatmap-intensity': [
-                    'interpolate',
-                    ['linear'],
-                    ['zoom'],
-                    0,
-                    1,
-                    9,
-                    3
-                ],
-                'heatmap-color': [
-                    'interpolate',
-                    ['linear'],
-                    ['heatmap-density'],
-                    0,
-                    'rgba(33,102,172,0)',
-                    0.2,
-                    'rgb(103,169,207)',
-                    0.4,
-                    'rgb(209,229,240)',
-                    0.6,
-                    'rgb(253,219,199)',
-                    0.8,
-                    'rgb(239,138,98)',
-                    1,
-                    'rgb(178,24,43)'
-                ],
-                'heatmap-radius': [
-                    'interpolate',
-                    ['linear'],
-                    ['zoom'],
-                    0,
-                    2,
-                    9,
-                    20
-                ],
-                'heatmap-opacity': [
-                    'interpolate',
-                    ['linear'],
-                    ['zoom'],
-                    7,
-                    1,
-                    9,
-                    0
-                ]
-            }
-        });
+      });
+      map.current.addLayer({
+        'id': 'customer_heat_title',
+        'type': 'symbol',
+        'source': "customer_heat",
+        'minzoom': 16,
+        'layout': {
+          'text-field': ['get', 'customer_name'],
+          'text-font': ["Roboto Medium"],
+          'text-size': {
+            'stops': [
+              [12, 10],
+              [13, 11],
+              [14, 11],
+              [15, 11.5],
+              [16, 12.5],
+              [20, 16]
+            ]
+          },
+          'text-anchor': "top",
+          'text-max-width': 9,
+          'text-offset': [0, 1.5],
+          'text-padding': 5
+        },
+        'paint': {
+          'text-color': "#ff5532",
+          'text-halo-color': "#ffffff",
+          'text-halo-width': 1,
+          'text-halo-blur': 0.5
+        }
+      });
+      map.current.on('click', 'customer_heat_icon', function (e) {
+        var coordinates = e.features[0].geometry.coordinates.slice();
+        var properties = e.features[0].properties;
+        var popupContent = `
+            <div class="customer-popup-info">
+                <b>${properties.customer_name}</b>
+            </div>
+        `;
+        if (properties.customer_primary_address != null && properties.customer_primary_address != "") {
+          popupContent += `
+            <div class="customer-popup-info">
+                <span class="customer-popup-icon customer-icon-marker customer-icon-default-color"></span>
+                <span>${properties.customer_primary_address}</span>
+            </div>`;
+        }
+        if (properties.customer_primary_contact != null && properties.customer_primary_contact != "") {
+          popupContent += `
+            <div class="customer-popup-info">
+                <span class="customer-popup-icon customer-icon-phone customer-icon-default-color"></span>
+                <span>${properties.customer_primary_contact}</span>
+            </div>`;
+        }
+        new maplibregl.Popup()
+          .setLngLat(coordinates)
+          .setHTML(popupContent)
+          .addTo(map.current);
+      });
+  }
+  }
+  
+  const renderMapForCustomer = async () => {
+    let dataGeo = {
+      'type': "FeatureCollection",
+      'features': []
     }
-};
+    for (let i = 0; i < lstCustomer.length; i++) {
+      let lngLat = JSON.parse(lstCustomer[i].customer_location_primary)
+      let feature = {
+        'type': "Feature",
+        'geometry': {
+          'type': "Point",
+          'coordinates': [lngLat.long, lngLat.lat]
+        },
+        'properties': lstCustomer[i]
+      }
+      dataGeo.features.push(feature);
+    }
+    if (map.current == null) return;
+    if (!map.current.isStyleLoaded()) return;
+    renderClusterForCustomer(dataGeo);
+    renderHeatMapForCustomer(dataGeo);
+  }
 
   const addLayerIndustry = (checkedKeys: React.Key[]) => {
     mapConfig.forEach((group) => {
