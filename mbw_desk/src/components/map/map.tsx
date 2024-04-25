@@ -417,12 +417,12 @@ function HistoryMap({ options, onLoad, HistoryIndex }) {
             const setPoints = async (CheckSource, TrackSource) => {
                 try {
                     if (!_map.getImage('marker-start')) {
-                        const iconCheckin = await _map.loadImage(_options.icon.start);
-                        _map.addImage('marker-start', iconCheckin.data)
+                        const iconStart = await _map.loadImage(_options.icon.start);
+                        _map.addImage('marker-start', iconStart.data)
                     }
                     if (!_map.getImage('marker-end')) {
-                        const iconCheckin = await _map.loadImage(_options.icon.end);
-                        _map.addImage('marker-end', iconCheckin.data)
+                        const iconEnd = await _map.loadImage(_options.icon.end);
+                        _map.addImage('marker-end', iconEnd.data)
                     }
                     if (!_map.getImage('marker-check')) {
                         const iconCheckin = await _map.loadImage(_options.icon.checkin);
@@ -1140,10 +1140,10 @@ function HistoryMap({ options, onLoad, HistoryIndex }) {
                     } else HisMap.getSource('RouteHistory').setData(fcRouteHistory);
 
                     var boundbox = bbox(fcRouteHistory);
-                    HisMap.fitBounds(boundbox, { padding: 100, maxZoom: 16, duration: 1000 });
+                    HisMap.fitBounds(boundbox, { padding: 100, maxZoom: 17, duration: 1000 });
 
                     var gpx = await preAnimation([detail])
-                    setTimeout( () => {
+                    setTimeout(() => {
                         setControls({
                             ready: true,
                             Data: gpx,
@@ -1214,8 +1214,8 @@ function HistoryMap({ options, onLoad, HistoryIndex }) {
                     .setOffset([0, -20])
                     .addTo(HisMap)
             }
-        } else{
-            if(GpxData.current)
+        } else {
+            if (GpxData.current)
                 setControls({
                     ready: true,
                     Data: GpxData.current,

@@ -263,13 +263,18 @@ function CustomerMapView() {
       ],
     });
     map.current.addControl(basemap, "bottom-left");
+    var mapConfigCache = JSON.parse(JSON.stringify(mapConfig));
+    var lstCustomerCache = JSON.parse(JSON.stringify(lstCustomer))
     basemap.on("changeBaseLayer", async function (response) {
+      setMapConfig(mapConfigCache);
+      setLstCustomer(lstCustomerCache);
       await new ekmapplf.VectorBaseMap(response.layer, apiKey).addTo(
         map.current
       );
-      await getConfigMap();
-      await addLayerIndustry();
-      await renderMapForCustomer();
+      setTimeout(async () => {
+        console.log(mapConfig);
+        await addLayerIndustry(mapConfig);
+      }, 500);
     });
     map.current.addControl(
       new maplibregl.NavigationControl({ visualizePitch: true }),
@@ -338,11 +343,20 @@ function CustomerMapView() {
       }
       if (isHeatMap) {
         map.current.setLayoutProperty("customer_heat", "visibility", "visible");
-        map.current.setLayoutProperty("customer_clus-cluster", "visibility", "none"); 
+        map.current.setLayoutProperty("customer_heat_icon", "visibility", "visible");
+        map.current.setLayoutProperty("customer_heat_title", "visibility", "visible");
+        map.current.setLayoutProperty("customer_clus-cluster", "visibility", "none");
+        map.current.setLayoutProperty("customer_clus-cluster-count", "visibility", "none");
+        map.current.setLayoutProperty("customer_clus-uncluster", "visibility", "none");
+        map.current.setLayoutProperty("customer_clus-title", "visibility", "none");
       } else {
-        map.current.setLayoutProperty("customer_clus", "visibility", "visible");
-        map.current.setLayoutProperty("customer_clus-cluster", "visibility", "visible"); 
         map.current.setLayoutProperty("customer_heat", "visibility", "none");
+        map.current.setLayoutProperty("customer_heat_icon", "visibility", "none");
+        map.current.setLayoutProperty("customer_heat_title", "visibility", "none");
+        map.current.setLayoutProperty("customer_clus-cluster", "visibility", "visible");
+        map.current.setLayoutProperty("customer_clus-cluster-count", "visibility", "visible");
+        map.current.setLayoutProperty("customer_clus-uncluster", "visibility", "visible");
+        map.current.setLayoutProperty("customer_clus-title", "visibility", "visible");
      
       }
     })
@@ -520,7 +534,7 @@ function CustomerMapView() {
           'id': 'customer_heat',
           'type': 'heatmap',
           'source': 'customer_heat',
-          'maxzoom': 9,
+          'maxzoom': 14,
           'paint': {
               'heatmap-weight': [
                   'interpolate',
@@ -572,7 +586,7 @@ function CustomerMapView() {
                   ['zoom'],
                   7,
                   1,
-                  9,
+                  14,
                   0
               ]
           },
@@ -584,7 +598,7 @@ function CustomerMapView() {
         'id': 'customer_heat_icon',
         'type': 'symbol',
         'source': "customer_heat",
-        'minzoom': 16,
+        'minzoom': 14,
         'layout': {
           'icon-image': 'marker-customer',
           'icon-allow-overlap': true,
@@ -600,7 +614,7 @@ function CustomerMapView() {
         'id': 'customer_heat_title',
         'type': 'symbol',
         'source': "customer_heat",
-        'minzoom': 16,
+        'minzoom': 14,
         'layout': {
           'text-field': ['get', 'customer_name'],
           'text-font': ["Roboto Medium"],
@@ -662,6 +676,7 @@ function CustomerMapView() {
       'type': "FeatureCollection",
       'features': []
     }
+    console.log(lstCustomer);
     for (let i = 0; i < lstCustomer.length; i++) {
       let lngLat = JSON.parse(lstCustomer[i].customer_location_primary)
       let feature = {
