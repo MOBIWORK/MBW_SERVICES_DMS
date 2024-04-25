@@ -36,10 +36,12 @@ const MapConfigTree: React.FC<MapConfigTreeProps> = ({objCoverageItem, onCheck, 
     if(objCoverageItem != null){
       setMapConfig(prevConfig => {
         for(let i = 0 ; i < prevConfig.length;i++){
-          if(prevConfig[i].id == "map_analytic_converage"){
+          if(prevConfig[i].key == "map_analytic_converage"){
+            objCoverageItem = { ...objCoverageItem, key: objCoverageItem.id, title: objCoverageItem.label };
             prevConfig[i].children.push(objCoverageItem);
           }
         }
+        console.log(prevConfig);
         return prevConfig;
       })
     }
