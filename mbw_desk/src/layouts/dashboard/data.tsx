@@ -81,12 +81,46 @@ export const listMenu: MenuItem[] = [
   //cham diem trung bay
   {
     label: (
-      <a className={""} href="/mbw_audit">
+      <Link className={""} to={"#"}>
           Chấm điểm trưng bày
-      </a>
+      </Link>
     ),
     icon: <FileImageOutlined style={{ fontSize: "22px" }} />,
     key: "checkinimage",
+    children: [
+      {
+        label: (
+          <a className={"text-[#212B36] hover:text-[#212B36]"} href="/mbw_audit">
+              Dashboard
+          </a>
+        ),
+        key: "imagedb",
+      },
+      {
+        label: (
+          <a className={"text-[#212B36] hover:text-[#212B36]"} href="/mbw_audit/reports">
+              Báo cáo
+          </a>
+        ),
+        key: "imagerb",
+      },
+      {
+        label: (
+          <a className={"text-[#212B36] hover:text-[#212B36]"} href="/mbw_audit/product_sku">
+              Sản phẩm
+          </a>
+        ),
+        key: "imagesp",
+      },
+      {
+        label: (
+          <a className={"text-[#212B36] hover:text-[#212B36]"} href="/mbw_audit/campaign">
+              Chiến dịch
+          </a>
+        ),
+        key: "imagecd",
+      },
+    ]
   },
   //report
   {
