@@ -119,30 +119,37 @@ def get_customer_router(data):
 
         if router:
             queryFilters['channel_code'] = ["in",router]
-        # if status: 
-        #     queryFilters['status'] = status
         #lay danh sach theo ngay
         from mbw_dms.api.common import weekday
         today= datetime.now()
         thu_trong_tuan, tuan_trong_thang = weekday(today)
-        if view_mode == "map" or (router and not is_ngoai_tuyen):
-            queryFilters.update({"travel_date": ["between",["Không giới hạn",thu_trong_tuan]]})
-            queryFilters.update({"frequency": ["like",tuan_trong_thang]})  
+        #them bo loc dung tuyen neu view map hoac cau hinh dung tuyen
+        if view_mode == "map" or not is_ngoai_tuyen:
+            queryFilters.update({"travel_date": ["in",["Không giới hạn",thu_trong_tuan]]})
+            queryFilters.update({"frequency": ["like",f"%{int(tuan_trong_thang)}%"]})  
         
-        list_router = frappe.db.get_all('DMS Router',filters=queryFilters, pluck='name',distinct=True)
+        list_routers = frappe.db.get_all('DMS Router',filters=queryFilters,fields=["name","travel_date"],distinct=True)
+
         list_customer = []
-        list_customer_in_router= []
-        for router_name in list_router:
+        list_customer_in_route= []
+        for router in list_routers:
+            router_name = router.name
             detail_router = frappe.get_doc("DMS Router",{"name":router_name}).as_dict()
             customer = detail_router.get('customers')
+            if is_ngoai_tuyen and (router.travel_date == thu_trong_tuan or router.travel_date == "Không giới hạn"):
+                customer_in_router = pydash.filter_(detail_router.get('customers'),lambda value: (value.frequency.find(str(int(tuan_trong_thang))) != -1))    
+                customer_in_router_name = pydash.map_(customer_in_router,lambda x:x.customer_code)
+                list_customer_in_route += customer_in_router_name
             if view_mode == "map" or (router and not is_ngoai_tuyen):
-                print("in",str(tuan_trong_thang))
-                customer = pydash.filter_(detail_router.get('customers'),lambda value: (value.frequency.find(str(int(tuan_trong_thang))) != -1))
+                customer = pydash.filter_(detail_router.get('customers'),lambda value: (value.frequency.find(str(int(tuan_trong_thang))) != -1))          
+
             list_customer += customer
+        if not is_ngoai_tuyen:
+            list_customer_in_route = list_customer
+        print('in router',list_customer_in_route)
         sort = "customer_name desc"
         if order_by: 
             sort = f"customer_name {order_by}"
-        #     list_customer = sorted(list_customer, key= lambda x: x.customer_name.split(' ')[-1],reverse=True if order_by == 'desc' else False)
         list_customer_name = []
         for customer in list_customer:
             list_customer_name.append(customer.get('customer_code'))
@@ -163,7 +170,6 @@ def get_customer_router(data):
             ,'customer_name'
             ,'UNIX_TIMESTAMP(custom_birthday) as birthday'
             ]
-        print("review",FiltersCustomer)
         if(view_mode == 'list'):
             detail_customer = frappe.db.get_all('Customer',filters= FiltersCustomer,fields=fields_customer,start=page_size*(page_number-1), page_length=page_size,order_by=sort,distinct=True)
             # print(detail_customer)
@@ -183,6 +189,14 @@ def get_customer_router(data):
             checkin = frappe.db.get_value("DMS Checkin",{"kh_ma":customer.get('customer_code')},["is_checkout"],as_dict=1)
             if checkin != None and checkin.is_checkout:
                 customer['is_checkin'] = True
+            print("ngoai tuyen",is_ngoai_tuyen)
+            if not is_ngoai_tuyen: 
+                customer["is_route"] = True
+            else:
+                customer["is_route"] = False
+                print(customer.customer_code,customer.customer_code in list_customer_in_route)
+                if customer.customer_code in list_customer_in_route:
+                    customer["is_route"] = True
         total_customer= len(frappe.db.get_all('Customer',filters= FiltersCustomer))
         return gen_response(200,"", {
             "data": detail_customer,
