@@ -744,7 +744,15 @@ const handleCheck = (checkedKeys: React.Key[]) => {
     });
   });
 };
-
+  const changeOpacity = (sliderValues: any, selectedKeys:React.Key) => {
+    selectedKeys.forEach(key => {
+      map.current.setPaintProperty(
+        key,
+        'raster-opacity',
+        sliderValues
+      )
+  });
+  }
   //moveLayers
   const handleMoveLayer = (layerIds: any, beforeIds: any) => {
     if (isParentId(layerIds)) {
@@ -975,7 +983,7 @@ const handleCheck = (checkedKeys: React.Key[]) => {
             <span style={{marginLeft:'8px'}}>Danh sách bản đồ</span>
           </div>
           <div className={`ekmapplf_tracking-legend-body ${isOpen ? 'open' : ''}`} style={{ maxHeight: isOpen ? '250px' : '0', overflow: 'auto' }}>
-            <MapConfigTree onCheck={handleCheck} onMoveLayer={handleMoveLayer} />
+            <MapConfigTree onCheck={handleCheck} onMoveLayer={handleMoveLayer} changeOpacity={changeOpacity}/>
           </div>
         </div>
 

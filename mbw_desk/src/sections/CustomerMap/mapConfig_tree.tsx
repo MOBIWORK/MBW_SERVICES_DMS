@@ -7,9 +7,10 @@ import { SettingFilled } from '@ant-design/icons';
 interface MapConfigTreeProps {
   onCheck: (checkedKeys: React.Key[]) => void;
   onMoveLayer: (layerIds: React.Key,beforeIds: React.Key) => void;
+  changeOpacity: (sliderValues: React.Key,selectedKeys: React.Key[]) => void;
 }
 
-const MapConfigTree: React.FC<MapConfigTreeProps> = ({ onCheck, onMoveLayer }) => {
+const MapConfigTree: React.FC<MapConfigTreeProps> = ({ onCheck, onMoveLayer, changeOpacity }) => {
   const [expandedKeys, setExpandedKeys] = useState<React.Key[]>([]);
   const [checkedKeys, setCheckedKeys] = useState<React.Key[]>([]);
   const [selectedKeys, setSelectedKeys] = useState<React.Key[]>([]);
@@ -17,6 +18,8 @@ const MapConfigTree: React.FC<MapConfigTreeProps> = ({ onCheck, onMoveLayer }) =
   const [mapConfig, setMapConfig] = useState<TreeDataNode[]>([]);
   const formatter: NonNullable<SliderSingleProps['tooltip']>['formatter'] = (value) => `${value}%`;
   const [showLegend, setShowLegend] = useState<boolean[]>([]);
+  const [sliderValues, setSliderValues] = useState<React.Key[]>([]);
+
   const handleLegendToggle = (index: number) => {
     setShowLegend(prevShowLegend => {
       const newShowLegend = [...prevShowLegend]; 
@@ -24,25 +27,36 @@ const MapConfigTree: React.FC<MapConfigTreeProps> = ({ onCheck, onMoveLayer }) =
       return newShowLegend;
     });
   };
+  const handleSliderChange = (index: number, value: number) => {
+    let valueNomar = value / 100;
+    setSliderValues(valueNomar)
+  };
+  useEffect(() => {
+    let arr = [];
+    if (selectedKeys && selectedKeys.length > 0) {
+        arr.push(selectedKeys);
+        changeOpacity(sliderValues, arr);
+    }
+  }, [sliderValues,selectedKeys]);
   const generateTreeData = (data: any[]): TreeDataNode[] =>
     data.map((item, index) => ({
       title: item.children ? (
         <span>{item.label}</span>
       ) : (
        <>
-        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between'}}>
           <span>{item.label}</span>
           <SettingFilled style={{margin: '0 5px'}} onClick={()=>handleLegendToggle(index)}/>
         </div>
         {showLegend[index] && (
             <>
-             <div>
+             <div style={{paddingTop: '5px'}}>
              <span>Chú giải</span><br/>
              <img src={item.legend} alt="legend" />
              </div>
              <div>
               <span>Độ mờ</span>
-              <Slider tooltip={{ formatter }} />
+              <Slider tooltip={{ formatter }}  onChange={(value) => handleSliderChange(index, value)}/>
              </div>
             </>
           )}
