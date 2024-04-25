@@ -275,21 +275,28 @@ def create_checkin_inventory(body):
             "customer_code", "customer_name", "customer_type", "customer_address", "checkin_id"
         ]
         del body['cmd']
+        doc = frappe.new_doc("DMS Inventory")
+        doc.set("create_by",user.name)
         for key, value in body.items():
             if key in normal_keys:
-                validate_filter(type_check='require',value=value)
+                print(key)
+                doc.set(key, validate_filter(type_check='require', value=value))
         items = body.get('inventory_items')
+        print(doc)
         for item in items:
-            item['exp_time'] = validate_filter(type_check='date',value=item['exp_time'])
-            item['total_cost'] = item['quantity'] * item['item_price']
-        body['doctype'] = "DMS Inventory"
-        body['create_by'] = user.get('name')
-        body['items'] = items
-        doc = frappe.get_doc(body)
-        doc.save()
+            if isinstance(item, dict):
+            # Validate and handle exp_time as timestamp
+                if 'exp_time' in item:
+                    item['exp_time'] = validate_filter(type_check='date', value=item['exp_time'])
+                # Calculate total cost
+                if 'quantity' in item and 'item_price' in item:
+                    item['total_cost'] = item['quantity'] * item['item_price']
+            doc.append("items", item)
+        doc.insert()
         frappe.db.commit()
         return gen_response(201, "Thành công", {"name": doc.name})
     except Exception as e:
+        print(e)
         return exception_handle(e)
 
 
