@@ -125,16 +125,16 @@ def get_customer_router(data):
         from mbw_dms.api.common import weekday
         today= datetime.now()
         thu_trong_tuan, tuan_trong_thang = weekday(today)
-        if view_mode == "map":
+        if view_mode == "map" or (router and not is_ngoai_tuyen):
             queryFilters.update({"travel_date": ["between",["Không giới hạn",thu_trong_tuan]]})
             queryFilters.update({"frequency": ["like",tuan_trong_thang]})  
         
         list_router = frappe.db.get_all('DMS Router',filters=queryFilters, pluck='name',distinct=True)
         list_customer = []
+        list_customer_in_router= []
         for router_name in list_router:
             detail_router = frappe.get_doc("DMS Router",{"name":router_name}).as_dict()
             customer = detail_router.get('customers')
-            print("trong tuyen",(router and not is_ngoai_tuyen))
             if view_mode == "map" or (router and not is_ngoai_tuyen):
                 print("in",str(tuan_trong_thang))
                 customer = pydash.filter_(detail_router.get('customers'),lambda value: (value.frequency.find(str(int(tuan_trong_thang))) != -1))
