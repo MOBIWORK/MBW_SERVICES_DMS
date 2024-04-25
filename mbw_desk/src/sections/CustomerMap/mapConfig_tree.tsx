@@ -5,12 +5,13 @@ import { AxiosService } from '@/services/server';
 import { SettingFilled } from '@ant-design/icons';
 
 interface MapConfigTreeProps {
+  objCoverageItem: any;
   onCheck: (checkedKeys: React.Key[]) => void;
   onMoveLayer: (layerIds: React.Key,beforeIds: React.Key) => void;
   changeOpacity: (sliderValues: React.Key,selectedKeys: React.Key[]) => void;
 }
 
-const MapConfigTree: React.FC<MapConfigTreeProps> = ({ onCheck, onMoveLayer, changeOpacity }) => {
+const MapConfigTree: React.FC<MapConfigTreeProps> = ({objCoverageItem, onCheck, onMoveLayer, changeOpacity }) => {
   const [expandedKeys, setExpandedKeys] = useState<React.Key[]>([]);
   const [checkedKeys, setCheckedKeys] = useState<React.Key[]>([]);
   const [selectedKeys, setSelectedKeys] = useState<React.Key[]>([]);
@@ -30,6 +31,19 @@ const MapConfigTree: React.FC<MapConfigTreeProps> = ({ onCheck, onMoveLayer, cha
     let valueNomar = value / 100;
     changeOpacity(valueNomar, selectedKeys);
   };
+  useEffect(() => {
+    console.log(objCoverageItem);
+    if(objCoverageItem != null){
+      setMapConfig(prevConfig => {
+        for(let i = 0 ; i < prevConfig.length;i++){
+          if(prevConfig[i].id == "map_analytic_converage"){
+            prevConfig[i].children.push(objCoverageItem);
+          }
+        }
+        return prevConfig;
+      })
+    }
+  }, [objCoverageItem])
   const generateTreeData = (data: any[]): TreeDataNode[] =>
     data.map((item, index) => ({
       title: item.children ? (

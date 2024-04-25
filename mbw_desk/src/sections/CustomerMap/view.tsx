@@ -135,6 +135,7 @@ function CustomerMapView() {
       fileName + "_export_" + new Date().getTime() + EXCEL_EXTENSION
     );
   };
+  const [objItemCoverage, setObjItemCoverage] = useState<any>(null);
   const [dataSource, setDataSource] = useState([]);
   const [mapHeight, setMapHeight] = useState('74.5vh');
   const [visibleTable, setVisibleTable] = useState(false);
@@ -146,23 +147,17 @@ function CustomerMapView() {
     for(let i = 0; i < sourceAndLayer.layers.length; i++){
       if(!map.current.getLayer(sourceAndLayer.layers[i].id)) map.current.addLayer(sourceAndLayer.layers[i]);
     }
-    setMapConfig(prevConfig => {
-      let propertySources = Object.getOwnPropertyNames(sourceAndLayer.sources);
-      let mapConverage = {
-        "id": propertySources[0],
-        "label": "Bản đồ độ phủ khách hàng theo đơn vị hành chính",
-        "sources": sourceAndLayer.sources,
-        "layers": sourceAndLayer.layers,
-        "visible": true,
-        "legend": null
-      }
-      for(let i = 0 ; i < prevConfig.length;i++){
-        if(prevConfig[i].id == "map_analytic_converage"){
-          prevConfig[i].children.push(mapConverage);
-        }
-      }
-      return prevConfig;
-    })
+
+    let propertySources = Object.getOwnPropertyNames(sourceAndLayer.sources);
+    let mapConverage = {
+      "id": propertySources[0],
+      "label": "Bản đồ độ phủ khách hàng theo đơn vị hành chính",
+      "sources": sourceAndLayer.sources,
+      "layers": sourceAndLayer.layers,
+      "visible": true,
+      "legend": null
+    }
+    setObjItemCoverage(mapConverage);
     setDataSource(data)
     setMapHeight('40vh');
     setVisibleTable(true)
@@ -992,7 +987,7 @@ const handleCheck = (checkedKeys: React.Key[]) => {
             <span style={{marginLeft:'8px'}}>Danh sách bản đồ</span>
           </div>
           <div className={`ekmapplf_tracking-legend-body ${isOpen ? 'open' : ''}`} style={{ maxHeight: isOpen ? '250px' : '0', overflow: 'auto' }}>
-            <MapConfigTree onCheck={handleCheck} onMoveLayer={handleMoveLayer} changeOpacity={changeOpacity}/>
+            <MapConfigTree objCoverageItem={objItemCoverage} onCheck={handleCheck} onMoveLayer={handleMoveLayer} changeOpacity={changeOpacity}/>
           </div>
         </div>
 
