@@ -95,9 +95,9 @@ export function ScopeAnalysis({ onResult, scopeResult,api }) {
         center: [107.9426393217799, 16.92300264959944],
         zoom: 4.2,
       });
-    
-    }else{
-      const filteredArr = arr_region.filter((item) => {
+       value = ['1','2','3','4','5','6','7']
+    }
+   const filteredArr = arr_region.filter((item) => {
         return value.includes(item.value);
       });
       if(selectRegion.length > value.length){
@@ -129,7 +129,7 @@ export function ScopeAnalysis({ onResult, scopeResult,api }) {
         modifiedTinh.push(obj)
      }
      setArrTinh(modifiedTinh);
-    }
+    
 
    setSelectRegion(value)
    onResultChange()

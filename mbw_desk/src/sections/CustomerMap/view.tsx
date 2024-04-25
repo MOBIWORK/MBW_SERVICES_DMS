@@ -986,7 +986,7 @@ const handleCheck = (checkedKeys: React.Key[]) => {
         columns={columns}
         dataSource={dataSource}
         pagination={false}
-        scroll={{ y: 450 }}
+        scroll={{ y: 270 }}
       />
       <div  onClick={handleClose} style={{display:'flex',position:'absolute',top:'10px',right:'10px',cursor:'pointer'}}>
         
