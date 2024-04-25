@@ -81,7 +81,7 @@ export const listMenu: MenuItem[] = [
   //cham diem trung bay
   {
     label: (
-      <Link className={""} to={"#"}>
+      <Link className={"text-[#212B36] hover:text-[#212B36]"} to={"#"}>
           Chấm điểm trưng bày
       </Link>
     ),
