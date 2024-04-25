@@ -61,7 +61,13 @@ export function ScopeAnalysis({ onResult, scopeResult,api }) {
       if(scopeResult.region){
         setSelectRegion(scopeResult.region)
         const filteredArr = arr_region.filter((item) => {
-          return scopeResult.region.includes(item.value);
+          if(scopeResult.region.includes('all')){
+            let value = ['1','2','3','4','5','6','7']
+            return value.includes(item.value);
+          }else{
+            return scopeResult.region.includes(item.value);
+          }
+         
         });
         
         for(let i = 0; i < filteredArr.length; i++) {
