@@ -67,7 +67,6 @@ export function ModalView ({ open, title, onCancel, onOk , lstCustomer,api}: Pro
         locations.push(coordinates)
       }
     }
-    console.log(formIndustry.getFieldValue('nganhhang'));
     if(formIndustry.getFieldValue('nganhhang')){
       type_categories = formIndustry.getFieldValue('nganhhang')
     }else{
@@ -75,9 +74,6 @@ export function ModalView ({ open, title, onCancel, onOk , lstCustomer,api}: Pro
       message.error('Chưa chọn ngành hàng ')
       return
     }
-    console.log(formScope.getFieldValue('huyen'));
-    console.log(formScope.getFieldValue('tinh'));
-    console.log(formScope.getFieldValue('khuvuc'));
     if(formScope.getFieldValue('huyen') && formScope.getFieldValue('huyen').length > 0){
       type_area = 'administrative_district'
       value_area = formScope.getFieldValue('huyen')
@@ -95,8 +91,7 @@ export function ModalView ({ open, title, onCancel, onOk , lstCustomer,api}: Pro
       message.error('Chưa chọn khu vực giới hạn')
       setLoadingSubmit(false)
       return
-    }
-    console.log(value_area);
+    };
     const apiUrl = `https://api.ekgis.vn/v1/analytic_market/determine_coverage?api_key=w1Dlh2wRon7mE6sL196TgvLS45fw02uon74pJ0rc`;
     const dataPost  = {
     "type_categories": type_categories,

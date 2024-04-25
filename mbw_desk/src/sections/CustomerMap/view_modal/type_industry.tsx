@@ -3,7 +3,7 @@ import { AxiosService } from "../../../services/server";
 import { Form, Select,Input } from "antd";
 export function TypeIndustry ({form}) {
     const [typeIndustry, setTypeIndustry] = useState(null);
-    const [inputValue, setInputValue] = useState('Bản đồ độ phủ');
+    const [inputValue, setInputValue] = useState('Bản đồ độ phủ khách hàng');
     const [transformedStoreTypes, setTransformedStoreTypes] = useState([]);
     
     const filterOption = (input: string, option?: { label: string; value: string }) =>
