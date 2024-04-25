@@ -202,15 +202,6 @@ function CustomerMapView() {
     let res = await AxiosService.get(
       "/api/method/mbw_dms.api.vgm.map_customer.get_config_map"
     );
-    let objMapAnalyticCoverage = {
-      "id": "map_analytic_converage",
-      "group": true,
-      "visible": false,
-      "label": "Bản đồ độ phủ khách hàng",
-      "children": []
-    }
-    if(res.result == null) res.result = [];
-    res.result.push(objMapAnalyticCoverage);
     console.log(res.result);
     setMapConfig(res.result);
     addLayerIndustry(res.result);
@@ -319,7 +310,7 @@ function CustomerMapView() {
     });
     //ban do heatMap
     var isHeatMap = false;
-    var cl = ""; //icon banr do nhiet
+    var cl = "icon_heatmap";
     var tl = "Bản đồ nhiệt phân bố khách hàng";
     let btnSwichMap = new ekmapplf.control.Button({
       className: "btn-ctl-group " + cl,
@@ -330,14 +321,14 @@ function CustomerMapView() {
       isHeatMap = !isHeatMap;
       if (isHeatMap) {
         btn._div.className = btn._div.className.replaceAll(
-          "customer_clus",
-          "earthquakes"
+          "icon_heatmap",
+          "icon_clustermap"
         ); //Thay doi icon tu heat sang cluster
         btn._div.title = "Bản đồ cụm phân bố khách hàng";
       } else {
         btn._div.className = btn._div.className.replaceAll(
-          "earthquakes",
-          "customer_clus"
+          "icon_clustermap",
+          "icon_heatmap"
         ); //Thay doi icon cluster sang heat
         btn._div.title = "Bản đồ nhiệt phân bố khách hàng";
       }
@@ -671,7 +662,6 @@ function CustomerMapView() {
   }
   
   const renderMapForCustomer = async () => {
-    
     let dataGeo = {
       'type': "FeatureCollection",
       'features': []

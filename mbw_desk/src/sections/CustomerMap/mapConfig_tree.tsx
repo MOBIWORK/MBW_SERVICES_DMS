@@ -62,6 +62,15 @@ const MapConfigTree: React.FC<MapConfigTreeProps> = ({ onCheck, onMoveLayer, cha
     let res = await AxiosService.get(
       "/api/method/mbw_dms.api.vgm.map_customer.get_config_map"
     );
+    let objMapAnalyticCoverage = {
+      "id": "map_analytic_converage",
+      "group": true,
+      "visible": false,
+      "label": "Bản đồ độ phủ khách hàng",
+      "children": []
+    }
+    if(res.result == null) res.result = [];
+    res.result.push(objMapAnalyticCoverage);
     let dataMapConfig = generateTreeData(res.result)
     setMapConfig(dataMapConfig);
   };
