@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { Tree } from 'antd';
-import type { TreeDataNode, TreeProps } from 'antd';
+import { Slider, Tree } from 'antd';
+import type { SliderSingleProps, TreeDataNode, TreeProps } from 'antd';
 import { AxiosService } from '@/services/server';
+import { SettingFilled } from '@ant-design/icons';
 
 interface MapConfigTreeProps {
   onCheck: (checkedKeys: React.Key[]) => void;
@@ -14,16 +15,38 @@ const MapConfigTree: React.FC<MapConfigTreeProps> = ({ onCheck, onMoveLayer }) =
   const [selectedKeys, setSelectedKeys] = useState<React.Key[]>([]);
   const [autoExpandParent, setAutoExpandParent] = useState<boolean>(true);
   const [mapConfig, setMapConfig] = useState<TreeDataNode[]>([]);
-
+  const formatter: NonNullable<SliderSingleProps['tooltip']>['formatter'] = (value) => `${value}%`;
+  const [showLegend, setShowLegend] = useState<boolean[]>([]);
+  const handleLegendToggle = (index: number) => {
+    setShowLegend(prevShowLegend => {
+      const newShowLegend = [...prevShowLegend]; 
+      newShowLegend[index] = !newShowLegend[index]; 
+      return newShowLegend;
+    });
+  };
   const generateTreeData = (data: any[]): TreeDataNode[] =>
     data.map((item, index) => ({
-      title: (
-        <div>
-          {item.label}
-          {item.legend && (
-            <img src={item.legend} alt="legend" style={{marginLeft:10, width: 100, height: 'auto' }} />
-          )}
+      title: item.children ? (
+        <span>{item.label}</span>
+      ) : (
+       <>
+        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+          <span>{item.label}</span>
+          <SettingFilled style={{margin: '0 5px'}} onClick={()=>handleLegendToggle(index)}/>
         </div>
+        {showLegend[index] && (
+            <>
+             <div>
+             <span>Chú giải</span><br/>
+             <img src={item.legend} alt="legend" />
+             </div>
+             <div>
+              <span>Độ mờ</span>
+              <Slider tooltip={{ formatter }} />
+             </div>
+            </>
+          )}
+        </>
       ),
       key: item.id,
       children: item.children ? generateTreeData(item.children) : [],
@@ -39,7 +62,7 @@ const MapConfigTree: React.FC<MapConfigTreeProps> = ({ onCheck, onMoveLayer }) =
 
   useEffect(()=>{
     getConfigMap();
-  },[])
+  },[showLegend])
 
   const onExpand: TreeProps['onExpand'] = (expandedKeysValue) => {
     console.log('onExpand', expandedKeysValue);

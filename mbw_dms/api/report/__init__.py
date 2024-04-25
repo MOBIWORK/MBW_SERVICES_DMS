@@ -84,7 +84,7 @@ def synthesis_report(**kwargs):
         if total_yesterday == 0:
             data['tang_vs_hqua'] = 100
         else:
-            data['tang_vs_hqua'] = data['doanh_so'] / total_yesterday * 100 - 100
+            data['tang_vs_hqua'] = round(float(data['doanh_so'] / total_yesterday * 100 - 100), 2)
 
         # Số lượng đơn hàng    
         if sales_orders_today:
@@ -97,7 +97,7 @@ def synthesis_report(**kwargs):
             data['luot_vt'] = len(data_checkin)
         data['ti_le_chuyen_doi'] = 0
         if data['luot_vt'] != 0:
-            data['ti_le_chuyen_doi'] = data['don_hang']/data['luot_vt']*100
+            data['ti_le_chuyen_doi'] = round(float(data['don_hang']/data['luot_vt']*100), 2)
 
         # Lấy số nhân viên online
         data['so_nv_online'] = 0
