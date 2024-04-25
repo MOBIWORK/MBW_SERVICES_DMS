@@ -240,6 +240,13 @@ function CustomerMapView() {
       id: "basemap_control",
       baseLayers: [
         {
+          id: "OSM:Night",
+          title: "Bản đồ nền Đêm",
+          thumbnail: "https://docs.ekgis.vn/assets/dem-map.png",
+          width: "50px",
+          height: "50px",
+        },
+        {
           id: "OSM:Bright",
           title: "Bản đồ nền Sáng",
           thumbnail: "https://docs.ekgis.vn/assets/map-sang.png",
@@ -253,13 +260,6 @@ function CustomerMapView() {
           width: "50px",
           height: "50px",
         },
-        {
-          id: "OSM:Night",
-          title: "Bản đồ nền Đêm",
-          thumbnail: "https://docs.ekgis.vn/assets/dem-map.png",
-          width: "50px",
-          height: "50px",
-        },
       ],
     });
     map.current.addControl(basemap, "bottom-left");
@@ -267,7 +267,9 @@ function CustomerMapView() {
       await new ekmapplf.VectorBaseMap(response.layer, apiKey).addTo(
         map.current
       );
-
+      await getConfigMap();
+      await addLayerIndustry();
+      await renderMapForCustomer();
     });
     map.current.addControl(
       new maplibregl.NavigationControl({ visualizePitch: true }),
@@ -655,6 +657,7 @@ function CustomerMapView() {
   }
   
   const renderMapForCustomer = async () => {
+    
     let dataGeo = {
       'type': "FeatureCollection",
       'features': []
@@ -716,23 +719,32 @@ function CustomerMapView() {
             map.current.setLayoutProperty(layer.id, 'visibility', visibility);
           });
         });
+
       }
+      
     });
+
   };
+  // Kiểm tra và thiết lập thuộc tính của lớp
+const handleCheck = (checkedKeys: React.Key[]) => {
+  mapConfig.forEach((group) => {
+    group.children.forEach((child: any) => {
+      const layers = child.layers;
 
-  const handleCheck = (checkedKeys: React.Key[]) => {
-    mapConfig.forEach((group) => {
-      group.children.forEach((child: any) => {
-        const layers = child.layers;
-
-        layers.forEach((layer: any) => {
+      layers.forEach((layer: any) => {
+        // Kiểm tra xem lớp có tồn tại không
+        if (map.current.getLayer(layer.id)) {
           const isVisible = checkedKeys.includes(layer.id);
           const visibility = isVisible ? 'visible' : 'none';
           map.current.setLayoutProperty(layer.id, 'visibility', visibility);
-        });
+        } else {
+          console.error('Lớp không tồn tại trên bản đồ:', layer.id);
+        }
       });
     });
-  };
+  });
+};
+
   //moveLayers
   const handleMoveLayer = (layerIds: any, beforeIds: any) => {
     if (isParentId(layerIds)) {
