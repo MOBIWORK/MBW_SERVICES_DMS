@@ -18,7 +18,6 @@ const MapConfigTree: React.FC<MapConfigTreeProps> = ({ onCheck, onMoveLayer, cha
   const [mapConfig, setMapConfig] = useState<TreeDataNode[]>([]);
   const formatter: NonNullable<SliderSingleProps['tooltip']>['formatter'] = (value) => `${value}%`;
   const [showLegend, setShowLegend] = useState<boolean[]>([]);
-  const [sliderValues, setSliderValues] = useState<React.Key[]>([]);
 
   const handleLegendToggle = (index: number) => {
     setShowLegend(prevShowLegend => {
@@ -29,15 +28,8 @@ const MapConfigTree: React.FC<MapConfigTreeProps> = ({ onCheck, onMoveLayer, cha
   };
   const handleSliderChange = (index: number, value: number) => {
     let valueNomar = value / 100;
-    setSliderValues(valueNomar)
+    changeOpacity(valueNomar, selectedKeys);
   };
-  useEffect(() => {
-    let arr = [];
-    if (selectedKeys && selectedKeys.length > 0) {
-        arr.push(selectedKeys);
-        changeOpacity(sliderValues, arr);
-    }
-  }, [sliderValues,selectedKeys]);
   const generateTreeData = (data: any[]): TreeDataNode[] =>
     data.map((item, index) => ({
       title: item.children ? (
@@ -56,7 +48,7 @@ const MapConfigTree: React.FC<MapConfigTreeProps> = ({ onCheck, onMoveLayer, cha
              </div>
              <div>
               <span>Độ mờ</span>
-              <Slider tooltip={{ formatter }}  onChange={(value) => handleSliderChange(index, value)}/>
+              <Slider defaultValue={100} tooltip={{ formatter }}  onChange={(value) => handleSliderChange(index, value)}/>
              </div>
             </>
           )}

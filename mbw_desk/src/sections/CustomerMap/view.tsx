@@ -745,6 +745,10 @@ const handleCheck = (checkedKeys: React.Key[]) => {
   });
 };
   const changeOpacity = (sliderValues: any, selectedKeys:React.Key) => {
+    
+    if(!sliderValues)return
+    console.log(sliderValues,selectedKeys);
+
     selectedKeys.forEach(key => {
       map.current.setPaintProperty(
         key,
