@@ -7,6 +7,7 @@ import "./map_customer.css";
 import MapConfigTree from "./mapConfig_tree";
 import { Dropdown } from 'antd';
 import { DownOutlined,CloseOutlined ,FileExcelOutlined,BackwardOutlined} from '@ant-design/icons';
+
 import type { MenuProps } from 'antd';
 import {TableCustom} from '../../components'
 import * as ExcelJS from "exceljs";
@@ -139,6 +140,7 @@ function CustomerMapView() {
   const [dataSource, setDataSource] = useState([]);
   const [mapHeight, setMapHeight] = useState('74.5vh');
   const [visibleTable, setVisibleTable] = useState(false);
+  
   const handleOk = async (data, configConverage) => {
     let sourceAndLayer = await renderLayerDistributorByAdministrative(data, configConverage);
     for(let source in sourceAndLayer.sources){
@@ -159,7 +161,18 @@ function CustomerMapView() {
     }
     setObjItemCoverage(mapConverage);
     setDataSource(data)
-    setMapHeight('40vh');
+    if(data.length == 1){
+      setMapHeight('63vh');
+    }else if(data.length == 2){
+      setMapHeight('58vh');
+    }else if(data.length == 3){
+      setMapHeight('52vh');
+    }
+    else if(data.length == 4){
+      setMapHeight('46vh');
+    }else{
+      setMapHeight('40vh');
+    }
     setVisibleTable(true)
     setOpen(false);
   };
@@ -212,6 +225,7 @@ function CustomerMapView() {
     );
     console.log(res.result);
     setMapConfig(res.result);
+    localStorage.setItem('mapConfig',JSON.stringify(res.result))
     addLayerIndustry(res.result);
   };
   const getLstCustomer = async () => {
@@ -262,19 +276,24 @@ function CustomerMapView() {
       ],
     });
     map.current.addControl(basemap, "bottom-left");
-    var mapConfigCache = JSON.parse(JSON.stringify(mapConfig));
     var lstCustomerCache = JSON.parse(JSON.stringify(lstCustomer))
     basemap.on("changeBaseLayer", async function (response) {
-      setMapConfig(mapConfigCache);
-      setLstCustomer(lstCustomerCache);
-      await new ekmapplf.VectorBaseMap(response.layer, apiKey).addTo(
-        map.current
-      );
-      setTimeout(async () => {
-        console.log(mapConfig);
-        await addLayerIndustry(mapConfig);
-      }, 500);
-    });
+      // setMapConfig(mapConfigCache);
+       setLstCustomer(lstCustomerCache);
+       await new ekmapplf.VectorBaseMap(response.layer, apiKey).addTo(
+         map.current
+       ); 
+       let mapConfigCache = JSON.parse(localStorage.getItem('mapConfig'))
+          setTimeout(async () => {
+            await addLayerIndustry(mapConfigCache);
+              let arrSaveVisibleLayer =  JSON.parse(localStorage.getItem('arrSaveVisible'))       
+              for(let i= 0; i< arrSaveVisibleLayer.length;i++){
+                if(map.current.getLayer(arrSaveVisibleLayer[i].id)){
+                  map.current.setLayoutProperty(arrSaveVisibleLayer[i].id, 'visibility', arrSaveVisibleLayer[i].visibility);
+                }
+              }
+          },100)
+     });
     map.current.addControl(
       new maplibregl.NavigationControl({ visualizePitch: true }),
       "bottom-right"
@@ -365,6 +384,8 @@ function CustomerMapView() {
     map.current.on("load", async () => {
       await getConfigMap();
       getLstCustomer();
+      console.log(mapConfig);
+   
     });
   };
 
@@ -693,7 +714,7 @@ function CustomerMapView() {
     renderHeatMapForCustomer(dataGeo);
   }
 
-  const addLayerIndustry = (configMap) => {
+  const addLayerIndustry = async (configMap) => {
     configMap.forEach((group) => {
       //group
       if (group.group) {
@@ -740,8 +761,7 @@ function CustomerMapView() {
   };
   // Kiểm tra và thiết lập thuộc tính của lớp
 const handleCheck = (checkedKeys: React.Key[], dataObj: React.Key[]) => {
-  console.log(checkedKeys,dataObj);
-  
+  let arrSaveVisible=[]
   mapConfig.forEach((group) => {
     group.children.forEach((child: any) => {
       const layers = child.layers;
@@ -752,6 +772,13 @@ const handleCheck = (checkedKeys: React.Key[], dataObj: React.Key[]) => {
           const isVisible = checkedKeys.includes(layer.id);
           const visibility = isVisible ? 'visible' : 'none';
           map.current.setLayoutProperty(layer.id, 'visibility', visibility);
+          let objVisibleLayer={
+            id:layer.id,
+            visibility: visibility
+          }
+          arrSaveVisible.push(objVisibleLayer)
+          localStorage.setItem('arrSaveVisible',JSON.stringify(arrSaveVisible))
+
         } else {
           console.error('Lớp không tồn tại trên bản đồ:', layer.id);
         }
