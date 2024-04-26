@@ -26,4 +26,4 @@ def list_district(ma_tinh):
     
 @frappe.whitelist(methods="GET", allow_guest=True)
 def get_name_district(name):
-    return gen_response(200,"",frappe.db.get_value(doctype='DMS District',filters={"name":name},fieldname=['ten_huyen']))
+    return gen_response(200, "Thành công", frappe.db.get_value('DMS District', {"name": name}, 'ten_huyen'))

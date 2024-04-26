@@ -11,22 +11,18 @@ from mbw_dms.api.common import (
 )
 
 class DMSProvince(Document):
-    def on_update(self):
-        frappe.cache.delete_value('vn-province')
+    pass
 
 # Danh sánh tỉnh/thành phố
 @frappe.whitelist(methods='GET')
 def list_province():
     try:
-        list_provinces = frappe.cache().get_value("vn-province")
-        if list_provinces == None:
-            list_provinces = frappe.db.get_list('DMS Province', fields=['name', 'ma_tinh', 'ten_tinh'], order_by='ma_tinh asc')
-            frappe.cache().set_value("vn-province", list_provinces)
+        list_provinces = frappe.db.get_list('DMS Province', fields=['name', 'ma_tinh', 'ten_tinh'], order_by='ma_tinh asc')
         return gen_response(200, 'Thành công', list_provinces)
     except Exception as e:
         return exception_handle(e)
     
 @frappe.whitelist(methods="GET", allow_guest=True)
 def get_name_city(name):
-    return gen_response(200,"",frappe.db.get_value(doctype='DMS Province',filters={"name":name},fieldname=['ten_tinh']))
+    return gen_response(200, "Thành công", frappe.db.get_value('DMS Province', {"name": name}, 'ten_tinh'))
 

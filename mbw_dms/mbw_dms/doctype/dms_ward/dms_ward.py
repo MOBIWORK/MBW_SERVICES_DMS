@@ -26,4 +26,4 @@ def list_ward(ma_quan_huyen):
     
 @frappe.whitelist(methods="GET", allow_guest=True)
 def get_name_ward(name):
-    return gen_response(200,"",frappe.db.get_value(doctype='DMS Ward',filters={"name":name},fieldname=['ten_xa']))
+    return gen_response(200, "Thành công", frappe.db.get_value('DMS Ward', {"name": name}, 'ten_xa'))
