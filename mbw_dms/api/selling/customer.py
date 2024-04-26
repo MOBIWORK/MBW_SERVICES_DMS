@@ -158,6 +158,8 @@ def create_customer(**kwargs):
             new_address_cus.state = kwargs.get('ward_cus')
             new_address_cus.is_shipping_address = kwargs.get('is_shipping_address')
             new_address_cus.is_primary_address = kwargs.get('is_primary_address')
+            new_address_cus.address_location = json.dumps({"long": kwargs.get(
+                "longitude"), "lat": kwargs.get("latitude")})
             new_address_cus.append('links', {
                 'link_doctype': new_customer.doctype,
                 'link_name': new_customer.name,
