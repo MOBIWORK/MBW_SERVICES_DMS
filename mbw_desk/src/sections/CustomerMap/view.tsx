@@ -874,57 +874,26 @@ function CustomerMapView() {
     let max = 100;
     let trungBinh = (max - min) / 6;
     let arrCode = [];
-    let fill_color_province: any = ['case'];
-    if (objSetting["type_area"] == "administrative_region") {
-      let valueArea = JSON.parse(objSetting["value_area"]);
-      let arrRegion = JSON.parse(ARR_REGIONSTR);
-      for (let i = 0; i < valueArea.length; i++) {
-        let ratio_distributor = objResult[i].ratio_coverage;
-        for (let j = 0; j < arrRegion.length; j++) {
-          if (arrRegion[j].code == valueArea[i]) {
-            let arrProvince = arrRegion[j].arrProvince;
-            for (let t = 0; t < arrProvince.length; t++) {
-              arrCode.push(arrProvince[i].provinceid);
-              fill_color_province.push(['==', ['get', 'code'], arrProvince[i].provinceid]);
-              if (min <= ratio_distributor && ratio_distributor < (min + trungBinh)) {
-                fill_color_province.push(arrRangeColor[0]);
-              } else if ((min + trungBinh) <= ratio_distributor && ratio_distributor < (min + 2 * trungBinh)) {
-                fill_color_province.push(arrRangeColor[1]);
-              } else if ((min + 2 * trungBinh) <= ratio_distributor && ratio_distributor < (min + 3 * trungBinh)) {
-                fill_color_province.push(arrRangeColor[2]);
-              } else if ((min + 3 * trungBinh) <= ratio_distributor && ratio_distributor < (min + 4 * trungBinh)) {
-                fill_color_province.push(arrRangeColor[3]);
-              } else if ((min + 4 * trungBinh) <= ratio_distributor && ratio_distributor < (min + 5 * trungBinh)) {
-                fill_color_province.push(arrRangeColor[4]);
-              } else if ((min + 5 * trungBinh) <= ratio_distributor && ratio_distributor <= max) {
-                fill_color_province.push(arrRangeColor[5]);
-              }
-            }
-            break;
-          }
-        }
-      }
-    } else if (objSetting["type_area"] == "administrative_province" || objSetting["type_area"] == "administrative_district") {
-      for (let i = 0; i < objResult.length; i++) {
-        let ratio_distributor = objResult[i].ratio_coverage;
-        arrCode.push(objResult[i].code);
-        fill_color_province.push(['==', ['get', 'code'], objResult[i].code]);
-        if (min <= ratio_distributor && ratio_distributor < (min + trungBinh)) {
-          fill_color_province.push(arrRangeColor[0]);
-        } else if ((min + trungBinh) <= ratio_distributor && ratio_distributor < (min + 2 * trungBinh)) {
-          fill_color_province.push(arrRangeColor[1]);
-        } else if ((min + 2 * trungBinh) <= ratio_distributor && ratio_distributor < (min + 3 * trungBinh)) {
-          fill_color_province.push(arrRangeColor[2]);
-        } else if ((min + 3 * trungBinh) <= ratio_distributor && ratio_distributor < (min + 4 * trungBinh)) {
-          fill_color_province.push(arrRangeColor[3]);
-        } else if ((min + 4 * trungBinh) <= ratio_distributor && ratio_distributor < (min + 5 * trungBinh)) {
-          fill_color_province.push(arrRangeColor[4]);
-        } else if ((min + 5 * trungBinh) <= ratio_distributor && ratio_distributor <= max) {
-          fill_color_province.push(arrRangeColor[5]);
-        }
+    let fill_color: any = ['case'];
+    for(let i = 0; i < objResult.length; i++){
+      let ratio_distributor = objResult[i].ratio_coverage;
+      arrCode.push(objResult[i].code);
+      fill_color.push(['==', ['get', 'code'], objResult[i].code]);
+      if (min <= ratio_distributor && ratio_distributor < (min + trungBinh)) {
+        fill_color.push(arrRangeColor[0]);
+      } else if ((min + trungBinh) <= ratio_distributor && ratio_distributor < (min + 2 * trungBinh)) {
+        fill_color.push(arrRangeColor[1]);
+      } else if ((min + 2 * trungBinh) <= ratio_distributor && ratio_distributor < (min + 3 * trungBinh)) {
+        fill_color.push(arrRangeColor[2]);
+      } else if ((min + 3 * trungBinh) <= ratio_distributor && ratio_distributor < (min + 4 * trungBinh)) {
+        fill_color.push(arrRangeColor[3]);
+      } else if ((min + 4 * trungBinh) <= ratio_distributor && ratio_distributor < (min + 5 * trungBinh)) {
+        fill_color.push(arrRangeColor[4]);
+      } else if ((min + 5 * trungBinh) <= ratio_distributor && ratio_distributor <= max) {
+        fill_color.push(arrRangeColor[5]);
       }
     }
-    fill_color_province.push('#ded9f5');
+    fill_color.push('#ded9f5');
     let sourceAndLayer = {
       'sources': {},
       'layers': []
@@ -947,7 +916,7 @@ function CustomerMapView() {
       },
       "paint": {
         "fill-opacity": 0.7,
-        "fill-color": arrCode.length > 0 ? fill_color_province : "rgba(33,102,172,0)"
+        "fill-color": arrCode.length > 0 ? fill_color : "rgba(33,102,172,0)"
       },
       "filter": ['in', 'code', ...arrCode]
     })
