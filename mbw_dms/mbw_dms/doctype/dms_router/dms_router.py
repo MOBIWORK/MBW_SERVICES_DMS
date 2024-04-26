@@ -425,11 +425,15 @@ def get_customer(filters):
         customer_group = filters.get('customer_group')
         customer_type = filters.get('customer_type')
         customer_name = filters.get('customer_name')
-
+        teamSale = filters.get('teamSale')
+        queryFilters = {}
+        if not teamSale:
+            return gen_response(500,_("Sale manager is invalid"),{})
+        else:
+            queryFilters["custom_sales_manager"] = teamSale
         city = filters.get('city')
         district = filters.get('district')
         ward = filters.get('ward')
-        queryFilters = {}
         if customer_type:
             queryFilters['customer_type'] = customer_type
         if customer_group:

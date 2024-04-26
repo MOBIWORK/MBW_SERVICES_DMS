@@ -1,6 +1,6 @@
 // @mui
 
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState ,createContext,useContext} from "react";
 import {Tabs, Form,notification, message } from "antd";
 import GeneralInformation from "./general-information";
 import Customer from "./customer";
@@ -9,12 +9,11 @@ import { AxiosService } from "../../services/server";
 import { useNavigate, useParams } from "react-router-dom";
 import {  router } from "../../types/router";
 import { rsData } from "../../types/response";
-import { createContext, useContext } from 'react';
 import { GlobalContext } from "@/App";
 
 
 // ----------------------------------------------------------------------
-
+export const SaleGroupContext = createContext<any>(null)
 export const CustomerContext = createContext<any>(null);
 export default function RouterCreate() {
   const [form] = Form.useForm();
@@ -23,6 +22,7 @@ export default function RouterCreate() {
   const [customerRouter,setCustomerRouter] = useState<any[]>([])
   const [detailRouter,setDetailRouter] = useState<router>()
   const {errorMsg,successMsg} = useContext(GlobalContext)
+  const [teamSale,setTeamSale] = useState<string>()
   const handleCreateRouter = useCallback(async(value:any) => {
     console.log({customerRouter});
     
@@ -120,22 +120,24 @@ export default function RouterCreate() {
           form={form}
           onFinish={detailRouter ? handleUpdateRouter: handleCreateRouter}
         >
-          <Tabs
-            defaultActiveKey="1"
-            items={[
-              {
-                label: <p className="px-4 mb-0"> Thông tin chung</p>,
-                key: "1",
-                children: <GeneralInformation form={form}/>,
-              },
-              {
-                label: <p className="px-4 mb-0">Khách hàng</p>,
-                key: "2",
-                children: <CustomerContext.Provider value={{setCustomerRouter,customerRouter}}><Customer /></CustomerContext.Provider>,
-              },
-            ]}
-            indicatorSize={(origin) => origin - 18}
-          />
+         <SaleGroupContext.Provider value={{teamSale,setTeamSale}}>
+            <Tabs
+              defaultActiveKey="1"
+              items={[
+                {
+                  label: <p className="px-4 mb-0"> Thông tin chung</p>,
+                  key: "1",
+                  children: <GeneralInformation form={form}/>,
+                },
+                {
+                  label: <p className="px-4 mb-0">Khách hàng</p>,
+                  key: "2",
+                  children: <CustomerContext.Provider value={{setCustomerRouter,customerRouter}}><Customer /></CustomerContext.Provider>,
+                },
+              ]}
+              indicatorSize={(origin) => origin - 18}
+            />
+         </SaleGroupContext.Provider>
         </Form>
       </div>
     </>

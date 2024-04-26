@@ -14,7 +14,8 @@ import {
 import FilterCustomer from "./filter";
 import { useForm } from "antd/es/form/Form";
 import { AxiosService } from "../../../services/server";
-import { CustomerContext } from "../view";
+import { CustomerContext, SaleGroupContext } from "../view";
+import { GlobalContext } from "@/App";
 type key = "customer_type"| "customer_group"| "city"| "district"|"ward"
 type filterType = key[]
 
@@ -53,6 +54,9 @@ type Props = {
 
 export function ChooseCustomer({closeModal}:Props) {
   const {setCustomerRouter,customerRouter} = useContext(CustomerContext)
+  const {errorMsg} = useContext(GlobalContext)
+  const {teamSale} = useContext(SaleGroupContext)
+
   const [form] = useForm();
   const [page_number,setPageNumber] = useState<number>(1)
   const [customerChoose, setCustomerChoose] = useState<{[key:number]:CustomerType[]}>({1: []});
@@ -110,18 +114,25 @@ export function ChooseCustomer({closeModal}:Props) {
   }
   useEffect(()=> {
     (async() => {
+      try {
+        // quang yêu cầu chỉ hiển thị danh sách khách hàng khi chọn sale manager
       const rsCustomer = await AxiosService.get('/api/method/mbw_dms.api.router.get_customer',{
         params: {
           ...filter,
+          teamSale,
           page_size: PAGE_SIZE,
           page_number
         }
       })
       setCustomerList(rsCustomer?.result?.data)
       setTotalNumber(rsCustomer.result?.total)
+      } catch (error:any) {
+        errorMsg(error)
+      }
+      
       
     })()
-  },[filter,page_number])
+  },[filter,page_number,teamSale])
   // useEffect(() => {
   // if(customerList.length>0)     {
   //   let csCode = customerList.map(cs => cs.customer_code)

@@ -1,4 +1,4 @@
-import React, { memo, useEffect, useState } from "react";
+import React, { memo, useContext, useEffect, useState } from "react";
 import { FormItemCustom } from "../../components/form-item/form-item";
 import { Col, Input, Select, TreeSelect } from "antd";
 import RowCustom from "./styled";
@@ -9,6 +9,7 @@ import { AxiosService } from "../../services/server";
 import { employee } from "../../types/employeeFilter";
 import useDebounce from "../../hooks/useDebount"
 import { treeArray } from "../../util";
+import { SaleGroupContext } from "./view";
 
 // let timeout: ReturnType<typeof setTimeout> | null;
 // let currentValue: string;
@@ -33,15 +34,14 @@ import { treeArray } from "../../util";
 //   }
 // };
 export default memo(function GeneralInformation({form}:{form :any}) {
-  console.log(form);
   
   // const { getFieldDecorator, setFieldsValue } = form;
   const [keySearch, setKeySearch] = useState("");
   let seachbykey = useDebounce(keySearch)
   const [listSales, setListSales] = useState<any[]>([]);
   const [listEmployees, setListEmployees] = useState<any[]>([]);
-  const [teamSale,setTeamSale] = useState<string>()
   // const [saleEmp,setSaleEmp] = useState<string>()
+  const {teamSale,setTeamSale} = useContext(SaleGroupContext)
   useEffect(() => {
     (async () => {
       try {
