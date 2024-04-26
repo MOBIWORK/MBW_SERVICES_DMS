@@ -99,28 +99,28 @@ export function ScopeAnalysis({ onResult, scopeResult,api }) {
     if(value.includes('all')){
       map.current.flyTo({
         center: [107.9426393217799, 16.92300264959944],
-        zoom: 4.2,
+        zoom: 5,
       });
        value = ['1','2','3','4','5','6','7']
     }
    const filteredArr = arr_region.filter((item) => {
         return value.includes(item.value);
       });
-      if(selectRegion.length > value.length){
+   if(value.includes('all')){
 
-      }else{
-        const filteredRegion = arr_region.filter((item) => item.value === value[ value.length - 1 ]);
-        if (filteredRegion.length > 0) {
-          if (filteredRegion[0].bbox != null) {
-            let bboxSplit = filteredRegion[0].bbox.split(",");
-            let bbox = [
-            [Number(bboxSplit[0]), Number(bboxSplit[1])],
-            [Number(bboxSplit[2]), Number(bboxSplit[3])],
-          ];
-          map.current.fitBounds(bbox);
-          }
-        }
+   }else{
+    const filteredRegion = arr_region.filter((item) => item.value === value);
+    if (filteredRegion.length > 0) {
+      if (filteredRegion[0].bbox != null) {
+        let bboxSplit = filteredRegion[0].bbox.split(",");
+        let bbox = [
+        [Number(bboxSplit[0]), Number(bboxSplit[1])],
+        [Number(bboxSplit[2]), Number(bboxSplit[3])],
+      ];
+      map.current.fitBounds(bbox);
       }
+    }
+   }
   let modifiedTinh = []
      for(let i = 0; i < filteredArr.length; i++) {
         let obj = {
@@ -144,9 +144,8 @@ export function ScopeAnalysis({ onResult, scopeResult,api }) {
 
   const onChangeTinh = async (value) => {
     let filteredItems = [];
-    setArrHuyen([])
-    setSelectHuyen([])
-    let modifiedHuyen = []
+   
+    
     // Duyệt qua từng phần tử trong mảng arrTinh
     for (let i = 0; i < arrTinh.length; i++) {
       // Lọc các phần tử trong mảng options của phần tử arrTinh[i]
@@ -158,30 +157,8 @@ export function ScopeAnalysis({ onResult, scopeResult,api }) {
       // Thêm các phần tử đã lọc vào mảng kết quả filteredItems
       filteredItems.push(...filteredArr);
     }
-    for(let i = 0; i < filteredItems.length;i++){
-      let obj = {
-        label: <span>{filteredItems[i].label}</span>,
-        title: filteredItems[i].label,
-        options : []
-      }
-     let urlAPI_district = `https://api.ekgis.vn/data/administrative/province/${filteredItems[i].value}/district?api_key=${api}`;
-     let response = await fetch(urlAPI_district);
-     const data = await response.json();
-     if (data && data.length > 0) {
-      obj.options = data.map((item) => ({
-        ...item,
-        value: item.districtid, // Thay đổi trường value thành item.code
-        label: item.name, // Thay đổi trường label thành item.name
-      }));
-     }
-      modifiedHuyen.push(obj)
-    }
-    setArrHuyen(modifiedHuyen)
-    if(selectTinh.length > value.length){
-
-    }else{
-      for(let i = 0; i < arrTinh.length; i ++){
-        const filteredProvince = arrTinh[i].options.filter((item) => item.value === value[value.length - 1]);
+    for(let i = 0; i < arrTinh.length; i ++){
+        const filteredProvince = arrTinh[i].options.filter((item) => item.value === value);
         if (filteredProvince.length > 0) {
           if (filteredProvince[0].bbox != null) {
             let bboxSplit = filteredProvince[0].bbox.split(",");
@@ -193,8 +170,6 @@ export function ScopeAnalysis({ onResult, scopeResult,api }) {
           }
         }
       }
-   
-    }
     setSelectTinh(value)
     onResultChange()
   };
@@ -478,10 +453,10 @@ export function ScopeAnalysis({ onResult, scopeResult,api }) {
           )}
 
           {controlAdministrative === "hanhchinh" && (
-            <div style={{ lineHeight: "20px", textAlign: "left" ,paddingLeft:'10px'}}>
+            <div style={{ lineHeight: "20px", textAlign: "left" ,paddingLeft:'10px',height:'320px'}}>
               <p
                 style={{
-                  padding: "10px",
+                  padding: "10px 0px 10px 0px",
                   fontWeight: "bold",
                   color: "#0a743e",
                 }}
@@ -492,7 +467,7 @@ export function ScopeAnalysis({ onResult, scopeResult,api }) {
              
                 <Form.Item label="Khu vực" name="khuvuc">
                   <Select
-                    mode="multiple"
+                    // mode="multiple"
                     showSearch
                     value={selectRegion}
                     placeholder="Chọn khu vực"
@@ -503,7 +478,7 @@ export function ScopeAnalysis({ onResult, scopeResult,api }) {
                 </Form.Item>
                 <Form.Item label="Đơn vị hành chính cấp tỉnh" name="tinh">
                   <Select
-                    mode="multiple"
+                    // mode="multiple"
                     showSearch
                     optionFilterProp="children"
                     placeholder="Chọn khu vực hành chính cấp tỉnh/thành phố"
@@ -513,7 +488,7 @@ export function ScopeAnalysis({ onResult, scopeResult,api }) {
                     filterOption={filterOptionTinhHuyen}
                   ></Select>
                 </Form.Item>
-                <Form.Item label="Đơn vị hành chính cấp huyện" name="huyen">
+                {/* <Form.Item label="Đơn vị hành chính cấp huyện" name="huyen">
                   <Select
                     mode="multiple"
                     showSearch
@@ -523,7 +498,7 @@ export function ScopeAnalysis({ onResult, scopeResult,api }) {
                     options={arrHuyen}
                     filterOption={filterOptionTinhHuyen}
                   ></Select>
-                </Form.Item>
+                </Form.Item> */}
              
             </div>
           )}

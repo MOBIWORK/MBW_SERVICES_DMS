@@ -5,8 +5,7 @@ import maplibregl from "maplibre-gl";
 import { AxiosService } from "../../services/server";
 import "./map_customer.css";
 import MapConfigTree from "./mapConfig_tree";
-import { Dropdown } from 'antd';
-
+import { Dropdown,Button} from 'antd';
 import { DownOutlined,CloseOutlined ,FileExcelOutlined,BackwardOutlined} from '@ant-design/icons';
 
 import type { MenuProps } from 'antd';
@@ -53,6 +52,18 @@ function CustomerMapView() {
       key: 'ratio_coverage',
       render: (ratio) => `${ratio}%`, // Format hiển thị phần trăm
     },
+    {
+      title: 'Số lượng khách hàng',
+      dataIndex: 'sum_user',
+      key: 'sum_user',
+    },
+    {
+      title: 'Số lượng ước tính',
+      dataIndex: 'sum_vgm',
+      key: 'sum_vgm',
+    },
+    // số lượng khách hàng
+    // số lượng ước tính
   ];
 
   const handleCloseModal = () => {
@@ -80,6 +91,8 @@ function CustomerMapView() {
     let fieldsMerge = [
       { title: "Tên đơn vị hành chính", field: "name" },
       { title: "Tỷ lệ độ phủ", field: "ratio_coverage" },
+      { title: "Số lượng khách hàng", field: "sum_user" },
+      { title: "Số lượng ước tính", field: "sum_vgm" }
     ];
     for (let i = 0; i < fieldsMerge.length; i++) {
       let cellStart = rowHeader.getCell(i + 1);
@@ -1031,7 +1044,9 @@ function CustomerMapView() {
     }
     return s4() + s4() + s4();
   }
-
+ const handleOnClick= () => {
+    setOpen(true);
+  } 
   return (
     <>
       <HeaderPage title="Bản đồ khách hàng" />
@@ -1040,13 +1055,8 @@ function CustomerMapView() {
         style={{ width: "100%", height: mapHeight, borderTopRightRadius: '20px', borderTopLeftRadius: '20px' }}
       >
         <div className='ekmapplf_map-ananyltic'>
-          <Dropdown.Button
-            type="primary"
-            icon={<DownOutlined />}
-            menu={{ items }}
-          >
-            Công cụ phân tích
-          </Dropdown.Button>
+        <Button onClick={handleOnClick}  type="primary">Công cụ phân tích</Button>
+          
 
         </div>
         <div id='ekmapplf_tracking_legend' className='ekmapplf_tracking-map-legend'>

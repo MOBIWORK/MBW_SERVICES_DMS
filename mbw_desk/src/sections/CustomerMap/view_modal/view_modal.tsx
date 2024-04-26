@@ -74,18 +74,19 @@ export function ModalView ({ open, title, onCancel, onOk , lstCustomer,api}: Pro
       message.error('Chưa chọn ngành hàng ')
       return
     }
-    if(formScope.getFieldValue('huyen') && formScope.getFieldValue('huyen').length > 0){
-      type_area = 'administrative_district'
-      value_area = formScope.getFieldValue('huyen')
-    }else if(formScope.getFieldValue('tinh') && formScope.getFieldValue('tinh').length > 0 ){
+    // if(formScope.getFieldValue('huyen') && formScope.getFieldValue('huyen').length > 0){
+    //   type_area = 'administrative_district'
+    //   value_area = formScope.getFieldValue('huyen')
+    // }else 
+    if(formScope.getFieldValue('tinh')){
       type_area = 'administrative_province'
-      value_area = formScope.getFieldValue('tinh')
-    }else if(formScope.getFieldValue('khuvuc') && formScope.getFieldValue('khuvuc').length > 0){
+      value_area = [formScope.getFieldValue('tinh')]
+    }else if(formScope.getFieldValue('khuvuc')){
       type_area = 'administrative_region'
       if(formScope.getFieldValue('khuvuc').includes('all')){
         value_area = ['1','2','3','4','5','6','7']
       }else{
-        value_area = formScope.getFieldValue('khuvuc')
+        value_area = [formScope.getFieldValue('khuvuc')]
       }
     }else{
       message.error('Chưa chọn khu vực giới hạn')
