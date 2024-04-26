@@ -6,7 +6,7 @@ import { SettingFilled } from '@ant-design/icons';
 
 interface MapConfigTreeProps {
   objCoverageItem: any;
-  onCheck: (checkedKeys: React.Key[]) => void;
+  onCheck: (checkedKeys: React.Key[], dataObj: React.Key[]) => void;
   onMoveLayer: (layerIds: React.Key,beforeIds: React.Key) => void;
   changeOpacity: (sliderValues: React.Key,selectedKeys: React.Key[]) => void;
 }
@@ -32,7 +32,6 @@ const MapConfigTree: React.FC<MapConfigTreeProps> = ({objCoverageItem, onCheck, 
     changeOpacity(valueNomar, selectedKeys);
   };
   useEffect(() => {
-    console.log(objCoverageItem);
     if(objCoverageItem != null){
       setMapConfig(prevConfig => {
         for(let i = 0 ; i < prevConfig.length;i++){
@@ -41,7 +40,6 @@ const MapConfigTree: React.FC<MapConfigTreeProps> = ({objCoverageItem, onCheck, 
             prevConfig[i].children.push(objCoverageItem);
           }
         }
-        console.log(prevConfig);
         return prevConfig;
       })
     }
@@ -103,7 +101,7 @@ const MapConfigTree: React.FC<MapConfigTreeProps> = ({objCoverageItem, onCheck, 
 
   const onCheckHandler: TreeProps['onCheck'] = (checkedKeysValue) => {
     setCheckedKeys(checkedKeysValue as React.Key[]);
-    onCheck(checkedKeysValue);
+    onCheck(checkedKeysValue, mapConfig);
   };
 
 
@@ -116,6 +114,7 @@ const MapConfigTree: React.FC<MapConfigTreeProps> = ({objCoverageItem, onCheck, 
   };
 
   const onDrop: TreeProps['onDrop'] = (info) => {
+    
     const dropKey = info.node.key;
     const dragKey = info.dragNode.key;
     const dropPos = info.node.pos.split('-');
@@ -138,8 +137,6 @@ const MapConfigTree: React.FC<MapConfigTreeProps> = ({objCoverageItem, onCheck, 
       };
     
       const data = [...mapConfig];
-    
-      let dragObj: TreeDataNode;
     
       loop(data, dragKey, (item, index, arr) => {
         arr.splice(index, 1);

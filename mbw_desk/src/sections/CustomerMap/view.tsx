@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { HeaderPage } from "../../components";
 import { ModalView } from "./view_modal/view_modal";
 import maplibregl from "maplibre-gl";
@@ -168,7 +168,20 @@ function CustomerMapView() {
   const [lstCustomer, setLstCustomer] = useState<TypeCustomer[]>([]);
   const map = useRef(null);
   const [isOpen, setIsOpen] = useState(true);
-
+  useEffect(() => {
+    if(objItemCoverage != null){
+      setMapConfig(prevConfig => {
+        for(let i = 0 ; i < prevConfig.length;i++){
+          if(prevConfig[i].key == "map_analytic_converage"){
+            objItemCoverage = { ...objItemCoverage, key: objItemCoverage.id, title: objItemCoverage.label };
+            prevConfig[i].children.push(objItemCoverage);
+          }
+        }
+        console.log(prevConfig,'zzzz');
+        return prevConfig;
+      })
+    }
+  }, [objItemCoverage]);
   const toggleLegend = () => {
     setIsOpen(!isOpen);
   };
@@ -726,7 +739,9 @@ function CustomerMapView() {
 
   };
   // Kiểm tra và thiết lập thuộc tính của lớp
-const handleCheck = (checkedKeys: React.Key[]) => {
+const handleCheck = (checkedKeys: React.Key[], dataObj: React.Key[]) => {
+  console.log(checkedKeys,dataObj);
+  
   mapConfig.forEach((group) => {
     group.children.forEach((child: any) => {
       const layers = child.layers;
@@ -759,6 +774,8 @@ const handleCheck = (checkedKeys: React.Key[]) => {
   }
   //moveLayers
   const handleMoveLayer = (layerIds: any, beforeIds: any) => {
+    console.log(mapConfig);
+    
     if (isParentId(layerIds)) {
       const layerChildIds = getChildLayerIds(mapConfig, [layerIds]);
       const beforeChildIds = getChildLayerIds(mapConfig, [beforeIds]);
