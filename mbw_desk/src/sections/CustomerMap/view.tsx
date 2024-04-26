@@ -6,12 +6,7 @@ import { AxiosService } from "../../services/server";
 import "./map_customer.css";
 import MapConfigTree from "./mapConfig_tree";
 import { Dropdown } from 'antd';
-<<<<<<< HEAD
-import { DownOutlined,CloseOutlined ,FileExcelOutlined,BackwardOutlined} from '@ant-design/icons';
-
-=======
 import { DownOutlined, CloseOutlined, FileExcelOutlined, BackwardOutlined } from '@ant-design/icons';
->>>>>>> 74076873 (+*fix map tree)
 import type { MenuProps } from 'antd';
 import { TableCustom } from '../../components'
 import * as ExcelJS from "exceljs";
