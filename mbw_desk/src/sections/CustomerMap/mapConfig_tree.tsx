@@ -32,18 +32,27 @@ const MapConfigTree: React.FC<MapConfigTreeProps> = ({objCoverageItem, onCheck, 
     changeOpacity(valueNomar, selectedKeys);
   };
   useEffect(() => {
-    if(objCoverageItem != null){
+    if (objCoverageItem != null) {
       setMapConfig(prevConfig => {
-        for(let i = 0 ; i < prevConfig.length;i++){
-          if(prevConfig[i].key == "map_analytic_converage"){
-            objCoverageItem = { ...objCoverageItem, key: objCoverageItem.id, title: objCoverageItem.label };
-            prevConfig[i].children.push(objCoverageItem);
+        const updatedConfig = prevConfig.map(item => {
+          if (item.key === "map_analytic_converage") {
+            // Kiểm tra xem mục đã tồn tại trong children chưa
+            const existingItemIndex = item.children.findIndex(child => child.key === objCoverageItem.id);
+            if (existingItemIndex !== -1) {
+              // Nếu đã tồn tại, cập nhật lại mục đó
+              item.children[existingItemIndex] = { ...objCoverageItem, key: objCoverageItem.id, title: objCoverageItem.label };
+            } else {
+              // Nếu chưa tồn tại, thêm mục mới
+              item.children.push({ ...objCoverageItem, key: objCoverageItem.id, title: objCoverageItem.label });
+            }
           }
-        }
-        return prevConfig;
-      })
+          return item;
+        });
+        return updatedConfig;
+      });
     }
-  }, [objCoverageItem])
+  }, [objCoverageItem]);
+  
   const generateTreeData = (data: any[]): TreeDataNode[] =>
     data.map((item, index) => ({
       title: item.children ? (
@@ -70,6 +79,7 @@ const MapConfigTree: React.FC<MapConfigTreeProps> = ({objCoverageItem, onCheck, 
       ),
       key: item.id,
       children: item.children ? generateTreeData(item.children) : [],
+      
     }));
 
   const getConfigMap = async () => {
@@ -92,7 +102,7 @@ const MapConfigTree: React.FC<MapConfigTreeProps> = ({objCoverageItem, onCheck, 
   useEffect(()=>{
     getConfigMap();
   },[showLegend])
-
+ 
   const onExpand: TreeProps['onExpand'] = (expandedKeysValue) => {
     console.log('onExpand', expandedKeysValue);
     setExpandedKeys(expandedKeysValue);
@@ -102,6 +112,7 @@ const MapConfigTree: React.FC<MapConfigTreeProps> = ({objCoverageItem, onCheck, 
   const onCheckHandler: TreeProps['onCheck'] = (checkedKeysValue) => {
     setCheckedKeys(checkedKeysValue as React.Key[]);
     onCheck(checkedKeysValue, mapConfig);
+    
   };
 
 
@@ -137,6 +148,7 @@ const MapConfigTree: React.FC<MapConfigTreeProps> = ({objCoverageItem, onCheck, 
       };
     
       const data = [...mapConfig];
+      let dragObj: TreeDataNode;
     
       loop(data, dragKey, (item, index, arr) => {
         arr.splice(index, 1);

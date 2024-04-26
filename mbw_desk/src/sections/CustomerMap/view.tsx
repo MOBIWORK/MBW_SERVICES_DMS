@@ -6,10 +6,14 @@ import { AxiosService } from "../../services/server";
 import "./map_customer.css";
 import MapConfigTree from "./mapConfig_tree";
 import { Dropdown } from 'antd';
+<<<<<<< HEAD
 import { DownOutlined,CloseOutlined ,FileExcelOutlined,BackwardOutlined} from '@ant-design/icons';
 
+=======
+import { DownOutlined, CloseOutlined, FileExcelOutlined, BackwardOutlined } from '@ant-design/icons';
+>>>>>>> 74076873 (+*fix map tree)
 import type { MenuProps } from 'antd';
-import {TableCustom} from '../../components'
+import { TableCustom } from '../../components'
 import * as ExcelJS from "exceljs";
 import * as XLSX from "xlsx";
 import * as FileSaver from "file-saver";
@@ -103,7 +107,7 @@ function CustomerMapView() {
         };
         let valCell = "";
         valCell = dataSource[i][fieldsMerge[j].field];
-        if(fieldsMerge[j].field == 'ratio_coverage'){
+        if (fieldsMerge[j].field == 'ratio_coverage') {
           valCell = valCell + '%'
         }
         row.getCell(cellStart).value = valCell;
@@ -143,11 +147,11 @@ function CustomerMapView() {
   
   const handleOk = async (data, configConverage) => {
     let sourceAndLayer = await renderLayerDistributorByAdministrative(data, configConverage);
-    for(let source in sourceAndLayer.sources){
-      if(!map.current.getSource(source)) map.current.addSource(source, sourceAndLayer.sources[source]);
+    for (let source in sourceAndLayer.sources) {
+      if (!map.current.getSource(source)) map.current.addSource(source, sourceAndLayer.sources[source]);
     }
-    for(let i = 0; i < sourceAndLayer.layers.length; i++){
-      if(!map.current.getLayer(sourceAndLayer.layers[i].id)) map.current.addLayer(sourceAndLayer.layers[i]);
+    for (let i = 0; i < sourceAndLayer.layers.length; i++) {
+      if (!map.current.getLayer(sourceAndLayer.layers[i].id)) map.current.addLayer(sourceAndLayer.layers[i]);
     }
 
     let propertySources = Object.getOwnPropertyNames(sourceAndLayer.sources);
@@ -182,19 +186,25 @@ function CustomerMapView() {
   const map = useRef(null);
   const [isOpen, setIsOpen] = useState(true);
   useEffect(() => {
-    if(objItemCoverage != null){
+    if (objItemCoverage != null) {
       setMapConfig(prevConfig => {
-        for(let i = 0 ; i < prevConfig.length;i++){
-          if(prevConfig[i].key == "map_analytic_converage"){
-            objItemCoverage = { ...objItemCoverage, key: objItemCoverage.id, title: objItemCoverage.label };
-            prevConfig[i].children.push(objItemCoverage);
+        const updatedConfig = prevConfig.map(item => {
+          if (item.id === "map_analytic_converage") { 
+            const existingItemIndex = item.children.findIndex(child => child.id === objItemCoverage.id);
+            if (existingItemIndex !== -1) {
+              item.children[existingItemIndex] = { ...objItemCoverage, key: objItemCoverage.id, title: objItemCoverage.label };
+            } else {
+              item.children.push({ ...objItemCoverage, key: objItemCoverage.id, title: objItemCoverage.label });
+            }
           }
-        }
-        console.log(prevConfig,'zzzz');
-        return prevConfig;
-      })
+          return item;
+        });
+        addLayerIndustry(updatedConfig)
+        return updatedConfig;
+      });
     }
   }, [objItemCoverage]);
+
   const toggleLegend = () => {
     setIsOpen(!isOpen);
   };
@@ -223,7 +233,15 @@ function CustomerMapView() {
     let res = await AxiosService.get(
       "/api/method/mbw_dms.api.vgm.map_customer.get_config_map"
     );
-    console.log(res.result);
+    let objMapAnalyticCoverage = {
+      "id": "map_analytic_converage",
+      "group": true,
+      "visible": false,
+      "label": "Bản đồ độ phủ khách hàng",
+      "children": []
+    }
+    if (res.result == null) res.result = [];
+    res.result.push(objMapAnalyticCoverage);
     setMapConfig(res.result);
     localStorage.setItem('mapConfig',JSON.stringify(res.result))
     addLayerIndustry(res.result);
@@ -375,7 +393,7 @@ function CustomerMapView() {
         map.current.setLayoutProperty("customer_clus-cluster-count", "visibility", "visible");
         map.current.setLayoutProperty("customer_clus-uncluster", "visibility", "visible");
         map.current.setLayoutProperty("customer_clus-title", "visibility", "visible");
-     
+
       }
     })
     map.current.addControl(btn3D, "bottom-right");
@@ -535,84 +553,84 @@ function CustomerMapView() {
           .setHTML(popupContent)
           .addTo(map.current);
       });
+    }
   }
-}
   const renderHeatMapForCustomer = async (dataGeo) => {
     if (map.current.getSource('customer_heat')) {
       map.current.getSource('customer_heat').setData(dataGeo);
-  } else {
+    } else {
       if (!map.current.getImage('marker-customer')) {
-          const iconCustomer = await map.current.loadImage("public/assets/check-icon.png");
-          map.current.addImage('marker-customer', iconCustomer.data);
+        const iconCustomer = await map.current.loadImage("public/assets/check-icon.png");
+        map.current.addImage('marker-customer', iconCustomer.data);
       }
       map.current.addSource('customer_heat', {
-          'type': 'geojson',
-          'data': dataGeo
+        'type': 'geojson',
+        'data': dataGeo
       });
 
       map.current.addLayer({
-          'id': 'customer_heat',
-          'type': 'heatmap',
-          'source': 'customer_heat',
-          'maxzoom': 14,
-          'paint': {
-              'heatmap-weight': [
-                  'interpolate',
-                  ['linear'],
-                  ['get', 'mag'],
-                  0,
-                  0,
-                  6,
-                  1
-              ],
-              'heatmap-intensity': [
-                  'interpolate',
-                  ['linear'],
-                  ['zoom'],
-                  0,
-                  1,
-                  9,
-                  3
-              ],
-              'heatmap-color': [
-                  'interpolate',
-                  ['linear'],
-                  ['heatmap-density'],
-                  0,
-                  'rgba(33,102,172,0)',
-                  0.2,
-                  'rgb(103,169,207)',
-                  0.4,
-                  'rgb(209,229,240)',
-                  0.6,
-                  'rgb(253,219,199)',
-                  0.8,
-                  'rgb(239,138,98)',
-                  1,
-                  'rgb(178,24,43)'
-              ],
-              'heatmap-radius': [
-                  'interpolate',
-                  ['linear'],
-                  ['zoom'],
-                  0,
-                  2,
-                  9,
-                  20
-              ],
-              'heatmap-opacity': [
-                  'interpolate',
-                  ['linear'],
-                  ['zoom'],
-                  7,
-                  1,
-                  14,
-                  0
-              ]
-          },
-          'layout': {
-            'visibility': "none"
-          }
+        'id': 'customer_heat',
+        'type': 'heatmap',
+        'source': 'customer_heat',
+        'maxzoom': 14,
+        'paint': {
+          'heatmap-weight': [
+            'interpolate',
+            ['linear'],
+            ['get', 'mag'],
+            0,
+            0,
+            6,
+            1
+          ],
+          'heatmap-intensity': [
+            'interpolate',
+            ['linear'],
+            ['zoom'],
+            0,
+            1,
+            9,
+            3
+          ],
+          'heatmap-color': [
+            'interpolate',
+            ['linear'],
+            ['heatmap-density'],
+            0,
+            'rgba(33,102,172,0)',
+            0.2,
+            'rgb(103,169,207)',
+            0.4,
+            'rgb(209,229,240)',
+            0.6,
+            'rgb(253,219,199)',
+            0.8,
+            'rgb(239,138,98)',
+            1,
+            'rgb(178,24,43)'
+          ],
+          'heatmap-radius': [
+            'interpolate',
+            ['linear'],
+            ['zoom'],
+            0,
+            2,
+            9,
+            20
+          ],
+          'heatmap-opacity': [
+            'interpolate',
+            ['linear'],
+            ['zoom'],
+            7,
+            1,
+            14,
+            0
+          ]
+        },
+        'layout': {
+          'visibility': "none"
+        }
       });
       map.current.addLayer({
         'id': 'customer_heat_icon',
@@ -687,9 +705,9 @@ function CustomerMapView() {
           .setHTML(popupContent)
           .addTo(map.current);
       });
+    }
   }
-  }
-  
+
   const renderMapForCustomer = async () => {
     let dataGeo = {
       'type': "FeatureCollection",
@@ -755,41 +773,50 @@ function CustomerMapView() {
         });
 
       }
-      
+
     });
 
   };
   // Kiểm tra và thiết lập thuộc tính của lớp
-const handleCheck = (checkedKeys: React.Key[], dataObj: React.Key[]) => {
-  let arrSaveVisible=[]
-  mapConfig.forEach((group) => {
-    group.children.forEach((child: any) => {
-      const layers = child.layers;
-
-      layers.forEach((layer: any) => {
-        // Kiểm tra xem lớp có tồn tại không
-        if (map.current.getLayer(layer.id)) {
-          const isVisible = checkedKeys.includes(layer.id);
-          const visibility = isVisible ? 'visible' : 'none';
-          map.current.setLayoutProperty(layer.id, 'visibility', visibility);
-          let objVisibleLayer={
-            id:layer.id,
-            visibility: visibility
+  const handleCheck = (checkedKeys: React.Key[], dataObj: React.Key[]) => {
+    let arrSaveVisible = [];
+    mapConfig.forEach((group) => {
+      group.children.forEach((child: any) => {
+        const mapInfo = child;
+        if (checkedKeys.includes(mapInfo.id)) {
+          let layers = mapInfo.layers;
+          for (let i = 0; i < layers.length; i++) {
+            if (map.current.getLayer(layers[i].id)) {
+              map.current.setLayoutProperty(layers[i].id, 'visibility', "visible");
+              let objVisibleLayer={
+                id:layers[i].id,
+                visibility: "visible"
+              }
+              arrSaveVisible.push(objVisibleLayer)
+            }
           }
-          arrSaveVisible.push(objVisibleLayer)
-          localStorage.setItem('arrSaveVisible',JSON.stringify(arrSaveVisible))
-
         } else {
-          console.error('Lớp không tồn tại trên bản đồ:', layer.id);
+          let layers = mapInfo.layers;
+          for (let i = 0; i < layers.length; i++) {
+            if (map.current.getLayer(layers[i].id)) {
+              map.current.setLayoutProperty(layers[i].id, 'visibility', "none");
+              let objVisibleLayer={
+                id:layers[i].id,
+                visibility: "none"
+              }
+              arrSaveVisible.push(objVisibleLayer)
+            }
+          }
         }
       });
     });
-  });
-};
-  const changeOpacity = (sliderValues: any, selectedKeys:React.Key) => {
     
-    if(!sliderValues)return
-    console.log(sliderValues,selectedKeys);
+    localStorage.setItem('arrSaveVisible',JSON.stringify(arrSaveVisible))
+  };
+  const changeOpacity = (sliderValues: any, selectedKeys: React.Key) => {
+
+    if (!sliderValues) return
+    console.log(sliderValues, selectedKeys);
 
     selectedKeys.forEach(key => {
       map.current.setPaintProperty(
@@ -797,12 +824,12 @@ const handleCheck = (checkedKeys: React.Key[], dataObj: React.Key[]) => {
         'raster-opacity',
         sliderValues
       )
-  });
+    });
   }
   //moveLayers
   const handleMoveLayer = (layerIds: any, beforeIds: any) => {
     console.log(mapConfig);
-    
+
     if (isParentId(layerIds)) {
       const layerChildIds = getChildLayerIds(mapConfig, [layerIds]);
       const beforeChildIds = getChildLayerIds(mapConfig, [beforeIds]);
@@ -838,15 +865,15 @@ const handleCheck = (checkedKeys: React.Key[], dataObj: React.Key[]) => {
     let trungBinh = (max - min) / 6;
     let arrCode = [];
     let fill_color_province: any = ['case'];
-    if(objSetting["type_area"] == "administrative_region"){
+    if (objSetting["type_area"] == "administrative_region") {
       let valueArea = JSON.parse(objSetting["value_area"]);
       let arrRegion = JSON.parse(ARR_REGIONSTR);
-      for(let i = 0; i < valueArea.length; i++){
+      for (let i = 0; i < valueArea.length; i++) {
         let ratio_distributor = objResult[i].ratio_coverage;
-        for(let j = 0; j < arrRegion.length; j++){
-          if(arrRegion[j].code == valueArea[i]){
+        for (let j = 0; j < arrRegion.length; j++) {
+          if (arrRegion[j].code == valueArea[i]) {
             let arrProvince = arrRegion[j].arrProvince;
-            for(let t = 0; t < arrProvince.length; t++){
+            for (let t = 0; t < arrProvince.length; t++) {
               arrCode.push(arrProvince[i].provinceid);
               fill_color_province.push(['==', ['get', 'code'], arrProvince[i].provinceid]);
               if (min <= ratio_distributor && ratio_distributor < (min + trungBinh)) {
@@ -867,8 +894,8 @@ const handleCheck = (checkedKeys: React.Key[], dataObj: React.Key[]) => {
           }
         }
       }
-    }else if(objSetting["type_area"] == "administrative_province" || objSetting["type_area"] == "administrative_district"){
-      for(let i = 0; i < objResult.length; i++){
+    } else if (objSetting["type_area"] == "administrative_province" || objSetting["type_area"] == "administrative_district") {
+      for (let i = 0; i < objResult.length; i++) {
         let ratio_distributor = objResult[i].ratio_coverage;
         arrCode.push(objResult[i].code);
         fill_color_province.push(['==', ['get', 'code'], objResult[i].code]);
@@ -1002,8 +1029,8 @@ const handleCheck = (checkedKeys: React.Key[], dataObj: React.Key[]) => {
   const guid12 = () => {
     function s4() {
       return Math.floor((1 + Math.random()) * 0x10000)
-          .toString(16)
-          .substring(1);
+        .toString(16)
+        .substring(1);
     }
     return s4() + s4() + s4();
   }
@@ -1013,7 +1040,7 @@ const handleCheck = (checkedKeys: React.Key[], dataObj: React.Key[]) => {
       <HeaderPage title="Bản đồ khách hàng" />
       <div
         id="map"
-        style={{ width: "100%", height: mapHeight, borderTopRightRadius:'20px',borderTopLeftRadius:'20px' }}
+        style={{ width: "100%", height: mapHeight, borderTopRightRadius: '20px', borderTopLeftRadius: '20px' }}
       >
         <div className='ekmapplf_map-ananyltic'>
           <Dropdown.Button
@@ -1028,31 +1055,31 @@ const handleCheck = (checkedKeys: React.Key[], dataObj: React.Key[]) => {
         <div id='ekmapplf_tracking_legend' className='ekmapplf_tracking-map-legend'>
           <div className='ekmapplf_tracking-legend-title' onClick={toggleLegend}>
             <span className={`icon ${isOpen ? 'ekmapplf_tracking-icon-square-minus' : 'ekmapplf_tracking-icon-square-plus'}`} style={{ filter: 'invert(100%) sepia(100%) saturate(0%) hue-rotate(187deg) brightness(105%) contrast(103%)' }}></span>
-            <span style={{marginLeft:'8px'}}>Danh sách bản đồ</span>
+            <span style={{ marginLeft: '8px' }}>Danh sách bản đồ</span>
           </div>
           <div className={`ekmapplf_tracking-legend-body ${isOpen ? 'open' : ''}`} style={{ maxHeight: isOpen ? '250px' : '0', overflow: 'auto' }}>
-            <MapConfigTree objCoverageItem={objItemCoverage} onCheck={handleCheck} onMoveLayer={handleMoveLayer} changeOpacity={changeOpacity}/>
+            <MapConfigTree objCoverageItem={objItemCoverage} onCheck={handleCheck} onMoveLayer={handleMoveLayer} changeOpacity={changeOpacity} />
           </div>
         </div>
 
       </div>
       {visibleTable && (
-        <div style={{position:'relative'}}>
-<TableCustom
-        columns={columns}
-        dataSource={dataSource}
-        pagination={false}
-        scroll={{ y: 270 }}
-      />
-      <div  onClick={handleClose} style={{display:'flex',position:'absolute',top:'10px',right:'10px',cursor:'pointer'}}>
-        
-        <CloseOutlined style={{ fontSize: '0.75rem' }} onClick={handleClose} /> </div>
-        <div onClick={exportExcel} style={{display:'flex',position:'absolute',top:'15px',right:'35px',cursor:'pointer'}}>
-        <FileExcelOutlined style={{color:'green', fontSize: '1.3rem'}}/>
+        <div style={{ position: 'relative' }}>
+          <TableCustom
+            columns={columns}
+            dataSource={dataSource}
+            pagination={false}
+            scroll={{ y: 270 }}
+          />
+          <div onClick={handleClose} style={{ display: 'flex', position: 'absolute', top: '10px', right: '10px', cursor: 'pointer' }}>
+
+            <CloseOutlined style={{ fontSize: '0.75rem' }} onClick={handleClose} /> </div>
+          <div onClick={exportExcel} style={{ display: 'flex', position: 'absolute', top: '15px', right: '35px', cursor: 'pointer' }}>
+            <FileExcelOutlined style={{ color: 'green', fontSize: '1.3rem' }} />
+          </div>
         </div>
-        </div>
-        
-        
+
+
       )}
 
       <ModalView
@@ -1062,7 +1089,7 @@ const handleCheck = (checkedKeys: React.Key[], dataObj: React.Key[]) => {
         onOk={handleOk}
         lstCustomer={lstCustomer}
         api={apiKey}>
-        
+
       </ModalView>
     </>
   );
