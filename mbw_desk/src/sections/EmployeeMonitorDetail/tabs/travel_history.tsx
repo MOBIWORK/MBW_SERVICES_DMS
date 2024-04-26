@@ -15,17 +15,17 @@ import { Link } from 'react-router-dom';
 // dayjs.locale('vi');
 export default function TravelHistory({ employee }: { employee?: string }) {
 
-  const [time, setTime] = useState<any>(new Date("03-29-2024")) //Date.now()
-  const [from_time, setFTime] = useState<string>(tmpToTimeZone(new Date("03-29-2024").setHours(0, 0, 0).toString()))
-  const [to_time, setTTime] = useState<string>(tmpToTimeZone(new Date("03-29-2024").setHours(24, 0, 0).toString()))
+  const [time, setTime] = useState<any>(dayjs()) //Date.now()
+  const [from_time, setFTime] = useState<string>(dayjs().startOf('day').toISOString())
+  const [to_time, setTTime] = useState<string>(dayjs().endOf('day').toISOString())
   const [nameEmployee, setNameEmployee] = useState<string>("");
   const [arrEmployee,setArrEmployee] = useState<any[]>([]);
   const [defaultEmployeeSelect, setDefaultEmployeeSelect] = useState<string>("");
   const handleChangeTime = (value: any) => {
     setTimeout(()=> {
       setTime(value)
-      setFTime(tmpToTimeZone(TodayLimit(value).today))
-      setTTime(tmpToTimeZone(TodayLimit(value).nextday))
+      setFTime(value.startOf('day').toISOString())
+      setTTime(value.endOf('day').toISOString())
     }, 200)
   }
   //const [loadingPage, setLoadingPage] = useState<boolean>(true);
@@ -51,7 +51,6 @@ export default function TravelHistory({ employee }: { employee?: string }) {
       if(import.meta.env.VITE_BASE_URL){
         resSummary = resSummary.data;
       }
-      console.log("Dữ liệu lịch swr ", resSummary);
       setOptions(prev => ({
         ...prev, 
         summary: resSummary?.summary,
@@ -84,9 +83,17 @@ export default function TravelHistory({ employee }: { employee?: string }) {
     let resSummary = await AxiosService.get("/api/method/mbw_dms.api.user.get_list_employees");
     if(resSummary.message == "Thành công"){
       let arrEmployee = resSummary["result"].map(function(item){
-        return {value: item["name"], label: item["employee_name"]};
+        return {value: item["name"], label: item["employee_name"], object_id: item["object_id"]};
       });
       setArrEmployee(arrEmployee);
+      for(let i = 0; i < arrEmployee.length; i++){
+        if(employee != null && arrEmployee[i].object_id == employee){
+          setTimeout(() => {
+            setDefaultEmployeeSelect(arrEmployee[i].value);
+          }, 500);
+          break;
+        }
+      }
     }
   }
   const handleChangeEmployee = async (item, option) => {
@@ -96,6 +103,7 @@ export default function TravelHistory({ employee }: { employee?: string }) {
     }))
     //initDataSummary(options.projectId, option.object_id);
     setNameEmployee(`${option.label} - ${item}`);
+    setDefaultEmployeeSelect(item);
   }
 
   useEffect(() => {
@@ -114,7 +122,6 @@ export default function TravelHistory({ employee }: { employee?: string }) {
       }
       try {
         const rs = await AxiosService.get(`/api/method/mbw_dms.api.user.get_projectID`);
-        console.log(rs);
         setOptions(prev => ({
           ...prev, 
           projectId: rs.result["Project ID"], //rs.result["Project ID"]
@@ -122,7 +129,6 @@ export default function TravelHistory({ employee }: { employee?: string }) {
         }))
         initDataEmployee(rs.result["Project ID"]); //rs.result["Project ID"]
         //initDataSummary(rs.result["Project ID"], emnameployee); //rs.result["Project ID"]
-        console.log(options);
         const infoEmployee = await AxiosService.get(`/api/method/mbw_dms.api.user.get_employee_info_by_objid?object_id=${employee}`);
         if(infoEmployee.message == "Thành công"){
           if(infoEmployee.result.length > 0){
@@ -164,7 +170,7 @@ export default function TravelHistory({ employee }: { employee?: string }) {
         <div className="flex">
         <div className='py-4 border border-solid border-transparent border-b-[#F5F5F5]'>
             <Select
-                defaultValue={defaultEmployeeSelect}
+                value={defaultEmployeeSelect}
                 style={{ width: 150 }}
                 onChange={handleChangeEmployee}
                 options={arrEmployee}

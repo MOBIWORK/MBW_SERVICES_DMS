@@ -23,6 +23,7 @@ export default function SupervisoryStaff({options}) {
     });
   const [loadingPage, setLoadingPage] = useState<boolean>(true);
   const [indexTimeLine, setIndexTimeLine] = useState<any>(null);
+  const [arrTimeLineEmployee, setArrTimeLineEmployee] = useState<[]>([]);
 
   useEffect(()=>{
     setLoadingPage(true);
@@ -30,50 +31,76 @@ export default function SupervisoryStaff({options}) {
   }, [options])
 
   const handleClickItem = (indexItem) => {
-    if(indexTimeLine == indexItem) setIndexTimeLine(null);
-    else setIndexTimeLine(indexItem);
+    let arrTimeLineEmployeeSource = arrTimeLineEmployee;
+    setIndexTimeLine(preValue => {
+      if(preValue == indexItem){
+        arrTimeLineEmployeeSource[indexItem]["active_item"] = false;
+        let arrTimeLineHistory = renderTimeLineHistory(arrTimeLineEmployeeSource);
+        setTimeLineHistory(arrTimeLineHistory);
+        setArrTimeLineEmployee(arrTimeLineEmployeeSource);
+        return null;
+      } else{
+        for(let i = 0; i < arrTimeLineEmployeeSource.length; i++){
+          if(i == indexItem) arrTimeLineEmployeeSource[i]["active_item"] = true;
+          else arrTimeLineEmployeeSource[i]["active_item"] = false;
+        }
+        let arrTimeLineHistory = renderTimeLineHistory(arrTimeLineEmployeeSource);
+        setTimeLineHistory(arrTimeLineHistory);
+        setArrTimeLineEmployee(arrTimeLineEmployeeSource);
+        return indexItem;
+      }
+    })
   }
 
   useEffect(() => {
+    let arrTimeLineHistory = renderTimeLineHistory(summaryData.details);
+    setTimeLineHistory(arrTimeLineHistory);
+  }, [summaryData])
+
+  const renderTimeLineHistory = (dataSource) => {
     let arrTimeLineHistory = [];
-    if(summaryData.details != null){
-      for(let i = 0; i < summaryData.details.length; i++){
-        let item = summaryData.details[i];
+    if(dataSource != null){
+      for(let i = 0; i < dataSource.length; i++){
+        let item = dataSource[i];
         if(item.type == "start"){
           arrTimeLineHistory.push({
             'dot': <ItemStartTimeLineDot></ItemStartTimeLineDot>,
-            'children': <ItemStartTimeLineContent data={{ 'time_start': formatTimeUTC(item.timestamp), 'address': item.address, 'index_item': i }} onEventClickItem={handleClickItem}></ItemStartTimeLineContent>
+            'children': <ItemStartTimeLineContent data={{ 'time_start': formatTimeUTC(item.timestamp), 'address': item.address, 'index_item': i, 'active_item': item.active_item != null? item.active_item : false }} onEventClickItem={handleClickItem}></ItemStartTimeLineContent>
           });
         }else if(item.type == "checkin"){
           arrTimeLineHistory.push({
             'dot': <ItemCheckInTimeLineDot></ItemCheckInTimeLineDot>,
-            'children': <ItemCheckInTimeLineContent data={{ 'time_checking': `${formatTimeUTC(item.startTime)} - ${formatTimeUTC(item.endTime)}`, 'retail_name': item.storeName, 'address': item.address, 'total_time':`${formatTotalTime(item.startTime, item.endTime)}`, 'index_item': i }} onEventClickItem={handleClickItem}></ItemCheckInTimeLineContent>
+            'children': <ItemCheckInTimeLineContent data={{ 'time_checking': `${formatTimeUTC(item.startTime)} - ${formatTimeUTC(item.endTime)}`, 'retail_name': item.storeName, 'address': item.address, 'total_time':`${formatTotalTime(item.startTime, item.endTime)}`, 'index_item': i, 'active_item': item.active_item != null? item.active_item : false }} onEventClickItem={handleClickItem}></ItemCheckInTimeLineContent>
           });
         }else if(item.type == "move"){
           arrTimeLineHistory.push({
             dot: <ItemMovingTimeLineDot></ItemMovingTimeLineDot>,
-            children: <ItemMovingTimeLineContent data={{ 'time_moving': `${formatTimeUTC(item.startTime)} - ${formatTimeUTC(item.endTime)}`, 'total_distance': `${formatDistance(item.distance)}`, 'total_time':`${formatTotalTime(item.startTime, item.endTime)}`, 'index_item': i }} onEventClickItem={handleClickItem}></ItemMovingTimeLineContent>
+            children: <ItemMovingTimeLineContent data={{ 'time_moving': `${formatTimeUTC(item.startTime)} - ${formatTimeUTC(item.endTime)}`, 'total_distance': `${formatDistance(item.distance)}`, 'total_time':`${formatTotalTime(item.startTime, item.endTime)}`, 'index_item': i, 'active_item': item.active_item != null? item.active_item : false }} onEventClickItem={handleClickItem}></ItemMovingTimeLineContent>
           });
         }else if(item.type == "stop"){
           arrTimeLineHistory.push({
             'dot': <ItemStopTimeLineDot></ItemStopTimeLineDot>,
-            'children': <ItemStopTimeLineContent data={{ 'time_stop': `${formatTimeUTC(item.startTime)} - ${formatTimeUTC(item.endTime)}`, 'address': item.address, 'total_time':`${formatTotalTime(item.startTime, item.endTime)}`, 'index_item': i }} onEventClickItem={handleClickItem}></ItemStopTimeLineContent>
+            'children': <ItemStopTimeLineContent data={{ 'time_stop': `${formatTimeUTC(item.startTime)} - ${formatTimeUTC(item.endTime)}`, 'address': item.address, 'total_time':`${formatTotalTime(item.startTime, item.endTime)}`, 'index_item': i, 'active_item': item.active_item != null? item.active_item : false }} onEventClickItem={handleClickItem}></ItemStopTimeLineContent>
           });
         }else if(item.type == "end"){
           arrTimeLineHistory.push({
             dot: <ItemEndTimeLineDot></ItemEndTimeLineDot>,
-            children: <ItemEndTimeLineContent data={{ 'time_end': `${formatTimeUTC(item.timestamp)}`, 'address': item.address, 'index_item': i }} onEventClickItem={handleClickItem}></ItemEndTimeLineContent>
+            children: <ItemEndTimeLineContent data={{ 'time_end': `${formatTimeUTC(item.timestamp)}`, 'address': item.address, 'index_item': i, 'active_item': item.active_item != null? item.active_item : false }} onEventClickItem={handleClickItem}></ItemEndTimeLineContent>
           });
         }
       }
     }
-    setTimeLineHistory(arrTimeLineHistory);
-  }, [summaryData])
+    return arrTimeLineHistory;
+  }
 
   const onLoadData = (evt) => {
-    if(evt != null) setSummaryData(evt);
+    if(evt != null){
+      setSummaryData(evt);
+      setArrTimeLineEmployee(evt.details);
+    } 
     else{
       setSummaryData({summary: null, details: []});
+      setArrTimeLineEmployee([]);
     }
     setLoadingPage(false);
   }
@@ -259,7 +286,7 @@ export default function SupervisoryStaff({options}) {
                   )}
                 </div>
               </Col>
-              <Col span={18} style={{ height: '615px' }}>
+              <Col span={18} style={{ height: '600px' }}>
                 <HistoryMap options={options} onLoad={onLoadData} HistoryIndex={indexTimeLine}/>
               </Col>
             </Row>
