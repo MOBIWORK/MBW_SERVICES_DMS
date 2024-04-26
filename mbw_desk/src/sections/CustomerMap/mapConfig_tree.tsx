@@ -51,6 +51,19 @@ const MapConfigTree: React.FC<MapConfigTreeProps> = ({objCoverageItem, onCheck, 
         return updatedConfig;
       });
     }
+    const newCheckedKeys: React.Key[] = [];
+
+    const traverseTree = (nodes: TreeDataNode[]) => {
+      nodes.forEach(node => {
+        if (node.children && node.children.length > 0) {
+          traverseTree(node.children);
+        } else if (node.visible && node.key) {
+          newCheckedKeys.push(node.key); 
+        }
+      });
+    };
+    traverseTree(mapConfig);
+    setCheckedKeys(newCheckedKeys);
   }, [objCoverageItem]);
   
   const generateTreeData = (data: any[]): TreeDataNode[] =>
@@ -79,7 +92,6 @@ const MapConfigTree: React.FC<MapConfigTreeProps> = ({objCoverageItem, onCheck, 
       ),
       key: item.id,
       children: item.children ? generateTreeData(item.children) : [],
-      
     }));
 
   const getConfigMap = async () => {
@@ -119,6 +131,7 @@ const MapConfigTree: React.FC<MapConfigTreeProps> = ({objCoverageItem, onCheck, 
   const onSelect: TreeProps['onSelect'] = (selectedKeysValue, info) => {
     console.log('onSelect', info);
     setSelectedKeys(selectedKeysValue);
+    
   };
   const onDragEnter: TreeProps['onDragEnter'] = (info) => {
     console.log('onDragEnter:', info);
