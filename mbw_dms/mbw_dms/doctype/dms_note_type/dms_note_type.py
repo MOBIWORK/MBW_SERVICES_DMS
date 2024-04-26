@@ -9,6 +9,7 @@ from mbw_dms.api.common import (
     exception_handle,
     gen_response,
     validate_image,
+    get_employee_id
 )
 from mbw_dms.api.validators import validate_not_none, validate_choice, validate_phone_number
 from mbw_dms.api import configs
@@ -74,22 +75,15 @@ def create_note(kwargs):
 @frappe.whitelist(methods="GET")
 def list_email(kwargs):
     try:
+        employee_id = get_employee_id()
+        data = []
         page_size = 20 if not kwargs.get('page_size') else int(kwargs.get('page_size'))
         page_number = 1 if not kwargs.get('page') or int(kwargs.get('page')) <= 0 else int(kwargs.get('page'))
-        employee = frappe.db.get_all("Employee",
-                                filters= {},
-                                fields=["name", "first_name", "image", "user_id", "designation"],
-                                start=page_size * (page_number - 1),
-                                page_length=page_size)
-        for employees in employee:
-            employees['image'] = validate_image(employees.get("image"))
-        count = len(frappe.db.get_all("Employee", filters={},))
-        return gen_response(200, "Thành công", {
-            "data" :employee,
-            "total": count,
-            "page_size": page_size,
-            "page_number": page_number
-            })
+        sale_person_parent = frappe.db.get_value("Sales Person", {"employee": employee_id}, "parent_sales_person")
+        employee_sale = frappe.db.get_value("Sales Person", {"sales_person_name": sale_person_parent}, 'employee')
+        info = frappe.db.get_value("Employee", {"employee": employee_sale}, ['name', 'first_name', 'image', 'user_id', 'designation'], as_dict=True)
+        info['image'] = validate_image(info.get('image'))
+        return gen_response(200, "Thành công", {"data":info})
     except Exception as e:
         return exception_handle(e) 
     
