@@ -128,6 +128,27 @@ def validate_filter_timestamp(type=None):
     return validate
 
 
+
+# Kiểm tra định dạng timestamp truyền lên trong bộ lọc
+def validate_timestamp_in_date(value):
+        try:
+            value = float(value)
+            start_time = datetime.fromtimestamp(value).strftime('%Y-%m-%d') + ' 00:00:00'
+            end_time = datetime.fromtimestamp(value).strftime('%Y-%m-%d') + ' 23:59:59'
+
+            return start_time,end_time
+        except ValueError as e:
+            if value:
+                raise Exception('%s không đúng định dạng timestamp' % value)
+            else:
+                raise Exception('Vui lòng điền đúng định dạng timestamp')
+        except:
+            if value:
+                raise Exception('%s không phải là định dạng timestamp' % value)
+            else:
+                raise Exception('Vui lòng điền đúng định dạng timestamp')
+
+
 # Kiểm tra định dạng kiểu dữ liệu
 def validate_type(type_value=None):
     def validate(value):
@@ -157,7 +178,8 @@ def validate_filter(type_check,type=None,value=None):
         "boolean": validate_int_bool,
         "timestamp": validate_filter_timestamp(type),
         "type": validate_type(type),
-        "enum": validate_enum(type)
+        "enum": validate_enum(type),
+        "in_date":validate_timestamp_in_date
     }
 
     return validate[type_check](value)

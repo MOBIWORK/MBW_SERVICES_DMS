@@ -92,7 +92,7 @@ def get_router(id):
 def get_customer_router(data):
     try:     
         # cho phep ngoai tuyen, lay o settting nhung gio se fix cung
-        is_ngoai_tuyen=False
+        is_ngoai_tuyen=True
         search_key = data.get("search_key")
         view_mode = validate_filter(value=data.get('view_mode'),type=['list','map'],type_check='enum') if data.get('view_mode') else 'list'
         # phan trang
@@ -186,10 +186,10 @@ def get_customer_router(data):
             address_name = customer["customer_primary_address"]
             customer["customer_primary_address"]=frappe.db.get_value("Address",{"name": address_name},["address_title"])
             customer['is_checkin'] = False
-            checkin = frappe.db.get_value("DMS Checkin",{"kh_ma":customer.get('customer_code')},["is_checkout"],as_dict=1)
+            start_time,end_time=validate_filter(type_check="in_date",value=datetime.now().timestamp())
+            checkin = frappe.db.get_value("DMS Checkin",{"kh_ma":customer.get('customer_code'),"creation": ["between",[start_time,end_time]]},["is_checkout"],as_dict=1)
             if checkin != None and checkin.is_checkout:
                 customer['is_checkin'] = True
-            print("ngoai tuyen",is_ngoai_tuyen)
             if not is_ngoai_tuyen: 
                 customer["is_route"] = True
             else:
