@@ -6,7 +6,9 @@ import { AxiosService } from "../../services/server";
 import "./map_customer.css";
 import MapConfigTree from "./mapConfig_tree";
 import { Dropdown } from 'antd';
-import { DownOutlined, CloseOutlined, FileExcelOutlined, BackwardOutlined } from '@ant-design/icons';
+
+import { DownOutlined,CloseOutlined ,FileExcelOutlined,BackwardOutlined} from '@ant-design/icons';
+
 import type { MenuProps } from 'antd';
 import { TableCustom } from '../../components'
 import * as ExcelJS from "exceljs";
