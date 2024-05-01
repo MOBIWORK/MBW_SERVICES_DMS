@@ -5,9 +5,7 @@ UNIX_TIMESTAMP = CustomFunction('UNIX_TIMESTAMP', ['day'])
 from mbw_dms.api.common import (
     exception_handle,
     gen_response,
-    get_language,
     get_value_child_doctype,
-    get_employee_id
 )
 from mbw_dms.api.validators import (
     validate_filter_timestamp,
@@ -15,8 +13,6 @@ from mbw_dms.api.validators import (
     validate_choice,
     validate_not_none
 )
-from mbw_dms.api import configs
-from mbw_dms.config_translate import i18n
 from mbw_dms.api import configs
 
 # Lấy danh sách sales order
@@ -28,9 +24,8 @@ def get_list_sales_order(**filters):
         to_date = validate_filter_timestamp('end')(filters.get('to_date')) if filters.get('to_date') else None
         page_size =  int(filters.get('page_size', 20))
         page_number = int(filters.get('page_number')) if filters.get('page_number') and int(filters.get('page_number')) > 0 else 1
-        employee = get_employee_id()
+
         query = {}
-        # query = {"customer":"sdvbsahfeliuka"}
         if from_date and to_date:
             query["creation"] = ["between",[from_date,to_date]]
         if status is not None and status != "All":
@@ -60,9 +55,9 @@ def get_list_sales_order(**filters):
                                         )
         for sale_order in sale_orders :
             sale_order['custom_id'] = frappe.db.get_value("Customer",filters={'name': sale_order['customer']},fieldname=['customer_code'])
-        total_order = len(frappe.db.get_list('Sales Order', filters=query))
+        total_order = frappe.db.count('Sales Order', filters=query)
 
-        return gen_response(200,'',{
+        return gen_response(200, "Thành công",{
             "data": sale_orders,
             "total": total_order,
             "page_size": page_size,
@@ -118,18 +113,20 @@ def get_sale_order(name):
             
             # Lấy ra chi tiết đơn hàng
             detail_order = {"list_items": []}
+
             if len(detail) > 0:
                 for key_item, value in detail[0].items() :
                     if key_item in field_detail_sales:                    
                         detail_order.setdefault(key_item,value)
                 detail_order['list_items'] = get_items(master_doc='Sales Order', master_name=name)
+
             if len(detail_taxes) > 0 :
-                detail_order = {**detail_order,**detail_taxes[0]}
+                detail_order = {**detail_order, **detail_taxes[0]}
             
             if len(employee) > 0:
                 detail_order = {**detail_order, **employee[0]}
 
-            return gen_response(200,'Thành công', detail_order)
+            return gen_response(200, "Thành công", detail_order)
         else:
             return gen_response(406, f"Không tồn tại đơn hàng {name}")
     except Exception as e: 
@@ -225,9 +222,9 @@ def create_sale_order(**kwargs):
             
             new_order.insert()
             frappe.db.commit()
-            return gen_response(201, 'Thành công',  {"name": new_order.name})
+            return gen_response(201, "Thành công",  {"name": new_order.name})
         else:
-            return gen_response(400, 'Tổng tiền chưa khớp với tính toán', {"grand_total": grand_total})
+            return gen_response(400, "Tổng tiền chưa khớp với tính toán", {"grand_total": grand_total})
     except Exception as e:
         return exception_handle(e)
 
@@ -241,7 +238,7 @@ def pricing_rule(**kwargs):
         for i, child in enumerate(pricing_rule):
             if "item_code" not in child and i < len(kwargs["items"]):
                 child["item_code"] = kwargs["items"][i]["item_code"]
-        return gen_response(200, 'Thành công', pricing_rule)
+        return gen_response(200, "Thành công", pricing_rule)
     except Exception as e:
         return exception_handle(e)
 
@@ -255,7 +252,7 @@ def price_list(**kwargs):
         for i, child in enumerate(price_list["children"]):
             if "item_code" not in child and i < len(kwargs["items"]):
                 child["item_code"] = kwargs["items"][i]["item_code"]
-        return gen_response(200, 'Thành công', price_list)
+        return gen_response(200, "Thành công", price_list)
     except Exception as e:
         return exception_handle(e)
 
@@ -347,9 +344,9 @@ def create_return_order(**kwargs):
         if grand_total == float(kwargs.get('grand_total')):
             new_order.insert()
             frappe.db.commit()
-            return gen_response(201, 'Thành công',  {"name": new_order.name})
+            return gen_response(201, "Thành công",  {"name": new_order.name})
         else:
-            return gen_response(400, 'Tổng tiền chưa khớp với tính toán', {"grand_total": grand_total})
+            return gen_response(400, "Tổng tiền chưa khớp với tính toán", {"grand_total": grand_total})
     except Exception as e:
         return exception_handle(e)
 
@@ -410,9 +407,9 @@ def edit_return_order(name, **kwargs):
                     order.set('discount_amount', float(discount_amount))
 
                 order.save()
-                return gen_response(200, 'Cập nhật thành công')
+                return gen_response(200, "Cập nhật thành công")
             else:
-                return gen_response(400, i18n.t('translate.invalid_edit_return_order', locale=get_language()))
+                return gen_response(400, "Sửa đơn trả hàng không thành công")
         else:
             return gen_response(406, f"Không tồn tại {name}")
     except Exception as e:
@@ -426,9 +423,9 @@ def delete_return_order(name, **kwargs):
             return_order = frappe.get_doc('Sales Invoice',name)
             if return_order.docstatus == 0:
                 frappe.delete_doc('Sales Invoice', name)
-                gen_response(200, "Thành công", [])
+                return gen_response(200, "Thành công", [])
             else:
-                return gen_response(400, i18n.t('translate.invalid_delete_return_order', locale=get_language()))
+                return gen_response(400, "Xóa đơn trả hàng không thành công")
         else:
             return gen_response(406, f"Không tồn tại {name}")
     except Exception as e:
@@ -454,9 +451,9 @@ def delete_item(name_return_order, item_code):
                 # Xóa sản phẩm từ danh sách items
                 return_order.items = [item for item in return_order.items if item.get("item_code") != item_code]
                 return_order.save()
-                return gen_response(200, 'Thành công', [])
+                return gen_response(200, "Thành công", [])
             else:
-                return gen_response(400, i18n.t('translate.invalid_edit_return_order', locale=get_language()))
+                return gen_response(400, "Sửa đơn trả hàng không thành công")
         else:
             return gen_response(406, f"Không tồn tại phiếu trả hàng {name_return_order}")
     except Exception as e:
@@ -473,6 +470,7 @@ def get_sale_order_by_checkin_id(doctype, **kwargs):
             Customer = frappe.qb.DocType("Customer")
             SalesOrderTaxes = frappe.qb.DocType("Sales Taxes and Charges")
             field_detail_sales = []
+
             if doctype == "Sales Order":
                 SalesOrderItem = frappe.qb.DocType("Sales Order Item")
                 field_detail_sales = ['total','grand_total','customer','customer_name','address_display',"delivery_date",'set_warehouse','taxes_and_charges','total_taxes_and_charges','apply_discount_on','additional_discount_percentage','discount_amount','contact_person','rounded_total']
@@ -490,6 +488,7 @@ def get_sale_order_by_checkin_id(doctype, **kwargs):
                             ,SalesOrderItem.name, SalesOrderItem.item_name,SalesOrderItem.item_code,SalesOrderItem.qty, SalesOrderItem.uom,SalesOrderItem.amount,SalesOrderItem.discount_amount,SalesOrderItem.discount_percentage                        
                         )
                         ).run(as_dict =1)
+                
             if doctype == "Sales Invoice":
                 SalesOrderItem = frappe.qb.DocType("Sales Invoice Item")
                 field_detail_sales = ['total','grand_total','customer','customer_name','address_display',"posting_date",'set_warehouse','taxes_and_charges','total_taxes_and_charges','apply_discount_on','additional_discount_percentage','discount_amount','contact_person','rounded_total']
@@ -507,24 +506,27 @@ def get_sale_order_by_checkin_id(doctype, **kwargs):
                             ,SalesOrderItem.name, SalesOrderItem.item_name,SalesOrderItem.item_code,SalesOrderItem.qty, SalesOrderItem.uom,SalesOrderItem.amount,SalesOrderItem.discount_amount,SalesOrderItem.discount_percentage                        
                         )
                         ).run(as_dict =1)
+                
             detail_taxes = (frappe.qb.from_(SalesOrder)
                             .inner_join(SalesOrderTaxes)
                             .on(SalesOrder.name == SalesOrderTaxes.parent)
                             .where(SalesOrder.name == detail_sales_order)
                             .select(SalesOrderTaxes.tax_amount,SalesOrderTaxes.rate,SalesOrderTaxes.account_head,SalesOrderTaxes.charge_type,)
                             ).run(as_dict =1)
+            
             detail_order = {"list_items": []}
             if len(detail) > 0 :
                 for key_item, value in detail[0].items() :
                     if key_item in field_detail_sales:  
                         detail_order.setdefault(key_item,value)
                     detail_order['list_items'] = get_items(master_doc=doctype, master_name=detail_sales_order)
-            if len(detail_taxes) > 0 :
-                detail_order = {**detail_order,**detail_taxes[0]}
 
-            return gen_response(200,'Thành công', detail_order)
+            if len(detail_taxes) > 0 :
+                detail_order = {**detail_order, **detail_taxes[0]}
+
+            return gen_response(200, "Thành công", detail_order)
         else:
-            return gen_response(200, 'Thành công', [])
+            return gen_response(200, "Thành công", [])
     except Exception as e: 
         exception_handle(e)
 

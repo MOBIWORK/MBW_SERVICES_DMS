@@ -23,9 +23,9 @@ def update_sales_roles_permissions():
 
 def update_permissions(doctype_name, sales_user_role, sales_manager_role):
     # Kiểm tra quyền cho vai trò "Sales User"
-    existing_sales_user_perms = frappe.get_all("Custom DocPerm", filters={"parent": doctype_name, "role": sales_user_role})
+    existing_sales_user_perms = frappe.db.exists("Custom DocPerm", filters={"parent": doctype_name, "role": sales_user_role})
     # Kiểm tra quyền cho vai trò "Sales Manager"
-    existing_sales_manager_perms = frappe.get_all("Custom DocPerm", filters={"parent": doctype_name, "role": sales_manager_role})
+    existing_sales_manager_perms = frappe.db.exists("Custom DocPerm", filters={"parent": doctype_name, "role": sales_manager_role})
 
     # Nếu không có quyền tồn tại, thì tạo mới quyền
     if not existing_sales_user_perms:

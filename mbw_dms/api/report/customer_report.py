@@ -85,7 +85,7 @@ def customer_report(**kwargs):
         """
         customer_count = frappe.db.sql(sql_count, as_dict=True)
 
-        return gen_response(200, 'Thành công', {
+        return gen_response(200, "Thành công", {
             "data": list_customers,
             "totals_cus": customer_count[0]['COUNT(*)'],
             "sum": totals,

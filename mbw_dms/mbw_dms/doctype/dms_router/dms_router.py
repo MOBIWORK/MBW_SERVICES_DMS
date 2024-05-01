@@ -241,7 +241,6 @@ def create_router(body):
         "status": "Active",
         "is_deleted": 0
         })
-        print("is_has_travel_date",is_has_travel_date,body.get("travel_date"))
 
         if body.get("travel_date") == "Không giới hạn":
             is_has_travel_date = False
@@ -289,7 +288,6 @@ def update_router(body):
         },
         ["travel_date"]
         )
-        print("is_has_travel_date",is_has_travel_date)
         if body.get("travel_date") == "Không giới hạn":
             is_has_travel_date = False
         if is_has_travel_date:

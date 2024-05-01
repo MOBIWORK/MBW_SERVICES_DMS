@@ -1,4 +1,5 @@
 import frappe
+from mbw_dms.api.common import get_all_parent_sales_persons
 
 def create_user_permission(doc, method=None):
     data = doc.as_dict()
@@ -30,16 +31,3 @@ def create_user_permission(doc, method=None):
             pass
     else:
         return
-
-# Tìm danh sách sales person cha
-def get_all_parent_sales_persons(sales_person):
-    parent_sales_persons = []
-    parent = frappe.get_value("Sales Person", sales_person, "parent_sales_person")
-
-    while parent:
-        is_group = frappe.get_value("Sales Person", parent, "is_group")
-        if is_group == 1:
-            parent_sales_persons.append(parent)
-        parent = frappe.get_value("Sales Person", parent, "parent_sales_person")
-
-    return parent_sales_persons

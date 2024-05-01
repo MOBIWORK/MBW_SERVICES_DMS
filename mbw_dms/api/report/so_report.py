@@ -2,7 +2,6 @@ import frappe
 
 from mbw_dms.api.common import gen_response ,exception_handle, get_child_values_doc
 from mbw_dms.api.validators import validate_filter_timestamp
-from datetime import datetime
 
 # Báo cáo tổng hợp đặt hàng
 @frappe.whitelist(methods='GET')
@@ -59,9 +58,10 @@ def so_report(**kwargs):
                 totals['sum_vat'] += i['tax_amount']
             totals['sum_discount_amount'] += i['discount_amount']
             totals['sum_grand_total'] += i['grand_total']
+
         count_data = frappe.db.count('Sales Order', filters=filters)
 
-        return gen_response(200, 'Thành công', {
+        return gen_response(200, "Thành công", {
             "data": sale_orders,
             "sum": totals,
             "page_number": page_number,
@@ -80,6 +80,7 @@ def si_report(**kwargs):
         to_date = validate_filter_timestamp(type='end')(kwargs.get('to_date')) if kwargs.get('to_date') else None
         page_size =  int(kwargs.get('page_size', 20))
         page_number = int(kwargs.get('page_number')) if kwargs.get('page_number') and int(kwargs.get('page_number')) >=1 else 1
+
         if from_date and to_date:
             filters["posting_date"] = ["between", [from_date, to_date]]
         elif from_date:
@@ -123,9 +124,10 @@ def si_report(**kwargs):
                 totals['sum_vat'] += i['tax_amount']
             totals['sum_discount_amount'] += i['discount_amount']
             totals['sum_grand_total'] += i['grand_total']
+
         count_data = frappe.db.count('Sales Invoice', filters=filters)
 
-        return gen_response(200, 'Thành công', {
+        return gen_response(200, "Thành công", {
             "data": sale_invoices,
             "sum": totals,
             "page_number": page_number,
@@ -143,7 +145,7 @@ def list_company(**kwargs):
         if name:
             filter_company["name"] = ['like', f'%{name}%']
         list_company = frappe.db.get_list('Company', filters=filter_company, fields=['name', 'company_name'])
-        return gen_response(200, 'Thành công', list_company)
+        return gen_response(200, "Thành công", list_company)
     except Exception as e:
         return exception_handle(e)
     

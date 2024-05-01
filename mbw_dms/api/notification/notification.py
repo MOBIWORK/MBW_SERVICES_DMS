@@ -7,7 +7,8 @@ from mbw_dms.api.common import (
     get_employee_by_name,
     validate_image,
     BASE_URL,
-    get_value_child_doctype
+    get_value_child_doctype,
+    get_all_parent_sales_persons
 )
 from mbw_dms.api.validators import validate_filter_timestamp
 from datetime import datetime
@@ -245,15 +246,3 @@ def get_notifi(**kwargs):
             })
     except Exception as e:
         exception_handle(e)
-
-def get_all_parent_sales_persons(sales_person):
-    parent_sales_persons = []
-    parent = frappe.get_value("Sales Person", sales_person, "parent_sales_person")
-
-    while parent:
-        is_group = frappe.get_value("Sales Person", parent, "is_group")
-        if is_group == 1:
-            parent_sales_persons.append(parent)
-        parent = frappe.get_value("Sales Person", parent, "parent_sales_person")
-
-    return parent_sales_persons

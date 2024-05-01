@@ -12,6 +12,7 @@ def synthesis_report(**kwargs):
         data['doanh_so'] = 0
         data['tang_vs_hqua'] = 0
         data['don_hang'] = 0
+
         # Lấy ngày hôm nay và ngày hôm qua
         today = datetime.date.today()
         yesterday = today - datetime.timedelta(days=1)
@@ -49,22 +50,16 @@ def synthesis_report(**kwargs):
             # Lấy số lượng khách hàng
             if i['customer'] not in list_cus:
                 list_cus.append(i['customer'])
+
             # Lấy số sản phẩm
             i['items'] = get_value_child_doctype('Sales Order', i['name'], 'items')
             for item in i['items']:
                 data['so_san_pham'] += item['qty']
                 item_counts[item['item_name']] += item['amount']
-        list_grand_total = [{'doanh_so': total, 'thoi_gian': time} for time, total in total_by_creation_time.items()]
-        data['bieu_do_doanh_so'] = list_grand_total
 
-        top_item_list = []
-        for item_name, amount in item_counts.items():
-            item_dict = {
-                "ten_sp": item_name,
-                "doanh_so": amount,
-                "image": validate_image(frappe.get_value("Item", {'item_name': item_name}, "image"))
-            }
-            top_item_list.append(item_dict)
+        # Doanh số
+        list_grand_total = [{'doanh_so': total, 'thoi_gian': time} for time, total in total_by_creation_time.items()]
+
 
         
         # Biểu đồ doanh số
@@ -74,6 +69,14 @@ def synthesis_report(**kwargs):
         data['so_nguoi_mua'] = len(list_cus)    
 
         # Danh sách sản phẩm có doanh số cao nhất
+        top_item_list = []
+        for item_name, amount in item_counts.items():
+            item_dict = {
+                "ten_sp": item_name,
+                "doanh_so": amount,
+                "image": validate_image(frappe.get_value("Item", {'item_name': item_name}, "image"))
+            }
+            top_item_list.append(item_dict)
         top_item_list = sorted(top_item_list, key=lambda x: x["doanh_so"], reverse=True)[:5]
         data['ds_sp_doanh_so_cao'] = top_item_list
         
@@ -107,7 +110,7 @@ def synthesis_report(**kwargs):
                 employee.append(i['owner'])
         data['so_nv_online'] = len(employee)
 
-        return gen_response(200, 'Thành công', data)
+        return gen_response(200, "Thành công", data)
     except Exception as e:
         return exception_handle(e)
     
@@ -155,6 +158,6 @@ def real_time_monitoring_report(**kwargs):
         data['so_nv_online'] = len(employee)
         data['so_nv_offline'] = total_employee - data['so_nv_online']
 
-        return gen_response(200, 'Thành công', data)
+        return gen_response(200, "Thành công", data)
     except Exception as e:
         return exception_handle(e)

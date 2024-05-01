@@ -1,7 +1,6 @@
 import frappe
-import datetime
 
-from mbw_dms.api.common import gen_response ,exception_handle, get_value_child_doctype
+from mbw_dms.api.common import gen_response ,exception_handle
 
 # Báo cáo KPI
 @frappe.whitelist(methods='GET')

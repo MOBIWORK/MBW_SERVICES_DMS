@@ -61,25 +61,25 @@ def get_kpi_monthly():
                 'vieng_tham': 0,
                 'kh_moi': 0
             }
-        return gen_response(200, 'Thành công', kpi)
+        return gen_response(200, "Thành công", kpi)
     except Exception as e:
         return exception_handle(e)
 	
-@frappe.whitelist(methods='GET')
-def get_kpi_employee(**kwargs):
-    filters = {}
-    thang = kwargs.get('thang')
-    nam = kwargs.get('nam')
-    nhom_ban_hang = kwargs.get('nhom_ban_hang')
-    nhan_vien = kwargs.get('nhan_vien')
+# @frappe.whitelist(methods='GET')
+# def get_kpi_employee(**kwargs):
+#     filters = {}
+#     thang = kwargs.get('thang')
+#     nam = kwargs.get('nam')
+#     nhom_ban_hang = kwargs.get('nhom_ban_hang')
+#     nhan_vien = kwargs.get('nhan_vien')
 
-    if thang:
-        filters['thang'] = thang
-    if nam:
-        filters['nam'] = nam
-    if nhom_ban_hang:
-        filters['nhom_ban_hang'] = nhom_ban_hang
-    if nhan_vien:
-        filters['nhan_vien_ban_hang'] = nhan_vien
+#     if thang:
+#         filters['thang'] = thang
+#     if nam:
+#         filters['nam'] = nam
+#     if nhom_ban_hang:
+#         filters['nhom_ban_hang'] = nhom_ban_hang
+#     if nhan_vien:
+#         filters['nhan_vien_ban_hang'] = nhan_vien
 
     

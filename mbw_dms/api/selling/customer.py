@@ -33,8 +33,8 @@ def list_customer(**kwargs):
         from_date = validate_filter_timestamp('start')(kwargs.get('from_date')) if kwargs.get('from_date') else None
         to_date = validate_filter_timestamp('end')(kwargs.get('to_date')) if kwargs.get('to_date') else None
         routers = routers_name_of_customer()
-        if len(routers) ==0 :
-            return gen_response(200,"",[])
+        if len(routers) == 0 :
+            return gen_response(200, "", [])
         customers_name = customers_code_router(routersName=routers)
         my_filter = {
             "customer_code": ["in",customers_name]
@@ -64,8 +64,7 @@ def list_customer(**kwargs):
                                 start=page_size*(page_number-1), 
                                 page_length=page_size)
                                 
-        record = len(frappe.db.get_all("Customer",
-                                filters= my_filter,))
+        record = frappe.db.count("Customer", filters = my_filter)
 
         for customer in customers:
             if customer['custom_birthday'] is not None:
@@ -74,7 +73,7 @@ def list_customer(**kwargs):
             customer['contact'] = get_contact(customer.get("name"))
             customer['address'] = get_customer_addresses(customer.get("name"))
             customer['cre_limid'] = frappe.db.get_all("Customer Credit Limit", {"parent" : customer.get('name')}, ['credit_limit'])
-        return gen_response(200, "ok", {
+        return gen_response(200, "Thành công", {
             "data": customers,
             "page_number": page_number,
             "page_size": page_size,
@@ -88,7 +87,7 @@ def list_customer(**kwargs):
 @frappe.whitelist(methods="GET")
 def list_customer_type():
     try:
-        brand = frappe.db.get_list('Customer Group', fields=["name", "customer_group_name"])
+        brand = frappe.db.get_list("Customer Group", fields=["name", "customer_group_name"])
         return gen_response(200, "Thành công", brand)
     except Exception as e:
         return exception_handle(e)
@@ -97,7 +96,7 @@ def list_customer_type():
 @frappe.whitelist(methods="DELETE")
 def delete_customer(name):
     try:
-        frappe.delete_doc('Customer',name)
+        frappe.delete_doc("Customer", name)
         return gen_response(200, "Thành công", [])
     except Exception as e:
         exception_handle(e)
@@ -219,7 +218,7 @@ def create_customer(**kwargs):
             router.save()
 
         frappe.db.commit()
-        return gen_response(201, 'Thành công', {"name": new_customer.name})
+        return gen_response(201, "Thành công", {"name": new_customer.name})
     except Exception as e:
         return exception_handle(e)
     
@@ -228,7 +227,7 @@ def create_customer(**kwargs):
 def list_territory():
     try:
         territory = frappe.db.get_list('Territory', fields=["name", "territory_name"])
-        return gen_response(200, 'Thành công', territory)
+        return gen_response(200, "Thành công", territory)
     except Exception as e:
         return exception_handle(e)
     
@@ -241,7 +240,7 @@ def update_customer(name, **kwargs):
             for field, value in dict(kwargs).items():
                 setattr(customers, field, value)
             customers.save()
-            gen_response(200, 'Cập nhật thành công')
+            gen_response(200, "Cập nhật thành công")
         else:
             return gen_response(406, f"Không tồn tại {name}")
     except Exception as e:
@@ -254,7 +253,7 @@ def get_customer_addresses(customer_name):
         filters={"link_name": customer_name},
         fields=["name", "address_line1", "address_line2", "city", "state", "is_primary_address", "is_shipping_address", "county"]
     )
-    return gen_response(200, 'Thành công', addresses)
+    return gen_response(200, "Thành công", addresses)
 
     
 @frappe.whitelist(methods="GET")
@@ -264,7 +263,7 @@ def get_contact(customer_name):
         filters={"link_name": customer_name},
         fields=['name','first_name', "phone", "is_primary_contact", "is_billing_contact"]
     )
-    return gen_response(200, 'Thành công', contact)
+    return gen_response(200, "Thành công", contact)
 
 @frappe.whitelist(methods='GET')
 def list_router(customer_name):
@@ -272,7 +271,7 @@ def list_router(customer_name):
         list_router = frappe.db.get_list('DMS Router', filters={'customer_name': customer_name}, fields=['*'])
         for i in list_router:
             i['customers'] = get_value_child_doctype('DMS Router', i['name'], 'customers')
-        return gen_response(200, 'Thành công', list_router)
+        return gen_response(200, "Thành công", list_router)
     except Exception as e:
         return exception_handle(e)
     
@@ -285,7 +284,7 @@ def list_sale_person():
         filters={"enabled": 1},
         fields=['name','sales_person_name']
         )
-        return gen_response(200, 'Thành công', sale_person)
+        return gen_response(200, "Thành công", sale_person)
     except Exception as e:
         return exception_handle(e)
 
@@ -303,6 +302,6 @@ def get_customer_has_location(**kwargs):
         """
 
         list_customers = frappe.db.sql(sql_query, as_dict=True)
-        return gen_response(200, 'Thành công', list_customers)
+        return gen_response(200, "Thành công", list_customers)
     except Exception as e:
         return exception_handle(e)

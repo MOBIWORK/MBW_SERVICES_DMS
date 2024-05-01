@@ -64,7 +64,7 @@ def list_product(**kwargs):
                 return pydash.pick(value, "link_image")
             images_links = pydash.map_(images, return_fiel)
             item["custom_images_item"] = images_links
-        count = len(frappe.db.get_list("Item", filters=my_filter))
+        count = frappe.db.count("Item", filters=my_filter)
 
         data_item = []
         for item in items:
@@ -75,7 +75,7 @@ def list_product(**kwargs):
             if item['details']:
                 data_item.append(item)
 
-        return gen_response(200, 'Thành công', {
+        return gen_response(200, "Thành công", {
             "data": data_item,
             "total": count,
             "page_size": page_size,
@@ -139,7 +139,7 @@ def list_warehouse(**kwargs):
             warehouse_filter['name'] = ['like', f'%{name}%']
         warehouse_filter['company'] = company
         list_warehouse = frappe.db.get_list('Warehouse', filters=warehouse_filter, fields=['name', 'warehouse_name'])
-        return gen_response(200, 'Thành công', list_warehouse)
+        return gen_response(200, "Thành công", list_warehouse)
     except Exception as e:
         return exception_handle(e)
     
@@ -158,7 +158,7 @@ def list_vat(**kwargs):
                             .where(Taxes.name.like(f"%{title}%") and Taxes.company == company)
                             .select(Taxes.name, Taxes.title, TaxesCharges.account_head, TaxesCharges.rate, TaxesCharges.charge_type)
                             ).run(as_dict =1)
-        return gen_response(200, 'Thành công', detail_taxes)
+        return gen_response(200, "Thành công", detail_taxes)
     except Exception as e:
         return exception_handle(e)
     

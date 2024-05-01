@@ -9,7 +9,8 @@ from mbw_dms.api.common import (
     exception_handle,
     gen_response,
     get_employee_id,
-    get_value_child_doctype
+    get_value_child_doctype,
+    get_all_parent_sales_persons
 )
 from mbw_dms.api.validators import validate_not_none, validate_choice
 from mbw_dms.api import configs
@@ -114,14 +115,3 @@ def list_album_name():
     except Exception as e:
         return exception_handle(e)
   
-def get_all_parent_sales_persons(sales_person):
-    parent_sales_persons = []
-    parent = frappe.get_value("Sales Person", sales_person, "parent_sales_person")
-
-    while parent:
-        is_group = frappe.get_value("Sales Person", parent, "is_group")
-        if is_group == 1:
-            parent_sales_persons.append(parent)
-        parent = frappe.get_value("Sales Person", parent, "parent_sales_person")
-
-    return parent_sales_persons

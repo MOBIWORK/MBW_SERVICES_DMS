@@ -373,3 +373,17 @@ def get_child_values_doc(doctype, master_name, fields_to_get, chil_name):
         result.append(item_dict)
 
     return result
+
+
+# Lấy sales person cha từ sales person con
+def get_all_parent_sales_persons(sales_person):
+    parent_sales_persons = []
+    parent = frappe.get_value("Sales Person", sales_person, "parent_sales_person")
+
+    while parent:
+        is_group = frappe.get_value("Sales Person", parent, "is_group")
+        if is_group == 1:
+            parent_sales_persons.append(parent)
+        parent = frappe.get_value("Sales Person", parent, "parent_sales_person")
+
+    return parent_sales_persons

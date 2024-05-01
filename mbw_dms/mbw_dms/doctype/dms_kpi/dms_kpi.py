@@ -8,7 +8,13 @@ from frappe.utils import nowdate, today
 import calendar
 from collections import defaultdict 
 import datetime
-from mbw_dms.api.common import exception_handle,gen_response,get_value_child_doctype,current_month_week,get_child_values_doc
+from mbw_dms.api.common import (
+    exception_handle,
+	gen_response,
+	get_value_child_doctype,
+	current_month_week,
+	get_child_values_doc
+)
 
 class DMSKPI(Document):
 	pass
@@ -27,26 +33,24 @@ def visit_report():
 		end_date = frappe.utils.getdate(end_date_str)
 
 		# Lấy id của nhân viên
-		user_name = frappe.get_value('Employee',{ 'user_id': frappe.session.user}, 'name')
+		user_name = frappe.get_value('Employee', {'user_id': frappe.session.user}, 'name')
         
 		kpi = None
 
-		# Lấy Kpi tháng
-		monthly_summary = frappe.get_all(
+		# Lấy Kpi tháng vt lượt
+		monthly_summary = frappe.get_value(
 				'DMS Summary KPI Monthly',
-				filters={'thang': month, 'nam': year, 'nhan_vien_ban_hang': user_name},
-				fields=['solan_vt_dungtuyen']
+				{'thang': month, 'nam': year, 'nhan_vien_ban_hang': user_name},
+				'solan_vt_dungtuyen'
 			)
-		# Lấy Kpi nhân viên
-		kpi_employee = frappe.get_all('DMS KPI',
-                filters={'ngay_hieu_luc_tu': (">=", start_date), 'ngay_hieu_luc_den': ("<=", end_date), 'nhan_vien_ban_hang': user_name},
-                fields=['so_kh_vt_luot'])
+		# Lấy Kpi nhân viên vt
+		kpi_employee = frappe.get_value('DMS KPI', {'ngay_hieu_luc_tu': (">=", start_date), 'ngay_hieu_luc_den': ("<=", end_date), 'nhan_vien_ban_hang': user_name}, 'so_kh_vt_luot')
 		
 		if monthly_summary and kpi_employee:
 			kpi = {
-                'chi_tieu': kpi_employee[0]['so_kh_vt_luot'],
-                'dat_duoc': monthly_summary[0]['solan_vt_dungtuyen'],
-                'phan_tram_thuc_hien': round(float(monthly_summary[0]['solan_vt_dungtuyen'] / kpi_employee[0]['so_kh_vt_luot'] * 100), 2),
+                'chi_tieu': kpi_employee,
+                'dat_duoc': monthly_summary,
+                'phan_tram_thuc_hien': round(float(monthly_summary / kpi_employee * 100), 2),
             }
 		else:
 			kpi = {
@@ -54,7 +58,7 @@ def visit_report():
                 'dat_duoc': 0,
                 'phan_tram_thuc_hien': 0,
             }
-		return gen_response(200, 'Thành công', kpi)
+		return gen_response(200, "Thành công", kpi)
 	except Exception as e:
 		return exception_handle(e)
 	
@@ -78,20 +82,21 @@ def sales_report():
 		kpi = None
 
 		# Lấy Kpi tháng
-		monthly_summary = frappe.get_all(
+		monthly_summary = frappe.get_value(
 				'DMS Summary KPI Monthly',
-				filters={'thang': month, 'nam': year, 'nhan_vien_ban_hang': user_name},
-				fields=['doanh_so_thang']
+				{'thang': month, 'nam': year, 'nhan_vien_ban_hang': user_name},
+				'doanh_so_thang'
 			)
 		# Lấy Kpi nhân viên
-		kpi_employee = frappe.get_all('DMS KPI',
-                filters={'ngay_hieu_luc_tu': (">=", start_date), 'ngay_hieu_luc_den': ("<=", end_date), 'nhan_vien_ban_hang': user_name},
-                fields=['doanh_so'])
+		kpi_employee = frappe.get_value('DMS KPI',
+                {'ngay_hieu_luc_tu': (">=", start_date), 'ngay_hieu_luc_den': ("<=", end_date), 'nhan_vien_ban_hang': user_name},
+                'doanh_so'
+			)
 		
 		if monthly_summary and kpi_employee:
 			kpi = {
-                'dat_duoc': float(monthly_summary[0]['doanh_so_thang']),
-                'phan_tram_thuc_hien': round(float(monthly_summary[0]['doanh_so_thang'] / kpi_employee[0]['doanh_so'] * 100), 2),
+                'dat_duoc': float(monthly_summary),
+                'phan_tram_thuc_hien': round(float(monthly_summary / kpi_employee * 100), 2),
             }
 		else:
 			kpi = {
@@ -101,10 +106,10 @@ def sales_report():
 		# Lấy danh sách đơn hàng từ đầu tháng đến hiện tại
 		sales_order = frappe.get_all(
 			'Sales Order',
-			filters={"transaction_date": (">=", start_date),
-        			 "transaction_date": ("<=", todays),
+			filters={"transaction_date": ("between", [start_date,todays]),
         			 "docstatus": 1,
-					 "owner": user_id},
+					 "owner": user_id
+					},
 			fields=['grand_total', 'transaction_date']
 		)
 
@@ -122,7 +127,7 @@ def sales_report():
 		for date, total in daily_totals.items():
 			orders_list.append({"ngay": date, "doanh_so": total})
 
-		return gen_response(200, 'Thành công', {
+		return gen_response(200, "Thành công", {
 			"Kpi": kpi,
 			"sales_invoice": orders_list
 		})
@@ -144,26 +149,27 @@ def invoices_report():
 		end_date = frappe.utils.getdate(end_date_str)
 
 		# Lấy id của nhân viên
-		user_name = frappe.get_value('Employee',{ 'user_id': frappe.session.user}, 'name')
 		user_id = frappe.session.user
+		user_name = frappe.get_value('Employee', { 'user_id': user_id}, 'name')
         
 		kpi = None
 
 		# Lấy Kpi tháng
-		monthly_summary = frappe.get_all(
+		monthly_summary = frappe.get_value(
 				'DMS Summary KPI Monthly',
-				filters={'thang': month, 'nam': year, 'nhan_vien_ban_hang': user_name},
-				fields=['doanh_thu_thang']
+				{'thang': month, 'nam': year, 'nhan_vien_ban_hang': user_name},
+				'doanh_thu_thang'
 			)
 		# Lấy Kpi nhân viên
 		kpi_employee = frappe.get_all('DMS KPI',
-                filters={'ngay_hieu_luc_tu': (">=", start_date), 'ngay_hieu_luc_den': ("<=", end_date), 'nhan_vien_ban_hang': user_name},
-                fields=['doanh_thu'])
+                {'ngay_hieu_luc_tu': (">=", start_date), 'ngay_hieu_luc_den': ("<=", end_date), 'nhan_vien_ban_hang': user_name},
+                'doanh_thu'
+				)
 		
 		if monthly_summary and kpi_employee:
 			kpi = {
-                'dat_duoc': float(monthly_summary[0]['doanh_thu_thang']),
-                'phan_tram_thuc_hien': round(float(monthly_summary[0]['doanh_thu_thang'] / kpi_employee[0]['doanh_thu'] * 100), 2),
+                'dat_duoc': float(monthly_summary),
+                'phan_tram_thuc_hien': round(float(monthly_summary / kpi_employee * 100), 2),
             }
 		else:
 			kpi = {
@@ -177,7 +183,8 @@ def invoices_report():
         			 "posting_date": ("<=", todays),
         			 "docstatus": 1,
 					 "is_return": 0,
-					 "owner": user_id},
+					 "owner": user_id
+					},
 			fields=['grand_total', 'posting_date']
 		)
 
@@ -196,7 +203,7 @@ def invoices_report():
 			invoices_list.append({"ngay": date, "doanh_thu": total})
 
 		# Trả về phản hồi bao gồm cả KPI và danh sách hóa đơn bán hàng
-		return gen_response(200, 'Thành công', {
+		return gen_response(200, "Thành công", {
 			"Kpi": kpi,
 			"sales_invoice": invoices_list
 		})
@@ -236,8 +243,7 @@ def report_orders_invoices(customer_name):
 		sales_invoice = frappe.get_all(
 			'Sales Invoice',
 			filters={
-					"posting_date": (">=", start_date),
-					"posting_date": ("<=", todays),
+					"posting_date": ("between", [start_date, todays]),
 					"docstatus": 1,
 					"customer_name": customer_name,
 					"is_return": 0,
@@ -270,7 +276,7 @@ def report_orders_invoices(customer_name):
 			data['nv_dat_hang'] = ''
 			data['don_hang_cuoi'] = ''
 
-		return gen_response(200, 'Thành công', data)
+		return gen_response(200, "Thành công", data)
 	
 	except Exception as e:
 		return exception_handle(e)
@@ -285,7 +291,11 @@ def report_detail_visit(customer_name, kwargs):
 		user_id = frappe.session.user
 		query_so = {}
 		if from_date and to_date:
-			query_so["creation"] = ["between",[from_date,to_date]]
+			query_so["creation"] = ["between", [from_date,to_date]]
+		elif from_date:
+			query_so["creation"] = [">=", from_date]
+		elif to_date:
+			query_so["creation"] = ["<=", to_date]
 		query_so["customer_name"] = customer_name
 		query_so["docstatus"] = 1
 		query_so["owner"] = user_id
@@ -316,9 +326,14 @@ def report_detail_visit(customer_name, kwargs):
 		# Tồn kho
 		query_inv = {}
 		if from_date and to_date:
-			query_inv["creation"] = ["between",[from_date,to_date]]
+			query_inv["creation"] = ["between", [from_date,to_date]]
+		elif from_date:
+			query_inv["creation"] = [">=", from_date]
+		elif to_date:
+			query_inv["creation"] = ["<=", to_date]
 		query_so["customer_name"] = customer_name
 		query_so["owner"] = user_id
+
 		inventory = frappe.get_all(
 			'DMS Inventory',
 			filters=query_inv,
@@ -327,7 +342,7 @@ def report_detail_visit(customer_name, kwargs):
 		for i in inventory:
 			i['items'] = get_value_child_doctype('DMS Inventory', i['name'], 'items')
 
-		return gen_response(200, 'Thành công', {
+		return gen_response(200, "Thành công", {
 			"don_hang": data,
 			"ton_kho": inventory
 		})
@@ -343,9 +358,14 @@ def router_results(kwargs):
 		filters = {}
 		from_date = validate_filter_timestamp(type='start')(kwargs.get('from_date')) if kwargs.get('from_date') else None
 		to_date = validate_filter_timestamp(type='end')(kwargs.get('to_date')) if kwargs.get('to_date') else None
-		user_id = frappe.session.user
 		if from_date and to_date:
-			filters["creation"] = ["between",[from_date,to_date]]
+			filters["creation"] = ["between", [from_date,to_date]]
+		elif from_date:
+			filters["creation"] = [">=", from_date]
+		elif to_date:
+			filters["creation"] = ["<=", to_date]
+
+		user_id = frappe.session.user
 		filters['owner'] = user_id
 
 
@@ -368,14 +388,14 @@ def router_results(kwargs):
 		for i in data_checkin:
 			if i['kh_ten'] not in list_customer:
 				list_customer.append(i['kh_ten'])
-			i['checkin_hinhanh'] = get_value_child_doctype('DMS Checkin', i['name'], 'checkin_hinhanh')
+			checkin_hinhanh = get_value_child_doctype('DMS Checkin', i['name'], 'checkin_hinhanh')
 			if i['checkin_donhang'] != 0:
 				data['vieng_tham_co_don'] += 1
 			if i['checkin_donhang'] == 0:
 				data['vieng_tham_ko_don'] += 1
-			if len(i['checkin_hinhanh']) != 0:
+			if len(checkin_hinhanh) != 0:
 				data['vieng_tham_co_anh'] += 1
-			if len(i['checkin_hinhanh']) == 0:
+			if len(checkin_hinhanh) == 0:
 				data['vieng_tham_ko_anh'] += 1
 			if i['checkin_dungtuyen'] == 0:
 				data['vt_ngoai_tuyen'] += 1
@@ -402,8 +422,8 @@ def router_results(kwargs):
 		cus = 0
 		if router_employee:
 			for i in router_employee:
-				i['customers'] = get_value_child_doctype('DMS Router', i['name'], 'customers')
-				for a in i['customers']:
+				customers = get_value_child_doctype('DMS Router', i['name'], 'customers')
+				for a in customers:
 					fre = a['frequency']
 					week_router = []
 					frequency = fre.split(';')
@@ -415,7 +435,7 @@ def router_results(kwargs):
 		data['so_kh_da_vt'] = len(list_customer)
 		data['so_kh_phai_vt'] = cus
 		
-		return gen_response(200, 'Thành công', data)
+		return gen_response(200, "Thành công", data)
 	except Exception as e:
 		return exception_handle(e)
 	
@@ -429,7 +449,11 @@ def checkin_report(kwargs):
 		to_date = validate_filter_timestamp(type='end')(kwargs.get('to_date')) if kwargs.get('to_date') else None
 		user_id = frappe.session.user
 		if from_date and to_date:
-			filters["creation"] = ["between",[from_date,to_date]]
+			filters["creation"] = ["between", [from_date,to_date]]
+		elif from_date:
+			filters["creation"] = [">=", from_date]
+		elif to_date:
+			filters["creation"] = ["<=", to_date]
 		filters['owner'] = user_id
 		user_name = frappe.get_value('Employee', {'user_id': user_id}, 'name')
 
@@ -471,9 +495,9 @@ def checkin_report(kwargs):
 		cus_not_checkin = 0
 		if router_employee:
 			for i in router_employee:
-				i['customers'] = get_value_child_doctype('DMS Router', i['name'], 'customers')
+				customers = get_value_child_doctype('DMS Router', i['name'], 'customers')
 				filtered_customers = []
-				for a in i['customers']:
+				for a in customers:
 					fre = a['frequency']
 					week_router = []
 					frequency = fre.split(';')
@@ -494,7 +518,7 @@ def checkin_report(kwargs):
 		data['so_kh_da_vt'] = len(list_customer)
 		data['so_kh_chua_vt'] = cus_not_checkin
 
-		return gen_response(200, 'Thành công', {
+		return gen_response(200, "Thành công", {
 			"data": data,
 			"has_checkin": data_checkin,
 			"not_checkin": filtered_customers
@@ -513,8 +537,13 @@ def order_statistics(kwargs):
 		from_date = validate_filter_timestamp(type='start')(kwargs.get('from_date')) if kwargs.get('from_date') else None
 		to_date = validate_filter_timestamp(type='end')(kwargs.get('to_date')) if kwargs.get('to_date') else None
 		user_id = frappe.session.user
+
 		if from_date and to_date:
-			filters["creation"] = ["between",[from_date,to_date]]
+			filters["creation"] = ["between", [from_date,to_date]]
+		elif from_date:
+			filters["creation"] = [">=", from_date]
+		elif to_date:
+			filters["creation"] = ["<=", to_date]
 		filters['owner'] = user_id
 
 		field_items = ['item_name', 'item_code', 'rate', 'qty', 'uom', 'amount']
@@ -528,7 +557,7 @@ def order_statistics(kwargs):
 		for i in sales_order:
 			if i['customer'] not in sales_order:
 				list_customer.append(i['customer'])
-			i['customer_code'] = frappe.get_value('Customer', {'name': i['customer']}, 'customer_code')
+			customer_code = frappe.get_value('Customer', {'name': i['customer']}, 'customer_code')
 
 			items = get_child_values_doc(doctype='Sales Order', master_name=i['name'], fields_to_get=field_items, chil_name='items')
 			qty = [item.get('qty') for item in items]
@@ -537,7 +566,7 @@ def order_statistics(kwargs):
 			sum_qty += int(sum(qty))
 			info_order = {
 				'customer': i['customer'],
-				'customer_code': i['customer_code'],
+				'customer_code': customer_code,
 				'qty': sum(qty),
 				'amount': sum(amount)
 			}
@@ -552,7 +581,7 @@ def order_statistics(kwargs):
 		data['total_qty'] = sum_qty
 		data['sum_amount'] = sum_amount
 
-		return gen_response(200, 'Thành công', {
+		return gen_response(200, "Thành công", {
 			"data": data,
 			"details": details,
 			"detail_items": detail_items
@@ -569,15 +598,21 @@ def new_customer_report(kwargs):
 		filters = {}
 		from_date = validate_filter_timestamp(type='start')(kwargs.get('from_date')) if kwargs.get('from_date') else None
 		to_date = validate_filter_timestamp(type='end')(kwargs.get('to_date')) if kwargs.get('to_date') else None
-		user_id = frappe.session.user
+		
 		if from_date and to_date:
-			filters["creation"] = ["between",[from_date,to_date]]
+			filters["creation"] = ["between", [from_date,to_date]]
+		elif from_date:
+			filters["creation"] = [">=", from_date]
+		elif to_date:
+			filters["creation"] = ["<=", to_date]
+
+		user_id = frappe.session.user
 		filters['owner'] = user_id
 
 		list_customers = frappe.db.get_all('Customer', filters=filters, fields=['name', 'customer_name', 'customer_type', 'customer_group', 'UNIX_TIMESTAMP(creation) as date_collection', 'customer_primary_address as address'])
 		data['total_new_cus'] = frappe.db.count('Customer', filters=filters)
 
-		return gen_response(200, 'Thành công', {
+		return gen_response(200, "Thành công", {
 			"data": data,
 			"list_customer": list_customers
 		})
@@ -600,7 +635,7 @@ def kpi_targets(kwargs):
 		first_day = today.replace(day=1)
 
     	# Lấy id của nhân viên
-		user_name = frappe.get_value('Employee',{ 'user_id': frappe.session.user}, 'name')
+		user_name = frappe.get_value('Employee', {'user_id': frappe.session.user}, 'name')
         
     	# Lấy Kpi tháng
 		monthly_summary = frappe.get_all(
@@ -666,7 +701,7 @@ def kpi_targets(kwargs):
                 'ti_le_vieng_tham': 0,
                 'ti_le_kh_moi': 0
             }
-		return gen_response(200, 'Thành công', kpi)
+		return gen_response(200, "Thành công", kpi)
 	except Exception as e:
 		return exception_handle(e)
 
@@ -677,12 +712,15 @@ def customer_not_order(kwargs):
 		date = int(kwargs.get('date'))
 		from_date = validate_filter_timestamp(type='start')(date)
 		to_date = validate_filter_timestamp(type='end')(date)
+
 		# Lấy tuyến của nhân viên
 		user_id = frappe.session.user
 		user_name = frappe.get_value('Employee',{ 'user_id': user_id}, 'name')
+
         # Lấy thứ của ngày
 		date_cre = datetime.datetime.fromtimestamp(date)
 		date = date_cre.weekday()
+
         # Chuyển đổi sang tên của ngày trong tuần
 		date_in_week = ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ Nhật"]
 		name_date = date_in_week[date]
@@ -692,8 +730,6 @@ def customer_not_order(kwargs):
 		total_customers = 0
 		if router_employee:
 			customers = get_value_child_doctype('DMS Router', router_employee, 'customers')
-			total_customers = len(customers)
-			total_customers = 0
 			for i in customers:
 				if not frappe.db.exists('Sales Order', {'customer_name': i['customer'], 'creation': ('between', [from_date, to_date])}):
 					transaction_date = frappe.get_all('Sales Order', filters={'customer_name': i['customer']}, order_by='transaction_date desc', fields=['transaction_date'])
@@ -707,7 +743,7 @@ def customer_not_order(kwargs):
 					total_customers += 1
 					list_cus_not_order.append(info)
 
-		return gen_response(200, 'Thành công', {
+		return gen_response(200, "Thành công", {
 			"total_customers": total_customers,
 			"details": list_cus_not_order
 		})
