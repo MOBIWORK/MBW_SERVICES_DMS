@@ -13,9 +13,9 @@ def get_name_city(name):
 
 # Danh sách quận/huyện
 @frappe.whitelist()
-def list_district(ma_tinh):
+def list_district(**kwargs):
     from mbw_dms.mbw_dms.doctype.dms_district.dms_district import list_district
-    return list_district(ma_tinh=ma_tinh)
+    return list_district(kwargs=kwargs)
 
 @frappe.whitelist()
 def get_name_district(name):
@@ -24,9 +24,9 @@ def get_name_district(name):
 
 # Danh sách phường/xã
 @frappe.whitelist()
-def list_ward(ma_quan_huyen):
+def list_ward(**kwargs):
     from mbw_dms.mbw_dms.doctype.dms_ward.dms_ward import list_ward
-    return list_ward(ma_quan_huyen=ma_quan_huyen)
+    return list_ward(kwargs=kwargs)
 
 @frappe.whitelist()
 def get_name_ward(name):

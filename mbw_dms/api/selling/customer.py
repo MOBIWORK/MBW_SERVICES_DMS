@@ -33,7 +33,6 @@ def list_customer(**kwargs):
         from_date = validate_filter_timestamp('start')(kwargs.get('from_date')) if kwargs.get('from_date') else None
         to_date = validate_filter_timestamp('end')(kwargs.get('to_date')) if kwargs.get('to_date') else None
         routers = routers_name_of_customer()
-        print("routers",routers)
         if len(routers) ==0 :
             return gen_response(200,"",[])
         customers_name = customers_code_router(routersName=routers)
@@ -43,7 +42,6 @@ def list_customer(**kwargs):
 
         page_size = int(kwargs.get('page_size', 20))
         page_number = 1 if not kwargs.get('page') or int(kwargs.get('page')) <= 0 else int(kwargs.get('page'))
-        # custom_birthday = int(kwargs.get('custom_birthday'))
         if name:
             my_filter["name"] = ['like', f'%{name}%']
         if customer_name:
@@ -54,7 +52,6 @@ def list_customer(**kwargs):
             my_filter["customer_group"] = ['like', f'%{customer_group}%']
         if from_date and to_date:
             my_filter["custom_birthday"] = ['between', [from_date, to_date]]
-        print("filter",my_filter)
         customers = frappe.db.get_all("Customer",
                                 filters= my_filter,
                                 fields=["name", "customer_name",

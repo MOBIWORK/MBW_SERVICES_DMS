@@ -17,9 +17,9 @@ class DMSWard(Document):
 
 # Danh sách phường/xã
 @frappe.whitelist(methods='GET')
-def list_ward(ma_quan_huyen):
+def list_ward(kwargs):
     try:
-        list_wards = frappe.db.get_list('DMS Ward', filters={'ma_quan_huyen': validate_not_none(ma_quan_huyen)}, fields=['name', 'ma_xa', 'ten_xa', 'ma_quan_huyen'], order_by='ma_xa asc')
+        list_wards = frappe.db.get_list('DMS Ward', filters={'ma_quan_huyen': validate_not_none(kwargs.get('ma_quan_huyen'))}, fields=['name', 'ma_xa', 'ten_xa', 'ma_quan_huyen'], order_by='ma_xa asc')
         return gen_response(200, 'Thành công', list_wards)
     except Exception as e:
         return exception_handle(e) 
