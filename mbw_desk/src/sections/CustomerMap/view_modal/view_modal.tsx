@@ -30,7 +30,7 @@ export function ModalView ({ open, title, onCancel, onOk , lstCustomer,api}: Pro
     {
       title: 'Phạm vi đánh giá độ phủ đại lý',
       content: <Form layout="vertical" form={formScope} style={{padding: "10px"}}>
-        <ScopeAnalysis onResult={handleScopeResult} scopeResult={scopeResult} api={api}></ScopeAnalysis>
+        <ScopeAnalysis form={formScope} onResult={handleScopeResult} scopeResult={scopeResult} api={api}></ScopeAnalysis>
       </Form> ,
     },
     {

@@ -126,7 +126,6 @@ const MapConfigTree: React.FC<MapConfigTreeProps> = ({objCoverageItem, onCheck, 
   },[showLegend])
  
   const onExpand: TreeProps['onExpand'] = (expandedKeysValue) => {
-    console.log('onExpand', expandedKeysValue);
     setExpandedKeys(expandedKeysValue);
     setAutoExpandParent(false);
   };
@@ -139,12 +138,12 @@ const MapConfigTree: React.FC<MapConfigTreeProps> = ({objCoverageItem, onCheck, 
 
 
   const onSelect: TreeProps['onSelect'] = (selectedKeysValue, info) => {
-    console.log('onSelect', info);
+    
     setSelectedKeys(selectedKeysValue);
     
   };
   const onDragEnter: TreeProps['onDragEnter'] = (info) => {
-    console.log('onDragEnter:', info);
+  
   };
 
   const onDrop: TreeProps['onDrop'] = (info) => {

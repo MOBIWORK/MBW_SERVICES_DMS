@@ -8,7 +8,7 @@ import maplibregl from "maplibre-gl";
 import classNames from 'classnames';
 import "./style.css";
 declare var ekmapplf: any;
-export function ScopeAnalysis({ onResult, scopeResult,api }) {
+export function ScopeAnalysis({ form, onResult, scopeResult,api }) {
   const [selectedOption, setSelectedOption] = useState("hanhchinh");
   const handleOptionChange = (value) => {
     setSelectedOption(value); // Cập nhật giá trị hiện tại của Segmented khi thay đổi lựa chọn
@@ -91,11 +91,14 @@ export function ScopeAnalysis({ onResult, scopeResult,api }) {
       setSelectHuyen(scopeResult.huyen)
     }
   }, []);
+  useEffect(() => {
+    setSelectTinh([])
+    form.setFieldValue('tinh', [])
+  }, [selectRegion])
   const onChangeKhuvuc = (value) => {
     setArrTinh([]);
     setSelectTinh([])
-    setArrHuyen([])
-    setSelectHuyen([])
+    // setSelectHuyen([])
     if(value.includes('all')){
       map.current.flyTo({
         center: [107.9426393217799, 16.92300264959944],
@@ -135,8 +138,6 @@ export function ScopeAnalysis({ onResult, scopeResult,api }) {
         modifiedTinh.push(obj)
      }
      setArrTinh(modifiedTinh);
-    
-
    setSelectRegion(value)
    onResultChange()
   
@@ -144,8 +145,6 @@ export function ScopeAnalysis({ onResult, scopeResult,api }) {
 
   const onChangeTinh = async (value) => {
     let filteredItems = [];
-   
-    
     // Duyệt qua từng phần tử trong mảng arrTinh
     for (let i = 0; i < arrTinh.length; i++) {
       // Lọc các phần tử trong mảng options của phần tử arrTinh[i]
@@ -173,28 +172,28 @@ export function ScopeAnalysis({ onResult, scopeResult,api }) {
     setSelectTinh(value)
     onResultChange()
   };
-  const onChangeHuyen = (value) => {
-    if(selectHuyen.length > value.length){
+  // const onChangeHuyen = (value) => {
+  //   if(selectHuyen.length > value.length){
 
-    }else{
-      for(let i = 0; i < arrHuyen.length; i ++){
-        const filteredHuyen = arrHuyen[i].options.filter((item) => item.value === value[value.length - 1]);
-        if (filteredHuyen.length > 0) {
-          if (filteredHuyen[0].bbox != null) {
-            let bboxSplit = filteredHuyen[0].bbox.split(",");
-            let bbox = [
-              [Number(bboxSplit[0]), Number(bboxSplit[1])],
-              [Number(bboxSplit[2]), Number(bboxSplit[3])],
-            ];
-            map.current.fitBounds(bbox);
-          }
-        }
-      }
+  //   }else{
+  //     for(let i = 0; i < arrHuyen.length; i ++){
+  //       const filteredHuyen = arrHuyen[i].options.filter((item) => item.value === value[value.length - 1]);
+  //       if (filteredHuyen.length > 0) {
+  //         if (filteredHuyen[0].bbox != null) {
+  //           let bboxSplit = filteredHuyen[0].bbox.split(",");
+  //           let bbox = [
+  //             [Number(bboxSplit[0]), Number(bboxSplit[1])],
+  //             [Number(bboxSplit[2]), Number(bboxSplit[3])],
+  //           ];
+  //           map.current.fitBounds(bbox);
+  //         }
+  //       }
+  //     }
    
-    }
-    setSelectHuyen(value);
-    onResultChange()
-  };
+  //   }
+  //   setSelectHuyen(value);
+  //   onResultChange()
+  // };
   const onResultChange = () => {
       let obj = {
         region: selectRegion,

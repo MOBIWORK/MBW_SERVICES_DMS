@@ -40,6 +40,7 @@ function CustomerMapView() {
   ];
   const [open, setOpen] = useState(false);
   const [isHeatMap, setIsHeatMap] = useState(false);
+  const [isStatusMapCustomer, setIsStatusMapCustomer] = useState(false);
 
   const columns = [
     {
@@ -221,11 +222,11 @@ function CustomerMapView() {
   };
 
   useEffect(() => {
+    localStorage.setItem('isStatusMapCustomer',JSON.stringify(true))
     getConfigApi();
   }, []);
   useEffect(() => {
     if (apiKey != null && apiKey != "") {
-      console.log(apiKey);
       renderMap();
     }
   }, [apiKey]);
@@ -265,11 +266,9 @@ function CustomerMapView() {
       setLstCustomer(res.result);
     }
     let objRes = JSON.parse('{"message":"Thành công","result":[{"name":"A Lâm","customer_name":"A Lâm","customer_code":"BH0123111115","customer_type":"Company","customer_group":"Khách lẻ","territory":"Thành phố Hà Nội","customer_primary_contact":"A Lâm","customer_primary_address":"395 Xuân Đỉnh, phường Xuân Đỉnh, Từ Liêm, Hà Nội, Việt Nam-Billing","customer_location_primary":"{\\"lat\\":20.7894317,\\"long\\":105.70448}"},{"name":"A Phương","customer_name":"A Phương","customer_code":"BH0120235252","customer_type":"Company","customer_group":"Khách lẻ","territory":"Thành phố Hà Nội","customer_primary_contact":"A Phương-A Phương","customer_primary_address":"538 Xuân Đỉnh, phường Xuân Đỉnh, Tây Hồ, Hà Nội, Việt Nam-Billing","customer_location_primary":"{\\"lat\\":21.0763504,\\"long\\":105.7869008}"},{"name":"A thuật","customer_name":"A thuật","customer_code":"HN11402","customer_type":"Company","customer_group":"Khách lẻ","territory":"Thành phố Hà Nội","customer_primary_contact":null,"customer_primary_address":"Đình Vĩnh Xương Trung, Mỹ Thành, Mỹ Đức, Hà Nội-Billing","customer_location_primary":"{\\"lat\\":20.6903959,\\"long\\":105.7689993}"},{"name":"A Toản","customer_name":"A Toản","customer_code":"BH0050608072022","customer_type":"Company","customer_group":"Khách lẻ","territory":"Thành phố Hà Nội","customer_primary_contact":"A Toản","customer_primary_address":"408 Trần Cung, Cổ Nhuế 1, Cầu Giấy, Hà Nội, Việt Nam-Billing","customer_location_primary":"{\\"lat\\":21.0555955,\\"long\\":105.7855697}"},{"name":"Anh  Hạnh","customer_name":"Anh  Hạnh","customer_code":"BH0057110022023","customer_type":"Company","customer_group":"Khách lẻ","territory":"Thành phố Hà Nội","customer_primary_contact":"Anh  Hạnh","customer_primary_address":"440 Cổ Nhuế, Cổ Nhuế 2, Từ Liêm, Hà Nội, Vietnam-Billing","customer_location_primary":"{\\"lat\\":21.069679,\\"long\\":105.7781418}"},{"name":"Xuyến  ngũ","customer_name":"Xuyến  ngũ","customer_code":"HN9251","customer_type":"Company","customer_group":"Khách lẻ","territory":"Thành phố Hà Nội","customer_primary_contact":null,"customer_primary_address":"Huyện Ứng Hòa, Hà Nội, VNM-Billing-2","customer_location_primary":"{\\"lat\\":20.7192067,\\"long\\":105.8028217}"},{"name":"Yến  Hiệp","customer_name":"Yến  Hiệp","customer_code":"HN8847","customer_type":"Company","customer_group":"Khách lẻ","territory":"Thành phố Hà Nội","customer_primary_contact":null,"customer_primary_address":"Tảo Khê  tảo  Dương  văn  ứng  hòa hà Nội-Billing","customer_location_primary":"{\\"lat\\":20.7082736,\\"long\\":105.7821972}"}]}');
-    console.log(objRes);
     setLstCustomer(objRes.result);
   };
   const renderMap = () => {
-    console.log(apiKey);
     map.current = new maplibregl.Map({
       container: "map",
       center: [108.485, 16.449],
@@ -373,6 +372,11 @@ function CustomerMapView() {
       icon: "",
       tooltip: tl,
     });
+    let btnSettingIndustry = new ekmapplf.control.Button({
+      className: "btn-ctl-group " + cl,
+      icon: "",
+      tooltip: tl,
+    });
     btnSwichMap.on("click", (btn) => {
       isHeatMap = !isHeatMap;
       setIsHeatMap(isHeatMap)
@@ -389,24 +393,28 @@ function CustomerMapView() {
         ); //Thay doi icon cluster sang heat
         btn._div.title = "Bản đồ nhiệt phân bố khách hàng";
       }
-      if (isHeatMap) {
-        map.current.setLayoutProperty("customer_heat", "visibility", "visible");
-        map.current.setLayoutProperty("customer_heat_icon", "visibility", "visible");
-        map.current.setLayoutProperty("customer_heat_title", "visibility", "visible");
-        map.current.setLayoutProperty("customer_clus-cluster", "visibility", "none");
-        map.current.setLayoutProperty("customer_clus-cluster-count", "visibility", "none");
-        map.current.setLayoutProperty("customer_clus-uncluster", "visibility", "none");
-        map.current.setLayoutProperty("customer_clus-title", "visibility", "none");
-      } else {
-        map.current.setLayoutProperty("customer_heat", "visibility", "none");
-        map.current.setLayoutProperty("customer_heat_icon", "visibility", "none");
-        map.current.setLayoutProperty("customer_heat_title", "visibility", "none");
-        map.current.setLayoutProperty("customer_clus-cluster", "visibility", "visible");
-        map.current.setLayoutProperty("customer_clus-cluster-count", "visibility", "visible");
-        map.current.setLayoutProperty("customer_clus-uncluster", "visibility", "visible");
-        map.current.setLayoutProperty("customer_clus-title", "visibility", "visible");
-
+      let isStatus = localStorage.getItem('isStatusMapCustomer')
+      if(isStatus === "true"){
+        if (isHeatMap) {
+          map.current.setLayoutProperty("customer_heat", "visibility", "visible");
+          map.current.setLayoutProperty("customer_heat_icon", "visibility", "visible");
+          map.current.setLayoutProperty("customer_heat_title", "visibility", "visible");
+          map.current.setLayoutProperty("customer_clus-cluster", "visibility", "none");
+          map.current.setLayoutProperty("customer_clus-cluster-count", "visibility", "none");
+          map.current.setLayoutProperty("customer_clus-uncluster", "visibility", "none");
+          map.current.setLayoutProperty("customer_clus-title", "visibility", "none");
+        } else {
+          map.current.setLayoutProperty("customer_heat", "visibility", "none");
+          map.current.setLayoutProperty("customer_heat_icon", "visibility", "none");
+          map.current.setLayoutProperty("customer_heat_title", "visibility", "none");
+          map.current.setLayoutProperty("customer_clus-cluster", "visibility", "visible");
+          map.current.setLayoutProperty("customer_clus-cluster-count", "visibility", "visible");
+          map.current.setLayoutProperty("customer_clus-uncluster", "visibility", "visible");
+          map.current.setLayoutProperty("customer_clus-title", "visibility", "visible");
+  
+        }
       }
+     
     })
     map.current.addControl(btn3D, "bottom-right");
     map.current.addControl(new maplibregl.FullscreenControl(), "top-right");
@@ -414,7 +422,6 @@ function CustomerMapView() {
     map.current.on("load", async () => {
       await getConfigMap();
       getLstCustomer();
-      console.log(mapConfig);
    
     });
   };
@@ -725,7 +732,6 @@ function CustomerMapView() {
       'type': "FeatureCollection",
       'features': []
     }
-    console.log(lstCustomer);
     for (let i = 0; i < lstCustomer.length; i++) {
       let lngLat = JSON.parse(lstCustomer[i].customer_location_primary)
       let feature = {
@@ -796,7 +802,6 @@ function CustomerMapView() {
       group.children.forEach((child: any) => {
         const mapInfo = child;
         if (checkedKeys.includes(mapInfo.id)) {
-          console.log('1');
           let layers = mapInfo.layers;
           for (let i = 0; i < layers.length; i++) {
             if (map.current.getLayer(layers[i].id)) {
@@ -828,8 +833,8 @@ function CustomerMapView() {
       });
     });
     if (checkedKeys.includes('map_customer')) {
+      localStorage.setItem('isStatusMapCustomer',JSON.stringify(true))
       if (isHeatMap) {
-          console.log('111');
           map.current.setLayoutProperty("customer_heat", "visibility", "visible");
           map.current.setLayoutProperty("customer_heat_icon", "visibility", "visible");
           map.current.setLayoutProperty("customer_heat_title", "visibility", "visible");
@@ -851,9 +856,10 @@ function CustomerMapView() {
 
       }
     }else{
+     
+      localStorage.setItem('isStatusMapCustomer',JSON.stringify(false))
       if (isHeatMap) {
         if (map.current.getLayer('customer_heat')){
-          console.log('11');
           map.current.setLayoutProperty("customer_heat", "visibility", "none");
           map.current.setLayoutProperty("customer_heat_icon", "visibility", "none");
           map.current.setLayoutProperty("customer_heat_title", "visibility", "none");
@@ -881,7 +887,6 @@ function CustomerMapView() {
   const changeOpacity = (sliderValues: any, selectedKeys: React.Key) => {
 
     if (!sliderValues) return
-    console.log(sliderValues, selectedKeys);
 
     selectedKeys.forEach(key => {
       map.current.setPaintProperty(
@@ -893,17 +898,44 @@ function CustomerMapView() {
   }
   //moveLayers
   const handleMoveLayer = (layerIds: any, beforeIds: any) => {
-    console.log(mapConfig);
-
     if (isParentId(layerIds)) {
       const layerChildIds = getChildLayerIds(mapConfig, [layerIds]);
       const beforeChildIds = getChildLayerIds(mapConfig, [beforeIds]);
-      layerChildIds.forEach((layerChildId, index) => {
-        const beforeChildId = beforeChildIds[index];
-        map.current.moveLayer(layerChildId, beforeChildId);
-      });
+      // layerChildIds.forEach((layerChildId, index) => {
+      //   const beforeChildId = beforeChildIds[index];
+      //   map.current.moveLayer(layerChildId, beforeChildId);
+      // });
+      for(let i = 0; i < layerChildIds.length;i++  ){
+        if(beforeChildIds.length > 0){
+          map.current.moveLayer(layerChildIds[i], beforeChildIds[beforeChildIds.length - 1]);
+        } 
+      }
     } else {
-      map.current.moveLayer(layerIds.toString(), beforeIds.toString());
+      // console.log(map.current.getLayer("customer_clus-cluster"));
+      // console.log(beforeIds);
+      // map.current.moveLayer("customer_clus-cluster", beforeIds.toString());
+     
+      let beforeChildIds = []
+      let layerChildId = []
+      if(layerIds == "map_customer" ){
+        layerChildId = ["customer_clus-cluster", "customer_clus-cluster-count" , "customer_clus-uncluster","customer_clus-title"]
+        beforeChildIds = getChildLayerIds(mapConfig, [beforeIds]);
+        for(let i = 0; i < layerChildId.length;i++  ){
+          if(beforeChildIds.length > 0){
+            map.current.moveLayer(layerChildId[i], beforeChildIds[beforeChildIds.length - 1]);
+          } 
+        }
+      }else if(beforeIds == 'map_customer'){
+        layerChildId = getChildLayerIds(mapConfig, [layerIds]); 
+        beforeChildIds = ["customer_clus-cluster", "customer_clus-cluster-count" , "customer_clus-uncluster","customer_clus-title"]
+        for(let i = 0; i < layerChildId.length;i++  ){
+          if(beforeChildIds.length > 0){
+            map.current.moveLayer(layerChildId[i], beforeChildIds[beforeChildIds.length - 1]);
+          } 
+        }
+      }else{
+        map.current.moveLayer(layerIds.toString(), beforeIds.toString());
+      }
     }
   };
   const isParentId = (id: any) => {
@@ -1079,7 +1111,7 @@ function CustomerMapView() {
         style={{ width: "100%", height: mapHeight, borderTopRightRadius: '20px', borderTopLeftRadius: '20px' }}
       >
         <div className='ekmapplf_map-ananyltic'>
-        <Button onClick={handleOnClick}  type="primary">Công cụ phân tích</Button>
+        <Button onClick={handleOnClick}  type="primary">Đánh giá độ phủ</Button>
           
 
         </div>
