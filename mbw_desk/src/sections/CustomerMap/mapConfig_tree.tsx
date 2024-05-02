@@ -92,6 +92,7 @@ const MapConfigTree: React.FC<MapConfigTreeProps> = ({objCoverageItem, onCheck, 
       ),
       key: item.id,
       children: item.children ? generateTreeData(item.children) : [],
+     
     }));
 
   const getConfigMap = async () => {
@@ -105,9 +106,18 @@ const MapConfigTree: React.FC<MapConfigTreeProps> = ({objCoverageItem, onCheck, 
       "label": "Bản đồ độ phủ khách hàng",
       "children": []
     }
+    let objMapCustomer = {
+      "id": "map_customer",
+      "group": true,
+      "visible": true,
+      "label": "Bản đồ khách hàng",
+      "children": []
+    }
     if(res.result == null) res.result = [];
     res.result.push(objMapAnalyticCoverage);
+    res.result.push(objMapCustomer);
     let dataMapConfig = generateTreeData(res.result)
+    setCheckedKeys(['map_customer'])
     setMapConfig(dataMapConfig);
   };
 

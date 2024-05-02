@@ -450,9 +450,10 @@ function RealtimeMap({ options, onClickPopup, status }) {
             };
 
             function isToday(timestamp) {
-                const date = new Date(timestamp);
-                const today = new Date();
-                return date.getDate() === today.getDate() && date.getMonth() === today.getMonth() && date.getFullYear() === today.getFullYear();
+                const timeZone = "Asia/Saigon"
+                const date = new Date(timestamp).toLocaleDateString('en-US', { timeZone: timeZone });
+                const today = new Date().toLocaleDateString('en-US', { timeZone: timeZone });
+                return date === today;
             }
 
         } catch (error) {
