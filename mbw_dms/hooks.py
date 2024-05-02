@@ -119,8 +119,6 @@ website_route_rules = [
 # Override standard doctype classes
 
 override_doctype_class = {
-	"Customer": "mbw_dms.controllers.dms_customer.DMSCustomer",
-    "Sales Order": "mbw_dms.controllers.dms_sales_order.DMSSalesOrder",
     "Item": "mbw_dms.controllers.dms_item.DMS_Item"
 }
 
@@ -264,6 +262,10 @@ doc_events = {
     "Sales Invoice": {
         "on_submit": "mbw_dms.controllers.dms_sales_invoice.update_kpi_monthly",
         "on_cancel": "mbw_dms.controllers.dms_sales_invoice.update_kpi_monthly_on_cancel"
+    },
+    "Sales Order": {
+        "on_submit": "mbw_dms.controllers.dms_sales_order.update_kpi_monthly",
+        "on_cancel": "mbw_dms.controllers.dms_sales_order.update_kpi_monthly_on_cancel"
     }
 }
 

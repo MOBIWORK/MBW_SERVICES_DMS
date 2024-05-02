@@ -18,7 +18,17 @@ class DMSProvince(Document):
 def list_province():
     try:
         list_provinces = frappe.db.get_list('DMS Province', fields=['name', 'ma_tinh', 'ten_tinh'], order_by='ma_tinh asc')
-        return gen_response(200, 'Thành công', list_provinces)
+        return gen_response(200, "Thành công", list_provinces)
+    except Exception as e:
+        return exception_handle(e)
+    
+# Lấy id tỉnh thành
+@frappe.whitelist(methods='GET')
+def get_id_province(kwargs):
+    try:
+        province_name = kwargs.get("province_name")
+        province_id = frappe.get_value("DMS Province", {"ten_tinh": ["like", f"%{province_name}%"]}, "name")
+        return gen_response(200, "Thành công", {"province_id": province_id})
     except Exception as e:
         return exception_handle(e)
     

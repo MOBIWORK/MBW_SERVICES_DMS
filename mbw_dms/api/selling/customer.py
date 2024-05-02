@@ -21,7 +21,7 @@ from mbw_dms.api.validators import (
 )
 from mbw_dms.api import configs
 
-#list customer
+# list customer
 @frappe.whitelist(methods='GET')
 def list_customer(**kwargs):
     try:
@@ -37,23 +37,24 @@ def list_customer(**kwargs):
             return gen_response(200, "", [])
         customers_name = customers_code_router(routersName=routers)
         my_filter = {
-            "customer_code": ["in",customers_name]
+            "customer_code": ["in", customers_name]
         }
 
         page_size = int(kwargs.get('page_size', 20))
         page_number = 1 if not kwargs.get('page') or int(kwargs.get('page')) <= 0 else int(kwargs.get('page'))
         if name:
-            my_filter["name"] = ['like', f'%{name}%']
+            my_filter["name"] = ["like", f"%{name}%"]
         if customer_name:
-            my_filter["customer_name"] = ['like', f'%{customer_name}%']
+            my_filter["customer_name"] = ["like", f"%{customer_name}%"]
         if customer_type:
-            my_filter["customer_type"] = ['like', f'%{customer_type}%']
+            my_filter["customer_type"] = ["like", f"%{customer_type}%"]
         if customer_group:
-            my_filter["customer_group"] = ['like', f'%{customer_group}%']
+            my_filter["customer_group"] = ["like", f"%{customer_group}%"]
         if from_date and to_date:
-            my_filter["custom_birthday"] = ['between', [from_date, to_date]]
+            my_filter["custom_birthday"] = ["between", [from_date, to_date]]
+
         customers = frappe.db.get_all("Customer",
-                                filters= my_filter,
+                                filters=my_filter,
                                 fields=["name", "customer_name",
                                         "customer_code","customer_type", 
                                         "customer_group", "territory",
@@ -64,7 +65,7 @@ def list_customer(**kwargs):
                                 start=page_size*(page_number-1), 
                                 page_length=page_size)
                                 
-        record = frappe.db.count("Customer", filters = my_filter)
+        record = frappe.db.count("Customer", filters=my_filter)
 
         for customer in customers:
             if customer['custom_birthday'] is not None:
@@ -96,8 +97,11 @@ def list_customer_type():
 @frappe.whitelist(methods="DELETE")
 def delete_customer(name):
     try:
-        frappe.delete_doc("Customer", name)
-        return gen_response(200, "Thành công", [])
+        if frappe.db.exists("Customer", {"name": name}):
+            frappe.delete_doc("Customer", name)
+            return gen_response(200, "Thành công", [])
+        else:
+            return gen_response(400, f"Không tồn tại khách hàng {name}")
     except Exception as e:
         exception_handle(e)
 
@@ -240,7 +244,7 @@ def update_customer(name, **kwargs):
             for field, value in dict(kwargs).items():
                 setattr(customers, field, value)
             customers.save()
-            gen_response(200, "Cập nhật thành công")
+            return gen_response(200, "Cập nhật thành công")
         else:
             return gen_response(406, f"Không tồn tại {name}")
     except Exception as e:

@@ -23,30 +23,48 @@ def update_sales_roles_permissions():
 
 def update_permissions(doctype_name, sales_user_role, sales_manager_role):
     # Kiểm tra quyền cho vai trò "Sales User"
-    existing_sales_user_perms = frappe.db.exists("Custom DocPerm", filters={"parent": doctype_name, "role": sales_user_role})
+    existing_sales_user_perms = frappe.db.exists("Custom DocPerm", {"parent": doctype_name, "role": sales_user_role})
     # Kiểm tra quyền cho vai trò "Sales Manager"
-    existing_sales_manager_perms = frappe.db.exists("Custom DocPerm", filters={"parent": doctype_name, "role": sales_manager_role})
+    existing_sales_manager_perms = frappe.db.exists("Custom DocPerm", {"parent": doctype_name, "role": sales_manager_role})
 
     # Nếu không có quyền tồn tại, thì tạo mới quyền
     if not existing_sales_user_perms:
     # Cập nhật quyền cho vai trò "Sales User"
-        frappe.get_doc({
-            "doctype": "Custom DocPerm",
-            "parent": doctype_name,
-            "role": sales_user_role,
-            "if_owner": 1,
-            "select": 1,
-            "create": 1,
-            "email": 1,
-            "export": 1,
-            "read": 1,
-            "delete": 1,
-            "report": 1,
-            "share": 1,
-            "write": 1,
-            "print": 1,
-            "import": 1
-        }).insert(ignore_permissions=True)
+        if doctype_name not in ["DMS First Checkin Customer", "DMS Logs", "DMS FakeGPS", "DMS Inventory Items", "DMS Inventory", "DMS Type of problem", "DMS Problem Monitor", "DMS Settings", "DMS Checkin", "DMS Log", "DMS Basic Authen Settings"]:
+            frappe.get_doc({
+                "doctype": "Custom DocPerm",
+                "parent": doctype_name,
+                "role": sales_user_role,
+                "if_owner": 1,
+                "select": 1,
+                "create": 1,
+                "email": 1,
+                "export": 1,
+                "read": 1,
+                "delete": 1,
+                "report": 1,
+                "share": 1,
+                "write": 1,
+                "print": 1,
+                "import": 1
+            }).insert(ignore_permissions=True)
+        else:
+            frappe.get_doc({
+                "doctype": "Custom DocPerm",
+                "parent": doctype_name,
+                "role": sales_user_role,
+                "select": 1,
+                "create": 1,
+                "email": 1,
+                "export": 1,
+                "read": 1,
+                "delete": 1,
+                "report": 1,
+                "share": 1,
+                "write": 1,
+                "print": 1,
+                "import": 1
+            }).insert(ignore_permissions=True)
     
     if not existing_sales_manager_perms:
         # Cập nhật quyền cho vai trò "Sales Manager"
