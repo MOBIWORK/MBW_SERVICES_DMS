@@ -93,7 +93,7 @@ export function ScopeAnalysis({ form, onResult, scopeResult,api }) {
   }, []);
   useEffect(() => {
     setSelectTinh([])
-    form.setFieldValue('tinh', [])
+    form.setFieldValue('tinh', "")
   }, [selectRegion])
   const onChangeKhuvuc = (value) => {
     setArrTinh([]);
@@ -170,6 +170,7 @@ export function ScopeAnalysis({ form, onResult, scopeResult,api }) {
         }
       }
     setSelectTinh(value)
+    form.setFieldValue('tinh', value)
     onResultChange()
   };
   // const onChangeHuyen = (value) => {
