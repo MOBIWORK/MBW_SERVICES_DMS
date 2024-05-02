@@ -63,7 +63,16 @@ const MapConfigTree: React.FC<MapConfigTreeProps> = ({objCoverageItem, onCheck, 
       });
     };
     traverseTree(mapConfig);
-    setCheckedKeys(newCheckedKeys);
+    setCheckedKeys(prevCheckedKeys => {
+      const newCheckedKey1s = [...prevCheckedKeys, newCheckedKeys];
+      return newCheckedKey1s;
+    });
+   
+    // setCheckedKeys(prevCheckedKeys => {
+    //   // Tạo một bản sao mới của mảng checkedKeys và thêm key mới vào
+    //   const newCheckedKeys = [...prevCheckedKeys, objCoverageItem.id];
+    //   return newCheckedKeys;
+    // });
   }, [objCoverageItem]);
   
   const generateTreeData = (data: any[]): TreeDataNode[] =>
@@ -114,8 +123,9 @@ const MapConfigTree: React.FC<MapConfigTreeProps> = ({objCoverageItem, onCheck, 
       "children": []
     }
     if(res.result == null) res.result = [];
-    res.result.push(objMapAnalyticCoverage);
     res.result.push(objMapCustomer);
+    res.result.push(objMapAnalyticCoverage);
+    
     let dataMapConfig = generateTreeData(res.result)
     setCheckedKeys(['map_customer'])
     setMapConfig(dataMapConfig);
