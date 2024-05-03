@@ -286,7 +286,7 @@ def create_checkin_inventory(body):
         for item in items:
             if isinstance(item, dict):
             # Validate and handle exp_time as timestamp
-                if 'exp_time' in item:
+                if 'exp_time' in item and item.get('exp_time') != None: 
                     item['exp_time'] = validate_filter(type_check='date', value=item['exp_time'])
                 # Calculate total cost
                 if 'quantity' in item and 'item_price' in item:
