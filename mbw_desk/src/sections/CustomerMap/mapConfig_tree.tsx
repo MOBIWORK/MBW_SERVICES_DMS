@@ -64,7 +64,7 @@ const MapConfigTree: React.FC<MapConfigTreeProps> = ({objCoverageItem, onCheck, 
     };
     traverseTree(mapConfig);
     setCheckedKeys(prevCheckedKeys => {
-      const newCheckedKey1s = [...prevCheckedKeys, newCheckedKeys];
+      const newCheckedKey1s = prevCheckedKeys.concat(newCheckedKeys)
       return newCheckedKey1s;
     });
    
@@ -108,6 +108,13 @@ const MapConfigTree: React.FC<MapConfigTreeProps> = ({objCoverageItem, onCheck, 
     let res = await AxiosService.get(
       "/api/method/mbw_dms.api.vgm.map_customer.get_config_map"
     );
+    let objMapCustomer = {
+      "id": "map_customer",
+      "group": true,
+      "visible": false,
+      "label": "Bản đồ khách hàng",
+      "children": []
+    }
     let objMapAnalyticCoverage = {
       "id": "map_analytic_converage",
       "group": true,
@@ -115,13 +122,7 @@ const MapConfigTree: React.FC<MapConfigTreeProps> = ({objCoverageItem, onCheck, 
       "label": "Bản đồ độ phủ khách hàng",
       "children": []
     }
-    let objMapCustomer = {
-      "id": "map_customer",
-      "group": true,
-      "visible": true,
-      "label": "Bản đồ khách hàng",
-      "children": []
-    }
+
     if(res.result == null) res.result = [];
     res.result.push(objMapCustomer);
     res.result.push(objMapAnalyticCoverage);

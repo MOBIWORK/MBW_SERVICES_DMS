@@ -24,7 +24,6 @@ export function TypeIndustry ({form}) {
   };
   const onChangeTypeIndustry = (value,label) => {
     setTypeIndustry(value)
-    console.log(label);
     form.setFieldsValue({ nganhhang: value });
     form.setFieldsValue({ namBando: "Bản đồ " + label });
   }

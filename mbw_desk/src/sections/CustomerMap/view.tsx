@@ -896,24 +896,39 @@ function CustomerMapView() {
       )
     });
   }
+  const getChildLayerIdsConverage = (config: any[], layerIds: string) => {
+    const item = config.find(item => item.id === layerIds);
+    let allLayerId = [];
+    if (item && item.children) {
+        for (let i = 0; i < item.children.length; i++) {
+            let layerIDs = item.children[i].layers.map(layer => layer.id);   
+            allLayerId = allLayerId.concat(layerIDs); // Sửa dòng này để gán kết quả của phép nối lại cho allLayerId
+        }
+    }
+    return allLayerId;
+}
   //moveLayers
   const handleMoveLayer = (layerIds: any, beforeIds: any) => {
     if (isParentId(layerIds)) {
-      const layerChildIds = getChildLayerIds(mapConfig, [layerIds]);
-      const beforeChildIds = getChildLayerIds(mapConfig, [beforeIds]);
-      // layerChildIds.forEach((layerChildId, index) => {
-      //   const beforeChildId = beforeChildIds[index];
-      //   map.current.moveLayer(layerChildId, beforeChildId);
-      // });
+      let layerChildIds = []
+      let beforeChildIds = []
+      if(layerIds == "map_analytic_converage" ){
+        layerChildIds = getChildLayerIdsConverage(mapConfig , layerIds)
+        beforeChildIds = getChildLayerIds(mapConfig, [beforeIds]);
+      }else if(beforeIds == "map_analytic_converage"){
+        beforeChildIds = getChildLayerIdsConverage(mapConfig , beforeIds)
+        layerChildIds = getChildLayerIds(mapConfig, [layerIds]);
+      }else{
+         layerChildIds = getChildLayerIds(mapConfig, [layerIds]);
+         beforeChildIds = getChildLayerIds(mapConfig, [beforeIds]);
+      }
       for(let i = 0; i < layerChildIds.length;i++  ){
         if(beforeChildIds.length > 0){
           map.current.moveLayer(layerChildIds[i], beforeChildIds[beforeChildIds.length - 1]);
         } 
       }
+    
     } else {
-      // console.log(map.current.getLayer("customer_clus-cluster"));
-      // console.log(beforeIds);
-      // map.current.moveLayer("customer_clus-cluster", beforeIds.toString());
      
       let beforeChildIds = []
       let layerChildId = []
@@ -928,12 +943,14 @@ function CustomerMapView() {
       }else if(beforeIds == 'map_customer'){
         layerChildId = getChildLayerIds(mapConfig, [layerIds]); 
         beforeChildIds = ["customer_clus-cluster", "customer_clus-cluster-count" , "customer_clus-uncluster","customer_clus-title"]
-        for(let i = 0; i < layerChildId.length;i++  ){
+        for(let i = 0; i < layerChildId.length;i++ ){
           if(beforeChildIds.length > 0){
             map.current.moveLayer(layerChildId[i], beforeChildIds[beforeChildIds.length - 1]);
           } 
         }
-      }else{
+     
+       }
+      else{
         map.current.moveLayer(layerIds.toString(), beforeIds.toString());
       }
     }

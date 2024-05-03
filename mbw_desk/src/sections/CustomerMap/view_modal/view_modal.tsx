@@ -93,8 +93,6 @@ export function ModalView ({ open, title, onCancel, onOk , lstCustomer,api}: Pro
       setLoadingSubmit(false)
       return
     };
-    console.log(value_area);
-    console.log(type_area);
     const apiUrl = `https://api.ekgis.vn/v1/analytic_market/determine_coverage?api_key=w1Dlh2wRon7mE6sL196TgvLS45fw02uon74pJ0rc`;
     const dataPost  = {
     "type_categories": type_categories,
@@ -169,7 +167,6 @@ export function ModalView ({ open, title, onCancel, onOk , lstCustomer,api}: Pro
       }
   
       const responseData = await response.json();
-      console.log('POST request successful. Response data:', responseData);
       return responseData; // Trả về dữ liệu từ phản hồi
     } catch (error) {
       console.error('Error posting data:', error);
