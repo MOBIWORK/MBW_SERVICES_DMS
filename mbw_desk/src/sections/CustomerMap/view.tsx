@@ -987,7 +987,7 @@ function CustomerMapView() {
     }
     let id = guid12();
     sourceAndLayer.sources[`s_${id}_bdm`] = {
-      "maxzoom": 8,
+      "minzoom": 1,
       "type": "vector",
       "tiles": [
         "https://api.ekgis.vn/maps/bdm/2022/{z}/{x}/{y}.pbf?api_key=" + apiKey
