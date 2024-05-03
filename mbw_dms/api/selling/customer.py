@@ -135,7 +135,7 @@ def create_customer(**kwargs):
         
         user_id = frappe.session.user
         employee_name = frappe.get_value('Employee', {'user_id': user_id}, 'name')
-        sale_person = frappe.get_value('Sales Person', {'employee': employee_name}, 'name')
+        sale_person = frappe.get_value('Sales Person', {'employee': employee_name}, 'parent_sales_person')
         new_customer.custom_sales_manager = sale_person
 
         new_customer.customer_location_primary = json.dumps({"long": kwargs.get(
