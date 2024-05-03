@@ -17,11 +17,17 @@ export function ModalView ({ open, title, onCancel, onOk , lstCustomer,api}: Pro
   const [formScope] = Form.useForm();
   const [formIndustry] = Form.useForm();
   const [scopeResult, setScopeResult] = useState(null);
+  const [bbox, setBbox] = useState("");
   const [industryResult, setIndustryResult] = useState(null);
   const [loadingSubmit, setLoadingSubmit] = useState(false);
   
   const handleScopeResult = (result) => {
-    setScopeResult(result);
+   
+    if(result){
+      setScopeResult(result);
+      setBbox(result.bbox);
+    }
+    
   };
   const handleIndustryResult = (result) => {
     setIndustryResult(result);
@@ -113,7 +119,7 @@ export function ModalView ({ open, title, onCancel, onOk , lstCustomer,api}: Pro
     setLoadingSubmit(false)
     message.success('Phân tích thành công')
     saveConfigMap(dataPost,responseData)
-    onOk(responseData, dataPost)
+    onOk(responseData, dataPost , bbox)
     setCurrent(0)
     
   }else{
@@ -200,7 +206,7 @@ export function ModalView ({ open, title, onCancel, onOk , lstCustomer,api}: Pro
       >
               <Steps current={current} items={items} />
       <div style={contentStyle}>{steps[current].content}</div>
-      <div style={{ marginTop: 24 }}>
+      <div style={{ marginTop: 24 , display:'flex', justifyContent:'flex-end'}}>
         {current < steps.length - 1 && (
           <Button type="primary" onClick={() => next()}>
             Tiếp theo

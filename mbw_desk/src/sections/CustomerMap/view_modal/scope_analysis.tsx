@@ -20,6 +20,7 @@ export function ScopeAnalysis({ form, onResult, scopeResult,api }) {
   const [selectTinh, setSelectTinh] = useState([]);
   const [arrHuyen, setArrHuyen] = useState([]);
   const [selectHuyen, setSelectHuyen] = useState([]);
+  const [bbox, setBbox] = useState("");
   const arr_region = JSON.parse(ARR_REGIONSTR).map((item) => {
     return {
       ...item,
@@ -94,10 +95,12 @@ export function ScopeAnalysis({ form, onResult, scopeResult,api }) {
   useEffect(() => {
     setSelectTinh([])
     form.setFieldValue('tinh', "")
+    setBbox('')
   }, [selectRegion])
   const onChangeKhuvuc = (value) => {
     setArrTinh([]);
     setSelectTinh([])
+    let bbox1 = [];
     // setSelectHuyen([])
     if(value.includes('all')){
       map.current.flyTo({
@@ -112,15 +115,17 @@ export function ScopeAnalysis({ form, onResult, scopeResult,api }) {
    if(value.includes('all')){
 
    }else{
+    
     const filteredRegion = arr_region.filter((item) => item.value === value);
     if (filteredRegion.length > 0) {
       if (filteredRegion[0].bbox != null) {
         let bboxSplit = filteredRegion[0].bbox.split(",");
-        let bbox = [
+        bbox1 = [
         [Number(bboxSplit[0]), Number(bboxSplit[1])],
         [Number(bboxSplit[2]), Number(bboxSplit[3])],
       ];
-      map.current.fitBounds(bbox);
+      map.current.fitBounds(bbox1);
+      setBbox(JSON.stringify(bbox))
       }
     }
    }
@@ -137,14 +142,15 @@ export function ScopeAnalysis({ form, onResult, scopeResult,api }) {
         }
         modifiedTinh.push(obj)
      }
-     setArrTinh(modifiedTinh);
+   setArrTinh(modifiedTinh);
    setSelectRegion(value)
-   onResultChange()
+   onResultChange(JSON.stringify(bbox1))
   
   };
 
   const onChangeTinh = async (value) => {
     let filteredItems = [];
+    let bbox1 = []
     // Duyệt qua từng phần tử trong mảng arrTinh
     for (let i = 0; i < arrTinh.length; i++) {
       // Lọc các phần tử trong mảng options của phần tử arrTinh[i]
@@ -156,22 +162,24 @@ export function ScopeAnalysis({ form, onResult, scopeResult,api }) {
       // Thêm các phần tử đã lọc vào mảng kết quả filteredItems
       filteredItems.push(...filteredArr);
     }
+    
     for(let i = 0; i < arrTinh.length; i ++){
         const filteredProvince = arrTinh[i].options.filter((item) => item.value === value);
         if (filteredProvince.length > 0) {
           if (filteredProvince[0].bbox != null) {
             let bboxSplit = filteredProvince[0].bbox.split(",");
-            let bbox = [
+            bbox1 = [
               [Number(bboxSplit[0]), Number(bboxSplit[1])],
               [Number(bboxSplit[2]), Number(bboxSplit[3])],
             ];
-            map.current.fitBounds(bbox);
+            map.current.fitBounds(bbox1);
+            setBbox(JSON.stringify(bbox))
           }
         }
       }
     setSelectTinh(value)
     form.setFieldValue('tinh', value)
-    onResultChange()
+    onResultChange(JSON.stringify(bbox1))
   };
   // const onChangeHuyen = (value) => {
   //   if(selectHuyen.length > value.length){
@@ -195,11 +203,12 @@ export function ScopeAnalysis({ form, onResult, scopeResult,api }) {
   //   setSelectHuyen(value);
   //   onResultChange()
   // };
-  const onResultChange = () => {
+  const onResultChange = (bbox1) => {
       let obj = {
         region: selectRegion,
         tinh : selectTinh,
-        huyen:selectHuyen
+        huyen:selectHuyen, 
+        bbox : bbox1
       }
       onResult(obj)
   }

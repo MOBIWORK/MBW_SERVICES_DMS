@@ -157,7 +157,16 @@ function CustomerMapView() {
   const [mapHeight, setMapHeight] = useState('74.5vh');
   const [visibleTable, setVisibleTable] = useState(false);
   
-  const handleOk = async (data, configConverage) => {
+  const handleOk = async (data, configConverage , bbox) => {
+    let bboxMap = JSON.parse(bbox)
+    if(bboxMap && bboxMap.length > 0){
+      map.current.fitBounds(bboxMap);
+    }else{
+      map.current.flyTo({
+        center: [107.9426393217799, 16.92300264959944],
+        zoom: 5,
+      });
+    }
     let sourceAndLayer = await renderLayerDistributorByAdministrative(data, configConverage);
     for (let source in sourceAndLayer.sources) {
       if (!map.current.getSource(source)) map.current.addSource(source, sourceAndLayer.sources[source]);
