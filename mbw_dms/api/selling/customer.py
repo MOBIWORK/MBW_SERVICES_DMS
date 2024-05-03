@@ -1,7 +1,6 @@
 import frappe
 from frappe import _
 import json
-from datetime import datetime
 
 from mbw_dms.api.common import (
     exception_handle,
@@ -59,7 +58,7 @@ def list_customer(**kwargs):
                                         "customer_code","customer_type", 
                                         "customer_group", "territory",
                                         "industry", "image","website", 
-                                        "customer_primary_contact", "customer_primary_address",
+                                        "mobile_no as contacts", "customer_primary_address",
                                         "custom_birthday","customer_location_primary",
                                         "customer_details"],
                                 start=page_size*(page_number-1), 
@@ -69,7 +68,7 @@ def list_customer(**kwargs):
 
         for customer in customers:
             if customer['custom_birthday'] is not None:
-                customer['custom_birthday'] = datetime.combine(customer['custom_birthday'], datetime.min.time()).timestamp()
+                customer['custom_birthday'] = customer['custom_birthday'].strftime("%d/%m/%Y")
             customer['image'] = validate_image(customer.get("image"))
             customer['contact'] = get_contact(customer.get("name"))
             customer['address'] = get_customer_addresses(customer.get("name"))
