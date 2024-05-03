@@ -53,16 +53,12 @@ export default memo(function GeneralInformation({form}:{form :any}) {
           value: team_sale.name,
           ...team_sale
         })),keyValue: "value", parentField: "parent_sales_person"}));
-        
-        // setListSales(rsSales.result.map((team_sale:listSale) => ({
-        //   label: team_sale.name,
-        //   value: team_sale.name
-        // })))
-        setListSales(treeArray({data: rsSales.result.map((team_sale:listSale) => ({
+        const TREE_SALES = treeArray({data: rsSales.result.map((team_sale:listSale) => ({
           title: team_sale.name,
           value: team_sale.name,
           ...team_sale
-        })),keyValue: "value", parentField: "parent_sales_person"}))
+        })),keyValue: "value", parentField: "parent_sales_person"})
+        setListSales(TREE_SALES)
         
       } catch (error) {
         
