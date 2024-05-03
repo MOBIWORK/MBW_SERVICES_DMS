@@ -24,16 +24,6 @@ def list_ward(kwargs):
     except Exception as e:
         return exception_handle(e) 
     
-# Lấy id phường xã
-@frappe.whitelist(methods='GET')
-def get_id_ward(kwargs):
-    try:
-        ward_name = kwargs.get("ward_name")
-        ward_id = frappe.get_value("DMS Ward", {"ten_xa": ["like", f"%{ward_name}%"]}, "name")
-        return gen_response(200, "Thành công", {"ward_id": ward_id})
-    except Exception as e:
-        return exception_handle(e)
-    
 @frappe.whitelist(methods="GET", allow_guest=True)
 def get_name_ward(name):
     return gen_response(200, "Thành công", frappe.db.get_value('DMS Ward', {"name": name}, 'ten_xa'))

@@ -12,20 +12,15 @@ def get_name_city(name):
     return get_name_city(name=name)
 
 @frappe.whitelist()
-def get_id_province(**kwargs):
-    from mbw_dms.mbw_dms.doctype.dms_province.dms_province import get_id_province
-    return get_id_province(kwargs=kwargs)
+def get_id_location(**kwargs):
+    from mbw_dms.mbw_dms.doctype.dms_province.dms_province import get_id_location
+    return get_id_location(kwargs=kwargs)
 
 # Danh sách quận/huyện
 @frappe.whitelist()
 def list_district(**kwargs):
     from mbw_dms.mbw_dms.doctype.dms_district.dms_district import list_district
     return list_district(kwargs=kwargs)
-
-@frappe.whitelist()
-def get_id_district(**kwargs):
-    from mbw_dms.mbw_dms.doctype.dms_district.dms_district import get_id_district
-    return get_id_district(kwargs=kwargs)
 
 @frappe.whitelist()
 def get_name_district(name):
@@ -37,11 +32,6 @@ def get_name_district(name):
 def list_ward(**kwargs):
     from mbw_dms.mbw_dms.doctype.dms_ward.dms_ward import list_ward
     return list_ward(kwargs=kwargs)
-
-@frappe.whitelist()
-def get_id_ward(**kwargs):
-    from mbw_dms.mbw_dms.doctype.dms_ward.dms_ward import get_id_ward
-    return get_id_ward(kwargs=kwargs)
 
 @frappe.whitelist()
 def get_name_ward(name):

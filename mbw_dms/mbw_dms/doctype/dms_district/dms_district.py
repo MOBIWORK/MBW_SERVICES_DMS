@@ -24,16 +24,6 @@ def list_district(kwargs):
     except Exception as e:
         return exception_handle(e)
     
-# Lấy id quận huyện
-@frappe.whitelist(methods='GET')
-def get_id_district(kwargs):
-    try:
-        district_name = kwargs.get("district_name")
-        district_id = frappe.get_value("DMS District", {"ten_huyen": ["like", f"%{district_name}%"]}, "name")
-        return gen_response(200, "Thành công", {"district_id": district_id})
-    except Exception as e:
-        return exception_handle(e)
-    
 @frappe.whitelist(methods="GET", allow_guest=True)
 def get_name_district(name):
     return gen_response(200, "Thành công", frappe.db.get_value('DMS District', {"name": name}, 'ten_huyen'))
