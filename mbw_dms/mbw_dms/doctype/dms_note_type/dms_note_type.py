@@ -76,13 +76,13 @@ def create_note(kwargs):
 def list_email(kwargs):
     try:
         employee_id = get_employee_id()
-        data = []
-        page_size = 20 if not kwargs.get('page_size') else int(kwargs.get('page_size'))
-        page_number = 1 if not kwargs.get('page') or int(kwargs.get('page')) <= 0 else int(kwargs.get('page'))
         sale_person_parent = frappe.db.get_value("Sales Person", {"employee": employee_id}, "parent_sales_person")
+        print('========================= value: ', sale_person_parent, flush=True)
         employee_sale = frappe.db.get_value("Sales Person", {"sales_person_name": sale_person_parent}, 'employee')
-        info = frappe.db.get_value("Employee", {"employee": employee_sale}, ['name', 'first_name', 'image', 'user_id', 'designation'], as_dict=True)
-        info['image'] = validate_image(info.get('image'))
+        if employee_sale == None or employee_sale == "":
+            return gen_response(406, "Chưa gán nhân viên!")
+        info = frappe.get_all("Employee", filters={"name": employee_sale}, fields=['name', 'first_name', 'image', 'user_id', 'designation'])
+        info[0].image = validate_image(info[0].image)
         return gen_response(200, "Thành công", {"data":info})
     except Exception as e:
         return exception_handle(e) 
@@ -98,7 +98,7 @@ def list_note(kwargs):
             my_filter["name"] = ['like', f'%{name}%']
         if custom_checkin_id:
             my_filter["custom_checkin_id"] = ['like', f'%{custom_checkin_id}%']
-        list_note = frappe.db.get_list('Note',filters=my_filter ,fields=["name", "title", "content", "creation","custom_checkin_id"])
+        list_note = frappe.get_all('Note',filters=my_filter ,fields=["name", "title", "content", "creation","custom_checkin_id"])
         return gen_response(200, "Thành công", list_note)
     except Exception as e:
         return exception_handle(e)

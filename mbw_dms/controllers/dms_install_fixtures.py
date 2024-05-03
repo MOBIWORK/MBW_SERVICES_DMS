@@ -309,6 +309,7 @@ def install(country=None):
 		{"doctype": "DMS Industry", "industry_name": _("Phòng khám"), "type": "clinic"},
 		{"doctype": "DMS Industry", "industry_name": _("Làm đẹp, spa"), "type": "spa_beauty"},
 		{"doctype": "DMS Industry", "industry_name": _("Phòng tập GYM, Yoga, Fitness"), "type": "gym"},
+		{"doctype": "Note", "title": _("Ghi chú khách hàng"), "public": 1},
 	]
 
 	for doctype, title_field, filename in (
