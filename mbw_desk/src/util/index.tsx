@@ -52,12 +52,13 @@ export const getAttrInArray = (array:any[], fields: any[], options = {}) => {
 interface treeArrayProps {data : any[], parentField?: string,parentValue ?: null | any,keyValue : string}
 export const treeArray = ( {data =[], parentField="",parentValue=null,keyValue=""}:treeArrayProps):any[] => {  
     if(data.length == 0) return data
-    let arr = data.filter(element => (element[parentField] == parentValue) || !(data.find(ele => ele[keyValue] == element[parentField])))
+    // let arr = data.filter(element => (element[parentField] == parentValue))
+    let arr = data.filter(element => (element[parentField] == parentValue) ||(!parentValue && !(data.find(ele => ele[keyValue] == element[parentField]))))
     return arr.map((element:any[]) => {
       return {
         ...element,
         children: treeArray({
-          data: data.filter(element => element[parentField] !== parentValue && data.find(ele => ele[keyValue] == element[parentField])),
+          data: data.filter(element => element[parentField] !== parentValue &&( parentValue || data.find(ele => ele[keyValue] == element[parentField]))),
           parentField,
           parentValue: element[keyValue as any] as string,
           keyValue
