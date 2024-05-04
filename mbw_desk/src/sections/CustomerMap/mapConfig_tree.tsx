@@ -124,7 +124,7 @@ const MapConfigTree: React.FC<MapConfigTreeProps> = ({objCoverageItem, onCheck, 
     }
 
     if(res.result == null) res.result = [];
-    res.result.push(objMapCustomer);
+    res.result.unshift(objMapCustomer);
     res.result.push(objMapAnalyticCoverage);
     
     let dataMapConfig = generateTreeData(res.result)
@@ -210,7 +210,7 @@ const MapConfigTree: React.FC<MapConfigTreeProps> = ({objCoverageItem, onCheck, 
       const layerIds = dragKey; 
       const beforeId = info.dropToGap ? dropKey : undefined;
       if (beforeId !== undefined) {
-        onMoveLayer(layerIds, beforeId);
+        onMoveLayer(layerIds, beforeId, data);
     } 
     }else{
       return;
