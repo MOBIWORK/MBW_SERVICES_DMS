@@ -84,7 +84,7 @@ export default memo(function Customer() {
       setOpenImport(false)
 
     } catch (err: any) {
-      errorMsg(err?.response?.data?.message || "Something was wrong")
+      errorMsg(err || "Something was wrong")
     }
   }
 

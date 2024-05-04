@@ -40,7 +40,7 @@ export default function CustomerList({search}: {search:string}) {
                         })
                     })
                 }}
-                defaultValue={value.split(';')}
+                defaultValue={value ? value.split(';') : []}
                 />
             }
         },{
