@@ -45,6 +45,7 @@ function CustomerMapView() {
   ];
   const [open, setOpen] = useState(false);
   const [isHeatMap, setIsHeatMap] = useState(false);
+  const [arrLayer, setArrLayer] = useState([]);
   const [isStatusMapCustomer, setIsStatusMapCustomer] = useState(false);
 
   const columns = [
@@ -195,6 +196,8 @@ function CustomerMapView() {
       legend: null,
     };
     setObjItemCoverage(mapConverage);
+    console.log(arrLayer);
+    handleMoveLayer("","",arrLayer)
     setDataSource(data);
     if (data.length == 1) {
       setMapHeight("63vh");
@@ -1040,6 +1043,7 @@ function CustomerMapView() {
   };
   //moveLayers
   const handleMoveLayer = (layerIds: any, beforeIds: any, arr) => {
+   
     // if (isParentId(layerIds)) {
     //   let layerChildIds = []
     //   let beforeChildIds = []
@@ -1091,14 +1095,36 @@ function CustomerMapView() {
     //   }
     // }
     let arrMap = JSON.parse(JSON.stringify(arr))
+    setArrLayer(arrMap)
     let mergedChildren = [];
-
     let index = arrMap.findIndex((item) => item.key === "map_customer");
+    let indexCoverage = arrMap.findIndex((item) => item.key === "map_analytic_converage");
+    if (indexCoverage !== -1) {
+      let layerCoverage = []
+      // Kiểm tra xem map_customer đã có children chưa
+      if (!arrMap[indexCoverage].children) {
+        arrMap[indexCoverage].children = [];
+      }
+      // Sử dụng concat để thêm children vào map_customer
+     // arrMap[indexCoverage].children = childrenToHeatmap
+     arrMap[indexCoverage].children.forEach(item => {
+      item.layers.forEach(layer => {
+        layerCoverage.push(layer.id);
+      });
+  });
+  
+  // Tạo mảng mới chứa các đối tượng {"key": "id_layer"}
+  let resultArray = layerCoverage.map(id => {
+      return { "key": id };
+  });
+  arrMap[indexCoverage].children = resultArray
+
+    }
     let childrenToHeatmap 
     if (isHeatMap) {
       childrenToHeatmap  = [{ key: "customer_heat" }, { key: "customer_heat_icon" }, { key: "customer_heat_title" }];
     } else {
-      childrenToHeatmap = [{ key: "customer_clus-cluster" }, { key: "customer_clus-cluster-count" }, { key: "customer_clus-uncluster" },{key :"customer_clus-title"}];
+      childrenToHeatmap = [{ key: "customer_clus-cluster" }, { key: "customer_clus-cluster-count" }, { key: "customer_clus-uncluster" },{key :"customer_clus-title"}].reverse();
     }
     // Thêm children vào map_customer
     if (index !== -1) {
@@ -1113,7 +1139,7 @@ function CustomerMapView() {
       // Kiểm tra xem item có children không
       if (item.children && item.children.length > 0) {
           // Duyệt qua mỗi phần tử trong children và thêm key vào mảng mergedChildren
-          item.children.reverse().forEach(child => {
+          item.children.forEach(child => {
               mergedChildren.push(child.key);
           });
       }
@@ -1127,6 +1153,12 @@ function CustomerMapView() {
     // console.log(mergedChildren);  
     // console.log(map.current.getStyle().layers);
   };
+  const changDataLayer = (data) => {
+    if(data && data.length > 0) {
+      handleMoveLayer("","",data)
+    }
+   
+  }
   const isParentId = (id: any) => {
     const item = mapConfig.find((item) => item.id === id);
     return item && item.children && item.children.length > 0;
@@ -1317,6 +1349,7 @@ function CustomerMapView() {
               onCheck={handleCheck}
               onMoveLayer={handleMoveLayer}
               changeOpacity={changeOpacity}
+              onSetData = {changDataLayer}
             />
           </div>
         </div>

@@ -9,9 +9,10 @@ interface MapConfigTreeProps {
   onCheck: (checkedKeys: React.Key[], dataObj: React.Key[]) => void;
   onMoveLayer: (layerIds: React.Key,beforeIds: React.Key) => void;
   changeOpacity: (sliderValues: React.Key,selectedKeys: React.Key[]) => void;
+  onSetData : (data: React.Key[]) => void
 }
 
-const MapConfigTree: React.FC<MapConfigTreeProps> = ({objCoverageItem, onCheck, onMoveLayer, changeOpacity }) => {
+const MapConfigTree: React.FC<MapConfigTreeProps> = ({objCoverageItem, onCheck, onMoveLayer, changeOpacity,onSetData }) => {
   const [expandedKeys, setExpandedKeys] = useState<React.Key[]>([]);
   const [checkedKeys, setCheckedKeys] = useState<React.Key[]>([]);
   const [selectedKeys, setSelectedKeys] = useState<React.Key[]>([]);
@@ -67,7 +68,7 @@ const MapConfigTree: React.FC<MapConfigTreeProps> = ({objCoverageItem, onCheck, 
       const newCheckedKey1s = prevCheckedKeys.concat(newCheckedKeys)
       return newCheckedKey1s;
     });
-   
+    onSetData(mapConfig)
     // setCheckedKeys(prevCheckedKeys => {
     //   // Tạo một bản sao mới của mảng checkedKeys và thêm key mới vào
     //   const newCheckedKeys = [...prevCheckedKeys, objCoverageItem.id];
@@ -124,8 +125,9 @@ const MapConfigTree: React.FC<MapConfigTreeProps> = ({objCoverageItem, onCheck, 
     }
 
     if(res.result == null) res.result = [];
-    res.result.unshift(objMapCustomer);
     res.result.push(objMapAnalyticCoverage);
+    res.result.unshift(objMapCustomer);
+    
     
     let dataMapConfig = generateTreeData(res.result)
     setCheckedKeys(['map_customer'])
