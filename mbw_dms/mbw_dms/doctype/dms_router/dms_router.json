@@ -32,8 +32,7 @@
    "in_list_view": 1,
    "label": "M\u00e3 tuy\u1ebfn",
    "read_only_depends_on": "eval:doc.is_group",
-   "reqd": 1,
-   "unique": 1
+   "reqd": 1
   },
   {
    "fieldname": "team_sale",
@@ -97,7 +96,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-04-22 09:11:04.022697",
+ "modified": "2024-05-04 14:17:51.679346",
  "modified_by": "Administrator",
  "module": "MBW DMS",
  "name": "DMS Router",
