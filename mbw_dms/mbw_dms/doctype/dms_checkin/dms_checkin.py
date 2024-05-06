@@ -258,9 +258,11 @@ def create_checkin(kwargs):
                 created_date = validate_datetime(value)
                 new_checkin.set(key, created_date)
         if kwargs.get("checkin_giora"):
-            new_checkin.set("is_checkout",1)
+            new_checkin.set("is_checkout", 1)
+
         new_checkin.insert(ignore_permissions=True)
         frappe.db.commit()
+
         return gen_response(201, "Thành công", {"name": new_checkin.name})
     except Exception as e:
         return exception_handle(e)
@@ -279,10 +281,8 @@ def create_checkin_inventory(body):
         doc.set("create_by",user.name)
         for key, value in body.items():
             if key in normal_keys:
-                print(key)
                 doc.set(key, validate_filter(type_check='require', value=value))
         items = body.get('inventory_items')
-        print(doc)
         for item in items:
             if isinstance(item, dict):
             # Validate and handle exp_time as timestamp
@@ -296,7 +296,6 @@ def create_checkin_inventory(body):
         frappe.db.commit()
         return gen_response(201, "Thành công", {"name": doc.name})
     except Exception as e:
-        print(e)
         return exception_handle(e)
 
 
@@ -459,12 +458,9 @@ def create_checkin_ek(doc, method=None):
 def list_inventory(kwargs):
     try:
         checkin_id = kwargs.get('checkin_id')
-        print('========================= value: ', checkin_id, flush=True)
         inventory = frappe.db.get_all('DMS Inventory', filters={'checkin_id': checkin_id} ,fields=['name', 'checkin_id'])
         for i in inventory:
             i['items'] = get_value_child_doctype("DMS Inventory", i['name'], 'items')
-            
-            # data.append(sale_team)
         return gen_response(200, "Thành công", inventory)
     except Exception as e:
         return exception_handle(e)

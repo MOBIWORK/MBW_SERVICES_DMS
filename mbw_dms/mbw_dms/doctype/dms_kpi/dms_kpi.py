@@ -41,10 +41,10 @@ def visit_report():
 		monthly_summary = frappe.get_value(
 				'DMS Summary KPI Monthly',
 				{'thang': month, 'nam': year, 'nhan_vien_ban_hang': user_name},
-				'solan_vt_dungtuyen'
+				'so_kh_vt_duynhat'
 			)
 		# Lấy Kpi nhân viên vt
-		kpi_employee = frappe.get_value('DMS KPI', {'ngay_hieu_luc_tu': (">=", start_date), 'ngay_hieu_luc_den': ("<=", end_date), 'nhan_vien_ban_hang': user_name}, 'so_kh_vt_luot')
+		kpi_employee = frappe.get_value('DMS KPI', {'ngay_hieu_luc_tu': (">=", start_date), 'ngay_hieu_luc_den': ("<=", end_date), 'nhan_vien_ban_hang': user_name}, 'so_kh_vt_duynhat')
 		
 		if monthly_summary and kpi_employee:
 			kpi = {
@@ -52,11 +52,11 @@ def visit_report():
                 'dat_duoc': monthly_summary,
                 'phan_tram_thuc_hien': round(float(monthly_summary / kpi_employee * 100), 2),
             }
-		else:
+		if monthly_summary and not kpi_employee:
 			kpi = {
                 'chi_tieu':0,
-                'dat_duoc': 0,
-                'phan_tram_thuc_hien': 0,
+                'dat_duoc': monthly_summary,
+                'phan_tram_thuc_hien': 100,
             }
 		return gen_response(200, "Thành công", kpi)
 	except Exception as e:
@@ -98,10 +98,10 @@ def sales_report():
                 'dat_duoc': float(monthly_summary),
                 'phan_tram_thuc_hien': round(float(monthly_summary / kpi_employee * 100), 2),
             }
-		else:
+		if monthly_summary and not kpi_employee:
 			kpi = {
-                'dat_duoc': 0,
-                'phan_tram_thuc_hien': 0,
+                'dat_duoc': float(monthly_summary),
+                'phan_tram_thuc_hien': 100,
             }
 		# Lấy danh sách đơn hàng từ đầu tháng đến hiện tại
 		sales_order = frappe.get_all(
@@ -161,7 +161,7 @@ def invoices_report():
 				'doanh_thu_thang'
 			)
 		# Lấy Kpi nhân viên
-		kpi_employee = frappe.get_all('DMS KPI',
+		kpi_employee = frappe.get_value('DMS KPI',
                 {'ngay_hieu_luc_tu': (">=", start_date), 'ngay_hieu_luc_den': ("<=", end_date), 'nhan_vien_ban_hang': user_name},
                 'doanh_thu'
 				)
@@ -171,16 +171,15 @@ def invoices_report():
                 'dat_duoc': float(monthly_summary),
                 'phan_tram_thuc_hien': round(float(monthly_summary / kpi_employee * 100), 2),
             }
-		else:
+		if monthly_summary and not kpi_employee:
 			kpi = {
-                'dat_duoc': 0,
-                'phan_tram_thuc_hien': 0,
+                'dat_duoc': float(monthly_summary),
+                'phan_tram_thuc_hien': 100,
             }
 		# Lấy danh sách hóa đơn từ đầu tháng đến hiện tại
 		sales_invoice = frappe.get_all(
 			'Sales Invoice',
-			filters={"posting_date": (">=", start_date),
-        			 "posting_date": ("<=", todays),
+			filters={"posting_date": ("between", [start_date, todays]),
         			 "docstatus": 1,
 					 "is_return": 0,
 					 "owner": user_id
@@ -229,8 +228,7 @@ def report_orders_invoices(customer_name):
 		sales_order = frappe.get_all(
 			'Sales Order',
 			filters={
-					"transaction_date": (">=", start_date),
-					"transaction_date": ("<=", todays),
+					"transaction_date": ("between", [start_date, todays]),
 					"customer_name": customer_name,
 					"docstatus": 1,
 					"owner": user_id
@@ -260,7 +258,7 @@ def report_orders_invoices(customer_name):
 		# Lấy tên người viếng thăm cuối cùng và đặt hàng lần cuối
 		last_visit = frappe.get_list('DMS Checkin', filters={'kh_ten': customer_name}, limit=1, order_by="creation desc", fields=['owner', 'checkin_giovao'])
 		if last_visit:
-			user_checkin = frappe.get_value('Employee',{ 'user_id': last_visit[0].owner}, 'employee_name')
+			user_checkin = frappe.get_value('Employee', {'user_id': last_visit[0].owner}, 'employee_name')
 			data['nv_vieng_tham'] = user_checkin
 			data['vieng_tham_cuoi'] = last_visit[0].checkin_giovao
 		else:
@@ -269,7 +267,7 @@ def report_orders_invoices(customer_name):
 
 		last_order = frappe.get_list('Sales Order', filters={'customer': customer_name, 'docstatus': 1}, limit=1, order_by="creation desc", fields=['owner', 'creation'])
 		if last_order:
-			user_order = frappe.get_value('Employee',{ 'user_id': last_order[0].owner}, 'employee_name')
+			user_order = frappe.get_value('Employee', {'user_id': last_order[0].owner}, 'employee_name')
 			data['nv_dat_hang'] = user_order
 			data['don_hang_cuoi'] = last_order[0].creation
 		else:
@@ -641,13 +639,13 @@ def kpi_targets(kwargs):
 		monthly_summary = frappe.get_all(
         'DMS Summary KPI Monthly',
         filters={'thang': month, 'nam': year, 'nhan_vien_ban_hang': user_name},
-        fields=['name', 'nam', 'thang', 'nhan_vien_ban_hang', 'doanh_thu_thang', 'doanh_so_thang', 'solan_vt_dungtuyen', 'solan_vt_ngoaituyen', 'so_kh_moi', 'so_don_hang']
+        fields=['name', 'nam', 'thang', 'nhan_vien_ban_hang', 'doanh_thu_thang', 'doanh_so_thang', 'so_kh_vt_duynhat', 'so_kh_moi', 'so_don_hang']
       	)
 
     	# Lấy Kpi nhân viên
 		kpi_employee = frappe.get_all('DMS KPI',
                 filters={'ngay_hieu_luc_tu': (">=", start_date), 'ngay_hieu_luc_den': ("<=", end_date), 'nhan_vien_ban_hang': user_name},
-                fields=['so_kh_vt_luot', 'so_kh_moi', 'so_don_hang', 'doanh_so', 'doanh_thu'])
+                fields=['so_kh_vt_duynhat', 'so_kh_moi', 'so_don_hang', 'doanh_so', 'doanh_thu'])
         
     	# Tính toán chỉ số KPI nếu có dữ liệu
 		kpi = None
@@ -663,16 +661,16 @@ def kpi_targets(kwargs):
 				'th_don_hang': monthly_summary[0]['so_don_hang'],
 				'kh_don_hang': kpi_employee[0]['so_don_hang'],
 				'cl_don_hang': kpi_employee[0]['so_don_hang'] - monthly_summary[0]['so_don_hang'],
-				'th_vieng_tham': monthly_summary[0]['solan_vt_dungtuyen'] + monthly_summary[0]['solan_vt_ngoaituyen'],
-				'kh_vieng_tham': kpi_employee[0]['so_kh_vt_luot'],
-				'cl_vieng_tham': kpi_employee[0]['so_kh_vt_luot'] - monthly_summary[0]['solan_vt_dungtuyen'] - monthly_summary[0]['solan_vt_ngoaituyen'],
+				'th_vieng_tham': monthly_summary[0]['so_kh_vt_duynhat'],
+				'kh_vieng_tham': kpi_employee[0]['so_kh_vt_duynhat'],
+				'cl_vieng_tham': kpi_employee[0]['so_kh_vt_duynhat'] - monthly_summary[0]['so_kh_vt_duynhat'],
 				'th_kh_moi': monthly_summary[0]['so_kh_moi'],
 				'kh_kh_moi': kpi_employee[0]['so_kh_moi'],
 				'cl_kh_moi': kpi_employee[0]['so_kh_moi'] - monthly_summary[0]['so_kh_moi'],
                 'ti_le_doanh_thu': round(float(monthly_summary[0]['doanh_thu_thang']/kpi_employee[0]['doanh_thu']) * 100, 2),
                 'ti_le_doanh_so': round(float(monthly_summary[0]['doanh_so_thang']/kpi_employee[0]['doanh_so']) * 100, 2),
                 'ti_le_don_hang': round(float(monthly_summary[0]['so_don_hang']/kpi_employee[0]['so_don_hang']) * 100, 2),
-                'ti_le_vieng_tham': round(float((monthly_summary[0]['solan_vt_dungtuyen'] + monthly_summary[0]['solan_vt_ngoaituyen'])/kpi_employee[0]['so_kh_vt_luot']) * 100, 2),
+                'ti_le_vieng_tham': round(float(monthly_summary[0]['so_kh_vt_duynhat']/kpi_employee[0]['so_kh_vt_duynhat']) * 100, 2),
                 'ti_le_kh_moi': round(float(monthly_summary[0]['so_kh_moi']/kpi_employee[0]['so_kh_moi']) * 100, 2)
             }
 
