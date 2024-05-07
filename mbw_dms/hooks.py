@@ -118,9 +118,8 @@ website_route_rules = [
 # ---------------
 # Override standard doctype classes
 
-override_doctype_class = {
-    "Item": "mbw_dms.controllers.dms_item.DMS_Item"
-}
+# override_doctype_class = {
+# }
 
 # Document Events
 # ---------------
