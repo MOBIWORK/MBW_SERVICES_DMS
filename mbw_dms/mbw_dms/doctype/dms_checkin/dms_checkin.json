@@ -95,7 +95,7 @@
   },
   {
    "fieldname": "checkin_donhang",
-   "fieldtype": "Int",
+   "fieldtype": "Data",
    "label": "Checkin \u0111\u01a1n h\u00e0ng"
   },
   {
@@ -175,7 +175,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-04-15 08:41:44.340450",
+ "modified": "2024-05-07 11:26:35.856697",
  "modified_by": "Administrator",
  "module": "MBW DMS",
  "name": "DMS Checkin",
