@@ -65,12 +65,12 @@ export default function RouterCreate() {
     })}
     try {
       await AxiosService.patch("/api/method/mbw_dms.api.router.update_router",{name:type,...value})
-      success()
+      successMsg()
       setTimeout(() => {
         navigate('/router-control')
       },500)
     } catch (err) {
-      error(err as string)
+      errorMsg(err as string)
       console.log("error create",err);
 
       
@@ -89,7 +89,7 @@ export default function RouterCreate() {
           if(rsRouter.result)
             form.setFieldsValue(rsRouter.result)
             setCustomerRouter(rsRouter.result?.customers || [])
-
+            setTeamSale(rsRouter.result?.team_sale)
         }catch(err) {
           console.log("error");
           
