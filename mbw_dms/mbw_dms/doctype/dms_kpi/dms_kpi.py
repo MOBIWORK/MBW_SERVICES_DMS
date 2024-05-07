@@ -129,7 +129,7 @@ def sales_report():
 
 		return gen_response(200, "Thành công", {
 			"Kpi": kpi,
-			"sales_invoice": orders_list
+			"sales_order": orders_list
 		})
 	except Exception as e:
 		return exception_handle(e)

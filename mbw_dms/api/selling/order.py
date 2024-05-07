@@ -136,7 +136,6 @@ def get_sale_order(name):
 @frappe.whitelist(methods='POST')
 def create_sale_order(**kwargs):
     try:
-        # from erpnext.accounts.party import get_party_details
         kwargs = frappe._dict(kwargs)
         new_order = frappe.new_doc('Sales Order')
         user_name = frappe.get_value('Employee',{ 'user_id': frappe.session.user}, 'name')
@@ -165,7 +164,8 @@ def create_sale_order(**kwargs):
         # Thêm mới sales team
         new_order.append('sales_team', {
             'sales_person': sales_person,
-            'allocated_percentage': 100
+            'allocated_percentage': 100,
+            'created_by': 1
         })
 
         # Thêm mới items trong đơn hàng
