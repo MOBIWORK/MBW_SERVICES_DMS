@@ -19,7 +19,7 @@ from mbw_dms.api.validators import (
     validate_filter_timestamp
 )
 from mbw_dms.api import configs
-
+import pydash
 # list customer
 @frappe.whitelist(methods='GET')
 def list_customer(**kwargs):
@@ -32,7 +32,7 @@ def list_customer(**kwargs):
         from_date = validate_filter_timestamp('start')(kwargs.get('from_date')) if kwargs.get('from_date') else None
         to_date = validate_filter_timestamp('end')(kwargs.get('to_date')) if kwargs.get('to_date') else None
         routers = routers_name_of_customer()
-        if len(routers) == 0 :
+        if not routers or len(routers) == 0 :
             return gen_response(200, "", [])
         customers_name = customers_code_router(routersName=routers)
         my_filter = {
@@ -64,7 +64,7 @@ def list_customer(**kwargs):
                                 start=page_size*(page_number-1), 
                                 page_length=page_size)
                                 
-        record = frappe.db.count("Customer", filters=my_filter)
+        record = len(frappe.db.get_all("Customer", filters=my_filter))
 
         for customer in customers:
             if customer['custom_birthday'] is not None:
@@ -83,6 +83,28 @@ def list_customer(**kwargs):
         return exception_handle(e)
     
 
+#customer detail
+@frappe.whitelist(methods="GET")
+def customer_detail(name):
+    try: 
+        doc_customer = frappe.get_doc("Customer",name).as_dict()
+        routers = routers_name_of_customer()
+        address = frappe.db.get_all("Address",{"link_doctype": "Customer","link_name": doc_customer.name},["address_title","address_location","is_primary_address","is_shipping_address"])
+        contacts = frappe.db.get_all("Contact",{"link_doctype": "Customer","link_name": doc_customer.name},["first_name","last_name","address","mobile_no"])
+        list_router_frequency = []
+        for name in routers:
+            router = frappe.get_doc("DMS Router",name).as_dict()
+            customers = router.customers
+            this_customer = pydash.find(customers,lambda x: x.name == name)
+            if this_customer:
+                list_router_frequency += {"frequency":this_customer.frequency,"router_name": router.channel_name,"router_code": router.channel_code}
+        doc_customer = pydash.pick_by(doc_customer,lambda value,key: key not in [ "docstatus","idx", "naming_series", "is_internal_customer","language","so_required","dn_required","is_frozen","disabled", "doctype",])       
+        doc_customer["address"] = address
+        doc_customer["contacts"] = contacts
+        doc_customer["routers"] = list_router_frequency
+        return gen_response(200,"",doc_customer)
+    except Exception as e:
+        exception_handle(e)
 #list customer type Company Individual
 @frappe.whitelist(methods="GET")
 def list_customer_type():
