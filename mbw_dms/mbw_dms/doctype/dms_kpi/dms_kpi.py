@@ -748,3 +748,74 @@ def customer_not_order(kwargs):
 		
 	except Exception as e:
 		return exception_handle(e)
+	
+
+# Báo cáo công nợ khách hàng
+@frappe.whitelist(methods='GET')
+def receivable_summary_report(**kwargs):
+	try:
+		filters = []
+		from_date = validate_filter_timestamp(type="start")(kwargs.get("from_date")) if kwargs.get("from_date") else None
+		to_date = validate_filter_timestamp(type="end")(kwargs.get("to_date")) if kwargs.get("to_date") else None
+		customer_type = kwargs.get("customer_type")
+		customer_group = kwargs.get("customer_group")
+
+		if customer_type:
+			filters.append(f"cus.customer_type='{customer_type}'")
+		if customer_group:
+			filters.append(f"cus.customer_group='{customer_group}'")
+		if from_date and to_date:
+			filters.append(f"inv.posting_date BETWEEN {from_date} AND {to_date}")
+
+		user_id = frappe.session.user
+		employee = frappe.get_value('Employee', {'user_id': user_id}, 'name')
+		sales_per = frappe.get_value('Sales Person', {'employee': employee}, 'name')
+
+		filters.append("inv.docstatus=1")
+		filters.append(f"st.sales_person IN (SELECT sales_person FROM `tabSales Team` WHERE st.parent IN ( SELECT parent FROM `tabSales Team` WHERE sales_person = '{sales_per}' AND created_by = 1))")
+
+		where_conditions = " AND ".join(filters)
+
+		sql_query = f"""
+			SELECT
+				inv.customer_name,
+				SUM(inv.outstanding_amount) AS total_due,
+				cus.customer_primary_contact,
+				cus.mobile_no
+			FROM
+				`tabSales Invoice` inv
+			JOIN `tabSales Team` st ON st.parent = inv.name
+			JOIN `tabCustomer` cus ON cus.name = inv.customer
+			WHERE
+				{where_conditions}
+			GROUP BY
+				inv.customer_name
+		"""
+		customers = frappe.db.sql(sql_query, as_dict=True)
+
+		total_dues = 0
+		total_paids = 0
+
+		# Lấy tổng số tiền đã trả của từng khách hàng
+		for customer in customers:
+			customer['total_paid'] = frappe.db.sql("""
+				SELECT
+					SUM(paid_amount) AS total_paid
+				FROM
+					`tabPayment Entry`
+				WHERE
+					party_name = %(customer_name)s
+					AND posting_date BETWEEN %(start_date)s AND %(end_date)s
+					AND docstatus = 1
+			""", {"customer_name": customer['customer_name'], "start_date": from_date, "end_date": to_date}, as_dict=True)[0]['total_paid'] or 0
+
+			total_dues += customer['total_due']
+			total_paids += customer['total_paid']
+
+		return gen_response(200, "Thành công", {
+			"total_dues": total_dues,
+			"total_paids": total_paids,
+			"customers": customers
+			})
+	except Exception as e:
+		return exception_handle(e)

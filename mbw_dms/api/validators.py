@@ -48,14 +48,15 @@ def validate_date(value):
     except:
         raise Exception('Không đúng định dạng timestamp `%s`' % value)
 
-
+import pytz
 # Kiểm tra trường datetime truyền lên
 def validate_datetime(value):
     try:
         value = int(float(value))
-        time = datetime.fromtimestamp(value)
-        time.strftime('%Y-%m-%d %H:%M:%S')
-        return str(time).split('+')[0]
+        utc_time = datetime.utcfromtimestamp(value)
+        local_timezone = pytz.timezone("Asia/Ho_Chi_Minh")
+        local_time = utc_time.replace(tzinfo=pytz.utc).astimezone(local_timezone)
+        return str(local_time).split('+')[0]
     except ValueError as e:
         raise Exception('Không đúng định dạng timestamp `%s`' % value)
     except:

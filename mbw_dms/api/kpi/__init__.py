@@ -59,3 +59,8 @@ def kpi_targets(**kwargs):
 def customer_not_order(**kwargs):
     from mbw_dms.mbw_dms.doctype.dms_kpi.dms_kpi import customer_not_order
     return customer_not_order(kwargs=kwargs)
+
+@frappe.whitelist()
+def receivable_summary_report(**kwargs):
+    from mbw_dms.mbw_dms.doctype.dms_kpi.dms_kpi import receivable_summary_report
+    return receivable_summary_report(kwargs=kwargs)
