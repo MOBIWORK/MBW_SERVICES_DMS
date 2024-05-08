@@ -713,7 +713,7 @@ def customer_not_order(kwargs):
 
 		# Lấy tuyến của nhân viên
 		user_id = frappe.session.user
-		user_name = frappe.get_value('Employee',{ 'user_id': user_id}, 'name')
+		user_name = frappe.get_value('Employee', { 'user_id': user_id}, 'name')
 
         # Lấy thứ của ngày
 		date_cre = datetime.datetime.fromtimestamp(date)
@@ -755,24 +755,36 @@ def customer_not_order(kwargs):
 def receivable_summary_report(**kwargs):
 	try:
 		filters = []
+		filter_inv = {}
 		from_date = validate_filter_timestamp(type="start")(kwargs.get("from_date")) if kwargs.get("from_date") else None
 		to_date = validate_filter_timestamp(type="end")(kwargs.get("to_date")) if kwargs.get("to_date") else None
 		customer_type = kwargs.get("customer_type")
 		customer_group = kwargs.get("customer_group")
 
-		if customer_type:
-			filters.append(f"cus.customer_type='{customer_type}'")
-		if customer_group:
-			filters.append(f"cus.customer_group='{customer_group}'")
-		if from_date and to_date:
-			filters.append(f"inv.posting_date BETWEEN {from_date} AND {to_date}")
-
 		user_id = frappe.session.user
 		employee = frappe.get_value('Employee', {'user_id': user_id}, 'name')
 		sales_per = frappe.get_value('Sales Person', {'employee': employee}, 'name')
 
-		filters.append("inv.docstatus=1")
-		filters.append(f"st.sales_person IN (SELECT sales_person FROM `tabSales Team` WHERE st.parent IN ( SELECT parent FROM `tabSales Team` WHERE sales_person = '{sales_per}' AND created_by = 1))")
+		invoice = []
+
+		if from_date and to_date:
+			filter_inv["posting_date"] = ["between", [from_date,to_date]]
+		filter_inv["docstatus"] = 1
+		list_invoices = frappe.get_all("Sales Invoice", filters=filter_inv, fields=['name'])
+		for i in list_invoices:
+			st = get_value_child_doctype("Sales Invoice", i["name"], "sales_team")
+			for j in st:
+				if j.sales_person == sales_per and j.created_by == 1 and i["name"] not in invoice:
+					invoice.append(i["name"])
+		invoice_str = ", ".join(["'" + inv + "'" for inv in invoice])
+
+		if customer_type:
+			filters.append(f"cus.customer_type='{customer_type}'")
+		if customer_group:
+			filters.append(f"cus.customer_group='{customer_group}'")
+
+		filters.append(f"inv.name IN ({invoice_str})")
+		filters.append("pe.docstatus=1")
 
 		where_conditions = " AND ".join(filters)
 
@@ -781,41 +793,35 @@ def receivable_summary_report(**kwargs):
 				inv.customer_name,
 				SUM(inv.outstanding_amount) AS total_due,
 				cus.customer_primary_contact,
-				cus.mobile_no
+				cus.mobile_no,
+				SUM(pe.paid_amount) AS total_paid
 			FROM
 				`tabSales Invoice` inv
-			JOIN `tabSales Team` st ON st.parent = inv.name
 			JOIN `tabCustomer` cus ON cus.name = inv.customer
+			JOIN `tabPayment Entry` pe ON pe.party_name = inv.customer_name
 			WHERE
 				{where_conditions}
 			GROUP BY
 				inv.customer_name
 		"""
-		customers = frappe.db.sql(sql_query, as_dict=True)
+		customers_invoice = frappe.db.sql(sql_query, as_dict=True)
 
 		total_dues = 0
 		total_paids = 0
+		remaining = 0
 
 		# Lấy tổng số tiền đã trả của từng khách hàng
-		for customer in customers:
-			customer['total_paid'] = frappe.db.sql("""
-				SELECT
-					SUM(paid_amount) AS total_paid
-				FROM
-					`tabPayment Entry`
-				WHERE
-					party_name = %(customer_name)s
-					AND posting_date BETWEEN %(start_date)s AND %(end_date)s
-					AND docstatus = 1
-			""", {"customer_name": customer['customer_name'], "start_date": from_date, "end_date": to_date}, as_dict=True)[0]['total_paid'] or 0
-
-			total_dues += customer['total_due']
-			total_paids += customer['total_paid']
+		for cus_inv in customers_invoice:
+			total_dues += cus_inv['total_due']
+			total_paids += cus_inv['total_paid']
+			cus_inv['remaining'] = cus_inv['total_due'] - cus_inv['total_paid']
+		remaining = total_dues - total_paids
 
 		return gen_response(200, "Thành công", {
 			"total_dues": total_dues,
 			"total_paids": total_paids,
-			"customers": customers
+			"remaining": remaining,
+			"customers": customers_invoice
 			})
 	except Exception as e:
 		return exception_handle(e)
