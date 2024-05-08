@@ -5,6 +5,7 @@ from mbw_dms.api.common import (
     exception_handle,
     gen_response,
     validate_image,
+    get_value_child_doctype
 )
 
 #list product
@@ -73,6 +74,11 @@ def list_product(**kwargs):
             item['details'] = frappe.get_all("Item Price", filters={"item_code": item.get('item_code'), "price_list": price_list}, fields=['uom', 'price_list', 'price_list_rate', 'valid_from', 'currency'])
             item['unit'] = frappe.db.get_all("UOM Conversion Detail", {"parent" : item.get('name')}, ['uom', 'conversion_factor'])
             item['stock'] = frappe.db.get_all("Stock Entry Detail", {"item_code": item.get('item_code')}, ['t_warehouse', 'qty'])
+            item['item_tax_template'] = frappe.db.get_all("Item Tax", {"parent": item["name"]}, ["item_tax_template"])
+            if item['item_tax_template']:
+                item['rate_tax_item'] = frappe.db.get_value("Item Tax Template Detail", {"parent": item['item_tax_template'][0].item_tax_template}, ["tax_rate"])
+            else:
+                item['rate_tax_item'] = []
             if item['details']:
                 data_item.append(item)
 
