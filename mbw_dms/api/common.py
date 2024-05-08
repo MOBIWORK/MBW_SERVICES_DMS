@@ -78,7 +78,7 @@ def exception_handle(e):
     print(frappe.response)
     return gen_response(406, cstr(e),{})
 
-def routers_name_of_customer(router=False, thisWeek = False,view_mode='list'):
+def routers_name_of_customer(router=False, thisWeek = False,view_mode='list',more_filters=False):
     queryFilters = {"is_deleted": 0,"status":"Active"}
     user_id = get_user_id()
     if user_id.name != "Administrator":
@@ -98,7 +98,8 @@ def routers_name_of_customer(router=False, thisWeek = False,view_mode='list'):
         thu_trong_tuan, tuan_trong_thang = weekday(today)
         queryFilters.update({"travel_date": ["between",["Không giới hạn",thu_trong_tuan]]})
         queryFilters.update({"frequency": ["like",tuan_trong_thang]})  
-    
+    if more_filters:
+        queryFilters.update(more_filters)
     list_router = frappe.db.get_all('DMS Router',filters=queryFilters, pluck='name',distinct=True)
     return list_router
 

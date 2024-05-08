@@ -88,16 +88,17 @@ def list_customer(**kwargs):
 def customer_detail(name):
     try: 
         doc_customer = frappe.get_doc("Customer",name).as_dict()
-        routers = routers_name_of_customer()
+        routers = routers_name_of_customer(more_filters={"customer_code": doc_customer.customer_code})
         address = frappe.db.get_all("Address",{"link_doctype": "Customer","link_name": doc_customer.name},["address_title","address_location","is_primary_address","is_shipping_address"])
         contacts = frappe.db.get_all("Contact",{"link_doctype": "Customer","link_name": doc_customer.name},["first_name","last_name","address","mobile_no"])
         list_router_frequency = []
         for name in routers:
             router = frappe.get_doc("DMS Router",name).as_dict()
             customers = router.customers
-            this_customer = pydash.find(customers,lambda x: x.name == name)
+            this_customer = pydash.find(customers,lambda x: x.customer_code == doc_customer.customer_code)
+            print(name,customers,this_customer)
             if this_customer:
-                list_router_frequency += {"frequency":this_customer.frequency,"router_name": router.channel_name,"router_code": router.channel_code}
+                list_router_frequency += [{"frequency":this_customer.frequency,"router_name": router.channel_name,"router_code": router.channel_code}]
         doc_customer = pydash.pick_by(doc_customer,lambda value,key: key not in [ "docstatus","idx", "naming_series", "is_internal_customer","language","so_required","dn_required","is_frozen","disabled", "doctype",])       
         doc_customer["address"] = address
         doc_customer["contacts"] = contacts
