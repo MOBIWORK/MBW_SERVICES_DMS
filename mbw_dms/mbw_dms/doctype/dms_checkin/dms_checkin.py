@@ -281,7 +281,7 @@ def create_checkin_inventory(body):
         doc.set("create_by",user.name)
         for key, value in body.items():
             if key in normal_keys:
-                doc.set(key, validate_filter(type_check='require', value=value))
+                doc.set(key, validate_filter(type_check='require_field', value=(value,key)))
         items = body.get('inventory_items')
         for item in items:
             if isinstance(item, dict):
