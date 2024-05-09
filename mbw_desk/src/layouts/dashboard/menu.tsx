@@ -45,14 +45,16 @@ export default function MenuLeft({
       <div className="font-semibold text-lg text-[#919EAB] leading-[22px] pl-[8px] mx-2 pb-4">
         <Link className="font-semibold text-lg !text-[#919EAB] leading-[22px]" to="/">DMS</Link>
       </div>
-      <MenuCustom
-        theme="light"
-        onClick={onClick}
-        selectedKeys={[current]}
-        mode="inline"
-        items={listMenu}
+      <div className="flex-1 !max-h-[89vh] overflow-y-scroll">
+        <MenuCustom
+          theme="light"
+          onClick={onClick}
+          selectedKeys={[current]}
+          mode="inline"
+          items={listMenu}
         // inlineCollapsed={collapsed}
-      />
+        />
+      </div>
     </div>
   );
 }
