@@ -96,7 +96,6 @@ def customer_detail(name):
             router = frappe.get_doc("DMS Router",name).as_dict()
             customers = router.customers
             this_customer = pydash.find(customers,lambda x: x.customer_code == doc_customer.customer_code)
-            print(name,customers,this_customer)
             if this_customer:
                 list_router_frequency += [{"frequency":this_customer.frequency,"router_name": router.channel_name,"router_code": router.channel_code}]
         doc_customer = pydash.pick_by(doc_customer,lambda value,key: key not in [ "docstatus","idx", "naming_series", "is_internal_customer","language","so_required","dn_required","is_frozen","disabled", "doctype",])       
