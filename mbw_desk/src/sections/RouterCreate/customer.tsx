@@ -63,24 +63,32 @@ export default memo(function Customer() {
       const sheetName = workbook.SheetNames[0];
       const worksheet = workbook.Sheets[sheetName];
       const jsonData = XLSX.utils.sheet_to_json(worksheet);
-      console.log("json_data", jsonData);
+      // console.log("=============json data==========",jsonData      );
+      
       setDataImport(jsonData)
     };
     reader.readAsArrayBuffer(file);
   }
 
   const handleImportCusTomer = async () => {
-    // console.log(dataImport);
-    let importCustomers = getAttrInArray(dataImport, ["Mã khách hàng", "Thứ tự VT", "Tần suất"], { isNull: false })
-    const list_customerCodes = importCustomers.map(customer => customer["Mã khách hàng"]).filter(code => !!code && !setCustomerRouter.map((cust: CustomerType) => cust.customer_code).includes(code))
-
+    let importCustomers = getAttrInArray(dataImport, ["Mã khách hàng", "Tên khách hàng", "Tần suất"], { isNull: false })
+    const customer_codes = importCustomers.map(customer => customer["Mã khách hàng"])
+    const list_customerCodes = customer_codes.filter(code => !!code && !customerRouter.map((cust: CustomerType) => cust.customer_code).includes(code))
+    // console.log("=================list_customerCodes========================",{list_customerCodes})
     try {
       const rsImport = await AxiosService.post("/api/method/mbw_dms.api.router.get_customer_import", {
         customer_codes: list_customerCodes
       })
-
+      let list_customer_import = rsImport.result
+      list_customer_import = list_customer_import.map((customer:any) =>{
+        let import_frequency = importCustomers.find(cs => cs["Mã khách hàng"] == customer.customer_code)
+        if(import_frequency) {
+          customer["frequency"] = import_frequency["Tần suất"]
+        }
+        return customer
+      })
       setCustomerRouter((prev: any) => [...prev, ...rsImport.result])
-      warningMsg(rsImport.message)
+      warningMsg("Add record from local!")
       setOpenImport(false)
 
     } catch (err: any) {
@@ -143,6 +151,7 @@ export default memo(function Customer() {
               doctype:'DMS Router Customer',
               export_fields: '{"DMS Router Customer":["name","display_address","customer","long","customer_code","phone_number","frequency","customer_name","lat"]}', 
               export_records: 'blank_template', 
+              // export_records: '5_records', 
               export_filters: null, 
               file_type: 'Excel'
             })

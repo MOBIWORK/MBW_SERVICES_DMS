@@ -16,7 +16,7 @@ export function AuthProvider({children}:Props) {
     updateCurrentUser,
     getUserCookie,
   } = useFrappeAuth();
-  console.log(window.location.pathname);
+  // console.log(window.location.pathname);
   
     if(!isLoading && !currentUser && window.location.pathname != `${BASE_URL || ""}/auth/login` )
       window.location.href = `${BASE_URL||""}/auth/login`
