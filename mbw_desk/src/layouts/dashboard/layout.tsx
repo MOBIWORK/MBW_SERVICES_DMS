@@ -18,34 +18,18 @@ const SiderCustome = styled(Sider)`
 export default function DashboardLayout({ children }: Props) {
   const [collapsed, setCollapsed] = useState(false);
   return (
-    <Layout style={{  overflow: "hidden ",height: `calc(100vh - 40px)`}} >
-        <SiderCustome style={{ background: "#fff" }} width={!collapsed ? 250 : 78} collapsible collapsed={collapsed} >            
+    <Layout className="overflow-hidden h-screen">
+        <SiderCustome className="!bg-[#fff]" width={!collapsed ? 250 : 78} collapsible collapsed={collapsed} >            
             <MenuLeft handleCollapsed = {setCollapsed} collapsed={collapsed}/>
           </SiderCustome>
       <Layout className="h-full">
-        <Content style={{ padding: "0 0px"}} className="!bg-[#fff] !min-h-screen">
           <Header />
           <Content
-              className="round"
-              style={{ padding: "0px 24px 20px", maxHeight: "85vh", overflow: "auto" ,background:"#F4F6F8" }}
+              className="round !overflow-y-scroll"
+              style={{ padding: "0px 24px 20px", maxHeight: "calc(100vh-46px)", overflow: "auto" ,background:"#F4F6F8" }}
             >
-              <div>{children}</div>
+              <div className="h-fit">{children}</div>
             </Content>
-          {/* <Layout
-            // style={{
-            //   height: `calc(100vh - 60px)`,
-            //   overflow:'auto',
-            //   // padding: "24px 0",
-            //   background: "#fff",
-            //   borderRadius: "8px",
-            //   margin: "0 auto"
-            // }}
-            className="overflow-auto "
-          >
-          
-            
-          </Layout> */}
-        </Content>
       </Layout>
     </Layout>
   );
