@@ -45,7 +45,7 @@ export default function Header() {
   ];
   return (
     <div className="w-full !border-[red] border bg-white py-[7px] !border-b-4">
-      <Row className="justify-end max-w-full ">
+      <Row className="justify-end max-w-full pr-8">
         <Dropdown
             menu={{ items }}
             trigger={["click"]}
