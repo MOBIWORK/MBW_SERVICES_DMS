@@ -117,7 +117,7 @@ export default function SupervisoryStaffRealTime() {
     for(let i = 0; i < arrEmployee.length; i++){
       for(let j = 0; j < arrSummary.length; j++){
         if(arrEmployee[i].object_id != null && arrEmployee[i].object_id == arrSummary[j].object["_id"]){
-          arrEmployee[i].summary = arrEmployee[i].summary;
+          arrEmployee[i].summary = arrSummary[j].summary;
           break;
         }else{
           arrEmployee[i].summary = {};
