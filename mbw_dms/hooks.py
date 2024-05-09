@@ -271,16 +271,3 @@ doc_events = {
 on_session_creation = [
     "mbw_dms.controllers.role_permissions.update_sales_roles_permissions"
 ]
-
-import frappe
-import csv
-
-def load_custom_translations():
-    translation_file_path = frappe.get_app_path("mbw_dms", "translations", "vi.csv")
-    with open(translation_file_path, newline='', encoding='utf-8') as csvfile:
-        translation_reader = csv.DictReader(csvfile)
-        for row in translation_reader:
-            frappe._dict(row)
-
-def after_install():
-    load_custom_translations()
