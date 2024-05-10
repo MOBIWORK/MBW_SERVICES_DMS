@@ -90,7 +90,7 @@ def customer_detail(name):
         doc_customer = frappe.get_doc("Customer",name).as_dict()
         routers = routers_name_of_customer(more_filters={"customer_code": doc_customer.customer_code})
         address = frappe.db.get_all("Address",{"link_doctype": "Customer","link_name": doc_customer.name},["address_title","address_location","is_primary_address","is_shipping_address"])
-        contacts = frappe.db.get_all("Contact",{"link_doctype": "Customer","link_name": doc_customer.name},["first_name","last_name","address","mobile_no"])
+        contacts = frappe.db.get_all("Contact",{"link_doctype": "Customer","link_name": doc_customer.name},["first_name","last_name","address","phone"])
         list_router_frequency = []
         for name in routers:
             router = frappe.get_doc("DMS Router",name).as_dict()
