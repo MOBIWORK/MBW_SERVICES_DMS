@@ -92,7 +92,7 @@ def get_router(id):
 def get_customer_router(data):
     try:     
         # cho phep ngoai tuyen, lay o settting nhung gio se fix cung
-        is_ngoai_tuyen=True
+        is_ngoai_tuyen= frappe.db.get_single_value("DMS Settings",fieldname=["vt_ngoaituyen"])
         search_key = data.get("search_key")
         view_mode = validate_filter(value=data.get('view_mode'),type=['list','map'],type_check='enum') if data.get('view_mode') else 'list'
         # phan trang
