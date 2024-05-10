@@ -256,6 +256,8 @@ def create_customer(**kwargs):
             frappe.db.delete("Address",new_address_cus.name)
         if new_contact:
             frappe.db.delete("Contact",new_contact.name)
+        if new_address_contact:
+            frappe.db.delete("Contact",new_address_contact.name)
         return exception_handle(e)
     
 # list 
