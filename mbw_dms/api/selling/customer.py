@@ -132,9 +132,15 @@ def create_customer(**kwargs):
     try:
         # Check dữ liệu đầu vào
         phone_number = ''
-        if kwargs.get('phone'):
-            phone_number = validate_phone_number(kwargs.get('phone'))
-
+        address = kwargs.get('address')
+        contact = kwargs.get('contact')
+        router_in = kwargs.get('router')
+        if contact and contact.get('phone'):
+            phone_number = validate_phone_number(contact.get('phone'))
+        json_location =""
+        if address.get("latitude") and address.get("longitude"):
+            json_location = json.dumps({"long": kwargs.get(
+                "longitude"), "lat": kwargs.get("latitude")})
         # Tạo mới khách hàng
         new_customer = frappe.new_doc('Customer')
         required_fields = ['customer_code', 'customer_name', 'customer_group', 'territory']
@@ -159,8 +165,7 @@ def create_customer(**kwargs):
         sale_person = frappe.get_value('Sales Person', {'employee': employee_name}, 'parent_sales_person')
         new_customer.custom_sales_manager = sale_person
 
-        new_customer.customer_location_primary = json.dumps({"long": kwargs.get(
-                "longitude"), "lat": kwargs.get("latitude")})
+        new_customer.customer_location_primary = json_location
 
         new_customer.append('credit_limits', {
             'company': kwargs.get('company'),
@@ -169,18 +174,17 @@ def create_customer(**kwargs):
         new_customer.insert()
 
         # Tạo mới địa chỉ khách hàng
-        if kwargs.get('address_title_cus'):
+        if address and address.get('address_title'):
             new_address_cus = frappe.new_doc('Address')
-            new_address_cus.address_title = kwargs.get('address_title_cus')
-            new_address_cus.address_type = kwargs.get('address_type_cus')
-            new_address_cus.address_line1 = kwargs.get('detail_address_cus')
-            new_address_cus.city = kwargs.get('province_cus')
-            new_address_cus.county = kwargs.get('district_cus')
-            new_address_cus.state = kwargs.get('ward_cus')
-            new_address_cus.is_shipping_address = kwargs.get('is_shipping_address')
-            new_address_cus.is_primary_address = kwargs.get('is_primary_address')
-            new_address_cus.address_location = json.dumps({"long": kwargs.get(
-                "longitude"), "lat": kwargs.get("latitude")})
+            new_address_cus.address_title = address.get('address_title')
+            new_address_cus.address_type = "Personal"
+            new_address_cus.address_line1 = address.get('address_line1')
+            new_address_cus.city = address.get('city')
+            new_address_cus.county = address.get('county')
+            new_address_cus.state = address.get('state')
+            new_address_cus.is_shipping_address = address.get('is_shipping_address')
+            new_address_cus.is_primary_address = address.get('is_primary_address')
+            new_address_cus.address_location = json_location
             new_address_cus.append('links', {
                 'link_doctype': new_customer.doctype,
                 'link_name': new_customer.name,
@@ -190,10 +194,10 @@ def create_customer(**kwargs):
             new_customer.save()
 
         # Tạo mới contact khách hàng
-        if kwargs.get('first_name'):
+        if contact and contact.get('first_name'):
             new_contact = frappe.new_doc('Contact')
             contact_fields = ['first_name', "address_contact"]
-            for key, value in kwargs.items():
+            for key, value in contact.items():
                 if key in contact_fields:
                     new_contact.set(key, value)
             new_contact.is_primary_contact = 1
@@ -206,23 +210,23 @@ def create_customer(**kwargs):
             new_contact.append('phone_nos', {
                 'phone': phone_number
             })
-
+            new_contact.insert()
             # Tạo mới địa chỉ contact
             new_address_contact = frappe.new_doc('Address')
-            new_address_contact.address_title = kwargs.get('adr_title_contact')
-            new_address_contact.address_type = kwargs.get('adr_type_contact')
-            new_address_contact.address_line1 = kwargs.get('detail_adr_contact')
-            new_address_contact.city = kwargs.get('province_contact')
-            new_address_contact.county = kwargs.get('district_contact')
-            new_address_contact.state = kwargs.get('ward_contact')
+            new_address_contact.address_title = contact.get('address_title')
+            new_address_contact.address_type = contact.get('address_type')
+            new_address_contact.address_line1 = contact.get('address_line1')
+            new_address_contact.city = contact.get('city')
+            new_address_contact.county = contact.get('county')
+            new_address_contact.state = contact.get('state')
             new_address_contact.append('links', {
-                'link_doctype': new_customer.doctype,
-                'link_name': new_customer.name,
+                'link_doctype': new_contact.doctype,
+                'link_name': new_contact.name,
             })
             new_address_contact.insert()
 
             new_contact.address = new_address_contact.name
-            new_contact.insert()
+            new_contact.save()
             new_customer.customer_primary_contact = new_contact.name
             new_customer.save()
 
@@ -230,21 +234,28 @@ def create_customer(**kwargs):
             new_customer.image = post_image(name_image='', faceimage=kwargs.get('faceimage'), doc_type='Customer', doc_name=new_customer.name)
             new_customer.save()
 
-        # Thêm tuyến khách hàng
-        if kwargs.get('router_name'):
-            router = frappe.get_doc('DMS Router', kwargs.get('router_name'))
+        # Thêm khách hàng vào tuyến 
+        if router_in and router_in.get('router_name'):
+            router = frappe.get_doc('DMS Router', router_in.get('router_name'))
+            # print("fre",router,router.get('frequency'))
             router.append('customers', {
                 'customer': new_customer.name,
                 'customer_code': new_customer.customer_code,
                 'customer_name': new_customer.customer_name,
                 'display_address': new_customer.customer_primary_address,
-                'frequency': kwargs.get('frequency')
+                'frequency': router_in.get('frequency')
             })
             router.save()
 
         frappe.db.commit()
         return gen_response(201, "Thành công", {"name": new_customer.name})
     except Exception as e:
+        if new_customer:
+            frappe.db.delete("Customer",new_customer.name)
+        if new_address_cus:
+            frappe.db.delete("Address",new_address_cus.name)
+        if new_contact:
+            frappe.db.delete("Contact",new_contact.name)
         return exception_handle(e)
     
 # list 
