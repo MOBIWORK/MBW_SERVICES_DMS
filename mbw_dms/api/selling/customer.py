@@ -196,7 +196,7 @@ def create_customer(**kwargs):
         # Tạo mới contact khách hàng
         if contact and contact.get('first_name'):
             new_contact = frappe.new_doc('Contact')
-            contact_fields = ['first_name', "address_contact"]
+            contact_fields = ['first_name', "address_contact","phone"]
             for key, value in contact.items():
                 if key in contact_fields:
                     new_contact.set(key, value)
