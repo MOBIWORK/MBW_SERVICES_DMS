@@ -78,7 +78,7 @@ def list_product(**kwargs):
             if item['item_tax_template']:
                 item['rate_tax_item'] = frappe.db.get_value("Item Tax Template Detail", {"parent": item['item_tax_template'][0].item_tax_template}, ["tax_rate"])
             else:
-                item['rate_tax_item'] = []
+                item['rate_tax_item'] = 0
             if item['details']:
                 data_item.append(item)
 
