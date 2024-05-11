@@ -502,6 +502,7 @@ export default function ReportCheckinFirst() {
             pagination={{
               defaultPageSize: PAGE_SIZE,
               total,
+              showSizeChanger: false,
               onChange(page) {
                 setPage(page);
               },

@@ -606,6 +606,7 @@ export default function ReportCustomer() {
             pagination={{
               defaultPageSize: PAGE_SIZE,
               total,
+              showSizeChanger: false,
               onChange(page) {
                 setPage(page);
               },

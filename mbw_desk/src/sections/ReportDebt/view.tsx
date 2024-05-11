@@ -333,7 +333,7 @@ export default function ReportDebt() {
         </div>
         <div className="pt-5">
           <TableReport
-            dataSource={data}
+            // dataSource={data}
             columns={columns}
             bordered
             scroll={{ x: true }}

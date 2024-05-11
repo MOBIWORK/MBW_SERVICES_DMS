@@ -55,6 +55,10 @@ interface DataTypeKPI {
   total?: number;
 }
 
+const currentMonth = dayjs().month() + 1; // Lấy tháng hiện tại (đánh số từ 0)
+const month = currentMonth.toString();
+const year = dayjs().format("YYYY");
+
 export default function ReportKPI() {
   const [listEmployees, setListEmployees] = useState<any[]>([]);
   const [listSales, setListSales] = useState<any[]>([]);
@@ -65,17 +69,13 @@ export default function ReportKPI() {
   const [page, setPage] = useState<number>(1);
   const PAGE_SIZE = 20;
   const [dataReort, setDataReport] = useState<any[]>([]);
-  const [fmonth, setFmonth] = useState("");
+  const [fmonth, setFmonth] = useState(month);
   const [fyear, setFYear] = useState("");
   const [total, setTotal] = useState<number>(0);
 
   const onChange: DatePickerProps["onChange"] = (date) => {
     setFYear(date?.["$y"].toString());
   };
-
-  const currentMonth = dayjs().month() + 1; // Lấy tháng hiện tại (đánh số từ 0)
-  const month = currentMonth.toString();
-  const year = dayjs().format("YYYY");
 
   useEffect(() => {
     (async () => {
@@ -218,7 +218,7 @@ export default function ReportKPI() {
         {/* {routersTable?.map(router => ({ key: router.name, ...router }))} */}
         <div className="pt-5">
           <TableCustom
-            dataSource={dataReort?.data?.map((report) => ({
+            dataSource={dataReort?.data?.map((report: any) => ({
               key: report.name,
               ...report,
             }))}
@@ -227,6 +227,7 @@ export default function ReportKPI() {
             pagination={{
               defaultPageSize: PAGE_SIZE,
               total,
+              showSizeChanger: false,
               onChange(page) {
                 setPage(page);
               },
@@ -274,17 +275,25 @@ export default function ReportKPI() {
                   </Table.Summary.Cell>
                   <Table.Summary.Cell index={18}></Table.Summary.Cell>
                   <Table.Summary.Cell index={19}>
-                    {Intl.NumberFormat().format(dataReort?.sum?.tong_kh_doanh_so)}
+                    {Intl.NumberFormat().format(
+                      dataReort?.sum?.tong_kh_doanh_so
+                    )}
                   </Table.Summary.Cell>
                   <Table.Summary.Cell index={20}>
-                    {Intl.NumberFormat().format(dataReort?.sum?.tong_th_doanh_so)}
+                    {Intl.NumberFormat().format(
+                      dataReort?.sum?.tong_th_doanh_so
+                    )}
                   </Table.Summary.Cell>
                   <Table.Summary.Cell index={21}></Table.Summary.Cell>
                   <Table.Summary.Cell index={22}>
-                    {Intl.NumberFormat().format(dataReort?.sum?.tong_kh_doanh_thu)}
+                    {Intl.NumberFormat().format(
+                      dataReort?.sum?.tong_kh_doanh_thu
+                    )}
                   </Table.Summary.Cell>
                   <Table.Summary.Cell index={23}>
-                    {Intl.NumberFormat().format(dataReort?.sum?.tong_th_doanh_thu)}
+                    {Intl.NumberFormat().format(
+                      dataReort?.sum?.tong_th_doanh_thu
+                    )}
                   </Table.Summary.Cell>
                   <Table.Summary.Cell index={24}></Table.Summary.Cell>
                   <Table.Summary.Cell index={25}>
@@ -325,14 +334,24 @@ export default function ReportKPI() {
               dataIndex="nhan_vien_ban_hang"
               key="nhan_vien_ban_hang"
               fixed="left"
-              render={(_: any, record: any) => <><div className="!min-w-[130px]">{record.nhan_vien_ban_hang}</div></>}
+              render={(_: any, record: any) => (
+                <>
+                  <div className="!min-w-[130px]">
+                    {record.nhan_vien_ban_hang}
+                  </div>
+                </>
+              )}
             />
             <Column
               title="Nhân viên"
               dataIndex="ten_nv"
               key="ten_nv"
               fixed="left"
-              render={(_: any, record: any) => <><div className="!min-w-[200px]">{record.ten_nv}</div></>}
+              render={(_: any, record: any) => (
+                <>
+                  <div className="!min-w-[200px]">{record.ten_nv}</div>
+                </>
+              )}
             />
             <Column
               title="Phòng/nhóm"

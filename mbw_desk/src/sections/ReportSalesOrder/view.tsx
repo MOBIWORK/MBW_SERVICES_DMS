@@ -579,6 +579,7 @@ export default function ReportSalesOrder() {
             pagination={{
               defaultPageSize: PAGE_SIZE,
               total,
+              showSizeChanger: false,
               onChange(page) {
                 setPage(page);
               },

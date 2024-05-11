@@ -1,13 +1,15 @@
 import { VerticalAlignBottomOutlined } from "@ant-design/icons";
 import { FormItemCustom, HeaderPage, TableCustom } from "../../components";
-import { DatePicker, Select, Table } from "antd";
+import { DatePicker, Select, Table, TreeSelect } from "antd";
 import { DatePickerProps, TableColumnsType } from "antd/lib";
 import { useEffect, useState } from "react";
 import useDebounce from "../../hooks/useDebount";
-import { rsDataFrappe } from "../../types/response";
+import { rsData, rsDataFrappe } from "../../types/response";
 import { AxiosService } from "../../services/server";
 import { employee } from "../../types/employeeFilter";
 import { area, customergroup, typecustomer } from "../ReportSales/data";
+import { treeArray } from "@/util";
+import { listSale } from "@/types/listSale";
 
 interface DataCheckin {
   key: React.Key;
@@ -136,51 +138,150 @@ const columnsCheckin: TableColumnsType<DataCheckin> = [
   },
 ];
 
-const data: DataCheckin[] = [
-  {
-    key: "KDA",
-    name: "7382jsd",
-    employee_code: "HHH-1",
-    employee_name: "Thiên Khuyển",
-    saleperson: "KV MB",
-    days: "20/1/2024",
-    date: "Thứ 4",
-    startwork: "08:00",
-    checkin: "12:30",
-    kmauto: 5,
-    kmmove: 15,
-    speed: 56,
-  },
-  {
-    key: "HUDS",
-    name: "7382jsd",
-    employee_code: "HHH-1",
-    employee_name: "Tần Sương",
-    saleperson: "KV MN",
-    days: "20/2/2024",
-    date: "Thứ 3",
-    startwork: "08:00",
-    checkin: "12:30",
-    kmauto: 19,
-    kmmove: 20,
-    speed: 23,
-  },
-];
+// const data: DataCheckin[] = [
+//   {
+//     key: "KDA",
+//     name: "7382jsd",
+//     employee_code: "HHH-1",
+//     employee_name: "Thiên Khuyển",
+//     saleperson: "KV MB",
+//     days: "20/1/2024",
+//     date: "Thứ 4",
+//     startwork: "08:00",
+//     checkin: "12:30",
+//     kmauto: 5,
+//     kmmove: 15,
+//     speed: 56,
+//   },
+//   {
+//     key: "HUDS",
+//     name: "7382jsd",
+//     employee_code: "HHH-1",
+//     employee_name: "Tần Sương",
+//     saleperson: "KV MN",
+//     days: "20/2/2024",
+//     date: "Thứ 3",
+//     startwork: "08:00",
+//     checkin: "12:30",
+//     kmauto: 19,
+//     kmmove: 20,
+//     speed: 23,
+//   },
+// ];
 
 export default function ReportCheckin() {
   const [listEmployees, setListEmployees] = useState<any[]>([]);
   const [listSales, setListSales] = useState<any[]>([]);
-  const [team_sale, setTeamSale] = useState<string>();
+  const [sales_team, setTeamSale] = useState<string>();
   const [keySearch4, setKeySearch4] = useState("");
   const [employee, setEmployee] = useState<string>();
   let seachbykey = useDebounce(keySearch4);
   const [keyS3, setKeyS3] = useState("");
+  const [customer_type, setCustomerType] = useState("");
+  const [listCustomerGroup, setListCustomerGroup] = useState<any[]>([]);
+  const [customer_group, setCustomerGroup] = useState("");
+  const [keySCustomerGroup, setKeySCustomerGroup] = useState("");
+  let keySearchCustomerGroup = useDebounce(keySCustomerGroup, 500);
+  const [territory, setTerritory] = useState("");
+  const [listTerritory, setListTerritory] = useState<any[]>([]);
+  const [keySTerritory, setKeySTerritory] = useState("");
+  let keySearchTerritory = useDebounce(keySTerritory, 500);
 
   let keySearch3 = useDebounce(keyS3, 300);
 
   const onChange: DatePickerProps["onChange"] = (dateString) => {
     console.log(dateString);
   };
+
+  useEffect(() => {
+    (async () => {
+      let rsSales: rsData<listSale[]> = await AxiosService.get(
+        "/api/method/mbw_dms.api.router.get_team_sale"
+      );
+
+      setListSales(
+        treeArray({
+          data: rsSales.result.map((team_sale: listSale) => ({
+            title: team_sale.name,
+            value: team_sale.name,
+            ...team_sale,
+          })),
+          keyValue: "value",
+          parentField: "parent_sales_person",
+        })
+      );
+    })();
+  }, []);
+  useEffect(() => {
+    (async () => {
+      let rsEmployee: rsDataFrappe<employee[]> = await AxiosService.get(
+        "/api/method/mbw_dms.api.router.get_sale_person",
+        {
+          params: {
+            team_sale: sales_team,
+            key_search: seachbykey,
+          },
+        }
+      );
+      let { message: results } = rsEmployee;
+      setListEmployees(
+        results.map((employee_filter: employee) => ({
+          value: employee_filter.employee_code,
+          label: employee_filter.employee_name || employee_filter.employee_code,
+        }))
+      );
+    })();
+  }, [sales_team, seachbykey]);
+
+  useEffect(() => {
+    (async () => {
+      let rsCustomerGroup: any = await AxiosService.get(
+        "/api/method/frappe.desk.search.search_link",
+        {
+          params: {
+            txt: keySearchCustomerGroup,
+            doctype: "Customer Group",
+            ignore_user_permissions: 0,
+            query: "",
+          },
+        }
+      );
+
+      let { message: results } = rsCustomerGroup;
+
+      setListCustomerGroup(
+        results.map((dtCustomerGroup: any) => ({
+          value: dtCustomerGroup.value.trim(),
+          label: dtCustomerGroup.value.trim(),
+        }))
+      );
+    })();
+  }, [keySearchCustomerGroup]);
+
+  useEffect(() => {
+    (async () => {
+      let rsTerritory: any = await AxiosService.get(
+        "/api/method/frappe.desk.search.search_link",
+        {
+          params: {
+            txt: keySearchTerritory,
+            doctype: "Territory",
+            ignore_user_permissions: 0,
+            query: "",
+          },
+        }
+      );
+
+      let { message: results } = rsTerritory;
+
+      setListTerritory(
+        results.map((dtTerritory: any) => ({
+          value: dtTerritory.value,
+          label: dtTerritory.value,
+        }))
+      );
+    })();
+  }, [keySearchTerritory]);
 
   const expandedRowRender = (record: any) => {
     const columns: TableColumnsType<ExpandedDataType> = [
@@ -296,60 +397,45 @@ export default function ReportCheckin() {
         ),
       },
     ];
-    const dataEx = [
-      {
-        customer: "Khách hàng 1",
-        customer_code:"KH1",
-        address: "Hà Nội",
-        typecustomer: "Loại khách hàng",
-        groupcustomer: "Nhóm khác hàng",
-        phonenumber: "012312393",
-        contact: "88 Tây Hồ",
-        checkin: "07:00",
-        checkout: "07:15",
-        timecheckin: "15 phút",
-        addresscheckin: "Hòang Thành Thăng Long",
-        distance: "0.2",
-      },
-      {
-        customer: "Khách hàng 2",
-        customer_code:"KH2",
-        address: "Hà Nội",
-        typecustomer: "Loại khách hàng",
-        groupcustomer: "Nhóm khác hàng",
-        phonenumber: "0928167294",
-        contact: "892 Lạc Long Quân",
-        checkin: "07:00",
-        checkout: "07:15",
-        timecheckin: "15 phút",
-        addresscheckin: "Phong Nha Kẻ Bàng",
-        distance: "0.2",
-      }
-    ];
-    return <Table columns={columns} dataSource={dataEx} pagination={false} />;
+    // const dataEx = [
+    //   {
+    //     customer: "Khách hàng 1",
+    //     customer_code:"KH1",
+    //     address: "Hà Nội",
+    //     typecustomer: "Loại khách hàng",
+    //     groupcustomer: "Nhóm khác hàng",
+    //     phonenumber: "012312393",
+    //     contact: "88 Tây Hồ",
+    //     checkin: "07:00",
+    //     checkout: "07:15",
+    //     timecheckin: "15 phút",
+    //     addresscheckin: "Hòang Thành Thăng Long",
+    //     distance: "0.2",
+    //   },
+    //   {
+    //     customer: "Khách hàng 2",
+    //     customer_code:"KH2",
+    //     address: "Hà Nội",
+    //     typecustomer: "Loại khách hàng",
+    //     groupcustomer: "Nhóm khác hàng",
+    //     phonenumber: "0928167294",
+    //     contact: "892 Lạc Long Quân",
+    //     checkin: "07:00",
+    //     checkout: "07:15",
+    //     timecheckin: "15 phút",
+    //     addresscheckin: "Phong Nha Kẻ Bàng",
+    //     distance: "0.2",
+    //   }
+    // ];
+    return (
+      <Table
+        columns={columns}
+        pagination={false}
+        // dataSource={dataEx}
+      />
+    );
   };
 
-  useEffect(() => {
-    (async () => {
-      let rsEmployee: rsDataFrappe<employee[]> = await AxiosService.get(
-        "/api/method/mbw_dms.api.router.get_sale_person",
-        {
-          params: {
-            team_sale: team_sale,
-            key_search: seachbykey,
-          },
-        }
-      );
-      console.log("rsemp", rsEmployee);
-      let { message: results } = rsEmployee;
-      setListEmployees(
-        results.map((employee_filter: employee) => ({
-          value: employee_filter.employee_code,
-          label: employee_filter.employee_name || employee_filter.employee_code,
-        }))
-      );
-    })();
-  }, [team_sale, seachbykey]);
   return (
     <>
       <HeaderPage
@@ -365,6 +451,28 @@ export default function ReportCheckin() {
         ]}
       />
       <div className="bg-white rounded-md py-7 px-4 border-[#DFE3E8] border-[0.2px] border-solid">
+        <div className="flex justify-start items-center pt-2">
+          <FormItemCustom
+            className="w-[200px] border-none mr-2"
+            label={"Từ ngày"}
+          ></FormItemCustom>
+          <FormItemCustom
+            className="w-[200px] border-none mr-2"
+            label={"Đến ngày"}
+          ></FormItemCustom>
+          <FormItemCustom
+            className="w-[200px] border-none mr-2"
+            label={"Nhóm bán hàng"}
+          ></FormItemCustom>
+          <FormItemCustom
+            className="w-[200px] border-none mr-2"
+            label={"Nhân viên bán hầng"}
+          ></FormItemCustom>
+          <FormItemCustom
+            className="w-[200px] border-none mr-2"
+            label={"Loại khách hàng"}
+          ></FormItemCustom>
+        </div>
         <div className="flex justify-start items-center">
           <FormItemCustom className="w-[200px] border-none mr-2">
             <DatePicker
@@ -383,68 +491,95 @@ export default function ReportCheckin() {
             />
           </FormItemCustom>
           <FormItemCustom className="w-[200px] border-none mr-2">
-            <Select
-              className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
-              defaultValue={""}
-              options={[
-                { label: "Tất cả nhóm bán hàng", value: "" },
-                ...listSales,
-              ]}
+            <TreeSelect
               showSearch
-              notFoundContent={null}
-              onSearch={(value: string) => setKeyS3(value)}
-              onChange={(value) => {
+              defaultValue={""}
+              treeData={listSales}
+              onChange={(value: string) => {
                 setTeamSale(value);
               }}
+            />
+          </FormItemCustom>
+
+          <FormItemCustom
+            name="employee"
+            className="w-[200px] border-none mr-2"
+          >
+            <Select
+              showSearch
+              filterOption={false}
+              notFoundContent={null}
+              defaultValue={""}
+              allowClear
+              onSearch={(value: string) => {
+                setKeySearch4(value);
+              }}
+              options={listEmployees}
+              onSelect={(value) => {
+                setEmployee(value);
+              }}
+              onClear={() => {
+                setEmployee("");
+              }}
+            />
+          </FormItemCustom>
+          <FormItemCustom className="w-[200px] border-none mr-2">
+            <Select
+              className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
+              options={typecustomer}
+              filterOption={false}
+              allowClear
+              showSearch
+              onSelect={(value) => {
+                setCustomerType(value);
+              }}
+              onClear={() => setCustomerType("")}
+            />
+          </FormItemCustom>
+        </div>
+        <div className="flex justify-start items-center pt-4">
+          <FormItemCustom
+            className="w-[200px] border-none mr-2"
+            label={"Nhóm khách hàng"}
+          ></FormItemCustom>
+          <FormItemCustom
+            className="w-[200px] border-none mr-2"
+            label={"Khu vực"}
+          ></FormItemCustom>
+        </div>
+
+        <div className="flex justify-start items-center">
+        <FormItemCustom className="w-[200px] border-none mr-2">
+            <Select
+              className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
+              options={listCustomerGroup}
+              onSelect={(value) => {
+                setCustomerGroup(value);
+              }}
+              onSearch={(value: string) => {
+                setKeySCustomerGroup(value);
+              }}
+              onClear={() => setCustomerGroup("")}
+              filterOption={false}
+              allowClear
+              showSearch
             />
           </FormItemCustom>
 
           <FormItemCustom className="w-[200px] border-none mr-2">
             <Select
               className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
-              options={[
-                { label: "Tất cả nhân viên", value: "" },
-                ...listEmployees,
-              ]}
-              showSearch
               defaultValue={""}
-              notFoundContent={null}
-              onSearch={setKeySearch4}
-              onChange={(value) => {
-                setEmployee(value);
+              options={listTerritory}
+              onSelect={(value) => {
+                setTerritory(value);
               }}
+              onSearch={(value: string) => {
+                setKeySTerritory(value);
+              }}
+              onClear={() => setTerritory("")}
+              filterOption={false}
               allowClear
-            />
-          </FormItemCustom>
-          <FormItemCustom className="w-[200px] border-none mr-2">
-            <Select
-              className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
-              defaultValue={""}
-              options={[
-                { label: "Loại khách hàng", value: "" },
-                ...typecustomer,
-              ]}
-              showSearch
-            />
-          </FormItemCustom>
-        </div>
-        <div className="flex justify-start items-center h-8 pt-9">
-          <FormItemCustom className="w-[200px] border-none mr-2">
-            <Select
-              className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
-              defaultValue={""}
-              options={[
-                { label: "Nhóm khách hàng", value: "" },
-                ...customergroup,
-              ]}
-              showSearch
-            />
-          </FormItemCustom>
-          <FormItemCustom className="w-[200px] border-none mr-2">
-            <Select
-              className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
-              defaultValue={""}
-              options={[{ label: "Khu vực", value: "" }, ...area]}
               showSearch
             />
           </FormItemCustom>
@@ -455,7 +590,7 @@ export default function ReportCheckin() {
             scroll={{ x: true }}
             columns={columnsCheckin}
             expandable={{ expandedRowRender, defaultExpandedRowKeys: ["0"] }}
-            dataSource={data}
+            // dataSource={data}
           />
         </div>
       </div>
