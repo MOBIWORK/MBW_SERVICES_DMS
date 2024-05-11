@@ -92,7 +92,7 @@ def get_router(id):
 def get_customer_router(data):
     try:     
         # cho phep ngoai tuyen, lay o settting nhung gio se fix cung
-        is_ngoai_tuyen= frappe.db.get_single_value("DMS Settings",fieldname=["vt_ngoaituyen"])
+        is_ngoai_tuyen= frappe.db.get_single_value("DMS Settings","vt_ngoaituyen")
         search_key = data.get("search_key")
         view_mode = validate_filter(value=data.get('view_mode'),type=['list','map'],type_check='enum') if data.get('view_mode') else 'list'
         # phan trang
@@ -125,7 +125,8 @@ def get_customer_router(data):
         thu_trong_tuan, tuan_trong_thang = weekday(today)
         #them bo loc dung tuyen neu view map hoac cau hinh dung tuyen
         if view_mode == "map" or not is_ngoai_tuyen:
-            queryFilters.update({"travel_date": ["in",["Không giới hạn",thu_trong_tuan]]})
+            # queryFilters.update({"travel_date": ["in",["Không giới hạn",thu_trong_tuan]]})
+            # dung tuyen chi xet ve tuan - Quang B.A
             queryFilters.update({"frequency": ["like",f"%{int(tuan_trong_thang)}%"]})  
         
         list_routers = frappe.db.get_all('DMS Router',filters=queryFilters,fields=["name","travel_date"],distinct=True)
