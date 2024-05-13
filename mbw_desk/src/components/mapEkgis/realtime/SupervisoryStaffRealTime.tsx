@@ -139,7 +139,6 @@ export default function SupervisoryStaffRealTime() {
         'objectId': arrDataSort[i].object_id
       })
     }
-    console.log(dataMoveTopEmployee);
     setDataTopDistanceEmployee(dataMoveTopEmployee);
   }
   const renderDataEmployee = async (arrEmployeeInput) => {
@@ -170,11 +169,9 @@ export default function SupervisoryStaffRealTime() {
         arrEmployeeInput[i].sales_order = 0;
       }
     }
-    console.log(arrEmployeeInput);
     let arrDataSort = arrEmployeeInput.sort((a, b) => {
       return b.sales_order - a.sales_order;
     });
-    console.log(arrDataSort)
     let arrEmployeeOut = [];
     for(let i = 0; i < arrDataSort.length; i++){
       if(i == 5) break;
@@ -189,7 +186,6 @@ export default function SupervisoryStaffRealTime() {
         'objectId': item.object_id
       })
     }
-    console.log(arrEmployeeOut);
     setDataEmployee(arrEmployeeOut);
   }
   const renderDataCheckingEmployee = (arrSummary, arrEmployee) => {
@@ -229,7 +225,6 @@ export default function SupervisoryStaffRealTime() {
         projectId: rs.result[ "Project ID"]
       }))
       const res_apikey = await AxiosService.get("/api/method/mbw_dms.api.vgm.map_customer.get_config_api");
-      console.log(res_apikey);
       setOptions(prev => ({
         ...prev,
         apiKey: res_apikey.result
@@ -239,13 +234,11 @@ export default function SupervisoryStaffRealTime() {
       if(responseAllEmployee.message == "Thành công"){
         arrEmployee = responseAllEmployee.result;
       }
-      console.log(arrEmployee);
       let urlSummary = `https://api.ekgis.vn/v2/tracking/locationHistory/summary/lastest/${rs.result[ "Project ID"]}/null?api_key=${options.apiKey}`;
       let res = await axios.get(urlSummary);
       if(import.meta.env.VITE_BASE_URL){
         res = res.data;
       }
-      console.log("Realtime ", import.meta.env.VITE_BASE_URL);
       if(res?.results.length > 0){
         let arrSummary = res?.results;
         renderDataMoveTopEmployee(arrSummary, JSON.parse(JSON.stringify(arrEmployee)));
@@ -262,7 +255,7 @@ export default function SupervisoryStaffRealTime() {
         <div style={{
           position: 'fixed',
           width: '100%',
-          height: '85%',
+          height: '100%',
           backgroundColor: 'rgba(0, 0, 0, 0.5)',
           zIndex: 9999,
           display: 'flex',
