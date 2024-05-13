@@ -46,15 +46,11 @@ const columns: TableColumnsType<DataSaleOrder> = [
     title: "Đơn đặt",
     dataIndex: "name",
     key: "name",
-    render: (_, record: any) => (
-      <div className="!w-[175px]">
-        <a
-          className="text-[#212B36]"
-          href={`app/sales-order/${record.name}`}
-          target="_blank"
-        >
-          {record.name}
-        </a>
+    render: (name, record: any) => (
+      <div className="!w-[175px]" onClick={() => {
+        window.location.href = `/app/sales-order/${name}`
+      }}>
+       {name}
       </div>
     ),
   },
@@ -77,18 +73,15 @@ const columns: TableColumnsType<DataSaleOrder> = [
   {
     title: "Kho",
     dataIndex: "set_warehouse",
-    key: "set_warehouse",
-    render: (_, record: any) => (
-      <div className="!w-[175px]">{record.set_warehouse}</div>
-    ),
+    key: "set_warehouse"
   },
   {
     title: "Ngày tạo",
     dataIndex: "transaction_date",
     key: "transaction_date",
-    render: (_, record: any) => (
+    render: (value) => (
       <div className="!w-[175px]">
-        {dayjs(record.transaction_date * 1000).format("DD/MM/YYYY")}
+        {dayjs(value * 1000).format("DD/MM/YYYY")}
       </div>
     ),
   },
