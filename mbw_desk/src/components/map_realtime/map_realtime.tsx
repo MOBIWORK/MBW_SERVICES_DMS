@@ -19,12 +19,16 @@ function RealtimeMap({ options, onClickPopup, status }) {
     const defaultOptions = {
         center: [105, 17],
         zoom: 4.5,
+        bounds: [
+            [82.79, 1.10], // Southwest coordinates
+            [132.63, 35.75] // Northeast coordinates
+        ],
+        pitch: 30,
         reloadTime: 60000,
         stopTime: 600,
-        iconOnline: 'https://files.ekgis.vn/sdks/tracking/assets/check-icon.png',
-        iconOffline: 'https://files.ekgis.vn/sdks/tracking/assets/offline-marker.png',
     };
     const _options = extend({}, defaultOptions, options);
+    if (_options.apiKey === "" || !_options.apiKey) throw new Error("apiKey is required");
 
     const initializeMap = async () => {
         try {
@@ -33,7 +37,8 @@ function RealtimeMap({ options, onClickPopup, status }) {
                 center: _options.center,
                 zoom: _options.zoom,
                 minZoom: 1,
-                pitch: 30,
+                pitch: _options.pitch,
+                maxBounds: _options.bounds
             });
 
             var _map = map.current;
@@ -191,7 +196,7 @@ function RealtimeMap({ options, onClickPopup, status }) {
                     }
                     return acc;
                 }, { online: 0, offline: 0 });
-                status(statusCount);
+                if (status) status(statusCount);
 
                 const FeatureCollection = {
                     'type': 'FeatureCollection',
@@ -320,7 +325,7 @@ function RealtimeMap({ options, onClickPopup, status }) {
                                 popup.on('open', () => {
                                     el.querySelector('.marker-name').style.display = 'none';
                                     popup.getElement().querySelector('.show-his').addEventListener('click', () => {
-                                        onClickPopup({ _id: props._id, name: props.name })
+                                        if (onClickPopup) onClickPopup({ _id: props._id, name: props.name })
                                     })
                                 })
                                 popup.on('close', () => {
