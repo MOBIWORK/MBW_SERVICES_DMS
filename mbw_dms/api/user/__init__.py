@@ -124,7 +124,6 @@ def get_list_top_employee(**kwargs):
             },
             fields = ['name', 'employee']
         )
-
         customer_set = set()
         for i in router_employee:
             emp = frappe.get_doc('Employee', {'name': i['employee']}).as_dict()
@@ -153,15 +152,15 @@ def get_list_top_employee(**kwargs):
             for a in customers:
                 fre = a['frequency']
                 week_router = []
-                frequency = fre.split(';')
-                for j in frequency:
-                    week_router.append(int(j))
+                if fre:
+                    frequency = fre.split(';')
+                    for j in frequency:
+                        week_router.append(int(j))
                 current_week = current_month_week()
                 if current_week in week_router:
                     cus += 1
             i['must_visit'] = cus
             i.pop('name')
-
         router_employee = sorted(router_employee, key=lambda x: x['sales_order'], reverse=True)[:5]
         return gen_response(200, 'Thành công', router_employee)
     except Exception as e:
