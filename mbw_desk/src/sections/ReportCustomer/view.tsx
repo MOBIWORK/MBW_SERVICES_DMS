@@ -145,9 +145,10 @@ export default function ReportCustomer() {
         title: "Ngày cập nhật",
         dataIndex: "update_at",
         key: "update_at",
-        render: (_, record: any) => (
-          <p>{dayjs(record.update_at * 1000).format("DD/MM/YYYY")}</p>
-        ),
+        render: (value, record: any) => {
+          {value ? <p>{dayjs(value * 1000).format("DD/MM/YYYY")}</p> : <></>}
+          
+        },
       },
       {
         title: "Người cập nhật",
