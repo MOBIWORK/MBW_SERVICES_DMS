@@ -40,14 +40,27 @@ def find(filters = {}, options = ["*"],page_length = 20, page =1,order = "name d
 				items = dataitem.get("items")
 			def filterFunction(value) :
 				filters_product = True
+				print("value=============",value.exp_time)
 				if  data.get("data").get("item_unit"):
-					filters_product = filters_product & (value.item_unit ==  data.get("data").get("item_unit"))
+					if value.item_unit:
+						filters_product = filters_product & (value.item_unit ==  data.get("data").get("item_unit"))
+					else:
+						filters_product = filters_product & False
 				if  data.get("data").get("item_code"):
-					filters_product = filters_product & (value.item_code ==  data.get("data").get("item_code"))
+					if value.item_code:
+						filters_product = filters_product & (value.item_code ==  data.get("data").get("item_code"))
+					else:
+						filters_product = filters_product & False
 				if data.get("data").get("expire_from"):
-					filters_product = filters_product & (value.exp_time >=  data.get("data").get("expire_from"))
+						if value.exp_time:
+							filters_product = filters_product & (value.exp_time >=  data.get("data").get("expire_from"))
+						else:
+							filters_product = filters_product & True
 				if  data.get("data").get("expire_to"):
-					filters_product = filters_product & (value.exp_time <=  data.get("data").get("expire_to"))
+					if value.exp_time:
+						filters_product = filters_product & (value.exp_time <=  data.get("data").get("expire_to"))
+					else:
+						filters_product = filters_product & True
 				if data.get("data").get("update_at_from"):
 					filters_product = filters_product & (value.update_at >=  data.get("data").get("update_at_from"))
 				if  data.get("data").get("update_at_to"):

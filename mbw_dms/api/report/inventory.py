@@ -34,6 +34,8 @@ def get_customer_inventory(**body):
             filters.update({"item_code": item_code})
         if expire_from:
             expire_from = datetime.fromtimestamp(float(expire_from)).date()
+            print("============",expire_from)
+            
             filters.update({"exp_time": [">=",expire_from]})
         if expire_to:
             expire_to = datetime.fromtimestamp(float(expire_to)).date()
