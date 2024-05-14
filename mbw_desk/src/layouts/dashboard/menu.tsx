@@ -45,7 +45,7 @@ export default function MenuLeft({
       <div className="font-semibold text-lg text-[#919EAB] leading-[22px] pl-[8px] mx-2 pb-4">
         <Link className="font-semibold text-lg !text-[#919EAB] leading-[22px]" to="/">DMS</Link>
       </div>
-      <div className="flex-1 !max-h-[89vh] overflow-y-scroll">
+      <div className="flex-1 !max-h-[89vh] overflow-y-scroll invisible-scrollbar">
         <MenuCustom
           theme="light"
           onClick={onClick}

@@ -59,9 +59,17 @@ body,#root {
 
 * {
   letter-spacing: -0.025em;
+}
 
-  scrollbar-width: thin;
-  scrollbar-color: #888 #f1f1f1;
+body::-webkit-scrollbar {
+  width: 5px;
+  display: block;
+  width: 10em;
+  overflow: auto;
+  height: 2em;
+  padding: 1em;
+  margin: 1em auto;
+  color: #888 #f1f1f1;
 }
 
 p {
@@ -103,4 +111,9 @@ p {
 
 body, * {
   font-family: "Inter" ,sans-serif;
+}
+
+
+.invisible-scrollbar::-webkit-scrollbar {
+  display: none!important;
 }
