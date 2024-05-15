@@ -194,9 +194,9 @@ def get_report_doc(report_name):
 
 def post_image(name_image, faceimage, doc_type, doc_name):
     # save file and insert Doctype File
-    file_name = name_image + "_" + str(datetime.now()) + "_.png"
+    file_name = name_image + "_"+ str(datetime.now().timestamp()) + "_.png"
     imgdata = base64.b64decode(faceimage)
-
+    print("file_name",file_name)
     doc_file = save_file(file_name, imgdata, doc_type, doc_name,
                          folder=None, decode=False, is_private=0, df=None)
 
@@ -204,6 +204,7 @@ def post_image(name_image, faceimage, doc_type, doc_name):
     path_file = "/files/" + file_name
     delete_file(path_file)
     file_url = BASE_URL + doc_file.get('file_url')
+    print("file_url",file_url)
     return file_url
 
 def add_text_to_image(file_name, imgdata, description):

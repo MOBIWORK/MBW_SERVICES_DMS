@@ -145,9 +145,9 @@ def get_customer_router(data):
                 customer = pydash.filter_(detail_router.get('customers'),lambda value: (value.frequency.find(str(int(tuan_trong_thang))) != -1))          
 
             list_customer += customer
-        if not is_ngoai_tuyen:
-            list_customer_in_route = list_customer
-        print('in router',list_customer_in_route)
+        # if not is_ngoai_tuyen:
+        #     list_customer_in_route = list_customer
+        # print('in router',list_customer_in_route)
         sort = "customer_name desc"
         if order_by: 
             sort = f"customer_name {order_by}"
@@ -192,10 +192,13 @@ def get_customer_router(data):
             if checkin != None and checkin.is_checkout:
                 customer['is_checkin'] = True
             if not is_ngoai_tuyen: 
-                customer["is_route"] = True
+                customer["is_route"] = False
+                # print(customer.customer_code,customer.customer_code in list_customer_in_route)
+                if customer.customer_code in list_customer_in_route:
+                    customer["is_route"] = True
             else:
                 customer["is_route"] = False
-                print(customer.customer_code,customer.customer_code in list_customer_in_route)
+                # print(customer.customer_code,customer.customer_code in list_customer_in_route)
                 if customer.customer_code in list_customer_in_route:
                     customer["is_route"] = True
         total_customer= len(frappe.db.get_all('Customer',filters= FiltersCustomer))

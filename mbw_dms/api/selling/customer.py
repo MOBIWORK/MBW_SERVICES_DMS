@@ -232,6 +232,7 @@ def create_customer(**kwargs):
 
         if kwargs.get('faceimage'):
             new_customer.image = post_image(name_image='', faceimage=kwargs.get('faceimage'), doc_type='Customer', doc_name=new_customer.name)
+            return "ok"
             new_customer.save()
 
         # Thêm khách hàng vào tuyến 
