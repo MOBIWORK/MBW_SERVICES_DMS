@@ -4,7 +4,7 @@ import frappe
 from bs4 import BeautifulSoup
 from frappe import _
 from frappe.utils import cstr
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 import base64
 from frappe.core.doctype.file.utils import delete_file
 from frappe.utils.file_manager import save_file
@@ -18,6 +18,23 @@ from datetime import datetime
 import pytz
 
 BASE_URL = frappe.utils.get_request_site_address()
+
+def time_now_utc():
+    now_utc = datetime.now(pytz.utc)
+    hcm_timezone = pytz.timezone('Asia/Ho_Chi_Minh')
+    time_now = now_utc.astimezone(hcm_timezone)
+    return time_now
+
+def convert_utc_time(timestamp:float):
+    dt = datetime.fromtimestamp(timestamp)
+
+    # Xác định múi giờ của 'Asia/Ho_Chi_Minh'
+    hcm_timezone = pytz.timezone('Asia/Ho_Chi_Minh')  # UTC+7 cho múi giờ 'Asia/Ho_Chi_Minh'
+
+    # Áp dụng múi giờ 'Asia/Ho_Chi_Minh' cho đối tượng datetime
+    dt_hcm = dt.replace(tzinfo=hcm_timezone)
+
+    return dt_hcm
 
 def this_week() :
     today = datetime.now()
@@ -196,7 +213,6 @@ def post_image(name_image, faceimage, doc_type, doc_name):
     # save file and insert Doctype File
     file_name = name_image + "_"+ str(datetime.now().timestamp()) + "_.png"
     imgdata = base64.b64decode(faceimage)
-    print("file_name",file_name)
     doc_file = save_file(file_name, imgdata, doc_type, doc_name,
                          folder=None, decode=False, is_private=0, df=None)
 
@@ -204,7 +220,6 @@ def post_image(name_image, faceimage, doc_type, doc_name):
     path_file = "/files/" + file_name
     delete_file(path_file)
     file_url = BASE_URL + doc_file.get('file_url')
-    print("file_url",file_url)
     return file_url
 
 def add_text_to_image(file_name, imgdata, description):
