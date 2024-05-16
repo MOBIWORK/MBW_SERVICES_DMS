@@ -82,9 +82,6 @@ export default function RouterDashboard() {
         <Col span={10} ><ListCustom data={report?.ds_sp_doanh_so_cao} /></Col>
       </Row>
 
-      <WrapperCard type="map">
-        <div className="h-[600px]"><MapEkgisRealTime /></div>
-      </WrapperCard>
     </>
   );
 }

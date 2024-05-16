@@ -15,6 +15,7 @@ import React, { useEffect, useState } from "react";
 import dayjs from "dayjs";
 import { AxiosService } from "../../services/server";
 import useDebounce from "../../hooks/useDebount";
+import { translationUrl } from "@/util";
 
 interface DataTypeCustomNew {
   key: React.Key;
@@ -351,6 +352,9 @@ export default function ReportCustomNew() {
             icon: <VerticalAlignBottomOutlined className="text-xl" />,
             size: "20px",
             className: "flex items-center",
+            action: () => {
+              translationUrl("/app/data-export/Data%20Export")
+            }
           },
         ]}
       />
@@ -392,7 +396,7 @@ export default function ReportCustomNew() {
               onClear={() => setDepartment("")}
               filterOption={false}
               allowClear
-              showSearch
+              placeholder="Tất cả phòng ban"
             />
           </FormItemCustom>
 
@@ -409,7 +413,7 @@ export default function ReportCustomNew() {
               onClear={() => setEmployee("")}
               filterOption={false}
               allowClear
-              showSearch
+              placeholder="Tất cả nhân viên"
             />
           </FormItemCustom>
 
@@ -419,7 +423,7 @@ export default function ReportCustomNew() {
               options={typecustomer}
               filterOption={false}
               allowClear
-              showSearch
+              placeholder="Tất cả loại khách hàng"
               onSelect={(value) => {
                 setCustomerType(value);
               }}
@@ -440,14 +444,13 @@ export default function ReportCustomNew() {
               onClear={() => setCustomerGroup("")}
               filterOption={false}
               allowClear
-              showSearch
+              placeholder="Tất cả nhóm khách hàng"
             />
           </FormItemCustom>
 
           <FormItemCustom className="w-[200px] border-none mr-2">
             <Select
               className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
-              defaultValue={""}
               options={listTerritory}
               onSelect={(value) => {
                 setTerritory(value);
@@ -458,7 +461,7 @@ export default function ReportCustomNew() {
               onClear={() => setTerritory("")}
               filterOption={false}
               allowClear
-              showSearch
+              placeholder="Tất cả khu vực"
             />
           </FormItemCustom>
         </div>

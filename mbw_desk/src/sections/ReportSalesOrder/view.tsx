@@ -7,6 +7,7 @@ import { AxiosService } from "../../services/server";
 import dayjs from "dayjs";
 import useDebounce from "../../hooks/useDebount";
 import { DatePickerProps } from "antd/lib";
+import { translationUrl } from "@/util";
 
 interface DataSaleOrder {
   key: React.Key;
@@ -412,6 +413,9 @@ export default function ReportSalesOrder() {
             icon: <VerticalAlignBottomOutlined className="text-xl" />,
             size: "20px",
             className: "flex items-center",
+            action: () => {
+              translationUrl("/app/data-export/Data%20Export")
+            }
           },
         ]}
       />
@@ -454,7 +458,7 @@ export default function ReportSalesOrder() {
               onClear={() => setCompany("")}
               filterOption={false}
               allowClear
-              showSearch
+              placeholder="Tất cả công ty"
             />
           </FormItemCustom>
 
@@ -471,14 +475,13 @@ export default function ReportSalesOrder() {
               onClear={() => setCustomer("")}
               filterOption={false}
               allowClear
-              showSearch
+              placeholder="Tất cả khách hàng"
             />
           </FormItemCustom>
 
           <FormItemCustom className="w-[200px] border-none mr-2">
             <Select
               className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
-              defaultValue={""}
               options={listTerritory}
               onSelect={(value) => {
                 setTerritory(value);
@@ -489,7 +492,7 @@ export default function ReportSalesOrder() {
               onClear={() => setTerritory("")}
               filterOption={false}
               allowClear
-              showSearch
+              placeholder="Tất cả khu vực"
             />
           </FormItemCustom>
 
@@ -498,6 +501,7 @@ export default function ReportSalesOrder() {
               format={"DD-MM-YYYY"}
               className="!bg-[#F4F6F8]"
               onChange={onChange}
+              placeholder="Từ ngày"
             />
           </FormItemCustom>
 
@@ -506,6 +510,7 @@ export default function ReportSalesOrder() {
               format={"DD-MM-YYYY"}
               className="!bg-[#F4F6F8]"
               onChange={onChange1}
+              placeholder="Đến ngày"
             />
           </FormItemCustom>
         </div>
@@ -536,7 +541,7 @@ export default function ReportSalesOrder() {
               onClear={() => setWarehouse("")}
               filterOption={false}
               allowClear
-              showSearch
+              placeholder="Tất cả kho"
             />
           </FormItemCustom>
 
@@ -553,7 +558,7 @@ export default function ReportSalesOrder() {
               onClear={() => setEmployee("")}
               filterOption={false}
               allowClear
-              showSearch
+              placeholder="Tất cả nhân viên"
             />
           </FormItemCustom>
         </div>

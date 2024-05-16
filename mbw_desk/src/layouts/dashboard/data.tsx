@@ -174,14 +174,6 @@ export const listMenu: MenuItem[] = [
       },
       {
         label: (
-          <Link className={"text-[#212B36] hover:text-[#212B36]"} to="/report-debt">
-              Báo cáo công nợ khách hàng
-          </Link>
-        ),
-        key: "report-debt",
-      },
-      {
-        label: (
           <Link className={"text-[#212B36] hover:text-[#212B36]"} to="/report-custom-new">
               Báo cáo khách hàng mới
           </Link>
