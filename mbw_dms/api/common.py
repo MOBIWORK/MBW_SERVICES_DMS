@@ -161,7 +161,7 @@ def get_employee_id():
 def get_employee_info():
     try:
         user_id = get_user_id()
-        return get_employee_by_user(user_id.get('email'),["name","user_id"])
+        return get_employee_by_user(user_id.get('email'),["name","user_id","fullname"])
     except:
         return ""
 

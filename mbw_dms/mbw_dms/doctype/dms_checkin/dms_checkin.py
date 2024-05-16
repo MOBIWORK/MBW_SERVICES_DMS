@@ -6,7 +6,7 @@ from frappe import  _
 from frappe.model.document import Document
 import datetime
 from frappe.utils.data import get_time
-from mbw_dms.api.common import exception_handle, gen_response, get_language, get_user_id, upload_image_s3, post_image, get_employee_info, get_value_child_doctype, get_employee_id
+from mbw_dms.api.common import (exception_handle, gen_response, get_language, get_user_id, upload_image_s3, post_image, get_employee_info, get_value_child_doctype, get_employee_id,time_now_utc)
 from mbw_dms.api.validators import validate_datetime, validate_filter
 from mbw_dms.mbw_dms.utils import create_dms_log
 from mbw_dms.config_translate import i18n
@@ -272,13 +272,13 @@ def create_checkin(kwargs):
 @frappe.whitelist(methods='POST')
 def create_checkin_inventory(body):
     try:
-        user = get_employee_id()
+        employee = get_employee_info()
         normal_keys = [
             "customer_code", "customer_name", "customer_type", "customer_address", "checkin_id"
         ]
         del body['cmd']
         doc = frappe.new_doc("DMS Inventory")
-        doc.set("create_by",user.name)
+        doc.set("create_by",employee.get("name"))
         for key, value in body.items():
             if key in normal_keys:
                 doc.set(key, validate_filter(type_check='require_field', value=(value,key)))
@@ -291,6 +291,10 @@ def create_checkin_inventory(body):
                 # Calculate total cost
                 if 'quantity' in item and 'item_price' in item:
                     item['total_cost'] = item['quantity'] * item['item_price']
+            item["update_bycode"] = employee.get("name")
+            item["update_byname"] = employee.get("fullname")
+            item["update_byname"] = time_now_utc()
+            
             doc.append("items", item)
         doc.insert()
         frappe.db.commit()
