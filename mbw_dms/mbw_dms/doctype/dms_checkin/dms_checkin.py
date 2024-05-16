@@ -6,7 +6,7 @@ from frappe import  _
 from frappe.model.document import Document
 import datetime
 from frappe.utils.data import get_time
-from mbw_dms.api.common import exception_handle, gen_response, get_language, get_user_id, upload_image_s3, post_image, get_employee_info, get_value_child_doctype
+from mbw_dms.api.common import exception_handle, gen_response, get_language, get_user_id, upload_image_s3, post_image, get_employee_info, get_value_child_doctype, get_employee_id
 from mbw_dms.api.validators import validate_datetime, validate_filter
 from mbw_dms.mbw_dms.utils import create_dms_log
 from mbw_dms.config_translate import i18n
@@ -272,7 +272,7 @@ def create_checkin(kwargs):
 @frappe.whitelist(methods='POST')
 def create_checkin_inventory(body):
     try:
-        user = get_user_id()
+        user = get_employee_id()
         normal_keys = [
             "customer_code", "customer_name", "customer_type", "customer_address", "checkin_id"
         ]
@@ -427,6 +427,8 @@ def cancel_checkout(data):
         frappe.db.delete("Sales Invoice",{"checkin_id":checkin_id})
         #xoa album anh
         frappe.db.delete("DMS Album Image",{"checkin_id":checkin_id})
+        #xoa check ton kho
+        frappe.db.delete("DMS Inventory",{"checkin_id":checkin_id})
         return
     except Exception as e :
         exception_handle(e)

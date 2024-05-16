@@ -3,7 +3,7 @@ from datetime import datetime
 from mbw_dms.mbw_dms.doctype.dms_inventory.dms_inventory import find
 
 from mbw_dms.api.common import gen_response ,exception_handle
-
+from frappe import _
 
 @frappe.whitelist(methods="GET",allow_guest=True)
 def get_customer_inventory(**body):
@@ -26,6 +26,12 @@ def get_customer_inventory(**body):
         qty_inven_to = body.get("qty_inven_to")
         total_from = body.get("total_from")
         total_to = body.get("total_to")
+
+        # Bộ lọc khách hàng
+        customer = body.get("customer")
+        # lọc nhân viên
+        employee = body.get("employee")
+        message = ""
         # tao filter
         filters = {}
         if employee_sale:
@@ -34,8 +40,6 @@ def get_customer_inventory(**body):
             filters.update({"item_code": item_code})
         if expire_from:
             expire_from = datetime.fromtimestamp(float(expire_from)).date()
-            print("============",expire_from)
-            
             filters.update({"exp_time": [">=",expire_from]})
         if expire_to:
             expire_to = datetime.fromtimestamp(float(expire_to)).date()
@@ -56,7 +60,15 @@ def get_customer_inventory(**body):
             filters.update({"total_cost": [">=", float(total_from)]})
         if total_to:
             filters.update({"total_cost": ["<=", float(total_to)]})
-        return gen_response(200,"",find(filters=filters, page_length=page_size,page=page_number,data= {
+        if customer:
+            customer_code = frappe.db.get_value("Customer",customer,["customer_code"],as_dict=1)
+            if customer_code:                
+                filters.update({"customer_code": customer_code.get("customer_code")})
+            else :
+                message= _("Custoemr not have Code")
+        if employee:
+           filters.update({"create_by": employee})
+        return gen_response(200,message,find(filters=filters, page_length=page_size,page=page_number,data= {
             "expire_from" :expire_from,
             "expire_to":expire_to,
             "update_at_from" :update_at_from,

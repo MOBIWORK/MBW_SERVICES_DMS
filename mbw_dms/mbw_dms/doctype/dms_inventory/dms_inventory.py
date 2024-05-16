@@ -40,7 +40,6 @@ def find(filters = {}, options = ["*"],page_length = 20, page =1,order = "name d
 				items = dataitem.get("items")
 			def filterFunction(value) :
 				filters_product = True
-				print("value=============",value.exp_time)
 				if  data.get("data").get("item_unit"):
 					if value.item_unit:
 						filters_product = filters_product & (value.item_unit ==  data.get("data").get("item_unit"))
