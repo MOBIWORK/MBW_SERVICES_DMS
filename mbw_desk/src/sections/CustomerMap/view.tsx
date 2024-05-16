@@ -824,16 +824,18 @@ function CustomerMapView() {
       features: [],
     };
     for (let i = 0; i < lstCustomer.length; i++) {
-      let lngLat = JSON.parse(lstCustomer[i].customer_location_primary);
-      let feature = {
-        type: "Feature",
-        geometry: {
-          type: "Point",
-          coordinates: [lngLat.long, lngLat.lat],
-        },
-        properties: lstCustomer[i],
-      };
-      dataGeo.features.push(feature);
+      if(lstCustomer[i].customer_location_primary != null && lstCustomer[i].customer_location_primary != ""){
+        let lngLat = JSON.parse(lstCustomer[i].customer_location_primary);
+        let feature = {
+          type: "Feature",
+          geometry: {
+            type: "Point",
+            coordinates: [lngLat.long, lngLat.lat],
+          },
+          properties: lstCustomer[i],
+        };
+        dataGeo.features.push(feature);
+      }
     }
     if (map.current == null) return;
     if (!map.current.isStyleLoaded()) return;
