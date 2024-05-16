@@ -157,7 +157,7 @@ def get_customer_router(data):
             list_customer_name.append(customer.get('customer_code'))
 
         # nếu truyền lên tuyến hôm nay thì chỉ trả về đúng tuyến
-        if router_today != "" and router_today == router_filter[0]:
+        if router_filter and router_today != "" and router_today == router_filter[0]:
             list_customer_name = list_customer_in_route
         FiltersCustomer = {"customer_code": ["in",list_customer_name]}
         if birthday_from and birthday_to:
