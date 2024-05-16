@@ -14,6 +14,7 @@ import React, { useEffect, useState } from "react";
 import { AxiosService } from "@/services/server";
 import useDebounce from "@/hooks/useDebount";
 import { DatePickerProps } from "antd/lib";
+import { translationUrl } from "@/util";
 
 interface DataCheckinFirst {
   key: React.Key;
@@ -350,6 +351,9 @@ export default function ReportCheckinFirst() {
             icon: <VerticalAlignBottomOutlined className="text-xl" />,
             size: "20px",
             className: "flex items-center",
+            action: () => {
+              translationUrl("/app/data-export/Data%20Export")
+            }
           },
         ]}
       />
@@ -390,7 +394,7 @@ export default function ReportCheckinFirst() {
               onClear={() => setDepartment("")}
               filterOption={false}
               allowClear
-              showSearch
+              placeholder="Tất cả phòng ban"
             />
           </FormItemCustom>
           <FormItemCustom className="w-[200px] border-none mr-2">
@@ -406,7 +410,7 @@ export default function ReportCheckinFirst() {
               onClear={() => setEmployee("")}
               filterOption={false}
               allowClear
-              showSearch
+              placeholder="Tất cả nhân viên"
             />
           </FormItemCustom>
 
@@ -416,7 +420,7 @@ export default function ReportCheckinFirst() {
               options={typecustomer}
               filterOption={false}
               allowClear
-              showSearch
+              placeholder="Tất cả loại khách hàng"
               onSelect={(value) => {
                 setCustomerType(value);
               }}
@@ -437,14 +441,13 @@ export default function ReportCheckinFirst() {
               onClear={() => setCustomerGroup("")}
               filterOption={false}
               allowClear
-              showSearch
+              placeholder="Tất cả nhóm khách hàng"
             />
           </FormItemCustom>
 
           <FormItemCustom className="w-[200px] border-none mr-2">
             <Select
               className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
-              defaultValue={""}
               options={listTerritory}
               onSelect={(value) => {
                 setTerritory(value);
@@ -455,7 +458,7 @@ export default function ReportCheckinFirst() {
               onClear={() => setTerritory("")}
               filterOption={false}
               allowClear
-              showSearch
+              placeholder="Tất cả khu vực"
             />
           </FormItemCustom>
         </div>
@@ -475,6 +478,7 @@ export default function ReportCheckinFirst() {
           <FormItemCustom className="w-[200px] border-none mr-2">
             <DatePicker
               format={"DD-MM-YYYY"}
+              placeholder="Từ ngày"
               className="!bg-[#F4F6F8]"
               onChange={onChange}
             />
@@ -483,6 +487,7 @@ export default function ReportCheckinFirst() {
           <FormItemCustom className="w-[200px] border-none mr-2">
             <DatePicker
               format={"DD-MM-YYYY"}
+              placeholder="Đến ngày"
               className="!bg-[#F4F6F8]"
               onChange={onChange1}
             />

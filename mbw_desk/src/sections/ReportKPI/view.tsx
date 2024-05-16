@@ -10,7 +10,7 @@ import { rsData, rsDataFrappe } from "../../types/response";
 import { employee } from "../../types/employeeFilter";
 import useDebounce from "../../hooks/useDebount";
 import dayjs from "dayjs";
-import { treeArray } from "../../util";
+import { translationUrl, treeArray } from "../../util";
 import { listSale } from "../../types/listSale";
 
 const { Column, ColumnGroup } = TableCustom;
@@ -151,6 +151,9 @@ export default function ReportKPI() {
             icon: <VerticalAlignBottomOutlined className="text-xl" />,
             size: "20px",
             className: "flex items-center",
+            action: () => {
+              translationUrl("/app/data-export/Data%20Export")
+            }
           },
         ]}
       />
@@ -171,20 +174,23 @@ export default function ReportKPI() {
             <DatePicker
               className="!bg-[#F4F6F8] !h-8"
               onChange={onChange}
+              placeholder="Tất cả "
               picker="year"
               defaultValue={dayjs().startOf("year")}
             />
           </FormItemCustom>
-          <FormItemCustom className="w-[200px] border-none mr-2">
+          <FormItemCustom className="w-[300px] border-none mr-2">
             <TreeSelect
-              showSearch
-              defaultValue={""}
-              treeData={[
-                { label: "Tất cả nhóm bán hàng", value: "" },
-                ...listSales,
-              ]}
+              placeholder="Nhóm bán hàng"
+              allowClear
+              treeData={listSales}
               onChange={(value: string) => {
                 setTeamSale(value);
+              }}
+              dropdownStyle={{
+                maxHeight: 400,
+                overflow: "auto",
+                minWidth: 400,
               }}
             />
           </FormItemCustom>
@@ -194,18 +200,14 @@ export default function ReportKPI() {
             className="w-[200px] border-none mr-2"
           >
             <Select
-              showSearch
               filterOption={false}
               notFoundContent={null}
-              defaultValue={""}
               allowClear
+              placeholder="Tất cả nhân viên"
               onSearch={(value: string) => {
                 setKeySearch4(value);
               }}
-              options={[
-                { label: "Tất cả nhân viên", value: "" },
-                ...listEmployees,
-              ]}
+              options={listEmployees}
               onSelect={(value) => {
                 setEmployee(value);
               }}

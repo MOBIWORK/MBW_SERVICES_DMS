@@ -492,11 +492,16 @@ export default function ReportCheckin() {
           </FormItemCustom>
           <FormItemCustom className="w-[200px] border-none mr-2">
             <TreeSelect
-              showSearch
-              defaultValue={""}
+              placeholder="Nhóm bán hàng"
+              allowClear
               treeData={listSales}
               onChange={(value: string) => {
                 setTeamSale(value);
+              }}
+              dropdownStyle={{
+                maxHeight: 400,
+                overflow: "auto",
+                minWidth: 400,
               }}
             />
           </FormItemCustom>
@@ -506,11 +511,10 @@ export default function ReportCheckin() {
             className="w-[200px] border-none mr-2"
           >
             <Select
-              showSearch
               filterOption={false}
               notFoundContent={null}
-              defaultValue={""}
               allowClear
+              placeholder="Tất cả nhân viên"
               onSearch={(value: string) => {
                 setKeySearch4(value);
               }}
@@ -525,11 +529,10 @@ export default function ReportCheckin() {
           </FormItemCustom>
           <FormItemCustom className="w-[200px] border-none mr-2">
             <Select
-              className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
               options={typecustomer}
+              placeholder="Tất cả loại khách hàng"
               filterOption={false}
               allowClear
-              showSearch
               onSelect={(value) => {
                 setCustomerType(value);
               }}
@@ -562,14 +565,13 @@ export default function ReportCheckin() {
               onClear={() => setCustomerGroup("")}
               filterOption={false}
               allowClear
-              showSearch
+              placeholder="Tất cả nhóm khách hàng"
             />
           </FormItemCustom>
 
           <FormItemCustom className="w-[200px] border-none mr-2">
             <Select
               className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
-              defaultValue={""}
               options={listTerritory}
               onSelect={(value) => {
                 setTerritory(value);
@@ -580,7 +582,7 @@ export default function ReportCheckin() {
               onClear={() => setTerritory("")}
               filterOption={false}
               allowClear
-              showSearch
+              placeholder="Tất cả khu vực"
             />
           </FormItemCustom>
         </div>

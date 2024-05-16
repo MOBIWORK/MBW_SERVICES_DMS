@@ -23,6 +23,7 @@ import { AxiosService } from "../../services/server";
 import dayjs from "dayjs";
 import { useForm } from "antd/es/form/Form";
 import useDebounce from "../../hooks/useDebount";
+import { translationUrl } from "@/util";
 
 interface DataCustomer {
   key: React.Key;
@@ -146,8 +147,9 @@ export default function ReportCustomer() {
         dataIndex: "update_at",
         key: "update_at",
         render: (value, record: any) => {
-          {value ? <p>{dayjs(value * 1000).format("DD/MM/YYYY")}</p> : <></>}
-          
+          {
+            value ? <p>{dayjs(value * 1000).format("DD/MM/YYYY")}</p> : <></>;
+          }
         },
       },
       {
@@ -293,7 +295,7 @@ export default function ReportCustomer() {
             item_code,
             page_size: PAGE_SIZE,
             page_number: page,
-            unit_product: unit
+            unit_product: unit,
           },
         }
       );
@@ -314,7 +316,7 @@ export default function ReportCustomer() {
     update_at_from,
     update_at_to,
     page,
-    unit
+    unit,
   ]);
 
   return (
@@ -328,6 +330,9 @@ export default function ReportCustomer() {
             icon: <VerticalAlignBottomOutlined className="text-xl" />,
             size: "20px",
             className: "flex items-center",
+            action: () => {
+              translationUrl("/app/data-export/Data%20Export")
+            }
           },
         ]}
       />
@@ -351,14 +356,15 @@ export default function ReportCustomer() {
                 <div className="flex justify-start items-center">
                   <FormItemCustom className="!w-[200px] border-none mr-2">
                     <Select
+                      optionFilterProp = "children"
                       filterOption={false}
-                      showSearch
-                      notFoundContent={null}
                       onSearch={(value: string) => setKeyItem(value)}
-                      options={item}
                       onSelect={(value) => {
                         setItemCode(value);
                       }}
+                      placeholder={<>Tất cả sản phẩm</>}
+                      notFoundContent={null}
+                      options={item}
                       allowClear
                       onClear={() => setItemCode("")}
                       optionRender={(option) => {
@@ -384,7 +390,7 @@ export default function ReportCustomer() {
 
                   <FormItemCustom className="!w-[200px] border-none mr-2">
                     <Select
-                      className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
+                      placeholder="Tất cả đơn vị tính"
                       options={listUnit}
                       onSelect={(value) => {
                         setUnit(value);
@@ -395,7 +401,6 @@ export default function ReportCustomer() {
                       onClear={() => setUnit("")}
                       filterOption={false}
                       allowClear
-                      showSearch
                     />
                   </FormItemCustom>
                 </div>
@@ -595,26 +600,25 @@ export default function ReportCustomer() {
           </Col>
         </Row>
 
-          <TableCustom
-            columns={columns}
-            expandable={{ expandedRowRender, defaultExpandedRowKeys: ["0"] }}
-            dataSource={dataCustomer?.data?.map((dataCus: DataCustomer) => {
-              return {
-                ...dataCus,
-                key: dataCus.name,
-              };
-            })}
-            pagination={{
-              defaultPageSize: PAGE_SIZE,
-              total,
-              showSizeChanger: false,
-              onChange(page) {
-                setPage(page);
-              },
-            }}
-          />
-        <div className="">
-        </div>
+        <TableCustom
+          columns={columns}
+          expandable={{ expandedRowRender, defaultExpandedRowKeys: ["0"] }}
+          dataSource={dataCustomer?.data?.map((dataCus: DataCustomer) => {
+            return {
+              ...dataCus,
+              key: dataCus.name,
+            };
+          })}
+          pagination={{
+            defaultPageSize: PAGE_SIZE,
+            total,
+            showSizeChanger: false,
+            onChange(page) {
+              setPage(page);
+            },
+          }}
+        />
+        <div className=""></div>
       </div>
     </>
   );

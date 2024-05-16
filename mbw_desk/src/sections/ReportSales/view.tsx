@@ -7,6 +7,7 @@ import { AxiosService } from "../../services/server";
 import dayjs from "dayjs";
 import useDebounce from "../../hooks/useDebount";
 import { DatePickerProps } from "antd/lib";
+import { translationUrl } from "@/util";
 
 interface DataSaleOrder {
   key: React.Key;
@@ -421,6 +422,9 @@ export default function ReportSales() {
             icon: <VerticalAlignBottomOutlined className="text-xl" />,
             size: "20px",
             className: "flex items-center",
+            action: () => {
+              translationUrl("/app/data-export/Data%20Export")
+            }
           },
         ]}
       />
@@ -463,7 +467,7 @@ export default function ReportSales() {
               onClear={() => setCompany("")}
               filterOption={false}
               allowClear
-              showSearch
+              placeholder="Tất cả công ty"
             />
           </FormItemCustom>
 
@@ -480,7 +484,7 @@ export default function ReportSales() {
               onClear={() => setCustomer("")}
               filterOption={false}
               allowClear
-              showSearch
+              placeholder="Tất cả khách hàng"
             />
           </FormItemCustom>
 
@@ -498,7 +502,7 @@ export default function ReportSales() {
               onClear={() => setTerritory("")}
               filterOption={false}
               allowClear
-              showSearch
+              placeholder="Tất cẩ khu vực"
             />
           </FormItemCustom>
 
@@ -506,6 +510,7 @@ export default function ReportSales() {
             <DatePicker
               format={"DD-MM-YYYY"}
               className="!bg-[#F4F6F8]"
+              placeholder="Từ ngày"
               onChange={onChange}
             />
           </FormItemCustom>
@@ -515,6 +520,7 @@ export default function ReportSales() {
               format={"DD-MM-YYYY"}
               className="!bg-[#F4F6F8]"
               onChange={onChange1}
+              placeholder="Đến ngày"
             />
           </FormItemCustom>
         </div>
@@ -545,7 +551,7 @@ export default function ReportSales() {
               onClear={() => setWarehouse("")}
               filterOption={false}
               allowClear
-              showSearch
+              placeholder="Tất cả kho"
             />
           </FormItemCustom>
 
@@ -562,7 +568,7 @@ export default function ReportSales() {
               onClear={() => setEmployee("")}
               filterOption={false}
               allowClear
-              showSearch
+              placeholder="Tất cả nhân viên"
             />
           </FormItemCustom>
         </div>
