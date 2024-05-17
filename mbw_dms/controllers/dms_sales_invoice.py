@@ -7,9 +7,12 @@ def update_kpi_monthly(doc, method):
     year = int(nowdate().split('-')[0])
 
     # Lấy id của nhân viên
-    name_sal_order = doc.get('items')[0].sales_order
-    employee = frappe.get_value('Sales Order', {'name': name_sal_order}, 'owner')
-    user_name = frappe.get_value('Employee',{ 'user_id': employee}, 'name')
+    sales_person = None
+    for i in doc.sales_team:
+        if i.created_by == 1:
+            sales_person = i.sales_person
+    
+    user_name = frappe.get_value("Sales Person", {"name": sales_person}, "employee")
     sales_team = frappe.get_value("DMS KPI", {'nhan_vien_ban_hang': user_name}, "nhom_ban_hang")
 
     # Kiểm tra đã tồn tại bản ghi KPI của tháng này chưa
@@ -42,9 +45,12 @@ def update_kpi_monthly_on_cancel(doc, method):
     year = int(nowdate().split('-')[0])
     
     # Lấy id của nhân viên
-    name_sal_order = doc.get('items')[0].sales_order
-    employee = frappe.get_value('Sales Order', {'name': name_sal_order}, 'owner')
-    user_name = frappe.get_value('Employee',{ 'user_id': employee}, 'name')
+    sales_person = None
+    for i in doc.sales_team:
+        if i.created_by == 1:
+            sales_person = i.sales_person
+    
+    user_name = frappe.get_value("Sales Person", {"name": sales_person}, "employee")
 
     # Kiểm tra đã tồn tại bản ghi KPI của tháng này chưa
     existing_monthly_summary = frappe.get_all(

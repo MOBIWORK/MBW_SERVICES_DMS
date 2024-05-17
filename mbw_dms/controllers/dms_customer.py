@@ -7,7 +7,7 @@ def update_kpi_monthly(doc, method):
     year = int(nowdate().split('-')[0])
 
     # Lấy id của nhân viên
-    user_name = frappe.get_value('Employee',{ 'user_id': doc.owner}, 'name')
+    user_name = frappe.get_value("Employee",{"user_id": doc.owner}, "name")
     sales_team = frappe.get_value("DMS KPI", {'nhan_vien_ban_hang': user_name}, "nhom_ban_hang")
 
     # Kiểm tra đã tồn tại bản ghi KPI của tháng này chưa

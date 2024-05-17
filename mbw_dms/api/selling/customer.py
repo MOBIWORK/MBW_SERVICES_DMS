@@ -20,6 +20,8 @@ from mbw_dms.api.validators import (
 )
 from mbw_dms.api import configs
 import pydash
+
+
 # list customer
 @frappe.whitelist(methods='GET')
 def list_customer(**kwargs):
@@ -67,6 +69,9 @@ def list_customer(**kwargs):
         record = len(frappe.db.get_all("Customer", filters=my_filter))
 
         for customer in customers:
+            if customer.customer_location_primary == "":
+                customer.customer_location_primary = None
+
             if customer['custom_birthday'] is not None:
                 customer['custom_birthday'] = customer['custom_birthday'].strftime("%d/%m/%Y")
             customer['image'] = validate_image(customer.get("image"))
@@ -83,7 +88,7 @@ def list_customer(**kwargs):
         return exception_handle(e)
     
 
-#customer detail
+# customer detail
 @frappe.whitelist(methods="GET")
 def customer_detail(name):
     try: 
@@ -105,7 +110,9 @@ def customer_detail(name):
         return gen_response(200,"",doc_customer)
     except Exception as e:
         exception_handle(e)
-#list customer type Company Individual
+
+
+# list customer type Company Individual
 @frappe.whitelist(methods="GET")
 def list_customer_type():
     try:
@@ -238,7 +245,6 @@ def create_customer(**kwargs):
         # Thêm khách hàng vào tuyến 
         if router_in and router_in.get('router_name'):
             router = frappe.get_doc('DMS Router', router_in.get('router_name'))
-            # print("fre",router,router.get('frequency'))
             router.append('customers', {
                 'customer': new_customer.name,
                 'customer_code': new_customer.customer_code,

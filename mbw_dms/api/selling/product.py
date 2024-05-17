@@ -5,10 +5,9 @@ from mbw_dms.api.common import (
     exception_handle,
     gen_response,
     validate_image,
-    get_value_child_doctype
 )
 
-#list product
+# list product
 @frappe.whitelist(methods='GET')
 def list_product(**kwargs):
     try:
@@ -18,7 +17,6 @@ def list_product(**kwargs):
 
         my_filter = {}
         name = kwargs.get('name')
-        customer = kwargs.get('customer')
         name_item = kwargs.get('item_name')
         brand = kwargs.get('brand')
         custom_industry = kwargs.get("industry")
@@ -26,16 +24,7 @@ def list_product(**kwargs):
         page_size = kwargs.get('page_size', 20)
         page_number = 1 if not kwargs.get('page') or int(kwargs.get('page')) <= 0 else int(kwargs.get('page'))
 
-        price_list = None
-        price_lisr_cg = None
         default_price_list = frappe.get_doc('Selling Settings').selling_price_list
-        if customer:
-            customer_group = frappe.get_value('Customer', {'name': customer}, 'customer_group')
-            price_lisr_cg = frappe.get_value('Customer Group', {'name': customer_group}, 'default_price_list')
-        if price_lisr_cg:
-            price_list = price_lisr_cg
-        else:
-            price_list = default_price_list
 
         if name:
             my_filter["name"] = ['like', f'%{name}%']
@@ -65,13 +54,12 @@ def list_product(**kwargs):
                 return pydash.pick(value, "link_image")
             images_links = pydash.map_(images, return_fiel)
             item["custom_images_item"] = images_links
-        count = len(frappe.db.get_list("Item",
-                                   filters=my_filter))
+        count = frappe.db.count("Item", filters=my_filter)
 
         data_item = []
         for item in items:
             item['image'] = validate_image(item.get("image"))
-            item['details'] = frappe.get_all("Item Price", filters={"item_code": item.get('item_code'), "price_list": price_list}, fields=['uom', 'price_list', 'price_list_rate', 'valid_from', 'currency'])
+            item['details'] = frappe.get_all("Item Price", filters={"item_code": item.get('item_code'), "price_list": default_price_list}, fields=['uom', 'price_list', 'price_list_rate', 'valid_from', 'currency'])
             item['unit'] = frappe.db.get_all("UOM Conversion Detail", {"parent" : item.get('name')}, ['uom', 'conversion_factor'])
             item['stock'] = frappe.db.get_all("Stock Entry Detail", {"item_code": item.get('item_code')}, ['t_warehouse', 'qty'])
             item['item_tax_template'] = frappe.db.get_all("Item Tax", {"parent": item["name"]}, ["item_tax_template"])
@@ -93,7 +81,7 @@ def list_product(**kwargs):
         return exception_handle(e)
 
 
-#list product campaign
+# list product campaign
 @frappe.whitelist(methods='GET')
 def list_product_campaign(**kwargs):
     try:

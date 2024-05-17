@@ -309,9 +309,9 @@ def create_return_order(**kwargs):
             amount += (rate - rate * discount_percentage /100) * float(-item_data.get('qty'))  # Giá tổng sản phầm (X)
 
         # Check dữ liệu mobile bắn lên
-        grand_total = 0     # Tổng tiền đơn hàng
-        total_vat = 0       # Giá vat (VAT)
-        discount_amount = 0
+        # grand_total = 0     # Tổng tiền đơn hàng
+        # total_vat = 0       # Giá vat (VAT)
+        # discount_amount = 0
 
         # Nếu loại chiết khấu là Grand total
         # if apply_discount_on == 'Grand Total':
@@ -357,15 +357,18 @@ def edit_return_order(name, **kwargs):
             order = frappe.get_doc('Sales Invoice', name)
             # Kiểm tra trạng thái của phiếu trả hàng có phải draft không
             if order.docstatus == 0:
-                taxes_and_charges = kwargs.get('taxes_and_charges')
+                # taxes_and_charges = kwargs.get('taxes_and_charges')
                 discount_percent = kwargs.get('additional_discount_percentage')
                 discount_amount = kwargs.get('discount_amount')
+                taxes_and_charges = kwargs.get('taxes_and_charges')
                 items = kwargs.get('items')
                 if items:
                     for item_data in items:
                         discount_percentage = item_data.get('discount_percentage')
                         rate = item_data.get('rate')
                         uom = item_data.get('uom')
+                        tax_rate = float(item_data.get('item_tax_rate', 0))
+                        item_tax_template = item_data.get('item_tax_template')
                         # Số lượng sản phẩm không thể sửa về 0
                         qty = int(item_data.get('qty', 1))
                         if qty == 0:
@@ -382,13 +385,18 @@ def edit_return_order(name, **kwargs):
                                 existing_item.discount_percentage = float(discount_percentage)
                             if rate:
                                 existing_item.rate = float(rate)
+                            if item_tax_template:
+                                existing_item.item_tax_template = item_tax_template
+                                existing_item.tax_rate = tax_rate
                         else:
                             order.append('items', {
                                 'item_code': item_data.get('item_code'),
                                 'qty': -qty,
                                 'uom': item_data.get('uom'),
                                 'rate': item_data.get('rate'),
-                                'discount_percentage': discount_percentage if discount_percentage else 0
+                                'discount_percentage': discount_percentage if discount_percentage else 0,
+                                'item_tax_template': item_tax_template,
+                                'item_tax_rate': tax_rate
                             })
 
                 # Trường hợp chỉnh sửa tax
