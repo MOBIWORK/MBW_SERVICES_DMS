@@ -299,8 +299,6 @@ export default function ReportCustomer() {
           },
         }
       );
-      console.log("ddd", rsReport);
-
       setDataCustomer(rsReport.result);
       setTotal(rsReport?.result?.total);
     })();
@@ -617,6 +615,7 @@ export default function ReportCustomer() {
               setPage(page);
             },
           }}
+          rowHoverable={false}
         />
         <div className=""></div>
       </div>

@@ -3,9 +3,61 @@ import styled from "styled-components";
 
 
 export const TableCustom = styled(Table)<{$border?: boolean,$wrap?: boolean}>`
-& table {
+& .ant-table-container .ant-table-tbody tr.ant-table-expanded-row:hover>td.ant-table-cell {
+  background: #F4F6F8!important;
+}
+& .ant-table-content>table {
   border-left: ${props => props.$border ? "" : "none"}!important;
   border-right: ${props => props.$border ? "" : "none"}!important;
+
+  & tr.ant-table-expanded-row {
+    &>td {
+      background: #F4F6F8!important; 
+    }
+    & .ant-table-content {
+    background: #F4F6F8!important;
+    z-index:91!important;
+    }
+
+    &:hover td.ant-table-cell {
+      background: white!important;
+    }
+  & table {
+      border-left: 1px solid #f0f0f0!important;
+      border-right: 1px solid #f0f0f0!important;
+      background: transparent;
+      border-radius: 16px!important;
+      &>thead>tr>th {
+        background: #DFE3E8!important;
+        color: #637381!important;
+        &:first-child {
+          border-start-start-radius: 16px!important;
+          border-start-start: 1!important;
+        }
+      }
+      &>tbody>tr:last-child {
+        // background: red;
+        &>td:first-child {
+          border-end-start-radius: 16px!important;
+        }
+      
+        &>td:last-child {
+          border-end-end-radius: 16px!important;
+        }
+      }
+
+      & .ant-table-tbody tr>td.ant-table-cell {
+        background: white!important;
+      }
+      & .ant-table-tbody tr:hover>td.ant-table-cell-row-hover {
+        background: white!important;
+      }
+    }
+
+    }
+    
+
+  } 
 }
 & .ant-table-container .ant-table-cell{
   font-size: 14px!important;
@@ -176,7 +228,7 @@ export const TableCustom = styled(Table)<{$border?: boolean,$wrap?: boolean}>`
     & .ant-table-content {
       padding: 25px 0;
       padding-right: 25px;
-      margin-left: -18px;
+      // margin-left: -18px;
     }
   }
 

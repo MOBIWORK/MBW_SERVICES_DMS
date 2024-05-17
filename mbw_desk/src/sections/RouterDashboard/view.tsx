@@ -1,32 +1,30 @@
 
 import { Col, Row } from "antd";
 import { HeaderPage } from "../../components";
-import { Doanhso, InfoCard, WrapperCard } from "./components/card";
+import { Doanhso, InfoCard } from "./components/card";
 import { ChartCustom } from "./components/chart";
 import { ListCustom } from "./components/list";
-import {MapEkgis} from "../../components/mapEkgis/map";
-import { cardData, dataChart, dataChart2, itemsProduct } from "./data";
-import { useEffect, useState } from "react";
+import {  useLayoutEffect, useState } from "react";
 import { AxiosService } from "../../services/server";
 import { rsData } from "../../types/response";
 import { ResultType } from "../../types/dashboard";
-import { MapEkgisRealTime } from "../../components/mapEkgis";
 
 
 
 export default function RouterDashboard() {
-  const [report, setReport] = useState<ResultType>()
-  const [isLoading, setLoading] = useState<boolean>(false)
-  useEffect(() => {
+  const [report, setReport] = useState<ResultType | null>(null)
+  useLayoutEffect(() => {
     (async()=> {
-      setLoading(true)
-      let rsReport:rsData<ResultType> = await AxiosService.get('/api/method/mbw_dms.api.report.synthesis_report')
-      setReport(rsReport.result)
-      setLoading(false)
+      try{
+        let rsReport:rsData<ResultType> = await AxiosService.get('/api/method/mbw_dms.api.report.synthesis_report')
+        setReport(rsReport.result)
+      }catch(err) {
+        console.log("err",err);        
+      }
     })()
   }, [])
+  
   return (
-    isLoading ? <>Loading ...</> :
     <>
       <HeaderPage title="Tổng quan" />
       <Row gutter={20}>
@@ -78,7 +76,7 @@ export default function RouterDashboard() {
         </Col>
       </Row>
       <Row gutter={20} className="my-5">
-        <Col span={14} ><ChartCustom data={report?.bieu_do_doanh_so.length > 0 ? report?.bieu_do_doanh_so.sort(d=> -d.thoi_gian) : []} /></Col>
+        <Col span={14} ><ChartCustom data={report && report?.bieu_do_doanh_so.length > 0  ? report?.bieu_do_doanh_so.sort(d=> -d.thoi_gian) : []} /></Col>
         <Col span={10} ><ListCustom data={report?.ds_sp_doanh_so_cao} /></Col>
       </Row>
 
