@@ -60,7 +60,6 @@ export default function MonitorAlbum() {
     });
   };
 
-
   //thêm
   useEffect(() => {
     (async () => {
@@ -133,15 +132,13 @@ export default function MonitorAlbum() {
 
   useEffect(() => {
     (async () => {
-      console.table(
-        {
-          customer_name,
-          creation: creation,
-          team_sale,
-          employee,
-          album_name: album 
-        },
-      )
+      console.table({
+        customer_name,
+        creation: creation,
+        team_sale,
+        employee,
+        album_name: album,
+      });
       const rsAlbum = await AxiosService.get(
         "/api/method/mbw_dms.api.album.list_monitor_album",
         {
@@ -150,7 +147,7 @@ export default function MonitorAlbum() {
             creation: creation,
             team_sale,
             employee,
-            album_name: album 
+            album_name: album,
           },
         }
       );
@@ -175,109 +172,90 @@ export default function MonitorAlbum() {
     <>
       <HeaderPage title="Giám sát chụp ảnh khách hàng" />
       <div className="bg-white rounded-md py-7 px-4">
-        <div className="flex justify-start items-center">
-          <FormItemCustom
-            className="w-[200px] border-none mr-2"
-            label={"Ngày chụp"}
-          ></FormItemCustom>
-          <FormItemCustom
-            className="w-[200px] border-none mr-2"
-            label={"Nhóm bán hàng"}
-          ></FormItemCustom>
-          <FormItemCustom
-            className="w-[200px] border-none mr-2"
-            label={"Nhân viên"}
-          ></FormItemCustom>
-          <FormItemCustom
-            className="w-[200px] border-none mr-2"
-            label={"Khách hàng"}
-          ></FormItemCustom>
-          <FormItemCustom
-            className="w-[200px] border-none mr-2"
-            label={"Album"}
-          ></FormItemCustom>
-        </div>
-        <div className="flex justify-start items-center">
-          <FormItemCustom className="w-[200px] border-none mr-2">
-            <DatePicker
-              format={"DD-MM-YYYY"}
-              className="!bg-[#F4F6F8] !h-8"
-              defaultValue={dayjs(dateNow)}
-              onChange={onChange}
-            />
-          </FormItemCustom>
-          <FormItemCustom className="w-[200px] border-none mr-2">
-            <TreeSelect
-              showSearch
-              treeData={[
-                { label: "Tất cả nhân viên", value: "" },
-                ...listSales,
-              ]}
-              onChange={(value: string) => {
-                setTeamSale(value);
-              }}
-            />
-          </FormItemCustom>
+        <div className="flex flex-wrap justify-start items-center">
+          <Row className="" gutter={[8, 8]}>
+            <FormItemCustom label={"Ngày chụp"} className="w-[175px] border-none mr-2">
+              <DatePicker
+                format={"DD-MM-YYYY"}
+                className="!bg-[#F4F6F8] !h-8"
+                defaultValue={dayjs(dateNow)}
+                onChange={onChange}
+              />
+            </FormItemCustom>
+            <FormItemCustom label={"Nhóm bán hàng"} className="w-[175px] border-none mr-2">
+              <TreeSelect
+                showSearch
+                treeData={[
+                  { label: "Tất cả nhân viên", value: "" },
+                  ...listSales,
+                ]}
+                onChange={(value: string) => {
+                  setTeamSale(value);
+                }}
+              />
+            </FormItemCustom>
 
-          <FormItemCustom className="w-[200px] border-none mr-2">
-            <Select
-              className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
-              options={[
-                { label: "Tất cả nhân viên", value: "" },
-                ...listEmployees,
-              ]}
-              showSearch
-              defaultValue={""}
-              notFoundContent={null}
-              onSearch={setKeySearch4}
-              onChange={(value) => {
-                setEmployee(value);
-              }}
-              allowClear
-            />
-          </FormItemCustom>
+            <FormItemCustom label={"Nhân viên"} className="w-[175px] border-none mr-2">
+              <Select
+                className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
+                options={[
+                  { label: "Tất cả nhân viên", value: "" },
+                  ...listEmployees,
+                ]}
+                showSearch
+                defaultValue={""}
+                notFoundContent={null}
+                onSearch={setKeySearch4}
+                onChange={(value) => {
+                  setEmployee(value);
+                }}
+                allowClear
+              />
+            </FormItemCustom>
 
-          <FormItemCustom
-            className="w-[200px] border-none mr-2"
-            name="customer"
-          >
-            <Select
-              className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
-              defaultValue={""}
-              options={[
-                { label: "Tất cả khách hàng", value: "" },
-                ...listCustomerGroup,
-              ]}
-              showSearch
-              notFoundContent={null}
-              onSearch={(value: string) => setKeyS1(value)}
-              onChange={(value) => {
-                setCustomer_name(value);
-              }}
-            />
-          </FormItemCustom>
+            <FormItemCustom
+              label={"Khách hàng"}
+              className="w-[175px] border-none mr-2"
+              name="customer"
+            >
+              <Select
+                className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
+                defaultValue={""}
+                options={[
+                  { label: "Tất cả khách hàng", value: "" },
+                  ...listCustomerGroup,
+                ]}
+                showSearch
+                notFoundContent={null}
+                onSearch={(value: string) => setKeyS1(value)}
+                onChange={(value) => {
+                  setCustomer_name(value);
+                }}
+              />
+            </FormItemCustom>
 
-          <FormItemCustom className="w-[200px] border-none mr-2">
-            <Select
-              className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
-              showSearch
-              defaultValue={""}
-              notFoundContent={null}
-              options={[
-                { label: "Tất cả Album", value: "" },
-                ...dataFilterAlbum.map((album: any) => ({
-                  label: album.ten_album,
-                  value: album.ten_album,
-                })),
-              ]}
-              onSearch={(value: string) => setKeyS(value)}
-              onChange={(value) => {
-                // console.log(value);
+            <FormItemCustom label={"Album"} className="w-[175px] border-none mr-2">
+              <Select
+                className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
+                showSearch
+                defaultValue={""}
+                notFoundContent={null}
+                options={[
+                  { label: "Tất cả Album", value: "" },
+                  ...dataFilterAlbum.map((album: any) => ({
+                    label: album.ten_album,
+                    value: album.ten_album,
+                  })),
+                ]}
+                onSearch={(value: string) => setKeyS(value)}
+                onChange={(value) => {
+                  // console.log(value);
 
-                setAlbum(value);
-              }}
-            />
-          </FormItemCustom>
+                  setAlbum(value);
+                }}
+              />
+            </FormItemCustom>
+          </Row>
         </div>
 
         <div className="pt-5">
@@ -293,7 +271,13 @@ export default function MonitorAlbum() {
                     hoverable
                     // setModal({ open: true, id: data?.name })
                     onClick={() => setModal({ open: true, id: data })}
-                    cover={<img className="!object-cover" alt={data?.image_url} src={data?.image_url} />}
+                    cover={
+                      <img
+                        className="!object-cover"
+                        alt={data?.image_url}
+                        src={data?.image_url}
+                      />
+                    }
                   >
                     <div className="flex items-center h-3">
                       <UserIcon />

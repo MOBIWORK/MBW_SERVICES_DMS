@@ -39,6 +39,8 @@ interface DataItem {
 const currentMonth = dayjs().month() + 1; // Lấy tháng hiện tại (đánh số từ 0)
 const month = currentMonth.toString();
 const year = dayjs().format("YYYY");
+const startOfMonth = dayjs().startOf("month");
+const endOfMonth = dayjs().endOf("month");
 
 const columns: TableColumnsType<DataSaleOrder> = [
   {
@@ -403,8 +405,9 @@ export default function ReportSales() {
     }
   };
 
-  console.log("YYYY",year);
-  
+  console.log("YYYY", year);
+  console.log("Fist", startOfMonth);
+  console.log("End", endOfMonth);
 
   return (
     <>
@@ -604,9 +607,9 @@ export default function ReportSales() {
                   </Table.Summary.Cell>
                   <Table.Summary.Cell index={11}>
                     <div className="text-right">
-                    {Intl.NumberFormat().format(
-                      dataSaleOrder?.sum?.sum_grand_total
-                    )}
+                      {Intl.NumberFormat().format(
+                        dataSaleOrder?.sum?.sum_grand_total
+                      )}
                     </div>
                   </Table.Summary.Cell>
                 </Table.Summary.Row>
