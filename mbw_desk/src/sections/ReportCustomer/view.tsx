@@ -15,6 +15,7 @@ import {
   Table,
   InputNumber,
   Select,
+  TreeSelect,
 } from "antd";
 import type { DatePickerProps, TableColumnsType } from "antd";
 import { LuFilter, LuFilterX } from "react-icons/lu";
@@ -23,7 +24,10 @@ import { AxiosService } from "../../services/server";
 import dayjs from "dayjs";
 import { useForm } from "antd/es/form/Form";
 import useDebounce from "../../hooks/useDebount";
-import { translationUrl } from "@/util";
+import { translationUrl, treeArray } from "@/util";
+import { rsData, rsDataFrappe } from "@/types/response";
+import { listSale } from "@/types/listSale";
+import { employee } from "@/types/employeeFilter";
 
 interface DataCustomer {
   key: React.Key;
@@ -52,7 +56,11 @@ interface ExpandedDataType {
 
 const columns: TableColumnsType<DataCustomer> = [
   {
-    title: "STT",
+    title: (
+      <div className="relative">
+        <span className="absolute -top-[11px] -left-8">STT</span>
+      </div>
+    ),
     dataIndex: "stt",
     key: "stt",
     render: (_, record, index) => index + 1,
@@ -104,6 +112,16 @@ export default function ReportCustomer() {
   const [keySUnit, setKeySUnit] = useState("");
   let keySItem = useDebounce(keyItem, 500);
   let keySearchUnit = useDebounce(keySUnit, 500);
+  const [listEmployees, setListEmployees] = useState<any[]>([]);
+  const [listSales, setListSales] = useState<any[]>([]);
+  const [sales_team, setTeamSale] = useState<string>();
+  const [keySearch4, setKeySearch4] = useState("");
+  const [employee, setEmployee] = useState<string>();
+  let seachbykey = useDebounce(keySearch4);
+  const [customer, setCustomer] = useState("");
+  const [listCustomer, setListCustomer] = useState<any[]>([]);
+  const [keySCustomer, setKeySCustomer] = useState("");
+  let keySearchCustomer = useDebounce(keySCustomer, 500);
   const expandedRowRender = (recordTable: any) => {
     const columns: TableColumnsType<ExpandedDataType> = [
       {
@@ -118,9 +136,13 @@ export default function ReportCustomer() {
         title: "Hạn sử dụng",
         dataIndex: "exp_time",
         key: "exp_time",
-        render: (_, record: any) => (
-          <p>{dayjs(record.exp_time * 1000).format("DD/MM/YYYY")}</p>
-        ),
+        render: (value, record: any) => {
+          return value ? (
+            <p>{dayjs(value * 1000).format("DD/MM/YYYY")}</p>
+          ) : (
+            <></>
+          );
+        },
       },
       { title: "Đơn vị tính", dataIndex: "item_unit", key: "item_unit" },
       { title: "Tồn", dataIndex: "quantity", key: "quantity" },
@@ -147,9 +169,11 @@ export default function ReportCustomer() {
         dataIndex: "update_at",
         key: "update_at",
         render: (value, record: any) => {
-          {
-            value ? <p>{dayjs(value * 1000).format("DD/MM/YYYY")}</p> : <></>;
-          }
+          return value ? (
+            <p>{dayjs(value * 1000).format("DD/MM/YYYY")}</p>
+          ) : (
+            <></>
+          );
         },
       },
       {
@@ -229,6 +253,71 @@ export default function ReportCustomer() {
 
   useEffect(() => {
     (async () => {
+      let rsSales: rsData<listSale[]> = await AxiosService.get(
+        "/api/method/mbw_dms.api.router.get_team_sale"
+      );
+
+      setListSales(
+        treeArray({
+          data: rsSales.result.map((team_sale: listSale) => ({
+            title: team_sale.name,
+            value: team_sale.name,
+            ...team_sale,
+          })),
+          keyValue: "value",
+          parentField: "parent_sales_person",
+        })
+      );
+    })();
+  }, []);
+  useEffect(() => {
+    (async () => {
+      let rsEmployee: rsDataFrappe<employee[]> = await AxiosService.get(
+        "/api/method/mbw_dms.api.router.get_sale_person",
+        {
+          params: {
+            team_sale: sales_team,
+            key_search: seachbykey,
+          },
+        }
+      );
+      let { message: results } = rsEmployee;
+      setListEmployees(
+        results.map((employee_filter: employee) => ({
+          value: employee_filter.employee_code,
+          label: employee_filter.employee_name || employee_filter.employee_code,
+        }))
+      );
+    })();
+  }, [sales_team, seachbykey]);
+
+  useEffect(() => {
+    (async () => {
+      let rsCustomer: any = await AxiosService.get(
+        "/api/method/frappe.desk.search.search_link",
+        {
+          params: {
+            txt: keySearchCustomer,
+            doctype: "Customer",
+            ignore_user_permissions: 0,
+            query: "",
+          },
+        }
+      );
+
+      let { message: results } = rsCustomer;
+
+      setListCustomer(
+        results.map((dtCustomer: any) => ({
+          value: dtCustomer.value,
+          label: dtCustomer.value,
+        }))
+      );
+    })();
+  }, [keySearchCustomer]);
+
+  useEffect(() => {
+    (async () => {
       let rsItem: any = await AxiosService.get(
         "/api/method/frappe.desk.search.search_link",
         {
@@ -296,6 +385,9 @@ export default function ReportCustomer() {
             page_size: PAGE_SIZE,
             page_number: page,
             unit_product: unit,
+            employee_sale: sales_team,
+            employee: employee,
+            customer: customer,
           },
         }
       );
@@ -315,6 +407,9 @@ export default function ReportCustomer() {
     update_at_to,
     page,
     unit,
+    sales_team,
+    employee,
+    customer,
   ]);
 
   return (
@@ -329,32 +424,23 @@ export default function ReportCustomer() {
             size: "20px",
             className: "flex items-center",
             action: () => {
-              translationUrl("/app/data-export/Data%20Export")
-            }
+              translationUrl("/app/data-export/Data%20Export");
+            },
           },
         ]}
       />
       <div className="bg-white rounded-xl border-[#DFE3E8] border-[0.2px] border-solid">
-        <Row className="justify-between items-end w-full p-4">
-          <Col span={14}>
-            <Row gutter={8}>
+        <Row gutter={[16, 16]} className="justify-between items-end w-full p-4">
+          <Col>
+            <Row gutter={[8,8]}>
               <Col className="mx-4 w-full" span={24}>
-                <div className="flex justify-start items-center ">
+                <div className="flex flex-wrap justify-start items-center ">
                   <FormItemCustom
-                    className="!w-[200px] border-none mr-2"
                     label={"Sản phẩm"}
-                  ></FormItemCustom>
-                  <FormItemCustom
-                    className="w-[200px] border-none mr-2"
-                    label={"Đơn vị tính"}
-                  ></FormItemCustom>
-                </div>
-              </Col>
-              <Col className="mx-4 w-full" span={24}>
-                <div className="flex justify-start items-center">
-                  <FormItemCustom className="!w-[200px] border-none mr-2">
+                    className="!w-[175px] border-none mr-2"
+                  >
                     <Select
-                      optionFilterProp = "children"
+                      optionFilterProp="children"
                       filterOption={false}
                       onSearch={(value: string) => setKeyItem(value)}
                       onSelect={(value) => {
@@ -386,7 +472,10 @@ export default function ReportCustomer() {
                     />
                   </FormItemCustom>
 
-                  <FormItemCustom className="!w-[200px] border-none mr-2">
+                  <FormItemCustom
+                    label={"Đơn vị tính"}
+                    className="!w-[175px] border-none mr-2"
+                  >
                     <Select
                       placeholder="Tất cả đơn vị tính"
                       options={listUnit}
@@ -401,17 +490,79 @@ export default function ReportCustomer() {
                       allowClear
                     />
                   </FormItemCustom>
+
+                  <FormItemCustom
+                    label={"Nhóm bán hàng"}
+                    className="!w-[175px] border-none mr-2"
+                  >
+                    <TreeSelect
+                      placeholder="Tất cả nhóm bán hàng"
+                      allowClear
+                      treeData={listSales}
+                      onChange={(value: string) => {
+                        setTeamSale(value);
+                      }}
+                      dropdownStyle={{
+                        maxHeight: 400,
+                        overflow: "auto",
+                        minWidth: 350,
+                      }}
+                    />
+                  </FormItemCustom>
+
+                  <FormItemCustom
+                    label={"Người kiểm tồn"}
+                    name="employee"
+                    className="!w-[175px] border-none mr-2"
+                  >
+                    <Select
+                      filterOption={false}
+                      notFoundContent={null}
+                      allowClear
+                      placeholder="Tất cả người kiểm tồn"
+                      onSearch={(value: string) => {
+                        setKeySearch4(value);
+                      }}
+                      options={listEmployees}
+                      onSelect={(value) => {
+                        setEmployee(value);
+                      }}
+                      onClear={() => {
+                        setEmployee("");
+                      }}
+                    />
+                  </FormItemCustom>
+
+                  <FormItemCustom
+                    label="Khách hàng"
+                    className="!w-[175px] border-none mr-2"
+                  >
+                    <Select
+                      className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
+                      options={listCustomer}
+                      onSelect={(value) => {
+                        setCustomer(value);
+                      }}
+                      onSearch={(value: string) => {
+                        setKeySCustomer(value);
+                      }}
+                      onClear={() => setCustomer("")}
+                      filterOption={false}
+                      allowClear
+                      placeholder="Tất cả khách hàng"
+                    />
+                  </FormItemCustom>
                 </div>
               </Col>
             </Row>
           </Col>
-          <Col className="mr-5">
+          <Col className="!ml-4">
             <div className="flex flex-wrap items-center">
               <div className="flex justify-center items-center mr-4">
                 <Dropdown
                   className="!h-8"
                   placement="bottomRight"
-                  // trigger={["click"]}
+                  trigger={["click"]}
                   dropdownRender={() => (
                     <DropDownCustom title={"Bộ lọc"}>
                       <div className="pt-6">
@@ -600,6 +751,7 @@ export default function ReportCustomer() {
 
         <TableCustom
           columns={columns}
+          scroll={{ x: true }}
           expandable={{ expandedRowRender, defaultExpandedRowKeys: ["0"] }}
           dataSource={dataCustomer?.data?.map((dataCus: DataCustomer) => {
             return {

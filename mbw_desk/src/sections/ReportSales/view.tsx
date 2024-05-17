@@ -1,6 +1,6 @@
 import { VerticalAlignBottomOutlined } from "@ant-design/icons";
 import { FormItemCustom, HeaderPage, TableCustom } from "../../components";
-import { DatePicker, Select, Table } from "antd";
+import { DatePicker, Row, Select, Table } from "antd";
 import type { TableColumnsType } from "antd";
 import { useEffect, useState } from "react";
 import { AxiosService } from "../../services/server";
@@ -36,9 +36,17 @@ interface DataItem {
   amount: number; // tổng tiền
 }
 
+const currentMonth = dayjs().month() + 1; // Lấy tháng hiện tại (đánh số từ 0)
+const month = currentMonth.toString();
+const year = dayjs().format("YYYY");
+
 const columns: TableColumnsType<DataSaleOrder> = [
   {
-    title: "STT",
+    title: (
+      <div className="relative">
+        <span className="absolute -top-[11px] -left-8">STT</span>
+      </div>
+    ),
     dataIndex: "stt",
     key: "stt",
     render: (_, record: any, index: number) => index + 1,
@@ -48,7 +56,7 @@ const columns: TableColumnsType<DataSaleOrder> = [
     dataIndex: "name",
     key: "name",
     render: (_, record: any) => (
-      <div className="!w-[175px]">
+      <div>
         <a
           className="text-[#212B36]"
           href={`app/sales-invoice/${record.name}`}
@@ -63,86 +71,72 @@ const columns: TableColumnsType<DataSaleOrder> = [
     title: "Khách hàng",
     dataIndex: "customer",
     key: "customer",
-    render: (_, record: any) => (
-      <div className="!w-[175px]">{record.customer}</div>
-    ),
+    render: (_, record: any) => <div>{record.customer}</div>,
   },
   {
     title: "Khu vực",
     dataIndex: "territory",
     key: "territory",
-    render: (_, record: any) => (
-      <div className="!w-[175px]">{record.territory}</div>
-    ),
+    render: (_, record: any) => <div>{record.territory}</div>,
   },
   {
     title: "Kho",
     dataIndex: "set_warehouse",
     key: "set_warehouse",
-    render: (_, record: any) => (
-      <div className="!w-[175px]">{record.set_warehouse}</div>
-    ),
+    render: (_, record: any) => <div>{record.set_warehouse}</div>,
   },
   {
     title: "Ngày tạo",
     dataIndex: "posting_date",
     key: "posting_date",
     render: (_, record: any) => (
-      <div className="!w-[175px]">
-        {dayjs(record.posting_date * 1000).format("DD/MM/YYYY")}
-      </div>
+      <div>{dayjs(record.posting_date * 1000).format("DD/MM/YYYY")}</div>
     ),
   },
   {
     title: "Nhân viên",
     dataIndex: "employee",
     key: "employee",
-    render: (_, record: any) => (
-      <div className="!w-[150px]">{record.employee}</div>
-    ),
+    render: (_, record: any) => <div>{record.employee}</div>,
   },
   {
-    title: "Thành tiền",
+    title: "Thành tiền (VNĐ)",
     dataIndex: "total",
     key: "total",
     render: (_, record: any) => (
-      <>
-        <span className="mr-2">VND</span>
+      <div className="!text-right">
         {Intl.NumberFormat().format(record.total)}
-      </>
+      </div>
     ),
   },
   {
-    title: "Tiền VAT",
+    title: "Tiền VAT (VNĐ)",
     dataIndex: "tax_amount",
     key: "tax_amount",
     render: (_, record: any) => (
-      <>
-        <span className="mr-2">VND</span>
+      <div className="text-right">
         {Intl.NumberFormat().format(record.tax_amount)}
-      </>
+      </div>
     ),
   },
   {
-    title: "Chiết khấu",
+    title: "Chiết khấu (VNĐ)",
     dataIndex: "discount_amount",
     key: "discount_amount",
     render: (_, record: any) => (
-      <>
-        <span className="mr-2">VND</span>
+      <div className="text-right">
         {Intl.NumberFormat().format(record.discount_amount)}
-      </>
+      </div>
     ),
   },
   {
-    title: "Tổng tiền",
+    title: "Tổng tiền (VNĐ)",
     dataIndex: "grand_total",
     key: "grand_total",
     render: (_, record: any) => (
-      <>
-        <span className="mr-2">VND</span>
+      <div className="text-right">
         {Intl.NumberFormat().format(record.grand_total)}
-      </>
+      </div>
     ),
   },
 ];
@@ -347,8 +341,6 @@ export default function ReportSales() {
 
       let { message: results } = rsEmployee;
 
-      console.log("rsEmployee", results);
-
       setListEmployee(
         results.map((dtEmployee: any) => ({
           value: dtEmployee.description.split(",")[1].trim(),
@@ -411,10 +403,13 @@ export default function ReportSales() {
     }
   };
 
+  console.log("YYYY",year);
+  
+
   return (
     <>
       <HeaderPage
-        title="Báo cáo tổng hợp đặt hàng"
+        title="Báo cáo tổng hợp bán hàng"
         buttons={[
           {
             label: "Xuất dữ liệu",
@@ -423,154 +418,139 @@ export default function ReportSales() {
             size: "20px",
             className: "flex items-center",
             action: () => {
-              translationUrl("/app/data-export/Data%20Export")
-            }
+              translationUrl("/app/data-export/Data%20Export");
+            },
           },
         ]}
       />
-      <div className="bg-white rounded-md py-7 px-4 border-[#DFE3E8] border-[0.2px] border-solid">
-        {/* label */}
-        <div className="flex justify-start items-center">
-          <FormItemCustom
-            className="w-[200px] border-none mr-2"
-            label={"Công ty"}
-          ></FormItemCustom>
-          <FormItemCustom
-            className="w-[200px] border-none mr-2"
-            label={"Khách hàng"}
-          ></FormItemCustom>
-          <FormItemCustom
-            className="w-[200px] border-none mr-2"
-            label={"Khu vực"}
-          ></FormItemCustom>
-          <FormItemCustom
-            className="w-[200px] border-none mr-2"
-            label={"Từ ngày"}
-          ></FormItemCustom>
-          <FormItemCustom
-            className="w-[200px] border-none mr-2"
-            label={"Đến ngày"}
-          ></FormItemCustom>
-        </div>
+      <div className="bg-white rounded-md py-7 border-[#DFE3E8] border-[0.2px] border-solid">
+        <div className="flex flex-wrap justify-start items-center px-4">
+          <Row className="" gutter={[8, 8]}>
+            <FormItemCustom
+              label={"Công ty"}
+              className="w-[175px] border-none mr-2"
+            >
+              <Select
+                className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
+                options={listCompany}
+                onSelect={(value) => {
+                  setCompany(value);
+                }}
+                onSearch={(value: string) => {
+                  setKeySCompany(value);
+                }}
+                onClear={() => setCompany("")}
+                filterOption={false}
+                allowClear
+                placeholder="Tất cả công ty"
+              />
+            </FormItemCustom>
 
-        <div className="flex justify-start items-center">
-          <FormItemCustom className="w-[200px] border-none mr-2">
-            <Select
-              className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
-              options={listCompany}
-              onSelect={(value) => {
-                setCompany(value);
-              }}
-              onSearch={(value: string) => {
-                setKeySCompany(value);
-              }}
-              onClear={() => setCompany("")}
-              filterOption={false}
-              allowClear
-              placeholder="Tất cả công ty"
-            />
-          </FormItemCustom>
+            <FormItemCustom
+              label={"Khác hàng"}
+              className="w-[175px] border-none mr-2"
+            >
+              <Select
+                className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
+                options={listCustomer}
+                onSelect={(value) => {
+                  setCustomer(value);
+                }}
+                onSearch={(value: string) => {
+                  setKeySCustomer(value);
+                }}
+                onClear={() => setCustomer("")}
+                filterOption={false}
+                allowClear
+                placeholder="Tất cả khách hàng"
+              />
+            </FormItemCustom>
 
-          <FormItemCustom className="w-[200px] border-none mr-2">
-            <Select
-              className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
-              options={listCustomer}
-              onSelect={(value) => {
-                setCustomer(value);
-              }}
-              onSearch={(value: string) => {
-                setKeySCustomer(value);
-              }}
-              onClear={() => setCustomer("")}
-              filterOption={false}
-              allowClear
-              placeholder="Tất cả khách hàng"
-            />
-          </FormItemCustom>
+            <FormItemCustom
+              label={"Khu vực"}
+              className="w-[175px] border-none mr-2"
+            >
+              <Select
+                className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
+                defaultValue={""}
+                options={listTerritory}
+                onSelect={(value) => {
+                  setTerritory(value);
+                }}
+                onSearch={(value: string) => {
+                  setKeySTerritory(value);
+                }}
+                onClear={() => setTerritory("")}
+                filterOption={false}
+                allowClear
+                placeholder="Tất cẩ khu vực"
+              />
+            </FormItemCustom>
 
-          <FormItemCustom className="w-[200px] border-none mr-2">
-            <Select
-              className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
-              defaultValue={""}
-              options={listTerritory}
-              onSelect={(value) => {
-                setTerritory(value);
-              }}
-              onSearch={(value: string) => {
-                setKeySTerritory(value);
-              }}
-              onClear={() => setTerritory("")}
-              filterOption={false}
-              allowClear
-              placeholder="Tất cẩ khu vực"
-            />
-          </FormItemCustom>
+            <FormItemCustom
+              label={"Từ ngày"}
+              className="w-[175px] border-none mr-2"
+            >
+              <DatePicker
+                format={"DD-MM-YYYY"}
+                className="!bg-[#F4F6F8]"
+                placeholder="Từ ngày"
+                onChange={onChange}
+              />
+            </FormItemCustom>
 
-          <FormItemCustom className="w-[200px] border-none mr-2">
-            <DatePicker
-              format={"DD-MM-YYYY"}
-              className="!bg-[#F4F6F8]"
-              placeholder="Từ ngày"
-              onChange={onChange}
-            />
-          </FormItemCustom>
+            <FormItemCustom
+              label={"Đến ngày"}
+              className="w-[175px] border-none mr-2"
+            >
+              <DatePicker
+                format={"DD-MM-YYYY"}
+                className="!bg-[#F4F6F8]"
+                onChange={onChange1}
+                placeholder="Đến ngày"
+              />
+            </FormItemCustom>
 
-          <FormItemCustom className="w-[200px] border-none mr-2">
-            <DatePicker
-              format={"DD-MM-YYYY"}
-              className="!bg-[#F4F6F8]"
-              onChange={onChange1}
-              placeholder="Đến ngày"
-            />
-          </FormItemCustom>
-        </div>
-        
-        {/* label */}
-        <div className="flex justify-start items-center pt-2">
-          <FormItemCustom
-            className="w-[200px] border-none mr-2"
-            label={"Kho"}
-          ></FormItemCustom>
-          <FormItemCustom
-            className="w-[200px] border-none mr-2"
-            label={"Nhân viên"}
-          ></FormItemCustom>
-        </div>
+            <FormItemCustom
+              label={"Kho"}
+              className="w-[175px] border-none mr-2"
+            >
+              <Select
+                className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
+                options={listWarehouse}
+                onSelect={(value) => {
+                  setWarehouse(value);
+                }}
+                onSearch={(value: string) => {
+                  setKeySWarehouse(value);
+                }}
+                onClear={() => setWarehouse("")}
+                filterOption={false}
+                allowClear
+                placeholder="Tất cả kho"
+              />
+            </FormItemCustom>
 
-        <div className="flex justify-start items-center h-8 mt-2 pb-5">
-          <FormItemCustom className="w-[200px] border-none mr-2">
-            <Select
-              className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
-              options={listWarehouse}
-              onSelect={(value) => {
-                setWarehouse(value);
-              }}
-              onSearch={(value: string) => {
-                setKeySWarehouse(value);
-              }}
-              onClear={() => setWarehouse("")}
-              filterOption={false}
-              allowClear
-              placeholder="Tất cả kho"
-            />
-          </FormItemCustom>
-
-          <FormItemCustom className="w-[200px] border-none mr-2">
-            <Select
-              className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
-              options={listEmployee}
-              onSelect={(value) => {
-                setEmployee(value);
-              }}
-              onSearch={(value: string) => {
-                setKeySEmployee(value);
-              }}
-              onClear={() => setEmployee("")}
-              filterOption={false}
-              allowClear
-              placeholder="Tất cả nhân viên"
-            />
-          </FormItemCustom>
+            <FormItemCustom
+              label={"Nhân viên"}
+              className="w-[175px] border-none mr-2"
+            >
+              <Select
+                className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
+                options={listEmployee}
+                onSelect={(value) => {
+                  setEmployee(value);
+                }}
+                onSearch={(value: string) => {
+                  setKeySEmployee(value);
+                }}
+                onClear={() => setEmployee("")}
+                filterOption={false}
+                allowClear
+                placeholder="Tất cả nhân viên"
+              />
+            </FormItemCustom>
+          </Row>
         </div>
         <div className="pt-5">
           <TableCustom
@@ -593,8 +573,6 @@ export default function ReportSales() {
               },
             }}
             summary={() => {
-              console.log("sale", dataSaleOrder);
-
               return (
                 <Table.Summary.Row>
                   <Table.Summary.Cell index={0}></Table.Summary.Cell>
@@ -606,24 +584,30 @@ export default function ReportSales() {
                   <Table.Summary.Cell index={6}></Table.Summary.Cell>
                   <Table.Summary.Cell index={7}></Table.Summary.Cell>
                   <Table.Summary.Cell index={8}>
-                    <span className="mr-2">VND</span>
-                    {Intl.NumberFormat().format(dataSaleOrder?.sum?.sum_total)}
+                    <div className="text-right">
+                      {Intl.NumberFormat().format(
+                        dataSaleOrder?.sum?.sum_total
+                      )}
+                    </div>
                   </Table.Summary.Cell>
                   <Table.Summary.Cell index={9}>
-                    <span className="mr-2">VND</span>
-                    {Intl.NumberFormat().format(dataSaleOrder?.sum?.sum_vat)}
+                    <div className="text-right">
+                      {Intl.NumberFormat().format(dataSaleOrder?.sum?.sum_vat)}
+                    </div>
                   </Table.Summary.Cell>
                   <Table.Summary.Cell index={10}>
-                    <span className="mr-2">VND</span>
-                    {Intl.NumberFormat().format(
-                      dataSaleOrder?.sum?.sum_discount_amount
-                    )}
+                    <div className="text-right">
+                      {Intl.NumberFormat().format(
+                        dataSaleOrder?.sum?.sum_discount_amount
+                      )}
+                    </div>
                   </Table.Summary.Cell>
                   <Table.Summary.Cell index={11}>
-                    <span className="mr-2">VND</span>
+                    <div className="text-right">
                     {Intl.NumberFormat().format(
                       dataSaleOrder?.sum?.sum_grand_total
                     )}
+                    </div>
                   </Table.Summary.Cell>
                 </Table.Summary.Row>
               );

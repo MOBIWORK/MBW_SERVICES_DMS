@@ -1,6 +1,6 @@
 import { VerticalAlignBottomOutlined } from "@ant-design/icons";
 import { FormItemCustom, HeaderPage, TableCustom } from "../../components";
-import { DatePicker, Select, Table, TreeSelect } from "antd";
+import { Col, DatePicker, Row, Select, Table, TreeSelect } from "antd";
 import { DatePickerProps, TableColumnsType } from "antd/lib";
 import { useEffect, useState } from "react";
 import useDebounce from "../../hooks/useDebount";
@@ -450,141 +450,126 @@ export default function ReportCheckin() {
           },
         ]}
       />
-      <div className="bg-white rounded-md py-7 px-4 border-[#DFE3E8] border-[0.2px] border-solid">
-        <div className="flex justify-start items-center pt-2">
-          <FormItemCustom
-            className="w-[200px] border-none mr-2"
-            label={"Từ ngày"}
-          ></FormItemCustom>
-          <FormItemCustom
-            className="w-[200px] border-none mr-2"
-            label={"Đến ngày"}
-          ></FormItemCustom>
-          <FormItemCustom
-            className="w-[200px] border-none mr-2"
-            label={"Nhóm bán hàng"}
-          ></FormItemCustom>
-          <FormItemCustom
-            className="w-[200px] border-none mr-2"
-            label={"Nhân viên bán hầng"}
-          ></FormItemCustom>
-          <FormItemCustom
-            className="w-[200px] border-none mr-2"
-            label={"Loại khách hàng"}
-          ></FormItemCustom>
-        </div>
-        <div className="flex justify-start items-center">
-          <FormItemCustom className="w-[200px] border-none mr-2">
-            <DatePicker
-              format={"DD-MM-YYYY"}
-              className="!bg-[#F4F6F8]"
-              placeholder="Từ ngày"
-              onChange={onChange}
-            />
-          </FormItemCustom>
-          <FormItemCustom className="w-[200px] border-none mr-2">
-            <DatePicker
-              format={"DD-MM-YYYY"}
-              className="!bg-[#F4F6F8]"
-              placeholder="Đến ngày"
-              onChange={onChange}
-            />
-          </FormItemCustom>
-          <FormItemCustom className="w-[200px] border-none mr-2">
-            <TreeSelect
-              placeholder="Nhóm bán hàng"
-              allowClear
-              treeData={listSales}
-              onChange={(value: string) => {
-                setTeamSale(value);
-              }}
-              dropdownStyle={{
-                maxHeight: 400,
-                overflow: "auto",
-                minWidth: 400,
-              }}
-            />
-          </FormItemCustom>
-
-          <FormItemCustom
-            name="employee"
-            className="w-[200px] border-none mr-2"
-          >
-            <Select
-              filterOption={false}
-              notFoundContent={null}
-              allowClear
-              placeholder="Tất cả nhân viên"
-              onSearch={(value: string) => {
-                setKeySearch4(value);
-              }}
-              options={listEmployees}
-              onSelect={(value) => {
-                setEmployee(value);
-              }}
-              onClear={() => {
-                setEmployee("");
-              }}
-            />
-          </FormItemCustom>
-          <FormItemCustom className="w-[200px] border-none mr-2">
-            <Select
-              options={typecustomer}
-              placeholder="Tất cả loại khách hàng"
-              filterOption={false}
-              allowClear
-              onSelect={(value) => {
-                setCustomerType(value);
-              }}
-              onClear={() => setCustomerType("")}
-            />
-          </FormItemCustom>
-        </div>
-        <div className="flex justify-start items-center pt-4">
-          <FormItemCustom
-            className="w-[200px] border-none mr-2"
-            label={"Nhóm khách hàng"}
-          ></FormItemCustom>
-          <FormItemCustom
-            className="w-[200px] border-none mr-2"
-            label={"Khu vực"}
-          ></FormItemCustom>
-        </div>
-
-        <div className="flex justify-start items-center">
-        <FormItemCustom className="w-[200px] border-none mr-2">
-            <Select
-              className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
-              options={listCustomerGroup}
-              onSelect={(value) => {
-                setCustomerGroup(value);
-              }}
-              onSearch={(value: string) => {
-                setKeySCustomerGroup(value);
-              }}
-              onClear={() => setCustomerGroup("")}
-              filterOption={false}
-              allowClear
-              placeholder="Tất cả nhóm khách hàng"
-            />
-          </FormItemCustom>
-
-          <FormItemCustom className="w-[200px] border-none mr-2">
-            <Select
-              className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
-              options={listTerritory}
-              onSelect={(value) => {
-                setTerritory(value);
-              }}
-              onSearch={(value: string) => {
-                setKeySTerritory(value);
-              }}
-              onClear={() => setTerritory("")}
-              filterOption={false}
-              allowClear
-              placeholder="Tất cả khu vực"
-            />
-          </FormItemCustom>
+      <div className="bg-white rounded-md py-7  border-[#DFE3E8] border-[0.2px] border-solid">
+        <div className="flex flex-wrap justify-start px-4 items-center">
+          <Row gutter={[8, 8]}>
+            
+              <FormItemCustom
+                label={"Từ ngày"}
+                className="border-none mr-2 w-[175px]"
+              >
+                <DatePicker
+                  format={"DD-MM-YYYY"}
+                  className="!bg-[#F4F6F8]"
+                  placeholder="Từ ngày"
+                  onChange={onChange}
+                />
+              </FormItemCustom>
+              <FormItemCustom
+                label={"Đến ngày"}
+                className="border-none mr-2 w-[175px]"
+              >
+                <DatePicker
+                  format={"DD-MM-YYYY"}
+                  className="!bg-[#F4F6F8]"
+                  placeholder="Đến ngày"
+                  onChange={onChange}
+                />
+              </FormItemCustom>
+              <FormItemCustom
+                label={"Nhóm bán hàng"}
+                className="border-none mr-2 w-[175px]"
+              >
+                <TreeSelect
+                  placeholder="Tất cả nhóm bán hàng"
+                  allowClear
+                  treeData={listSales}
+                  onChange={(value: string) => {
+                    setTeamSale(value);
+                  }}
+                  dropdownStyle={{
+                    maxHeight: 400,
+                    overflow: "auto",
+                    minWidth: 400,
+                  }}
+                />
+              </FormItemCustom>
+              <FormItemCustom
+                label={"Nhân viên"}
+                className="border-none mr-2 w-[175px]"
+                name="employee"
+              >
+                <Select
+                  filterOption={false}
+                  notFoundContent={null}
+                  allowClear
+                  placeholder="Tất cả nhân viên"
+                  onSearch={(value: string) => {
+                    setKeySearch4(value);
+                  }}
+                  options={listEmployees}
+                  onSelect={(value) => {
+                    setEmployee(value);
+                  }}
+                  onClear={() => {
+                    setEmployee("");
+                  }}
+                />
+              </FormItemCustom>
+              <FormItemCustom
+                label={"Loại khách hàng"}
+                className="border-none mr-2 w-[175px]"
+              >
+                <Select
+                  options={typecustomer}
+                  placeholder="Tất cả loại khách hàng"
+                  filterOption={false}
+                  allowClear
+                  onSelect={(value) => {
+                    setCustomerType(value);
+                  }}
+                  onClear={() => setCustomerType("")}
+                />
+              </FormItemCustom>
+              <FormItemCustom
+                label={"Nhóm khác hàng"}
+                className="border-none mr-2 w-[175px]"
+              >
+                <Select
+                  className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
+                  options={listCustomerGroup}
+                  onSelect={(value) => {
+                    setCustomerGroup(value);
+                  }}
+                  onSearch={(value: string) => {
+                    setKeySCustomerGroup(value);
+                  }}
+                  onClear={() => setCustomerGroup("")}
+                  filterOption={false}
+                  allowClear
+                  placeholder="Tất cả nhóm khách hàng"
+                />
+              </FormItemCustom>
+              <FormItemCustom
+                label={"Khu vực"}
+                className="border-none mr-2 w-[175px]"
+              >
+                <Select
+                  className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
+                  options={listTerritory}
+                  onSelect={(value) => {
+                    setTerritory(value);
+                  }}
+                  onSearch={(value: string) => {
+                    setKeySTerritory(value);
+                  }}
+                  onClear={() => setTerritory("")}
+                  filterOption={false}
+                  allowClear
+                  placeholder="Tất cả khu vực"
+                />
+              </FormItemCustom>
+          </Row>
         </div>
         <div className="pt-10">
           <TableCustom

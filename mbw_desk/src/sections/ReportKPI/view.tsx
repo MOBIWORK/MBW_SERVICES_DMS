@@ -1,7 +1,11 @@
 import { VerticalAlignBottomOutlined } from "@ant-design/icons";
 import { FormItemCustom, HeaderPage, TableCustom } from "../../components";
-import { DatePicker, Select, Table, TreeSelect, Typography } from "antd";
-import { TableReport } from "../ReportSales/tableCustom";
+import {
+  DatePicker,
+  Select,
+  Table,
+  TreeSelect,
+} from "antd";
 import { monthAll } from "./data";
 import { DatePickerProps } from "antd/lib";
 import { useEffect, useState } from "react";
@@ -152,14 +156,14 @@ export default function ReportKPI() {
             size: "20px",
             className: "flex items-center",
             action: () => {
-              translationUrl("/app/data-export/Data%20Export")
-            }
+              translationUrl("/app/data-export/Data%20Export");
+            },
           },
         ]}
       />
       <div className="bg-white rounded-md py-7 border-[#DFE3E8] border-[0.2px] border-solid">
         <div className="flex justify-start items-center px-4">
-          <FormItemCustom className="w-[200px] border-none mr-2">
+          <FormItemCustom className="border-none mr-2">
             <Select
               className="!bg-[#F4F6F8] options:bg-[#F4F6F8] !h-8"
               defaultValue={month}
@@ -170,7 +174,7 @@ export default function ReportKPI() {
               showSearch
             />
           </FormItemCustom>
-          <FormItemCustom className="w-[200px] border-none mr-2">
+          <FormItemCustom className="border-none mr-2">
             <DatePicker
               className="!bg-[#F4F6F8] !h-8"
               onChange={onChange}
@@ -179,7 +183,7 @@ export default function ReportKPI() {
               defaultValue={dayjs().startOf("year")}
             />
           </FormItemCustom>
-          <FormItemCustom className="w-[300px] border-none mr-2">
+          <FormItemCustom className="border-none mr-2">
             <TreeSelect
               placeholder="Nhóm bán hàng"
               allowClear
@@ -195,10 +199,7 @@ export default function ReportKPI() {
             />
           </FormItemCustom>
 
-          <FormItemCustom
-            name="employee"
-            className="w-[200px] border-none mr-2"
-          >
+          <FormItemCustom className="border-none mr-2" name="employee">
             <Select
               filterOption={false}
               notFoundContent={null}

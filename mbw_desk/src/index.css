@@ -117,3 +117,7 @@ body, * {
 .invisible-scrollbar::-webkit-scrollbar {
   display: none!important;
 }
+
+:where(.css-dev-only-do-not-override-1jlkgmc).ant-form-item .ant-form-item-label >label::after {
+  display: none
+}
