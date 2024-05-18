@@ -7,7 +7,7 @@ from mbw_dms.api.common import (
     validate_image,
 )
 
-# list product
+# Danh sách sản phẩm
 @frappe.whitelist(methods='GET')
 def list_product(**kwargs):
     try:
@@ -39,9 +39,7 @@ def list_product(**kwargs):
 
         items = frappe.db.get_list("Item",
                                    filters=my_filter,
-                                   fields=[
-                                            "name",
-                                            "item_code", "item_name", "item_group", 
+                                   fields=[ "name", "item_code", "item_name", "item_group", 
                                             "stock_uom", "min_order_qty", "description",
                                             "brand", "country_of_origin", "image",
                                             "custom_industry", "end_of_life"],
@@ -81,7 +79,7 @@ def list_product(**kwargs):
         return exception_handle(e)
 
 
-# list product campaign
+# Danh sách sản phẩm trưng bày
 @frappe.whitelist(methods='GET')
 def list_product_campaign(**kwargs):
     try:
@@ -123,14 +121,13 @@ def list_product_campaign(**kwargs):
 
         items = frappe.db.get_list("Item",
                                    filters=my_filter,
-                                   fields=[
-                                            "name",
-                                            "item_code", "item_name", "item_group", 
+                                   fields=[ "name", "item_code", "item_name", "item_group", 
                                             "stock_uom", "min_order_qty", "description",
                                             "brand", "country_of_origin", "image",
                                             "custom_industry", "end_of_life"],
                                    start=page_size * (page_number - 1),
                                    page_length=page_size)
+        
         for item in items:
             item_doc = frappe.get_doc("Item", item.get("name"))
             images = item_doc.custom_images_item or []
@@ -138,8 +135,7 @@ def list_product_campaign(**kwargs):
                 return pydash.pick(value, "link_image")
             images_links = pydash.map_(images, return_fiel)
             item["custom_images_item"] = images_links
-        count = len(frappe.db.get_list("Item",
-                                   filters=my_filter))
+        count = frappe.db.count("Item", filters=my_filter)
 
         data_item = []
         for item in items:

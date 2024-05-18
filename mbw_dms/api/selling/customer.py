@@ -22,7 +22,7 @@ from mbw_dms.api import configs
 import pydash
 
 
-# list customer
+# Danh sách khách hàng
 @frappe.whitelist(methods='GET')
 def list_customer(**kwargs):
     try:
@@ -88,7 +88,7 @@ def list_customer(**kwargs):
         return exception_handle(e)
     
 
-# customer detail
+# Chi tiết khách hàng
 @frappe.whitelist(methods="GET")
 def customer_detail(name):
     try: 
@@ -107,7 +107,8 @@ def customer_detail(name):
         doc_customer["address"] = address
         doc_customer["contacts"] = contacts
         doc_customer["routers"] = list_router_frequency
-        return gen_response(200,"",doc_customer)
+
+        return gen_response(200, "", doc_customer)
     except Exception as e:
         exception_handle(e)
 
@@ -121,7 +122,7 @@ def list_customer_type():
     except Exception as e:
         return exception_handle(e)
     
-# delete customer
+# Xóa khách hàng
 @frappe.whitelist(methods="DELETE")
 def delete_customer(name):
     try:
@@ -133,7 +134,7 @@ def delete_customer(name):
     except Exception as e:
         exception_handle(e)
 
-# create customer
+# Thêm mới khách hàng
 @frappe.whitelist(methods="POST")
 def create_customer(**kwargs):
     try:
@@ -144,16 +145,17 @@ def create_customer(**kwargs):
         router_in = kwargs.get('router')
         if contact and contact.get('phone'):
             phone_number = validate_phone_number(contact.get('phone'))
-        json_location =""
+        json_location = ""
         if address.get("latitude") and address.get("longitude"):
-            json_location = json.dumps({"long": kwargs.get(
-                "longitude"), "lat": kwargs.get("latitude")})
+            json_location = json.dumps({"long": kwargs.get("longitude"), "lat": kwargs.get("latitude")})
+            
         # Tạo mới khách hàng
         new_customer = frappe.new_doc('Customer')
         required_fields = ['customer_code', 'customer_name', 'customer_group', 'territory']
         normal_fields = ['customer_details', 'website']
         date_fields = ['custom_birthday']
         choice_fields = ['customer_type']
+
         for key, value in kwargs.items():
             if key in normal_fields:
                 new_customer.set(key, value)
@@ -239,7 +241,6 @@ def create_customer(**kwargs):
 
         if kwargs.get('faceimage'):
             new_customer.image = post_image(name_image='', faceimage=kwargs.get('faceimage'), doc_type='Customer', doc_name=new_customer.name)
-            return "ok"
             new_customer.save()
 
         # Thêm khách hàng vào tuyến 
@@ -267,7 +268,7 @@ def create_customer(**kwargs):
             frappe.db.delete("Contact",new_address_contact.name)
         return exception_handle(e)
     
-# list 
+# Danh sách lãnh thổ 
 @frappe.whitelist(methods="GET")
 def list_territory():
     try:
@@ -276,7 +277,7 @@ def list_territory():
     except Exception as e:
         return exception_handle(e)
     
-# update
+# Chỉnh sửa khách hàng
 @frappe.whitelist(methods="PUT")
 def update_customer(name, **kwargs):
     try:
@@ -290,7 +291,8 @@ def update_customer(name, **kwargs):
             return gen_response(406, f"Không tồn tại {name}")
     except Exception as e:
         return exception_handle(e)
-    
+
+# Lấy địa chỉ khách hàng
 @frappe.whitelist(methods="GET")
 def get_customer_addresses(customer_name):
     addresses = frappe.db.get_all(
@@ -300,7 +302,7 @@ def get_customer_addresses(customer_name):
     )
     return gen_response(200, "Thành công", addresses)
 
-    
+# Lấy liên hệ khách hàng
 @frappe.whitelist(methods="GET")
 def get_contact(customer_name):
     contact = frappe.get_all(
@@ -310,6 +312,7 @@ def get_contact(customer_name):
     )
     return gen_response(200, "Thành công", contact)
 
+# Lấy danh sách tuyến khách hàng
 @frappe.whitelist(methods='GET')
 def list_router(customer_name):
     try:
@@ -320,7 +323,7 @@ def list_router(customer_name):
     except Exception as e:
         return exception_handle(e)
     
-#list sales person
+# Lấy danh sách nhân viên bán hàng
 @frappe.whitelist(methods='GET')
 def list_sale_person():
     try:
@@ -333,7 +336,7 @@ def list_sale_person():
     except Exception as e:
         return exception_handle(e)
 
-
+# Lấy danh sách khách hàng có địa chỉ
 @frappe.whitelist(methods='GET')
 def get_customer_has_location(**kwargs):
     try:
