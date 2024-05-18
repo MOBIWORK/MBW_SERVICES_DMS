@@ -3,7 +3,7 @@
 
 import frappe
 from frappe.model.document import Document
-
+import json
 class Address(Document):
 	pass
 
@@ -16,7 +16,9 @@ def update_address(doc,method=None):
 				"name": link.link_name,
 			})
 			if customer and customer.customer_primary_address == doc.name :
-				customer.customer_location_primary = doc.address_location
+				customer.customer_location_primary = doc.address_location if (doc.address_location and json.loads(doc.address_location) and bool(json.loads(doc.address_location).get("long")) and bool(json.loads(doc.address_location).get("long"))) else None
+
+				frappe.msgprint(f"data mới :: {doc.address_location}, {customer.customer_location_primary}", )
 				customer.save()
 	if doc.is_new() != False:
 		from  frappe.model.rename_doc import update_document_title

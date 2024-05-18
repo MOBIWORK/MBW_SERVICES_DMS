@@ -1,24 +1,20 @@
 // @mui
 
-import { IoIosMenu } from "react-icons/io";
 import { VscAdd } from "react-icons/vsc";
 import { LuUploadCloud } from "react-icons/lu";
 import { LiaDownloadSolid } from "react-icons/lia";
 import { LuFilter, LuFilterX } from "react-icons/lu";
-import { PiSortAscendingBold, PiSortDescendingBold } from "react-icons/pi";
-import { Button, Select, Row, Col, Dropdown, Modal, message, TreeSelect } from "antd";
-import React, { useCallback, useContext, useEffect, useState } from "react";
+import { Button, Select, Row, Col, Dropdown, Modal, TreeSelect } from "antd";
+import React, { memo, useCallback, useContext, useEffect, useState } from "react";
 import { FormItemCustom } from "../../components/form-item";
-import { DropDownCustom, HeaderPage, TableCustom, } from "../../components";
+import { ContentFrame, DropDownCustom, HeaderPage, TableCustom, } from "../../components";
 import { rsData, rsDataFrappe } from "../../types/response";
 import { employee } from "../../types/employeeFilter";
 import { AxiosService } from "../../services/server";
 import useDebounce from "../../hooks/useDebount";
-import { Link, useNavigate } from "react-router-dom";
-import { TagCustomStatus } from "../../components/tag/tag";
-import dayjs from "dayjs";
+import { useNavigate } from "react-router-dom";
 import Filter from "./components/filter";
-import { columns, orderFields } from "./data";
+import { columns } from "./data";
 import { useForm } from "antd/lib/form/Form";
 import { MdKeyboardArrowDown } from "react-icons/md";
 import { router } from "../../types/router";
@@ -29,12 +25,11 @@ import { listSale } from "@/types/listSale";
 
 
 
-
-export default function RouterControl() {
+function RouterControl() {
   const navigate = useNavigate();
   const PAGE_SIZE = 20
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
-  const {errorMsg,successMsg} = useContext(GlobalContext)
+  const { errorMsg, successMsg } = useContext(GlobalContext)
   const [form] = useForm()
   const [keyS, setKeyS] = useState<string | false>("");
   const [isdeletedField, setDelete] = useState<boolean>(false)
@@ -53,7 +48,7 @@ export default function RouterControl() {
   const [listSales, setListSales] = useState<any[]>([]);
   const [orderBy, setOrder] = useState<"desc" | "asc">("desc")
   const [team_sale, setTeamSale] = useState<string>();
-  const [rfRouter,setRfRouter] = useState<boolean>(false)
+  const [rfRouter, setRfRouter] = useState<boolean>(false)
   const [orderField, setOrderField] = useState<any>({
     "label": "Thời gian cập nhật",
     "value": "modified"
@@ -169,7 +164,7 @@ export default function RouterControl() {
 
     })()
 
-  }, [router, employee, status, page, filter, orderBy, orderField,rfRouter])
+  }, [router, employee, status, page, filter, orderBy, orderField, rfRouter])
   const handleUpdate = useCallback(async (type: string, value: string) => {
     try {
       let rsUpdate: rsData<router[]> = await AxiosService.patch("/api/method/mbw_dms.api.router.update_routers", {
@@ -249,235 +244,242 @@ export default function RouterControl() {
 
   return (
     <>
-      <HeaderPage
-        title="Quản lý tuyến"
-        buttons={[
-          {
-            label: "Xuất excel",
-            icon: <LiaDownloadSolid className="text-xl" />,
-            size: "20px",
-            className: "flex items-center mr-2",
-            action: () => {
-              translationUrl("/app/data-export/Data%20Export")
+      <ContentFrame
+        header={
+          <HeaderPage
+            title="Quản lý tuyến"
+            buttons={[
+              {
+                label: "Xuất excel",
+                icon: <LiaDownloadSolid className="text-xl" />,
+                size: "20px",
+                className: "flex items-center mr-2",
+                action: () => {
+                  translationUrl("/app/data-export/Data%20Export")
+                }
+              },
+              {
+                label: "Nhập excel",
+                icon: <LuUploadCloud className="text-xl" />,
+                size: "20px",
+                className: "flex items-center mr-2",
+                action: () => {
+                  translationUrl(`/app/data-import/new-data-import`)
+                }
+              },
+              {
+                label: "Thêm mới",
+                type: "primary",
+                icon: <VscAdd className="text-xl" />,
+                size: "20px",
+                className: "flex items-center",
+                action: () => navigate('/dms-router/create-dms-router')
+              },
+            ]}
+            customButton={
+              <>
+                <Dropdown
+                  trigger={["click"]}
+                  placement="bottomRight"
+                  dropdownRender={(menu) => (
+                    <DropDownCustom >
+                      <div className="-m-2">
+                        <div className="py-2 px-4 cursor-pointer hover:bg-[#f5f5f5] w-[168px]"
+                          onClick={setAction.bind(null, {
+                            isOpen: true, action: "Khoá", data: {
+                              type: "status",
+                              value: "Lock"
+                            }
+                          })
+                          }
+                        >Khóa tuyến</div>
+                        <div className="py-2 px-4 cursor-pointer hover:bg-[#f5f5f5] w-[168px]" onClick={setAction.bind(null, {
+                          isOpen: true, action: "Khoá", data: {
+                            type: "status",
+                            value: "Active"
+                          }
+                        })
+                        }>Mở tuyến </div>
+                        <div className="py-2 px-4 cursor-pointer hover:bg-[#f5f5f5] w-[168px]"
+                          onClick={setAction.bind(null, {
+                            isOpen: true, action: "Khoá", data: {
+                              type: "is_deleted",
+                              value: "set"
+                            }
+                          })
+                          }
+                        >Xóa Tuyến</div>
+                      </div>
+                    </DropDownCustom>
+                  )}>
+                  <Button type="primary" className="ml-2 flex items-center"> Hành động <span className="text-base"><MdKeyboardArrowDown /></span> </Button>
+                </Dropdown>
+              </>
             }
-          },
-          {
-            label: "Nhập excel",
-            icon: <LuUploadCloud className="text-xl" />,
-            size: "20px",
-            className: "flex items-center mr-2",
-            action: () => {
-              translationUrl(`/app/data-import/new-data-import`)
-            }
-          },
-          {
-            label: "Thêm mới",
-            type: "primary",
-            icon: <VscAdd className="text-xl" />,
-            size: "20px",
-            className: "flex items-center",
-            action: () => navigate('/dms-router/create-dms-router')
-          },
-        ]}
-        customButton={
-          <>
-            <Dropdown
-              trigger={["click"]}
-              placement="bottomRight"
-              dropdownRender={(menu) => (
-                <DropDownCustom >
-                  <div className="-m-2">
-                    <div className="py-2 px-4 cursor-pointer hover:bg-[#f5f5f5] w-[168px]"
-                      onClick={setAction.bind(null, {
-                        isOpen: true, action: "Khoá", data: {
-                          type: "status",
-                          value: "Lock"
-                        }
-                      })
-                      }
-                    >Khóa tuyến</div>
-                    <div className="py-2 px-4 cursor-pointer hover:bg-[#f5f5f5] w-[168px]" onClick={setAction.bind(null, {
-                      isOpen: true, action: "Khoá", data: {
-                        type: "status",
-                        value: "Active"
-                      }
-                    })
-                    }>Mở tuyến </div>
-                    <div className="py-2 px-4 cursor-pointer hover:bg-[#f5f5f5] w-[168px]"
-                      onClick={setAction.bind(null, {
-                        isOpen: true, action: "Khoá", data: {
-                          type: "is_deleted",
-                          value: "set"
-                        }
-                      })
-                      }
-                    >Xóa Tuyến</div>
-                  </div>
-                </DropDownCustom>
-              )}>
-              <Button type="primary" className="ml-2 flex items-center"> Hành động <span className="text-base"><MdKeyboardArrowDown /></span> </Button>
-            </Dropdown>
-          </>
+          />
         }
-      />
+      >
+        <div className="bg-[#f9fafa]">
+          <div className="mx-2 pb-10">
+            <div className="">
+              <div className="h-auto bg-white py-7 rounded-lg border border-solid border-[#DFE3E8]">
+                {/* header  */}
+                <Row className="justify-between w-full  px-4">
+                  <Col span={14} className="hidden lg:block">
+                    <Row gutter={8}>
+                      {/* bộ lọc tuyến  */}
+                      <Col span={6} className="!min-w-[175px]">
+                        <FormItemCustom name="router">
+                          <Select
+                            // labelInValue
+                            mode="multiple"
+                            filterOption={false}
+                            onChange={(value) => {
+                              setRouter(value)
+                            }}
+                            onDeselect={(value) => {
+                              setRouter(prev => prev?.filter(vl => vl !== value))
+                            }}
+                            showSearch
+                            placeholder="Tuyến"
+                            notFoundContent={null}
+                            onSearch={(value: string) => setKeySRouter(value)}
+                            options={listRouter}
+                            allowClear
+                            optionRender={(option) => {
+                              return <div className="text-sm">
+                                <p role="img" aria-label={option.data.label} className="my-1">
+                                  {option.data.label}
+                                </p>
+                                <span className="text-xs !font-semibold">{option.data.desc}</span>
+                              </div>
+                            }
+                            }
+                          />
+                        </FormItemCustom>
+                      </Col>
+                      {/* lọc nhân viên mới */}
+                      <Col span={6}>
+                        <FormItemCustom className="w-full border-none mr-2">
+                          <TreeSelect
+                            showSearch
+                            placeholder="Nhóm bán hàng"
+                            allowClear
+                            treeData={listSales}
+                            onChange={(value: string) => {
+                              setTeamSale(value);
+                            }}
+                            dropdownStyle={{ maxHeight: 400, overflow: 'auto', minWidth: 400 }}
+                          />
+                        </FormItemCustom>
+                      </Col>
 
-      <div className="bg-[#f9fafa]">
-        <div className="mx-2 pb-10">
-          <div className="">
-            <div className="h-auto bg-white py-7 rounded-lg border border-solid border-[#DFE3E8]">
-              {/* header  */}
-              <Row className="justify-between w-full  px-4">
-                <Col span={14} className="hidden lg:block">
-                  <Row gutter={8}>
-                    {/* bộ lọc tuyến  */}
-                    <Col span={6}>
-                      <FormItemCustom name="router">
-                        <Select
-                          // labelInValue
-                          mode="multiple"
-                          filterOption={false}
-                          onChange={(value) => {
-                            setRouter(value)
-                          }}
-                          onDeselect={(value) => {
-                            setRouter(prev => prev?.filter(vl => vl !== value))
-                          }}
-                          showSearch
-                          placeholder="Tuyến"
-                          notFoundContent={null}
-                          onSearch={(value: string) => setKeySRouter(value)}
-                          options={listRouter}
-                          allowClear
-                          optionRender={(option) => {
-                            return <div className="text-sm">
-                              <p role="img" aria-label={option.data.label} className="my-1">
-                                {option.data.label}
-                              </p>
-                              <span className="text-xs !font-semibold">{option.data.desc}</span>
-                            </div>
-                          }
-                          }
-                        />
-                      </FormItemCustom>
-                    </Col>
-                    {/* lọc nhân viên mới */}
-                    <Col span={6}>
-                      <FormItemCustom className="w-full border-none mr-2">
-                        <TreeSelect
-                          showSearch
-                          placeholder="Nhóm bán hàng"
-                          allowClear
-                          treeData={listSales}
-                          onChange={(value: string) => {
-                            setTeamSale(value);
-                          }}
-                          dropdownStyle={{ maxHeight: 400, overflow: 'auto', minWidth: 400 }}
-                        />
-                      </FormItemCustom>
-                    </Col>
-
-                   <Col span={6}>
-                      <FormItemCustom className="w-full border-none mr-2">
-                        <Select
-                          className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
-                          options={listEmployees}
-                          showSearch
-                          placeholder="Nhân viên chăm sóc"
-                          defaultValue={""}
-                          notFoundContent={null}
-                          onSearch={setKeySearch4}
-                          onChange={(value) => {
-                            setEmployee(value);
-                          }}
-                          allowClear
-                          dropdownStyle={{ maxHeight: 400, overflow: 'auto', minWidth: 300 }}
-                        />
-                      </FormItemCustom>
-                   </Col>
-                    {/* lọc trạng thái */}
-                    <Col span={6}>
-                      <FormItemCustom className="w-[150px] border-none">
-                        <Select
-                          className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
-                          optionFilterProp="children"
-                          placeholder="Trạng thái"
-                          onChange={onChange}
-                          onSearch={onSearch}
-                          filterOption={filterOption}
-                          onClear={() => setStatus(undefined)}
-                          defaultValue=""
-                          options={[
-                            {
-                              value: "Active",
-                              label: "Hoạt động",
-                            },
-                            {
-                              value: "Lock",
-                              label: "Khóa",
-                            },
-                          ]}
-                          allowClear
-                        />
-                      </FormItemCustom>
-                    </Col>
-                  </Row>
-                </Col>
-                <Col className="">
-                  <div className="flex flex-wrap items-center">
-                    <div className="flex justify-center items-center mr-4">
-                      <Dropdown
-                        trigger={["click"]}
-                        placement="bottomRight"
-                        dropdownRender={(menu) => (
-                          <DropDownCustom title="Bộ lọc">
-                            <Filter action={setFilter} form={form} />
-                          </DropDownCustom>
-                        )}
-                      >
-                        <Button
-                          className="flex items-center text-nowrap !text-[13px] !leading-[21px] !font-normal  border-r-[0.1px] rounded-r-none h-[32px]"
-                          icon={<LuFilter style={{ fontSize: "20px" }} />}
+                      <Col span={6}>
+                        <FormItemCustom className="w-full border-none mr-2">
+                          <Select
+                            className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
+                            options={listEmployees}
+                            showSearch
+                            placeholder="Nhân viên chăm sóc"
+                            defaultValue={""}
+                            notFoundContent={null}
+                            onSearch={setKeySearch4}
+                            onChange={(value) => {
+                              setEmployee(value);
+                            }}
+                            allowClear
+                            dropdownStyle={{ maxHeight: 400, overflow: 'auto', minWidth: 300 }}
+                          />
+                        </FormItemCustom>
+                      </Col>
+                      {/* lọc trạng thái */}
+                      <Col span={6}>
+                        <FormItemCustom className="w-[150px] border-none">
+                          <Select
+                            className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
+                            optionFilterProp="children"
+                            placeholder="Trạng thái"
+                            onChange={onChange}
+                            onSearch={onSearch}
+                            filterOption={filterOption}
+                            onClear={() => setStatus(undefined)}
+                            defaultValue=""
+                            options={[
+                              {
+                                value: "Active",
+                                label: "Hoạt động",
+                              },
+                              {
+                                value: "Lock",
+                                label: "Khóa",
+                              },
+                            ]}
+                            allowClear
+                          />
+                        </FormItemCustom>
+                      </Col>
+                    </Row>
+                  </Col>
+                  <Col className="">
+                    <div className="flex flex-wrap items-center">
+                      <div className="flex justify-center items-center mr-4">
+                        <Dropdown
+                          trigger={["click"]}
+                          placement="bottomRight"
+                          dropdownRender={(menu) => (
+                            <DropDownCustom title="Bộ lọc">
+                              <Filter action={setFilter} form={form} />
+                            </DropDownCustom>
+                          )}
                         >
-                          Bộ lọc
+                          <Button
+                            className="flex items-center text-nowrap !text-[13px] !leading-[21px] !font-normal  border-r-[0.1px] rounded-r-none h-[32px]"
+                            icon={<LuFilter style={{ fontSize: "20px" }} />}
+                          >
+                            Bộ lọc
+                          </Button>
+                        </Dropdown>
+                        <Button className="border-l-[0.1px] rounded-l-none h-[32px]" onClick={() => form.resetFields()}>
+                          <LuFilterX style={{ fontSize: "20px" }} />
                         </Button>
-                      </Dropdown>
-                      <Button className="border-l-[0.1px] rounded-l-none h-[32px]" onClick={() => form.resetFields()}>
-                        <LuFilterX style={{ fontSize: "20px" }} />
-                      </Button>
-                    </div>
+                      </div>
 
-                  </div>
-                </Col>
-              </Row>
-              {/* hien thi table  */}
-              <div className="pt-5">
-                <div className="w-full overflow-x-scroll ">
-                  <TableCustom
-                    rowSelection={rowSelection}
-                    onRow={(record, rowIndex) => {
-                      return {
-                        onClick: (event) => {
-                          console.log(record);
-                          navigate(`/dms-router/${record?.name}`)
+                    </div>
+                  </Col>
+                </Row>
+                {/* hien thi table  */}
+                <div className="pt-5">
+                  <div className="w-full overflow-x-scroll ">
+                    <TableCustom
+                      rowSelection={rowSelection}
+                      onRow={(record, rowIndex) => {
+                        return {
+                          onClick: (event) => {
+                            console.log(record);
+                            navigate(`/dms-router/${record?.name}`)
+                          }
                         }
-                      }
-                    }}
-                    columns={columns}
-                    dataSource={routersTable?.map(router => ({ key: router.name, ...router }))}
-                    pagination={{
-                      defaultPageSize: PAGE_SIZE,
-                      total,
-                      onChange(page, pageSize) {
-                        setPage(page)
-                      },
-                    }}
-                  />
+                      }}
+                      columns={columns}
+                      dataSource={routersTable?.map(router => ({ key: router.name, ...router }))}
+                      pagination={{
+                        defaultPageSize: PAGE_SIZE,
+                        total,
+                        onChange(page, pageSize) {
+                          setPage(page)
+                        },
+                      }}
+                    />
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
+      </ContentFrame>
+
+
+
       <Modal open={action.isOpen} onCancel={setAction.bind(null, {
         isOpen: false,
         data: null,
@@ -492,7 +494,11 @@ export default function RouterControl() {
           {action.action} {selectedRowKeys.length} đã chọn ?
         </span>
       </Modal>
-      
+
     </>
   )
 }
+
+
+
+export default memo(RouterControl)

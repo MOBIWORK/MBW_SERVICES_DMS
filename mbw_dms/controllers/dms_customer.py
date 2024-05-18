@@ -60,5 +60,5 @@ def update_location(doc,method=None):
         })
         if address:
             doc.customer_location_primary = address.address_location
-            frappe.msgprint('update location')
+            frappe.msgprint('update location',f" shit:{doc.customer_location_primary}, {address.address_location}")
     pass

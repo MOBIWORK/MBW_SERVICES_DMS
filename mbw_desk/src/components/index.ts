@@ -26,3 +26,5 @@ export  {WrapperCard, WrapperCardTable, WrapperCardMap} from './wrap-card/Wrappe
 export {Mapcustom} from './map_mbw/map'
 
 export  {default as HistoryMap} from './map/map'
+
+export {default as ContentFrame} from "./content-frame"
