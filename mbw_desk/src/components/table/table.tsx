@@ -3,6 +3,11 @@ import styled from "styled-components";
 
 
 export const TableCustom = styled(Table)<{$border?: boolean,$wrap?: boolean}>`
+& .ant-table-body {
+  overflow-y: scroll;
+    max-height: 500px!important;
+}
+
 & .ant-table-container .ant-table-tbody tr.ant-table-expanded-row:hover>td.ant-table-cell {
   background: #F4F6F8!important;
 }

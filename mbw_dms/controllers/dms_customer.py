@@ -1,5 +1,6 @@
 import frappe
 from frappe.utils import nowdate
+import pydash
 
 def update_kpi_monthly(doc, method):
     # Lấy ngày tháng để truy xuất dữ liệu
@@ -58,7 +59,12 @@ def update_location(doc,method=None):
         address = frappe.get_doc("Address", {
             "name" : doc.customer_primary_address
         })
-        if address:
-            doc.customer_location_primary = address.address_location
-            frappe.msgprint('update location',f" shit:{doc.customer_location_primary}, {address.address_location}")
+        if not pydash.find(address.links,lambda x: x.link_name == doc.name and x.link_doctype == "Customer"):
+            address.append("links", {
+                "link_doctype": "Customer",
+                "link_name": doc.name
+            })
+            address.save()
+            frappe.db.commit()
+        
     pass

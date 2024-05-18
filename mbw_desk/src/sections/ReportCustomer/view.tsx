@@ -434,7 +434,7 @@ export default function ReportCustomer() {
           <Col>
             <Row gutter={[8,8]}>
               <Col className="mx-4 w-full" span={24}>
-                <div className="flex flex-wrap justify-start items-center ">
+                <Form layout="vertical" className="flex flex-wrap justify-start items-center ">
                   <FormItemCustom
                     label={"Sản phẩm"}
                     className="!w-[175px] border-none mr-2"
@@ -552,7 +552,7 @@ export default function ReportCustomer() {
                       placeholder="Tất cả khách hàng"
                     />
                   </FormItemCustom>
-                </div>
+                </Form>
               </Col>
             </Row>
           </Col>
