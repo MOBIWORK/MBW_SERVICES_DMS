@@ -1,6 +1,6 @@
 import { SearchOutlined, VerticalAlignBottomOutlined } from "@ant-design/icons";
-import { FormItemCustom, HeaderPage } from "../../components";
-import { Input, Select, Table, Typography } from "antd";
+import { ContentFrame, FormItemCustom, HeaderPage } from "../../components";
+import { Form, Input, Row, Select, Table, Typography } from "antd";
 import type { TableColumnsType } from "antd";
 import { TableReport } from "../ReportSales/tableCustom";
 import {
@@ -163,31 +163,46 @@ const columns: TableColumnsType<DataTypeCustomNew> = [
     title: "Số lần VT",
     dataIndex: "totals_checkin",
     key: "totals_checkin",
+    render: (_, record: any) => (
+      <div className="!text-right">{record.totals_checkin}</div>
+    ),
   },
   {
     title: "VT đầu",
     dataIndex: "first_checkin",
     key: "first_checkin",
+    render: (_, record: any) => (
+      <div className="!text-right">{record.first_checkin}</div>
+    ),
   },
   {
     title: "VT cuối",
     dataIndex: "last_checkin",
     key: "last_checkin",
+    render: (_, record: any) => (
+      <div className="!text-right">{record.last_checkin}</div>
+    ),
+    
   },
   {
     title: "Số đơn hàng",
     dataIndex: "totals_so",
     key: "totals_so",
+    render: (_, record: any) => (
+      <div className="!text-right">{record.totals_so}</div>
+    ),
   },
   {
     title: "Đơn hàng cuối",
     dataIndex: "last_sale_order",
     key: "last_sale_order",
-    render: (_, record: any) => (
-      <div className="!w-[175px]">
-        {dayjs(record.last_sale_order * 1000).format("DD/MM/YYYY")}
-      </div>
-    ),
+    render: (value) => {
+      return value ? (
+        <p>{dayjs(value * 1000).format("DD/MM/YYYY")}</p>
+      ) : (
+        <></>
+      );
+    },
   },
 ];
 
@@ -213,7 +228,7 @@ export default function ReportCustomNew() {
   const [listTerritory, setListTerritory] = useState<any[]>([]);
   const [keySTerritory, setKeySTerritory] = useState("");
   let keySearchTerritory = useDebounce(keySTerritory, 500);
-  const [has_sales_order, setHasSaleOrder] = useState<boolean>()
+  const [has_sales_order, setHasSaleOrder] = useState<boolean>();
 
   useEffect(() => {
     (async () => {
@@ -340,208 +355,211 @@ export default function ReportCustomNew() {
       setDataCustomNew(result);
       setTotal(result?.totals_cus);
     })();
-  }, [page, customer_type, customer_group, territory, employee, has_sales_order, department]);
+  }, [
+    page,
+    customer_type,
+    customer_group,
+    territory,
+    employee,
+    has_sales_order,
+    department,
+  ]);
   return (
     <>
-      <HeaderPage
-        title="Báo cáo khách hàng mới"
-        buttons={[
-          {
-            label: "Xuất dữ liệu",
-            type: "primary",
-            icon: <VerticalAlignBottomOutlined className="text-xl" />,
-            size: "20px",
-            className: "flex items-center",
-            action: () => {
-              translationUrl("/app/data-export/Data%20Export")
-            }
-          },
-        ]}
-      />
-      <div className="bg-white rounded-md py-7 px-4 border-[#DFE3E8] border-[0.2px] border-solid">
-        <div className="flex justify-start items-center pt-2">
-          <FormItemCustom
-            className="w-[200px] border-none mr-2"
-            label={"Phòng ban"}
-          ></FormItemCustom>
-          <FormItemCustom
-            className="w-[200px] border-none mr-2"
-            label={"Nhân viên"}
-          ></FormItemCustom>
-          <FormItemCustom
-            className="w-[200px] border-none mr-2"
-            label={"Loại khách hàng"}
-          ></FormItemCustom>
-          <FormItemCustom
-            className="w-[200px] border-none mr-2"
-            label={"Nhóm khách hàng"}
-          ></FormItemCustom>
-          <FormItemCustom
-            className="w-[200px] border-none mr-2"
-            label={"Khu vực"}
-          ></FormItemCustom>
-        </div>
-
-        <div className="flex justify-start items-center">
-          <FormItemCustom className="w-[200px] border-none mr-2">
-            <Select
-              className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
-              options={listDepartment}
-              onSelect={(value) => {
-                setDepartment(value);
-              }}
-              onSearch={(value: string) => {
-                setKeySDepartment(value);
-              }}
-              onClear={() => setDepartment("")}
-              filterOption={false}
-              allowClear
-              placeholder="Tất cả phòng ban"
-            />
-          </FormItemCustom>
-
-          <FormItemCustom className="w-[200px] border-none mr-2">
-            <Select
-              className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
-              options={listEmployee}
-              onSelect={(value) => {
-                setEmployee(value);
-              }}
-              onSearch={(value: string) => {
-                setKeySEmployee(value);
-              }}
-              onClear={() => setEmployee("")}
-              filterOption={false}
-              allowClear
-              placeholder="Tất cả nhân viên"
-            />
-          </FormItemCustom>
-
-          <FormItemCustom className="w-[200px] border-none mr-2">
-            <Select
-              className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
-              options={typecustomer}
-              filterOption={false}
-              allowClear
-              placeholder="Tất cả loại khách hàng"
-              onSelect={(value) => {
-                setCustomerType(value);
-              }}
-              onClear={() => setCustomerType("")}
-            />
-          </FormItemCustom>
-
-          <FormItemCustom className="w-[200px] border-none mr-2">
-            <Select
-              className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
-              options={listCustomerGroup}
-              onSelect={(value) => {
-                setCustomerGroup(value);
-              }}
-              onSearch={(value: string) => {
-                setKeySCustomerGroup(value);
-              }}
-              onClear={() => setCustomerGroup("")}
-              filterOption={false}
-              allowClear
-              placeholder="Tất cả nhóm khách hàng"
-            />
-          </FormItemCustom>
-
-          <FormItemCustom className="w-[200px] border-none mr-2">
-            <Select
-              className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
-              options={listTerritory}
-              onSelect={(value) => {
-                setTerritory(value);
-              }}
-              onSearch={(value: string) => {
-                setKeySTerritory(value);
-              }}
-              onClear={() => setTerritory("")}
-              filterOption={false}
-              allowClear
-              placeholder="Tất cả khu vực"
-            />
-          </FormItemCustom>
-        </div>
-
-        <div className="flex justify-start items-center pt-4">
-          <FormItemCustom
-            className="w-[200px] border-none mr-2"
-            label={"Phát sinh đơn hàng"}
-          ></FormItemCustom>
-        </div>
-
-        <div className="flex justify-start items-center">
-          <FormItemCustom className="w-[200px] border-none mr-2">
-            <Select
-              className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
-              options={psorder}
-              filterOption={false}
-              allowClear
-              showSearch
-              onSelect={(value) => {
-                setHasSaleOrder(value);
-              }}
-              onClear={() => setHasSaleOrder(undefined)}
-            />
-          </FormItemCustom>
-        </div>
-
-        <div className="pt-5">
-          <TableReport
-            dataSource={dataCustomNew?.data?.map(
-              (dataSale: DataTypeCustomNew) => {
-                return {
-                  ...dataSale,
-                  key: dataSale.name,
-                };
-              }
-            )}
-            bordered
-            columns={columns}
-            pagination={{
-              defaultPageSize: PAGE_SIZE,
-              total,
-              showSizeChanger: false,
-              onChange(page) {
-                setPage(page);
+      <ContentFrame
+        header={
+          <HeaderPage
+            title="Báo cáo khách hàng mới"
+            buttons={[
+              {
+                label: "Xuất dữ liệu",
+                type: "primary",
+                icon: <VerticalAlignBottomOutlined className="text-xl" />,
+                size: "20px",
+                className: "flex items-center",
+                action: () => {
+                  translationUrl("/app/data-export/Data%20Export");
+                },
               },
-            }}
-            scroll={{ x: true }}
-            summary={() => {
-              return (
-                <Table.Summary.Row>
-                  <Table.Summary.Cell index={0}></Table.Summary.Cell>
-                  <Table.Summary.Cell index={1}>Tổng</Table.Summary.Cell>
-                  <Table.Summary.Cell index={2}></Table.Summary.Cell>
-                  <Table.Summary.Cell index={3}></Table.Summary.Cell>
-                  <Table.Summary.Cell index={4}></Table.Summary.Cell>
-                  <Table.Summary.Cell index={5}></Table.Summary.Cell>
-                  <Table.Summary.Cell index={6}></Table.Summary.Cell>
-                  <Table.Summary.Cell index={7}></Table.Summary.Cell>
-                  <Table.Summary.Cell index={8}></Table.Summary.Cell>
-                  <Table.Summary.Cell index={9}></Table.Summary.Cell>
-                  <Table.Summary.Cell index={10}></Table.Summary.Cell>
-                  <Table.Summary.Cell index={11}></Table.Summary.Cell>
-                  <Table.Summary.Cell index={12}></Table.Summary.Cell>
-                  <Table.Summary.Cell index={13}></Table.Summary.Cell>
-                  <Table.Summary.Cell index={14}></Table.Summary.Cell>
-                  <Table.Summary.Cell index={15}>
-                    {dataCustomNew?.sum?.sum_checkin}
-                  </Table.Summary.Cell>
-                  <Table.Summary.Cell index={16}></Table.Summary.Cell>
-                  <Table.Summary.Cell index={17}></Table.Summary.Cell>
-                  <Table.Summary.Cell index={18}>
-                    {dataCustomNew?.sum?.sum_so}
-                  </Table.Summary.Cell>
-                </Table.Summary.Row>
-              );
-            }}
+            ]}
           />
+        }
+      >
+        <div className="bg-white rounded-md pt-4 pb-7 border-[#DFE3E8] border-[0.2px] border-solid">
+          <Form
+            layout="vertical"
+            className="flex flex-wrap justify-start items-center px-4"
+          >
+            <Row className="" gutter={[8, 8]}>
+              <FormItemCustom
+                label={"Phòng ban"}
+                className="w-[175px] border-none mr-2"
+              >
+                <Select
+                  className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
+                  options={listDepartment}
+                  onSelect={(value) => {
+                    setDepartment(value);
+                  }}
+                  onSearch={(value: string) => {
+                    setKeySDepartment(value);
+                  }}
+                  onClear={() => setDepartment("")}
+                  filterOption={false}
+                  allowClear
+                  placeholder="Tất cả phòng ban"
+                />
+              </FormItemCustom>
+
+              <FormItemCustom
+                label={"Nhân viên"}
+                className="w-[175px] border-none mr-2"
+              >
+                <Select
+                  className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
+                  options={listEmployee}
+                  onSelect={(value) => {
+                    setEmployee(value);
+                  }}
+                  onSearch={(value: string) => {
+                    setKeySEmployee(value);
+                  }}
+                  onClear={() => setEmployee("")}
+                  filterOption={false}
+                  allowClear
+                  placeholder="Tất cả nhân viên"
+                />
+              </FormItemCustom>
+
+              <FormItemCustom
+                label={"Khách hàng"}
+                className="w-[175px] border-none mr-2"
+              >
+                <Select
+                  className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
+                  options={typecustomer}
+                  filterOption={false}
+                  allowClear
+                  placeholder="Tất cả loại khách hàng"
+                  onSelect={(value) => {
+                    setCustomerType(value);
+                  }}
+                  onClear={() => setCustomerType("")}
+                />
+              </FormItemCustom>
+
+              <FormItemCustom
+                label={"Nhóm khách hàng"}
+                className="w-[175px] border-none mr-2"
+              >
+                <Select
+                  className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
+                  options={listCustomerGroup}
+                  onSelect={(value) => {
+                    setCustomerGroup(value);
+                  }}
+                  onSearch={(value: string) => {
+                    setKeySCustomerGroup(value);
+                  }}
+                  onClear={() => setCustomerGroup("")}
+                  filterOption={false}
+                  allowClear
+                  placeholder="Tất cả nhóm khách hàng"
+                />
+              </FormItemCustom>
+
+              <FormItemCustom
+                label={"Khu vực"}
+                className="w-[175px] border-none mr-2"
+              >
+                <Select
+                  className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
+                  options={listTerritory}
+                  onSelect={(value) => {
+                    setTerritory(value);
+                  }}
+                  onSearch={(value: string) => {
+                    setKeySTerritory(value);
+                  }}
+                  onClear={() => setTerritory("")}
+                  filterOption={false}
+                  allowClear
+                  placeholder="Tất cả khu vực"
+                />
+              </FormItemCustom>
+              <FormItemCustom
+                label={" "}
+                className="w-[175px] border-none mr-2"
+              >
+                <Select
+                  className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
+                  options={psorder}
+                  filterOption={false}
+                  allowClear
+                  showSearch
+                  onSelect={(value) => {
+                    setHasSaleOrder(value);
+                  }}
+                  onClear={() => setHasSaleOrder(undefined)}
+                />
+              </FormItemCustom>
+            </Row>
+          </Form>
+
+          <div className="pt-5">
+            <TableReport
+              dataSource={dataCustomNew?.data?.map(
+                (dataSale: DataTypeCustomNew) => {
+                  return {
+                    ...dataSale,
+                    key: dataSale.name,
+                  };
+                }
+              )}
+              bordered
+              columns={columns}
+              pagination={{
+                defaultPageSize: PAGE_SIZE,
+                total,
+                showSizeChanger: false,
+                onChange(page) {
+                  setPage(page);
+                },
+              }}
+              scroll={{ x: true }}
+              summary={() => {
+                return (
+                  <Table.Summary.Row>
+                    <Table.Summary.Cell index={0}></Table.Summary.Cell>
+                    <Table.Summary.Cell index={1}>Tổng</Table.Summary.Cell>
+                    <Table.Summary.Cell index={2}></Table.Summary.Cell>
+                    <Table.Summary.Cell index={3}></Table.Summary.Cell>
+                    <Table.Summary.Cell index={4}></Table.Summary.Cell>
+                    <Table.Summary.Cell index={5}></Table.Summary.Cell>
+                    <Table.Summary.Cell index={6}></Table.Summary.Cell>
+                    <Table.Summary.Cell index={7}></Table.Summary.Cell>
+                    <Table.Summary.Cell index={8}></Table.Summary.Cell>
+                    <Table.Summary.Cell index={9}></Table.Summary.Cell>
+                    <Table.Summary.Cell index={10}></Table.Summary.Cell>
+                    <Table.Summary.Cell index={11}></Table.Summary.Cell>
+                    <Table.Summary.Cell index={12}></Table.Summary.Cell>
+                    <Table.Summary.Cell index={13}></Table.Summary.Cell>
+                    <Table.Summary.Cell index={14}></Table.Summary.Cell>
+                    <Table.Summary.Cell index={15}>
+                      <div className="text-right">{dataCustomNew?.sum?.sum_checkin}</div>
+                    </Table.Summary.Cell>
+                    <Table.Summary.Cell index={16}></Table.Summary.Cell>
+                    <Table.Summary.Cell index={17}></Table.Summary.Cell>
+                    <Table.Summary.Cell index={18}>
+                      <div className="text-right">{dataCustomNew?.sum?.sum_so}</div>
+                    </Table.Summary.Cell>
+                  </Table.Summary.Row>
+                );
+              }}
+            />
+          </div>
         </div>
-      </div>
+      </ContentFrame>
     </>
   );
 }

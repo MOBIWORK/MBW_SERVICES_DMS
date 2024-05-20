@@ -1,6 +1,11 @@
 import { VerticalAlignBottomOutlined } from "@ant-design/icons";
-import { FormItemCustom, HeaderPage, TableCustom } from "../../components";
-import { DatePicker, Row, Select, Table } from "antd";
+import {
+  ContentFrame,
+  FormItemCustom,
+  HeaderPage,
+  TableCustom,
+} from "../../components";
+import { DatePicker, Form, Row, Select, Table, message } from "antd";
 import type { TableColumnsType } from "antd";
 import { useEffect, useState } from "react";
 import { AxiosService } from "../../services/server";
@@ -36,11 +41,10 @@ interface DataItem {
   amount: number; // tổng tiền
 }
 
-const currentMonth = dayjs().month() + 1; // Lấy tháng hiện tại (đánh số từ 0)
-const month = currentMonth.toString();
-const year = dayjs().format("YYYY");
-const startOfMonth = dayjs().startOf("month");
-const endOfMonth = dayjs().endOf("month");
+const startOfMonth: any = dayjs().startOf("month");
+const endOfMonth: any = dayjs().endOf("month");
+let start = Date.parse(startOfMonth["$d"]) / 1000;
+let end = Date.parse(endOfMonth["$d"]) / 1000;
 
 const columns: TableColumnsType<DataSaleOrder> = [
   {
@@ -157,8 +161,8 @@ export default function ReportSales() {
   const [customer, setCustomer] = useState("");
   const [listCustomer, setListCustomer] = useState<any[]>([]);
   const [keySCustomer, setKeySCustomer] = useState("");
-  const [from_date, setFromDate] = useState<any>();
-  const [to_date, setToDate] = useState<any>();
+  const [from_date, setFromDate] = useState<any>(start);
+  const [to_date, setToDate] = useState<any>(end);
   const [warehouse, setWarehouse] = useState("");
   const [listWarehouse, setListWarehouse] = useState<any[]>([]);
   const [keySWarehouse, setKeySWarehouse] = useState("");
@@ -183,33 +187,52 @@ export default function ReportSales() {
       { title: "Tên sản phẩm", dataIndex: "item_name", key: "item_name" },
       { title: "Nhóm sản phẩm", dataIndex: "item_group", key: "item_group" },
       { title: "Nhãn hàng", dataIndex: "brand", key: "brand" },
-      { title: "Đơn giá", dataIndex: "rate", key: "rate" },
-      { title: "Số lượng", dataIndex: "qty", key: "qty" },
+      {
+        title: "Đơn giá",
+        dataIndex: "rate",
+        key: "rate",
+        render: (_, record: any) => (
+          <div className="!text-right">
+            {Intl.NumberFormat().format(record.rate)}
+          </div>
+        ),
+      },
+      {
+        title: "Số lượng",
+        dataIndex: "qty",
+        key: "qty",
+        render: (_, record: any) => (
+          <div className="!text-right">{record.qty}</div>
+        ),
+      },
       {
         title: "Chiết khấu (%)",
         dataIndex: "discount_percentage",
         key: "discount_percentage",
-      },
-      {
-        title: "Tiền chiết khấu",
-        dataIndex: "discount_amount",
-        key: "discount_amount",
         render: (_, record: any) => (
-          <>
-            <span className="mr-2">VND</span>
-            {Intl.NumberFormat().format(record.discount_amount)}
-          </>
+          <div className="!text-right">
+            {Intl.NumberFormat().format(record.discount_percentage)}
+          </div>
         ),
       },
       {
-        title: "Tổng tiền",
+        title: "Tiền chiết khấu (VNĐ)",
+        dataIndex: "discount_amount",
+        key: "discount_amount",
+        render: (_, record: any) => (
+          <div className="!text-right">
+            {Intl.NumberFormat().format(record.discount_amount)}
+          </div>
+        ),
+      },
+      {
+        title: "Tổng tiền (VNĐ)",
         dataIndex: "amount",
         key: "amount",
         render: (_, record: any) => (
-          <>
-            <span className="mr-2">VND</span>
+          <div className="!text-right">
             {Intl.NumberFormat().format(record.amount)}
-          </>
+          </div>
         ),
       },
     ];
@@ -390,6 +413,12 @@ export default function ReportSales() {
   const onChange: DatePickerProps["onChange"] = (dateString: any) => {
     if (dateString === null || dateString === undefined) {
       setFromDate("");
+    } else if (
+      endOfMonth &&
+      dateString &&
+      dateString.isAfter(endOfMonth, "day")
+    ) {
+      message.error("Từ ngày phải nhỏ hơn hoặc bằng Đến ngày");
     } else {
       let fDate = Date.parse(dateString["$d"]) / 1000;
       setFromDate(fDate);
@@ -399,225 +428,240 @@ export default function ReportSales() {
   const onChange1: DatePickerProps["onChange"] = (dateString: any) => {
     if (dateString === null || dateString === undefined) {
       setToDate("");
+    } else if (
+      startOfMonth &&
+      dateString &&
+      dateString.isBefore(startOfMonth, "day")
+    ) {
+      message.error("Đến ngày phải lớn hơn hoặc bằng Từ ngày");
     } else {
       let tDate = Date.parse(dateString["$d"]) / 1000;
       setToDate(tDate);
     }
   };
 
-  console.log("YYYY", year);
-  console.log("Fist", startOfMonth);
-  console.log("End", endOfMonth);
-
   return (
     <>
-      <HeaderPage
-        title="Báo cáo tổng hợp bán hàng"
-        buttons={[
-          {
-            label: "Xuất dữ liệu",
-            type: "primary",
-            icon: <VerticalAlignBottomOutlined className="text-xl" />,
-            size: "20px",
-            className: "flex items-center",
-            action: () => {
-              translationUrl("/app/data-export/Data%20Export");
-            },
-          },
-        ]}
-      />
-      <div className="bg-white rounded-md py-7 border-[#DFE3E8] border-[0.2px] border-solid">
-        <div className="flex flex-wrap justify-start items-center px-4">
-          <Row className="" gutter={[8, 8]}>
-            <FormItemCustom
-              label={"Công ty"}
-              className="w-[175px] border-none mr-2"
-            >
-              <Select
-                className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
-                options={listCompany}
-                onSelect={(value) => {
-                  setCompany(value);
-                }}
-                onSearch={(value: string) => {
-                  setKeySCompany(value);
-                }}
-                onClear={() => setCompany("")}
-                filterOption={false}
-                allowClear
-                placeholder="Tất cả công ty"
-              />
-            </FormItemCustom>
-
-            <FormItemCustom
-              label={"Khác hàng"}
-              className="w-[175px] border-none mr-2"
-            >
-              <Select
-                className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
-                options={listCustomer}
-                onSelect={(value) => {
-                  setCustomer(value);
-                }}
-                onSearch={(value: string) => {
-                  setKeySCustomer(value);
-                }}
-                onClear={() => setCustomer("")}
-                filterOption={false}
-                allowClear
-                placeholder="Tất cả khách hàng"
-              />
-            </FormItemCustom>
-
-            <FormItemCustom
-              label={"Khu vực"}
-              className="w-[175px] border-none mr-2"
-            >
-              <Select
-                className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
-                defaultValue={""}
-                options={listTerritory}
-                onSelect={(value) => {
-                  setTerritory(value);
-                }}
-                onSearch={(value: string) => {
-                  setKeySTerritory(value);
-                }}
-                onClear={() => setTerritory("")}
-                filterOption={false}
-                allowClear
-                placeholder="Tất cẩ khu vực"
-              />
-            </FormItemCustom>
-
-            <FormItemCustom
-              label={"Từ ngày"}
-              className="w-[175px] border-none mr-2"
-            >
-              <DatePicker
-                format={"DD-MM-YYYY"}
-                className="!bg-[#F4F6F8]"
-                placeholder="Từ ngày"
-                onChange={onChange}
-              />
-            </FormItemCustom>
-
-            <FormItemCustom
-              label={"Đến ngày"}
-              className="w-[175px] border-none mr-2"
-            >
-              <DatePicker
-                format={"DD-MM-YYYY"}
-                className="!bg-[#F4F6F8]"
-                onChange={onChange1}
-                placeholder="Đến ngày"
-              />
-            </FormItemCustom>
-
-            <FormItemCustom
-              label={"Kho"}
-              className="w-[175px] border-none mr-2"
-            >
-              <Select
-                className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
-                options={listWarehouse}
-                onSelect={(value) => {
-                  setWarehouse(value);
-                }}
-                onSearch={(value: string) => {
-                  setKeySWarehouse(value);
-                }}
-                onClear={() => setWarehouse("")}
-                filterOption={false}
-                allowClear
-                placeholder="Tất cả kho"
-              />
-            </FormItemCustom>
-
-            <FormItemCustom
-              label={"Nhân viên"}
-              className="w-[175px] border-none mr-2"
-            >
-              <Select
-                className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
-                options={listEmployee}
-                onSelect={(value) => {
-                  setEmployee(value);
-                }}
-                onSearch={(value: string) => {
-                  setKeySEmployee(value);
-                }}
-                onClear={() => setEmployee("")}
-                filterOption={false}
-                allowClear
-                placeholder="Tất cả nhân viên"
-              />
-            </FormItemCustom>
-          </Row>
-        </div>
-        <div className="pt-5">
-          <TableCustom
-            dataSource={dataSaleOrder?.data?.map((dataSale: DataSaleOrder) => {
-              return {
-                ...dataSale,
-                key: dataSale.name,
-              };
-            })}
-            expandable={{ expandedRowRender, defaultExpandedRowKeys: ["0"] }}
-            bordered
-            columns={columns}
-            scroll={{ x: true }}
-            pagination={{
-              defaultPageSize: PAGE_SIZE,
-              total,
-              showSizeChanger: false,
-              onChange(page) {
-                setPage(page);
+      <ContentFrame
+        header={
+          <HeaderPage
+            title="Báo cáo tổng hợp bán hàng"
+            buttons={[
+              {
+                label: "Xuất dữ liệu",
+                type: "primary",
+                icon: <VerticalAlignBottomOutlined className="text-xl" />,
+                size: "20px",
+                className: "flex items-center",
+                action: () => {
+                  translationUrl("/app/data-export/Data%20Export");
+                },
               },
-            }}
-            summary={() => {
-              return (
-                <Table.Summary.Row>
-                  <Table.Summary.Cell index={0}></Table.Summary.Cell>
-                  <Table.Summary.Cell index={1}>Tổng</Table.Summary.Cell>
-                  <Table.Summary.Cell index={2}></Table.Summary.Cell>
-                  <Table.Summary.Cell index={3}></Table.Summary.Cell>
-                  <Table.Summary.Cell index={4}></Table.Summary.Cell>
-                  <Table.Summary.Cell index={5}></Table.Summary.Cell>
-                  <Table.Summary.Cell index={6}></Table.Summary.Cell>
-                  <Table.Summary.Cell index={7}></Table.Summary.Cell>
-                  <Table.Summary.Cell index={8}>
-                    <div className="text-right">
-                      {Intl.NumberFormat().format(
-                        dataSaleOrder?.sum?.sum_total
-                      )}
-                    </div>
-                  </Table.Summary.Cell>
-                  <Table.Summary.Cell index={9}>
-                    <div className="text-right">
-                      {Intl.NumberFormat().format(dataSaleOrder?.sum?.sum_vat)}
-                    </div>
-                  </Table.Summary.Cell>
-                  <Table.Summary.Cell index={10}>
-                    <div className="text-right">
-                      {Intl.NumberFormat().format(
-                        dataSaleOrder?.sum?.sum_discount_amount
-                      )}
-                    </div>
-                  </Table.Summary.Cell>
-                  <Table.Summary.Cell index={11}>
-                    <div className="text-right">
-                      {Intl.NumberFormat().format(
-                        dataSaleOrder?.sum?.sum_grand_total
-                      )}
-                    </div>
-                  </Table.Summary.Cell>
-                </Table.Summary.Row>
-              );
-            }}
+            ]}
           />
+        }
+      >
+        <div className="bg-white rounded-md pt-4 pb-7 border-[#DFE3E8] border-[0.2px] border-solid">
+          <Form
+            layout="vertical"
+            className="flex flex-wrap justify-start items-center px-4"
+          >
+            <Row className="" gutter={[8, 8]}>
+              <FormItemCustom
+                label={"Công ty"}
+                className="w-[175px] border-none mr-2"
+              >
+                <Select
+                  className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
+                  options={listCompany}
+                  onSelect={(value) => {
+                    setCompany(value);
+                  }}
+                  onSearch={(value: string) => {
+                    setKeySCompany(value);
+                  }}
+                  onClear={() => setCompany("")}
+                  filterOption={false}
+                  allowClear
+                  placeholder="Tất cả công ty"
+                />
+              </FormItemCustom>
+
+              <FormItemCustom
+                label={"Khác hàng"}
+                className="w-[175px] border-none mr-2"
+              >
+                <Select
+                  className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
+                  options={listCustomer}
+                  onSelect={(value) => {
+                    setCustomer(value);
+                  }}
+                  onSearch={(value: string) => {
+                    setKeySCustomer(value);
+                  }}
+                  onClear={() => setCustomer("")}
+                  filterOption={false}
+                  allowClear
+                  placeholder="Tất cả khách hàng"
+                />
+              </FormItemCustom>
+
+              <FormItemCustom
+                label={"Khu vực"}
+                className="w-[175px] border-none mr-2"
+              >
+                <Select
+                  className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
+                  options={listTerritory}
+                  onSelect={(value) => {
+                    setTerritory(value);
+                  }}
+                  onSearch={(value: string) => {
+                    setKeySTerritory(value);
+                  }}
+                  onClear={() => setTerritory("")}
+                  filterOption={false}
+                  allowClear
+                  placeholder="Tất cẩ khu vực"
+                />
+              </FormItemCustom>
+
+              <FormItemCustom
+                label={"Từ ngày"}
+                className="w-[175px] border-none mr-2"
+              >
+                <DatePicker
+                  format={"DD-MM-YYYY"}
+                  className="!bg-[#F4F6F8] !h-8"
+                  placeholder="Từ ngày"
+                  onChange={onChange}
+                  defaultValue={startOfMonth}
+                />
+              </FormItemCustom>
+
+              <FormItemCustom
+                label={"Đến ngày"}
+                className="w-[175px] border-none mr-2"
+              >
+                <DatePicker
+                  format={"DD-MM-YYYY"}
+                  className="!bg-[#F4F6F8] !h-8"
+                  onChange={onChange1}
+                  placeholder="Đến ngày"
+                  defaultValue={endOfMonth}
+                />
+              </FormItemCustom>
+
+              <FormItemCustom
+                label={"Kho"}
+                className="w-[175px] border-none mr-2"
+              >
+                <Select
+                  className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
+                  options={listWarehouse}
+                  onSelect={(value) => {
+                    setWarehouse(value);
+                  }}
+                  onSearch={(value: string) => {
+                    setKeySWarehouse(value);
+                  }}
+                  onClear={() => setWarehouse("")}
+                  filterOption={false}
+                  allowClear
+                  placeholder="Tất cả kho"
+                />
+              </FormItemCustom>
+
+              <FormItemCustom
+                label={"Nhân viên"}
+                className="w-[175px] border-none mr-2"
+              >
+                <Select
+                  className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
+                  options={listEmployee}
+                  onSelect={(value) => {
+                    setEmployee(value);
+                  }}
+                  onSearch={(value: string) => {
+                    setKeySEmployee(value);
+                  }}
+                  onClear={() => setEmployee("")}
+                  filterOption={false}
+                  allowClear
+                  placeholder="Tất cả nhân viên"
+                />
+              </FormItemCustom>
+            </Row>
+          </Form>
+          <div className="pt-5">
+            <TableCustom
+              dataSource={dataSaleOrder?.data?.map(
+                (dataSale: DataSaleOrder) => {
+                  return {
+                    ...dataSale,
+                    key: dataSale.name,
+                  };
+                }
+              )}
+              expandable={{ expandedRowRender, defaultExpandedRowKeys: ["0"] }}
+              bordered
+              columns={columns}
+              scroll={{ x: true }}
+              pagination={{
+                defaultPageSize: PAGE_SIZE,
+                total,
+                showSizeChanger: false,
+                onChange(page) {
+                  setPage(page);
+                },
+              }}
+              summary={() => {
+                return (
+                  <Table.Summary.Row>
+                    <Table.Summary.Cell index={0}></Table.Summary.Cell>
+                    <Table.Summary.Cell index={1}>Tổng</Table.Summary.Cell>
+                    <Table.Summary.Cell index={2}></Table.Summary.Cell>
+                    <Table.Summary.Cell index={3}></Table.Summary.Cell>
+                    <Table.Summary.Cell index={4}></Table.Summary.Cell>
+                    <Table.Summary.Cell index={5}></Table.Summary.Cell>
+                    <Table.Summary.Cell index={6}></Table.Summary.Cell>
+                    <Table.Summary.Cell index={7}></Table.Summary.Cell>
+                    <Table.Summary.Cell index={8}>
+                      <div className="text-right">
+                        {Intl.NumberFormat().format(
+                          dataSaleOrder?.sum?.sum_total
+                        )}
+                      </div>
+                    </Table.Summary.Cell>
+                    <Table.Summary.Cell index={9}>
+                      <div className="text-right">
+                        {Intl.NumberFormat().format(
+                          dataSaleOrder?.sum?.sum_vat
+                        )}
+                      </div>
+                    </Table.Summary.Cell>
+                    <Table.Summary.Cell index={10}>
+                      <div className="text-right">
+                        {Intl.NumberFormat().format(
+                          dataSaleOrder?.sum?.sum_discount_amount
+                        )}
+                      </div>
+                    </Table.Summary.Cell>
+                    <Table.Summary.Cell index={11}>
+                      <div className="text-right">
+                        {Intl.NumberFormat().format(
+                          dataSaleOrder?.sum?.sum_grand_total
+                        )}
+                      </div>
+                    </Table.Summary.Cell>
+                  </Table.Summary.Row>
+                );
+              }}
+            />
+          </div>
         </div>
-      </div>
+      </ContentFrame>
     </>
   );
 }

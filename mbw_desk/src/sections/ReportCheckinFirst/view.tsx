@@ -1,13 +1,8 @@
-import { SearchOutlined, VerticalAlignBottomOutlined } from "@ant-design/icons";
-import { FormItemCustom, HeaderPage } from "../../components";
-import { DatePicker, Input, Select, Table, Typography } from "antd";
+import { VerticalAlignBottomOutlined } from "@ant-design/icons";
+import { ContentFrame, FormItemCustom, HeaderPage, TableCustom } from "../../components";
+import { DatePicker, Form, Row, Select, message } from "antd";
 import type { TableColumnsType } from "antd";
-import { TableReport } from "../ReportSales/tableCustom";
 import {
-  area,
-  customergroup,
-  department,
-  ordernew,
   typecustomer,
 } from "../ReportSales/data";
 import React, { useEffect, useState } from "react";
@@ -15,6 +10,7 @@ import { AxiosService } from "@/services/server";
 import useDebounce from "@/hooks/useDebount";
 import { DatePickerProps } from "antd/lib";
 import { translationUrl } from "@/util";
+import dayjs from "dayjs";
 
 interface DataCheckinFirst {
   key: React.Key;
@@ -35,6 +31,11 @@ interface DataCheckinFirst {
   date_checkin: string;
 }
 
+const startOfMonth: any = dayjs().startOf("month");
+const endOfMonth: any = dayjs().endOf("month");
+let start = Date.parse(startOfMonth["$d"]) / 1000;
+let end = Date.parse(endOfMonth["$d"]) / 1000;
+
 const columns: TableColumnsType<DataCheckinFirst> = [
   {
     title: "STT",
@@ -47,7 +48,7 @@ const columns: TableColumnsType<DataCheckinFirst> = [
     dataIndex: "department",
     key: "department",
     render: (_, record: any) => (
-      <div className="!w-[175px]">{record.department}</div>
+      <div>{record.department}</div>
     ),
   },
   {
@@ -55,7 +56,7 @@ const columns: TableColumnsType<DataCheckinFirst> = [
     dataIndex: "employee_id",
     key: "employee_id",
     render: (_, record: any) => (
-      <div className="!w-[175px]">{record.employee_id}</div>
+      <div>{record.employee_id}</div>
     ),
   },
   {
@@ -63,7 +64,7 @@ const columns: TableColumnsType<DataCheckinFirst> = [
     dataIndex: "employee_name",
     key: "employee_name",
     render: (_, record: any) => (
-      <div className="!w-[175px]">{record.employee_name}</div>
+      <div>{record.employee_name}</div>
     ),
   },
   {
@@ -71,7 +72,7 @@ const columns: TableColumnsType<DataCheckinFirst> = [
     dataIndex: "customer_code",
     key: "customer_code",
     render: (_, record: any) => (
-      <div className="!w-[175px]">{record.customer_code}</div>
+      <div>{record.customer_code}</div>
     ),
   },
   {
@@ -79,7 +80,7 @@ const columns: TableColumnsType<DataCheckinFirst> = [
     dataIndex: "customer_name",
     key: "customer_name",
     render: (_, record: any) => (
-      <div className="!w-[175px]">{record.customer_name}</div>
+      <div>{record.customer_name}</div>
     ),
   },
   {
@@ -87,7 +88,7 @@ const columns: TableColumnsType<DataCheckinFirst> = [
     dataIndex: "customer_type",
     key: "customer_type",
     render: (_, record: any) => (
-      <div className="!w-[175px]">{record.customer_type}</div>
+      <div>{record.customer_type}</div>
     ),
   },
   {
@@ -95,7 +96,7 @@ const columns: TableColumnsType<DataCheckinFirst> = [
     dataIndex: "customer_group",
     key: "customer_group",
     render: (_, record: any) => (
-      <div className="!w-[175px]">{record.customer_group}</div>
+      <div>{record.customer_group}</div>
     ),
   },
   {
@@ -103,7 +104,7 @@ const columns: TableColumnsType<DataCheckinFirst> = [
     dataIndex: "contact_person",
     key: "contact_person",
     render: (_, record: any) => (
-      <div className="!w-[175px]">{record.contact_person}</div>
+      <div>{record.contact_person}</div>
     ),
   },
   {
@@ -111,7 +112,7 @@ const columns: TableColumnsType<DataCheckinFirst> = [
     dataIndex: "phone",
     key: "phone",
     render: (_, record: any) => (
-      <div className="!w-[175px]">{record.phone}</div>
+      <div>{record.phone}</div>
     ),
   },
   {
@@ -119,7 +120,7 @@ const columns: TableColumnsType<DataCheckinFirst> = [
     dataIndex: "tax_id",
     key: "tax_id",
     render: (_, record: any) => (
-      <div className="!w-[175px]">{record.tax_id}</div>
+      <div>{record.tax_id}</div>
     ),
   },
   {
@@ -127,7 +128,7 @@ const columns: TableColumnsType<DataCheckinFirst> = [
     dataIndex: "territory",
     key: "territory",
     render: (_, record: any) => (
-      <div className="!w-[175px]">{record.territory}</div>
+      <div>{record.territory}</div>
     ),
   },
   {
@@ -145,7 +146,7 @@ const columns: TableColumnsType<DataCheckinFirst> = [
     dataIndex: "date_checkin",
     key: "date_checkin",
     render: (_, record: any) => (
-      <div className="!w-[175px]">
+      <div>
         {record.date_checkin
           ?.split("-")
           ?.reverse()
@@ -178,12 +179,18 @@ export default function ReportCheckinFirst() {
   const [listTerritory, setListTerritory] = useState<any[]>([]);
   const [keySTerritory, setKeySTerritory] = useState("");
   let keySearchTerritory = useDebounce(keySTerritory, 500);
-  const [from_date, setFromDate] = useState<any>();
-  const [to_date, setToDate] = useState<any>();
+  const [from_date, setFromDate] = useState<any>(startOfMonth);
+  const [to_date, setToDate] = useState<any>(endOfMonth);
 
   const onChange: DatePickerProps["onChange"] = (dateString: any) => {
     if (dateString === null || dateString === undefined) {
       setFromDate("");
+    } else if (
+      endOfMonth &&
+      dateString &&
+      dateString.isAfter(endOfMonth, "day")
+    ) {
+      message.error("Từ ngày phải nhỏ hơn hoặc bằng Đến ngày");
     } else {
       let fDate = Date.parse(dateString["$d"]) / 1000;
       setFromDate(fDate);
@@ -193,6 +200,12 @@ export default function ReportCheckinFirst() {
   const onChange1: DatePickerProps["onChange"] = (dateString: any) => {
     if (dateString === null || dateString === undefined) {
       setToDate("");
+    } else if (
+      startOfMonth &&
+      dateString &&
+      dateString.isBefore(startOfMonth, "day")
+    ) {
+      message.error("Đến ngày phải lớn hơn hoặc bằng Từ ngày");
     } else {
       let tDate = Date.parse(dateString["$d"]) / 1000;
       setToDate(tDate);
@@ -342,181 +355,159 @@ export default function ReportCheckinFirst() {
 
   return (
     <>
-      <HeaderPage
-        title="Báo cáo thống kê khách hàng viếng thăm lần đầu"
-        buttons={[
-          {
-            label: "Xuất dữ liệu",
-            type: "primary",
-            icon: <VerticalAlignBottomOutlined className="text-xl" />,
-            size: "20px",
-            className: "flex items-center",
-            action: () => {
-              translationUrl("/app/data-export/Data%20Export")
-            }
-          },
-        ]}
-      />
-      <div className="bg-white rounded-md py-7 px-4 border-[#DFE3E8] border-[0.2px] border-solid">
-        <div className="flex justify-start items-center pt-2">
-          <FormItemCustom
-            className="w-[200px] border-none mr-2"
-            label={"Phòng ban"}
-          ></FormItemCustom>
-          <FormItemCustom
-            className="w-[200px] border-none mr-2"
-            label={"Nhân viên"}
-          ></FormItemCustom>
-          <FormItemCustom
-            className="w-[200px] border-none mr-2"
-            label={"Loại khách hàng"}
-          ></FormItemCustom>
-          <FormItemCustom
-            className="w-[200px] border-none mr-2"
-            label={"Nhóm khách hàng"}
-          ></FormItemCustom>
-          <FormItemCustom
-            className="w-[200px] border-none mr-2"
-            label={"Khu vực"}
-          ></FormItemCustom>
-        </div>
-        <div className="flex justify-start items-center">
-          <FormItemCustom className="w-[200px] border-none mr-2">
-            <Select
-              className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
-              options={listDepartment}
-              onSelect={(value) => {
-                setDepartment(value);
-              }}
-              onSearch={(value: string) => {
-                setKeySDepartment(value);
-              }}
-              onClear={() => setDepartment("")}
-              filterOption={false}
-              allowClear
-              placeholder="Tất cả phòng ban"
-            />
-          </FormItemCustom>
-          <FormItemCustom className="w-[200px] border-none mr-2">
-            <Select
-              className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
-              options={listEmployee}
-              onSelect={(value) => {
-                setEmployee(value);
-              }}
-              onSearch={(value: string) => {
-                setKeySEmployee(value);
-              }}
-              onClear={() => setEmployee("")}
-              filterOption={false}
-              allowClear
-              placeholder="Tất cả nhân viên"
-            />
-          </FormItemCustom>
-
-          <FormItemCustom className="w-[200px] border-none mr-2">
-            <Select
-              className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
-              options={typecustomer}
-              filterOption={false}
-              allowClear
-              placeholder="Tất cả loại khách hàng"
-              onSelect={(value) => {
-                setCustomerType(value);
-              }}
-              onClear={() => setCustomerType("")}
-            />
-          </FormItemCustom>
-
-          <FormItemCustom className="w-[200px] border-none mr-2">
-            <Select
-              className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
-              options={listCustomerGroup}
-              onSelect={(value) => {
-                setCustomerGroup(value);
-              }}
-              onSearch={(value: string) => {
-                setKeySCustomerGroup(value);
-              }}
-              onClear={() => setCustomerGroup("")}
-              filterOption={false}
-              allowClear
-              placeholder="Tất cả nhóm khách hàng"
-            />
-          </FormItemCustom>
-
-          <FormItemCustom className="w-[200px] border-none mr-2">
-            <Select
-              className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
-              options={listTerritory}
-              onSelect={(value) => {
-                setTerritory(value);
-              }}
-              onSearch={(value: string) => {
-                setKeySTerritory(value);
-              }}
-              onClear={() => setTerritory("")}
-              filterOption={false}
-              allowClear
-              placeholder="Tất cả khu vực"
-            />
-          </FormItemCustom>
-        </div>
-
-        <div className="flex justify-start items-center pt-2">
-          <FormItemCustom
-            className="w-[200px] border-none mr-2"
-            label={"Từ ngày"}
-          ></FormItemCustom>
-          <FormItemCustom
-            className="w-[200px] border-none mr-2"
-            label={"Đến ngày"}
-          ></FormItemCustom>
-        </div>
-
-        <div className="flex justify-start items-center">
-          <FormItemCustom className="w-[200px] border-none mr-2">
-            <DatePicker
-              format={"DD-MM-YYYY"}
-              placeholder="Từ ngày"
-              className="!bg-[#F4F6F8]"
-              onChange={onChange}
-            />
-          </FormItemCustom>
-
-          <FormItemCustom className="w-[200px] border-none mr-2">
-            <DatePicker
-              format={"DD-MM-YYYY"}
-              placeholder="Đến ngày"
-              className="!bg-[#F4F6F8]"
-              onChange={onChange1}
-            />
-          </FormItemCustom>
-        </div>
-        <div className="pt-5">
-          <TableReport
-            dataSource={dataReport?.data?.map(
-              (dataCheckin: DataCheckinFirst) => {
-                return {
-                  ...dataCheckin,
-                  key: dataCheckin.name,
-                };
-              }
-            )}
-            bordered
-            pagination={{
-              defaultPageSize: PAGE_SIZE,
-              total,
-              showSizeChanger: false,
-              onChange(page) {
-                setPage(page);
+      <ContentFrame
+        header={
+          <HeaderPage
+            title="Báo cáo thống kê khách hàng viếng thăm lần đầu"
+            buttons={[
+              {
+                label: "Xuất dữ liệu",
+                type: "primary",
+                icon: <VerticalAlignBottomOutlined className="text-xl" />,
+                size: "20px",
+                className: "flex items-center",
+                action: () => {
+                  translationUrl("/app/data-export/Data%20Export");
+                },
               },
-            }}
-            columns={columns}
-            scroll={{ x: true }}
+            ]}
           />
+        }
+      >
+        <div className="bg-white rounded-md pt-4 pb-7 border-[#DFE3E8] border-[0.2px] border-solid">
+          <Form
+            layout="vertical"
+            className="flex flex-wrap justify-start items-center px-4"
+          >
+            <Row className="" gutter={[8, 8]}>
+              <FormItemCustom label={"Phòng ban"} className="w-[175px] border-none mr-2">
+                <Select
+                  className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
+                  options={listDepartment}
+                  onSelect={(value) => {
+                    setDepartment(value);
+                  }}
+                  onSearch={(value: string) => {
+                    setKeySDepartment(value);
+                  }}
+                  onClear={() => setDepartment("")}
+                  filterOption={false}
+                  allowClear
+                  placeholder="Tất cả phòng ban"
+                />
+              </FormItemCustom>
+              <FormItemCustom label={"Nhân viên"} className="w-[175px] border-none mr-2">
+                <Select
+                  className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
+                  options={listEmployee}
+                  onSelect={(value) => {
+                    setEmployee(value);
+                  }}
+                  onSearch={(value: string) => {
+                    setKeySEmployee(value);
+                  }}
+                  onClear={() => setEmployee("")}
+                  filterOption={false}
+                  allowClear
+                  placeholder="Tất cả nhân viên"
+                />
+              </FormItemCustom>
+
+              <FormItemCustom label={"Khách hàng"} className="w-[175px] border-none mr-2">
+                <Select
+                  className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
+                  options={typecustomer}
+                  filterOption={false}
+                  allowClear
+                  placeholder="Tất cả loại khách hàng"
+                  onSelect={(value) => {
+                    setCustomerType(value);
+                  }}
+                  onClear={() => setCustomerType("")}
+                />
+              </FormItemCustom>
+
+              <FormItemCustom label={"Nhóm khách hàng"} className="w-[175px] border-none mr-2">
+                <Select
+                  className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
+                  options={listCustomerGroup}
+                  onSelect={(value) => {
+                    setCustomerGroup(value);
+                  }}
+                  onSearch={(value: string) => {
+                    setKeySCustomerGroup(value);
+                  }}
+                  onClear={() => setCustomerGroup("")}
+                  filterOption={false}
+                  allowClear
+                  placeholder="Tất cả nhóm khách hàng"
+                />
+              </FormItemCustom>
+
+              <FormItemCustom label={"Khu vực"} className="w-[175px] border-none mr-2">
+                <Select
+                  className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
+                  options={listTerritory}
+                  onSelect={(value) => {
+                    setTerritory(value);
+                  }}
+                  onSearch={(value: string) => {
+                    setKeySTerritory(value);
+                  }}
+                  onClear={() => setTerritory("")}
+                  filterOption={false}
+                  allowClear
+                  placeholder="Tất cả khu vực"
+                />
+              </FormItemCustom>
+
+              <FormItemCustom label={"Từ ngày"} className="w-[175px] border-none mr-2">
+                <DatePicker
+                  format={"DD-MM-YYYY"}
+                  placeholder="Từ ngày"
+                  className="!bg-[#F4F6F8] !h-8"
+                  onChange={onChange}
+                  defaultValue={startOfMonth}
+                />
+              </FormItemCustom>
+
+              <FormItemCustom label={"Đến ngày"} className="w-[175px] border-none mr-2">
+                <DatePicker
+                  format={"DD-MM-YYYY"}
+                  placeholder="Đến ngày"
+                  className="!bg-[#F4F6F8] !h-8"
+                  onChange={onChange1}
+                  defaultValue={endOfMonth}
+                />
+              </FormItemCustom>
+            </Row>
+          </Form>
+
+          <div className="pt-5">
+            <TableCustom
+              dataSource={dataReport?.data?.map(
+                (dataCheckin: DataCheckinFirst) => {
+                  return {
+                    ...dataCheckin,
+                    key: dataCheckin.name,
+                  };
+                }
+              )}
+              bordered
+              pagination={{
+                defaultPageSize: PAGE_SIZE,
+                total,
+                showSizeChanger: false,
+                onChange(page) {
+                  setPage(page);
+                },
+              }}
+              columns={columns}
+              scroll={{ x: true }}
+            />
+          </div>
         </div>
-      </div>
+      </ContentFrame>
     </>
   );
 }

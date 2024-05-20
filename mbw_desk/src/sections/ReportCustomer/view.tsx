@@ -145,13 +145,15 @@ export default function ReportCustomer() {
         },
       },
       { title: "Đơn vị tính", dataIndex: "item_unit", key: "item_unit" },
-      { title: "Tồn", dataIndex: "quantity", key: "quantity" },
+      { title: "Tồn", dataIndex: "quantity", key: "quantity", render: (_, record: any) => (
+        <div className="!text-right">{record.quantity}</div>
+      ), },
       {
         title: "Giá sản phẩm",
         dataIndex: "item_price",
         key: "item_price",
         render: (_, record: any) => (
-          <p>{Intl.NumberFormat().format(record.item_price)}</p>
+          <p className="text-right">{Intl.NumberFormat().format(record.item_price)}</p>
         ),
       },
       {
@@ -159,7 +161,7 @@ export default function ReportCustomer() {
         dataIndex: "total",
         key: "total",
         render: (_, record: any) => (
-          <p>
+          <p className="text-right">
             {Intl.NumberFormat().format(record.quantity * record.item_price)}
           </p>
         ),
@@ -432,9 +434,12 @@ export default function ReportCustomer() {
       <div className="bg-white rounded-xl border-[#DFE3E8] border-[0.2px] border-solid">
         <Row gutter={[16, 16]} className="justify-between items-end w-full p-4">
           <Col>
-            <Row gutter={[8,8]}>
+            <Row gutter={[8, 8]}>
               <Col className="mx-4 w-full" span={24}>
-                <Form layout="vertical" className="flex flex-wrap justify-start items-center ">
+                <Form
+                  layout="vertical"
+                  className="flex flex-wrap justify-start items-center "
+                >
                   <FormItemCustom
                     label={"Sản phẩm"}
                     className="!w-[175px] border-none mr-2"

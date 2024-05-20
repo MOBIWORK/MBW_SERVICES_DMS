@@ -1,6 +1,11 @@
 import { VerticalAlignBottomOutlined } from "@ant-design/icons";
-import { FormItemCustom, HeaderPage, TableCustom } from "../../components";
-import { Col, DatePicker, Row, Select, Table, TreeSelect } from "antd";
+import {
+  ContentFrame,
+  FormItemCustom,
+  HeaderPage,
+  TableCustom,
+} from "../../components";
+import { Col, DatePicker, Form, Row, Select, Table, TreeSelect } from "antd";
 import { DatePickerProps, TableColumnsType } from "antd/lib";
 import { useEffect, useState } from "react";
 import useDebounce from "../../hooks/useDebount";
@@ -438,22 +443,28 @@ export default function ReportCheckin() {
 
   return (
     <>
-      <HeaderPage
-        title="Báo cáo viếng thăm"
-        buttons={[
-          {
-            label: "Xuất dữ liệu",
-            type: "primary",
-            icon: <VerticalAlignBottomOutlined className="text-xl" />,
-            size: "20px",
-            className: "flex items-center",
-          },
-        ]}
-      />
-      <div className="bg-white rounded-md py-7  border-[#DFE3E8] border-[0.2px] border-solid">
-        <div className="flex flex-wrap justify-start px-4 items-center">
-          <Row gutter={[8, 8]}>
-            
+      <ContentFrame
+        header={
+          <HeaderPage
+            title="Báo cáo viếng thăm"
+            buttons={[
+              {
+                label: "Xuất dữ liệu",
+                type: "primary",
+                icon: <VerticalAlignBottomOutlined className="text-xl" />,
+                size: "20px",
+                className: "flex items-center",
+              },
+            ]}
+          />
+        }
+      >
+        <div className="bg-white rounded-md pt-4 pb-7  border-[#DFE3E8] border-[0.2px] border-solid">
+          <Form
+            layout="vertical"
+            className="flex flex-wrap justify-start px-4 items-center"
+          >
+            <Row gutter={[8, 8]}>
               <FormItemCustom
                 label={"Từ ngày"}
                 className="border-none mr-2 w-[175px]"
@@ -569,18 +580,19 @@ export default function ReportCheckin() {
                   placeholder="Tất cả khu vực"
                 />
               </FormItemCustom>
-          </Row>
+            </Row>
+          </Form>
+          <div className="pt-5">
+            <TableCustom
+              bordered
+              scroll={{ x: true }}
+              columns={columnsCheckin}
+              expandable={{ expandedRowRender, defaultExpandedRowKeys: ["0"] }}
+              // dataSource={data}
+            />
+          </div>
         </div>
-        <div className="pt-10">
-          <TableCustom
-            bordered
-            scroll={{ x: true }}
-            columns={columnsCheckin}
-            expandable={{ expandedRowRender, defaultExpandedRowKeys: ["0"] }}
-            // dataSource={data}
-          />
-        </div>
-      </div>
+      </ContentFrame>
     </>
   );
 }

@@ -1,11 +1,11 @@
 import { VerticalAlignBottomOutlined } from "@ant-design/icons";
-import { FormItemCustom, HeaderPage, TableCustom } from "../../components";
 import {
-  DatePicker,
-  Select,
-  Table,
-  TreeSelect,
-} from "antd";
+  ContentFrame,
+  FormItemCustom,
+  HeaderPage,
+  TableCustom,
+} from "../../components";
+import { DatePicker, Select, Table, TreeSelect, Form } from "antd";
 import { monthAll } from "./data";
 import { DatePickerProps } from "antd/lib";
 import { useEffect, useState } from "react";
@@ -146,476 +146,503 @@ export default function ReportKPI() {
 
   return (
     <>
-      <HeaderPage
-        title="Báo cáo KPI"
-        buttons={[
-          {
-            label: "Xuất dữ liệu",
-            type: "primary",
-            icon: <VerticalAlignBottomOutlined className="text-xl" />,
-            size: "20px",
-            className: "flex items-center",
-            action: () => {
-              translationUrl("/app/data-export/Data%20Export");
-            },
-          },
-        ]}
-      />
-      <div className="bg-white rounded-md py-7 border-[#DFE3E8] border-[0.2px] border-solid">
-        <div className="flex justify-start items-center px-4">
-          <FormItemCustom className="border-none mr-2">
-            <Select
-              className="!bg-[#F4F6F8] options:bg-[#F4F6F8] !h-8"
-              defaultValue={month}
-              options={monthAll}
-              onChange={(value: string) => {
-                setFmonth(value);
-              }}
-              showSearch
-            />
-          </FormItemCustom>
-          <FormItemCustom className="border-none mr-2">
-            <DatePicker
-              className="!bg-[#F4F6F8] !h-8"
-              onChange={onChange}
-              placeholder="Tất cả "
-              picker="year"
-              defaultValue={dayjs().startOf("year")}
-            />
-          </FormItemCustom>
-          <FormItemCustom className="border-none mr-2">
-            <TreeSelect
-              placeholder="Nhóm bán hàng"
-              allowClear
-              treeData={listSales}
-              onChange={(value: string) => {
-                setTeamSale(value);
-              }}
-              dropdownStyle={{
-                maxHeight: 400,
-                overflow: "auto",
-                minWidth: 400,
-              }}
-            />
-          </FormItemCustom>
-
-          <FormItemCustom className="border-none mr-2" name="employee">
-            <Select
-              filterOption={false}
-              notFoundContent={null}
-              allowClear
-              placeholder="Tất cả nhân viên"
-              onSearch={(value: string) => {
-                setKeySearch4(value);
-              }}
-              options={listEmployees}
-              onSelect={(value) => {
-                setEmployee(value);
-              }}
-              onClear={() => {
-                setEmployee("");
-              }}
-            />
-          </FormItemCustom>
-        </div>
-        {/* {routersTable?.map(router => ({ key: router.name, ...router }))} */}
-        <div className="pt-5">
-          <TableCustom
-            dataSource={dataReort?.data?.map((report: any) => ({
-              key: report.name,
-              ...report,
-            }))}
-            bordered
-            scroll={{ x: true }}
-            pagination={{
-              defaultPageSize: PAGE_SIZE,
-              total,
-              showSizeChanger: false,
-              onChange(page) {
-                setPage(page);
+      <ContentFrame
+        header={
+          <HeaderPage
+            title="Báo cáo KPI"
+            buttons={[
+              {
+                label: "Xuất dữ liệu",
+                type: "primary",
+                icon: <VerticalAlignBottomOutlined className="text-xl" />,
+                size: "20px",
+                className: "flex items-center",
+                action: () => {
+                  translationUrl("/app/data-export/Data%20Export");
+                },
               },
-            }}
-            summary={() => {
-              return (
-                <Table.Summary.Row>
-                  <Table.Summary.Cell index={0}></Table.Summary.Cell>
-                  <Table.Summary.Cell index={1}>Tổng</Table.Summary.Cell>
-                  <Table.Summary.Cell index={2}></Table.Summary.Cell>
-                  <Table.Summary.Cell index={3}></Table.Summary.Cell>
-                  <Table.Summary.Cell index={4}>
-                    {dataReort?.sum?.tong_kh_vt}
-                  </Table.Summary.Cell>
-                  <Table.Summary.Cell index={5}>
-                    {dataReort?.sum?.tong_th_vt}
-                  </Table.Summary.Cell>
-                  <Table.Summary.Cell index={6}></Table.Summary.Cell>
-                  <Table.Summary.Cell index={7}>
-                    {dataReort?.sum?.tong_kh_vt_dn}
-                  </Table.Summary.Cell>
-                  <Table.Summary.Cell index={8}>
-                    {dataReort?.sum?.tong_th_vt_dn}
-                  </Table.Summary.Cell>
-                  <Table.Summary.Cell index={9}></Table.Summary.Cell>
-                  <Table.Summary.Cell index={10}>
-                    {dataReort?.sum?.tong_kh_dat_hang}
-                  </Table.Summary.Cell>
-                  <Table.Summary.Cell index={11}>
-                    {dataReort?.sum?.tong_th_dat_hang}
-                  </Table.Summary.Cell>
-                  <Table.Summary.Cell index={12}></Table.Summary.Cell>
-                  <Table.Summary.Cell index={13}>
-                    {dataReort?.sum?.tong_kh_kh_moi}
-                  </Table.Summary.Cell>
-                  <Table.Summary.Cell index={14}>
-                    {dataReort?.sum?.tong_th_kh_moi}
-                  </Table.Summary.Cell>
-                  <Table.Summary.Cell index={15}></Table.Summary.Cell>
-                  <Table.Summary.Cell index={16}>
-                    {dataReort?.sum?.tong_kh_don_hang}
-                  </Table.Summary.Cell>
-                  <Table.Summary.Cell index={17}>
-                    {dataReort?.sum?.tong_th_don_hang}
-                  </Table.Summary.Cell>
-                  <Table.Summary.Cell index={18}></Table.Summary.Cell>
-                  <Table.Summary.Cell index={19}>
-                    {Intl.NumberFormat().format(
-                      dataReort?.sum?.tong_kh_doanh_so
-                    )}
-                  </Table.Summary.Cell>
-                  <Table.Summary.Cell index={20}>
-                    {Intl.NumberFormat().format(
-                      dataReort?.sum?.tong_th_doanh_so
-                    )}
-                  </Table.Summary.Cell>
-                  <Table.Summary.Cell index={21}></Table.Summary.Cell>
-                  <Table.Summary.Cell index={22}>
-                    {Intl.NumberFormat().format(
-                      dataReort?.sum?.tong_kh_doanh_thu
-                    )}
-                  </Table.Summary.Cell>
-                  <Table.Summary.Cell index={23}>
-                    {Intl.NumberFormat().format(
-                      dataReort?.sum?.tong_th_doanh_thu
-                    )}
-                  </Table.Summary.Cell>
-                  <Table.Summary.Cell index={24}></Table.Summary.Cell>
-                  <Table.Summary.Cell index={25}>
-                    {dataReort?.sum?.tong_kh_san_lg}
-                  </Table.Summary.Cell>
-                  <Table.Summary.Cell index={26}>
-                    {dataReort?.sum?.tong_th_san_lg}
-                  </Table.Summary.Cell>
-                  <Table.Summary.Cell index={27}></Table.Summary.Cell>
-                  <Table.Summary.Cell index={28}>
-                    {dataReort?.sum?.tong_kh_sku}
-                  </Table.Summary.Cell>
-                  <Table.Summary.Cell index={29}>
-                    {dataReort?.sum?.tong_th_sku}
-                  </Table.Summary.Cell>
-                  <Table.Summary.Cell index={30}></Table.Summary.Cell>
-                  <Table.Summary.Cell index={31}>
-                    {dataReort?.sum?.tong_kh_so_gio_lam_viec}
-                  </Table.Summary.Cell>
-                  <Table.Summary.Cell index={32}>
-                    {dataReort?.sum?.tong_th_so_gio_lam_viec}
-                  </Table.Summary.Cell>
-                  <Table.Summary.Cell index={33}></Table.Summary.Cell>
-                </Table.Summary.Row>
-              );
-            }}
+            ]}
+          />
+        }
+      >
+        <div className="bg-white rounded-md pt-4 pb-7 border-[#DFE3E8] border-[0.2px] border-solid">
+          <Form
+            layout="vertical"
+            className="flex justify-start items-center px-4"
           >
-            <Column
-              title="STT"
-              dataIndex="stt"
-              key="stt"
-              fixed="left"
-              className="!text-center"
-              render={(_: any, record: any, index: number) => index + 1}
-            />
-            <Column
-              title="Mã Nhân viên"
-              dataIndex="nhan_vien_ban_hang"
-              key="nhan_vien_ban_hang"
-              fixed="left"
-              render={(_: any, record: any) => (
-                <>
-                  <div className="!min-w-[130px]">
-                    {record.nhan_vien_ban_hang}
-                  </div>
-                </>
-              )}
-            />
-            <Column
-              title="Nhân viên"
-              dataIndex="ten_nv"
-              key="ten_nv"
-              fixed="left"
-              render={(_: any, record: any) => (
-                <>
-                  <div className="!min-w-[200px]">{record.ten_nv}</div>
-                </>
-              )}
-            />
-            <Column
-              title="Phòng/nhóm"
-              dataIndex="nhom_ban_hang"
-              key="nhom_ban_hang"
-              render={(_, record: any) => (
-                <div className="!w-[180px]">{record.nhom_ban_hang}</div>
-              )}
-            />
-            <ColumnGroup
-              className="!whitespace-normal !min-w-[210px] !text-center"
-              title="Số khách hàng viếng thăm"
+            <FormItemCustom
+              label={"Tháng"}
+              className="border-none mr-2 w-[175px]"
             >
-              <Column title="KH" width={70} dataIndex="kh_vt" key="kh_vt" />
-              <Column title="TH" width={70} dataIndex="th_vt" key="th_vt" />
-              <Column
-                title="TL"
-                width={70}
-                dataIndex="tl_vt"
-                key="tl_vt"
-                render={(_: any, record: DataTypeKPI) => <>{record.tl_vt}%</>}
+              <Select
+                className="!bg-[#F4F6F8] options:bg-[#F4F6F8] !h-8"
+                defaultValue={month}
+                options={monthAll}
+                onChange={(value: string) => {
+                  setFmonth(value);
+                }}
+                showSearch
               />
-            </ColumnGroup>
-            <ColumnGroup
-              className="!whitespace-normal !min-w-[210px] !text-center"
-              title="Số khách hàng viếng thăm duy nhất"
+            </FormItemCustom>
+            <FormItemCustom
+              label={"Năm"}
+              className="border-none mr-2 w-[175px]"
             >
-              <Column
-                title="KH"
-                width={70}
-                dataIndex="kh_vt_dn"
-                key="kh_vt_dn"
+              <DatePicker
+                className="!bg-[#F4F6F8] !h-8"
+                onChange={onChange}
+                placeholder="Tất cả "
+                picker="year"
+                defaultValue={dayjs().startOf("year")}
               />
-              <Column
-                title="TH"
-                width={70}
-                dataIndex="th_vt_dn"
-                key="th_vt_dn"
-              />
-              <Column
-                title="TL"
-                width={70}
-                dataIndex="tl_vt_dn"
-                key="tl_vt_dn"
-                render={(_: any, record: DataTypeKPI) => (
-                  <>{record.tl_vt_dn}%</>
-                )}
-              />
-            </ColumnGroup>
-            <ColumnGroup
-              className="!whitespace-normal !min-w-[210px] !text-center"
-              title="Số khách hàng đặt hàng"
+            </FormItemCustom>
+            <FormItemCustom
+              label={"Nhóm bán hàng"}
+              className="border-none mr-2 w-[175px]"
             >
-              <Column
-                title="KH"
-                width={70}
-                dataIndex="kh_dat_hang"
-                key="kh_dat_hang"
+              <TreeSelect
+                placeholder="Tất cả nhóm bán hàng"
+                allowClear
+                treeData={listSales}
+                onChange={(value: string) => {
+                  setTeamSale(value);
+                }}
+                dropdownStyle={{
+                  maxHeight: 400,
+                  overflow: "auto",
+                  minWidth: 400,
+                }}
               />
-              <Column
-                title="TH"
-                width={70}
-                dataIndex="th_dat_hang"
-                key="th_dat_hang"
-              />
-              <Column
-                title="TL"
-                width={70}
-                dataIndex="tl_dat_hang"
-                key="tl_dat_hang"
-                render={(_: any, record: DataTypeKPI) => (
-                  <>{record.tl_dat_hang}%</>
-                )}
-              />
-            </ColumnGroup>
-            <ColumnGroup
-              className="!whitespace-normal !min-w-[210px] !text-center"
-              title="Số khách hàng thêm mới"
+            </FormItemCustom>
+
+            <FormItemCustom
+              label={"Nhân viên"}
+              className="border-none mr-2 w-[175px]"
+              name="employee"
             >
-              <Column
-                title="KH"
-                width={70}
-                dataIndex="kh_kh_moi"
-                key="kh_kh_moi"
+              <Select
+                filterOption={false}
+                notFoundContent={null}
+                allowClear
+                placeholder="Tất cả nhân viên"
+                onSearch={(value: string) => {
+                  setKeySearch4(value);
+                }}
+                options={listEmployees}
+                onSelect={(value) => {
+                  setEmployee(value);
+                }}
+                onClear={() => {
+                  setEmployee("");
+                }}
               />
-              <Column
-                title="TH"
-                width={70}
-                dataIndex="th_kh_moi"
-                key="th_kh_moi"
-              />
-              <Column
-                title="TL"
-                width={70}
-                dataIndex="tl_kh_moi"
-                key="tl_kh_moi"
-                render={(_: any, record: DataTypeKPI) => (
-                  <>{record.tl_kh_moi}%</>
-                )}
-              />
-            </ColumnGroup>
-            <ColumnGroup
-              className="!whitespace-normal"
-              title="Số đơn hàng"
-              width={210}
-            >
-              <Column
-                title="KH"
-                width={70}
-                dataIndex="kh_don_hang"
-                key="kh_don_hang"
-              />
-              <Column
-                title="TH"
-                width={70}
-                dataIndex="th_don_hang"
-                key="th_don_hang"
-              />
-              <Column
-                title="TL"
-                width={70}
-                dataIndex="tl_don_hang"
-                key="tl_don_hang"
-                render={(_: any, record: DataTypeKPI) => (
-                  <>{record.tl_don_hang}%</>
-                )}
-              />
-            </ColumnGroup>
-            <ColumnGroup
-              className="!whitespace-normal"
-              title="Doanh số (VNĐ)"
-              width={210}
-            >
-              <Column
-                title="KH"
-                dataIndex="kh_doanh_so"
-                key="kh_doanh_so"
-                render={(_: any, record: DataTypeKPI) => (
-                  <>{Intl.NumberFormat().format(record.kh_doanh_so)}</>
-                )}
-              />
-              <Column
-                title="TH"
-                width={70}
-                dataIndex="th_doanh_so"
-                key="th_doanh_so"
-                render={(_: any, record: DataTypeKPI) => (
-                  <>{Intl.NumberFormat().format(record.th_doanh_so)}</>
-                )}
-              />
-              <Column
-                title="TL"
-                width={70}
-                dataIndex="tl_don_hang"
-                key="tl_don_hang"
-                render={(_: any, record: DataTypeKPI) => (
-                  <>{record.tl_don_hang}%</>
-                )}
-              />
-            </ColumnGroup>
-            <ColumnGroup
-              className="!whitespace-normal"
-              title="Doanh thu (VNĐ)"
-              width={210}
+            </FormItemCustom>
+          </Form>
+          {/* {routersTable?.map(router => ({ key: router.name, ...router }))} */}
+          <div className="pt-5">
+            <TableCustom
+              dataSource={dataReort?.data?.map((report: any) => ({
+                key: report.name,
+                ...report,
+              }))}
+              bordered
+              scroll={{ x: true }}
+              pagination={{
+                defaultPageSize: PAGE_SIZE,
+                total,
+                showSizeChanger: false,
+                onChange(page) {
+                  setPage(page);
+                },
+              }}
+              summary={() => {
+                return (
+                  <Table.Summary.Row>
+                    <Table.Summary.Cell index={0}></Table.Summary.Cell>
+                    <Table.Summary.Cell index={1}>Tổng</Table.Summary.Cell>
+                    <Table.Summary.Cell index={2}></Table.Summary.Cell>
+                    <Table.Summary.Cell index={3}></Table.Summary.Cell>
+                    <Table.Summary.Cell index={4}>
+                      {dataReort?.sum?.tong_kh_vt}
+                    </Table.Summary.Cell>
+                    <Table.Summary.Cell index={5}>
+                      {dataReort?.sum?.tong_th_vt}
+                    </Table.Summary.Cell>
+                    <Table.Summary.Cell index={6}></Table.Summary.Cell>
+                    <Table.Summary.Cell index={7}>
+                      {dataReort?.sum?.tong_kh_vt_dn}
+                    </Table.Summary.Cell>
+                    <Table.Summary.Cell index={8}>
+                      {dataReort?.sum?.tong_th_vt_dn}
+                    </Table.Summary.Cell>
+                    <Table.Summary.Cell index={9}></Table.Summary.Cell>
+                    <Table.Summary.Cell index={10}>
+                      {dataReort?.sum?.tong_kh_dat_hang}
+                    </Table.Summary.Cell>
+                    <Table.Summary.Cell index={11}>
+                      {dataReort?.sum?.tong_th_dat_hang}
+                    </Table.Summary.Cell>
+                    <Table.Summary.Cell index={12}></Table.Summary.Cell>
+                    <Table.Summary.Cell index={13}>
+                      {dataReort?.sum?.tong_kh_kh_moi}
+                    </Table.Summary.Cell>
+                    <Table.Summary.Cell index={14}>
+                      {dataReort?.sum?.tong_th_kh_moi}
+                    </Table.Summary.Cell>
+                    <Table.Summary.Cell index={15}></Table.Summary.Cell>
+                    <Table.Summary.Cell index={16}>
+                      {dataReort?.sum?.tong_kh_don_hang}
+                    </Table.Summary.Cell>
+                    <Table.Summary.Cell index={17}>
+                      {dataReort?.sum?.tong_th_don_hang}
+                    </Table.Summary.Cell>
+                    <Table.Summary.Cell index={18}></Table.Summary.Cell>
+                    <Table.Summary.Cell index={19}>
+                      {Intl.NumberFormat().format(
+                        dataReort?.sum?.tong_kh_doanh_so
+                      )}
+                    </Table.Summary.Cell>
+                    <Table.Summary.Cell index={20}>
+                      {Intl.NumberFormat().format(
+                        dataReort?.sum?.tong_th_doanh_so
+                      )}
+                    </Table.Summary.Cell>
+                    <Table.Summary.Cell index={21}></Table.Summary.Cell>
+                    <Table.Summary.Cell index={22}>
+                      {Intl.NumberFormat().format(
+                        dataReort?.sum?.tong_kh_doanh_thu
+                      )}
+                    </Table.Summary.Cell>
+                    <Table.Summary.Cell index={23}>
+                      {Intl.NumberFormat().format(
+                        dataReort?.sum?.tong_th_doanh_thu
+                      )}
+                    </Table.Summary.Cell>
+                    <Table.Summary.Cell index={24}></Table.Summary.Cell>
+                    <Table.Summary.Cell index={25}>
+                      {dataReort?.sum?.tong_kh_san_lg}
+                    </Table.Summary.Cell>
+                    <Table.Summary.Cell index={26}>
+                      {dataReort?.sum?.tong_th_san_lg}
+                    </Table.Summary.Cell>
+                    <Table.Summary.Cell index={27}></Table.Summary.Cell>
+                    <Table.Summary.Cell index={28}>
+                      {dataReort?.sum?.tong_kh_sku}
+                    </Table.Summary.Cell>
+                    <Table.Summary.Cell index={29}>
+                      {dataReort?.sum?.tong_th_sku}
+                    </Table.Summary.Cell>
+                    <Table.Summary.Cell index={30}></Table.Summary.Cell>
+                    <Table.Summary.Cell index={31}>
+                      {dataReort?.sum?.tong_kh_so_gio_lam_viec}
+                    </Table.Summary.Cell>
+                    <Table.Summary.Cell index={32}>
+                      {dataReort?.sum?.tong_th_so_gio_lam_viec}
+                    </Table.Summary.Cell>
+                    <Table.Summary.Cell index={33}></Table.Summary.Cell>
+                  </Table.Summary.Row>
+                );
+              }}
             >
               <Column
-                title="KH"
-                width={70}
-                dataIndex="kh_doanh_thu"
-                key="kh_doanh_thu"
-                render={(_: any, record: DataTypeKPI) => (
-                  <>{Intl.NumberFormat().format(record.kh_doanh_thu)}</>
+                title="STT"
+                dataIndex="stt"
+                key="stt"
+                fixed="left"
+                className="!text-center"
+                render={(_: any, record: any, index: number) => index + 1}
+              />
+              <Column
+                title="Mã Nhân viên"
+                dataIndex="nhan_vien_ban_hang"
+                key="nhan_vien_ban_hang"
+                fixed="left"
+                render={(_: any, record: any) => (
+                  <>
+                    <div className="!min-w-[130px]">
+                      {record.nhan_vien_ban_hang}
+                    </div>
+                  </>
                 )}
               />
               <Column
-                title="TH"
-                width={70}
-                dataIndex="th_doanh_thu"
-                key="th_doanh_thu"
-                render={(_: any, record: DataTypeKPI) => (
-                  <>{Intl.NumberFormat().format(record.th_doanh_thu)}</>
+                title="Nhân viên"
+                dataIndex="ten_nv"
+                key="ten_nv"
+                fixed="left"
+                render={(_: any, record: any) => (
+                  <>
+                    <div className="!min-w-[200px]">{record.ten_nv}</div>
+                  </>
                 )}
               />
               <Column
-                title="TL"
-                width={70}
-                dataIndex="tl_doanh_thu"
-                key="tl_doanh_thu"
-                render={(_: any, record: DataTypeKPI) => (
-                  <>{record.tl_doanh_thu}%</>
+                title="Phòng/nhóm"
+                dataIndex="nhom_ban_hang"
+                key="nhom_ban_hang"
+                render={(_, record: any) => (
+                  <div className="!w-[180px]">{record.nhom_ban_hang}</div>
                 )}
               />
-            </ColumnGroup>
-            <ColumnGroup
-              className="!whitespace-normal"
-              title="Sản lượng"
-              width={210}
-            >
-              <Column
-                title="KH"
-                width={70}
-                dataIndex="kh_san_lg"
-                key="kh_san_lg"
-              />
-              <Column
-                title="TH"
-                width={70}
-                dataIndex="th_san_lg"
-                key="th_san_lg"
-              />
-              <Column
-                title="TL"
-                width={70}
-                dataIndex="tl_san_luong"
-                key="tl_san_luong"
-                render={(_: any, record: DataTypeKPI) => (
-                  <>{record.tl_san_luong}%</>
-                )}
-              />
-            </ColumnGroup>
-            <ColumnGroup className="!whitespace-normal" title="SKU" width={210}>
-              <Column title="KH" width={70} dataIndex="kh_sku" key="kh_sku" />
-              <Column title="TH" width={70} dataIndex="th_sku" key="th_sku" />
-              <Column
-                title="TL"
-                width={70}
-                dataIndex="tl_sku"
-                key="tl_sku"
-                render={(_: any, record: DataTypeKPI) => <>{record.tl_sku}%</>}
-              />
-            </ColumnGroup>
-            <ColumnGroup
-              className="!whitespace-normal"
-              title="Số giờ làm việc"
-              width={210}
-            >
-              <Column
-                title="KH"
-                width={70}
-                dataIndex="kh_so_gio_lam_viec"
-                key="kh_so_gio_lam_viec"
-              />
-              <Column
-                title="TH"
-                width={70}
-                dataIndex="th_so_gio_lam_viec"
-                key="th_so_gio_lam_viec"
-              />
-              <Column
-                title="TL"
-                width={70}
-                dataIndex="tl_so_gio_lam_viec"
-                key="tl_so_gio_lam_viec"
-                render={(_: any, record: DataTypeKPI) => (
-                  <>{record.tl_so_gio_lam_viec}%</>
-                )}
-              />
-            </ColumnGroup>
-          </TableCustom>
+              <ColumnGroup
+                className="!whitespace-normal !min-w-[210px] !text-center"
+                title="Số khách hàng viếng thăm"
+              >
+                <Column title="KH" width={70} dataIndex="kh_vt" key="kh_vt" />
+                <Column title="TH" width={70} dataIndex="th_vt" key="th_vt" />
+                <Column
+                  title="TL"
+                  width={70}
+                  dataIndex="tl_vt"
+                  key="tl_vt"
+                  render={(_: any, record: DataTypeKPI) => <>{record.tl_vt}%</>}
+                />
+              </ColumnGroup>
+              <ColumnGroup
+                className="!whitespace-normal !min-w-[210px] !text-center"
+                title="Số khách hàng viếng thăm duy nhất"
+              >
+                <Column
+                  title="KH"
+                  width={70}
+                  dataIndex="kh_vt_dn"
+                  key="kh_vt_dn"
+                />
+                <Column
+                  title="TH"
+                  width={70}
+                  dataIndex="th_vt_dn"
+                  key="th_vt_dn"
+                />
+                <Column
+                  title="TL"
+                  width={70}
+                  dataIndex="tl_vt_dn"
+                  key="tl_vt_dn"
+                  render={(_: any, record: DataTypeKPI) => (
+                    <>{record.tl_vt_dn}%</>
+                  )}
+                />
+              </ColumnGroup>
+              <ColumnGroup
+                className="!whitespace-normal !min-w-[210px] !text-center"
+                title="Số khách hàng đặt hàng"
+              >
+                <Column
+                  title="KH"
+                  width={70}
+                  dataIndex="kh_dat_hang"
+                  key="kh_dat_hang"
+                />
+                <Column
+                  title="TH"
+                  width={70}
+                  dataIndex="th_dat_hang"
+                  key="th_dat_hang"
+                />
+                <Column
+                  title="TL"
+                  width={70}
+                  dataIndex="tl_dat_hang"
+                  key="tl_dat_hang"
+                  render={(_: any, record: DataTypeKPI) => (
+                    <>{record.tl_dat_hang}%</>
+                  )}
+                />
+              </ColumnGroup>
+              <ColumnGroup
+                className="!whitespace-normal !min-w-[210px] !text-center"
+                title="Số khách hàng thêm mới"
+              >
+                <Column
+                  title="KH"
+                  width={70}
+                  dataIndex="kh_kh_moi"
+                  key="kh_kh_moi"
+                />
+                <Column
+                  title="TH"
+                  width={70}
+                  dataIndex="th_kh_moi"
+                  key="th_kh_moi"
+                />
+                <Column
+                  title="TL"
+                  width={70}
+                  dataIndex="tl_kh_moi"
+                  key="tl_kh_moi"
+                  render={(_: any, record: DataTypeKPI) => (
+                    <>{record.tl_kh_moi}%</>
+                  )}
+                />
+              </ColumnGroup>
+              <ColumnGroup
+                className="!whitespace-normal"
+                title="Số đơn hàng"
+                width={210}
+              >
+                <Column
+                  title="KH"
+                  width={70}
+                  dataIndex="kh_don_hang"
+                  key="kh_don_hang"
+                />
+                <Column
+                  title="TH"
+                  width={70}
+                  dataIndex="th_don_hang"
+                  key="th_don_hang"
+                />
+                <Column
+                  title="TL"
+                  width={70}
+                  dataIndex="tl_don_hang"
+                  key="tl_don_hang"
+                  render={(_: any, record: DataTypeKPI) => (
+                    <>{record.tl_don_hang}%</>
+                  )}
+                />
+              </ColumnGroup>
+              <ColumnGroup
+                className="!whitespace-normal"
+                title="Doanh số (VNĐ)"
+                width={210}
+              >
+                <Column
+                  title="KH"
+                  dataIndex="kh_doanh_so"
+                  key="kh_doanh_so"
+                  render={(_: any, record: DataTypeKPI) => (
+                    <>{Intl.NumberFormat().format(record.kh_doanh_so)}</>
+                  )}
+                />
+                <Column
+                  title="TH"
+                  width={70}
+                  dataIndex="th_doanh_so"
+                  key="th_doanh_so"
+                  render={(_: any, record: DataTypeKPI) => (
+                    <>{Intl.NumberFormat().format(record.th_doanh_so)}</>
+                  )}
+                />
+                <Column
+                  title="TL"
+                  width={70}
+                  dataIndex="tl_don_hang"
+                  key="tl_don_hang"
+                  render={(_: any, record: DataTypeKPI) => (
+                    <>{record.tl_don_hang}%</>
+                  )}
+                />
+              </ColumnGroup>
+              <ColumnGroup
+                className="!whitespace-normal"
+                title="Doanh thu (VNĐ)"
+                width={210}
+              >
+                <Column
+                  title="KH"
+                  width={70}
+                  dataIndex="kh_doanh_thu"
+                  key="kh_doanh_thu"
+                  render={(_: any, record: DataTypeKPI) => (
+                    <>{Intl.NumberFormat().format(record.kh_doanh_thu)}</>
+                  )}
+                />
+                <Column
+                  title="TH"
+                  width={70}
+                  dataIndex="th_doanh_thu"
+                  key="th_doanh_thu"
+                  render={(_: any, record: DataTypeKPI) => (
+                    <>{Intl.NumberFormat().format(record.th_doanh_thu)}</>
+                  )}
+                />
+                <Column
+                  title="TL"
+                  width={70}
+                  dataIndex="tl_doanh_thu"
+                  key="tl_doanh_thu"
+                  render={(_: any, record: DataTypeKPI) => (
+                    <>{record.tl_doanh_thu}%</>
+                  )}
+                />
+              </ColumnGroup>
+              <ColumnGroup
+                className="!whitespace-normal"
+                title="Sản lượng"
+                width={210}
+              >
+                <Column
+                  title="KH"
+                  width={70}
+                  dataIndex="kh_san_lg"
+                  key="kh_san_lg"
+                />
+                <Column
+                  title="TH"
+                  width={70}
+                  dataIndex="th_san_lg"
+                  key="th_san_lg"
+                />
+                <Column
+                  title="TL"
+                  width={70}
+                  dataIndex="tl_san_luong"
+                  key="tl_san_luong"
+                  render={(_: any, record: DataTypeKPI) => (
+                    <>{record.tl_san_luong}%</>
+                  )}
+                />
+              </ColumnGroup>
+              <ColumnGroup
+                className="!whitespace-normal"
+                title="SKU"
+                width={210}
+              >
+                <Column title="KH" width={70} dataIndex="kh_sku" key="kh_sku" />
+                <Column title="TH" width={70} dataIndex="th_sku" key="th_sku" />
+                <Column
+                  title="TL"
+                  width={70}
+                  dataIndex="tl_sku"
+                  key="tl_sku"
+                  render={(_: any, record: DataTypeKPI) => (
+                    <>{record.tl_sku}%</>
+                  )}
+                />
+              </ColumnGroup>
+              <ColumnGroup
+                className="!whitespace-normal"
+                title="Số giờ làm việc"
+                width={210}
+              >
+                <Column
+                  title="KH"
+                  width={70}
+                  dataIndex="kh_so_gio_lam_viec"
+                  key="kh_so_gio_lam_viec"
+                />
+                <Column
+                  title="TH"
+                  width={70}
+                  dataIndex="th_so_gio_lam_viec"
+                  key="th_so_gio_lam_viec"
+                />
+                <Column
+                  title="TL"
+                  width={70}
+                  dataIndex="tl_so_gio_lam_viec"
+                  key="tl_so_gio_lam_viec"
+                  render={(_: any, record: DataTypeKPI) => (
+                    <>{record.tl_so_gio_lam_viec}%</>
+                  )}
+                />
+              </ColumnGroup>
+            </TableCustom>
+          </div>
         </div>
-      </div>
+      </ContentFrame>
     </>
   );
 }

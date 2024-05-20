@@ -1,19 +1,16 @@
 import { Table } from "antd";
 import styled from "styled-components";
 
-
-export const TableCustom = styled(Table)<{$border?: boolean,$wrap?: boolean}>`
-& .ant-table-body {
-  overflow-y: scroll;
-    max-height: 500px!important;
-}
-
+export const TableCustom = styled(Table)<{
+  $border?: boolean;
+  $wrap?: boolean;
+}>`
 & .ant-table-container .ant-table-tbody tr.ant-table-expanded-row:hover>td.ant-table-cell {
   background: #F4F6F8!important;
 }
 & .ant-table-content>table {
-  border-left: ${props => props.$border ? "" : "none"}!important;
-  border-right: ${props => props.$border ? "" : "none"}!important;
+  border-left: ${(props) => (props.$border ? "" : "none")}!important;
+  border-right: ${(props) => (props.$border ? "" : "none")}!important;
 
   & tr.ant-table-expanded-row {
     &>td {
@@ -75,7 +72,7 @@ export const TableCustom = styled(Table)<{$border?: boolean,$wrap?: boolean}>`
 }
 
 & tbody .ant-table-cell {
-  white-space: ${props => props?.$wrap ? "wrap":"nowrap"}!important;
+  white-space: ${(props) => (props?.$wrap ? "wrap" : "nowrap")}!important;
 }
 &:not(:has(.ant-table-cell)) .ant-table-thead {
   &>tr {

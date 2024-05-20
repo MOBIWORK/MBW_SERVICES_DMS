@@ -8,6 +8,7 @@ import {
   DatePicker,
   DatePickerProps,
   TreeSelect,
+  Form,
 } from "antd";
 import { CardCustom } from "../../components/card/card";
 import { UserIcon } from "../../icons/user";
@@ -172,7 +173,7 @@ export default function MonitorAlbum() {
     <>
       <HeaderPage title="Giám sát chụp ảnh khách hàng" />
       <div className="bg-white rounded-md py-7 px-4">
-        <div className="flex flex-wrap justify-start items-center">
+        <Form layout="vertical" className="flex flex-wrap justify-start items-center">
           <Row className="" gutter={[8, 8]}>
             <FormItemCustom label={"Ngày chụp"} className="w-[175px] border-none mr-2">
               <DatePicker
@@ -256,7 +257,7 @@ export default function MonitorAlbum() {
               />
             </FormItemCustom>
           </Row>
-        </div>
+        </Form>
 
         <div className="pt-5">
           <Row gutter={[16, 8]}>
