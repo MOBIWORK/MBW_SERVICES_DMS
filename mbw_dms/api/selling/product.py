@@ -18,24 +18,34 @@ def list_product(**kwargs):
         my_filter = {}
         name = kwargs.get('name')
         name_item = kwargs.get('item_name')
+        customer = kwargs.get('customer')
         brand = kwargs.get('brand')
         custom_industry = kwargs.get("industry")
         item_group = kwargs.get("item_group")
         page_size = kwargs.get('page_size', 20)
-        page_number = 1 if not kwargs.get('page') or int(kwargs.get('page')) <= 0 else int(kwargs.get('page'))
+        page_number = 1 if not kwargs.get('page_size') or int(kwargs.get('page_size')) <= 0 else int(kwargs.get('page_size'))
 
+        price_list = None
+        price_lisr_cg = None
         default_price_list = frappe.get_doc('Selling Settings').selling_price_list
+        if customer:
+            customer_group = frappe.get_value('Customer', {'name': customer}, 'customer_group')
+            price_lisr_cg = frappe.get_value('Customer Group', {'name': customer_group}, 'default_price_list')
+        if price_lisr_cg:
+            price_list = price_lisr_cg
+        else:
+            price_list = default_price_list
 
         if name:
-            my_filter["name"] = ['like', f'%{name}%']
+            my_filter["name"] = ["like", f'%{name}%']
         if name_item:
-            my_filter["item_name"] = ['like', f'%{name_item}%']
+            my_filter["item_name"] = ["like", f'%{name_item}%']
         if brand:
-            my_filter["brand"] = ['like', f'%{brand}%']
+            my_filter["brand"] = ["like", f'%{brand}%']
         if custom_industry:
-            my_filter["custom_industry"] = ['like', f'%{custom_industry}%']
+            my_filter["custom_industry"] = ["like", f'%{custom_industry}%']
         if item_group:
-            my_filter["item_group"] = ['like', f'%{item_group}%']
+            my_filter["item_group"] = ["like", f'%{item_group}%']
 
         items = frappe.db.get_list("Item",
                                    filters=my_filter,
@@ -57,7 +67,7 @@ def list_product(**kwargs):
         data_item = []
         for item in items:
             item['image'] = validate_image(item.get("image"))
-            item['details'] = frappe.get_all("Item Price", filters={"item_code": item.get('item_code'), "price_list": default_price_list}, fields=['uom', 'price_list', 'price_list_rate', 'valid_from', 'currency'])
+            item['details'] = frappe.get_all("Item Price", filters={"item_code": item.get('item_code'), "price_list": price_list}, fields=['uom', 'price_list', 'price_list_rate', 'valid_from', 'currency'])
             item['unit'] = frappe.db.get_all("UOM Conversion Detail", {"parent" : item.get('name')}, ['uom', 'conversion_factor'])
             item['stock'] = frappe.db.get_all("Stock Entry Detail", {"item_code": item.get('item_code')}, ['t_warehouse', 'qty'])
             item['item_tax_template'] = frappe.db.get_all("Item Tax", {"parent": item["name"]}, ["item_tax_template"])
@@ -95,29 +105,20 @@ def list_product_campaign(**kwargs):
         custom_industry = kwargs.get("industry")
         item_group = kwargs.get("item_group")
         page_size = kwargs.get('page_size', 20)
-        page_number = 1 if not kwargs.get('page') or int(kwargs.get('page')) <= 0 else int(kwargs.get('page'))
+        page_number = 1 if not kwargs.get('page_size') or int(kwargs.get('page_size')) <= 0 else int(kwargs.get('page_size'))
 
-        price_list = None
-        price_lisr_cg = None
         default_price_list = frappe.get_doc('Selling Settings').selling_price_list
-        if customer:
-            customer_group = frappe.get_value('Customer', {'name': customer}, 'customer_group')
-            price_lisr_cg = frappe.get_value('Customer Group', {'name': customer_group}, 'default_price_list')
-        if price_lisr_cg:
-            price_list = price_lisr_cg
-        else:
-            price_list = default_price_list
 
         if name:
-            my_filter["name"] = ['like', f'%{name}%']
+            my_filter["name"] = ["like", f'%{name}%']
         if name_item:
-            my_filter["item_name"] = ['like', f'%{name_item}%']
+            my_filter["item_name"] = ["like", f'%{name_item}%']
         if brand:
-            my_filter["brand"] = ['like', f'%{brand}%']
+            my_filter["brand"] = ["like", f'%{brand}%']
         if custom_industry:
-            my_filter["custom_industry"] = ['like', f'%{custom_industry}%']
+            my_filter["custom_industry"] = ["like", f'%{custom_industry}%']
         if item_group:
-            my_filter["item_group"] = ['like', f'%{item_group}%']
+            my_filter["item_group"] = ["like", f'%{item_group}%']
 
         items = frappe.db.get_list("Item",
                                    filters=my_filter,
@@ -140,7 +141,7 @@ def list_product_campaign(**kwargs):
         data_item = []
         for item in items:
             item['image'] = validate_image(item.get("image"))
-            item['details'] = frappe.get_all("Item Price", filters={"item_code": item.get('item_code'), "price_list": price_list}, fields=['uom', 'price_list', 'price_list_rate', 'valid_from', 'currency'])
+            item['details'] = frappe.get_all("Item Price", filters={"item_code": item.get('item_code'), "price_list": default_price_list}, fields=['uom', 'price_list', 'price_list_rate', 'valid_from', 'currency'])
             item['unit'] = frappe.db.get_all("UOM Conversion Detail", {"parent" : item.get('name')}, ['uom', 'conversion_factor'])
             item['stock'] = frappe.db.get_all("Stock Entry Detail", {"item_code": item.get('item_code')}, ['t_warehouse', 'qty'])
             data_item.append(item)
