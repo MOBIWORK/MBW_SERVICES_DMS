@@ -272,13 +272,13 @@ def create_checkin(kwargs):
 @frappe.whitelist(methods='POST')
 def create_checkin_inventory(body):
     try:
-        employee = get_employee_info()
+        employee = frappe.get_doc("Employee", {"user_id": frappe.session.user})
         normal_keys = [
             "customer_code", "customer_name", "customer_type", "customer_address", "checkin_id"
         ]
         del body['cmd']
         doc = frappe.new_doc("DMS Inventory")
-        doc.set("create_by",employee.get("name"))
+        doc.set("create_by", employee.get("name"))
         for key, value in body.items():
             if key in normal_keys:
                 doc.set(key, validate_filter(type_check='require_field', value=(value,key)))
