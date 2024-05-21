@@ -62,7 +62,7 @@ def list_product(**kwargs):
                 return pydash.pick(value, "link_image")
             images_links = pydash.map_(images, return_fiel)
             item["custom_images_item"] = images_links
-        count = frappe.db.count("Item", filters=my_filter)
+        count = len(frappe.db.get_list("Item", filters=my_filter))
 
         data_item = []
         for item in items:
@@ -99,7 +99,6 @@ def list_product_campaign(**kwargs):
 
         my_filter = {}
         name = kwargs.get('name')
-        customer = kwargs.get('customer')
         name_item = kwargs.get('item_name')
         brand = kwargs.get('brand')
         custom_industry = kwargs.get("industry")
@@ -121,13 +120,13 @@ def list_product_campaign(**kwargs):
             my_filter["item_group"] = ["like", f'%{item_group}%']
 
         items = frappe.db.get_list("Item",
-                                   filters=my_filter,
-                                   fields=[ "name", "item_code", "item_name", "item_group", 
+                                    filters=my_filter,
+                                    fields=["name", "item_code", "item_name", "item_group", 
                                             "stock_uom", "min_order_qty", "description",
                                             "brand", "country_of_origin", "image",
                                             "custom_industry", "end_of_life"],
-                                   start=page_size * (page_number - 1),
-                                   page_length=page_size)
+                                    start=page_size * (page_number - 1),
+                                    page_length=page_size)
         
         for item in items:
             item_doc = frappe.get_doc("Item", item.get("name"))
@@ -136,7 +135,7 @@ def list_product_campaign(**kwargs):
                 return pydash.pick(value, "link_image")
             images_links = pydash.map_(images, return_fiel)
             item["custom_images_item"] = images_links
-        count = frappe.db.count("Item", filters=my_filter)
+        count = len(frappe.db.get_list("Item", filters=my_filter))
 
         data_item = []
         for item in items:
