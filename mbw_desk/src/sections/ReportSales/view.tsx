@@ -106,7 +106,7 @@ const columns: TableColumnsType<DataSaleOrder> = [
     render: (_, record: any) => <div>{record.employee}</div>,
   },
   {
-    title: "Thành tiền (VNĐ)",
+    title: <div className="text-right">Thành tiền (VNĐ)</div>,
     dataIndex: "total",
     key: "total",
     render: (_, record: any) => (
@@ -116,7 +116,7 @@ const columns: TableColumnsType<DataSaleOrder> = [
     ),
   },
   {
-    title: "Tiền VAT (VNĐ)",
+    title: <div className="text-right">Tiền VAT (VNĐ)</div>,
     dataIndex: "tax_amount",
     key: "tax_amount",
     render: (_, record: any) => (
@@ -126,7 +126,7 @@ const columns: TableColumnsType<DataSaleOrder> = [
     ),
   },
   {
-    title: "Chiết khấu (VNĐ)",
+    title: <div className="text-right">Chiết khấu (VNĐ)</div>,
     dataIndex: "discount_amount",
     key: "discount_amount",
     render: (_, record: any) => (
@@ -136,7 +136,7 @@ const columns: TableColumnsType<DataSaleOrder> = [
     ),
   },
   {
-    title: "Tổng tiền (VNĐ)",
+    title: <div className="text-right">Tổng tiền (VNĐ)</div>,
     dataIndex: "grand_total",
     key: "grand_total",
     render: (_, record: any) => (
@@ -178,17 +178,19 @@ export default function ReportSales() {
   const expandedRowRender = (recordTable: any) => {
     const columns: TableColumnsType<DataItem> = [
       {
-        title: "STT",
+        title: <div className="text-center">STT</div>,
         dataIndex: "stt",
         key: "stt",
-        render: (_, record: any, index) => index + 1,
+        render: (_, record: any, index) => (
+          <div className="text-center">{index + 1}</div>
+        ),
       },
       { title: "Mã sản phẩm", dataIndex: "item_code", key: "item_code" },
       { title: "Tên sản phẩm", dataIndex: "item_name", key: "item_name" },
       { title: "Nhóm sản phẩm", dataIndex: "item_group", key: "item_group" },
       { title: "Nhãn hàng", dataIndex: "brand", key: "brand" },
       {
-        title: "Đơn giá",
+        title: <div className="text-right">Đơn giá</div>,
         dataIndex: "rate",
         key: "rate",
         render: (_, record: any) => (
@@ -198,7 +200,7 @@ export default function ReportSales() {
         ),
       },
       {
-        title: "Số lượng",
+        title: <div className="text-right">Số lượng</div>,
         dataIndex: "qty",
         key: "qty",
         render: (_, record: any) => (
@@ -206,7 +208,7 @@ export default function ReportSales() {
         ),
       },
       {
-        title: "Chiết khấu (%)",
+        title: <div className="text-right">Chiết khấu (%)</div>,
         dataIndex: "discount_percentage",
         key: "discount_percentage",
         render: (_, record: any) => (
@@ -216,7 +218,7 @@ export default function ReportSales() {
         ),
       },
       {
-        title: "Tiền chiết khấu (VNĐ)",
+        title: <div className="text-right">Tiền chiết khấu (VNĐ)</div>,
         dataIndex: "discount_amount",
         key: "discount_amount",
         render: (_, record: any) => (
@@ -226,7 +228,7 @@ export default function ReportSales() {
         ),
       },
       {
-        title: "Tổng tiền (VNĐ)",
+        title: <div className="text-right">Tổng tiền (VNĐ)</div>,
         dataIndex: "amount",
         key: "amount",
         render: (_, record: any) => (
@@ -468,6 +470,32 @@ export default function ReportSales() {
           >
             <Row className="" gutter={[8, 8]}>
               <FormItemCustom
+                label={"Từ ngày"}
+                className="w-[175px] border-none mr-2"
+              >
+                <DatePicker
+                  format={"DD-MM-YYYY"}
+                  className="!bg-[#F4F6F8] !h-7 rounded-lg mt-[-2px]"
+                  placeholder="Từ ngày"
+                  onChange={onChange}
+                  defaultValue={startOfMonth}
+                />
+              </FormItemCustom>
+
+              <FormItemCustom
+                label={"Đến ngày"}
+                className="w-[175px] border-none mr-2"
+              >
+                <DatePicker
+                  format={"DD-MM-YYYY"}
+                  className="!bg-[#F4F6F8] !h-7 rounded-lg mt-[-2px]"
+                  onChange={onChange1}
+                  placeholder="Đến ngày"
+                  defaultValue={endOfMonth}
+                />
+              </FormItemCustom>
+
+              <FormItemCustom
                 label={"Công ty"}
                 className="w-[175px] border-none mr-2"
               >
@@ -488,7 +516,7 @@ export default function ReportSales() {
               </FormItemCustom>
 
               <FormItemCustom
-                label={"Khác hàng"}
+                label={"Khách hàng"}
                 className="w-[175px] border-none mr-2"
               >
                 <Select
@@ -524,32 +552,6 @@ export default function ReportSales() {
                   filterOption={false}
                   allowClear
                   placeholder="Tất cẩ khu vực"
-                />
-              </FormItemCustom>
-
-              <FormItemCustom
-                label={"Từ ngày"}
-                className="w-[175px] border-none mr-2"
-              >
-                <DatePicker
-                  format={"DD-MM-YYYY"}
-                  className="!bg-[#F4F6F8] !h-8"
-                  placeholder="Từ ngày"
-                  onChange={onChange}
-                  defaultValue={startOfMonth}
-                />
-              </FormItemCustom>
-
-              <FormItemCustom
-                label={"Đến ngày"}
-                className="w-[175px] border-none mr-2"
-              >
-                <DatePicker
-                  format={"DD-MM-YYYY"}
-                  className="!bg-[#F4F6F8] !h-8"
-                  onChange={onChange1}
-                  placeholder="Đến ngày"
-                  defaultValue={endOfMonth}
                 />
               </FormItemCustom>
 
@@ -619,9 +621,12 @@ export default function ReportSales() {
               summary={() => {
                 return (
                   <Table.Summary.Row>
-                    <Table.Summary.Cell index={0}></Table.Summary.Cell>
-                    <Table.Summary.Cell index={1}>Tổng</Table.Summary.Cell>
-                    <Table.Summary.Cell index={2}></Table.Summary.Cell>
+                    <Table.Summary.Cell
+                      index={0}
+                      className="!border-r-0"
+                    ></Table.Summary.Cell>
+                    <Table.Summary.Cell index={1}></Table.Summary.Cell>
+                    <Table.Summary.Cell index={2}>Tổng</Table.Summary.Cell>
                     <Table.Summary.Cell index={3}></Table.Summary.Cell>
                     <Table.Summary.Cell index={4}></Table.Summary.Cell>
                     <Table.Summary.Cell index={5}></Table.Summary.Cell>

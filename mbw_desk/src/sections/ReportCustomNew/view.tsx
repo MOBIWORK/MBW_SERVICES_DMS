@@ -1,13 +1,8 @@
-import { SearchOutlined, VerticalAlignBottomOutlined } from "@ant-design/icons";
-import { ContentFrame, FormItemCustom, HeaderPage } from "../../components";
-import { Form, Input, Row, Select, Table, Typography } from "antd";
+import { VerticalAlignBottomOutlined } from "@ant-design/icons";
+import { ContentFrame, FormItemCustom, HeaderPage, TableCustom } from "../../components";
+import { Form, Input, Row, Select, Table } from "antd";
 import type { TableColumnsType } from "antd";
-import { TableReport } from "../ReportSales/tableCustom";
 import {
-  area,
-  customergroup,
-  department,
-  ordernew,
   psorder,
   typecustomer,
 } from "../ReportSales/data";
@@ -46,14 +41,14 @@ const columns: TableColumnsType<DataTypeCustomNew> = [
     title: "STT",
     dataIndex: "stt",
     key: "stt",
-    render: (_, record: any, index: number) => index + 1,
+    render: (_, record: any, index: number) => <div className="text-center">{index + 1}</div>,
   },
   {
     title: "Phòng ban",
     dataIndex: "department",
     key: "department",
     render: (_, record: any) => (
-      <div className="!w-[175px]">{record.department}</div>
+      <div>{record.department}</div>
     ),
   },
   {
@@ -61,7 +56,7 @@ const columns: TableColumnsType<DataTypeCustomNew> = [
     dataIndex: "employee_id",
     key: "employee_id",
     render: (_, record: any) => (
-      <div className="!w-[175px]">{record.employee_id}</div>
+      <div>{record.employee_id}</div>
     ),
   },
   {
@@ -69,7 +64,7 @@ const columns: TableColumnsType<DataTypeCustomNew> = [
     dataIndex: "employee_name",
     key: "employee_name",
     render: (_, record: any) => (
-      <div className="!w-[175px]">{record.employee_name}</div>
+      <div>{record.employee_name}</div>
     ),
   },
   {
@@ -77,7 +72,7 @@ const columns: TableColumnsType<DataTypeCustomNew> = [
     dataIndex: "customer_code",
     key: "customer_code",
     render: (_, record: any) => (
-      <div className="!w-[175px]">{record.customer_code}</div>
+      <div>{record.customer_code}</div>
     ),
   },
   {
@@ -85,7 +80,7 @@ const columns: TableColumnsType<DataTypeCustomNew> = [
     dataIndex: "customer_name",
     key: "customer_name",
     render: (_, record: any) => (
-      <div className="!w-[175px]">{record.customer_name}</div>
+      <div>{record.customer_name}</div>
     ),
   },
   {
@@ -93,7 +88,7 @@ const columns: TableColumnsType<DataTypeCustomNew> = [
     dataIndex: "customer_type",
     key: "customer_type",
     render: (_, record: any) => (
-      <div className="!w-[175px]">{record.customer_type}</div>
+      <div>{record.customer_type}</div>
     ),
   },
   {
@@ -101,7 +96,7 @@ const columns: TableColumnsType<DataTypeCustomNew> = [
     dataIndex: "customer_group",
     key: "customer_group",
     render: (_, record: any) => (
-      <div className="!w-[175px]">{record.customer_group}</div>
+      <div>{record.customer_group}</div>
     ),
   },
   {
@@ -109,7 +104,7 @@ const columns: TableColumnsType<DataTypeCustomNew> = [
     dataIndex: "contact",
     key: "contact",
     render: (_, record: any) => (
-      <div className="!w-[175px]">{record.contact}</div>
+      <div>{record.contact}</div>
     ),
   },
   {
@@ -117,7 +112,7 @@ const columns: TableColumnsType<DataTypeCustomNew> = [
     dataIndex: "phone",
     key: "phone",
     render: (_, record: any) => (
-      <div className="!w-[175px]">{record.phone}</div>
+      <div>{record.phone}</div>
     ),
   },
   {
@@ -125,7 +120,7 @@ const columns: TableColumnsType<DataTypeCustomNew> = [
     dataIndex: "tax_id",
     key: "tax_id",
     render: (_, record: any) => (
-      <div className="!w-[175px]">{record.tax_id}</div>
+      <div>{record.tax_id}</div>
     ),
   },
   {
@@ -133,7 +128,7 @@ const columns: TableColumnsType<DataTypeCustomNew> = [
     dataIndex: "territory",
     key: "territory",
     render: (_, record: any) => (
-      <div className="!w-[175px]">{record.territory}</div>
+      <div>{record.territory}</div>
     ),
   },
   {
@@ -141,7 +136,7 @@ const columns: TableColumnsType<DataTypeCustomNew> = [
     dataIndex: "address",
     key: "address",
     render: (_, record: any) => (
-      <div className="!w-[175px]">{record.contribution}</div>
+      <div>{record.contribution}</div>
     ),
   },
   {
@@ -149,7 +144,7 @@ const columns: TableColumnsType<DataTypeCustomNew> = [
     dataIndex: "creation",
     key: "creation",
     render: (_, record: any) => (
-      <div className="!w-[175px]">
+      <div>
         {dayjs(record.creation * 1000).format("DD/MM/YYYY")}
       </div>
     ),
@@ -160,7 +155,7 @@ const columns: TableColumnsType<DataTypeCustomNew> = [
     key: "f1",
   },
   {
-    title: "Số lần VT",
+    title: <div className="!text-right">Số lần VT</div>,
     dataIndex: "totals_checkin",
     key: "totals_checkin",
     render: (_, record: any) => (
@@ -172,7 +167,7 @@ const columns: TableColumnsType<DataTypeCustomNew> = [
     dataIndex: "first_checkin",
     key: "first_checkin",
     render: (_, record: any) => (
-      <div className="!text-right">{record.first_checkin}</div>
+      <div>{record.first_checkin}</div>
     ),
   },
   {
@@ -180,12 +175,12 @@ const columns: TableColumnsType<DataTypeCustomNew> = [
     dataIndex: "last_checkin",
     key: "last_checkin",
     render: (_, record: any) => (
-      <div className="!text-right">{record.last_checkin}</div>
+      <div>{record.last_checkin}</div>
     ),
     
   },
   {
-    title: "Số đơn hàng",
+    title: <div className="!text-right">Số đơn hàng</div>,
     dataIndex: "totals_so",
     key: "totals_so",
     render: (_, record: any) => (
@@ -488,7 +483,7 @@ export default function ReportCustomNew() {
                 />
               </FormItemCustom>
               <FormItemCustom
-                label={" "}
+                label={"Phát sinh đơn hàng"}
                 className="w-[175px] border-none mr-2"
               >
                 <Select
@@ -507,7 +502,7 @@ export default function ReportCustomNew() {
           </Form>
 
           <div className="pt-5">
-            <TableReport
+            <TableCustom
               dataSource={dataCustomNew?.data?.map(
                 (dataSale: DataTypeCustomNew) => {
                   return {

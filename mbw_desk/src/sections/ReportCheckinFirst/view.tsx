@@ -179,8 +179,8 @@ export default function ReportCheckinFirst() {
   const [listTerritory, setListTerritory] = useState<any[]>([]);
   const [keySTerritory, setKeySTerritory] = useState("");
   let keySearchTerritory = useDebounce(keySTerritory, 500);
-  const [from_date, setFromDate] = useState<any>(startOfMonth);
-  const [to_date, setToDate] = useState<any>(endOfMonth);
+  const [from_date, setFromDate] = useState<any>(start);
+  const [to_date, setToDate] = useState<any>(end);
 
   const onChange: DatePickerProps["onChange"] = (dateString: any) => {
     if (dateString === null || dateString === undefined) {
