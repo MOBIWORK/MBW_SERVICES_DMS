@@ -23,7 +23,7 @@ def list_product(**kwargs):
         custom_industry = kwargs.get("industry")
         item_group = kwargs.get("item_group")
         page_size = kwargs.get('page_size', 20)
-        page_number = 1 if not kwargs.get('page_size') or int(kwargs.get('page_size')) <= 0 else int(kwargs.get('page_size'))
+        page_number = 1 if not kwargs.get('page_number') or int(kwargs.get('page_number')) <= 0 else int(kwargs.get('page_number'))
 
         price_list = None
         price_lisr_cg = None
@@ -104,7 +104,7 @@ def list_product_campaign(**kwargs):
         custom_industry = kwargs.get("industry")
         item_group = kwargs.get("item_group")
         page_size = kwargs.get('page_size', 20)
-        page_number = 1 if not kwargs.get('page_size') or int(kwargs.get('page_size')) <= 0 else int(kwargs.get('page_size'))
+        page_number = 1 if not kwargs.get('page_number') or int(kwargs.get('page_number')) <= 0 else int(kwargs.get('page_number'))
 
         default_price_list = frappe.get_doc('Selling Settings').selling_price_list
 
