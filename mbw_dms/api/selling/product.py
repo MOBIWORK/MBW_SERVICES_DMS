@@ -29,10 +29,14 @@ def list_product(**kwargs):
         price_lisr_cg = None
         default_price_list = frappe.get_doc('Selling Settings').selling_price_list
         if customer:
-            customer_group = frappe.get_value('Customer', {'name': customer}, 'customer_group')
-            price_lisr_cg = frappe.get_value('Customer Group', {'name': customer_group}, 'default_price_list')
-        if price_lisr_cg:
-            price_list = price_lisr_cg
+            customers = frappe.get_doc("Customer", customer)
+            if customers.get("default_price_list"):
+                price_list = customers.default_price_list
+                
+            else:
+                price_lisr_cg = frappe.get_value('Customer Group', {'name': customers.customer_group}, 'default_price_list')
+                if price_lisr_cg:
+                    price_list = price_lisr_cg
         else:
             price_list = default_price_list
 
