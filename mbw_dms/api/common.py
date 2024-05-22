@@ -209,6 +209,15 @@ def get_report_doc(report_name):
         gen_response(403, "You don't have permission", [])
     return doc
 
+
+def null_location(location):
+    if location == "" or not bool(location):
+        location = None
+    else:
+        if not json.loads(location).get("long") or not json.loads(location).get("lat"):
+            location = None
+    return location
+
 def post_image(name_image, faceimage, doc_type, doc_name):
     # save file and insert Doctype File
     file_name = name_image + "_"+ str(datetime.now().timestamp()) + "_.png"

@@ -9,7 +9,8 @@ from mbw_dms.api.common import (
     post_image,
     get_value_child_doctype,
     routers_name_of_customer,
-    customers_code_router
+    customers_code_router,
+    null_location
 )
 from mbw_dms.api.validators import (
     validate_date, 
@@ -88,6 +89,8 @@ def list_customer(**kwargs):
         return exception_handle(e)
     
 
+
+
 # Chi tiết khách hàng
 @frappe.whitelist(methods="GET")
 def customer_detail(name):
@@ -107,7 +110,10 @@ def customer_detail(name):
         doc_customer["address"] = address
         doc_customer["contacts"] = contacts
         doc_customer["routers"] = list_router_frequency
+        doc_customer["customer_location_primary"] = null_location( doc_customer["customer_location_primary"] )
 
+        for address in  doc_customer["address"]:
+            address.address_location = null_location(address.address_location)
         return gen_response(200, "", doc_customer)
     except Exception as e:
         exception_handle(e)

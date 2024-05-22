@@ -7,7 +7,7 @@ import json
 from frappe.model.document import Document
 from pypika import CustomFunction
 
-from mbw_dms.api.common import exception_handle, gen_response,get_language,get_user_id,get_employee_by_user, time_now_utc
+from mbw_dms.api.common import exception_handle, gen_response,get_language,get_user_id,get_employee_by_user, time_now_utc,null_location
 from frappe.desk.reportview import get_filters_cond, get_match_cond
 from erpnext.controllers.queries import get_fields
 from mbw_dms.api.validators import validate_filter 
@@ -201,11 +201,7 @@ def get_customer_router(data):
         
         total_customer= len( frappe.db.get_all('Customer',filters= FiltersCustomer))
         for customer in detail_customer:
-            if customer.customer_location_primary == "" or not bool(customer.customer_location_primary):
-                customer.customer_location_primary = None
-            else:
-                if not json.loads(customer.customer_location_primary).get("long") or not json.loads(customer.customer_location_primary).get("lat"):
-                    customer.customer_location_primary = None
+            customer.customer_location_primary = null_location(customer.customer_location_primary)
         return gen_response(200,"", {
             "data": detail_customer,
             "total": total_customer,
