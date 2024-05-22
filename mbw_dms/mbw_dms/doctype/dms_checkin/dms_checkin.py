@@ -363,6 +363,7 @@ def create_checkin_image(body):
 def update_address_customer(body):
     try:
         customer = validate_filter(type_check='require',value=body.get('customer'))
+        checkin_id = validate_filter(type_check='require',value=body.get('checkin_id'))
         city = validate_filter(type_check='require',value=body.get('city'))
         county = validate_filter(type_check='require',value=body.get('county'))
         state = validate_filter(type_check='require',value=body.get('state'))
@@ -388,7 +389,8 @@ def update_address_customer(body):
                     "state": ward_info,
                     "county": district_info,
                     "city": city_info,   
-                    "address_location":address_location               
+                    "address_location":address_location,
+                    "checkin_id":checkin_id         
                 }
             if customer_info.get("customer_primary_address"):
                 doc_address = frappe.get_doc("Address",customer_info.get("customer_primary_address"))
@@ -433,6 +435,13 @@ def cancel_checkout(data):
         frappe.db.delete("DMS Album Image",{"checkin_id":checkin_id})
         #xoa check ton kho
         frappe.db.delete("DMS Inventory",{"checkin_id":checkin_id})
+        address = frappe.db.get_doc("Address",{"checkin_id":checkin_id})
+        address.links = []
+
+        address.save()
+        frappe.db.commit()
+        # xoá địa chỉ
+        frappe.db.delete("Address",{"checkin_id":checkin_id})
         return
     except Exception as e :
         exception_handle(e)
