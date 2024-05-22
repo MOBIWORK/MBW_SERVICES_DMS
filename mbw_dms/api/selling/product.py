@@ -22,7 +22,7 @@ def list_product(**kwargs):
         brand = kwargs.get('brand')
         custom_industry = kwargs.get("industry")
         item_group = kwargs.get("item_group")
-        page_size = kwargs.get('page_size', 20)
+        page_size = int(kwargs.get('page_size', 20))
         page_number = 1 if not kwargs.get('page_number') or int(kwargs.get('page_number')) <= 0 else int(kwargs.get('page_number'))
 
         price_list = None
@@ -32,7 +32,7 @@ def list_product(**kwargs):
             customers = frappe.get_doc("Customer", customer)
             if customers.get("default_price_list"):
                 price_list = customers.default_price_list
-                
+
             else:
                 price_lisr_cg = frappe.get_value('Customer Group', {'name': customers.customer_group}, 'default_price_list')
                 if price_lisr_cg:
@@ -50,6 +50,7 @@ def list_product(**kwargs):
             my_filter["custom_industry"] = ["like", f'%{custom_industry}%']
         if item_group:
             my_filter["item_group"] = ["like", f'%{item_group}%']
+        my_filter["disabled"] = 0
 
         items = frappe.db.get_list("Item",
                                    filters=my_filter,
@@ -66,7 +67,13 @@ def list_product(**kwargs):
                 return pydash.pick(value, "link_image")
             images_links = pydash.map_(images, return_fiel)
             item["custom_images_item"] = images_links
-        count = len(frappe.db.get_list("Item", filters=my_filter))
+
+        list_item = frappe.db.get_all("Item", filters=my_filter, fields=["name", "item_code"])
+        count_item = 0
+        for item in list_item:
+            item['details'] = frappe.get_all("Item Price", filters={"item_code": item.item_code, "price_list": price_list}, fields=['name'])
+            if item['details']:
+                count_item += 1
 
         data_item = []
         for item in items:
@@ -84,7 +91,7 @@ def list_product(**kwargs):
 
         return gen_response(200, "Thành công", {
             "data": data_item,
-            "total": count,
+            "total": count_item,
             "page_size": page_size,
             "page_number": page_number
         })
@@ -107,7 +114,7 @@ def list_product_campaign(**kwargs):
         brand = kwargs.get('brand')
         custom_industry = kwargs.get("industry")
         item_group = kwargs.get("item_group")
-        page_size = kwargs.get('page_size', 20)
+        page_size = int(kwargs.get('page_size', 20))
         page_number = 1 if not kwargs.get('page_number') or int(kwargs.get('page_number')) <= 0 else int(kwargs.get('page_number'))
 
         default_price_list = frappe.get_doc('Selling Settings').selling_price_list
@@ -122,6 +129,7 @@ def list_product_campaign(**kwargs):
             my_filter["custom_industry"] = ["like", f'%{custom_industry}%']
         if item_group:
             my_filter["item_group"] = ["like", f'%{item_group}%']
+        my_filter["disabled"] = 0
 
         items = frappe.db.get_list("Item",
                                     filters=my_filter,
@@ -139,7 +147,8 @@ def list_product_campaign(**kwargs):
                 return pydash.pick(value, "link_image")
             images_links = pydash.map_(images, return_fiel)
             item["custom_images_item"] = images_links
-        count = len(frappe.db.get_list("Item", filters=my_filter))
+
+        count = len(frappe.db.get_list("Item", filters=my_filter, fields=["name"]))
 
         data_item = []
         for item in items:
