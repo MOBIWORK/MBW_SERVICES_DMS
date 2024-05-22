@@ -82,10 +82,7 @@ const columns: TableColumnsType<DataSaleOrder> = [
       <div>
         <a
           className="text-[#212B36]"
-          onClick={e => {
-            e.preventDefault()
-            window.location.href = `app/sales-order/${record.name}`
-          }}
+          href={`/app/sales-order/${record.name}`}
           target="_blank"
         >
           {record.name}
