@@ -200,6 +200,9 @@ def get_customer_router(data):
                 customer["is_route"] = True
         
         total_customer= len( frappe.db.get_all('Customer',filters= FiltersCustomer))
+        for customer in detail_customer:
+            if customer.customer_location_primary == "" or not customer.customer_location_primary or json.loads(customer.customer_location_primary).long or json.loads(customer.customer_location_primary).lat:
+                customer.customer_location_primary = None
         return gen_response(200,"", {
             "data": detail_customer,
             "total": total_customer,

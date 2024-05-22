@@ -432,8 +432,10 @@ export default function ReportCustomer() {
         ]}
       />
       <div className="bg-white rounded-xl border-[#DFE3E8] border-[0.2px] border-solid">
+        {/* bộ lọc  */}
         <Row gutter={[16, 16]} className="justify-between items-end w-full p-4">
-          <Col>
+          {/* filter big screen */}
+          <Col >
             <Row gutter={[8, 8]}>
               <Col className="mx-4 w-full" span={24}>
                 <Form
@@ -561,12 +563,13 @@ export default function ReportCustomer() {
               </Col>
             </Row>
           </Col>
-          <Col className="!ml-4">
+          {/* Dropdow filter */}
+          <Col className="!ml-4" >
             <div className="flex flex-wrap items-center">
               <div className="flex justify-center items-center mr-4">
                 <Dropdown
-                  className="!h-8"
-                  placement="bottomRight"
+                  className="!min-h-8"
+                  // placement="bottom"
                   trigger={["click"]}
                   dropdownRender={() => (
                     <DropDownCustom title={"Bộ lọc"}>
@@ -753,7 +756,8 @@ export default function ReportCustomer() {
             </div>
           </Col>
         </Row>
-
+        {/* end bộ lọc  */}
+        {/* hiển thị nội dung  */}
         <TableCustom
           columns={columns}
           scroll={{ x: true }}
@@ -774,6 +778,7 @@ export default function ReportCustomer() {
           }}
           rowHoverable={false}
         />
+        {/* end hiển thị nội dung */}
         <div className=""></div>
       </div>
     </>
