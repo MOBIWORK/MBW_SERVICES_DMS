@@ -1,18 +1,35 @@
 import { VerticalAlignBottomOutlined } from "@ant-design/icons";
 import {
   ContentFrame,
+  DropDownCustom,
   FormItemCustom,
   HeaderPage,
   TableCustom,
 } from "../../components";
-import { DatePicker, Form, Row, Select, Table, message } from "antd";
+import {
+  Button,
+  Col,
+  DatePicker,
+  Dropdown,
+  Form,
+  Row,
+  Select,
+  Table,
+  TreeSelect,
+  message,
+} from "antd";
 import type { TableColumnsType } from "antd";
 import { useEffect, useState } from "react";
 import { AxiosService } from "../../services/server";
 import dayjs from "dayjs";
 import useDebounce from "../../hooks/useDebount";
 import { DatePickerProps } from "antd/lib";
-import { translationUrl } from "@/util";
+import { translationUrl, treeArray } from "@/util";
+import { rsData, rsDataFrappe } from "@/types/response";
+import { employee } from "@/types/employeeFilter";
+import { listSale } from "@/types/listSale";
+import { LuFilter, LuFilterX } from "react-icons/lu";
+import { useForm } from "antd/es/form/Form";
 
 interface DataSaleOrder {
   key: React.Key;
@@ -65,7 +82,10 @@ const columns: TableColumnsType<DataSaleOrder> = [
       <div>
         <a
           className="text-[#212B36]"
-          href={`app/sales-invoice/${record.name}`}
+          onClick={e => {
+            e.preventDefault()
+            window.location.href = `app/sales-invoice/${record.name}`
+          }}
           target="_blank"
         >
           {record.name}
@@ -151,6 +171,7 @@ export default function ReportSales() {
   const [dataSaleOrder, setDataSaleOrder] = useState<DataSaleOrder[]>([]);
   const [total, setTotal] = useState<number>(0);
   const PAGE_SIZE = 20;
+  const [formFilter] = useForm();
   const [page, setPage] = useState<number>(1);
   const [listCompany, setListCompany] = useState<any[]>([]);
   const [company, setCompany] = useState("");
@@ -167,13 +188,15 @@ export default function ReportSales() {
   const [listWarehouse, setListWarehouse] = useState<any[]>([]);
   const [keySWarehouse, setKeySWarehouse] = useState("");
   const [employee, setEmployee] = useState("");
-  const [listEmployee, setListEmployee] = useState<any[]>([]);
-  const [keySEmployee, setKeySEmployee] = useState("");
+  const [listEmployees, setListEmployees] = useState<any[]>([]);
   let keySearchCompany = useDebounce(keySCompany, 500);
   let keySearchTerritory = useDebounce(keySTerritory, 500);
   let keySearchCustomer = useDebounce(keySCustomer, 500);
   let keySearchWarehouse = useDebounce(keySWarehouse, 500);
-  let keySearchEmployee = useDebounce(keySEmployee, 500);
+  const [keySearch4, setKeySearch4] = useState("");
+  let seachbykey = useDebounce(keySearch4);
+  const [listSales, setListSales] = useState<any[]>([]);
+  const [sales_team, setTeamSale] = useState<string>();
 
   const expandedRowRender = (recordTable: any) => {
     const columns: TableColumnsType<DataItem> = [
@@ -354,28 +377,43 @@ export default function ReportSales() {
 
   useEffect(() => {
     (async () => {
-      let rsEmployee: any = await AxiosService.get(
-        "/api/method/frappe.desk.search.search_link",
+      let rsSales: rsData<listSale[]> = await AxiosService.get(
+        "/api/method/mbw_dms.api.router.get_team_sale"
+      );
+
+      setListSales(
+        treeArray({
+          data: rsSales.result.map((team_sale: listSale) => ({
+            title: team_sale.name,
+            value: team_sale.name,
+            ...team_sale,
+          })),
+          keyValue: "value",
+          parentField: "parent_sales_person",
+        })
+      );
+    })();
+  }, []);
+  useEffect(() => {
+    (async () => {
+      let rsEmployee: rsDataFrappe<employee[]> = await AxiosService.get(
+        "/api/method/mbw_dms.api.router.get_sale_person",
         {
           params: {
-            txt: keySearchTerritory,
-            doctype: "Employee",
-            ignore_user_permissions: 0,
-            query: "mbw_dms.api.report.so_report.employee_query",
+            team_sale: sales_team,
+            key_search: seachbykey,
           },
         }
       );
-
       let { message: results } = rsEmployee;
-
-      setListEmployee(
-        results.map((dtEmployee: any) => ({
-          value: dtEmployee.description.split(",")[1].trim(),
-          label: dtEmployee.description.split(",")[0].trim(),
+      setListEmployees(
+        results.map((employee_filter: employee) => ({
+          value: employee_filter.employee_code,
+          label: employee_filter.employee_name || employee_filter.employee_code,
         }))
       );
     })();
-  }, [keySearchEmployee]);
+  }, [sales_team, seachbykey]);
 
   useEffect(() => {
     (async () => {
@@ -442,6 +480,29 @@ export default function ReportSales() {
     }
   };
 
+  const handleSearchFilter = (val: any) => {
+    if(val.company) {
+      setCompany(val.company)
+    }else {
+      setCompany("")
+    }
+    if(val.customer) {
+      setCustomer(val.customer)
+    }else {
+      setCustomer("")
+    }
+    if (val.territory) {
+      setTerritory(val.territory)
+    } else {
+      setTerritory("")
+    }
+    if(val.warehouse) {
+      setWarehouse(val.warehouse)
+    }else {
+      setWarehouse("")
+    }
+  };
+
   return (
     <>
       <ContentFrame
@@ -463,139 +524,199 @@ export default function ReportSales() {
           />
         }
       >
-        <div className="bg-white rounded-md pt-4 pb-7 border-[#DFE3E8] border-[0.2px] border-solid">
-          <Form
-            layout="vertical"
-            className="flex flex-wrap justify-start items-center px-4"
+        <div className="bg-white rounded-2xl pt-4 pb-7 border-[#DFE3E8] border-[0.2px] border-solid">
+          <Row
+            gutter={[16, 16]}
+            className="justify-between items-end w-full"
           >
-            <Row className="" gutter={[8, 8]}>
-              <FormItemCustom
-                label={"Từ ngày"}
-                className="w-[175px] border-none mr-2"
-              >
-                <DatePicker
-                  format={"DD-MM-YYYY"}
-                  className="!bg-[#F4F6F8] !h-7 rounded-lg mt-[-2px]"
-                  placeholder="Từ ngày"
-                  onChange={onChange}
-                  defaultValue={startOfMonth}
-                />
-              </FormItemCustom>
+            <Col>
+              <Row gutter={[8, 8]}>
+                <Col className="mx-4 w-full" span={24}>
+                  <Form
+                    layout="vertical"
+                    className="flex flex-wrap justify-start items-center "
+                  >
+                    <FormItemCustom
+                      label={"Từ ngày"}
+                      className="w-[175px] border-none mr-2"
+                    >
+                      <DatePicker
+                        format={"DD-MM-YYYY"}
+                        className="!bg-[#F4F6F8] !h-7 rounded-lg mt-[-2px]"
+                        placeholder="Từ ngày"
+                        onChange={onChange}
+                        defaultValue={startOfMonth}
+                      />
+                    </FormItemCustom>
 
-              <FormItemCustom
-                label={"Đến ngày"}
-                className="w-[175px] border-none mr-2"
-              >
-                <DatePicker
-                  format={"DD-MM-YYYY"}
-                  className="!bg-[#F4F6F8] !h-7 rounded-lg mt-[-2px]"
-                  onChange={onChange1}
-                  placeholder="Đến ngày"
-                  defaultValue={endOfMonth}
-                />
-              </FormItemCustom>
+                    <FormItemCustom
+                      label={"Đến ngày"}
+                      className="w-[175px] border-none mr-2"
+                    >
+                      <DatePicker
+                        format={"DD-MM-YYYY"}
+                        className="!bg-[#F4F6F8] !h-7 rounded-lg mt-[-2px]"
+                        onChange={onChange1}
+                        placeholder="Đến ngày"
+                        defaultValue={endOfMonth}
+                      />
+                    </FormItemCustom>
 
-              <FormItemCustom
-                label={"Công ty"}
-                className="w-[175px] border-none mr-2"
-              >
-                <Select
-                  className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
-                  options={listCompany}
-                  onSelect={(value) => {
-                    setCompany(value);
-                  }}
-                  onSearch={(value: string) => {
-                    setKeySCompany(value);
-                  }}
-                  onClear={() => setCompany("")}
-                  filterOption={false}
-                  allowClear
-                  placeholder="Tất cả công ty"
-                />
-              </FormItemCustom>
+                    <FormItemCustom
+                      label={"Nhóm bán hàng"}
+                      className="border-none mr-2 w-[200px]"
+                    >
+                      <TreeSelect
+                        placeholder="Tất cả nhóm bán hàng"
+                        allowClear
+                        treeData={listSales}
+                        onChange={(value: string) => {
+                          setTeamSale(value);
+                        }}
+                        dropdownStyle={{
+                          maxHeight: 400,
+                          overflow: "auto",
+                          minWidth: 400,
+                        }}
+                      />
+                    </FormItemCustom>
 
-              <FormItemCustom
-                label={"Khách hàng"}
-                className="w-[175px] border-none mr-2"
-              >
-                <Select
-                  className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
-                  options={listCustomer}
-                  onSelect={(value) => {
-                    setCustomer(value);
-                  }}
-                  onSearch={(value: string) => {
-                    setKeySCustomer(value);
-                  }}
-                  onClear={() => setCustomer("")}
-                  filterOption={false}
-                  allowClear
-                  placeholder="Tất cả khách hàng"
-                />
-              </FormItemCustom>
+                    <FormItemCustom
+                      label={"Nhân viên"}
+                      className="border-none mr-2 w-[200px]"
+                      name="employee"
+                    >
+                      <Select
+                        filterOption={false}
+                        notFoundContent={null}
+                        allowClear
+                        placeholder="Tất cả nhân viên"
+                        onSearch={(value: string) => {
+                          setKeySearch4(value);
+                        }}
+                        options={listEmployees}
+                        onSelect={(value) => {
+                          setEmployee(value);
+                        }}
+                        onClear={() => {
+                          setEmployee("");
+                        }}
+                      />
+                    </FormItemCustom>
+                  </Form>
+                </Col>
+              </Row>
+            </Col>
+            <Col className="!ml-4">
+              <div className="flex flex-wrap items-center">
+                <div className="flex justify-center items-center mr-4">
+                  <Dropdown
+                    className="!h-9"
+                    placement="bottomRight"
+                    trigger={["click"]}
+                    dropdownRender={() => (
+                      <DropDownCustom title={"Bộ lọc"}>
+                        <div className="">
+                          <Form
+                            layout="vertical"
+                            form={formFilter}
+                            onFinish={handleSearchFilter}
+                          >
+                            <FormItemCustom
+                              name="company"
+                              label={"Công ty"}
+                              className="w-[468px] border-none"
+                            >
+                              <Select
+                                className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
+                                options={listCompany}
+                                allowClear
+                                placeholder="Tất cả công ty"
+                              />
+                            </FormItemCustom>
 
-              <FormItemCustom
-                label={"Khu vực"}
-                className="w-[175px] border-none mr-2"
-              >
-                <Select
-                  className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
-                  options={listTerritory}
-                  onSelect={(value) => {
-                    setTerritory(value);
-                  }}
-                  onSearch={(value: string) => {
-                    setKeySTerritory(value);
-                  }}
-                  onClear={() => setTerritory("")}
-                  filterOption={false}
-                  allowClear
-                  placeholder="Tất cẩ khu vực"
-                />
-              </FormItemCustom>
+                            <FormItemCustom
+                              name="customer"
+                              label={"Khách hàng"}
+                              className="w-[468px] border-none pt-2"
+                            >
+                              <Select
+                                className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
+                                options={listCustomer}
+                                filterOption={false}
+                                allowClear
+                                placeholder="Tất cả khách hàng"
+                              />
+                            </FormItemCustom>
 
-              <FormItemCustom
-                label={"Kho"}
-                className="w-[175px] border-none mr-2"
-              >
-                <Select
-                  className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
-                  options={listWarehouse}
-                  onSelect={(value) => {
-                    setWarehouse(value);
-                  }}
-                  onSearch={(value: string) => {
-                    setKeySWarehouse(value);
-                  }}
-                  onClear={() => setWarehouse("")}
-                  filterOption={false}
-                  allowClear
-                  placeholder="Tất cả kho"
-                />
-              </FormItemCustom>
+                            <FormItemCustom
+                              name="territory"
+                              label={"Khu vực"}
+                              className="w-[468px] border-none pt-2"
+                            >
+                              <Select
+                                className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
+                                options={listTerritory}
+                                allowClear
+                                placeholder="Tất cẩ khu vực"
+                              />
+                            </FormItemCustom>
 
-              <FormItemCustom
-                label={"Nhân viên"}
-                className="w-[175px] border-none mr-2"
-              >
-                <Select
-                  className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
-                  options={listEmployee}
-                  onSelect={(value) => {
-                    setEmployee(value);
-                  }}
-                  onSearch={(value: string) => {
-                    setKeySEmployee(value);
-                  }}
-                  onClear={() => setEmployee("")}
-                  filterOption={false}
-                  allowClear
-                  placeholder="Tất cả nhân viên"
-                />
-              </FormItemCustom>
-            </Row>
-          </Form>
+                            <FormItemCustom
+                              name="warehouse"
+                              label={"Kho"}
+                              className="w-[468px] border-none pt-2"
+                            >
+                              <Select
+                                className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
+                                options={listWarehouse}
+                                allowClear
+                                placeholder="Tất cả kho"
+                              />
+                            </FormItemCustom>
+                          </Form>
+                        </div>
+                        <Row className="justify-between pt-6 pb-4">
+                          <div></div>
+                          <div>
+                            <Button
+                              className="mr-3"
+                              onClick={(ev: any) => {
+                                ev.preventDefault();
+                                formFilter.resetFields();
+                              }}
+                            >
+                              Đặt lại
+                            </Button>
+                            <Button
+                              type="primary"
+                              onClick={() => {
+                                formFilter.submit();
+                              }}
+                            >
+                              Áp dụng
+                            </Button>
+                          </div>
+                        </Row>
+                      </DropDownCustom>
+                    )}
+                  >
+                    <Button
+                      onClick={(e: any) => e.preventDefault()}
+                      className="flex items-center text-nowrap !text-[13px] !leading-[21px] !font-normal  border-r-[0.1px] rounded-r-none h-9"
+                      icon={<LuFilter style={{ fontSize: "20px" }} />}
+                    >
+                      Bộ lọc
+                    </Button>
+                  </Dropdown>
+                  <Button className="border-l-[0.1px] rounded-l-none !h-9">
+                    <LuFilterX style={{ fontSize: "20px" }} />
+                  </Button>
+                </div>
+              </div>
+            </Col>
+          </Row>
+
           <div className="pt-5">
             <TableCustom
               dataSource={dataSaleOrder?.data?.map(

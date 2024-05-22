@@ -463,7 +463,7 @@ export default function ReportCheckin() {
           />
         }
       >
-        <div className="bg-white rounded-md pt-4 pb-7  border-[#DFE3E8] border-[0.2px] border-solid">
+        <div className="bg-white rounded-2xl pt-4 pb-7  border-[#DFE3E8] border-[0.2px] border-solid">
           <Form
             layout="vertical"
             className="flex flex-wrap justify-start px-4 items-center"

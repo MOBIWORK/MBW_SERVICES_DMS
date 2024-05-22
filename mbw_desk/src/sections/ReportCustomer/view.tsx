@@ -187,7 +187,7 @@ export default function ReportCustomer() {
         },
       },
       {
-        title: "Người cập nhật",
+        title: "Người kiểm tồn",
         dataIndex: "update_byname",
         key: "update_byname",
         render: (_, record: any) => (
@@ -395,7 +395,6 @@ export default function ReportCustomer() {
             page_size: PAGE_SIZE,
             page_number: page,
             unit_product: unit,
-            employee_sale: sales_team,
             employee: employee,
             customer: customer,
           },
@@ -417,7 +416,6 @@ export default function ReportCustomer() {
     update_at_to,
     page,
     unit,
-    sales_team,
     employee,
     customer,
   ]);
@@ -443,10 +441,10 @@ export default function ReportCustomer() {
           />
         }
       >
-        <div className="bg-white rounded-xl border-[#DFE3E8] border-[0.2px] border-solid">
+        <div className="bg-white rounded-2xl pt-4 pb-7 border-[#DFE3E8] border-[0.2px] border-solid">
           <Row
             gutter={[16, 16]}
-            className="justify-between items-end w-full p-4"
+            className="justify-between items-end w-full"
           >
             <Col>
               <Row gutter={[8, 8]}>
@@ -582,6 +580,7 @@ export default function ReportCustomer() {
                   <Dropdown
                     className="!h-9"
                     trigger={["click"]}
+                    placement="bottomRight"
                     dropdownRender={() => (
                       <DropDownCustom title={"Bộ lọc"}>
                         <div className="pt-6">
@@ -773,7 +772,7 @@ export default function ReportCustomer() {
               </div>
             </Col>
           </Row>
-
+          <div className="pt-5">
           <TableCustom
             columns={columns}
             scroll={{ x: true }}
@@ -794,6 +793,7 @@ export default function ReportCustomer() {
             }}
             rowHoverable={false}
           />
+          </div>
           <div className=""></div>
         </div>
       </ContentFrame>

@@ -1,11 +1,13 @@
 import { VerticalAlignBottomOutlined } from "@ant-design/icons";
-import { ContentFrame, FormItemCustom, HeaderPage, TableCustom } from "../../components";
+import {
+  ContentFrame,
+  FormItemCustom,
+  HeaderPage,
+  TableCustom,
+} from "../../components";
 import { Form, Input, Row, Select, Table } from "antd";
 import type { TableColumnsType } from "antd";
-import {
-  psorder,
-  typecustomer,
-} from "../ReportSales/data";
+import { psorder, typecustomer } from "../ReportSales/data";
 import React, { useEffect, useState } from "react";
 import dayjs from "dayjs";
 import { AxiosService } from "../../services/server";
@@ -41,112 +43,88 @@ const columns: TableColumnsType<DataTypeCustomNew> = [
     title: "STT",
     dataIndex: "stt",
     key: "stt",
-    render: (_, record: any, index: number) => <div className="text-center">{index + 1}</div>,
+    render: (_, record: any, index: number) => (
+      <div className="text-center">{index + 1}</div>
+    ),
   },
   {
     title: "Phòng ban",
     dataIndex: "department",
     key: "department",
-    render: (_, record: any) => (
-      <div>{record.department}</div>
-    ),
+    render: (_, record: any) => <div>{record.department}</div>,
   },
   {
     title: "Mã nhân viên",
     dataIndex: "employee_id",
     key: "employee_id",
-    render: (_, record: any) => (
-      <div>{record.employee_id}</div>
-    ),
+    render: (_, record: any) => <div>{record.employee_id}</div>,
   },
   {
     title: "Tên nhân viên",
     dataIndex: "employee_name",
     key: "employee_name",
-    render: (_, record: any) => (
-      <div>{record.employee_name}</div>
-    ),
+    render: (_, record: any) => <div>{record.employee_name}</div>,
   },
   {
     title: "Mã khách hàng",
     dataIndex: "customer_code",
     key: "customer_code",
-    render: (_, record: any) => (
-      <div>{record.customer_code}</div>
-    ),
+    render: (_, record: any) => <div>{record.customer_code}</div>,
   },
   {
     title: "Tên khách hàng",
     dataIndex: "customer_name",
     key: "customer_name",
-    render: (_, record: any) => (
-      <div>{record.customer_name}</div>
-    ),
+    render: (_, record: any) => <div>{record.customer_name}</div>,
   },
   {
     title: "Loại khách hàng",
     dataIndex: "customer_type",
     key: "customer_type",
-    render: (_, record: any) => (
-      <div>{record.customer_type}</div>
-    ),
+    render: (_, record: any) => <div>{record.customer_type}</div>,
   },
   {
     title: "Nhóm khách hàng",
     dataIndex: "customer_group",
     key: "customer_group",
-    render: (_, record: any) => (
-      <div>{record.customer_group}</div>
-    ),
+    render: (_, record: any) => <div>{record.customer_group}</div>,
   },
   {
     title: "Người liên hệ",
     dataIndex: "contact",
     key: "contact",
-    render: (_, record: any) => (
-      <div>{record.contact}</div>
-    ),
+    render: (_, record: any) => <div>{record.contact}</div>,
   },
   {
     title: "SDT",
     dataIndex: "phone",
     key: "phone",
-    render: (_, record: any) => (
-      <div>{record.phone}</div>
-    ),
+    render: (_, record: any) => <div>{record.phone}</div>,
   },
   {
     title: "Mã số thuế",
     dataIndex: "tax_id",
     key: "tax_id",
-    render: (_, record: any) => (
-      <div>{record.tax_id}</div>
-    ),
+    render: (_, record: any) => <div>{record.tax_id}</div>,
   },
   {
     title: "Khu vưc",
     dataIndex: "territory",
     key: "territory",
-    render: (_, record: any) => (
-      <div>{record.territory}</div>
-    ),
+    render: (_, record: any) => <div>{record.territory}</div>,
   },
   {
     title: "Địa chỉ",
     dataIndex: "address",
     key: "address",
-    render: (_, record: any) => (
-      <div>{record.contribution}</div>
-    ),
+    render: (_, record: any) => <div>{record.contribution}</div>,
   },
   {
     title: "Ngày thu thập",
     dataIndex: "creation",
     key: "creation",
     render: (_, record: any) => (
-      <div>
-        {dayjs(record.creation * 1000).format("DD/MM/YYYY")}
-      </div>
+      <div>{dayjs(record.creation * 1000).format("DD/MM/YYYY")}</div>
     ),
   },
   {
@@ -166,18 +144,13 @@ const columns: TableColumnsType<DataTypeCustomNew> = [
     title: "VT đầu",
     dataIndex: "first_checkin",
     key: "first_checkin",
-    render: (_, record: any) => (
-      <div>{record.first_checkin}</div>
-    ),
+    render: (_, record: any) => <div>{record.first_checkin}</div>,
   },
   {
     title: "VT cuối",
     dataIndex: "last_checkin",
     key: "last_checkin",
-    render: (_, record: any) => (
-      <div>{record.last_checkin}</div>
-    ),
-    
+    render: (_, record: any) => <div>{record.last_checkin}</div>,
   },
   {
     title: <div className="!text-right">Số đơn hàng</div>,
@@ -192,11 +165,7 @@ const columns: TableColumnsType<DataTypeCustomNew> = [
     dataIndex: "last_sale_order",
     key: "last_sale_order",
     render: (value) => {
-      return value ? (
-        <p>{dayjs(value * 1000).format("DD/MM/YYYY")}</p>
-      ) : (
-        <></>
-      );
+      return value ? <p>{dayjs(value * 1000).format("DD/MM/YYYY")}</p> : <></>;
     },
   },
 ];
@@ -380,7 +349,7 @@ export default function ReportCustomNew() {
           />
         }
       >
-        <div className="bg-white rounded-md pt-4 pb-7 border-[#DFE3E8] border-[0.2px] border-solid">
+        <div className="bg-white rounded-2xl pt-4 pb-7 border-[#DFE3E8] border-[0.2px] border-solid">
           <Form
             layout="vertical"
             className="flex flex-wrap justify-start items-center px-4"
@@ -541,12 +510,16 @@ export default function ReportCustomNew() {
                     <Table.Summary.Cell index={13}></Table.Summary.Cell>
                     <Table.Summary.Cell index={14}></Table.Summary.Cell>
                     <Table.Summary.Cell index={15}>
-                      <div className="text-right">{dataCustomNew?.sum?.sum_checkin}</div>
+                      <div className="text-right">
+                        {dataCustomNew?.sum?.sum_checkin}
+                      </div>
                     </Table.Summary.Cell>
                     <Table.Summary.Cell index={16}></Table.Summary.Cell>
                     <Table.Summary.Cell index={17}></Table.Summary.Cell>
                     <Table.Summary.Cell index={18}>
-                      <div className="text-right">{dataCustomNew?.sum?.sum_so}</div>
+                      <div className="text-right">
+                        {dataCustomNew?.sum?.sum_so}
+                      </div>
                     </Table.Summary.Cell>
                   </Table.Summary.Row>
                 );
