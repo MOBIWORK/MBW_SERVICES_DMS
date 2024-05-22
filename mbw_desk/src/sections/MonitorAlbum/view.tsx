@@ -178,7 +178,7 @@ export default function MonitorAlbum() {
             <FormItemCustom label={"Ngày chụp"} className="w-[175px] border-none mr-2">
               <DatePicker
                 format={"DD-MM-YYYY"}
-                className="!bg-[#F4F6F8] !h-8"
+                className="!bg-[#F4F6F8] !h-7 rounded-lg mt-[-2px]"
                 defaultValue={dayjs(dateNow)}
                 onChange={onChange}
               />

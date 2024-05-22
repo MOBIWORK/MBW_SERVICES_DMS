@@ -15,6 +15,7 @@ import { employee } from "../../types/employeeFilter";
 import { area, customergroup, typecustomer } from "../ReportSales/data";
 import { treeArray } from "@/util";
 import { listSale } from "@/types/listSale";
+import dayjs from "dayjs";
 
 interface DataCheckin {
   key: React.Key;
@@ -48,6 +49,9 @@ interface ExpandedDataType {
   addresscheckin: string;
   distance: string;
 }
+
+const startOfMonth: any = dayjs().startOf("month");
+const endOfMonth: any = dayjs().endOf("month");
 
 const columnsCheckin: TableColumnsType<DataCheckin> = [
   {
@@ -459,7 +463,7 @@ export default function ReportCheckin() {
           />
         }
       >
-        <div className="bg-white rounded-md pt-4 pb-7  border-[#DFE3E8] border-[0.2px] border-solid">
+        <div className="bg-white rounded-2xl pt-4 pb-7  border-[#DFE3E8] border-[0.2px] border-solid">
           <Form
             layout="vertical"
             className="flex flex-wrap justify-start px-4 items-center"
@@ -467,29 +471,31 @@ export default function ReportCheckin() {
             <Row gutter={[8, 8]}>
               <FormItemCustom
                 label={"Từ ngày"}
-                className="border-none mr-2 w-[175px]"
+                className="border-none mr-2 w-[200px]"
               >
                 <DatePicker
                   format={"DD-MM-YYYY"}
-                  className="!bg-[#F4F6F8]"
+                  className="!bg-[#F4F6F8] !h-7 rounded-lg mt-[-2px]"
                   placeholder="Từ ngày"
                   onChange={onChange}
+                  defaultValue={startOfMonth}
                 />
               </FormItemCustom>
               <FormItemCustom
                 label={"Đến ngày"}
-                className="border-none mr-2 w-[175px]"
+                className="border-none mr-2 w-[200px]"
               >
                 <DatePicker
                   format={"DD-MM-YYYY"}
-                  className="!bg-[#F4F6F8]"
+                  className="!bg-[#F4F6F8] !h-7 rounded-lg mt-[-2px]"
                   placeholder="Đến ngày"
                   onChange={onChange}
+                  defaultValue={endOfMonth}
                 />
               </FormItemCustom>
               <FormItemCustom
                 label={"Nhóm bán hàng"}
-                className="border-none mr-2 w-[175px]"
+                className="border-none mr-2 w-[200px]"
               >
                 <TreeSelect
                   placeholder="Tất cả nhóm bán hàng"
@@ -507,7 +513,7 @@ export default function ReportCheckin() {
               </FormItemCustom>
               <FormItemCustom
                 label={"Nhân viên"}
-                className="border-none mr-2 w-[175px]"
+                className="border-none mr-2 w-[200px]"
                 name="employee"
               >
                 <Select
@@ -529,7 +535,7 @@ export default function ReportCheckin() {
               </FormItemCustom>
               <FormItemCustom
                 label={"Loại khách hàng"}
-                className="border-none mr-2 w-[175px]"
+                className="border-none mr-2 w-[200px]"
               >
                 <Select
                   options={typecustomer}
@@ -544,7 +550,7 @@ export default function ReportCheckin() {
               </FormItemCustom>
               <FormItemCustom
                 label={"Nhóm khác hàng"}
-                className="border-none mr-2 w-[175px]"
+                className="border-none mr-2 w-[200px]"
               >
                 <Select
                   className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
@@ -563,7 +569,7 @@ export default function ReportCheckin() {
               </FormItemCustom>
               <FormItemCustom
                 label={"Khu vực"}
-                className="border-none mr-2 w-[175px]"
+                className="border-none mr-2 w-[200px]"
               >
                 <Select
                   className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"

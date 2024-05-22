@@ -1,0 +1,1 @@
+import{L as s}from"./index-3DFh7Nef.js";function n({header:e,children:r}){return s.jsxs(s.Fragment,{children:[s.jsx("div",{className:"w-full bg-white",children:e}),s.jsx("div",{className:"w-full p-5",children:r})]})}export{n as C};

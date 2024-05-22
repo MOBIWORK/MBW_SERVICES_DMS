@@ -34,6 +34,11 @@ export const FormItemCustom = styled(Form.Item)<{ disabled?: boolean }>`
   }
 }
 
+.ant-select-selector {
+  border-radius: 8px;
+  height: 28px!important;
+}
+
 & input:empty, & .ant-select-selector {
   background-color: #F5F7FA!important;
 }

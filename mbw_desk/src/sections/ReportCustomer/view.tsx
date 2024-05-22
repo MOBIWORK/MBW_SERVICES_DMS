@@ -1,5 +1,6 @@
 import { VerticalAlignBottomOutlined } from "@ant-design/icons";
 import {
+  ContentFrame,
   DropDownCustom,
   FormItemCustom,
   HeaderPage,
@@ -125,10 +126,10 @@ export default function ReportCustomer() {
   const expandedRowRender = (recordTable: any) => {
     const columns: TableColumnsType<ExpandedDataType> = [
       {
-        title: "STT",
+        title: <div className="text-center">STT</div>,
         dataIndex: "stt",
         key: "stt",
-        render: (_, record: any, index) => index + 1,
+        render: (_, record: any, index) => <div className="text-center">{index + 1}</div>,
       },
       { title: "Mã sản phẩm", dataIndex: "item_code", key: "item_code" },
       { title: "Tên sản phẩm", dataIndex: "item_name", key: "item_name" },
@@ -145,19 +146,26 @@ export default function ReportCustomer() {
         },
       },
       { title: "Đơn vị tính", dataIndex: "item_unit", key: "item_unit" },
-      { title: "Tồn", dataIndex: "quantity", key: "quantity", render: (_, record: any) => (
-        <div className="!text-right">{record.quantity}</div>
-      ), },
       {
-        title: "Giá sản phẩm",
-        dataIndex: "item_price",
-        key: "item_price",
+        title: <div className="text-right">Tồn</div>,
+        dataIndex: "quantity",
+        key: "quantity",
         render: (_, record: any) => (
-          <p className="text-right">{Intl.NumberFormat().format(record.item_price)}</p>
+          <div className="!text-right">{record.quantity}</div>
         ),
       },
       {
-        title: "Tổng giá trị",
+        title: <div className="text-right">Giá sản phẩm</div>,
+        dataIndex: "item_price",
+        key: "item_price",
+        render: (_, record: any) => (
+          <p className="text-right">
+            {Intl.NumberFormat().format(record.item_price)}
+          </p>
+        ),
+      },
+      {
+        title: <div className="text-right">Tổng giá trị</div>,
         dataIndex: "total",
         key: "total",
         render: (_, record: any) => (
@@ -179,7 +187,7 @@ export default function ReportCustomer() {
         },
       },
       {
-        title: "Người cập nhật",
+        title: "Người kiểm tồn",
         dataIndex: "update_byname",
         key: "update_byname",
         render: (_, record: any) => (
@@ -387,7 +395,6 @@ export default function ReportCustomer() {
             page_size: PAGE_SIZE,
             page_number: page,
             unit_product: unit,
-            employee_sale: sales_team,
             employee: employee,
             customer: customer,
           },
@@ -409,136 +416,140 @@ export default function ReportCustomer() {
     update_at_to,
     page,
     unit,
-    sales_team,
     employee,
     customer,
   ]);
 
   return (
     <>
-      <HeaderPage
-        title="Báo cáo tồn kho khách hàng"
-        buttons={[
-          {
-            label: "Xuất dữ liệu",
-            type: "primary",
-            icon: <VerticalAlignBottomOutlined className="text-xl" />,
-            size: "20px",
-            className: "flex items-center",
-            action: () => {
-              translationUrl("/app/data-export/Data%20Export");
-            },
-          },
-        ]}
-      />
-      <div className="bg-white rounded-xl border-[#DFE3E8] border-[0.2px] border-solid">
-        {/* bộ lọc  */}
-        <Row gutter={[16, 16]} className="justify-between items-end w-full p-4">
-          {/* filter big screen */}
-          <Col >
-            <Row gutter={[8, 8]}>
-              <Col className="mx-4 w-full" span={24}>
-                <Form
-                  layout="vertical"
-                  className="flex flex-wrap justify-start items-center "
-                >
-                  <FormItemCustom
-                    label={"Sản phẩm"}
-                    className="!w-[175px] border-none mr-2"
+      <ContentFrame
+        header={
+          <HeaderPage
+            title="Báo cáo tồn kho khách hàng"
+            buttons={[
+              {
+                label: "Xuất dữ liệu",
+                type: "primary",
+                icon: <VerticalAlignBottomOutlined className="text-xl" />,
+                size: "20px",
+                className: "flex items-center",
+                action: () => {
+                  translationUrl("/app/data-export/Data%20Export");
+                },
+              },
+            ]}
+          />
+        }
+      >
+        <div className="bg-white rounded-2xl pt-4 pb-7 border-[#DFE3E8] border-[0.2px] border-solid">
+          <Row
+            gutter={[16, 16]}
+            className="justify-between items-end w-full"
+          >
+            <Col>
+              <Row gutter={[8, 8]}>
+                <Col className="mx-4 w-full" span={24}>
+                  <Form
+                    layout="vertical"
+                    className="flex flex-wrap justify-start items-center "
                   >
-                    <Select
-                      optionFilterProp="children"
-                      filterOption={false}
-                      onSearch={(value: string) => setKeyItem(value)}
-                      onSelect={(value) => {
-                        setItemCode(value);
-                      }}
-                      placeholder={<>Tất cả sản phẩm</>}
-                      notFoundContent={null}
-                      options={item}
-                      allowClear
-                      onClear={() => setItemCode("")}
-                      optionRender={(option) => {
-                        return (
-                          <>
-                            <div className="text-sm">
-                              <p
-                                role="img"
-                                aria-label={option.data.label}
-                                className="my-1"
-                              >
-                                {option.data.label}
-                              </p>
-                              <span className="text-xs !font-semibold">
-                                {option.data.des}
-                              </span>
-                            </div>
-                          </>
-                        );
-                      }}
-                    />
-                  </FormItemCustom>
+                    <FormItemCustom
+                      label={"Sản phẩm"}
+                      className="w-[200px] border-none mr-2"
+                    >
+                      <Select
+                        optionFilterProp="children"
+                        filterOption={false}
+                        onSearch={(value: string) => setKeyItem(value)}
+                        onSelect={(value) => {
+                          setItemCode(value);
+                        }}
+                        placeholder={<>Tất cả sản phẩm</>}
+                        notFoundContent={null}
+                        options={item}
+                        allowClear
+                        onClear={() => setItemCode("")}
+                        optionRender={(option) => {
+                          return (
+                            <>
+                              <div className="text-sm">
+                                <p
+                                  role="img"
+                                  aria-label={option.data.label}
+                                  className="my-1"
+                                >
+                                  {option.data.label}
+                                </p>
+                                <span className="text-xs !font-semibold">
+                                  {option.data.des}
+                                </span>
+                              </div>
+                            </>
+                          );
+                        }}
+                      />
+                    </FormItemCustom>
 
-                  <FormItemCustom
-                    label={"Đơn vị tính"}
-                    className="!w-[175px] border-none mr-2"
-                  >
-                    <Select
-                      placeholder="Tất cả đơn vị tính"
-                      options={listUnit}
-                      onSelect={(value) => {
-                        setUnit(value);
-                      }}
-                      onSearch={(value: string) => {
-                        setKeySUnit(value);
-                      }}
-                      onClear={() => setUnit("")}
-                      filterOption={false}
-                      allowClear
-                    />
-                  </FormItemCustom>
+                    <FormItemCustom
+                      label={"Đơn vị tính"}
+                      className="w-[200px] border-none mr-2"
+                    >
+                      <Select
+                        placeholder="Tất cả đơn vị tính"
+                        options={listUnit}
+                        onSelect={(value) => {
+                          setUnit(value);
+                        }}
+                        onSearch={(value: string) => {
+                          setKeySUnit(value);
+                        }}
+                        onClear={() => setUnit("")}
+                        filterOption={false}
+                        allowClear
+                      />
+                    </FormItemCustom>
 
-                  <FormItemCustom
-                    label={"Nhóm bán hàng"}
-                    className="!w-[175px] border-none mr-2"
-                  >
-                    <TreeSelect
-                      placeholder="Tất cả nhóm bán hàng"
-                      allowClear
-                      treeData={listSales}
-                      onChange={(value: string) => {
-                        setTeamSale(value);
-                      }}
-                      dropdownStyle={{
-                        maxHeight: 400,
-                        overflow: "auto",
-                        minWidth: 350,
-                      }}
-                    />
-                  </FormItemCustom>
+                    <FormItemCustom
+                      label={"Nhóm bán hàng"}
+                      className="w-[200px] border-none mr-2"
+                    >
+                      <TreeSelect
+                        placeholder="Tất cả nhóm bán hàng"
+                        allowClear
+                        treeData={listSales}
+                        onChange={(value: string) => {
+                          setTeamSale(value);
+                        }}
+                        dropdownStyle={{
+                          maxHeight: 400,
+                          overflow: "auto",
+                          minWidth: 350,
+                        }}
+                      />
+                    </FormItemCustom>
 
-                  <FormItemCustom
-                    label={"Người kiểm tồn"}
-                    name="employee"
-                    className="!w-[175px] border-none mr-2"
-                  >
-                    <Select
-                      filterOption={false}
-                      notFoundContent={null}
-                      allowClear
-                      placeholder="Tất cả người kiểm tồn"
-                      onSearch={(value: string) => {
-                        setKeySearch4(value);
-                      }}
-                      options={listEmployees}
-                      onSelect={(value) => {
-                        setEmployee(value);
-                      }}
-                      onClear={() => {
-                        setEmployee("");
-                      }}
-                    />
-                  </FormItemCustom>
+                    <FormItemCustom
+                      label={"Người kiểm tồn"}
+                      name="employee"
+                      className="w-[200px] border-none mr-2"
+                    >
+                      <Select
+                        filterOption={false}
+                        notFoundContent={null}
+                        allowClear
+                        placeholder="Tất cả người kiểm tồn"
+                        onSearch={(value: string) => {
+                          setKeySearch4(value);
+                        }}
+                        options={listEmployees}
+                        onSelect={(value) => {
+                          setEmployee(value);
+                        }}
+                        onClear={() => {
+                          setEmployee("");
+                        }}
+                      />
+                    </FormItemCustom>
 
                   <FormItemCustom
                     label="Khách hàng"
@@ -563,13 +574,12 @@ export default function ReportCustomer() {
               </Col>
             </Row>
           </Col>
-          {/* Dropdow filter */}
-          <Col className="!ml-4" >
+          <Col className="!ml-4">
             <div className="flex flex-wrap items-center">
               <div className="flex justify-center items-center mr-4">
                 <Dropdown
-                  className="!min-h-8"
-                  // placement="bottom"
+                  className="!h-8"
+                  placement="bottomRight"
                   trigger={["click"]}
                   dropdownRender={() => (
                     <DropDownCustom title={"Bộ lọc"}>
@@ -608,77 +618,77 @@ export default function ReportCustomer() {
                             </Col>
                           </Row>
 
-                          <div className="pt-5 font-semibold text-sm leading-5 text-[#212B36]">
-                            Ngày cập nhật
-                          </div>
-                          <Row className="pt-1" gutter={16}>
-                            <Col span={12}>
-                              <span className="font-normal text-sm leading-5 text-[#637381]">
-                                Ngày bắt đầu
-                              </span>
-                              <FormItemCustom
-                                name="update_at_from"
-                                className="pt-2"
-                              >
-                                <DatePicker
-                                  format={"DD-MM-YYYY"}
-                                  className="!bg-[#F4F6F8]"
-                                  onChange={onChange}
-                                />
-                              </FormItemCustom>
-                            </Col>
-                            <Col span={12}>
-                              <span className="font-normal text-sm leading-5 text-[#637381]">
-                                Kết thúc
-                              </span>
-                              <FormItemCustom
-                                name="update_at_to"
-                                className="pt-2"
-                              >
-                                <DatePicker
-                                  format={"DD-MM-YYYY"}
-                                  className="!bg-[#F4F6F8]"
-                                  onChange={onChange}
-                                />
-                              </FormItemCustom>
-                            </Col>
-                          </Row>
+                            <div className="pt-5 font-semibold text-sm leading-5 text-[#212B36]">
+                              Ngày cập nhật
+                            </div>
+                            <Row className="pt-1" gutter={16}>
+                              <Col span={12}>
+                                <span className="font-normal text-sm leading-5 text-[#637381]">
+                                  Ngày bắt đầu
+                                </span>
+                                <FormItemCustom
+                                  name="update_at_from"
+                                  className="pt-2"
+                                >
+                                  <DatePicker
+                                    format={"DD-MM-YYYY"}
+                                    className="!bg-[#F4F6F8]"
+                                    onChange={onChange}
+                                  />
+                                </FormItemCustom>
+                              </Col>
+                              <Col span={12}>
+                                <span className="font-normal text-sm leading-5 text-[#637381]">
+                                  Kết thúc
+                                </span>
+                                <FormItemCustom
+                                  name="update_at_to"
+                                  className="pt-2"
+                                >
+                                  <DatePicker
+                                    format={"DD-MM-YYYY"}
+                                    className="!bg-[#F4F6F8]"
+                                    onChange={onChange}
+                                  />
+                                </FormItemCustom>
+                              </Col>
+                            </Row>
 
-                          <div className="pt-5 font-semibold text-sm leading-5 text-[#212B36]">
-                            Số lượng tồn kho
-                          </div>
-                          <Row className="pt-1" gutter={16}>
-                            <Col span={12}>
-                              <span className="font-normal text-sm leading-5 text-[#637381]">
-                                Từ
-                              </span>
-                              <FormItemCustom
-                                className="pt-2"
-                                name="qty_inven_from"
-                              >
-                                <InputNumber
-                                  controls={false}
-                                  className="w-full"
-                                  placeholder="0"
-                                />
-                              </FormItemCustom>
-                            </Col>
-                            <Col span={12}>
-                              <span className="font-normal text-sm leading-5 text-[#637381]">
-                                Đến
-                              </span>
-                              <FormItemCustom
-                                className="pt-2"
-                                name="qty_inven_to"
-                              >
-                                <InputNumber
-                                  controls={false}
-                                  className="w-full"
-                                  placeholder="0"
-                                />
-                              </FormItemCustom>
-                            </Col>
-                          </Row>
+                            <div className="pt-5 font-semibold text-sm leading-5 text-[#212B36]">
+                              Số lượng tồn kho
+                            </div>
+                            <Row className="pt-1" gutter={16}>
+                              <Col span={12}>
+                                <span className="font-normal text-sm leading-5 text-[#637381]">
+                                  Từ
+                                </span>
+                                <FormItemCustom
+                                  className="pt-2"
+                                  name="qty_inven_from"
+                                >
+                                  <InputNumber
+                                    controls={false}
+                                    className="w-full"
+                                    placeholder="0"
+                                  />
+                                </FormItemCustom>
+                              </Col>
+                              <Col span={12}>
+                                <span className="font-normal text-sm leading-5 text-[#637381]">
+                                  Đến
+                                </span>
+                                <FormItemCustom
+                                  className="pt-2"
+                                  name="qty_inven_to"
+                                >
+                                  <InputNumber
+                                    controls={false}
+                                    className="w-full"
+                                    placeholder="0"
+                                  />
+                                </FormItemCustom>
+                              </Col>
+                            </Row>
 
                           <div className="pt-5 font-semibold text-sm leading-5 text-[#212B36]">
                             Tổng giá trị
@@ -756,8 +766,7 @@ export default function ReportCustomer() {
             </div>
           </Col>
         </Row>
-        {/* end bộ lọc  */}
-        {/* hiển thị nội dung  */}
+
         <TableCustom
           columns={columns}
           scroll={{ x: true }}
@@ -778,7 +787,6 @@ export default function ReportCustomer() {
           }}
           rowHoverable={false}
         />
-        {/* end hiển thị nội dung */}
         <div className=""></div>
       </div>
     </>

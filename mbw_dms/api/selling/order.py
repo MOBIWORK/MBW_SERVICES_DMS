@@ -36,32 +36,28 @@ def get_list_sales_order(**filters):
             query['customer'] = filters.get('customer')
         if filters.get('name'):
             query['name'] = filters.get('name')
-        print(query)
         sale_orders =frappe.db.get_list('Sales Order', 
                                        filters=query, 
-                                       fields=[
-                                            'customer', 'customer_name', 'name',
+                                       fields=['customer', 'customer_name', 'name',
                                                '(customer_address) as address_display',
                                                'UNIX_TIMESTAMP(po_date) as po_date',
                                                'UNIX_TIMESTAMP(delivery_date) as delivery_date',
                                                'UNIX_TIMESTAMP(creation) as creation','grand_total',
                                                'rounding_adjustment','rounded_total','status',
-                                               "sales_person"
-                                               ], 
+                                               "sales_person"], 
                                        order_by='delivery_date desc', 
                                        start=page_size*(page_number-1), 
                                        page_length=page_size,
-                                       parent_doctype="Sales Order",
-                                        )
+                                       parent_doctype="Sales Order")
         for sale_order in sale_orders :
             sale_order['custom_id'] = frappe.db.get_value("Customer",filters={'name': sale_order['customer']},fieldname=['customer_code'])
-        total_order = frappe.db.count('Sales Order', filters=query)
+        total_order = len(frappe.db.get_list('Sales Order', filters=query))
 
         return gen_response(200, "Thành công",{
             "data": sale_orders,
             "total": total_order,
             "page_size": page_size,
-            "page_number":page_number
+            "page_number": page_number
         })
     except Exception as e: 
         exception_handle(e)
