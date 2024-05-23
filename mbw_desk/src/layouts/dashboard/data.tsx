@@ -57,14 +57,14 @@ export const listMenu: MenuItem[] = [
         ),
         key: "employee-monitor",
       },
-      {
-        label: (
-          <Link className={""} to="employee-monitor-kpi">
-              Giám sát nhân viên theo kpi
-          </Link>
-        ),
-        key: "employee-monitor-kpi",
-      },
+      // {
+      //   label: (
+      //     <Link className={""} to="employee-monitor-kpi">
+      //         Giám sát nhân viên theo kpi
+      //     </Link>
+      //   ),
+      //   key: "employee-monitor-kpi",
+      // },
     ],
   },
   //control router

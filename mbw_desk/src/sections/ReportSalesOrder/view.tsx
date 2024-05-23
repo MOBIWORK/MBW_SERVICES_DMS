@@ -531,7 +531,7 @@ export default function ReportSalesOrder() {
                   >
                     <FormItemCustom
                       label={"Từ ngày"}
-                      className="w-[175px] border-none mr-2"
+                      className="w-[200px] border-none mr-2"
                     >
                       <DatePicker
                         format={"DD-MM-YYYY"}
@@ -544,7 +544,7 @@ export default function ReportSalesOrder() {
 
                     <FormItemCustom
                       label={"Đến ngày"}
-                      className="w-[175px] border-none mr-2"
+                      className="w-[200px] border-none mr-2"
                     >
                       <DatePicker
                         format={"DD-MM-YYYY"}

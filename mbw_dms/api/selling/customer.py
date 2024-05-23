@@ -180,7 +180,6 @@ def create_customer(**kwargs):
         new_customer.custom_sales_manager = sale_person
 
         new_customer.customer_location_primary = json_location
-        print('========================= json_location: ', json_location, flush=True)
 
         new_customer.append('credit_limits', {
             'company': kwargs.get('company'),
