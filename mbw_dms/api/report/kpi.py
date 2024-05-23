@@ -27,8 +27,9 @@ def kpi_report(**kwargs):
         sql_query = """
             SELECT mo.nhan_vien_ban_hang, mo.nhom_ban_hang,mo.so_kh_vt_luot as th_vt, kpi.so_kh_vt_luot as kh_vt, mo.so_kh_vt_duynhat as th_vt_dn, kpi.so_kh_vt_duynhat as kh_vt_dn, mo.so_kh_dat_hang as th_dat_hang, kpi.so_kh_dathang as kh_dat_hang, mo.so_don_hang as th_don_hang, kpi.so_don_hang as kh_don_hang,
             mo.so_kh_moi as th_kh_moi, kpi.so_kh_moi as kh_kh_moi, mo.doanh_so_thang as th_doanh_so, kpi.doanh_so as kh_doanh_so, mo.doanh_thu_thang as th_doanh_thu, kpi.doanh_thu as kh_doanh_thu, mo.san_luong as th_san_lg, kpi.san_luong as kh_san_lg, mo.sku as th_sku, kpi.sku as kh_sku, mo.so_gio_lam_viec as th_so_gio_lam_viec, kpi.so_gio_lam_viec as kh_so_gio_lam_viec
-            FROM `tabDMS Summary KPI Monthly` mo
-            JOIN `tabDMS KPI` kpi ON mo.nhan_vien_ban_hang = kpi.nhan_vien_ban_hang
+            FROM `tabDMS KPI` kpi
+            LEFT JOIN `tabDMS Summary KPI Monthly` mo ON kpi.nhan_vien_ban_hang = mo.nhan_vien_ban_hang
+            WHERE mo.nhan_vien_ban_hang IS NOT NULL
         """
 
         if where_condition:
@@ -44,6 +45,7 @@ def kpi_report(**kwargs):
             JOIN `tabDMS KPI` kpi ON mo.nhan_vien_ban_hang = kpi.nhan_vien_ban_hang
         """
         count_data = frappe.db.sql(sql_query_count, as_dict=True)
+
         totals = {
             'tong_kh_vt': 0,
             'tong_th_vt': 0,

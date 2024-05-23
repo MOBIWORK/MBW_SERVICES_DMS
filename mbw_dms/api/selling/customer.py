@@ -54,6 +54,7 @@ def list_customer(**kwargs):
             my_filter["customer_group"] = ["like", f"%{customer_group}%"]
         if from_date and to_date:
             my_filter["custom_birthday"] = ["between", [from_date, to_date]]
+        my_filter["disabled"] = 0
 
         customers = frappe.db.get_all("Customer",
                                 filters=my_filter,
@@ -88,8 +89,6 @@ def list_customer(**kwargs):
     except Exception as e:
         return exception_handle(e)
     
-
-
 
 # Chi tiết khách hàng
 @frappe.whitelist(methods="GET")

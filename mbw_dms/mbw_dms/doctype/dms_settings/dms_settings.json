@@ -28,6 +28,7 @@
   "company_lat",
   "industrys",
   "config_map_by_vgm",
+  "nguong_nhan_dien_sp",
   "aws_tab",
   "access_key_s3",
   "key_secret_s3",
@@ -176,12 +177,18 @@
    "fieldname": "config_map_by_vgm",
    "fieldtype": "JSON",
    "label": "C\u1ea5u h\u00ecnh b\u1ea3n \u0111\u1ed3 VGM"
+  },
+  {
+   "default": "0,6",
+   "fieldname": "nguong_nhan_dien_sp",
+   "fieldtype": "Float",
+   "label": "Ng\u01b0\u1ee1ng nh\u1eadn di\u1ec7n s\u1ea3n ph\u1ea9m"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-04-23 16:30:46.649609",
+ "modified": "2024-05-23 11:35:01.249297",
  "modified_by": "Administrator",
  "module": "MBW DMS",
  "name": "DMS Settings",
