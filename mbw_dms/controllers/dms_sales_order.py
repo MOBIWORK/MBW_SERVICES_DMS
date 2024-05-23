@@ -91,7 +91,7 @@ def update_kpi_monthly_on_cancel(doc, method):
     end_date = frappe.utils.getdate(end_date_str)
     
     # Lấy id của nhân viên
-    ales_person = None
+    sales_person = None
     for i in doc.sales_team:
         if i.created_by == 1:
             sales_person = i.sales_person

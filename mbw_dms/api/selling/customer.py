@@ -152,7 +152,7 @@ def create_customer(**kwargs):
             phone_number = validate_phone_number(contact.get('phone'))
         json_location = ""
         if address.get("latitude") and address.get("longitude"):
-            json_location = json.dumps({"long": kwargs.get("longitude"), "lat": kwargs.get("latitude")})
+            json_location = json.dumps({"long": address.get("longitude"), "lat": address.get("latitude")})
             
         # Tạo mới khách hàng
         new_customer = frappe.new_doc('Customer')
@@ -180,6 +180,7 @@ def create_customer(**kwargs):
         new_customer.custom_sales_manager = sale_person
 
         new_customer.customer_location_primary = json_location
+        print('========================= json_location: ', json_location, flush=True)
 
         new_customer.append('credit_limits', {
             'company': kwargs.get('company'),
