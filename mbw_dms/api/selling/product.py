@@ -25,9 +25,8 @@ def list_product(**kwargs):
         page_size = int(kwargs.get('page_size', 20))
         page_number = 1 if not kwargs.get('page_number') or int(kwargs.get('page_number')) <= 0 else int(kwargs.get('page_number'))
 
-        price_list = None
         price_lisr_cg = None
-        default_price_list = frappe.get_doc('Selling Settings').selling_price_list
+        price_list = frappe.get_doc('Selling Settings').selling_price_list
         if customer:
             customers = frappe.get_doc("Customer", customer)
             if customers.get("default_price_list"):
@@ -37,8 +36,6 @@ def list_product(**kwargs):
                 price_lisr_cg = frappe.get_value('Customer Group', {'name': customers.customer_group}, 'default_price_list')
                 if price_lisr_cg:
                     price_list = price_lisr_cg
-        else:
-            price_list = default_price_list
 
         if name:
             my_filter["name"] = ["like", f'%{name}%']
