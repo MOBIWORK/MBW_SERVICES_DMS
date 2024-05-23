@@ -6,7 +6,7 @@ from frappe import  _
 from frappe.model.document import Document
 import datetime
 from frappe.utils.data import get_time
-from mbw_dms.api.common import (exception_handle, gen_response, get_language, get_user_id, upload_image_s3, post_image, get_employee_info, get_value_child_doctype, get_employee_id,time_now_utc)
+from mbw_dms.api.common import (exception_handle, gen_response, get_language, get_user_id, upload_image_s3, post_image, get_employee_info, get_value_child_doctype, get_employee_id,time_now_utc,null_location)
 from mbw_dms.api.validators import validate_datetime, validate_filter
 from mbw_dms.mbw_dms.utils import create_dms_log
 from mbw_dms.config_translate import i18n
@@ -370,7 +370,7 @@ def update_address_customer(body):
         address_line1 = validate_filter(type_check='require',value=body.get('address_line1'))
         long = validate_filter(type_check='require',value=body.get('long'))
         lat = validate_filter(type_check='require',value=body.get('lat'))
-        address_location = json.dumps({"long": long,"lat":lat})
+        address_location = null_location(json.dumps({"long": long,"lat":lat}))
 
         customer_info = frappe.db.get_value(doctype="Customer",filters= {"name": customer},fieldname=['name','customer_primary_address',"customer_name"],as_dict=1)
         doc_customer = frappe.get_doc("Customer",body.get('customer'))
