@@ -17,7 +17,7 @@ import json
 from frappe.utils import nowdate
 import calendar
 from mbw_dms.api.ekgis.constant import API_URL, API_URL_TRACKING
-
+import pydash
 class DMSCheckin(Document):
     def after_insert(self):
         self.update_kpi_monthly()
@@ -397,7 +397,7 @@ def update_address_customer(body):
             link_cs_address = {
                         "link_doctype": "Customer",
                         "link_name":customer,
-                        "link_title": customer_info.get("customer_name")
+                        "link_title": checkin_id
                     }
             curent_address  = create_address(new_address=new_address,link_cs_address=link_cs_address)
             # kiểm tra địa chỉ của khách hàng có trùng với đại chỉ truyền lên
@@ -420,6 +420,7 @@ def cancel_checkout(data):
     try:
         gen_response(200,i18n.t("translate.successfully",locale=get_language()),[])
         checkin_id = data.get('checkin_id')
+        customer_id = data.get('customer_id')
         #xoa don hang
         frappe.db.delete("Sales Order",{"checkin_id":checkin_id})
         #xoa tra hang
@@ -431,9 +432,14 @@ def cancel_checkout(data):
         address = frappe.db.get_value("Address",{"checkin_id":checkin_id})
         if address:
             address = frappe.get_doc("Address",{"checkin_id":checkin_id})
-            address.links = []
+            links = address.links
+            find_not_cs = pydash.filter_(links, lambda cs: cs.get("link_doctype") ==  "Customer" and cs.get("link_title") == checkin_id)
+            address.set("links",find_not_cs)
             address.save()
-            frappe.db.delete("Address",{"checkin_id":checkin_id})
+            customer = frappe.get_doc("Customer",customer_id)
+            customer.set("customer_primary_address",None)
+            customer.set("customer_location_primary",None)
+            customer.saver()
         frappe.db.commit()
         # xoá địa chỉ
         return
