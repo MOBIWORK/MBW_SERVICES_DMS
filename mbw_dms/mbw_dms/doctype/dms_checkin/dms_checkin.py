@@ -378,6 +378,7 @@ def update_address_customer(body):
         customer_info = frappe.db.get_value(doctype="Customer",filters= {"name": customer},fieldname=['name','customer_primary_address',"customer_name"],as_dict=1)
         
         if customer_info:
+            
             # chuyển data từ mobile về dạng địa chỉ
             city_info = frappe.db.get_value(doctype="DMS Province",filters={"ten_tinh": ["like",f"%{city}%"]},fieldname=['ma_tinh'])
             district_info = frappe.db.get_value(doctype="DMS District",filters={"ten_huyen": ["like",f"%{county}%"]},fieldname=['ma_huyen'])
@@ -398,7 +399,13 @@ def update_address_customer(body):
                         "link_name":customer,
                         "link_title": customer_info.get("customer_name")
                     }
-            curent_address  = create_address(new_address=new_address,link_cs_address=link_cs_address)            
+            curent_address  = create_address(new_address=new_address,link_cs_address=link_cs_address)
+            # kiểm tra địa chỉ của khách hàng có trùng với đại chỉ truyền lên
+            doc_customer = frappe.get_doc("Customer",body.get('customer'))
+            if customer_info.get("customer_primary_address") != curent_address.get("name") :
+                doc_customer.customer_primary_address = curent_address.get("name")
+            doc_customer.save()
+            
             frappe.db.commit()
             return gen_response(200,"",curent_address.get('name') )
         else:
