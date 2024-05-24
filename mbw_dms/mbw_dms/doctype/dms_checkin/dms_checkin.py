@@ -6,7 +6,10 @@ from frappe import  _
 from frappe.model.document import Document
 import datetime
 from frappe.utils.data import get_time
-from mbw_dms.api.common import (exception_handle, gen_response, get_language, get_user_id, upload_image_s3, post_image, get_employee_info, get_value_child_doctype, get_employee_id,time_now_utc,null_location)
+from mbw_dms.api.common import (exception_handle, gen_response,
+                                get_language, get_user_id, upload_image_s3,
+                                post_image, get_employee_info, get_value_child_doctype, 
+                                get_employee_id,time_now_utc,null_location,create_address)
 from mbw_dms.api.validators import validate_datetime, validate_filter
 from mbw_dms.mbw_dms.utils import create_dms_log
 from mbw_dms.config_translate import i18n
@@ -373,11 +376,9 @@ def update_address_customer(body):
         address_location = null_location(json.dumps({"long": long,"lat":lat}))
 
         customer_info = frappe.db.get_value(doctype="Customer",filters= {"name": customer},fieldname=['name','customer_primary_address',"customer_name"],as_dict=1)
-        doc_customer = frappe.get_doc("Customer",body.get('customer'))
-        doc_customer.customer_location_primary = address_location
-        doc_customer.primary_address = f"{address_line1}<br>{address_line1}<br>\n{county}\n<br>{city}<br>\n"
-        doc_customer.save()
+        
         if customer_info:
+            # chuyển data từ mobile về dạng địa chỉ
             city_info = frappe.db.get_value(doctype="DMS Province",filters={"ten_tinh": ["like",f"%{city}%"]},fieldname=['ma_tinh'])
             district_info = frappe.db.get_value(doctype="DMS District",filters={"ten_huyen": ["like",f"%{county}%"]},fieldname=['ma_huyen'])
             ward_info = frappe.db.get_value(doctype="DMS Ward",filters={"ten_xa": ["like",f"%{state}%"]},fieldname=['ma_xa'])
@@ -392,38 +393,14 @@ def update_address_customer(body):
                     "address_location":address_location,
                     "checkin_id":checkin_id         
                 }
-            current_address = frappe.db.get_value("Address",new_address.get("address_title"))
-            if customer_info.get("customer_primary_address"):
-                if current_address:
-                    doc_address = frappe.get_doc("Address",new_address.get("address_title"))
-                    doc_address.append("links", {
+            link_cs_address = {
                         "link_doctype": "Customer",
                         "link_name":customer,
                         "link_title": customer_info.get("customer_name")
-                    })
-                else:   
-                    doc_address = frappe.get_doc("Address",customer_info.get("customer_primary_address"))
-                    for key,value in new_address.items():
-                        setattr(doc_address,key,value)
-                    doc_address.save()
-                
-            else: 
-                new_address.update({  
-                    "doctype": "Address",                  
-                     "links": [{
-                        "link_doctype": "Customer",
-                        "link_name":customer,
-                        "link_title": customer_info.get("customer_name")
-                    }],
-                    "address_type": "Billing"
-                })
-                doc_address = frappe.get_doc(new_address)
-                doc_address.save()
-                setattr(doc_customer,"customer_primary_address",doc_address.get('name'))
-                doc_customer.save()
-            
+                    }
+            curent_address  = create_address(new_address=new_address,link_cs_address=link_cs_address)            
             frappe.db.commit()
-            return gen_response(200,"",doc_address.get('address_title') )
+            return gen_response(200,"",curent_address.get('name') )
         else:
             return gen_response(406,i18n.t('translate.not_found', locale=get_language()),{})             
         

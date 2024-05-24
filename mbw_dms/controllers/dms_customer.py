@@ -59,7 +59,8 @@ def update_location(doc,method=None):
         address = frappe.get_doc("Address", {
             "name" : doc.customer_primary_address
         })
-        if not pydash.find(address.links,lambda x: x.link_name == doc.name and x.link_doctype == "Customer"):
+        link_dynamic = address.links
+        if not bool(pydash.find(link_dynamic,lambda x: x.link_name == doc.name and x.link_doctype == "Customer")):
             address.append("links", {
                 "link_doctype": "Customer",
                 "link_name": doc.name

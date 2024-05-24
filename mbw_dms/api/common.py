@@ -16,6 +16,7 @@ from PIL import ImageFont
 from frappe.desk.query_report import get_reference_report 
 from datetime import datetime
 import pytz
+import pydash
 
 BASE_URL = frappe.utils.get_request_site_address()
 
@@ -121,7 +122,7 @@ def routers_name_of_customer(router=False, thisWeek = False,view_mode='list',mor
     return list_router
 
 def customers_code_router(router=False,routersName=[],thisWeek = False,view_mode='list'):
-    import pydash
+    
     list_customer = []
     for router_name in routersName:
         detail_router = frappe.get_doc("DMS Router",{"name":router_name}).as_dict()
@@ -217,6 +218,29 @@ def null_location(location):
         if not json.loads(location).get("long") or not json.loads(location).get("lat"):
             location = None
     return location
+
+
+def create_address(new_address,link_cs_address) :
+    current_address_cs = frappe.db.get_value("Address",{"address_title":new_address.get("address_title")})
+    if current_address_cs:
+        current_address_cs = frappe.get_doc("Address",{"address_title":new_address.get("address_title")})
+        current_address_cs.address_location = new_address.get("address_location")
+        current_address_cs.checkin_id = new_address.get("checkin_id")
+        if link_cs_address:
+            links = current_address_cs.links
+            find_cs = pydash.find(links, lambda cs: cs.get("link_doctype") ==  link_cs_address.get("link_doctype") and cs.get("link_name") == link_cs_address.get("link_name"))
+            if not bool(find_cs):
+                current_address_cs.append("links",link_cs_address)        
+        current_address_cs.save()
+    else:
+        new_address_doc = frappe.new_doc("Address")
+        for key,value in new_address.items():
+            setattr(new_address_doc,key,value)
+        if link_cs_address:
+            new_address_doc.append("links",link_cs_address)
+        new_address_doc.save()
+        current_address_cs = new_address_doc
+    return current_address_cs
 
 def post_image(name_image, faceimage, doc_type, doc_name):
     # save file and insert Doctype File

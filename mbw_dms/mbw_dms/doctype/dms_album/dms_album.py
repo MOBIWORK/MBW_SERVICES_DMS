@@ -99,16 +99,10 @@ def list_album():
         data = []
         dms_albums = frappe.db.get_list('DMS Album', fields=['name', 'ma_album', 'ten_album', 'so_anh_toi_thieu', 'trang_thai'])
         for i in dms_albums:
-            print('========================= i: ', i, flush=True)
             sale_team = get_value_child_doctype("DMS Album", i['name'], 'nhom_ban_hang')
-            print('========================= sale: ', sale_team, flush=True)
             for salein in sale_team:
-                print('========================= salein: ', salein, flush=True)
                 if salein.nhom_ban_hang in get_all_parent_sales_persons(saleperson):
-                    print('========================= data1: ', data, flush=True)
                     if i not in data:
-                        print('========================= data2: ', data, flush=True)
-                        print('========================= i2: ', i, flush=True)
                         data.append(i)
         return gen_response(200, "Thành công", data)
     except Exception as e:
