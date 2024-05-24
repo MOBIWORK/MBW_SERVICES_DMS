@@ -38,6 +38,7 @@ def list_customer(**kwargs):
         if not routers or len(routers) == 0 :
             return gen_response(200, "", [])
         customers_name = customers_code_router(routersName=routers)
+        
         my_filter = {
             "customer_code": ["in", customers_name]
         }
@@ -68,7 +69,7 @@ def list_customer(**kwargs):
                                 start=page_size*(page_number-1), 
                                 page_length=page_size)
                                 
-        record = len(frappe.db.get_all("Customer", filters=my_filter))
+        record = frappe.db.count("Customer", filters=my_filter)
 
         for customer in customers:
             if customer.customer_location_primary == "":
@@ -80,6 +81,7 @@ def list_customer(**kwargs):
             customer['contact'] = get_contact(customer.get("name"))
             customer['address'] = get_customer_addresses(customer.get("name"))
             customer['cre_limid'] = frappe.db.get_all("Customer Credit Limit", {"parent" : customer.get('name')}, ['credit_limit'])
+
         return gen_response(200, "Thành công", {
             "data": customers,
             "page_number": page_number,
