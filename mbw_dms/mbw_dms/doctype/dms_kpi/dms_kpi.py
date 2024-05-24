@@ -329,8 +329,8 @@ def report_detail_visit(customer_name, kwargs):
 			query_inv["creation"] = [">=", from_date]
 		elif to_date:
 			query_inv["creation"] = ["<=", to_date]
-		query_so["customer_name"] = customer_name
-		query_so["owner"] = user_id
+		query_inv["customer_name"] = customer_name
+		query_inv["owner"] = user_id
 
 		inventory = frappe.get_all(
 			'DMS Inventory',

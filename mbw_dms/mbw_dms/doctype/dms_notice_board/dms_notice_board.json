@@ -1,6 +1,7 @@
 {
  "actions": [],
- "autoname": "autoincrement",
+ "allow_import": 1,
+ "autoname": "auto-increment",
  "creation": "2023-10-12 10:27:12.760230",
  "default_view": "List",
  "doctype": "DocType",
@@ -94,7 +95,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-04-22 16:24:43.567257",
+ "modified": "2024-05-23 17:01:05.520213",
  "modified_by": "Administrator",
  "module": "MBW DMS",
  "name": "DMS Notice Board",
