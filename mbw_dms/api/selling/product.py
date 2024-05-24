@@ -6,6 +6,7 @@ from mbw_dms.api.common import (
     gen_response,
     validate_image,
 )
+from frappe.utils import cint
 
 # Danh sách sản phẩm
 @frappe.whitelist(methods='GET')
@@ -22,8 +23,10 @@ def list_product(**kwargs):
         brand = kwargs.get('brand')
         custom_industry = kwargs.get("industry")
         item_group = kwargs.get("item_group")
-        page_size = int(kwargs.get('page_size', 20))
-        page_number = 1 if not kwargs.get('page_number') or int(kwargs.get('page_number')) <= 0 else int(kwargs.get('page_number'))
+        page_size =  cint(kwargs.get('page_size', 20))
+        page_number = cint(kwargs.get('page_number', 1))
+        if page_number <= 0:
+            page_number = 1
 
         price_lisr_cg = None
         price_list = frappe.get_doc('Selling Settings').selling_price_list
@@ -65,12 +68,22 @@ def list_product(**kwargs):
             images_links = pydash.map_(images, return_fiel)
             item["custom_images_item"] = images_links
 
-        list_item = frappe.db.get_all("Item", filters=my_filter, fields=["name", "item_code"])
-        count_item = 0
-        for item in list_item:
-            item['details'] = frappe.get_all("Item Price", filters={"item_code": item.item_code, "price_list": price_list}, fields=['name'])
-            if item['details']:
-                count_item += 1
+        # Lấy danh sách các sản phẩm mà người dùng có quyền truy cập
+        user = frappe.session.user
+        list_items = frappe.db.get_list("Item", filters=my_filter, fields=["name", "item_group"])
+
+        # Lấy danh sách các nhóm sản phẩm mà người dùng có quyền truy cập thông qua User Permissions
+        user_permissions = frappe.defaults.get_user_permissions(user)
+        permitted_item_groups = set()
+        
+        if "Item Group" in user_permissions:
+            permitted_item_groups = {perm.get("doc") for perm in user_permissions.get("Item Group")}
+
+        # Đếm số lượng sản phẩm thỏa mãn quyền truy cập và các bộ lọc
+        permitted_items_count = 0
+        for item in list_items:
+            if item.get("item_group") in permitted_item_groups:
+                permitted_items_count += 1
 
         data_item = []
         for item in items:
@@ -88,7 +101,7 @@ def list_product(**kwargs):
 
         return gen_response(200, "Thành công", {
             "data": data_item,
-            "total": count_item,
+            "total": permitted_items_count,
             "page_size": page_size,
             "page_number": page_number
         })
@@ -111,8 +124,10 @@ def list_product_campaign(**kwargs):
         brand = kwargs.get('brand')
         custom_industry = kwargs.get("industry")
         item_group = kwargs.get("item_group")
-        page_size = int(kwargs.get('page_size', 20))
-        page_number = 1 if not kwargs.get('page_number') or int(kwargs.get('page_number')) <= 0 else int(kwargs.get('page_number'))
+        page_size =  cint(kwargs.get('page_size', 20))
+        page_number = cint(kwargs.get('page_number', 1))
+        if page_number <= 0:
+            page_number = 1
 
         default_price_list = frappe.get_doc('Selling Settings').selling_price_list
 

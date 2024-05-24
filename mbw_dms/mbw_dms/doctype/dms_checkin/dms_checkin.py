@@ -435,8 +435,9 @@ def cancel_checkout(data):
         frappe.db.delete("DMS Album Image",{"checkin_id":checkin_id})
         #xoa check ton kho
         frappe.db.delete("DMS Inventory",{"checkin_id":checkin_id})
-        address = frappe.get_doc("Address",{"checkin_id":checkin_id})
+        address = frappe.db.get_value("Address",{"checkin_id":checkin_id})
         if address:
+            address = frappe.get_doc("Address",{"checkin_id":checkin_id})
             address.links = []
             address.save()
             frappe.db.delete("Address",{"checkin_id":checkin_id})
