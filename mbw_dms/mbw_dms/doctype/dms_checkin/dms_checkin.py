@@ -392,11 +392,20 @@ def update_address_customer(body):
                     "address_location":address_location,
                     "checkin_id":checkin_id         
                 }
+            current_address = frappe.db.get_value("Address",new_address.get("address_title"))
             if customer_info.get("customer_primary_address"):
-                doc_address = frappe.get_doc("Address",customer_info.get("customer_primary_address"))
-                for key,value in new_address.items():
-                    setattr(doc_address,key,value)
-                doc_address.save()
+                if current_address:
+                    doc_address = frappe.get_doc("Address",new_address.get("address_title"))
+                    doc_address.append("links", {
+                        "link_doctype": "Customer",
+                        "link_name":customer,
+                        "link_title": customer_info.get("customer_name")
+                    })
+                else:   
+                    doc_address = frappe.get_doc("Address",customer_info.get("customer_primary_address"))
+                    for key,value in new_address.items():
+                        setattr(doc_address,key,value)
+                    doc_address.save()
                 
             else: 
                 new_address.update({  
