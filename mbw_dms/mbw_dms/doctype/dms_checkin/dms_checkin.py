@@ -436,12 +436,12 @@ def cancel_checkout(data):
         #xoa check ton kho
         frappe.db.delete("DMS Inventory",{"checkin_id":checkin_id})
         address = frappe.get_doc("Address",{"checkin_id":checkin_id})
-        address.links = []
-
-        address.save()
+        if address:
+            address.links = []
+            address.save()
+            frappe.db.delete("Address",{"checkin_id":checkin_id})
         frappe.db.commit()
         # xoá địa chỉ
-        frappe.db.delete("Address",{"checkin_id":checkin_id})
         return
     except Exception as e :
         exception_handle(e)
