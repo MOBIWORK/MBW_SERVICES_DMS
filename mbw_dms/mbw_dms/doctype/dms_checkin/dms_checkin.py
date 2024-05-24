@@ -439,7 +439,7 @@ def cancel_checkout(data):
             customer = frappe.get_doc("Customer",customer_id)
             customer.set("customer_primary_address",None)
             customer.set("customer_location_primary",None)
-            customer.saver()
+            customer.save()
         frappe.db.commit()
         # xoá địa chỉ
         return
