@@ -433,7 +433,7 @@ def cancel_checkout(data):
         if address:
             address = frappe.get_doc("Address",{"checkin_id":checkin_id})
             links = address.links
-            find_not_cs = pydash.filter_(links, lambda cs: cs.get("link_doctype") ==  "Customer" and cs.get("link_title") == checkin_id)
+            find_not_cs = pydash.filter_(links, lambda cs: cs.get("link_title") != checkin_id)
             address.set("links",find_not_cs)
             address.save()
             customer = frappe.get_doc("Customer",customer_id)
