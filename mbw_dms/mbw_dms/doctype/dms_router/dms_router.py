@@ -91,43 +91,48 @@ def get_router(id):
 @frappe.whitelist(methods="GET")
 def get_customer_router(data):
     try:     
-        # cấu hình ngoại tuyến từ dms setting
+        # Cấu hình ngoại tuyến từ dms setting
         search_key = data.get("search_key")
         view_mode = validate_filter(value=data.get('view_mode'), type=['list','map'], type_check='enum') if data.get('view_mode') else 'list'
-        # phân trang
+
+        # Phân trang
         page_size =  int(data.get('page_size', 20))
         page_number = int(data.get('page_number') ) if data.get('page_number') and int(data.get('page_number')) > 0 else 1
-        # bộ lọc tuyến
+
+        # Bộ lọc tuyến
         router_filter = validate_filter(type_check='type', type=str, value=data.get('router')).split(";") if data.get('router') else False
-        # bộ lọc khách hàng
+
+        # Bộ lọc khách hàng
         order_by = data.get('order_by')
-        birthday_from = validate_filter(type_check='timestamp',type='start',value=data.get('birthday_from')) if data.get('birthday_from') else False
-        birthday_to =validate_filter(type_check='timestamp',type='end',value=data.get('birthday_to'))  if data.get('birthday_to') else False
+        birthday_from = validate_filter(type_check='timestamp', type='start', value=data.get('birthday_from')) if data.get('birthday_from') else False
+        birthday_to = validate_filter(type_check='timestamp', type='end', value=data.get('birthday_to')) if data.get('birthday_to') else False
         customer_group = data.get('customer_group')
         customer_type = data.get('customer_type')
-        # chỉ lấy những tuyến đang hoạt động
-        queryFilters = {"is_deleted": 0,"status":"Active"}
-        # nếu là admin thì lấy tất cả tuyến hoạt động, nếu là nhân viên chỉ lấy nhân viên chăm sốc tuyến đấy
+
+        # Chỉ lấy những tuyến đang hoạt động
+        queryFilters = {"is_deleted": 0, "status": "Active"}
+
+        # Nếu là admin thì lấy tất cả tuyến hoạt động, nếu là nhân viên chỉ lấy nhân viên chăm sốc tuyến đấy
         user_id = get_user_id()
         if user_id.name != "Administrator":
             employee = get_employee_by_user(user = user_id.email)
             if not employee:
                 return gen_response("404", _("Employee not registered"))
             queryFilters['employee'] = employee.name
-        # thêm bộ lọc tuyến
+        # Thêm bộ lọc tuyến
         if router_filter:
-            queryFilters['channel_code'] = ["in",router_filter]
-        # lấy thứ hôm nay và tuần này
+            queryFilters['channel_code'] = ["in", router_filter]
+        # Lấy thứ hôm nay và tuần này
         from mbw_dms.api.common import weekday
         today= time_now_utc()
         thu_trong_tuan, tuan_trong_thang = weekday(today)
 
-        # dịch vụ lấy khách hàng hiển thị cho map: chỉu tuyến hôm nay và tuần này
+        # Dịch vụ lấy khách hàng hiển thị cho map: chỉu tuyến hôm nay và tuần này
         if view_mode == "map":
-            queryFilters.update({"travel_date": ["in",["Không giới hạn", thu_trong_tuan]]})
-            queryFilters.update({"frequency": ["like",f"%{int(tuan_trong_thang)}%"]})  
+            queryFilters.update({"travel_date": ["in", ["Không giới hạn", thu_trong_tuan]]})
+            queryFilters.update({"frequency": ["like", f"%{int(tuan_trong_thang)}%"]})  
          
-        #Lấy danh sách tuyến theo bộ lọc tuyến
+        # Lấy danh sách tuyến theo bộ lọc tuyến
         list_routers = frappe.db.get_all('DMS Router', filters=queryFilters, fields=["channel_code", "name", "travel_date"], distinct=True)
         list_customer = []
         list_customer_in_route= []
@@ -136,26 +141,30 @@ def get_customer_router(data):
             router_name = router.name
             detail_router = frappe.get_doc("DMS Router", {"name":router_name}).as_dict()
             customers = detail_router.get('customers')
-            # danh sách id khách hàng đúng tuyến
+
+            # Danh sách id khách hàng đúng tuyến
             if (router.travel_date == thu_trong_tuan or router.travel_date == "Không giới hạn"):
                 if router.travel_date == thu_trong_tuan:
                     router_today = router.channel_code
-                customer_in_router = pydash.filter_(customers,lambda value: (value.frequency.find(str(int(tuan_trong_thang))) != -1))    
-                customer_in_router_name = pydash.map_(customer_in_router,lambda x:x.customer_code)
+                customer_in_router = pydash.filter_(customers, lambda value: (value.frequency.find(str(int(tuan_trong_thang))) != -1))    
+                customer_in_router_name = pydash.map_(customer_in_router, lambda x:x.customer_code)
                 list_customer_in_route += customer_in_router_name
-            # danh sách khách hàng hiển thị trên map
+
+            # Danh sách khách hàng hiển thị trên map
             if view_mode == "map":
-                customers = pydash.filter_(customers,lambda value: (value.frequency.find(str(int(tuan_trong_thang))) != -1) and (detail_router.get("travel_date") == thu_trong_tuan or detail_router.get("travel_date") == "Không giới hạn") )          
+                customers = pydash.filter_(customers, lambda value: (value.frequency.find(str(int(tuan_trong_thang))) != -1) and (detail_router.get("travel_date") == thu_trong_tuan or detail_router.get("travel_date") == "Không giới hạn") )          
             list_customer += customers
+
         sort = "customer_name desc"
         if order_by: 
             sort = f"customer_name {order_by}"
-        # chuyển mảng danh sách khách hàng về id
+
+        # Chuyển mảng danh sách khách hàng về id
         list_customer_name = []
         for customer in list_customer:
             list_customer_name.append(customer.get('customer_code'))
 
-        # nếu truyền lên tuyến hôm nay thì chỉ trả về đúng tuyến
+        # Nếu truyền lên tuyến hôm nay thì chỉ trả về đúng tuyến
         if router_filter and router_today != "" and router_today == router_filter[0]:
             list_customer_name = list_customer_in_route
 
@@ -170,12 +179,14 @@ def get_customer_router(data):
             FiltersCustomer['customer_type'] =customer_type
         if search_key:
             FiltersCustomer['customer_name'] =["like",f"%{search_key}%"]
+
         fields_customer = [
             'name','customer_primary_address'
             ,'customer_code','customer_location_primary','mobile_no'
             ,'customer_name'
             ,'UNIX_TIMESTAMP(custom_birthday) as birthday'
             ]
+        
         if(view_mode == 'list'):
             detail_customer = frappe.db.get_all('Customer',filters= FiltersCustomer,fields=fields_customer,start=page_size*(page_number-1), page_length=page_size,order_by=sort,distinct=True)
         else:
@@ -185,8 +196,8 @@ def get_customer_router(data):
             "customer_primary_address"
             ]
             FiltersCustomer.update({"customer_location_primary": ["is", "set"]})
-              
             detail_customer = frappe.db.get_all('Customer',filters= FiltersCustomer,fields=fields_customer)    
+
         for customer in detail_customer:
             address_name = customer["customer_primary_address"]
             customer["customer_primary_address"]=frappe.db.get_value("Address",{"name": address_name},["address_title"])
@@ -202,7 +213,8 @@ def get_customer_router(data):
         total_customer= len( frappe.db.get_all('Customer',filters= FiltersCustomer))
         for customer in detail_customer:
             customer.customer_location_primary = null_location(customer.customer_location_primary)
-        return gen_response(200,"", {
+
+        return gen_response(200, "", {
             "data": detail_customer,
             "total": total_customer,
             "page_size": page_size,

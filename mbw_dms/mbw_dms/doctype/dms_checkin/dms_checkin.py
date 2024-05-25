@@ -282,25 +282,30 @@ def create_checkin_inventory(body):
         del body['cmd']
         doc = frappe.new_doc("DMS Inventory")
         doc.set("create_by", employee.get("name"))
+
         for key, value in body.items():
             if key in normal_keys:
                 doc.set(key, validate_filter(type_check='require_field', value=(value,key)))
         items = body.get('inventory_items')
+
         for item in items:
             if isinstance(item, dict):
             # Validate and handle exp_time as timestamp
                 if 'exp_time' in item and item.get('exp_time'): 
                     item['exp_time'] = validate_filter(type_check='date', value=item['exp_time'])
+
                 # Calculate total cost
                 if 'quantity' in item and 'item_price' in item:
                     item['total_cost'] = item['quantity'] * item['item_price']
+
             item["update_bycode"] = employee.get("name")
             item["update_byname"] = employee.get("fullname")
             item["update_byname"] = time_now_utc()
-            
             doc.append("items", item)
+            
         doc.insert()
         frappe.db.commit()
+
         return gen_response(201, "Thành công", {"name": doc.name})
     except Exception as e:
         return exception_handle(e)
