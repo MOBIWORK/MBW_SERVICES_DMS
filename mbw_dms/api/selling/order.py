@@ -36,6 +36,7 @@ def get_list_sales_order(**filters):
             query['customer'] = filters.get('customer')
         if filters.get('name'):
             query['name'] = filters.get('name')
+            
         sale_orders =frappe.db.get_list('Sales Order', 
                                        filters=query, 
                                        fields=['customer', 'customer_name', 'name',
@@ -49,7 +50,7 @@ def get_list_sales_order(**filters):
                                        start=page_size*(page_number-1), 
                                        page_length=page_size,
                                        parent_doctype="Sales Order")
-        for sale_order in sale_orders :
+        for sale_order in sale_orders:
             sale_order['custom_id'] = frappe.db.get_value("Customer",filters={'name': sale_order['customer']},fieldname=['customer_code'])
         total_order = len(frappe.db.get_list('Sales Order', filters=query))
 
