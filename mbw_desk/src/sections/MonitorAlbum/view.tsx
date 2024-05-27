@@ -30,7 +30,7 @@ export default function MonitorAlbum() {
   const [album, setAlbum] = useState<string>();
   const [customer_name, setCustomer_name] = useState<string>();
   const [employee, setEmployee] = useState<string>();
-  const [creation, setCreation] = useState<any>();
+  const [creation, setCreation] = useState<any>(dateNow);
   const [keyS, setKeyS] = useState("");
   const [keyS1, setKeyS1] = useState("");
   const [keyS2, setKeyS2] = useState("");
@@ -133,13 +133,6 @@ export default function MonitorAlbum() {
 
   useEffect(() => {
     (async () => {
-      console.table({
-        customer_name,
-        creation: creation,
-        team_sale,
-        employee,
-        album_name: album,
-      });
       const rsAlbum = await AxiosService.get(
         "/api/method/mbw_dms.api.album.list_monitor_album",
         {
@@ -161,7 +154,6 @@ export default function MonitorAlbum() {
       const rsAlbum = await AxiosService.get(
         "/api/method/mbw_dms.api.album.list_album"
       );
-      setCreation(dateNow);
       setDataFilterAlbum(rsAlbum.result);
     })();
   }, []);

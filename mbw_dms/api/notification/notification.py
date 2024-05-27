@@ -246,7 +246,6 @@ def get_notifi(**kwargs):
                 else:
                     i['is_watched'] = False
                 del i['employee_watched']
-                del i['user_image']
                 data.append(i)
             elif i.apply_for == 'Specific Salesteam':
                 sale_team = get_value_child_doctype("DMS Notice Board", i['name'], 'salesteams')
@@ -267,7 +266,6 @@ def get_notifi(**kwargs):
                 else:
                     i['is_watched'] = False
                 del i['employee_watched']
-                del i['user_image']
                 for salein in sale_team:
                     if salein.nhom_ban_hang in get_all_parent_sales_persons(saleperson):
                         if i not in data:
@@ -304,13 +302,11 @@ def get_notifi_detail(**kwargs):
                 if employee_watched_json:
                     employee_watched = json.loads(employee_watched_json)
                     if not any(d['name'] == employee_id for d in employee_watched):
-                        i['is_watched'] = False
+                        i['is_watched'] = True
                     else:
                         i['is_watched'] = True
                 else:
                     i['is_watched'] = True
-                del i['employee_watched']
-                del i['user_image']
                 data.append(i)
             elif i.apply_for == 'Specific Salesteam':
                 sale_team = get_value_child_doctype("DMS Notice Board", i['name'], 'salesteams')
@@ -325,13 +321,11 @@ def get_notifi_detail(**kwargs):
                 if employee_watched_json:
                     employee_watched = json.loads(employee_watched_json)
                     if not any(d['name'] == employee_id for d in employee_watched):
-                        i['is_watched'] = False
+                        i['is_watched'] = True
                     else:
                         i['is_watched'] = True
                 else:
                     i['is_watched'] = True
-                del i['employee_watched']
-                del i['user_image']
                 for salein in sale_team:
                     if salein.nhom_ban_hang in get_all_parent_sales_persons(saleperson):
                         if i not in data:
@@ -365,7 +359,6 @@ def get_notifi_detail(**kwargs):
             info["employee_watched"] = employee_watched
             user_image = info.get('user_image')
             info['user_image'] = validate_image(user_image)
-            del info['user_image']
         
         else:
             return gen_response(404, "Không tồn tại tài liệu", data)
