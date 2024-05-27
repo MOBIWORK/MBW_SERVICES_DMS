@@ -295,7 +295,6 @@ def report_detail_visit(customer_name, kwargs):
 		elif to_date:
 			query_so["creation"] = ["<=", to_date]
 		query_so["customer_name"] = customer_name
-		query_so["docstatus"] = 1
 		query_so["owner"] = user_id
 		data = {}
 
@@ -491,10 +490,10 @@ def checkin_report(kwargs):
         )
 
 		cus_not_checkin = 0
+		filtered_customers = []
 		if router_employee:
 			for i in router_employee:
 				customers = get_value_child_doctype('DMS Router', i['name'], 'customers')
-				filtered_customers = []
 				for a in customers:
 					fre = a['frequency']
 					week_router = []
@@ -804,7 +803,6 @@ def receivable_summary_report(**kwargs):
 			GROUP BY
 				inv.customer_name
 		"""
-		print("sql=============================",sql_query)
 		customers_invoice = frappe.db.sql(sql_query, as_dict=True)
 
 		total_dues = 0
