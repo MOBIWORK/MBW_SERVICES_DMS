@@ -782,8 +782,8 @@ def receivable_summary_report(**kwargs):
 			filters.append(f"cus.customer_type='{customer_type}'")
 		if customer_group:
 			filters.append(f"cus.customer_group='{customer_group}'")
-
-		filters.append(f"inv.name IN ({invoice_str})")
+		if invoice_str != "":
+			filters.append(f"inv.name IN ({invoice_str})")
 		filters.append("pe.docstatus=1")
 
 		where_conditions = " AND ".join(filters)
@@ -804,6 +804,7 @@ def receivable_summary_report(**kwargs):
 			GROUP BY
 				inv.customer_name
 		"""
+		print("sql=============================",sql_query)
 		customers_invoice = frappe.db.sql(sql_query, as_dict=True)
 
 		total_dues = 0
