@@ -94,14 +94,14 @@ def create_album(kwargs):
 @frappe.whitelist(methods="GET")
 def list_album():
     try:
-        setting_min_imgs = frappe.db.get_single_value("DMS Settings",["batbuoc_chupanh"])
+        setting_min_imgs = frappe.db.get_single_value("DMS Settings","batbuoc_chupanh")
         employee_id = get_employee_id()
         saleperson = frappe.get_value('Sales Person', {'employee': employee_id}, 'sales_person_name')
         data = []
         dms_albums = frappe.db.get_list('DMS Album', fields=['name', 'ma_album', 'ten_album', 'so_anh_toi_thieu', 'trang_thai'])
         for i in dms_albums:
             sale_team = get_value_child_doctype("DMS Album", i['name'], 'nhom_ban_hang')
-            if not setting_min_imgs.get("batbuoc_chupanh") :
+            if setting_min_imgs == 0:
                 i["so_anh_toi_thieu"] = 0
             for salein in sale_team:
                 if salein.nhom_ban_hang in get_all_parent_sales_persons(saleperson):
