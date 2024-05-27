@@ -280,3 +280,97 @@ def get_notifi(**kwargs):
             })
     except Exception as e:
         exception_handle(e)
+
+
+@frappe.whitelist(methods="GET")
+def get_notifi_detail(**kwargs):
+    try:
+        employee_id = get_employee_id()
+        data = []
+        img_src_pattern = r'<img[^>]+src="([^">]+)"'
+        name = kwargs.get('name')
+        saleperson = frappe.get_value('Sales Person', {'employee': employee_id}, 'sales_person_name')
+        notis =  frappe.get_all('DMS Notice Board', filters={'name': name}, fields=['name', 'owner', 'notice_title', 'description', 'from_date', 'to_date', 'priority_level', 'apply_for', 'message', 'employee_watched'],)
+        for i in notis:
+            if i.apply_for == 'All Employee':
+                info_user = frappe.db.get_value("User", {"name": i.owner}, ['full_name', 'user_image'], as_dict=True)
+                i['full_name'] = info_user.full_name
+                i['user_image'] = validate_image(info_user.user_image)
+                img_srcs = re.findall(img_src_pattern, i['message'])
+                for img_src in img_srcs:
+                    if img_src:
+                        i['message'] = i['message'].replace(img_src,f"{validate_image(img_src)}")
+                employee_watched_json = i.get('employee_watched')
+                if employee_watched_json:
+                    employee_watched = json.loads(employee_watched_json)
+                    if not any(d['name'] == employee_id for d in employee_watched):
+                        i['is_watched'] = False
+                    else:
+                        i['is_watched'] = True
+                else:
+                    i['is_watched'] = True
+                del i['employee_watched']
+                del i['user_image']
+                data.append(i)
+            elif i.apply_for == 'Specific Salesteam':
+                sale_team = get_value_child_doctype("DMS Notice Board", i['name'], 'salesteams')
+                info_user = frappe.db.get_value("User", {"name": i.owner}, ['full_name', 'user_image'], as_dict=True)
+                i['full_name'] = info_user.full_name
+                i['user_image'] = validate_image(info_user.user_image)
+                img_srcs = re.findall(img_src_pattern, i['message'])
+                for img_src in img_srcs:
+                    if img_src:
+                        i['message'] = i['message'].replace(img_src,f"{validate_image(img_src)}")
+                employee_watched_json = i.get('employee_watched')
+                if employee_watched_json:
+                    employee_watched = json.loads(employee_watched_json)
+                    if not any(d['name'] == employee_id for d in employee_watched):
+                        i['is_watched'] = False
+                    else:
+                        i['is_watched'] = True
+                else:
+                    i['is_watched'] = True
+                del i['employee_watched']
+                del i['user_image']
+                for salein in sale_team:
+                    if salein.nhom_ban_hang in get_all_parent_sales_persons(saleperson):
+                        if i not in data:
+                            data.append(i)    
+        
+        if len(data):
+            info = data[0]
+            employee_watched_json = info.get('employee_watched')
+            employee_watched = []
+            if employee_watched_json:
+                employee_watched = json.loads(employee_watched_json)
+            if not any(d['name'] == employee_id for d in employee_watched):
+                employee_info = get_employee_by_name(
+                    employee_id, ["name", "image", "employee_name"])
+                employee_image = validate_image(employee_info.get('image'))
+
+                employee_add = {
+                    "name": employee_id,
+                    "image": employee_image,
+                    "employee_name": employee_info.get('employee_name')
+                }
+                employee_watched.append(employee_add)
+                employee_watched_json = json.dumps(employee_watched)
+
+                # Viewed employee updates for notifications
+                doc = frappe.get_doc('DMS Notice Board', name)
+                doc.employee_watched = employee_watched_json
+                doc.save(ignore_permissions=True)
+                frappe.db.commit()
+
+            info["employee_watched"] = employee_watched
+            user_image = info.get('user_image')
+            info['user_image'] = validate_image(user_image)
+            del info['user_image']
+        
+        else:
+            return gen_response(404, "Không tồn tại tài liệu", data)
+        return gen_response(200, "Thành công", {
+            "data": info,
+            })
+    except Exception as e:
+        exception_handle(e)
