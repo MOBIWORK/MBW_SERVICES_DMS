@@ -34,7 +34,6 @@ def list_product(**kwargs):
             customers = frappe.get_doc("Customer", customer)
             if customers.get("default_price_list"):
                 price_list = customers.default_price_list
-
             else:
                 price_lisr_cg = frappe.get_value('Customer Group', {'name': customers.customer_group}, 'default_price_list')
                 if price_lisr_cg:
@@ -63,8 +62,10 @@ def list_product(**kwargs):
         for item in items:
             item_doc = frappe.get_doc("Item", item.get("name"))
             images = item_doc.custom_images_item or []
+
             def return_fiel(value):
                 return pydash.pick(value, "link_image")
+            
             images_links = pydash.map_(images, return_fiel)
             item["custom_images_item"] = images_links
 
@@ -75,15 +76,23 @@ def list_product(**kwargs):
         # Lấy danh sách các nhóm sản phẩm mà người dùng có quyền truy cập thông qua User Permissions
         user_permissions = frappe.defaults.get_user_permissions(user)
         permitted_item_groups = set()
+        permitted_item = set()
         
-        if "Item Group" in user_permissions:
-            permitted_item_groups = {perm.get("doc") for perm in user_permissions.get("Item Group")}
+        if "Item Group" in user_permissions or "Item" in user_permissions:
+            if "Item Group" in user_permissions:
+                permitted_item_groups = {perm.get("doc") for perm in user_permissions.get("Item Group")}
+            if "Item" in user_permissions:
+                permitted_item = {perm.get("doc") for perm in user_permissions.get("Item")}
 
-        # Đếm số lượng sản phẩm thỏa mãn quyền truy cập và các bộ lọc
-        permitted_items_count = 0
-        for item in list_items:
-            if item.get("item_group") in permitted_item_groups:
-                permitted_items_count += 1
+            # Đếm số lượng sản phẩm thỏa mãn quyền truy cập và các bộ lọc
+            permitted_items_count = 0
+            for item in list_items:
+                if item.get("item_group") in permitted_item_groups:
+                    permitted_items_count += 1
+                if item.get("name") in permitted_item:
+                    permitted_items_count += 1
+        else:
+            permitted_items_count = frappe.db.count("Item", filters=my_filter)
 
         data_item = []
         for item in items:
@@ -160,7 +169,30 @@ def list_product_campaign(**kwargs):
             images_links = pydash.map_(images, return_fiel)
             item["custom_images_item"] = images_links
 
-        count = len(frappe.db.get_list("Item", filters=my_filter, fields=["name"]))
+        # Lấy danh sách các sản phẩm mà người dùng có quyền truy cập
+        user = frappe.session.user
+        list_items = frappe.db.get_list("Item", filters=my_filter, fields=["name", "item_group"])
+
+        # Lấy danh sách các nhóm sản phẩm mà người dùng có quyền truy cập thông qua User Permissions
+        user_permissions = frappe.defaults.get_user_permissions(user)
+        permitted_item_groups = set()
+        permitted_item = set()
+        
+        if "Item Group" in user_permissions or "Item" in user_permissions:
+            if "Item Group" in user_permissions:
+                permitted_item_groups = {perm.get("doc") for perm in user_permissions.get("Item Group")}
+            if "Item" in user_permissions:
+                permitted_item = {perm.get("doc") for perm in user_permissions.get("Item")}
+
+            # Đếm số lượng sản phẩm thỏa mãn quyền truy cập và các bộ lọc
+            permitted_items_count = 0
+            for item in list_items:
+                if item.get("item_group") in permitted_item_groups:
+                    permitted_items_count += 1
+                if item.get("name") in permitted_item:
+                    permitted_items_count += 1
+        else:
+            permitted_items_count = frappe.db.count("Item", filters=my_filter)
 
         data_item = []
         for item in items:
@@ -172,7 +204,7 @@ def list_product_campaign(**kwargs):
 
         return gen_response(200, "Thành công", {
             "data": data_item,
-            "total": count,
+            "total": permitted_items_count,
             "page_size": page_size,
             "page_number": page_number
         })

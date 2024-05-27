@@ -14,6 +14,7 @@ from mbw_dms.api.validators import validate_filter_timestamp
 from datetime import datetime
 from pypika import Order, CustomFunction
 import json
+import re
 
 @frappe.whitelist(methods="GET")
 def get_list_notification(**kwargs):
@@ -209,6 +210,7 @@ def get_notifi(**kwargs):
         employee_id = get_employee_id()
         my_filter = {}
         data = []
+        img_src_pattern = r'<img[^>]+src="([^">]+)"'
         from_date = validate_filter_timestamp(type='start')(kwargs.get('from_date')) if kwargs.get('from_date') else None
         to_date = validate_filter_timestamp(type='end')(kwargs.get('to_date')) if kwargs.get('to_date') else None
         page_size =  int(kwargs.get('page_size', 20))
@@ -230,15 +232,47 @@ def get_notifi(**kwargs):
                 info_user = frappe.db.get_value("User", {"name": i.owner}, ['full_name', 'user_image'], as_dict=True)
                 i['full_name'] = info_user.full_name
                 i['user_image'] = validate_image(info_user.user_image)
+                img_srcs = re.findall(img_src_pattern, i['message'])
+                for img_src in img_srcs:
+                    if img_src:
+                        i['message'] = i['message'].replace(img_src,f"{validate_image(img_src)}")
+                employee_watched_json = i.get('employee_watched')
+                if employee_watched_json:
+                    employee_watched = json.loads(employee_watched_json)
+                    if not any(d['name'] == employee_id for d in employee_watched):
+                        i['is_watched'] = False
+                    else:
+                        i['is_watched'] = True
+                else:
+                    i['is_watched'] = False
+                del i['employee_watched']
+                del i['user_image']
                 data.append(i)
             elif i.apply_for == 'Specific Salesteam':
                 sale_team = get_value_child_doctype("DMS Notice Board", i['name'], 'salesteams')
                 info_user = frappe.db.get_value("User", {"name": i.owner}, ['full_name', 'user_image'], as_dict=True)
                 i['full_name'] = info_user.full_name
                 i['user_image'] = validate_image(info_user.user_image)
+                img_srcs = re.findall(img_src_pattern, i['message'])
+                for img_src in img_srcs:
+                    if img_src:
+                        i['message'] = i['message'].replace(img_src,f"{validate_image(img_src)}")
+                employee_watched_json = i.get('employee_watched')
+                if employee_watched_json:
+                    employee_watched = json.loads(employee_watched_json)
+                    if not any(d['name'] == employee_id for d in employee_watched):
+                        i['is_watched'] = False
+                    else:
+                        i['is_watched'] = True
+                else:
+                    i['is_watched'] = False
+                del i['employee_watched']
+                del i['user_image']
                 for salein in sale_team:
                     if salein.nhom_ban_hang in get_all_parent_sales_persons(saleperson):
-                        data.append(i)
+                        if i not in data:
+                            data.append(i)
+        
         return gen_response(200, "Thành công", {
             "data": data,
             "page_number": page_number,

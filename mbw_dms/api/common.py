@@ -107,9 +107,8 @@ def routers_name_of_customer(router=False, thisWeek = False,view_mode='list',mor
 
     if router:
         queryFilters['channel_code'] = ["in",router]
-    # if status: 
-    #     queryFilters['status'] = status
-    #lay danh sach theo ngay
+   
+    # lay danh sach theo ngay
     if thisWeek or view_mode=="map":
         from mbw_dms.api.common import weekday
         today= datetime.now()
@@ -133,10 +132,6 @@ def customers_code_router(router=False,routersName=[],thisWeek = False,view_mode
             thu_trong_tuan, tuan_trong_thang = weekday(today)
             customer = pydash.filter_(detail_router.get('customers'),lambda value: (value.frequency.find(str(int(tuan_trong_thang))) != -1))
         list_customer += customer
-    sort = "customer_name desc"
-    # if order_by: 
-    #     sort = f"customer_name {order_by}"
-    #     list_customer = sorted(list_customer, key= lambda x: x.customer_name.split(' ')[-1],reverse=True if order_by == 'desc' else False)
     list_customer_name = []
     for customer in list_customer:
         list_customer_name.append(customer.get('customer_code'))   
