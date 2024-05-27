@@ -163,7 +163,7 @@ def create_sale_order(**kwargs):
 
         # Thêm mới items trong đơn hàng
         items = kwargs.get('items')
-        account_heads = {}  # Dictionary để lưu trữ tổng amount và tax_amount theo account_head
+        account_heads = {}
 
         for item_data in items:
             rate = float(item_data.get('rate', 0))

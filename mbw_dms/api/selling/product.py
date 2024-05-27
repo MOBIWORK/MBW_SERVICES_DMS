@@ -29,7 +29,7 @@ def list_product(**kwargs):
             page_number = 1
 
         price_lisr_cg = None
-        price_list = frappe.get_doc('Selling Settings').selling_price_list
+        price_list = None
         if customer:
             customers = frappe.get_doc("Customer", customer)
             if customers.get("default_price_list"):
@@ -95,9 +95,13 @@ def list_product(**kwargs):
             permitted_items_count = frappe.db.count("Item", filters=my_filter)
 
         data_item = []
+        default_selling_price_list = frappe.get_doc('Selling Settings').selling_price_list
         for item in items:
             item['image'] = validate_image(item.get("image"))
-            item['details'] = frappe.get_all("Item Price", filters={"item_code": item.get('item_code'), "price_list": price_list}, fields=['uom', 'price_list', 'price_list_rate', 'valid_from', 'currency'])
+            if price_list is not None:
+                item['details'] = frappe.get_all("Item Price", filters={"item_code": item.get('item_code'), "price_list": price_list}, fields=['uom', 'price_list', 'price_list_rate', 'valid_from', 'currency'])
+            else:
+                item['details'] = frappe.get_all("Item Price", filters={"item_code": item.get('item_code'), "price_list": default_selling_price_list}, fields=['uom', 'price_list', 'price_list_rate', 'valid_from', 'currency'])
             item['unit'] = frappe.db.get_all("UOM Conversion Detail", {"parent" : item.get('name')}, ['uom', 'conversion_factor'])
             item['stock'] = frappe.db.get_all("Stock Entry Detail", {"item_code": item.get('item_code')}, ['t_warehouse', 'qty'])
             item['item_tax_template'] = frappe.db.get_all("Item Tax", {"parent": item["name"]}, ["item_tax_template"])
