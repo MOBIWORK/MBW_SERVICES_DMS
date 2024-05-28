@@ -23,6 +23,11 @@ def update_address_customer(**kwargs):
     from mbw_dms.mbw_dms.doctype.dms_checkin.dms_checkin import update_address_customer
     return update_address_customer(body=kwargs)
 
+@frappe.whitelist(methods="PATCH")
+def update_address_customer_checkin(**kwargs):
+    from mbw_dms.mbw_dms.doctype.dms_checkin.dms_checkin import update_address_customer_checkin
+    return update_address_customer_checkin(body=kwargs)
+
 # cancel checkout
 @frappe.whitelist()
 def cancel_checkout(**kwargs):
