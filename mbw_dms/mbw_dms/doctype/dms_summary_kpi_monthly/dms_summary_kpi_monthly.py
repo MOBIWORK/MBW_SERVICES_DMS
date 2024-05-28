@@ -26,7 +26,7 @@ def get_kpi_monthly():
         end_date = frappe.utils.getdate(end_date_str)
         
 		# Lấy id của nhân viên
-        user_name = frappe.get_value('Employee',{ 'user_id': frappe.session.user}, 'name')
+        user_name = frappe.get_value('Employee', {'user_id': frappe.session.user}, 'name')
         
 		# Lấy Kpi tháng
         monthly_summary = frappe.get_all(
@@ -38,7 +38,8 @@ def get_kpi_monthly():
 		# Lấy Kpi nhân viên
         kpi_employee = frappe.get_all('DMS KPI',
                 filters={'ngay_hieu_luc_tu': (">=", start_date), 'ngay_hieu_luc_den': ("<=", end_date), 'nhan_vien_ban_hang': user_name},
-                fields=['so_kh_vt_duynhat', 'so_kh_moi', 'so_don_hang', 'doanh_so', 'doanh_thu'])
+                fields=['so_kh_vt_duynhat', 'so_kh_moi', 'so_don_hang', 'doanh_so', 'doanh_thu']
+            )
         
         kpi = None
 

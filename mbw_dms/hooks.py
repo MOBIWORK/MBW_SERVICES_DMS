@@ -243,6 +243,9 @@ doc_events = {
 	"DMS Checkin": {
 		"on_update": "mbw_dms.mbw_dms.doctype.dms_checkin.dms_checkin.create_checkin_ek"
 	},
+    "DMS KPI": {
+        "before_insert": "mbw_dms.mbw_dms.doctype.dms_kpi.dms_kpi.validate_create_kpi"
+    },
     "Address":{
         "on_update": "mbw_dms.mbw_dms.doctype.address.address.update_address"
     },
