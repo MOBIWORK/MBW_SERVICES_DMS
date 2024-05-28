@@ -371,19 +371,20 @@ def create_checkin_image(body):
 def update_address_customer(body):
     try:
         customer = validate_filter(type_check='require', value=body.get('customer'))
-        checkin_id = validate_filter(type_check='require', value=body.get('checkin_id'))
-        city = validate_filter(type_check='require', value=body.get('city'))
-        county = validate_filter(type_check='require', value=body.get('county'))
-        state = validate_filter(type_check='require', value=body.get('state'))
-        address_line1 = validate_filter(type_check='require', value=body.get('address_line1'))
+        checkin_id = validate_filter(type_check='require', value=body.get('checkin_id'))        
         long = validate_filter(type_check='require', value=body.get('long'))
         lat = validate_filter(type_check='require', value=body.get('lat'))
         address_location = null_location(json.dumps({"long": long, "lat": lat}))
-
+        screen =  validate_filter(type_check='enum', value=body.get('screen'),type=("checkin","other"))
         customer_info = frappe.db.get_value(doctype="Customer", filters= {"name": customer}, fieldname=["name", "customer_primary_address", "customer_name"], as_dict=1)
         
         if customer_info:
+            doc_customer = frappe.get_doc("Customer", body.get("customer"))
             # chuyển data từ mobile về dạng địa chỉ
+            city = validate_filter(type_check='require', value=body.get('city'))
+            county = validate_filter(type_check='require', value=body.get('county'))
+            state = validate_filter(type_check='require', value=body.get('state'))
+            address_line1 = validate_filter(type_check='require', value=body.get('address_line1'))
             city_info = frappe.db.get_value(doctype="DMS Province", filters={"ten_tinh": ["like", f"%{city}%"]}, fieldname=["ma_tinh"])
             district_info = frappe.db.get_value(doctype="DMS District", filters={"ten_huyen": ["like", f"%{county}%"]}, fieldname=["ma_huyen"])
             ward_info = frappe.db.get_value(doctype="DMS Ward", filters={"ten_xa": ["like", f"%{state}%"]}, fieldname=["ma_xa"])
@@ -397,7 +398,7 @@ def update_address_customer(body):
                     "county": district_info,
                     "city": city_info,   
                     "address_location":address_location,
-                    "checkin_id":checkin_id         
+                    "checkin_id ":checkin_id         
                 }
             
             link_cs_address = {
@@ -407,17 +408,15 @@ def update_address_customer(body):
                     }
             
             curent_address  = create_address(new_address=new_address, link_cs_address=link_cs_address)
-
-            # kiểm tra địa chỉ của khách hàng có trùng với đại chỉ truyền lên
-            doc_customer = frappe.get_doc("Customer", body.get("customer"))
             if customer_info.get("customer_primary_address") != curent_address.get("name") :
                 doc_customer.customer_primary_address = curent_address.get("name")
+           
             doc_customer.save()
             
             frappe.db.commit()
             return gen_response(200, "Thành công", curent_address.get("name") )
         else:
-            return gen_response(406, "Không tồn tại khách hàng", {})             
+            return gen_response(406, _("Không tồn tại khách hàng"), {})             
         
     except Exception as e:
         exception_handle(e)
