@@ -21,7 +21,7 @@ export default function DashboardLayout({ children }: Props) {
   const [collapsed, setCollapsed] = useState(false);
   return (
     <Layout className="overflow-hidden h-screen">
-        <SiderCustome className="!bg-[#fff]" width={!collapsed ? 250 : 78} collapsible collapsed={collapsed} trigger={<AvatarComponent/>} >            
+        <SiderCustome className="!bg-[#fff]" width={!collapsed ? 250 : 78} collapsible collapsed={collapsed} trigger={<AvatarComponent mini={collapsed}/>} >            
             <MenuLeft handleCollapsed = {setCollapsed} collapsed={collapsed}/>
           </SiderCustome>
           <Content

@@ -5,7 +5,7 @@ import { useFrappeAuth } from 'frappe-react-sdk';
 import { AxiosService } from '@/services/server';
 import { UpOutlined } from '@ant-design/icons';
 
-function AvatarComponent() {
+function AvatarComponent({mini}:{mini: boolean}) {
     const { currentUser } = useFrappeAuth();
 
     const [empDetail, setEmpDetail] = useState<employeeType>();
@@ -58,13 +58,15 @@ function AvatarComponent() {
                                 >
                                     {!empDetail?.user_image && empDetail?.full_name.split(" ").reduce((prev: string, now: string) => `${prev[0] || ""}${now[0]}`, "")}
                                 </Avatar>
-                                <p className='text-base font-medium  ml-[5px] text-left'>
+                                {!mini &&    <p className='text-base font-medium  ml-[5px] text-left'>
                                     <p>{empDetail?.full_name}</p>
                                     <p className='text-xs text-[#637381] font-normal'>{empDetail?.department}</p>
-                                </p>
+                                </p>}
+                              
                             </Row>
                         </Col>
-                        <Col className='text-[#637381] text-xs'><UpOutlined /></Col>
+                        {!mini &&   <Col className='text-[#637381] text-xs'><UpOutlined /></Col>}
+                      
                     </Row>
                 </Dropdown>
             </Row>
