@@ -315,20 +315,48 @@ def create_return_order(**kwargs):
 
         # Thêm mới items trong đơn hàng
         items = kwargs.get('items')
-        amount = 0
+        account_heads = {}
+
         for item_data in items:
             rate = float(item_data.get('rate'))   # Giá item
             discount_percentage = float(item_data.get('discount_percentage', 0))  # Phần trăn chiết khấu của item
+            item_tax_template = item_data.get('item_tax_template')
             tax_rate = float(item_data.get('item_tax_rate', 0))
+
             new_order.append('items', {
                 'item_code': item_data.get('item_code'),
                 'qty': -item_data.get('qty'),
                 'uom': item_data.get('uom'),
                 'discount_percentage': discount_percentage,
-                'item_tax_template': item_data.get('item_tax_template'),
+                'item_tax_template': item_tax_template,
                 'item_tax_rate': tax_rate
             })
-            amount += (rate - rate * discount_percentage /100) * float(-item_data.get('qty'))  # Giá tổng sản phầm (X)
+            item_amount = (rate - rate * discount_percentage / 100) * float(-item_data.get('qty'))
+            tax_amount = item_amount * tax_rate / 100
+            amount = item_amount + tax_amount 
+
+            if item_tax_template:
+                taxes = frappe.get_doc("Item Tax Template", item_tax_template)
+                account_head = taxes.taxes[0].tax_type
+
+                if account_head in account_heads:
+                    # Cộng dồn giá trị nếu account_head đã tồn tại
+                    account_heads[account_head]['tax_amount'] += tax_amount
+                    account_heads[account_head]['total'] += amount
+                else:
+                    # Thêm mới nếu account_head chưa tồn tại
+                    account_heads[account_head] = {
+                        'charge_type': 'On Net Total',
+                        'account_head': account_head,
+                        'tax_amount': tax_amount,
+                        'total': amount,
+                        'rate': 0,
+                        'description': 'VAT'
+                    }
+
+        if account_heads != {}:
+            for tax in account_heads.values():
+                new_order.append('taxes', tax)
 
         # Check dữ liệu mobile bắn lên
         # grand_total = 0     # Tổng tiền đơn hàng
@@ -381,7 +409,6 @@ def edit_return_order(name, **kwargs):
             if order.docstatus == 0:
                 discount_percent = kwargs.get('additional_discount_percentage')
                 discount_amount = kwargs.get('discount_amount')
-                taxes_and_charges = kwargs.get('taxes_and_charges')
                 items = kwargs.get('items')
                 if items:
                     for item_data in items:
@@ -419,12 +446,6 @@ def edit_return_order(name, **kwargs):
                                 'item_tax_template': item_tax_template,
                                 'item_tax_rate': tax_rate
                             })
-
-                # Trường hợp chỉnh sửa tax
-                if taxes_and_charges:
-                    order.set('taxes', [])
-                    order.taxes_and_charges = taxes_and_charges  
-                    order.append('taxes', get_value_child_doctype('Sales Taxes and Charges Template', taxes_and_charges, 'taxes')[0])
 
                 # Trường hợp chỉnh sửa chiết khấu theo % 
                 if discount_percent:
