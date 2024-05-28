@@ -216,11 +216,10 @@ def null_location(location):
 
 
 def create_address(new_address,link_cs_address) :
-    current_address_cs = frappe.db.get_value("Address",{"address_title":new_address.get("address_title")})
+    current_address_cs = frappe.db.get_value("Address",{"address_title":new_address.get("address_title")},["name","address_location"],as_dict=1)
     if current_address_cs:
-        current_address_cs = frappe.get_doc("Address",{"address_title":new_address.get("address_title")})
+        current_address_cs = frappe.get_doc("Address",current_address_cs.get("name"))
         current_address_cs.address_location = new_address.get("address_location")
-        current_address_cs.checkin_id = new_address.get("checkin_id")
         if link_cs_address:
             links = current_address_cs.links
             find_cs = pydash.filter_(links, lambda cs: cs.get("link_doctype") ==  link_cs_address.get("link_doctype") and cs.get("link_name") != link_cs_address.get("link_name"))
