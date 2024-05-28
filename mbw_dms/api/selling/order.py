@@ -184,25 +184,27 @@ def create_sale_order(**kwargs):
             tax_amount = item_amount * tax_rate / 100
             amount = item_amount + tax_amount 
 
-            taxes = frappe.get_doc("Item Tax Template", item_tax_template)
-            account_head = taxes.taxes[0].tax_type
+            if item_tax_template:
+                taxes = frappe.get_doc("Item Tax Template", item_tax_template)
+                account_head = taxes.taxes[0].tax_type
 
-            if account_head in account_heads:
-                # Cộng dồn giá trị nếu account_head đã tồn tại
-                account_heads[account_head]['tax_amount'] += tax_amount
-                account_heads[account_head]['total'] += amount
-            else:
-                # Thêm mới nếu account_head chưa tồn tại
-                account_heads[account_head] = {
-                    'charge_type': 'On Net Total',
-                    'account_head': account_head,
-                    'tax_amount': tax_amount,
-                    'total': amount,
-                    'rate': 0,
-                    'description': 'VAT'
-                }
-        for tax in account_heads.values():
-            new_order.append('taxes', tax)
+                if account_head in account_heads:
+                    # Cộng dồn giá trị nếu account_head đã tồn tại
+                    account_heads[account_head]['tax_amount'] += tax_amount
+                    account_heads[account_head]['total'] += amount
+                else:
+                    # Thêm mới nếu account_head chưa tồn tại
+                    account_heads[account_head] = {
+                        'charge_type': 'On Net Total',
+                        'account_head': account_head,
+                        'tax_amount': tax_amount,
+                        'total': amount,
+                        'rate': 0,
+                        'description': 'VAT'
+                    }
+        if account_heads != {}:
+            for tax in account_heads.values():
+                new_order.append('taxes', tax)
 
         # Check dữ liệu mobile bắn lên
         # grand_total = 0     # Tổng tiền đơn hàng
