@@ -287,6 +287,8 @@ def report_detail_visit(customer_name, kwargs):
 		from_date = validate_filter_timestamp('start')(kwargs.get('from_date')) if kwargs.get('from_date') else None
 		to_date = validate_filter_timestamp('end')(kwargs.get('to_date')) if kwargs.get('to_date') else None
 		user_id = frappe.session.user
+		employee = frappe.get_value('Employee', {'user_id': user_id}, 'name')
+		sales_per = frappe.get_value('Sales Person', {'employee': employee}, 'name')
 		query_so = {}
 		if from_date and to_date:
 			query_so["creation"] = ["between", [from_date,to_date]]
@@ -295,7 +297,7 @@ def report_detail_visit(customer_name, kwargs):
 		elif to_date:
 			query_so["creation"] = ["<=", to_date]
 		query_so["customer_name"] = customer_name
-		query_so["owner"] = user_id
+		query_so["docstatus"] = ["!=", 2]
 		data = {}
 
 		# Lấy danh sách đơn hàng
@@ -304,19 +306,22 @@ def report_detail_visit(customer_name, kwargs):
 			filters=query_so,
 			fields=['name', 'transaction_date', 'grand_total']
 		)
-		data['so_don_trong_thang'] = len(sales_order)
 
 		orders_list = []
 		grand_totals = 0
 		for i in sales_order:
-			order_info = {
-				'name': i.get('name'),
-				'transaction_date': i.get('transaction_date'),
-				'grand_total': i.get('grand_total')
-			}
-			orders_list.append(order_info)
-			grand_totals += i['grand_total']
+			st = get_value_child_doctype("Sales Order", i["name"], "sales_team")
+			for j in st:
+				if j.sales_person == sales_per and j.created_by == 1 and i["name"] not in orders_list:
+					order_info = {
+						'name': i.get('name'),
+						'transaction_date': i.get('transaction_date'),
+						'grand_total': i.get('grand_total')
+					}
+					orders_list.append(order_info)
+					grand_totals += i['grand_total']
 
+		data['so_don_trong_thang'] = len(orders_list)
 		data['so_tien_phai_tra'] = grand_totals
 		data['danh_sach_don'] = orders_list
 
@@ -339,9 +344,48 @@ def report_detail_visit(customer_name, kwargs):
 		for i in inventory:
 			i['items'] = get_value_child_doctype('DMS Inventory', i['name'], 'items')
 
+		# Công nợ
+		query_si = {}
+		if from_date and to_date:
+			query_si["creation"] = ["between", [from_date,to_date]]
+		elif from_date:
+			query_si["creation"] = [">=", from_date]
+		elif to_date:
+			query_si["creation"] = ["<=", to_date]
+		query_si["customer_name"] = customer_name
+		query_si["docstatus"] = 1
+
+		sales_invoice = frappe.get_all(
+			'Sales Invoice',
+			filters=query_si,
+			fields=['name', 'posting_date', 'grand_total']
+		)
+		grouped_data = {}
+		for invoice in sales_invoice:
+			st = get_value_child_doctype("Sales Invoice", invoice["name"], "sales_team")
+			for j in st:
+				if j.sales_person == sales_per and j.created_by == 1:
+					posting_date = invoice['posting_date']
+					if posting_date not in grouped_data:
+						grouped_data[posting_date] = {
+							'invoices': [],
+							'total_grand_total': 0
+						}
+					grouped_data[posting_date]['invoices'].append(invoice)
+					grouped_data[posting_date]['total_grand_total'] += invoice['grand_total']
+
+		# Chuyển đổi dữ liệu thành danh sách
+		receivable_summary = []
+		for posting_date, details in grouped_data.items():
+			receivable_summary.append({
+				f'{posting_date}': details['invoices'],
+				'total_grand_total': details['total_grand_total']
+			})
+
 		return gen_response(200, "Thành công", {
 			"don_hang": data,
-			"ton_kho": inventory
+			"ton_kho": inventory,
+			"cong_no": receivable_summary
 		})
 	
 	except Exception as e:
