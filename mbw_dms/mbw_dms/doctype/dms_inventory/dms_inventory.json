@@ -49,8 +49,7 @@
    "fieldname": "customer_address",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "\u0110\u1ecba Ch\u1ec9",
-   "reqd": 1
+   "label": "\u0110\u1ecba Ch\u1ec9"
   },
   {
    "fieldname": "create_by",
@@ -81,7 +80,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-05-16 16:11:22.148275",
+ "modified": "2024-05-29 15:55:47.337529",
  "modified_by": "Administrator",
  "module": "MBW DMS",
  "name": "DMS Inventory",

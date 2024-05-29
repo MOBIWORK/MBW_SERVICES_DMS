@@ -279,7 +279,7 @@ def create_checkin_inventory(body):
     try:
         employee = frappe.get_doc("Employee", {"user_id": frappe.session.user})
         normal_keys = [
-            "customer_code", "customer_name", "customer_type", "customer_address", "checkin_id"
+            "customer_code", "customer_name", "customer_type", "checkin_id"
         ]
         del body['cmd']
         doc = frappe.new_doc("DMS Inventory")
@@ -288,6 +288,8 @@ def create_checkin_inventory(body):
         for key, value in body.items():
             if key in normal_keys:
                 doc.set(key, validate_filter(type_check='require_field', value=(value,key)))
+            else:
+                doc.set(key,value)
         items = body.get('inventory_items')
 
         for item in items:
