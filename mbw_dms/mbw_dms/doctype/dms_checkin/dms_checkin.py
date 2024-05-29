@@ -9,7 +9,9 @@ from frappe.utils.data import get_time
 from mbw_dms.api.common import (exception_handle, gen_response,
                                 get_language, get_user_id, upload_image_s3,
                                 post_image, get_employee_info, get_value_child_doctype, 
-                                get_employee_id,time_now_utc,null_location,create_address)
+                                get_employee_id,time_now_utc,null_location,create_address,
+                                create_address_current
+                                )
 from mbw_dms.api.validators import validate_datetime, validate_filter
 from mbw_dms.mbw_dms.utils import create_dms_log
 from mbw_dms.config_translate import i18n
@@ -453,79 +455,72 @@ def update_address_customer_checkin(body):
                         "link_name":customer,
                         "link_title": checkin_id
                     }
+        address_return = ""
         if customer_info:
-            
-            # xử lý khách hàng có địa chỉ
-            if customer_info.get("customer_primary_address"):
-                current_address_cs  = frappe.db.get_value("Address",customer_info.get("customer_primary_address"),["name"],as_dict=1)
-                if current_address_cs:
-                    current_address_cs = frappe.get_doc("Address",current_address_cs.get("name"))
-                    current_address_cs.address_location = address_location
-                    if link_cs_address:
-                        links = current_address_cs.links
-                        find_cs = pydash.filter_(links, lambda cs: cs.get("link_doctype") ==  link_cs_address.get("link_doctype") and cs.get("link_name") != link_cs_address.get("link_name"))
-                        find_cs.append(link_cs_address)
-                        current_address_cs.set("links",find_cs)        
-                    current_address_cs.save()
-                else:
-                    return gen_response(500,_("Địa chỉ trên hệ thống chưa đúng, vui lòng cập nhật lại địa chỉ"),{})
-
-            # xử lý nếu khách hàng không có địa chỉ
-            else :
+            # không truyền lên địa chỉ
+            if not bool(city) and not bool(address_line1):
                 doc_customer = frappe.get_doc("Customer", body.get("customer"))
-                # không truyền lên địa chỉ
-                if not bool(city) and not bool(address_line1):
+                if not bool(customer_info.get("customer_primary_address")):
                     doc_customer.customer_location_primary = address_location
                     doc_customer.save()
-                # truyền lên địa chỉ thiếu trường
-                elif not bool(city) or not bool(address_line1) :
-                    not_have = ""
-                    if not bool(city):
-                        not_have += "city"
-                    if not bool(address_line1):
-                        not_have = not_have + "và address_line1" if len(not_have)>1 else "address_line1"
-                    
-                    return gen_response(500,_(f"Vui lòng nhâp {not_have}"),{})
-                # truyền lên đầy đủ:
                 else:
-                    city_info = frappe.db.get_value(doctype="DMS Province", filters={"ten_tinh": ["like", f"%{city}%"]}, fieldname=["ma_tinh"])
-                    if county:
-                        district_info = frappe.db.get_value(doctype="DMS District", filters={"ten_huyen": ["like", f"%{county}%"]}, fieldname=["ma_huyen"])
-                    if state:
-                        ward_info = frappe.db.get_value(doctype="DMS Ward", filters={"ten_xa": ["like", f"%{state}%"]}, fieldname=["ma_xa"])
-                    if not bool(city_info) : 
-                        return gen_response(404,_("Couldn't find city"), {})
-                    
-                    new_address = {
-                            "address_title": f"{address_line1}, {state}, {county}, {city}",
-                            "address_line1":address_line1, 
-                            "city": city_info,   
-                            "address_location":address_location,
-                            "checkin_id ":checkin_id         
-                        }
-                    address_title = f"{city}"
-                    if district_info:
-                        new_address.update({
-                            "county": district_info,
-                        })
-                        address_title = f"{county}, " +address_title
-                    if ward_info:
-                        new_address.update({
-                            "state": ward_info,
-                        })
-                        address_title = f"{state}, " +address_title
-                    address_title = f"{address_line1}, " +address_title
-                    new_address.update({"address_title":address_title})
-                    
-                    
-                    curent_address  = create_address(new_address=new_address, link_cs_address=link_cs_address)
-                    if customer_info.get("customer_primary_address") != curent_address.get("name") :
-                        doc_customer.customer_primary_address = curent_address.get("name")
-           
+                    address_current = create_address_current(customer_info.get("customer_primary_address"),address_location,link_cs_address)
+                    if address_current:
+                        address_return = address_current.get("name")
+                    else:
+                        doc_customer.customer_location_primary = address_location
+                        doc_customer.save()
+                frappe.db.commit()
+            # truyền lên địa chỉ thiếu trường
+            elif not bool(city) or not bool(address_line1) :
+                not_have = ""
+                if not bool(city):
+                    not_have += "Thành phố"
+                if not bool(address_line1):
+                    not_have = not_have + "và Địa chỉ chi tiết" if len(not_have)>1 else " Địa chỉ chi tiết"
+                
+                return gen_response(500,_(f"Vui lòng nhâp {not_have}"),{})
+            # truyền lên đầy đủ:
+            else:
+                city_info = frappe.db.get_value(doctype="DMS Province", filters={"ten_tinh": ["like", f"%{city}%"]}, fieldname=["ma_tinh"])
+                if county:
+                    district_info = frappe.db.get_value(doctype="DMS District", filters={"ten_huyen": ["like", f"%{county}%"]}, fieldname=["ma_huyen"])
+                if state:
+                    ward_info = frappe.db.get_value(doctype="DMS Ward", filters={"ten_xa": ["like", f"%{state}%"]}, fieldname=["ma_xa"])
+                if not bool(city_info) : 
+                    return gen_response(404,_("Couldn't find city"), {})
+                
+                new_address = {
+                        "address_title": f"{address_line1}, {state}, {county}, {city}",
+                        "address_line1":address_line1, 
+                        "city": city_info,   
+                        "address_location":address_location,
+                        "checkin_id ":checkin_id         
+                    }
+                address_title = f"{city}"
+                if district_info:
+                    new_address.update({
+                        "county": district_info,
+                    })
+                    address_title = f"{county}, " +address_title
+                if ward_info:
+                    new_address.update({
+                        "state": ward_info,
+                    })
+                    address_title = f"{state}, " +address_title
+                address_title = f"{address_line1}, " +address_title
+                new_address.update({"address_title":address_title})
+                
+                
+                curent_address  = create_address(new_address=new_address, link_cs_address=link_cs_address)
+                if customer_info.get("customer_primary_address") != curent_address.get("name") :
+                    doc_customer = frappe.get_doc("Customer", body.get("customer"))
+                    doc_customer.customer_primary_address = curent_address.get("name")        
                     doc_customer.save()
+                    frappe.db.commit()
+                address_return = address_title
             
-            frappe.db.commit()
-            return gen_response(200, "Thành công", customer_info.get("customer_primary_address"))
+            return gen_response(200, "Thành công", address_return)
         else:
             return gen_response(406, _("Không tồn tại khách hàng"), {})             
         

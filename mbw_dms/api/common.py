@@ -236,6 +236,92 @@ def create_address(new_address,link_cs_address) :
         current_address_cs = new_address_doc
     return current_address_cs
 
+
+def create_address_current(address_title,new_location,link_cs_address) :
+    current_address = frappe.db.get_value("Address",address_title,["name","address_location"],as_dict=1)
+    if current_address:
+        current_address_cs = frappe.get_doc("Address",current_address.get("name"))
+        current_address_cs.address_location =new_location
+        if link_cs_address:
+            links = current_address_cs.links
+            find_cs = pydash.filter_(links, lambda cs: cs.get("link_doctype") ==  link_cs_address.get("link_doctype") and cs.get("link_name") != link_cs_address.get("link_name"))
+            find_cs.append(link_cs_address)
+            current_address_cs.set("links",find_cs)        
+        current_address_cs.save()
+    else:
+        new_address_doc = frappe.new_doc("Address")
+        new_address = handle_address(address_title)
+        if new_address:
+            for key,value in new_address.items():
+                setattr(new_address_doc,key,value)
+            if link_cs_address:
+                new_address_doc.append("links",link_cs_address)
+            new_address_doc.save()
+            current_address_cs = new_address_doc
+        else :
+            current_address_cs = False
+    return current_address_cs
+
+def handle_address(address_title) : 
+    address_oop =  {"address_title": address_title}
+    arr_address = address_title.split(",")
+    arr_address = pydash.map_(arr_address,lambda x : x.strip())
+    lenAdd = len(arr_address)
+    if len ==1:
+        return False
+    elif len ==2:
+        address_oop.update({               
+                        "address_line1":arr_address[0], 
+                        "city": arr_address[1],  
+                    })
+    elif len ==3:
+        address_oop.update({               
+                        "address_line1":arr_address[0], 
+                        "county": arr_address[1],
+                        "city": arr_address[2],  
+                    })
+    elif len ==4:
+        address_oop.update({               
+                        "address_line1":arr_address[0], 
+                        "state": arr_address[1],
+                        "county": arr_address[2],
+                        "city": arr_address[3],  
+                    })
+    else :
+        address_oop.update({               
+                        "state": arr_address[len-3],
+                        "county": arr_address[len-2],
+                        "city": arr_address[len-1],  
+                    })
+        address_line1 = ",".join(arr_address[:-3])
+        address_oop.update({
+            "address_line1":address_line1,
+        })
+    city_info = frappe.db.get_value(doctype="DMS Province", filters={"ten_tinh": ["like", f"%{address_oop.city}%"]}, fieldname=["ma_tinh"])
+    if not city_info:
+        return False
+    else:
+        address_oop.update({               
+                        "city":city_info,  
+                    })
+    if address_oop.county:
+        district_info = frappe.db.get_value(doctype="DMS District", filters={"ten_huyen": ["like", f"%{address_oop.county}%"]}, fieldname=["ma_huyen"])
+        if district_info :
+             address_oop.update({               
+                         "county": district_info,
+                    })
+        else:
+            del address_oop["county"]                   
+     
+    if address_oop.state:
+        ward_info = frappe.db.get_value(doctype="DMS Ward", filters={"ten_xa": ["like", f"%{address_oop.state}%"]}, fieldname=["ma_xa"])
+        if ward_info:
+            address_oop.update({
+            "state": ward_info,
+            })
+        else:
+            del address_oop["state"]
+    return address_oop
 def post_image(name_image, faceimage, doc_type, doc_name):
     # save file and insert Doctype File
     file_name = name_image + "_"+ str(datetime.now().timestamp()) + "_.png"
