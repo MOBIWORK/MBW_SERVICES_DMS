@@ -555,7 +555,7 @@ def cancel_checkout(data):
             customer.save(ignore_permissions = True)
         frappe.db.commit()
         # xoá địa chỉ
-        return
+        return gen_response(200,"",{})
     except Exception as e :
         exception_handle(e)
 
