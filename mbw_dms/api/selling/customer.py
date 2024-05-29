@@ -288,7 +288,7 @@ def list_territory():
 # Chỉnh sửa khách hàng
 @frappe.whitelist(methods="PUT")
 def update_customer(name, **kwargs):
-    # try:
+    try:
         if frappe.db.exists("Customer", name, cache=True):
             customer = frappe.get_doc("Customer", name)
             
@@ -321,7 +321,7 @@ def update_customer(name, **kwargs):
                 address_data_list = kwargs.get("address")
                 if address_data_list:
                     for address_data in address_data_list:
-                        address_name = address_data.get("address_title")
+                        address_name = address_data.get("name")
                         if address_name and frappe.db.exists("Address", address_name):
                             address = frappe.get_doc("Address", address_name)
                             address.update(address_data)
@@ -370,19 +370,26 @@ def update_customer(name, **kwargs):
                 if credit_limits_data_list:
                     for credit_limits_data in credit_limits_data_list:
                         credit_name = credit_limits_data.get("name")
+                        credit_limit_updated = False
                         if credit_name:
                             # Cập nhật credit limit đã tồn tại
                             for credit_limit in customer.credit_limits:
                                 if credit_limit.name == credit_name:
                                     credit_limit.credit_limit = credit_limits_data.get("credit_limit")
+                                    credit_limit.company = credit_limits_data.get("company", credit_limit.company)
+                                    credit_limit_updated = True
+                                    break
+                        if not credit_limit_updated:
+                            # Thêm mới credit limit
+                            customer.append("credit_limits", credit_limits_data)
             
             customer.save()
             frappe.db.commit()
             return gen_response(200, "Cập nhật thành công")
         else:
             return gen_response(406, f"Không tồn tại {name}")
-    # except Exception as e:
-    #     return exception_handle(e)
+    except Exception as e:
+        return exception_handle(e)
 
 
 # Lấy địa chỉ khách hàng
