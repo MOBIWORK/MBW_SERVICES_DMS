@@ -210,9 +210,9 @@ def create_customer(**kwargs):
             new_customer.save()
 
         # Tạo mới contact khách hàng
-        if contact and contact.get('first_name'):
-            new_contact = frappe.new_doc('Contact')
-            contact_fields = ['first_name', "address_contact","phone"]
+        if contact and contact.get("first_name"):
+            new_contact = frappe.new_doc("Contact")
+            contact_fields = ["first_name", "address_contact","phone"]
             for key, value in contact.items():
                 if key in contact_fields:
                     new_contact.set(key, value)
@@ -288,17 +288,102 @@ def list_territory():
 # Chỉnh sửa khách hàng
 @frappe.whitelist(methods="PUT")
 def update_customer(name, **kwargs):
-    try:
+    # try:
         if frappe.db.exists("Customer", name, cache=True):
-            customers = frappe.get_doc('Customer', name)
-            for field, value in dict(kwargs).items():
-                setattr(customers, field, value)
-            customers.save()
+            customer = frappe.get_doc("Customer", name)
+            
+            # Cập nhật các trường cơ bản của khách hàng
+            required_fields = ["customer_code", "customer_name", "customer_group", "territory"]
+            normal_fields = ["customer_details", "website"]
+            date_fields = ["custom_birthday"]
+            choice_fields = ["customer_type"]
+
+            for key, value in kwargs.items():
+                if key in normal_fields:
+                    customer.set(key, value)
+                elif key in required_fields:
+                    required = validate_not_none(value)
+                    customer.set(key, required)
+                elif key in date_fields:
+                    custom_birthday = validate_date(value)
+                    customer.set(key, custom_birthday)
+                elif key in choice_fields:
+                    customer_type = validate_choice(configs.customer_type)(value)
+                    customer.set(key, customer_type)
+
+            # Thay đổi ảnh
+            if kwargs.get("image"):
+                customer.image = post_image(name_image="", faceimage=kwargs.get("image"), doc_type="Customer", doc_name=customer.name)
+                customer.save()
+            
+            # Cập nhật hoặc thêm mới địa chỉ
+            if "address" in kwargs:
+                address_data_list = kwargs.get("address")
+                if address_data_list:
+                    for address_data in address_data_list:
+                        address_name = address_data.get("address_title")
+                        if address_name and frappe.db.exists("Address", address_name):
+                            address = frappe.get_doc("Address", address_name)
+                            address.update(address_data)
+                            address.save(ignore_permissions=True)
+                        else:
+                            address = frappe.new_doc("Address")
+                            address.update(address_data)
+                            address.append("links", {
+                                "link_doctype": "Customer",
+                                "link_name": name
+                            })
+                            address.insert(ignore_permissions=True)
+            
+            # Cập nhật hoặc thêm mới liên hệ
+            if "contact" in kwargs:
+                contacts_data_list = kwargs.get("contact")
+                if contacts_data_list:
+                    for contact_data in contacts_data_list:
+                        contact_name = contact_data.get("name")
+                        if contact_name and frappe.db.exists("Contact", contact_name):
+                            contact = frappe.get_doc("Contact", contact_name)
+                            contact.update(contact_data)
+                            contact.save(ignore_permissions=True)
+                        else:
+                            contact = frappe.new_doc("Contact")
+                            contact.update(contact_data)
+                            contact.append("links", {
+                                "link_doctype": "Customer",
+                                "link_name": name
+                            })
+                            contact.insert()
+
+            # Chỉnh sửa tuyến
+            if "router" in kwargs:
+                routers_data = kwargs.get("router")
+                if routers_data:
+                    router_name = routers_data.get("router_name")
+                    if router_name and frappe.db.exists("DMS Router Customer", {"parent": router_name, "customer_name": name}):
+                        router = frappe.get_doc("DMS Router Customer", {"parent": router_name, "customer_name": name})
+                        router.frequency = routers_data.get("frequency")
+                        router.save()
+            
+            # Chỉnh sửa hạn mức công nợ
+            if "credit_limits" in kwargs:
+                credit_limits_data_list = kwargs.get("credit_limits")
+                if credit_limits_data_list:
+                    for credit_limits_data in credit_limits_data_list:
+                        credit_name = credit_limits_data.get("name")
+                        if credit_name:
+                            # Cập nhật credit limit đã tồn tại
+                            for credit_limit in customer.credit_limits:
+                                if credit_limit.name == credit_name:
+                                    credit_limit.credit_limit = credit_limits_data.get("credit_limit")
+            
+            customer.save()
+            frappe.db.commit()
             return gen_response(200, "Cập nhật thành công")
         else:
             return gen_response(406, f"Không tồn tại {name}")
-    except Exception as e:
-        return exception_handle(e)
+    # except Exception as e:
+    #     return exception_handle(e)
+
 
 # Lấy địa chỉ khách hàng
 @frappe.whitelist(methods="GET")
