@@ -435,7 +435,6 @@ def update_address_customer(body):
 
 
 # Cập nhật địa chỉ khách hàng
-@frappe.whitelist()
 def update_address_customer_checkin(body):
     try:
         customer = validate_filter(type_check='require', value=body.get('customer'))
@@ -455,10 +454,10 @@ def update_address_customer_checkin(body):
                         "link_title": checkin_id
                     }
         if customer_info:
-            doc_customer = frappe.get_doc("Customer", body.get("customer"))
+            
             # xử lý khách hàng có địa chỉ
             if customer_info.get("customer_primary_address"):
-                current_address_cs  = frappe.db.get_value("Address",customer_info.get("customer_primary_address"))
+                current_address_cs  = frappe.db.get_value("Address",customer_info.get("customer_primary_address"),["name"],as_dict=1)
                 if current_address_cs:
                     current_address_cs = frappe.get_doc("Address",current_address_cs.get("name"))
                     current_address_cs.address_location = address_location
@@ -473,6 +472,7 @@ def update_address_customer_checkin(body):
 
             # xử lý nếu khách hàng không có địa chỉ
             else :
+                doc_customer = frappe.get_doc("Customer", body.get("customer"))
                 # không truyền lên địa chỉ
                 if not bool(city) and not bool(address_line1):
                     doc_customer.customer_location_primary = address_location
@@ -522,7 +522,7 @@ def update_address_customer_checkin(body):
                     if customer_info.get("customer_primary_address") != curent_address.get("name") :
                         doc_customer.customer_primary_address = curent_address.get("name")
            
-            doc_customer.save()
+                    doc_customer.save()
             
             frappe.db.commit()
             return gen_response(200, "Thành công", customer_info.get("customer_primary_address"))
