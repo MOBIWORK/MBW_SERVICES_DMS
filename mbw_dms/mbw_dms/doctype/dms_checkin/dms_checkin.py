@@ -380,7 +380,7 @@ def update_address_customer(body):
         customer_info = frappe.db.get_value(doctype="Customer", filters= {"name": customer}, fieldname=["name", "customer_primary_address", "customer_name"], as_dict=1)
         
         if customer_info:
-            doc_customer = frappe.get_doc("Customer", body.get("customer"))
+            
             # chuyển data từ mobile về dạng địa chỉ
             city = validate_filter(type_check='require', value=body.get('city'))
             county = body.get('county')
@@ -420,10 +420,11 @@ def update_address_customer(body):
                     }
             
             curent_address  = create_address(new_address=new_address, link_cs_address=link_cs_address)
-            if customer_info.get("customer_primary_address") != curent_address.get("name") :
+            doc_customer = frappe.get_doc("Customer", body.get("customer"))
+            if doc_customer.get("customer_primary_address") != curent_address.get("name") :
                 doc_customer.customer_primary_address = curent_address.get("name")
+                doc_customer.save()
            
-            doc_customer.save()
             
             frappe.db.commit()
             return gen_response(200, "Thành công", curent_address.get("name") )
