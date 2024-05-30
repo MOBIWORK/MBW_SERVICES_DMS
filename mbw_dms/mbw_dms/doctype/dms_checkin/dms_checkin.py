@@ -447,10 +447,10 @@ def update_address_customer_checkin(body):
         lat = validate_filter(type_check='require', value=body.get('lat'))
         address_location = null_location(json.dumps({"long": long, "lat": lat}))
         customer_info = frappe.db.get_value(doctype="Customer", filters= {"name": customer}, fieldname=["name", "customer_primary_address", "customer_name"], as_dict=1)
-        city = body.get('city')
-        county = body.get('county')
+        city = validate_filter(type_check='require',value = body.get('city'))
+        county =validate_filter(type_check='require',value= body.get('county'))
         country = body.get('country')
-        state =body.get('state')
+        state =validate_filter(type_check='require',value=body.get('state'))
         address_line1 = body.get('address_line1')
 
         link_cs_address = {
@@ -486,34 +486,34 @@ def update_address_customer_checkin(body):
                 return gen_response(500,_(f"Vui lòng nhâp {not_have}"),{})
             # truyền lên đầy đủ:
             else:
-                city_info = frappe.db.get_value(doctype="DMS Province", filters={"ma_tinh": city}, fieldname=["ten_tinh"])
-                if county:
-                    district_info = frappe.db.get_value(doctype="DMS District", filters={"ma_huyen":county}, fieldname=["ten_huyen"])
-                if state:
-                    ward_info = frappe.db.get_value(doctype="DMS Ward", filters={"ma_xa": state}, fieldname=["ten_xa"])
-                if not bool(city_info) : 
-                    return gen_response(404,_("Couldn't find city"), {})
+                # city_info = frappe.db.get_value(doctype="DMS Province", filters={"ma_tinh": city}, fieldname=["ten_tinh"])
+                # if county:
+                #     district_info = frappe.db.get_value(doctype="DMS District", filters={"ma_huyen":county}, fieldname=["ten_huyen"])
+                # if state:
+                #     ward_info = frappe.db.get_value(doctype="DMS Ward", filters={"ma_xa": state}, fieldname=["ten_xa"])
+                # if not bool(city_info) : 
+                #     return gen_response(404,_("Couldn't find city"), {})
                 
                 new_address = {
-                        "address_title": f"{address_line1}, {ward_info}, {district_info}, {city_info}",
+                        "address_title": "",
                         "address_line1":address_line1, 
-                        "city": city,   
+                        "city": city.get("code"),   
                         "address_location":address_location,
                         "checkin_id ":checkin_id         
                     }
                 if country:
                     new_address.update({"country":country})
-                address_title = f"{city_info}"
+                address_title = f"{city.get("name")}"
                 if county:
                     new_address.update({
-                        "county": county,
+                        "county": county.get("code"),
                     })
-                    address_title = f"{district_info}, " +address_title
+                    address_title = f"{county.get("name")}, " +address_title
                 if state:
                     new_address.update({
-                        "state": state,
+                        "state": state.get("code"),
                     })
-                    address_title = f"{ward_info}, " +address_title
+                    address_title = f"{state.get("name")}, " +address_title
                 address_title = f"{address_line1}, " +address_title
                 new_address.update({"address_title":address_title})                
                 curent_address  = create_address(new_address=new_address, link_cs_address=link_cs_address)
