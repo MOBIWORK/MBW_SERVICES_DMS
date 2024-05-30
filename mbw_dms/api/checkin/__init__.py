@@ -1,5 +1,5 @@
 import frappe
-from mbw_dms.api.common import (validate_filter)
+from mbw_dms.api.validators import  (validate_filter)
 # Tạo mới checkin
 @frappe.whitelist()
 def create_checkin(**kwargs):
@@ -27,7 +27,8 @@ def update_address_customer(**kwargs):
 def update_address_customer_checkin(**kwargs):
     from mbw_dms.mbw_dms.doctype.dms_checkin.dms_checkin import update_address_customer_checkin
     checkin_id = validate_filter(type_check='require', value=kwargs.get('checkin_id'))
-    return update_address_customer_checkin(body=kwargs.update({"checkin_id":checkin_id}))
+    new_body = {**kwargs,"checkin_id":checkin_id}
+    return update_address_customer_checkin(body=new_body)
 
 # cancel checkout
 @frappe.whitelist()

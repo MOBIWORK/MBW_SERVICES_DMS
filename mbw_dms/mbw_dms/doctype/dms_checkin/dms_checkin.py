@@ -441,6 +441,7 @@ def update_address_customer(body):
 # Cập nhật địa chỉ khách hàng
 def update_address_customer_checkin(body):
     try:
+
         customer = validate_filter(type_check='require', value=body.get('customer'))
         checkin_id = body.get('checkin_id')        
         long = validate_filter(type_check='require', value=body.get('long'))
@@ -452,7 +453,7 @@ def update_address_customer_checkin(body):
         country = body.get('country')
         state =validate_filter(type_check='require',value=body.get('state'))
         address_line1 = body.get('address_line1')
-
+        
         link_cs_address = {
                         "link_doctype": "Customer",
                         "link_name":customer                        
@@ -486,14 +487,6 @@ def update_address_customer_checkin(body):
                 return gen_response(500,_(f"Vui lòng nhâp {not_have}"),{})
             # truyền lên đầy đủ:
             else:
-                # city_info = frappe.db.get_value(doctype="DMS Province", filters={"ma_tinh": city}, fieldname=["ten_tinh"])
-                # if county:
-                #     district_info = frappe.db.get_value(doctype="DMS District", filters={"ma_huyen":county}, fieldname=["ten_huyen"])
-                # if state:
-                #     ward_info = frappe.db.get_value(doctype="DMS Ward", filters={"ma_xa": state}, fieldname=["ten_xa"])
-                # if not bool(city_info) : 
-                #     return gen_response(404,_("Couldn't find city"), {})
-                
                 new_address = {
                         "address_title": "",
                         "address_line1":address_line1, 
@@ -501,21 +494,24 @@ def update_address_customer_checkin(body):
                         "address_location":address_location,
                         "checkin_id ":checkin_id         
                     }
-                if country:
-                    new_address.update({"country":country})
-                address_title = f"{city.get("name")}"
+                # if country:
+                #     new_address.update({"country":country})
+                city_name = city.get("name")
+                address_title = f"{city_name}"
                 if county:
                     new_address.update({
                         "county": county.get("code"),
                     })
-                    address_title = f"{county.get("name")}, " +address_title
+                    county_name = county.get("name")
+                    address_title = f"{county_name}, " +address_title
                 if state:
                     new_address.update({
                         "state": state.get("code"),
                     })
-                    address_title = f"{state.get("name")}, " +address_title
+                    state_name =state.get("name")
+                    address_title = f"{state_name}, " +address_title
                 address_title = f"{address_line1}, " +address_title
-                new_address.update({"address_title":address_title})                
+                new_address.update({"address_title":address_title})    
                 curent_address  = create_address(new_address=new_address, link_cs_address=link_cs_address)
                 if customer_info.get("customer_primary_address") != curent_address.get("name") :
                     doc_customer = frappe.get_doc("Customer", body.get("customer"))
