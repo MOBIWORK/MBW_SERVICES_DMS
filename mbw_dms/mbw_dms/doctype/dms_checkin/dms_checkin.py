@@ -449,6 +449,7 @@ def update_address_customer_checkin(body):
         customer_info = frappe.db.get_value(doctype="Customer", filters= {"name": customer}, fieldname=["name", "customer_primary_address", "customer_name"], as_dict=1)
         city = body.get('city')
         county = body.get('county')
+        country = body.get('country')
         state =body.get('state')
         address_line1 = body.get('address_line1')
 
@@ -500,6 +501,8 @@ def update_address_customer_checkin(body):
                         "address_location":address_location,
                         "checkin_id ":checkin_id         
                     }
+                if country:
+                    new_address.update({"country":country})
                 address_title = f"{city_info}"
                 if county:
                     new_address.update({
