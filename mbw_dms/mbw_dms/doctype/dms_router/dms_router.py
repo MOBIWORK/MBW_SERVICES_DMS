@@ -200,7 +200,7 @@ def get_customer_router(data):
 
         for customer in detail_customer:
             address_name = customer["customer_primary_address"]
-            customer["customer_primary_address"]=frappe.db.get_value("Address",{"name": address_name},["address_title"])
+            customer["customer_primary_address"]=frappe.db.get_value("Address",{"name": address_name},["address_title","address_line1","city","county","state"],as_dict=1)
             customer['is_checkin'] = False
             start_time,end_time=validate_filter(type_check="in_date",value=datetime.now().timestamp())
             checkin = frappe.db.get_value("DMS Checkin",{"kh_ma":customer.get('customer_code'),"creation": ["between",[start_time,end_time]]},["is_checkout"],as_dict=1)
