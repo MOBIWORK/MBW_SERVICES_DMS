@@ -54,36 +54,36 @@ def customer_report(**kwargs):
         list_customers = frappe.db.sql(sql_query, (limit, offset), as_dict=True)
 
         totals = {
-            'sum_checkin': 0,
-            'sum_so': 0,
+            "sum_checkin": 0,
+            "sum_so": 0,
         }
         if list_customers:
             for i in list_customers:
                 # Số lần viếng thăm
-                i['first_checkin'] = ''
-                i['last_checkin'] = ''
-                i['totals_checkin'] = frappe.db.count('DMS Checkin', {'kh_ten': i['cus_id']})
-                if i['totals_checkin']:
-                    totals['sum_checkin'] += i['totals_checkin']
-                first_checkin = frappe.db.get_all('DMS Checkin', filters={'kh_ten': i['cus_id']}, order_by='creation asc', fields=['UNIX_TIMESTAMP(creation) as creation'], limit=1)
-                last_checkin = frappe.db.get_all('DMS Checkin', filters={'kh_ten': i['cus_id']}, order_by='creation desc', fields=['UNIX_TIMESTAMP(creation) as creation'], limit=1)
+                i["first_checkin"] = ""
+                i["last_checkin"] = ""
+                i["totals_checkin"] = frappe.db.count("DMS Checkin", {"kh_ten": i["cus_id"]})
+                if i["totals_checkin"]:
+                    totals["sum_checkin"] += i["totals_checkin"]
+                first_checkin = frappe.db.get_all("DMS Checkin", filters={"kh_ten": i["cus_id"]}, order_by="creation asc", fields=["UNIX_TIMESTAMP(creation) as creation"], limit=1)
+                last_checkin = frappe.db.get_all("DMS Checkin", filters={"kh_ten": i["cus_id"]}, order_by="creation desc", fields=["UNIX_TIMESTAMP(creation) as creation"], limit=1)
                 if first_checkin:
-                    i['first_checkin'] = first_checkin[0].creation
+                    i["first_checkin"] = first_checkin[0].creation
                 if last_checkin:
-                    i['last_checkin'] = last_checkin[0].creation
+                    i["last_checkin"] = last_checkin[0].creation
 
                 # Nguồn
-                i['source'] = ''
+                i["source"] = ""
 
                 # Số đơn hàng
-                i['totals_so'] = frappe.db.count('Sales Order', {'customer_name': i['cus_id']})
-                if i['totals_so']:
-                    totals['sum_so'] += i['totals_so']
+                i["totals_so"] = frappe.db.count("Sales Order", {"customer_name": i["cus_id"]})
+                if i["totals_so"]:
+                    totals["sum_so"] += i["totals_so"]
                 # Đơn hàng cuối
-                i['last_sale_order'] = ''
-                last_so = frappe.db.get_all('Sales Order', filters={'customer_name': i['cus_id']}, order_by='creation desc', fields=['UNIX_TIMESTAMP(creation) as creation'], limit=1)
+                i["last_sale_order"] = ""
+                last_so = frappe.db.get_all("Sales Order", filters={"customer_name": i["cus_id"]}, order_by="creation desc", fields=["UNIX_TIMESTAMP(creation) as creation"], limit=1)
                 if last_so:
-                    i['last_sale_order'] = last_so[0].creation
+                    i["last_sale_order"] = last_so[0].creation
         
         filters_cus = []
         if from_date and to_date:
@@ -91,7 +91,7 @@ def customer_report(**kwargs):
         
         where_cons = " AND ".join(filters)
         # Tổng số khách hàng
-        sql_count = f""" SELECT COUNT(*) FROM `tabCustomer` cus """
+        sql_count = f""" SELECT COUNT(*) FROM `tabCustomer`"""
         if where_cons:
             sql_count += " WHERE {}".format(where_cons)
         customer_count = frappe.db.sql(sql_count, as_dict=True)
