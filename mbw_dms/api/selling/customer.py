@@ -385,7 +385,7 @@ def update_customer(name, **kwargs):
             
             customer.save()
             frappe.db.commit()
-            return gen_response(200, "Cập nhật thành công")
+            return gen_response(200, "ok")
         else:
             return gen_response(406, f"Không tồn tại {name}")
     except Exception as e:
