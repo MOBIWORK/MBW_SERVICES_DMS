@@ -70,5 +70,8 @@ def update_location(doc,method=None):
         elif doc.customer_location_primary != address.address_location :
             doc.customer_location_primary = address.address_location
             doc.save(ignore_permissions=True)
+    elif bool(doc.customer_location_primary):
+        doc.customer_location_primary = None
+        doc.save(ignore_permissions=True)
     frappe.db.commit()
     pass
