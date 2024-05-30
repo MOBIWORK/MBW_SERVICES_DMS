@@ -76,7 +76,7 @@ def get_sale_order(name):
             Employee = frappe.qb.DocType("Employee")
 
             # Lấy ra các trường trong đơn hàng
-            field_detail_sales = ['total','grand_total','customer_code', 'customer','customer_name','customer_address','delivery_date','set_warehouse','taxes_and_charges','total_taxes_and_charges','apply_discount_on','additional_discount_percentage','discount_amount','contact_person','rounded_total', 'status']
+            field_detail_sales = ["total", "grand_total", "customer_code", "customer", "customer_name", "customer_address", "delivery_date", "set_warehouse", "total_taxes_and_charges", "apply_discount_on", "additional_discount_percentage", "discount_amount", "contact_person", "rounded_total", "status"]
 
             # Thực hiện join để lấy ra giá trị
             detail = (frappe.qb.from_(SalesOrder)
@@ -92,6 +92,7 @@ def get_sale_order(name):
                         ,SalesOrder.taxes_and_charges,SalesOrder.total_taxes_and_charges, SalesOrder.apply_discount_on, SalesOrder.additional_discount_percentage,SalesOrder.discount_amount,SalesOrder.contact_person, SalesOrder.status
                     )
                     ).run(as_dict =1)
+            
             # Lấy ra giá trị tax
             detail_taxes = (frappe.qb.from_(SalesOrder)
                             .inner_join(SalesOrderTaxes)
@@ -587,7 +588,7 @@ def get_items(master_doc, master_name):
 
     items = master_doc.get('items')
 
-    fields_to_get = ['name', 'item_name', 'item_code', 'rate', 'qty', 'uom', 'amount', 'discount_amount', 'discount_percentage', 'is_free_item']
+    fields_to_get = ["name", "item_name", "item_code", "rate", "qty", "uom", "amount", "discount_amount", "discount_percentage", "is_free_item", "item_tax_template", "item_tax_rate"]
     result = []
 
     for item in items:
