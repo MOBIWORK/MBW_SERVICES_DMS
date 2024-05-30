@@ -371,7 +371,6 @@ def create_checkin_image(body):
         exception_handle(e)
 
 # Cập nhật địa chỉ khách hàng
-@frappe.whitelist()
 def update_address_customer(body):
     try:
         customer = validate_filter(type_check='require', value=body.get('customer'))
@@ -443,7 +442,7 @@ def update_address_customer(body):
 def update_address_customer_checkin(body):
     try:
         customer = validate_filter(type_check='require', value=body.get('customer'))
-        checkin_id = validate_filter(type_check='require', value=body.get('checkin_id'))        
+        checkin_id = body.get('checkin_id')        
         long = validate_filter(type_check='require', value=body.get('long'))
         lat = validate_filter(type_check='require', value=body.get('lat'))
         address_location = null_location(json.dumps({"long": long, "lat": lat}))
@@ -455,9 +454,10 @@ def update_address_customer_checkin(body):
 
         link_cs_address = {
                         "link_doctype": "Customer",
-                        "link_name":customer,
-                        "link_title": checkin_id
+                        "link_name":customer                        
                     }
+        if checkin_id :
+            link_cs_address.update({"link_title": checkin_id})
         address_return = ""
         if customer_info:
             # không truyền lên địa chỉ
@@ -485,36 +485,34 @@ def update_address_customer_checkin(body):
                 return gen_response(500,_(f"Vui lòng nhâp {not_have}"),{})
             # truyền lên đầy đủ:
             else:
-                city_info = frappe.db.get_value(doctype="DMS Province", filters={"ten_tinh": ["like", f"%{city}%"]}, fieldname=["ma_tinh"])
+                city_info = frappe.db.get_value(doctype="DMS Province", filters={"ma_tinh": city}, fieldname=["ten_tinh"])
                 if county:
-                    district_info = frappe.db.get_value(doctype="DMS District", filters={"ten_huyen": ["like", f"%{county}%"]}, fieldname=["ma_huyen"])
+                    district_info = frappe.db.get_value(doctype="DMS District", filters={"ma_huyen":county}, fieldname=["ten_huyen"])
                 if state:
-                    ward_info = frappe.db.get_value(doctype="DMS Ward", filters={"ten_xa": ["like", f"%{state}%"]}, fieldname=["ma_xa"])
+                    ward_info = frappe.db.get_value(doctype="DMS Ward", filters={"ma_xa": state}, fieldname=["ten_xa"])
                 if not bool(city_info) : 
                     return gen_response(404,_("Couldn't find city"), {})
                 
                 new_address = {
-                        "address_title": f"{address_line1}, {state}, {county}, {city}",
+                        "address_title": f"{address_line1}, {ward_info}, {district_info}, {city_info}",
                         "address_line1":address_line1, 
-                        "city": city_info,   
+                        "city": city,   
                         "address_location":address_location,
                         "checkin_id ":checkin_id         
                     }
-                address_title = f"{city}"
-                if district_info:
+                address_title = f"{city_info}"
+                if county:
                     new_address.update({
-                        "county": district_info,
+                        "county": county,
                     })
-                    address_title = f"{county}, " +address_title
-                if ward_info:
+                    address_title = f"{district_info}, " +address_title
+                if state:
                     new_address.update({
-                        "state": ward_info,
+                        "state": state,
                     })
-                    address_title = f"{state}, " +address_title
+                    address_title = f"{ward_info}, " +address_title
                 address_title = f"{address_line1}, " +address_title
-                new_address.update({"address_title":address_title})
-                
-                
+                new_address.update({"address_title":address_title})                
                 curent_address  = create_address(new_address=new_address, link_cs_address=link_cs_address)
                 if customer_info.get("customer_primary_address") != curent_address.get("name") :
                     doc_customer = frappe.get_doc("Customer", body.get("customer"))
@@ -529,6 +527,11 @@ def update_address_customer_checkin(body):
         
     except Exception as e:
         exception_handle(e)
+
+
+
+
+
 
 # cancel checkout
 @frappe.whitelist(methods="DELETE")
