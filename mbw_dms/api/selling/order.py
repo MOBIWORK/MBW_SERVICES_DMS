@@ -5,7 +5,6 @@ UNIX_TIMESTAMP = CustomFunction('UNIX_TIMESTAMP', ['day'])
 from mbw_dms.api.common import (
     exception_handle,
     gen_response,
-    get_value_child_doctype,
 )
 from mbw_dms.api.validators import (
     validate_filter_timestamp,
@@ -14,6 +13,7 @@ from mbw_dms.api.validators import (
     validate_not_none
 )
 from mbw_dms.api import configs
+import json
 
 # Lấy danh sách đơn hàng
 @frappe.whitelist(allow_guest=True,methods='GET')
@@ -588,13 +588,18 @@ def get_items(master_doc, master_name):
 
     items = master_doc.get('items')
 
-    fields_to_get = ["name", "item_name", "item_code", "rate", "qty", "uom", "amount", "discount_amount", "discount_percentage", "is_free_item", "item_tax_template", "item_tax_rate"]
+    fields_to_get = ["name", "item_name", "item_code", "rate", "qty", "uom", "amount", "discount_amount", "discount_percentage", "is_free_item", "item_tax_rate"]
     result = []
 
     for item in items:
         item_dict = {}
         for fieldname in fields_to_get:
-            item_dict[fieldname] = item.get(fieldname)
+            if fieldname == "item_tax_rate":
+                data = json.loads(item.get(fieldname))
+                value = list(data.values())[0]
+                item_dict[fieldname] = float(value)
+            else:
+                item_dict[fieldname] = item.get(fieldname)
         result.append(item_dict)
 
     return result
