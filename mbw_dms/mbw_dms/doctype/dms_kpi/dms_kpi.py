@@ -223,7 +223,7 @@ def invoices_report():
 
 		# Trả về phản hồi bao gồm cả KPI và danh sách hóa đơn bán hàng
 		return gen_response(200, "Thành công", {
-			"Kpi": kpi,
+			"kpi": kpi,
 			"sales_invoice": invoices_list
 		})
 	except Exception as e:

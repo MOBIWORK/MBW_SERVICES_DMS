@@ -14,16 +14,7 @@ def first_checkin_report(**kwargs):
         page_number = int(kwargs.get("page_number")) if kwargs.get("page_number") and int(kwargs.get("page_number")) >= 1 else 1
         sales_team = kwargs.get("sales_team")
         sales_person = kwargs.get("sales_person")
-        customer_type = kwargs.get("customer_type")
-        customer_group = kwargs.get("customer_group")
-        territory = kwargs.get("territory")
 
-        if customer_type:
-            filters["customer_type"] = customer_type
-        if customer_group:
-            filters["customer_group"] = customer_group
-        if territory:
-            filters["territory"] = territory
         if sales_team:
             filters["sales_team"] = sales_team
         if sales_person:
@@ -38,7 +29,7 @@ def first_checkin_report(**kwargs):
 
         data = frappe.db.get_all("DMS First Checkin Customer",
                                  filters=filters,
-                                 fields=["employee_id", "employee_name", "customer_name", "customer_code", "customer_type", "customer_group", "contact_person", "phone",
+                                 fields=["sales_team", "employee_id", "sales_person", "customer_name", "customer_code", "customer_type", "customer_group", "contact_person", "phone",
                                          "tax_id", "territory", "address", "date_checkin"],
                                  start=page_size*(page_number-1), page_length=page_size)
         
