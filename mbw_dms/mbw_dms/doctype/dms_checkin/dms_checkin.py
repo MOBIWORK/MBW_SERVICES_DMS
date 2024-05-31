@@ -23,7 +23,7 @@ import pydash
 class DMSCheckin(Document):
     def after_insert(self):
         self.update_kpi_monthly()
-        # self.send_data_to_ekgis()
+        # # self.send_data_to_ekgis()
         self.check_router()
         self.update_data_first_checkin()
 
@@ -437,12 +437,10 @@ def update_address_customer(body):
         exception_handle(e)
 
 
-
-
 # Cập nhật địa chỉ khách hàng
 def update_address_customer_checkin(body):
     try:
-        print("body===========================",body)
+
         customer = validate_filter(type_check='require', value=body.get('customer'))
         checkin_id = body.get('checkin_id')        
         long = validate_filter(type_check='require', value=body.get('long'))
@@ -530,9 +528,6 @@ def update_address_customer_checkin(body):
 
 
 
-
-
-
 # cancel checkout
 @frappe.whitelist(methods="DELETE")
 def cancel_checkout(data):
@@ -567,27 +562,6 @@ def cancel_checkout(data):
         exception_handle(e)
 
 import requests
-
-def create_checkin_ek(doc, method=None):
-    objectId = ""
-    projectId = ""
-    api_checkin = f"https://api.ekgis.vn/v1/checkin/{projectId}/{objectId}"
-    data_checkin = {
-                "projectid":projectId,
-                "objectid": projectId,
-                "lng": doc.checkin_long,
-                "lat": doc.checkin_lat,
-                "accuracy": doc.checkin_dochinhxac,
-                "battery_checkin": 0,
-                "battery_checkout": 0
-                }
-    if doc.checkin_giovao and not doc.checkin_giora:
-        data_checkin.update({"activity": "checkin"})
-        data_checkin.update({"time_checkin" : doc.checkin_giovao})
-    if doc.checkin_giovao and doc.checkin_giora:
-        data_checkin.update({"activity": "checkout"})
-        data_checkin.update({"time_checkin": doc.checkin_giora})
-    requests.post(url = api_checkin,data= data_checkin)
 
 @frappe.whitelist(methods="GET")
 def list_inventory(kwargs):

@@ -22,6 +22,7 @@ def kpi_report(**kwargs):
             filters.append(f"thang={month}")
         if year:
             filters.append(f"nam={year}")
+        filters.append("mo.nhan_vien_ban_hang IS NOT NULL")
         where_condition = " AND ".join(filters)
         
         sql_query = """
@@ -29,7 +30,6 @@ def kpi_report(**kwargs):
             mo.so_kh_moi as th_kh_moi, kpi.so_kh_moi as kh_kh_moi, mo.doanh_so_thang as th_doanh_so, kpi.doanh_so as kh_doanh_so, mo.doanh_thu_thang as th_doanh_thu, kpi.doanh_thu as kh_doanh_thu, mo.san_luong as th_san_lg, kpi.san_luong as kh_san_lg, mo.sku as th_sku, kpi.sku as kh_sku, mo.so_gio_lam_viec as th_so_gio_lam_viec, kpi.so_gio_lam_viec as kh_so_gio_lam_viec
             FROM `tabDMS KPI` kpi
             LEFT JOIN `tabDMS Summary KPI Monthly` mo ON kpi.nhan_vien_ban_hang = mo.nhan_vien_ban_hang
-            WHERE mo.nhan_vien_ban_hang IS NOT NULL
         """
 
         if where_condition:
