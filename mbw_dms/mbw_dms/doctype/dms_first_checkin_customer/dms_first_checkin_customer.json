@@ -5,9 +5,9 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "department",
   "employee_id",
-  "employee_name",
+  "sales_person",
+  "sales_team",
   "customer_name",
   "customer_code",
   "customer_type",
@@ -21,19 +21,9 @@
  ],
  "fields": [
   {
-   "fieldname": "department",
-   "fieldtype": "Data",
-   "label": "Department"
-  },
-  {
    "fieldname": "employee_id",
    "fieldtype": "Data",
    "label": "Employee Id"
-  },
-  {
-   "fieldname": "employee_name",
-   "fieldtype": "Data",
-   "label": "Employee name"
   },
   {
    "fieldname": "customer_name",
@@ -86,11 +76,21 @@
    "fieldname": "date_checkin",
    "fieldtype": "Date",
    "label": "Date checkin"
+  },
+  {
+   "fieldname": "sales_person",
+   "fieldtype": "Data",
+   "label": "Sales Person"
+  },
+  {
+   "fieldname": "sales_team",
+   "fieldtype": "Data",
+   "label": "Sales Team"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-04-11 09:37:26.550540",
+ "modified": "2024-05-31 09:28:58.889462",
  "modified_by": "Administrator",
  "module": "MBW DMS",
  "name": "DMS First Checkin Customer",

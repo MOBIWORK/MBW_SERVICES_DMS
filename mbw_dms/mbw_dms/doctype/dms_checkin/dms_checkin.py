@@ -264,11 +264,8 @@ def create_checkin(kwargs):
                 new_checkin.set(key, created_date)
         if kwargs.get("checkin_giora"):
             new_checkin.set("is_checkout", 1)
-        print(frappe.utils.now())
         new_checkin.insert(ignore_permissions=True)
-        print(frappe.utils.now())
         frappe.db.commit()
-        print(frappe.utils.now())
         return gen_response(201, "Thành công", {"name": new_checkin.name})
     except Exception as e:
         return exception_handle(e)
