@@ -34,7 +34,7 @@ export const FormItemCustom = styled(Form.Item)<{ disabled?: boolean }>`
   }
 }
 
-.ant-select-selector {
+.ant-select-selector,.ant-form-item .ant-form-item-control-input,.ant-select-single {
   border-radius: 8px;
   height: 28px!important;
 }

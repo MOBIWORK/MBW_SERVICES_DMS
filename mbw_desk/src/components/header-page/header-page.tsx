@@ -2,7 +2,7 @@ import { Button, Row } from "antd";
 import React, { ReactNode } from "react";
 
 type button = {
-  label: string;
+  label?: string;
   size?: string;
   icon?: React.ReactNode;
   action?: any;
@@ -31,11 +31,11 @@ export function HeaderPage({ title, buttons ,customButton, customSlect}: Props) 
                 key={index}
                 className={button.className}
                 size={button.size || "middle"}
-                icon={button.icon}
+                icon={button?.label ?button.icon : false} 
                 onClick={button.action}
                 type={button.type}
               >
-                {button.label}
+                {button?.label ? button?.label : button.icon}
               </Button>
             ))}
             {customSlect}

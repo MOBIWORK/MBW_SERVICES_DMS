@@ -21,6 +21,7 @@ import { router } from "../../types/router";
 import { GlobalContext } from "@/App";
 import { translationUrl, treeArray } from "@/util";
 import { listSale } from "@/types/listSale";
+import { SyncOutlined } from "@ant-design/icons";
 // ----------------------------------------------------------------------
 
 
@@ -53,6 +54,8 @@ function RouterControl() {
     "label": "Thời gian cập nhật",
     "value": "modified"
   },)
+
+  const [refresh,setRefresh] = useState<boolean>(false)
 
   const [keySearch4, setKeySearch4] = useState("");
   let seachbykey = useDebounce(keySearch4);
@@ -164,7 +167,7 @@ function RouterControl() {
 
     })()
 
-  }, [router, employee, status, page, filter, orderBy, orderField, rfRouter])
+  }, [router, employee, status, page, filter, orderBy, orderField, rfRouter,refresh])
   const handleUpdate = useCallback(async (type: string, value: string) => {
     try {
       let rsUpdate: rsData<router[]> = await AxiosService.patch("/api/method/mbw_dms.api.router.update_routers", {
@@ -250,7 +253,16 @@ function RouterControl() {
             title="Quản lý tuyến"
             buttons={[
               {
-                label: "Xuất excel",
+                // label: "Xuất excel",
+                icon: <SyncOutlined  className="text-xl" />,
+                size: "18px",
+                className: "flex mr-2 ",
+                action: () => {
+                  setRefresh(prev => !prev)
+                }
+              },
+              {
+                // label: "Xuất excel",
                 icon: <LiaDownloadSolid className="text-xl" />,
                 size: "20px",
                 className: "flex items-center mr-2",
@@ -259,7 +271,7 @@ function RouterControl() {
                 }
               },
               {
-                label: "Nhập excel",
+                // label: "Nhập excel",
                 icon: <LuUploadCloud className="text-xl" />,
                 size: "20px",
                 className: "flex items-center mr-2",
