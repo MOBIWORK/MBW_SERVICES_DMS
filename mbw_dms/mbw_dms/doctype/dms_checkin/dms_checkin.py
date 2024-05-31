@@ -23,7 +23,7 @@ import pydash
 class DMSCheckin(Document):
     def after_insert(self):
         self.update_kpi_monthly()
-        self.send_data_to_ekgis()
+        # self.send_data_to_ekgis()
         self.check_router()
         self.update_data_first_checkin()
 
@@ -264,10 +264,11 @@ def create_checkin(kwargs):
                 new_checkin.set(key, created_date)
         if kwargs.get("checkin_giora"):
             new_checkin.set("is_checkout", 1)
-
+        print(frappe.utils.now())
         new_checkin.insert(ignore_permissions=True)
+        print(frappe.utils.now())
         frappe.db.commit()
-
+        print(frappe.utils.now())
         return gen_response(201, "Thành công", {"name": new_checkin.name})
     except Exception as e:
         return exception_handle(e)
@@ -441,7 +442,7 @@ def update_address_customer(body):
 # Cập nhật địa chỉ khách hàng
 def update_address_customer_checkin(body):
     try:
-
+        print("body===========================",body)
         customer = validate_filter(type_check='require', value=body.get('customer'))
         checkin_id = body.get('checkin_id')        
         long = validate_filter(type_check='require', value=body.get('long'))
@@ -519,7 +520,7 @@ def update_address_customer_checkin(body):
                     doc_customer.save()
                     frappe.db.commit()
                 address_return = address_title
-            
+            frappe.clear_cache()
             return gen_response(200, "Thành công", address_return)
         else:
             return gen_response(406, _("Không tồn tại khách hàng"), {})             
@@ -547,9 +548,10 @@ def cancel_checkout(data):
         frappe.db.delete("DMS Album Image",{"checkin_id":checkin_id})
         #xoa check ton kho
         frappe.db.delete("DMS Inventory",{"checkin_id":checkin_id})
-        address = frappe.db.get_value("Address",{"checkin_id":checkin_id})
-        if address:
-            address = frappe.get_doc("Address",{"checkin_id":checkin_id})
+        address = frappe.db.get_all("Address",{"link_title":checkin_id},["name"])
+        if len(address)>0:
+            address = address[0]
+            address = frappe.get_doc("Address",address.get("name"))
             links = address.links
             find_not_cs = pydash.filter_(links, lambda cs:cs.get("link_title") != checkin_id)
             address.set("links",find_not_cs)
