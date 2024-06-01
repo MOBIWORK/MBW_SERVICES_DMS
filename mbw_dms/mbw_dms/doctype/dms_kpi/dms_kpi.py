@@ -47,7 +47,7 @@ def visit_report():
 		# Lấy id của nhân viên
 		user_name = frappe.get_value("Employee", {"user_id": frappe.session.user}, "name")
         
-		kpi = None
+		kpi = {}
 
 		# Lấy Kpi tháng vt lượt
 		monthly_summary = frappe.get_value(
@@ -70,6 +70,10 @@ def visit_report():
                 "dat_duoc": monthly_summary,
                 "phan_tram_thuc_hien": 100,
             }
+		
+		if not monthly_summary and not kpi_employee:
+			return kpi
+		
 		return gen_response(200, "Thành công", kpi)
 	except Exception as e:
 		return exception_handle(e)
@@ -93,7 +97,7 @@ def sales_report():
 		employee = frappe.get_value("Employee", {"user_id": user_id}, "name")
 		sales_per = frappe.get_value("Sales Person", {"employee": employee}, "name")
         
-		kpi = None
+		kpi = {}
 
 		# Lấy Kpi tháng
 		monthly_summary = frappe.get_value(
@@ -107,42 +111,45 @@ def sales_report():
                 "doanh_so"
 			)
 		
+		# Tạo một danh sách để lưu trữ thông tin của các đơn bán hàng
+		orders_list = []
 		if monthly_summary and kpi_employee:
 			kpi = {
                 "dat_duoc": float(monthly_summary),
                 "phan_tram_thuc_hien": round(float(monthly_summary / kpi_employee * 100), 2),
             }
+
+			# Lấy danh sách đơn hàng từ đầu tháng đến hiện tại
+			sales_order = frappe.get_all(
+				"Sales Order",
+				filters={"transaction_date": ("between", [start_date,todays]),
+						"docstatus": 1,
+						},
+				fields=["name", "grand_total", "transaction_date"]
+			)
+
+			daily_totals = defaultdict(float)
+			for order in sales_order:
+				st = get_value_child_doctype("Sales Order", order["name"], "sales_team")
+				for j in st:
+					if j.sales_person == sales_per and j.created_by == 1:
+						transaction_date = order.get("transaction_date")
+						date_str = transaction_date.strftime("%Y-%m-%d")
+						total = order.get("grand_total")
+						daily_totals[date_str] += total
+
+			# Lặp qua từng mục trong daily_totals để tạo danh sách các đơn bán hàng
+			for date, total in daily_totals.items():
+				orders_list.append({"ngay": date, "doanh_so": total})
+
 		if monthly_summary and not kpi_employee:
 			kpi = {
                 "dat_duoc": float(monthly_summary),
                 "phan_tram_thuc_hien": 100,
             }
-
-		# Lấy danh sách đơn hàng từ đầu tháng đến hiện tại
-		sales_order = frappe.get_all(
-			"Sales Order",
-			filters={"transaction_date": ("between", [start_date,todays]),
-        			 "docstatus": 1,
-					},
-			fields=["name", "grand_total", "transaction_date"]
-		)
-
-		daily_totals = defaultdict(float)
-		for order in sales_order:
-			st = get_value_child_doctype("Sales Order", order["name"], "sales_team")
-			for j in st:
-				if j.sales_person == sales_per and j.created_by == 1:
-					transaction_date = order.get("transaction_date")
-					date_str = transaction_date.strftime("%Y-%m-%d")
-					total = order.get("grand_total")
-					daily_totals[date_str] += total
-
-		# Tạo một danh sách để lưu trữ thông tin của các đơn bán hàng
-		orders_list = []
-
-		# Lặp qua từng mục trong daily_totals để tạo danh sách các đơn bán hàng
-		for date, total in daily_totals.items():
-			orders_list.append({"ngay": date, "doanh_so": total})
+		
+		if not monthly_summary and not kpi_employee:
+			return kpi
 
 		return gen_response(200, "Thành công", {
 			"kpi": kpi,
@@ -170,7 +177,9 @@ def invoices_report():
 		employee = frappe.get_value("Employee", {"user_id": user_id}, "name")
 		sales_per = frappe.get_value("Sales Person", {"employee": employee}, "name")
         
-		kpi = None
+		kpi = {}
+		# Tạo một danh sách để lưu trữ thông tin của các hóa đơn bán hàng
+		invoices_list = []
 
 		# Lấy Kpi tháng
 		monthly_summary = frappe.get_value(
@@ -189,37 +198,39 @@ def invoices_report():
                 "dat_duoc": float(monthly_summary),
                 "phan_tram_thuc_hien": round(float(monthly_summary / kpi_employee * 100), 2),
             }
+
+			# Lấy danh sách hóa đơn từ đầu tháng đến hiện tại
+			sales_invoice = frappe.get_all(
+				"Sales Invoice",
+				filters={"posting_date": ("between", [start_date, todays]),
+						"docstatus": 1,
+						"is_return": 0,
+						},
+				fields=["name", "grand_total", "posting_date"]
+			)
+
+			daily_totals = defaultdict(float)
+			for invoice in sales_invoice:
+				st = get_value_child_doctype("Sales Invoice", invoice["name"], "sales_team")
+				for j in st:
+					if j.sales_person == sales_per and j.created_by == 1:
+						posting_date = invoice.get("posting_date")
+						date_str = posting_date.strftime("%Y-%m-%d")
+						total = invoice.get("grand_total")
+						daily_totals[date_str] += total
+
+			# Lặp qua từng mục trong daily_totals để tạo danh sách các hóa đơn bán hàng
+			for date, total in daily_totals.items():
+				invoices_list.append({"ngay": date, "doanh_thu": total})
+
 		if monthly_summary and not kpi_employee:
 			kpi = {
                 "dat_duoc": float(monthly_summary),
                 "phan_tram_thuc_hien": 100,
             }
-		# Lấy danh sách hóa đơn từ đầu tháng đến hiện tại
-		sales_invoice = frappe.get_all(
-			"Sales Invoice",
-			filters={"posting_date": ("between", [start_date, todays]),
-        			 "docstatus": 1,
-					 "is_return": 0,
-					},
-			fields=["name", "grand_total", "posting_date"]
-		)
 
-		daily_totals = defaultdict(float)
-		for invoice in sales_invoice:
-			st = get_value_child_doctype("Sales Invoice", invoice["name"], "sales_team")
-			for j in st:
-				if j.sales_person == sales_per and j.created_by == 1:
-					posting_date = invoice.get("posting_date")
-					date_str = posting_date.strftime("%Y-%m-%d")
-					total = invoice.get("grand_total")
-					daily_totals[date_str] += total
-
-		# Tạo một danh sách để lưu trữ thông tin của các hóa đơn bán hàng
-		invoices_list = []
-
-		# Lặp qua từng mục trong daily_totals để tạo danh sách các hóa đơn bán hàng
-		for date, total in daily_totals.items():
-			invoices_list.append({"ngay": date, "doanh_thu": total})
+		if not monthly_summary and not kpi_employee:
+			return kpi
 
 		# Trả về phản hồi bao gồm cả KPI và danh sách hóa đơn bán hàng
 		return gen_response(200, "Thành công", {

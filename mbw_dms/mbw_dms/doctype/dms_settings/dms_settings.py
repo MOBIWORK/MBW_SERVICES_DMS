@@ -10,7 +10,6 @@ from mbw_dms.api.ekgis.constant import API_URL_TRACKING
 
 class DMSSettings(Document):
     def on_update(self):
-        print("dc::",self.industrys)
         frappe.cache.delete_value("website-config")
         frappe.cache.delete_value("ProjectID")
     @frappe.whitelist(methods='POST')
@@ -19,7 +18,7 @@ class DMSSettings(Document):
             # Gửi yêu cầu POST đến API để lấy thông tin mới
             api_url = f"{API_URL_TRACKING}/project"
             data_post = {
-                'name': validate_not_none(frappe.local.site),
+                "name": validate_not_none(frappe.local.site),
             }
             params = {"api_key": self.api_key}
             response = requests.post(api_url, params=params, json=data_post)
@@ -28,7 +27,7 @@ class DMSSettings(Document):
                 new_info = response.json()
                 
                 # Cập nhật trường ma_du_an với thông tin mới lấy được
-                self.ma_du_an = new_info['results'].get('_id')
+                self.ma_du_an = new_info["results"].get("_id")
                 self.save()
                 
                 frappe.msgprint("Thông tin đã được cập nhật thành công.")
@@ -44,8 +43,9 @@ def get_list_config():
         list_configs = None
         list_configs = frappe.cache().get_value("website-config")
         if list_configs == None:
-            list_configs = frappe.get_doc('DMS Settings')
+            list_configs = frappe.get_doc("DMS Settings")
+            print('========================= value: ', list_configs, flush=True)
             frappe.cache().set_value("website-config", list_configs)
-        return gen_response(200, 'Thành công', list_configs)
+        return gen_response(200, "Thành công", list_configs)
     except Exception as e:
         return exception_handle(e)
