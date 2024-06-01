@@ -44,8 +44,12 @@ def get_list_config():
         list_configs = frappe.cache().get_value("website-config")
         if list_configs == None:
             list_configs = frappe.get_doc("DMS Settings")
-            print('========================= value: ', list_configs, flush=True)
             frappe.cache().set_value("website-config", list_configs)
+        
+        if isinstance(list_configs, dict):
+            list_configs.pop('config_map_by_vgm', None)
+        elif hasattr(list_configs, 'config_map_by_vgm'):
+            delattr(list_configs, 'config_map_by_vgm')
         return gen_response(200, "Thành công", list_configs)
     except Exception as e:
         return exception_handle(e)
