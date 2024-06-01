@@ -72,7 +72,7 @@ def visit_report():
             }
 		
 		if not monthly_summary and not kpi_employee:
-			return kpi
+			return gen_response(200, "Thành công", kpi)
 		
 		return gen_response(200, "Thành công", kpi)
 	except Exception as e:
@@ -149,7 +149,7 @@ def sales_report():
             }
 		
 		if not monthly_summary and not kpi_employee:
-			return kpi
+			return gen_response(200, "Thành công", kpi)
 
 		return gen_response(200, "Thành công", {
 			"kpi": kpi,
@@ -230,7 +230,7 @@ def invoices_report():
             }
 
 		if not monthly_summary and not kpi_employee:
-			return kpi
+			return gen_response(200, "Thành công", kpi)
 
 		# Trả về phản hồi bao gồm cả KPI và danh sách hóa đơn bán hàng
 		return gen_response(200, "Thành công", {
