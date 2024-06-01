@@ -22,9 +22,9 @@ class DMSKPI(Document):
 def validate_create_kpi(doc, method):
 	month = int(nowdate().split('-')[1])
 	year = int(nowdate().split('-')[0])
-	start_date_str = f'{year:04d}-{month:02d}-01'
+	start_date_str = f"{year:04d}-{month:02d}-01"
 	last_day_of_month = calendar.monthrange(year, month)[1]
-	end_date_str = f'{year:04d}-{month:02d}-{last_day_of_month:02d}'
+	end_date_str = f"{year:04d}-{month:02d}-{last_day_of_month:02d}"
 	start_date = frappe.utils.getdate(start_date_str)
 	end_date = frappe.utils.getdate(end_date_str)
 	
@@ -33,14 +33,14 @@ def validate_create_kpi(doc, method):
 
 
 # Báo cáo kpi viếng thăm
-@frappe.whitelist(methods='GET')
+@frappe.whitelist(methods="GET")
 def visit_report():
 	try:
 		month = int(nowdate().split('-')[1])
 		year = int(nowdate().split('-')[0])
-		start_date_str = f'{year:04d}-{month:02d}-01'
+		start_date_str = f"{year:04d}-{month:02d}-01"
 		last_day_of_month = calendar.monthrange(year, month)[1]
-		end_date_str = f'{year:04d}-{month:02d}-{last_day_of_month:02d}'
+		end_date_str = f"{year:04d}-{month:02d}-{last_day_of_month:02d}"
 		start_date = frappe.utils.getdate(start_date_str)
 		end_date = frappe.utils.getdate(end_date_str)
 
@@ -50,11 +50,7 @@ def visit_report():
 		kpi = {}
 
 		# Lấy Kpi tháng vt lượt
-		monthly_summary = frappe.get_value(
-				"DMS Summary KPI Monthly",
-				{"thang": month, "nam": year, "nhan_vien_ban_hang": user_name},
-				"so_kh_vt_duynhat"
-			)
+		monthly_summary = frappe.get_value("DMS Summary KPI Monthly", {"thang": month, "nam": year, "nhan_vien_ban_hang": user_name}, "so_kh_vt_duynhat")
 		# Lấy Kpi nhân viên vt
 		kpi_employee = frappe.get_value("DMS KPI", {"ngay_hieu_luc_tu": (">=", start_date), "ngay_hieu_luc_den": ("<=", end_date), "nhan_vien_ban_hang": user_name}, "so_kh_vt_duynhat")
 		
@@ -64,6 +60,7 @@ def visit_report():
                 "dat_duoc": monthly_summary,
                 "phan_tram_thuc_hien": round(float(monthly_summary / kpi_employee * 100), 2),
             }
+
 		if monthly_summary and not kpi_employee:
 			kpi = {
                 "chi_tieu": 0,
@@ -80,15 +77,15 @@ def visit_report():
 	
 
 # Báo cáo doanh số
-@frappe.whitelist(methods='GET')
+@frappe.whitelist(methods="GET")
 def sales_report():
 	try:
 		todays = today()
 		month = int(nowdate().split('-')[1])
 		year = int(nowdate().split('-')[0])
-		start_date_str = f'{year:04d}-{month:02d}-01'
+		start_date_str = f"{year:04d}-{month:02d}-01"
 		last_day_of_month = calendar.monthrange(year, month)[1]
-		end_date_str = f'{year:04d}-{month:02d}-{last_day_of_month:02d}'
+		end_date_str = f"{year:04d}-{month:02d}-{last_day_of_month:02d}"
 		start_date = frappe.utils.getdate(start_date_str)
 		end_date = frappe.utils.getdate(end_date_str)
 
@@ -105,6 +102,7 @@ def sales_report():
 				{"thang": month, "nam": year, "nhan_vien_ban_hang": employee},
 				"doanh_so_thang"
 			)
+		
 		# Lấy Kpi nhân viên
 		kpi_employee = frappe.get_value("DMS KPI",
                 {"ngay_hieu_luc_tu": (">=", start_date), "ngay_hieu_luc_den": ("<=", end_date), "nhan_vien_ban_hang": employee},
@@ -160,15 +158,15 @@ def sales_report():
 
 
 # Báo cáo doanh thu nhân viên
-@frappe.whitelist(methods='GET')
+@frappe.whitelist(methods="GET")
 def invoices_report():
 	try:
 		todays = today()
 		month = int(nowdate().split('-')[1])
 		year = int(nowdate().split('-')[0])
-		start_date_str = f'{year:04d}-{month:02d}-01'
+		start_date_str = f"{year:04d}-{month:02d}-01"
 		last_day_of_month = calendar.monthrange(year, month)[1]
-		end_date_str = f'{year:04d}-{month:02d}-{last_day_of_month:02d}'
+		end_date_str = f"{year:04d}-{month:02d}-{last_day_of_month:02d}"
 		start_date = frappe.utils.getdate(start_date_str)
 		end_date = frappe.utils.getdate(end_date_str)
 
@@ -185,13 +183,12 @@ def invoices_report():
 		monthly_summary = frappe.get_value(
 				"DMS Summary KPI Monthly",
 				{"thang": month, "nam": year, "nhan_vien_ban_hang": employee},
-				"doanh_thu_thang"
-			)
+				"doanh_thu_thang")
+		
 		# Lấy Kpi nhân viên
 		kpi_employee = frappe.get_value("DMS KPI",
                 {"ngay_hieu_luc_tu": (">=", start_date), "ngay_hieu_luc_den": ("<=", end_date), "nhan_vien_ban_hang": employee},
-                "doanh_thu"
-				)
+                "doanh_thu")
 		
 		if monthly_summary and kpi_employee:
 			kpi = {
@@ -242,13 +239,13 @@ def invoices_report():
 	
 
 # Báo cáo doanh thu, đơn hàng cho Mobile
-@frappe.whitelist(methods='GET')
+@frappe.whitelist(methods="GET")
 def report_orders_invoices(customer_name):
 	try:
 		todays = today()
 		month = int(nowdate().split('-')[1])
 		year = int(nowdate().split('-')[0])
-		start_date_str = f'{year:04d}-{month:02d}-01'
+		start_date_str = f"{year:04d}-{month:02d}-01"
 		start_date = frappe.utils.getdate(start_date_str)
 
 		user_id = frappe.session.user
@@ -303,8 +300,8 @@ def report_orders_invoices(customer_name):
 			data["nv_vieng_tham"] = user_checkin
 			data["vieng_tham_cuoi"] = last_visit[0].checkin_giovao
 		else:
-			data["nv_vieng_tham"] = ''
-			data["vieng_tham_cuoi"] = ''
+			data["nv_vieng_tham"] = ""
+			data["vieng_tham_cuoi"] = ""
 
 		last_order = frappe.get_list("Sales Order", filters={"customer": customer_name, "docstatus": 1}, limit=1, order_by="creation desc", fields=["owner", "creation"])
 		if last_order:
@@ -312,8 +309,8 @@ def report_orders_invoices(customer_name):
 			data["nv_dat_hang"] = user_order
 			data["don_hang_cuoi"] = last_order[0].creation
 		else:
-			data["nv_dat_hang"] = ''
-			data["don_hang_cuoi"] = ''
+			data["nv_dat_hang"] = ""
+			data["don_hang_cuoi"] = ""
 
 		return gen_response(200, "Thành công", data)
 	
@@ -322,7 +319,7 @@ def report_orders_invoices(customer_name):
 
 
 # Báo cáo chi tiết viếng thăm
-@frappe.whitelist(methods='GET')
+@frappe.whitelist(methods="GET")
 def report_detail_visit(customer_name, kwargs):
 	try:
 		from_date = validate_filter_timestamp("start")(kwargs.get("from_date")) if kwargs.get("from_date") else None
@@ -379,11 +376,7 @@ def report_detail_visit(customer_name, kwargs):
 		query_inv["customer_name"] = customer_name
 		query_inv["owner"] = user_id
 
-		inventory = frappe.get_all(
-			"DMS Inventory",
-			filters=query_inv,
-			fields=["name", "creation"]
-		)
+		inventory = frappe.get_all("DMS Inventory", filters=query_inv, fields=["name", "creation"])
 		for i in inventory:
 			i["items"] = get_value_child_doctype("DMS Inventory", i["name"], "items")
 
@@ -398,11 +391,8 @@ def report_detail_visit(customer_name, kwargs):
 		query_si["customer_name"] = customer_name
 		query_si["docstatus"] = 1
 
-		sales_invoice = frappe.get_all(
-			"Sales Invoice",
-			filters=query_si,
-			fields=["name", "posting_date", "grand_total"]
-		)
+		sales_invoice = frappe.get_all("Sales Invoice", filters=query_si, fields=["name", "posting_date", "grand_total"])
+
 		grouped_data = {}
 		for invoice in sales_invoice:
 			st = get_value_child_doctype("Sales Invoice", invoice["name"], "sales_team")
@@ -421,7 +411,7 @@ def report_detail_visit(customer_name, kwargs):
 		receivable_summary = []
 		for posting_date, details in grouped_data.items():
 			receivable_summary.append({
-				f'{posting_date}': details["invoices"],
+				f"{posting_date}": details["invoices"],
 				"total_grand_total": details["total_grand_total"]
 			})
 
@@ -435,7 +425,7 @@ def report_detail_visit(customer_name, kwargs):
 		return exception_handle(e)
 	
 # Kết quả đi tuyến
-@frappe.whitelist(methods='GET')
+@frappe.whitelist(methods="GET")
 def router_results(kwargs):
 	try:
 		data = {}
@@ -454,7 +444,7 @@ def router_results(kwargs):
 		sales_per = frappe.get_value("Sales Person", {"employee": employee}, "name")
 
 		# Tổng doanh số trong ngày
-		data['doanh_so'] = 0
+		data["doanh_so"] = 0
 		sales_order = frappe.get_all("Sales Order", filters={**filters, "docstatus": 1}, fields=["grand_total"])
 		for i in sales_order:
 			st = get_value_child_doctype("Sales Order", i["name"], "sales_team")
@@ -526,7 +516,7 @@ def router_results(kwargs):
 	
 
 # Báo cáo viếng thăm
-@frappe.whitelist(methods='GET')
+@frappe.whitelist(methods="GET")
 def checkin_report(kwargs):
 	try:
 		data = {}
@@ -566,7 +556,7 @@ def checkin_report(kwargs):
 
 		# Check số khách hàng phải viếng thăm theo tuyến
 		# Lấy tuyến của nhân viên
-		user_name = frappe.get_value('Employee', {'user_id': user_id}, 'name')
+		user_name = frappe.get_value("Employee", {"user_id": user_id}, "name")
         # Lấy thứ của ngày
 		days = datetime.date.today()
 		date = days.weekday()
@@ -687,7 +677,7 @@ def order_statistics(kwargs):
 	
 
 # Báo cáo khách hàng mới
-@frappe.whitelist(methods='GET')
+@frappe.whitelist(methods="GET")
 def new_customer_report(kwargs):
 	try:
 		data = {}
@@ -717,14 +707,14 @@ def new_customer_report(kwargs):
 
 
 # Chỉ tiêu KPI
-@frappe.whitelist(methods='GET')
+@frappe.whitelist(methods="GET")
 def kpi_targets(kwargs):
 	try:
 		month = int(kwargs.get("month"))
 		year = int(kwargs.get("year"))
-		start_date_str = f'{year:04d}-{month:02d}-01'
+		start_date_str = f"{year:04d}-{month:02d}-01"
 		last_day_of_month = calendar.monthrange(year, month)[1]
-		end_date_str = f'{year:04d}-{month:02d}-{last_day_of_month:02d}'
+		end_date_str = f"{year:04d}-{month:02d}-{last_day_of_month:02d}"
 		start_date = frappe.utils.getdate(start_date_str)
 		end_date = frappe.utils.getdate(end_date_str)
 
@@ -732,7 +722,7 @@ def kpi_targets(kwargs):
 		first_day = today.replace(day=1)
 
     	# Lấy id của nhân viên
-		user_name = frappe.get_value("Employee", {"user_id": frappe.session.user}, 'name')
+		user_name = frappe.get_value("Employee", {"user_id": frappe.session.user}, "name")
         
     	# Lấy Kpi tháng
 		monthly_summary = frappe.get_all(
@@ -750,53 +740,53 @@ def kpi_targets(kwargs):
 		kpi = None
 		if monthly_summary and kpi_employee:
 			kpi = {
-				'so_ngay_thuc_hien': (today - first_day).days + 1 if datetime.datetime.now().month == month else last_day_of_month,
-				'th_doanh_thu': monthly_summary[0]['doanh_thu_thang'],
-				'kh_doanh_thu': kpi_employee[0]['doanh_thu'],
-				'cl_doanh_thu': kpi_employee[0]['doanh_thu'] - monthly_summary[0]['doanh_thu_thang'],
-				'th_doanh_so': monthly_summary[0]['doanh_so_thang'],
-				'kh_doanh_so': kpi_employee[0]['doanh_so'],
-				'cl_doanh_so': kpi_employee[0]['doanh_so'] - monthly_summary[0]['doanh_so_thang'],
-				'th_don_hang': monthly_summary[0]['so_don_hang'],
-				'kh_don_hang': kpi_employee[0]['so_don_hang'],
-				'cl_don_hang': kpi_employee[0]['so_don_hang'] - monthly_summary[0]['so_don_hang'],
-				'th_vieng_tham': monthly_summary[0]['so_kh_vt_duynhat'],
-				'kh_vieng_tham': kpi_employee[0]['so_kh_vt_duynhat'],
-				'cl_vieng_tham': kpi_employee[0]['so_kh_vt_duynhat'] - monthly_summary[0]['so_kh_vt_duynhat'],
-				'th_kh_moi': monthly_summary[0]['so_kh_moi'],
-				'kh_kh_moi': kpi_employee[0]['so_kh_moi'],
-				'cl_kh_moi': kpi_employee[0]['so_kh_moi'] - monthly_summary[0]['so_kh_moi'],
-                'ti_le_doanh_thu': round(float(monthly_summary[0]['doanh_thu_thang']/kpi_employee[0]['doanh_thu']) * 100, 2),
-                'ti_le_doanh_so': round(float(monthly_summary[0]['doanh_so_thang']/kpi_employee[0]['doanh_so']) * 100, 2),
-                'ti_le_don_hang': round(float(monthly_summary[0]['so_don_hang']/kpi_employee[0]['so_don_hang']) * 100, 2),
-                'ti_le_vieng_tham': round(float(monthly_summary[0]['so_kh_vt_duynhat']/kpi_employee[0]['so_kh_vt_duynhat']) * 100, 2),
-                'ti_le_kh_moi': round(float(monthly_summary[0]['so_kh_moi']/kpi_employee[0]['so_kh_moi']) * 100, 2)
+				"so_ngay_thuc_hien": (today - first_day).days + 1 if datetime.datetime.now().month == month else last_day_of_month,
+				"th_doanh_thu": monthly_summary[0]["doanh_thu_thang"],
+				"kh_doanh_thu": kpi_employee[0]["doanh_thu"],
+				"cl_doanh_thu": kpi_employee[0]["doanh_thu"] - monthly_summary[0]["doanh_thu_thang"],
+				"th_doanh_so": monthly_summary[0]["doanh_so_thang"],
+				"kh_doanh_so": kpi_employee[0]["doanh_so"],
+				"cl_doanh_so": kpi_employee[0]["doanh_so"] - monthly_summary[0]["doanh_so_thang"],
+				"th_don_hang": monthly_summary[0]["so_don_hang"],
+				"kh_don_hang": kpi_employee[0]["so_don_hang"],
+				"cl_don_hang": kpi_employee[0]["so_don_hang"] - monthly_summary[0]['so_don_hang'],
+				"th_vieng_tham": monthly_summary[0]["so_kh_vt_duynhat"],
+				"kh_vieng_tham": kpi_employee[0]["so_kh_vt_duynhat"],
+				"cl_vieng_tham": kpi_employee[0]["so_kh_vt_duynhat"] - monthly_summary[0]["so_kh_vt_duynhat"],
+				"th_kh_moi": monthly_summary[0]["so_kh_moi"],
+				"kh_kh_moi": kpi_employee[0]["so_kh_moi"],
+				"cl_kh_moi": kpi_employee[0]["so_kh_moi"] - monthly_summary[0]["so_kh_moi"],
+                "ti_le_doanh_thu": round(float(monthly_summary[0]["doanh_thu_thang"] / kpi_employee[0]["doanh_thu"]) * 100, 2),
+                "ti_le_doanh_so": round(float(monthly_summary[0]["doanh_so_thang"] / kpi_employee[0]["doanh_so"]) * 100, 2),
+                "ti_le_don_hang": round(float(monthly_summary[0]["so_don_hang"] / kpi_employee[0]["so_don_hang"]) * 100, 2),
+                "ti_le_vieng_tham": round(float(monthly_summary[0]["so_kh_vt_duynhat"] / kpi_employee[0]["so_kh_vt_duynhat"]) * 100, 2),
+                "ti_le_kh_moi": round(float(monthly_summary[0]["so_kh_moi"] / kpi_employee[0]["so_kh_moi"]) * 100, 2)
             }
 
         # Nếu không có dữ liệu, gán giá trị 0 cho tất cả các chỉ số KPI
 		else:
 			kpi = {
-                'so_ngay_thuc_hien': 0,
-				'th_doanh_thu':0,
-				'kh_doanh_thu': 0,
-				'cl_doanh_thu': 0,
-				'th_doanh_so': 0,
-				'kh_doanh_so': 0,
-				'cl_doanh_so': 0,
-				'th_don_hang': 0,
-				'kh_don_hang': 0,
-				'cl_don_hang': 0,
-				'th_vieng_tham': 0,
-				'kh_vieng_tham': 0,
-				'cl_vieng_tham': 0,
-				'th_kh_moi': 0,
-				'kh_kh_moi': 0,
-				'cl_kh_moi': 0,
-                'ti_le_doanh_thu': 0,
-                'ti_le_doanh_so': 0,
-                'ti_le_don_hang': 0,
-                'ti_le_vieng_tham': 0,
-                'ti_le_kh_moi': 0
+                "so_ngay_thuc_hien": 0,
+				"th_doanh_thu":0,
+				"kh_doanh_thu": 0,
+				"cl_doanh_thu": 0,
+				"th_doanh_so": 0,
+				"kh_doanh_so": 0,
+				"cl_doanh_so": 0,
+				"th_don_hang": 0,
+				"kh_don_hang": 0,
+				"cl_don_hang": 0,
+				"th_vieng_tham": 0,
+				"kh_vieng_tham": 0,
+				"cl_vieng_tham": 0,
+				"th_kh_moi": 0,
+				"kh_kh_moi": 0,
+				"cl_kh_moi": 0,
+                "ti_le_doanh_thu": 0,
+                "ti_le_doanh_so": 0,
+                "ti_le_don_hang": 0,
+                "ti_le_vieng_tham": 0,
+                "ti_le_kh_moi": 0
             }
 		return gen_response(200, "Thành công", kpi)
 	except Exception as e:
@@ -804,7 +794,7 @@ def kpi_targets(kwargs):
 
 
 # Khách hàng chưa phát sinh đơn
-@frappe.whitelist(methods='GET')
+@frappe.whitelist(methods="GET")
 def customer_not_order(kwargs):
 	try:
 		date = int(kwargs.get("date"))
@@ -826,6 +816,7 @@ def customer_not_order(kwargs):
 		router_employee = frappe.get_value("DMS Router", {"employee": user_name, "travel_date": name_date}, "name")
 		list_cus_not_order = []
 		total_customers = 0
+
 		if router_employee:
 			customers = get_value_child_doctype("DMS Router", router_employee, "customers")
 			for i in customers:
@@ -851,7 +842,7 @@ def customer_not_order(kwargs):
 	
 
 # Báo cáo công nợ khách hàng
-@frappe.whitelist(methods='GET')
+@frappe.whitelist(methods="GET")
 def receivable_summary_report(**kwargs):
 	try:
 		filters = []
@@ -862,8 +853,8 @@ def receivable_summary_report(**kwargs):
 		customer_group = kwargs.get("customer_group")
 
 		user_id = frappe.session.user
-		employee = frappe.get_value('Employee', {'user_id': user_id}, 'name')
-		sales_per = frappe.get_value('Sales Person', {'employee': employee}, 'name')
+		employee = frappe.get_value("Employee", {"user_id": user_id}, "name")
+		sales_per = frappe.get_value("Sales Person", {"employee": employee}, "name")
 
 		invoice = []
 
@@ -871,6 +862,7 @@ def receivable_summary_report(**kwargs):
 			filter_inv["posting_date"] = ["between", [from_date,to_date]]
 		filter_inv["docstatus"] = 1
 		list_invoices = frappe.get_all("Sales Invoice", filters=filter_inv, fields=['name'])
+
 		for i in list_invoices:
 			st = get_value_child_doctype("Sales Invoice", i["name"], "sales_team")
 			for j in st:
@@ -912,9 +904,9 @@ def receivable_summary_report(**kwargs):
 
 		# Lấy tổng số tiền đã trả của từng khách hàng
 		for cus_inv in customers_invoice:
-			total_dues += cus_inv['total_due']
-			total_paids += cus_inv['total_paid']
-			cus_inv['remaining'] = cus_inv['total_due'] - cus_inv['total_paid']
+			total_dues += cus_inv["total_due"]
+			total_paids += cus_inv["total_paid"]
+			cus_inv["remaining"] = cus_inv["total_due"] - cus_inv["total_paid"]
 		remaining = total_dues - total_paids
 
 		return gen_response(200, "Thành công", {
