@@ -5,7 +5,7 @@ import { LuUploadCloud } from "react-icons/lu";
 import { LiaDownloadSolid } from "react-icons/lia";
 import { LuFilter, LuFilterX } from "react-icons/lu";
 import { Button, Select, Row, Col, Dropdown, Modal, TreeSelect } from "antd";
-import React, { memo, useCallback, useContext, useEffect, useState } from "react";
+import React, { memo, useCallback, useContext, useEffect, useLayoutEffect, useState } from "react";
 import { FormItemCustom } from "../../components/form-item";
 import { ContentFrame, DropDownCustom, HeaderPage, TableCustom, } from "../../components";
 import { rsData, rsDataFrappe } from "../../types/response";
@@ -146,7 +146,7 @@ function RouterControl() {
   }, [keySearchRouter]);
 
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     (async () => {
 
       const rsRouter = await AxiosService.get('/api/method/mbw_dms.api.router.get_list_router', {
@@ -461,7 +461,7 @@ function RouterControl() {
                 </Row>
                 {/* hien thi table  */}
                 <div className="pt-5">
-                  <div className="w-full overflow-x-scroll ">
+                  <div className="w-full">
                     <TableCustom
                       rowSelection={rowSelection}
                       onRow={(record, rowIndex) => {
@@ -474,12 +474,19 @@ function RouterControl() {
                       }}
                       columns={columns}
                       dataSource={routersTable?.map(router => ({ key: router.name, ...router }))}
-                      pagination={{
-                        defaultPageSize: PAGE_SIZE,
-                        total,
-                        onChange(page, pageSize) {
-                          setPage(page)
-                        },
+                      pagination={ total && total > PAGE_SIZE ?
+                        {
+                          pageSize: PAGE_SIZE,
+                          total,
+                          onChange(page, pageSize) {
+                            setPage(page)
+                          },
+                      }:
+                      false
+                    }
+                      scroll={{
+                        x:"max-content",
+                        y:"60vh"
                       }}
                     />
                   </div>
