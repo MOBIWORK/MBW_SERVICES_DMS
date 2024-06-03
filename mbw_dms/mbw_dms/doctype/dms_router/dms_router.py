@@ -91,6 +91,7 @@ def get_router(id):
 @frappe.whitelist(methods="GET")
 def get_customer_router(data):
     try:     
+        user= get_user_id()
         # Cấu hình ngoại tuyến từ dms setting
         search_key = data.get("search_key")
         view_mode = validate_filter(value=data.get('view_mode'), type=['list','map'], type_check='enum') if data.get('view_mode') else 'list'
@@ -172,7 +173,7 @@ def get_customer_router(data):
 
         # lấy ra ds khách hàng đã checkin        
         start_time,end_time=validate_filter(type_check="in_date",value=datetime.now().timestamp())
-        list_checkin = frappe.db.get_all("DMS Checkin",{"kh_ma": ["in",list_customer_name],"creation": ["between",[start_time,end_time]]},["is_checkout","kh_ma"]) 
+        list_checkin = frappe.db.get_all("DMS Checkin",{"kh_ma": ["in",list_customer_name],"creation": ["between",[start_time,end_time]], "createdbyemail":user.get("email")},["is_checkout","kh_ma"]) 
         print("list_checkin",list_checkin)        
         list_checkin_code = pydash.map_(list_checkin,lambda x:x.kh_ma)
         if checkin_status == "is_checkin":
