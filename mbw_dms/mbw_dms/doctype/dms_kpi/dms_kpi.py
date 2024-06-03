@@ -386,7 +386,8 @@ def report_detail_visit(customer_name, kwargs):
 		receivable_summary = []
 		for posting_date, details in grouped_data.items():
 			receivable_summary.append({
-				f"{posting_date}": details["invoices"],
+				"posting_date": posting_date,
+				"details": details["invoices"],
 				"total_grand_total": details["total_grand_total"]
 			})
 

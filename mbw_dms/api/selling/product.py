@@ -278,7 +278,7 @@ def list_vat(**kwargs):
     try:
         kwargs = frappe._dict(kwargs)
         title = kwargs.get("title") if kwargs.get("title") else ""
-        company = kwargs.get('company') if kwargs.get('company') else ''
+        company = kwargs.get("company") if kwargs.get("company") else ""
         Taxes = frappe.qb.DocType("Sales Taxes and Charges Template")
         TaxesCharges = frappe.qb.DocType("Sales Taxes and Charges")
         detail_taxes = (frappe.qb.from_(Taxes)
