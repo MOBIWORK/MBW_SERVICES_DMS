@@ -1,6 +1,7 @@
 import frappe
 
 from mbw_dms.api.common import gen_response ,exception_handle
+import calendar
 
 # Báo cáo KPI
 @frappe.whitelist(methods='GET')
@@ -12,17 +13,25 @@ def kpi_report(**kwargs):
         page_number = int(kwargs.get("page_number")) if kwargs.get("page_number") and int(kwargs.get("page_number")) >= 1 else 1
         employee = kwargs.get("employee")
         sales_team = kwargs.get("sales_team")
-        month = kwargs.get("month")
-        year = kwargs.get("year")
+        month = int(kwargs.get("month"))
+        year = int(kwargs.get("year"))
+        start_date_str = f"{year:04d}-{month:02d}-01"
+        last_day_of_month = calendar.monthrange(year, month)[1]
+        end_date_str = f"{year:04d}-{month:02d}-{last_day_of_month:02d}"
+        start_date = frappe.utils.getdate(start_date_str)
+        end_date = frappe.utils.getdate(end_date_str)
+
         if employee:
             filters.append(f"mo.nhan_vien_ban_hang='{employee}'")
         if sales_team:
             filters.append(f"kpi.nhom_ban_hang='{sales_team}'")
         if month:
-            filters.append(f"thang={month}")
+            filters.append(f"mo.thang={month}")
         if year:
-            filters.append(f"nam={year}")
+            filters.append(f"mo.nam={year}")
         filters.append("mo.nhan_vien_ban_hang IS NOT NULL")
+        filters.append(f"kpi.ngay_hieu_luc_tu >= '{start_date}'")
+        filters.append(f"kpi.ngay_hieu_luc_den <= '{end_date}'")
         where_condition = " AND ".join(filters)
         
         sql_query = """
@@ -44,6 +53,8 @@ def kpi_report(**kwargs):
             FROM `tabDMS Summary KPI Monthly` mo
             JOIN `tabDMS KPI` kpi ON mo.nhan_vien_ban_hang = kpi.nhan_vien_ban_hang
         """
+        if where_condition:
+            sql_query_count += " WHERE {}".format(where_condition)
         count_data = frappe.db.sql(sql_query_count, as_dict=True)
 
         totals = {
