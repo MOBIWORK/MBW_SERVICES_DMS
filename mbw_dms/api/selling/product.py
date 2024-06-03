@@ -9,7 +9,7 @@ from mbw_dms.api.common import (
 from frappe.utils import cint
 
 # Danh sách sản phẩm
-@frappe.whitelist(methods='GET')
+@frappe.whitelist(methods="GET")
 def list_product(**kwargs):
     try:
         kwargs = frappe._dict(kwargs)
@@ -17,14 +17,14 @@ def list_product(**kwargs):
             frappe.throw(_("Không có quyền"), frappe.PermissionError)
 
         my_filter = {}
-        name = kwargs.get('name')
-        name_item = kwargs.get('item_name')
-        customer = kwargs.get('customer')
-        brand = kwargs.get('brand')
+        name = kwargs.get("name")
+        name_item = kwargs.get("item_name")
+        customer = kwargs.get("customer")
+        brand = kwargs.get("brand")
         custom_industry = kwargs.get("industry")
         item_group = kwargs.get("item_group")
-        page_size =  cint(kwargs.get('page_size', 20))
-        page_number = cint(kwargs.get('page_number', 1))
+        page_size =  cint(kwargs.get("page_size", 20))
+        page_number = cint(kwargs.get("page_number", 1))
         if page_number <= 0:
             page_number = 1
 
@@ -35,7 +35,7 @@ def list_product(**kwargs):
             if customers.get("default_price_list"):
                 price_list = customers.default_price_list
             else:
-                price_lisr_cg = frappe.get_value('Customer Group', {'name': customers.customer_group}, 'default_price_list')
+                price_lisr_cg = frappe.get_value("Customer Group", {"name": customers.customer_group}, "default_price_list")
                 if price_lisr_cg:
                     price_list = price_lisr_cg
 
@@ -51,9 +51,8 @@ def list_product(**kwargs):
             my_filter["item_group"] = ["like", f'%{item_group}%']
         my_filter["disabled"] = 0
 
-        items = frappe.db.get_list("Item",
-                                   filters=my_filter,
-                                   fields=[ "name", "item_code", "item_name", "item_group", 
+        items = frappe.db.get_list("Item", filters=my_filter,
+                                   fields=["name", "item_code", "item_name", "item_group", 
                                             "stock_uom", "min_order_qty", "description",
                                             "brand", "country_of_origin", "image",
                                             "custom_industry", "end_of_life"],
@@ -95,20 +94,20 @@ def list_product(**kwargs):
             permitted_items_count = frappe.db.count("Item", filters=my_filter)
 
         data_item = []
-        default_selling_price_list = frappe.get_doc('Selling Settings').selling_price_list
+        default_selling_price_list = frappe.get_doc("Selling Settings").selling_price_list
         for item in items:
-            item['image'] = validate_image(item.get("image"))
-            item['details'] = frappe.get_all("Item Price", filters={"item_code": item.get('item_code'), "price_list": price_list}, fields=['uom', 'price_list', 'price_list_rate', 'valid_from', 'currency'])
-            if not item['details']:
-                item['details'] = frappe.get_all("Item Price", filters={"item_code": item.get('item_code'), "price_list": default_selling_price_list}, fields=['uom', 'price_list', 'price_list_rate', 'valid_from', 'currency'])
-            item['unit'] = frappe.db.get_all("UOM Conversion Detail", {"parent" : item.get('name')}, ['uom', 'conversion_factor'])
-            item['stock'] = frappe.db.get_all("Stock Entry Detail", {"item_code": item.get('item_code')}, ['t_warehouse', 'qty'])
-            item['item_tax_template'] = frappe.db.get_all("Item Tax", {"parent": item["name"]}, ["item_tax_template"])
-            if item['item_tax_template']:
-                item['rate_tax_item'] = frappe.db.get_value("Item Tax Template Detail", {"parent": item['item_tax_template'][0].item_tax_template}, ["tax_rate"])
+            item["image"] = validate_image(item.get("image"))
+            item["details"] = frappe.get_all("Item Price", filters={"item_code": item.get('item_code'), "price_list": price_list}, fields=["uom", "price_list", "price_list_rate", "valid_from", "currency"])
+            if not item["details"]:
+                item["details"] = frappe.get_all("Item Price", filters={"item_code": item.get('item_code'), "price_list": default_selling_price_list}, fields=["uom", "price_list", "price_list_rate", "valid_from", "currency"])
+            item["unit"] = frappe.db.get_all("UOM Conversion Detail", {"parent" : item.get("name")}, ["uom", "conversion_factor"])
+            item["stock"] = frappe.db.get_all("Stock Entry Detail", {"item_code": item.get("item_code")}, ["t_warehouse", "qty"])
+            item["item_tax_template"] = frappe.db.get_all("Item Tax", {"parent": item["name"]}, ["item_tax_template"])
+            if item["item_tax_template"]:
+                item["rate_tax_item"] = frappe.db.get_value("Item Tax Template Detail", {"parent": item["item_tax_template"][0].item_tax_template}, ["tax_rate"])
             else:
-                item['rate_tax_item'] = 0
-            if item['details']:
+                item["rate_tax_item"] = 0
+            if item["details"]:
                 data_item.append(item)
 
         return gen_response(200, "Thành công", {
@@ -123,7 +122,7 @@ def list_product(**kwargs):
 
 
 # Danh sách sản phẩm trưng bày
-@frappe.whitelist(methods='GET')
+@frappe.whitelist(methods="GET")
 def list_product_campaign(**kwargs):
     try:
         kwargs = frappe._dict(kwargs)
@@ -131,17 +130,17 @@ def list_product_campaign(**kwargs):
             frappe.throw(_("Không có quyền"), frappe.PermissionError)
 
         my_filter = {}
-        name = kwargs.get('name')
-        name_item = kwargs.get('item_name')
-        brand = kwargs.get('brand')
+        name = kwargs.get("name")
+        name_item = kwargs.get("item_name")
+        brand = kwargs.get("brand")
         custom_industry = kwargs.get("industry")
         item_group = kwargs.get("item_group")
-        page_size =  cint(kwargs.get('page_size', 20))
-        page_number = cint(kwargs.get('page_number', 1))
+        page_size =  cint(kwargs.get("page_size", 20))
+        page_number = cint(kwargs.get("page_number", 1))
         if page_number <= 0:
             page_number = 1
 
-        default_price_list = frappe.get_doc('Selling Settings').selling_price_list
+        default_price_list = frappe.get_doc("Selling Settings").selling_price_list
 
         if name:
             my_filter["name"] = ["like", f'%{name}%']
@@ -199,10 +198,10 @@ def list_product_campaign(**kwargs):
 
         data_item = []
         for item in items:
-            item['image'] = validate_image(item.get("image"))
-            item['details'] = frappe.get_all("Item Price", filters={"item_code": item.get('item_code'), "price_list": default_price_list}, fields=['uom', 'price_list', 'price_list_rate', 'valid_from', 'currency'])
-            item['unit'] = frappe.db.get_all("UOM Conversion Detail", {"parent" : item.get('name')}, ['uom', 'conversion_factor'])
-            item['stock'] = frappe.db.get_all("Stock Entry Detail", {"item_code": item.get('item_code')}, ['t_warehouse', 'qty'])
+            item["image"] = validate_image(item.get("image"))
+            item["details"] = frappe.get_all("Item Price", filters={"item_code": item.get("item_code"), "price_list": default_price_list}, fields=["uom", "price_list", "price_list_rate", "valid_from", "currency"])
+            item["unit"] = frappe.db.get_all("UOM Conversion Detail", {"parent" : item.get("name")}, ["uom", "conversion_factor"])
+            item["stock"] = frappe.db.get_all("Stock Entry Detail", {"item_code": item.get("item_code")}, ["t_warehouse", "qty"])
             data_item.append(item)
 
         return gen_response(200, "Thành công", {
@@ -220,7 +219,7 @@ def list_product_campaign(**kwargs):
 @frappe.whitelist(methods="GET")
 def list_brand():
     try:
-        brand = frappe.db.get_list('Brand', fields=["name", "brand", "description"])
+        brand = frappe.db.get_list("Brand", fields=["name", "brand", "description"])
         return gen_response(200, "Thành công", brand)
     except Exception as e:
         return exception_handle(e)
@@ -229,7 +228,7 @@ def list_brand():
 @frappe.whitelist(methods="GET")
 def list_industry():
     try:
-        industry = frappe.db.get_list('Industry Type', fields=["name", "industry"],ignore_permissions=True)
+        industry = frappe.db.get_list("Industry Type", fields=["name", "industry"],ignore_permissions=True)
         return gen_response(200, "Thành công", industry)
     except Exception as e:
         return exception_handle(e)
@@ -238,21 +237,21 @@ def list_industry():
 @frappe.whitelist(methods="GET")
 def list_item_group():
     try:
-        item_group = frappe.db.get_list('Item Group', fields=["name", "item_group_name", "parent_item_group"])
+        item_group = frappe.db.get_list("Item Group", fields=["name", "item_group_name", "parent_item_group"])
         return gen_response(200, "Thành công", item_group)
     except Exception as e:
         return exception_handle(e)
     
 # List UOM
-@frappe.whitelist(methods='GET')
+@frappe.whitelist(methods="GET")
 def list_uom(**kwargs):
     try:
         kwargs=frappe._dict(kwargs)
         uom_filter = {}
-        name = kwargs.get('name')
+        name = kwargs.get("name")
         if name:
-            uom_filter["name"] = ['like', f'%{name}%']
-        list_uom = frappe.db.get_list('UOM', filters=uom_filter, fields=['name', 'uom_name'])
+            uom_filter["name"] = ["like", f"%{name}%"]
+        list_uom = frappe.db.get_list("UOM", filters=uom_filter, fields=["name", "uom_name"])
         return gen_response(200, "Thành công", list_uom)
     except Exception as e:
         return exception_handle(e)
@@ -263,22 +262,22 @@ def list_warehouse(**kwargs):
     try:
         kwargs = frappe._dict(kwargs)
         warehouse_filter = {}
-        name = kwargs.get('name')
-        company = kwargs.get('company')
+        name = kwargs.get("name")
+        company = kwargs.get("company")
         if name:
-            warehouse_filter['name'] = ['like', f'%{name}%']
-        warehouse_filter['company'] = company
-        list_warehouse = frappe.db.get_list('Warehouse', filters=warehouse_filter, fields=['name', 'warehouse_name'])
+            warehouse_filter["name"] = ["like", f"%{name}%"]
+        warehouse_filter["company"] = company
+        list_warehouse = frappe.db.get_list("Warehouse", filters=warehouse_filter, fields=["name", "warehouse_name"])
         return gen_response(200, "Thành công", list_warehouse)
     except Exception as e:
         return exception_handle(e)
     
 # List VAT
-@frappe.whitelist(methods='GET')
+@frappe.whitelist(methods="GET")
 def list_vat(**kwargs):
     try:
         kwargs = frappe._dict(kwargs)
-        title = kwargs.get('title') if kwargs.get('title') else ''
+        title = kwargs.get("title") if kwargs.get("title") else ""
         company = kwargs.get('company') if kwargs.get('company') else ''
         Taxes = frappe.qb.DocType("Sales Taxes and Charges Template")
         TaxesCharges = frappe.qb.DocType("Sales Taxes and Charges")
