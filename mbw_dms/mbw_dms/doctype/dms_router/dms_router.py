@@ -108,6 +108,8 @@ def get_customer_router(data):
         birthday_to = validate_filter(type_check='timestamp', type='end', value=data.get('birthday_to')) if data.get('birthday_to') else False
         customer_group = data.get('customer_group')
         customer_type = data.get('customer_type')
+        ## trang thái viếng thăm
+        checkin_status = validate_filter(type_check="enum",type=("all","is_checkin","not_checkin"),value=data.get("checkin_status"),) 
 
         # Chỉ lấy những tuyến đang hoạt động
         queryFilters = {"is_deleted": 0, "status": "Active"}
@@ -168,6 +170,15 @@ def get_customer_router(data):
         if router_filter and router_today != "" and router_today == router_filter[0]:
             list_customer_name = list_customer_in_route
 
+        # lấy ra ds khách hàng đã checkin        
+        start_time,end_time=validate_filter(type_check="in_date",value=datetime.now().timestamp())
+        list_checkin = frappe.db.get_all("DMS Checkin",{"kh_ma": ["in",list_customer_name],"creation": ["between",[start_time,end_time]]},["is_checkout","kh_ma"]) 
+        print("list_checkin",list_checkin)        
+        list_checkin_code = pydash.map_(list_checkin,lambda x:x.kh_ma)
+        if checkin_status == "is_checkin":
+            list_customer_name = list_checkin_code
+        elif checkin_status == "not_checkin":
+            list_checkin_code = pydash.filter_(list_checkin_code,lambda x: x not in list_checkin_code)
         FiltersCustomer = {"customer_code": ["in", list_customer_name]}
         FiltersCustomer["disabled"] = 0
 
@@ -202,10 +213,10 @@ def get_customer_router(data):
             address_name = customer["customer_primary_address"]
             customer["customer_primary_address"]=frappe.db.get_value("Address",{"name": address_name},["address_title","address_line1","city","county","state"],as_dict=1)
             customer['is_checkin'] = False
-            start_time,end_time=validate_filter(type_check="in_date",value=datetime.now().timestamp())
-            checkin = frappe.db.get_value("DMS Checkin",{"kh_ma":customer.get('customer_code'),"creation": ["between",[start_time,end_time]]},["is_checkout"],as_dict=1)
-            if checkin != None and checkin.is_checkout:
-                customer['is_checkin'] = True
+            # start_time,end_time=validate_filter(type_check="in_date",value=datetime.now().timestamp())
+            # checkin = frappe.db.get_value("DMS Checkin",{"kh_ma":customer.get('customer_code'),"creation": ["between",[start_time,end_time]]},["is_checkout"],as_dict=1)
+            
+            customer['is_checkin'] = customer["customer_code"] in list_checkin_code
             customer["is_route"] = False
             if customer.customer_code in list_customer_in_route:
                 customer["is_route"] = True
