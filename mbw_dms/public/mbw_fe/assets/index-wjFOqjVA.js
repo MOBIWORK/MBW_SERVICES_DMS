@@ -1,1 +1,0 @@
-import{P as s}from"./index-AFmgeI67.js";function n({header:e,children:r}){return s.jsxs(s.Fragment,{children:[s.jsx("div",{className:"w-full bg-white",children:e}),s.jsx("div",{className:"w-full p-5",children:r})]})}export{n as C};

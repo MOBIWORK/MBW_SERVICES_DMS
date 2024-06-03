@@ -29,7 +29,7 @@ import { useResize } from "@/hooks";
 
 function RouterControl() {
   const navigate = useNavigate();
-  const PAGE_SIZE = 10
+  const PAGE_SIZE = 20
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const { errorMsg, successMsg } = useContext(GlobalContext)
   const [form] = useForm()
