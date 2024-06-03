@@ -45,6 +45,7 @@ def customer_report(**kwargs):
             LEFT JOIN `tabSales Team` st ON cus.name = st.parent
             LEFT JOIN `tabSales Person` sp ON st.sales_person = sp.name
         """
+        
         if where_conditions:
             sql_query += " WHERE {}".format(where_conditions)
         sql_query += " LIMIT %s OFFSET %s"
@@ -57,14 +58,17 @@ def customer_report(**kwargs):
             "sum_checkin": 0,
             "sum_so": 0,
         }
+
         if list_customers:
             for i in list_customers:
                 # Số lần viếng thăm
                 i["first_checkin"] = ""
                 i["last_checkin"] = ""
                 i["totals_checkin"] = frappe.db.count("DMS Checkin", {"kh_ten": i["cus_id"]})
+
                 if i["totals_checkin"]:
                     totals["sum_checkin"] += i["totals_checkin"]
+
                 first_checkin = frappe.db.get_all("DMS Checkin", filters={"kh_ten": i["cus_id"]}, order_by="creation asc", fields=["UNIX_TIMESTAMP(creation) as creation"], limit=1)
                 last_checkin = frappe.db.get_all("DMS Checkin", filters={"kh_ten": i["cus_id"]}, order_by="creation desc", fields=["UNIX_TIMESTAMP(creation) as creation"], limit=1)
                 if first_checkin:
@@ -85,12 +89,12 @@ def customer_report(**kwargs):
                 if last_so:
                     i["last_sale_order"] = last_so[0].creation
         
+        # Tổng số khách hàng
         filters_cus = []
         if from_date and to_date:
             filters_cus["creation"] = ["between", [from_date, to_date]]
         
         where_cons = " AND ".join(filters)
-        # Tổng số khách hàng
         sql_count = f""" SELECT COUNT(*) FROM `tabCustomer`"""
         if where_cons:
             sql_count += " WHERE {}".format(where_cons)
@@ -103,5 +107,6 @@ def customer_report(**kwargs):
             "page_number": page_number,
             "page_size": page_size,
         })
+    
     except Exception as e:
         return exception_handle(e)
