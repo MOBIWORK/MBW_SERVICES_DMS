@@ -248,4 +248,9 @@ export const TableCustom = styled(Table)<{
       border-start-start-radius: 0px!important;
     }
   } 
+
+
+
+    background: #fff!important;
+  
 `;

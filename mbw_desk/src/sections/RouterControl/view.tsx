@@ -22,13 +22,14 @@ import { GlobalContext } from "@/App";
 import { translationUrl, treeArray } from "@/util";
 import { listSale } from "@/types/listSale";
 import { SyncOutlined } from "@ant-design/icons";
+import { useResize } from "@/hooks";
 // ----------------------------------------------------------------------
 
 
 
 function RouterControl() {
   const navigate = useNavigate();
-  const PAGE_SIZE = 20
+  const PAGE_SIZE = 10
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const { errorMsg, successMsg } = useContext(GlobalContext)
   const [form] = useForm()
@@ -55,6 +56,8 @@ function RouterControl() {
     "value": "modified"
   },)
 
+  const size = useResize()
+  const [scrollYTable,setScrollYTable] = useState<number>(size?.h*0.68)
   const [refresh,setRefresh] = useState<boolean>(false)
 
   const [keySearch4, setKeySearch4] = useState("");
@@ -245,6 +248,8 @@ function RouterControl() {
     })();
   }, [team_sale, seachbykey]);
 
+useEffect(()=> {setScrollYTable(size.h*0.6)},[size])
+  
   return (
     <>
       <ContentFrame
@@ -332,7 +337,7 @@ function RouterControl() {
         }
       >
         <div className="bg-[#f9fafa]">
-          <div className="mx-2 pb-10">
+          <div className="mx-2">
             <div className="">
               <div className="h-auto bg-white py-7 rounded-lg border border-solid border-[#DFE3E8]">
                 {/* header  */}
@@ -461,7 +466,7 @@ function RouterControl() {
                 </Row>
                 {/* hien thi table  */}
                 <div className="pt-5">
-                  <div className="w-full">
+                  <div className="w-full max-h-[72vh] box-border">
                     <TableCustom
                       rowSelection={rowSelection}
                       onRow={(record, rowIndex) => {
@@ -486,7 +491,7 @@ function RouterControl() {
                     }
                       scroll={{
                         x:"max-content",
-                        y:"60vh"
+                        y:scrollYTable
                       }}
                     />
                   </div>
