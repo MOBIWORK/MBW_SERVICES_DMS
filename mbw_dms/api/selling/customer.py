@@ -98,6 +98,7 @@ def customer_detail(name):
     try: 
         doc_customer = frappe.get_doc("Customer",name).as_dict()
         routers = routers_name_of_customer(more_filters={"customer_code": doc_customer.customer_code})
+        print("==================",routers)
         address = frappe.db.get_all("Address",{"link_doctype": "Customer","link_name": doc_customer.name},["address_title","address_location","is_primary_address","is_shipping_address"])
         contacts = frappe.db.get_all("Contact",{"link_doctype": "Customer","link_name": doc_customer.name},["first_name","last_name","address","phone"])
         list_router_frequency = []
@@ -112,7 +113,9 @@ def customer_detail(name):
         doc_customer["contacts"] = contacts
         doc_customer["routers"] = list_router_frequency
         doc_customer["customer_location_primary"] = null_location( doc_customer["customer_location_primary"] )
-
+        if doc_customer["image"] and  doc_customer["image"].find("http") == -1:
+            from frappe.utils import get_url
+            doc_customer["image"] = (get_url() +  doc_customer["image"]).replace(" ","%20")
         for address in  doc_customer["address"]:
             address.address_location = null_location(address.address_location)
         return gen_response(200, "", doc_customer)
