@@ -109,7 +109,7 @@ def get_customer_router(data):
         customer_group = data.get('customer_group')
         customer_type = data.get('customer_type')
         ## trang thái viếng thăm
-        checkin_status = validate_filter(type_check="enum",type=("all","is_checkin","not_checkin"),value=data.get("checkin_status"),) 
+        checkin_status = validate_filter(type_check="enum",type=("all","is_checkin","not_checkin"),value=data.get("checkin_status") or "all",) 
 
         # Chỉ lấy những tuyến đang hoạt động
         queryFilters = {"is_deleted": 0, "status": "Active"}
