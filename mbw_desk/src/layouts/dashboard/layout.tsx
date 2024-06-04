@@ -21,14 +21,13 @@ export default function DashboardLayout({ children }: Props) {
   const [collapsed, setCollapsed] = useState(false);
   return (
     <Layout className="overflow-hidden h-screen">
-        <SiderCustome className="!bg-[#fff]" width={!collapsed ? 250 : 78} collapsible collapsed={collapsed} trigger={<AvatarComponent mini={collapsed}/>} >            
+        <SiderCustome className="!bg-[#fff]" style={{height:"unset"}} width={!collapsed ? 250 : 78} collapsible collapsed={collapsed} trigger={<AvatarComponent mini={collapsed}/>} >            
             <MenuLeft handleCollapsed = {setCollapsed} collapsed={collapsed}/>
           </SiderCustome>
           <Content
-              className="round !overflow-y-scroll"
-              style={{ padding: "0", maxHeight: "calc(100vh-46px)", overflow: "auto" ,background:"#F4F6F8" }}
+              className="round max-h-screen p-0 bg-[#F4F6F8]"
             >
-              <div className="h-fit">{children}</div>
+              {children}
             </Content>
     </Layout>
   );

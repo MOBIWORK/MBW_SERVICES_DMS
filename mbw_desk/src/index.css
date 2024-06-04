@@ -121,3 +121,7 @@ body, * {
 :where(.css-dev-only-do-not-override-1jlkgmc).ant-form-item .ant-form-item-label >label::after {
   display: none
 }
+
+* {
+  box-sizing: border-box;
+}
