@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useState } from 'react'
+import { forwardRef, useEffect, useLayoutEffect, useState } from 'react'
 
 export {default} from './useCookie'
 
@@ -28,3 +28,4 @@ export const useResize = () => {
     return size
 
 }
+

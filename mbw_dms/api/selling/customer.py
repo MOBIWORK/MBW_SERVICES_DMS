@@ -226,7 +226,7 @@ def create_customer(**kwargs):
             new_contact.is_billing_contact = 1
 
             new_contact.append("links", {
-                "link_doctyp": new_customer.doctype,
+                "link_doctype": new_customer.doctype,
                 "link_name": new_customer.name,
             })
             new_contact.append("phone_nos", {

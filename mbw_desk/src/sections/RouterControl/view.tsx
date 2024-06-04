@@ -5,7 +5,7 @@ import { LuUploadCloud } from "react-icons/lu";
 import { LiaDownloadSolid } from "react-icons/lia";
 import { LuFilter, LuFilterX } from "react-icons/lu";
 import { Button, Select, Row, Col, Dropdown, Modal, TreeSelect } from "antd";
-import React, { memo, useCallback, useContext, useEffect, useLayoutEffect, useState } from "react";
+import React, { memo, useCallback, useContext, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { FormItemCustom } from "../../components/form-item";
 import { ContentFrame, DropDownCustom, HeaderPage, TableCustom, } from "../../components";
 import { rsData, rsDataFrappe } from "../../types/response";
@@ -29,6 +29,7 @@ import { useResize } from "@/hooks";
 
 function RouterControl() {
   const navigate = useNavigate();
+  const tableRef = useRef(null)
   const PAGE_SIZE = 20
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const { errorMsg, successMsg } = useContext(GlobalContext)
@@ -225,6 +226,11 @@ function RouterControl() {
         })
       );
     })();
+
+    if (tableRef.current ) {
+      console.log(tableRef.current);
+      
+    }
   }, []);
 
   useEffect(() => {
@@ -468,6 +474,7 @@ useEffect(()=> {setScrollYTable(size.h*0.6)},[size])
                 <div className="pt-5">
                   <div className="w-full max-h-[72vh] box-border">
                     <TableCustom
+                      ref={tableRef}
                       rowSelection={rowSelection}
                       onRow={(record, rowIndex) => {
                         return {
