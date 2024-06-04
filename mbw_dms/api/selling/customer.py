@@ -116,7 +116,7 @@ def customer_detail(name):
         doc_customer["contacts"] = contacts
         doc_customer["routers"] = list_router_frequency
         doc_customer["customer_location_primary"] = null_location( doc_customer["customer_location_primary"] )
-        if doc_customer["image"] and  doc_customer["image"].find("http") == -1:
+        if doc_customer["image"] and not doc_customer["image"].startswith("http"):
             from frappe.utils import get_url
             doc_customer["image"] = (get_url() +  doc_customer["image"]).replace(" ","%20")
         for address in  doc_customer["address"]:
