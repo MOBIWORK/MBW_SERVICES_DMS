@@ -111,19 +111,20 @@ def get_sale_order(name):
             
             # Lấy ra chi tiết đơn hàng
             detail_order = {"list_items": []}
-
+            print("=======================\n",detail,"\n",detail_taxes,"\n",employee)
             if len(detail) > 0:
                 for key_item, value in detail[0].items() :
+                    print("i detail1",key_item,value)
                     if key_item in field_detail_sales:                    
                         detail_order.setdefault(key_item,value)
                 detail_order['list_items'] = get_items(master_doc='Sales Order', master_name=name)
-
+                    
             if len(detail_taxes) > 0 :
+                print("in")
                 detail_order = {**detail_order, **detail_taxes[0]}
             
             if len(employee) > 0:
                 detail_order = {**detail_order, **employee[0]}
-
             return gen_response(200, "Thành công", detail_order)
         else:
             return gen_response(406, f"Không tồn tại đơn hàng {name}")
@@ -584,9 +585,8 @@ def get_sale_order_by_checkin_id(doctype, **kwargs):
 def get_items(master_doc, master_name):
     if not master_name:
         return
-    master_doc = frappe.get_doc(master_doc, master_name)
-
-    items = master_doc.get('items')
+    master_doc = frappe.get_doc(master_doc, master_name).as_dict()
+    items = master_doc["items"]
 
     fields_to_get = ["name", "item_name", "item_code", "rate", "qty", "uom", "amount", "discount_amount", "discount_percentage", "is_free_item", "item_tax_rate"]
     result = []
@@ -596,7 +596,7 @@ def get_items(master_doc, master_name):
         for fieldname in fields_to_get:
             if fieldname == "item_tax_rate":
                 data = json.loads(item.get(fieldname))
-                value = list(data.values())[0]
+                value = list(data.values())[0] if len(list(data.values()))>0 else 0
                 item_dict[fieldname] = float(value)
             else:
                 item_dict[fieldname] = item.get(fieldname)
