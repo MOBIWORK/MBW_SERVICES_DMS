@@ -272,13 +272,13 @@ def create_customer(**kwargs):
         frappe.db.commit()
         return gen_response(201, "Thành công", {"name": new_customer.name})
     except Exception as e:
-        if new_customer:
+        if 'new_customer' in locals() and new_customer is not None:
             frappe.db.delete("Customer",new_customer.name)
-        if new_address_cus:
+        if 'new_address_cus' in locals() and new_address_cus is not None:
             frappe.db.delete("Address",new_address_cus.name)
-        if new_contact:
+        if 'new_contact' in locals() and new_contact is not None:
             frappe.db.delete("Contact",new_contact.name)
-        if new_address_contact:
+        if 'new_address_contact' in locals() and new_address_contact is not None:
             frappe.db.delete("Contact",new_address_contact.name)
         return exception_handle(e)
     
