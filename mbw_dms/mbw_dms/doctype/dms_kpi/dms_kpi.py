@@ -356,6 +356,7 @@ def report_detail_visit(customer_name, kwargs):
 			i["items"] = get_value_child_doctype("DMS Inventory", i["name"], "items")
 
 		# Công nợ
+
 		query_si = {}
 		if from_date and to_date:
 			query_si["creation"] = ["between", [from_date,to_date]]
@@ -366,13 +367,23 @@ def report_detail_visit(customer_name, kwargs):
 		query_si["customer_name"] = customer_name
 		query_si["docstatus"] = 1
 
+		total_sum_si = 0
+		si = frappe.db.get_all("Sales Invoice", filters={"docstatus": 1, "customer_name": customer_name}, fields=["name", "grand_total"])
+		for i in si:
+			st = get_value_child_doctype("Sales Invoice", i["name"], "sales_team")
+			for j in st:
+				if j.sales_person == sales_per and j.created_by == 1:
+					total_sum_si += i["grand_total"]
+
 		sales_invoice = frappe.get_all("Sales Invoice", filters=query_si, fields=["name", "posting_date", "grand_total"])
 
 		grouped_data = {}
+		total_si_fil = 0
 		for invoice in sales_invoice:
 			st = get_value_child_doctype("Sales Invoice", invoice["name"], "sales_team")
 			for j in st:
 				if j.sales_person == sales_per and j.created_by == 1:
+					total_si_fil += invoice["grand_total"]
 					posting_date = invoice["posting_date"]
 					if posting_date not in grouped_data:
 						grouped_data[posting_date] = {
@@ -383,18 +394,24 @@ def report_detail_visit(customer_name, kwargs):
 					grouped_data[posting_date]["total_grand_total"] += invoice["grand_total"]
 
 		# Chuyển đổi dữ liệu thành danh sách
-		receivable_summary = []
+		receivable_details = []
 		for posting_date, details in grouped_data.items():
-			receivable_summary.append({
+			receivable_details.append({
 				"posting_date": posting_date,
 				"details": details["invoices"],
 				"total_grand_total": details["total_grand_total"]
 			})
+		
+		receivable_summary = {
+			"tong_cong_no": total_sum_si,
+			"cong_no_den_ngay": total_si_fil
+		}
 
 		return gen_response(200, "Thành công", {
 			"don_hang": data,
 			"ton_kho": inventory,
-			"cong_no": receivable_summary
+			"cong_no": receivable_summary,
+			"cong_no_chi_tiet": receivable_details
 		})
 	
 	except Exception as e:
@@ -860,7 +877,7 @@ def receivable_summary_report(**kwargs):
 			FROM
 				`tabSales Invoice` inv
 			JOIN `tabCustomer` cus ON cus.name = inv.customer
-			JOIN `tabPayment Entry` pe ON pe.party_name = inv.customer_name
+			LEFT JOIN `tabPayment Entry` pe ON pe.party_name = inv.customer_name
 			WHERE
 				{where_conditions}
 			GROUP BY
