@@ -831,7 +831,7 @@ def receivable_summary_report(**kwargs):
 		if from_date and to_date:
 			filter_inv["posting_date"] = ["between", [from_date,to_date]]
 		filter_inv["docstatus"] = 1
-		list_invoices = frappe.get_all("Sales Invoice", filters=filter_inv, fields=['name'])
+		list_invoices = frappe.get_all("Sales Invoice", filters=filter_inv, fields=["name"])
 
 		for i in list_invoices:
 			st = get_value_child_doctype("Sales Invoice", i["name"], "sales_team")
@@ -846,7 +846,7 @@ def receivable_summary_report(**kwargs):
 			filters.append(f"cus.customer_group='{customer_group}'")
 		if invoice_str != "":
 			filters.append(f"inv.name IN ({invoice_str})")
-		filters.append("pe.docstatus=1")
+		filters.append("inv.docstatus=1")
 
 		where_conditions = " AND ".join(filters)
 
@@ -856,7 +856,7 @@ def receivable_summary_report(**kwargs):
 				SUM(inv.outstanding_amount) AS total_due,
 				cus.customer_primary_contact,
 				cus.mobile_no,
-				SUM(pe.paid_amount) AS total_paid
+				COALESCE(SUM(pe.paid_amount), 0) AS total_paid
 			FROM
 				`tabSales Invoice` inv
 			JOIN `tabCustomer` cus ON cus.name = inv.customer
