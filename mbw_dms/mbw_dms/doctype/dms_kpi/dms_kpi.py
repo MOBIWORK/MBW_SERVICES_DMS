@@ -836,8 +836,6 @@ def receivable_summary_report(**kwargs):
 		filter_inv = {}
 		from_date = validate_filter_timestamp(type="start")(kwargs.get("from_date")) if kwargs.get("from_date") else None
 		to_date = validate_filter_timestamp(type="end")(kwargs.get("to_date")) if kwargs.get("to_date") else None
-		customer_type = kwargs.get("customer_type")
-		customer_group = kwargs.get("customer_group")
 
 		user_id = frappe.session.user
 		employee = frappe.get_value("Employee", {"user_id": user_id}, "name")
@@ -857,10 +855,6 @@ def receivable_summary_report(**kwargs):
 					invoice.append(i["name"])
 		invoice_str = ", ".join(["'" + inv + "'" for inv in invoice])
 
-		if customer_type:
-			filters.append(f"cus.customer_type='{customer_type}'")
-		if customer_group:
-			filters.append(f"cus.customer_group='{customer_group}'")
 		if invoice_str != "":
 			filters.append(f"inv.name IN ({invoice_str})")
 		filters.append("inv.docstatus=1")
@@ -873,6 +867,8 @@ def receivable_summary_report(**kwargs):
 				SUM(inv.outstanding_amount) AS total_due,
 				cus.customer_primary_contact,
 				cus.mobile_no,
+				cus.customer_type,
+				cus.customer_group,
 				COALESCE(SUM(pe.paid_amount), 0) AS total_paid
 			FROM
 				`tabSales Invoice` inv
