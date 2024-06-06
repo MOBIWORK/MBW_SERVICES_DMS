@@ -546,3 +546,18 @@ def get_items(master_doc, master_name):
         result.append(item_dict)
 
     return result
+
+@frappe.whitelist(methods="DELETE")
+def delete_sales_order(name, **kwargs):
+    try:
+        if frappe.db.exists("Sales Oder", name):
+            so = frappe.get_doc("Sales Order", name)
+            if so.docstatus == 0:
+                frappe.db.delete("Sales Order",{"name": name})
+                return gen_response(200, "Thành công")
+            else:
+                return gen_response(406, "Chỉ có thể xóa đơn hàng ở trạng thái nháp")
+        else:
+            return gen_response(406, "Không tồn tại đơn bán hàng")
+    except Exception as e:
+        return exception_handle(e)
