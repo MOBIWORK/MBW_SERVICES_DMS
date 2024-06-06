@@ -276,7 +276,7 @@ def create_checkin(kwargs):
         if kwargs.get("checkin_giora"):
             new_checkin.set("is_checkout", 1)
         employee = get_user_id()
-        new_checkin.set("createbyname",employee.get("fullname"))
+        new_checkin.set("createbyname",employee.get("full_name"))
         new_checkin.set("createdbyemail",employee.get("email"))
         new_checkin.insert(ignore_permissions=True)
         frappe.db.commit()
