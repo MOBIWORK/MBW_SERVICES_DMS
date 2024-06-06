@@ -55,13 +55,11 @@ def synthesis_report(**kwargs):
             i["items"] = get_value_child_doctype("Sales Order", i["name"], "items")
             for item in i["items"]:
                 data["so_san_pham"] += item["qty"]
-                item_counts[item[item_name]] += item[amount]
+                item_counts[item["item_name"]] += item["amount"]
 
         # Doanh số
         list_grand_total = [{"doanh_so": total, "thoi_gian": time} for time, total in total_by_creation_time.items()]
 
-
-        
         # Biểu đồ doanh số
         data["bieu_do_doanh_so"] = list_grand_total
 

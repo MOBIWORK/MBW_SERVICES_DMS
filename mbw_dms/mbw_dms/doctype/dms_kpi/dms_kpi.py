@@ -259,7 +259,7 @@ def report_orders_invoices(customer_name):
 		# Lấy danh sách hóa đơn từ đầu tháng đến hiện tại
 		sales_invoice = frappe.get_all("Sales Invoice",
 			filters={"posting_date": ("between", [start_date, todays]), "docstatus": 1, "customer_name": customer_name, "is_return": 0},
-			fields=["grand_total", "posting_date"]
+			fields=["name", "grand_total", "posting_date"]
 		)
 
 		total_invoices = 0
@@ -438,7 +438,7 @@ def router_results(kwargs):
 
 		# Tổng doanh số trong ngày
 		data["doanh_so"] = 0
-		sales_order = frappe.get_all("Sales Order", filters={**filters, "docstatus": 1}, fields=["grand_total"])
+		sales_order = frappe.get_all("Sales Order", filters={**filters, "docstatus": 1}, fields=["name", "grand_total"])
 		for i in sales_order:
 			st = get_value_child_doctype("Sales Order", i["name"], "sales_team")
 			for j in st:
@@ -526,24 +526,26 @@ def checkin_report(kwargs):
 
 		# Tổng doanh thu trong ngày
 		data["doanh_so"] = 0
-		sales_order = frappe.get_all("Sales Invoice", filters={**filters, "docstatus": 1}, fields=["grand_total"])
-		for i in sales_order:
-			st = get_value_child_doctype("Sales Order", i["name"], "sales_team")
-			for j in st:
-				if j.sales_person == sales_per and j.created_by == 1:
-					data["doanh_so"] += i["grand_total"]
+		sales_invoice = frappe.get_all("Sales Invoice", filters={**filters, "docstatus": 1}, fields=["name", "grand_total"])
+		if sales_invoice:
+			for i in sales_invoice:
+				st = get_value_child_doctype("Sales Invoice", i["name"], "sales_team")
+				for j in st:
+					if j.sales_person == sales_per and j.created_by == 1:
+						data["doanh_so"] += i["grand_total"]
 
 		data_checkin = frappe.get_all("DMS Checkin", filters={**filters, "owner": employee}, fields=["name", "kh_ten", "kh_ma", "checkin_giovao", "checkin_giora", "checkin_donhang", "checkin_dungtuyen"])
 		list_customer = []
 
-		for i in data_checkin:
-			i["checkin_hinhanh"] = 0
-			checkin_image = get_value_child_doctype("DMS Checkin", i["name"], "checkin_hinhanh")
-			if checkin_image:
-				i["checkin_hinhanh"] = len(checkin_image)
-			if i["kh_ten"] not in list_customer:
-				list_customer.append(i["kh_ten"])
-			i["doanh_so"] = frappe.get_value("Sales Order", {"customer": i["kh_ten"]}, "grand_total")
+		if data_checkin:
+			for i in data_checkin:
+				i["checkin_hinhanh"] = 0
+				checkin_image = get_value_child_doctype("DMS Checkin", i["name"], "checkin_hinhanh")
+				if checkin_image:
+					i["checkin_hinhanh"] = len(checkin_image)
+				if i["kh_ten"] not in list_customer:
+					list_customer.append(i["kh_ten"])
+				i["doanh_so"] = frappe.get_value("Sales Order", {"customer": i["kh_ten"]}, "grand_total")
 
 		# Check số khách hàng phải viếng thăm theo tuyến
 		# Lấy tuyến của nhân viên
@@ -682,7 +684,7 @@ def new_customer_report(kwargs):
 		user_id = frappe.session.user
 		filters["owner"] = user_id
 
-		list_customers = frappe.db.get_all("Customer", filters=filters, fields=["name", "customer_name", "customer_type", "customer_group", "UNIX_TIMESTAMP(creation) as date_collection", "customer_primary_address as address"])
+		list_customers = frappe.db.get_all("Customer", filters=filters, fields=["name", "customer_name", "customer_code", "customer_type", "customer_group", "UNIX_TIMESTAMP(creation) as date_collection", "customer_primary_address as address"])
 		data["total_new_cus"] = frappe.db.count("Customer", filters=filters)
 
 		return gen_response(200, "Thành công", {
@@ -865,6 +867,7 @@ def receivable_summary_report(**kwargs):
 			SELECT
 				inv.customer_name,
 				SUM(inv.outstanding_amount) AS total_due,
+				cus.customer_code,
 				cus.customer_primary_contact,
 				cus.mobile_no,
 				cus.customer_type,
