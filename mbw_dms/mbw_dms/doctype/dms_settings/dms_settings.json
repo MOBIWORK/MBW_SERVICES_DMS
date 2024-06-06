@@ -8,11 +8,11 @@
  "engine": "InnoDB",
  "field_order": [
   "c\u1ea5u_h\u00ecnh_mobile_tab",
+  "saiso_chophep_kb_vitringoaisaiso",
+  "saiso_chophep_checkout_ngoaisaiso",
   "vt_ngoaituyen",
   "kb_vitringoaisaiso",
-  "saiso_chophep_kb_vitringoaisaiso",
   "checkout_ngoaisaiso",
-  "saiso_chophep_checkout_ngoaisaiso",
   "tgcheckin_toithieu",
   "thoigian_toithieu",
   "batbuoc_kiemton",
@@ -28,7 +28,6 @@
   "company_lat",
   "industrys",
   "config_map_by_vgm",
-  "nguong_nhan_dien_sp",
   "aws_tab",
   "access_key_s3",
   "key_secret_s3",
@@ -46,25 +45,23 @@
    "default": "0",
    "fieldname": "kb_vitringoaisaiso",
    "fieldtype": "Check",
-   "label": " Checkin ngo\u00e0i sai s\u1ed1"
+   "label": " Cho ph\u00e9p checkin ngo\u00e0i sai s\u1ed1"
   },
   {
-   "depends_on": "eval:doc.kb_vitringoaisaiso == 1;",
    "fieldname": "saiso_chophep_kb_vitringoaisaiso",
    "fieldtype": "Float",
-   "label": "Sai s\u1ed1 cho ph\u00e9p (m\u00e9t)"
+   "label": "Sai s\u1ed1 cho ph\u00e9p checkin"
   },
   {
    "default": "0",
    "fieldname": "checkout_ngoaisaiso",
    "fieldtype": "Check",
-   "label": "Checkout ngo\u00e0i sai s\u1ed1"
+   "label": "Cho ph\u00e9p checkout ngo\u00e0i sai s\u1ed1"
   },
   {
-   "depends_on": "eval:doc.checkout_ngoaisaiso == 1;",
    "fieldname": "saiso_chophep_checkout_ngoaisaiso",
    "fieldtype": "Float",
-   "label": "Sai s\u1ed1 cho ph\u00e9p"
+   "label": "Sai s\u1ed1 cho ph\u00e9p checkout"
   },
   {
    "default": "0",
@@ -177,18 +174,12 @@
    "fieldname": "config_map_by_vgm",
    "fieldtype": "JSON",
    "label": "C\u1ea5u h\u00ecnh b\u1ea3n \u0111\u1ed3 VGM"
-  },
-  {
-   "default": "0,6",
-   "fieldname": "nguong_nhan_dien_sp",
-   "fieldtype": "Float",
-   "label": "Ng\u01b0\u1ee1ng nh\u1eadn di\u1ec7n s\u1ea3n ph\u1ea9m"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-05-23 11:35:01.249297",
+ "modified": "2024-06-06 17:49:03.540659",
  "modified_by": "Administrator",
  "module": "MBW DMS",
  "name": "DMS Settings",
