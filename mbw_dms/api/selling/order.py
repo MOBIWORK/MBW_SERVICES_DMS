@@ -65,76 +65,81 @@ def get_list_sales_order(**filters):
 
 
 # Chi tiết đơn hàng
+def sales_order_detail(name):
+    if frappe.db.exists("Sales Order", name, cache=True):
+        SalesOrder = frappe.qb.DocType("Sales Order")
+        Customer = frappe.qb.DocType("Customer")
+        SalesOrderItem = frappe.qb.DocType("Sales Order Item")
+        SalesOrderTaxes = frappe.qb.DocType("Sales Taxes and Charges")
+        Employee = frappe.qb.DocType("Employee")
+
+        # Lấy ra các trường trong đơn hàng
+        field_detail_sales = ["total", "grand_total", "customer_code", "customer", "customer_name", "customer_address", "delivery_date", "set_warehouse", "total_taxes_and_charges", "apply_discount_on", "additional_discount_percentage", "discount_amount", "contact_person", "rounded_total", "status"]
+
+        # Thực hiện join để lấy ra giá trị
+        detail = (frappe.qb.from_(SalesOrder)
+                .inner_join(SalesOrderItem)
+                .on(SalesOrder.name == SalesOrderItem.parent)
+                
+                .inner_join(Customer)
+                .on(Customer.name == SalesOrder.customer)
+                .where(SalesOrder.name == name)
+                .select(
+                    Customer.customer_code
+                    ,SalesOrder.customer,SalesOrder.customer_name,SalesOrder.customer_address,UNIX_TIMESTAMP(SalesOrder.delivery_date).as_('delivery_date'),SalesOrder.set_warehouse,SalesOrder.total,SalesOrder.grand_total
+                    ,SalesOrder.taxes_and_charges,SalesOrder.total_taxes_and_charges, SalesOrder.apply_discount_on, SalesOrder.additional_discount_percentage,SalesOrder.discount_amount,SalesOrder.contact_person, SalesOrder.status
+                )
+                ).run(as_dict =1)
+        
+        # Lấy ra giá trị tax
+        detail_taxes = (frappe.qb.from_(SalesOrder)
+                        .inner_join(SalesOrderTaxes)
+                        .on(SalesOrder.name == SalesOrderTaxes.parent)
+                        .where(SalesOrder.name == name)
+                        .select(SalesOrderTaxes.tax_amount,SalesOrderTaxes.rate.as_('rate_tax'))
+                        ).run(as_dict =1)
+        
+        # Lấy ra thông tin nhân viên bán hàng
+        employee = (frappe.qb.from_(SalesOrder)
+                        .inner_join(Employee)
+                        .on(SalesOrder.owner == Employee.user_id)
+                        .where(SalesOrder.name == name)
+                        .select(Employee.employee_name, Employee.cell_number, Employee.current_address)
+                        ).run(as_dict =1)
+        
+        # Lấy ra chi tiết đơn hàng
+        detail_order = {"list_items": []}
+        if len(detail) > 0:
+            for key_item, value in detail[0].items() :
+                if key_item in field_detail_sales:                    
+                    detail_order.setdefault(key_item,value)
+            detail_order['list_items'] = get_items(master_doc='Sales Order', master_name=name)
+                
+        if len(detail_taxes) > 0 :
+            detail_order = {**detail_order, **detail_taxes[0]}
+        
+        if len(employee) > 0:
+            detail_order = {**detail_order, **employee[0]}
+        return detail_order
+    else:
+        return []
+
 @frappe.whitelist(methods='GET')
 def get_sale_order(name):
     try:
         if frappe.db.exists("Sales Order", name, cache=True):
-            SalesOrder = frappe.qb.DocType("Sales Order")
-            Customer = frappe.qb.DocType("Customer")
-            SalesOrderItem = frappe.qb.DocType("Sales Order Item")
-            SalesOrderTaxes = frappe.qb.DocType("Sales Taxes and Charges")
-            Employee = frappe.qb.DocType("Employee")
-
-            # Lấy ra các trường trong đơn hàng
-            field_detail_sales = ["total", "grand_total", "customer_code", "customer", "customer_name", "customer_address", "delivery_date", "set_warehouse", "total_taxes_and_charges", "apply_discount_on", "additional_discount_percentage", "discount_amount", "contact_person", "rounded_total", "status"]
-
-            # Thực hiện join để lấy ra giá trị
-            detail = (frappe.qb.from_(SalesOrder)
-                    .inner_join(SalesOrderItem)
-                    .on(SalesOrder.name == SalesOrderItem.parent)
-                    
-                    .inner_join(Customer)
-                    .on(Customer.name == SalesOrder.customer)
-                    .where(SalesOrder.name == name)
-                    .select(
-                        Customer.customer_code
-                        ,SalesOrder.customer,SalesOrder.customer_name,SalesOrder.customer_address,UNIX_TIMESTAMP(SalesOrder.delivery_date).as_('delivery_date'),SalesOrder.set_warehouse,SalesOrder.total,SalesOrder.grand_total
-                        ,SalesOrder.taxes_and_charges,SalesOrder.total_taxes_and_charges, SalesOrder.apply_discount_on, SalesOrder.additional_discount_percentage,SalesOrder.discount_amount,SalesOrder.contact_person, SalesOrder.status
-                    )
-                    ).run(as_dict =1)
-            
-            # Lấy ra giá trị tax
-            detail_taxes = (frappe.qb.from_(SalesOrder)
-                            .inner_join(SalesOrderTaxes)
-                            .on(SalesOrder.name == SalesOrderTaxes.parent)
-                            .where(SalesOrder.name == name)
-                            .select(SalesOrderTaxes.tax_amount,SalesOrderTaxes.rate.as_('rate_tax'))
-                            ).run(as_dict =1)
-            
-            # Lấy ra thông tin nhân viên bán hàng
-            employee = (frappe.qb.from_(SalesOrder)
-                            .inner_join(Employee)
-                            .on(SalesOrder.owner == Employee.user_id)
-                            .where(SalesOrder.name == name)
-                            .select(Employee.employee_name, Employee.cell_number, Employee.current_address)
-                            ).run(as_dict =1)
-            
-            # Lấy ra chi tiết đơn hàng
-            detail_order = {"list_items": []}
-            print("=======================\n",detail,"\n",detail_taxes,"\n",employee)
-            if len(detail) > 0:
-                for key_item, value in detail[0].items() :
-                    print("i detail1",key_item,value)
-                    if key_item in field_detail_sales:                    
-                        detail_order.setdefault(key_item,value)
-                detail_order['list_items'] = get_items(master_doc='Sales Order', master_name=name)
-                    
-            if len(detail_taxes) > 0 :
-                print("in")
-                detail_order = {**detail_order, **detail_taxes[0]}
-            
-            if len(employee) > 0:
-                detail_order = {**detail_order, **employee[0]}
-            return gen_response(200, "Thành công", detail_order)
+            order_details = sales_order_detail(name)
+            return gen_response(200, "Thành công", order_details)
         else:
             return gen_response(406, f"Không tồn tại đơn hàng {name}")
-    except Exception as e: 
-        exception_handle(e)
+    except Exception as e:
+        return exception_handle(e)
+
 
 # Tạo mới đơn hàng
 @frappe.whitelist(methods='POST')
 def create_sale_order(**kwargs):
-    # try:
+    try:
         kwargs = frappe._dict(kwargs)
         new_order = frappe.new_doc('Sales Order')
         user_name = frappe.get_value('Employee',{ 'user_id': frappe.session.user}, 'name')
@@ -208,45 +213,17 @@ def create_sale_order(**kwargs):
             for tax in account_heads.values():
                 new_order.append('taxes', tax)
 
-        # Check dữ liệu mobile bắn lên
-        # grand_total = 0     # Tổng tiền đơn hàng
-        # discount_amount = 0
-
-        # Nếu loại chiết khấu là Grand total
-        # if apply_discount_on == 'Grand Total':
-        #     if discount_percent != 0:
-        #         discount_amount = discount_percent * amount / 100     # CK = %CK * (VAT + X)
-        #         grand_total = amount - discount_amount         # total = X + VAT - Ck
-        #     if discount_percent == 0:
-        #         new_order.discount_amount = discount_amount
-        #         grand_total = amount - discount_amount
-
-        # # Nếu loại chiết khấu là Net total
-        # if apply_discount_on == 'Net Total':
-        #     if discount_percent != 0:
-        #         discount_amount = discount_percent * amount / 100
-        #         grand_total = amount - discount_amount
-        #     if discount_percent == 0:
-        #         new_order.discount_amount = discount_amount
-        #         grand_total = amount - discount_amount
-
-        # Nếu không truyền lên chiết khấu
-        # if apply_discount_on is None:
-        #     grand_total = amount
-        
-        # So sánh với giá bên mobile tính toán
-        # if grand_total == float(kwargs.get('grand_total')):
         customer = frappe.get_doc('Customer', kwargs.customer)
         customer.has_sales_order = 1
         customer.save()
         
         new_order.insert()
         frappe.db.commit()
-        return gen_response(201, "Thành công",  {"name": new_order.name})
-        # else:
-        #     return gen_response(400, "Tổng tiền chưa khớp với tính toán", {"grand_total": grand_total})
-    # except Exception as e:
-    #     return exception_handle(e)
+        detail_order = sales_order_detail(new_order.name)
+        return gen_response(201, "Thành công",  {"detail_order": detail_order})
+       
+    except Exception as e:
+        return exception_handle(e)
 
 
 # Áp dụng quy tắc đặt giá
@@ -360,44 +337,10 @@ def create_return_order(**kwargs):
             for tax in account_heads.values():
                 new_order.append('taxes', tax)
 
-        # Check dữ liệu mobile bắn lên
-        # grand_total = 0     # Tổng tiền đơn hàng
-        # total_vat = 0       # Giá vat (VAT)
-        # discount_amount = 0
-
-        # Nếu loại chiết khấu là Grand total
-        # if apply_discount_on == 'Grand Total':
-        #     total_vat = rate_taxes * amount / 100          # VAT = %VAT * X
-        #     if discount_percent != 0:
-        #         discount_amount = discount_percent * (amount + total_vat) / 100     # CK = %CK * (VAT + X)
-        #         grand_total = amount + total_vat - discount_amount         # total = X + VAT - Ck
-        #     if discount_percent == 0:
-        #         new_order.discount_amount = discount_amount
-        #         grand_total = amount + total_vat - discount_amount
-
-        # # Nếu loại chiết khấu là Net total
-        # if apply_discount_on == 'Net Total':
-        #     if discount_percent != 0:
-        #         discount_amount = discount_percent * amount / 100
-        #         total_vat = rate_taxes * (amount - discount_amount) / 100
-        #         grand_total = amount + total_vat - discount_amount
-        #     if discount_percent == 0:
-        #         new_order.discount_amount = discount_amount
-        #         total_vat = rate_taxes * (amount - discount_amount) / 100
-        #         grand_total = amount + total_vat - discount_amount
-
-        # # Nếu không truyền lên chiết khấu
-        # if apply_discount_on is None:
-        #     total_vat = rate_taxes * amount / 100          # VAT = %VAT * X
-        #     grand_total = amount + total_vat
-        
-        # So sánh với giá bên mobile tính toán
-        # if grand_total == float(kwargs.get('grand_total')):
         new_order.insert()
         frappe.db.commit()
         return gen_response(201, "Thành công", {"name": new_order.name})
-        # else:
-        #     return gen_response(400, "Tổng tiền chưa khớp với tính toán", {"grand_total": grand_total})
+        
     except Exception as e:
         return exception_handle(e)
 
