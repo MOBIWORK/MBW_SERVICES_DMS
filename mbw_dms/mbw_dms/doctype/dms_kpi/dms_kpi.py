@@ -453,7 +453,7 @@ def router_results(kwargs):
 		data["vt_dung_tuyen"] = 0
 		data["vt_ngoai_tuyen"] = 0
 
-		data_checkin = frappe.get_all("DMS Checkin", filters={**filters, "owner": employee}, fields=["name", "kh_ten", "checkin_donhang", "checkin_dungtuyen"])
+		data_checkin = frappe.get_all("DMS Checkin", filters={**filters, "owner": user_id}, fields=["name", "kh_ten", "checkin_donhang", "checkin_dungtuyen"])
 		list_customer = []
 		for i in data_checkin:
 			if i["kh_ten"] not in list_customer:
@@ -534,7 +534,7 @@ def checkin_report(kwargs):
 					if j.sales_person == sales_per and j.created_by == 1:
 						data["doanh_so"] += i["grand_total"]
 
-		data_checkin = frappe.get_all("DMS Checkin", filters={**filters, "owner": employee}, fields=["name", "kh_ten", "kh_ma", "checkin_giovao", "checkin_giora", "checkin_donhang", "checkin_dungtuyen"])
+		data_checkin = frappe.get_all("DMS Checkin", filters={**filters, "owner": user_id}, fields=["name", "kh_ten", "kh_ma", "checkin_giovao", "checkin_giora", "checkin_donhang", "checkin_dungtuyen"])
 		list_customer = []
 
 		if data_checkin:
