@@ -299,23 +299,15 @@ def update_customer(name, **kwargs):
             customer = frappe.get_doc("Customer", name)
             
             # Cập nhật các trường cơ bản của khách hàng
-            required_fields = ["customer_code", "customer_name", "customer_group", "territory"]
-            normal_fields = ["customer_details", "website"]
+            fields = ["customer_code", "customer_name", "customer_group", "territory", "customer_details", "website", "customer_type"]
             date_fields = ["custom_birthday"]
-            choice_fields = ["customer_type"]
 
             for key, value in kwargs.items():
-                if key in normal_fields:
+                if key in fields:
                     customer.set(key, value)
-                elif key in required_fields:
-                    required = validate_not_none(value)
-                    customer.set(key, required)
                 elif key in date_fields:
                     custom_birthday = validate_date(value)
                     customer.set(key, custom_birthday)
-                elif key in choice_fields:
-                    customer_type = validate_choice(configs.customer_type)(value)
-                    customer.set(key, customer_type)
 
             # Thay đổi ảnh
             if kwargs.get("image"):
