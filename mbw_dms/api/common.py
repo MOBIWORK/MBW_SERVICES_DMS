@@ -144,7 +144,7 @@ def get_user_id():
     str_b64Val = base64.b64decode(usrPass).decode('utf-8')
     list_key = str_b64Val.split(':')
     api_key = list_key[0]
-    user_id = frappe.db.get_value('User', {"api_key": api_key},['name','email'],as_dict=1)
+    user_id = frappe.db.get_value('User', {"api_key": api_key},['name','email',"fullname"],as_dict=1)
     return user_id
 
 def get_employee_id():

@@ -275,6 +275,9 @@ def create_checkin(kwargs):
                 new_checkin.set(key, created_date)
         if kwargs.get("checkin_giora"):
             new_checkin.set("is_checkout", 1)
+        employee = get_user_id()
+        new_checkin.set("createbyname",employee.get("fullname"))
+        new_checkin.set("createdbyemail",employee.get("email"))
         new_checkin.insert(ignore_permissions=True)
         frappe.db.commit()
         return gen_response(201, "Thành công", {"name": new_checkin.name})
