@@ -230,7 +230,9 @@ def create_customer(**kwargs):
                 "link_name": new_customer.name,
             })
             new_contact.append("phone_nos", {
-                "phone": phone_number
+                "phone": phone_number,
+                "is_primary_phone":1,
+                "is_primary_mobile_no":1
             })
             new_contact.insert()
             # Tạo mới địa chỉ contact
