@@ -313,10 +313,11 @@ def create_checkin_inventory(body):
                 # Calculate total cost
                 if 'quantity' in item and 'item_price' in item:
                     item['total_cost'] = item['quantity'] * item['item_price']
-
+                item_info =frappe.db.get_value("Item",item.get("item_code"),["item_name"], as_dict=1)
+                item["item_name"] = item_info.item_name
             item["update_bycode"] = employee.get("name")
             item["update_byname"] = employee.get("fullname")
-            item["update_byname"] = time_now_utc()
+            item["update_at"] = time_now_utc()
             doc.append("items", item)
             
         doc.insert()
