@@ -25,9 +25,9 @@ def validate_phone_number(value):
 
 
 # Kiểm tra trường bắt buộc có dữ liệu truyền lên không được để trống (required=True)
-def validate_not_none(value):
+def validate_not_none(value,field=""):
     if not value:
-        raise ValueError(f"Vui lòng nhập dữ liệu!")
+        raise ValueError(f"Vui lòng nhập dữ liệu: {field}")
     return value
 
 

@@ -19,7 +19,7 @@ class DMSDistrict(Document):
 @frappe.whitelist(methods='GET')
 def list_district(kwargs):
     try:
-        list_districts = frappe.db.get_list('DMS District', filters={'ma_tinh_thanh': validate_not_none(kwargs.get('ma_tinh'))}, fields=['name', 'ma_huyen', 'ten_huyen', 'ma_tinh_thanh'], order_by='ma_huyen asc')
+        list_districts = frappe.db.get_list('DMS District', filters={'ma_tinh_thanh': validate_not_none(kwargs.get('ma_tinh'),"mã tỉnh")}, fields=['name', 'ma_huyen', 'ten_huyen', 'ma_tinh_thanh'], order_by='ma_huyen asc')
         return gen_response(200, 'Thành công', list_districts)
     except Exception as e:
         return exception_handle(e)
