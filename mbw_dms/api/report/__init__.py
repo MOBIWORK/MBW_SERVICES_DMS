@@ -5,7 +5,7 @@ from mbw_dms.api.common import gen_response ,exception_handle, get_value_child_d
 from collections import defaultdict
 
 # Dữ liệu báo cáo tổng hợp
-@frappe.whitelist(methods='GET')
+@frappe.whitelist(methods="GET")
 def synthesis_report(**kwargs):
     try:
         data = {}
@@ -114,7 +114,7 @@ def synthesis_report(**kwargs):
     
 
 # Báo cáo giám sát thời gian thực
-@frappe.whitelist(methods='GET')
+@frappe.whitelist(methods="GET")
 def real_time_monitoring_report(**kwargs):
     try:
         data = {}

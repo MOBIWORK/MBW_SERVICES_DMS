@@ -2,7 +2,7 @@ import frappe
 from mbw_dms.api.common import gen_response, exception_handle
 from mbw_dms.api.validators import validate_filter_timestamp
 
-@frappe.whitelist(methods='GET')
+@frappe.whitelist(methods="GET")
 def report_web_visit(**kwargs):
     try:
         filters = []

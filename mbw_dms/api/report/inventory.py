@@ -5,6 +5,7 @@ from mbw_dms.mbw_dms.doctype.dms_inventory.dms_inventory import find
 from mbw_dms.api.common import gen_response ,exception_handle
 from frappe import _
 
+# Báo cáo tồn kho
 @frappe.whitelist(methods="GET",allow_guest=True)
 def get_customer_inventory(**body):
     try:
