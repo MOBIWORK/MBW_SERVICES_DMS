@@ -385,6 +385,7 @@ def create_checkin_image(body):
 # Cập nhật địa chỉ khách hàng
 def update_address_customer(body):
     try:
+        
         customer = validate_filter(type_check='require', value=body.get('customer'))
         checkin_id = validate_filter(type_check='require', value=body.get('checkin_id'))        
         long = validate_filter(type_check='require', value=body.get('long'))
@@ -451,7 +452,7 @@ def update_address_customer(body):
 # Cập nhật địa chỉ khách hàng
 def update_address_customer_checkin(body):
     try:
-
+        
         customer = validate_filter(type_check='require', value=body.get('customer'))
         checkin_id = body.get('checkin_id')        
         long = validate_filter(type_check='require', value=body.get('long'))
@@ -471,6 +472,7 @@ def update_address_customer_checkin(body):
         if checkin_id :
             link_cs_address.update({"link_title": checkin_id})
         address_return = ""
+        
         if customer_info:
             # không truyền lên địa chỉ
             if not bool(city) and not bool(address_line1):
