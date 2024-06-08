@@ -63,7 +63,7 @@ def list_customer(**kwargs):
                                         "customer_code","customer_type", 
                                         "customer_group", "territory",
                                         "industry", "image","website", 
-                                        "mobile_no as contacts", "customer_primary_address",
+                                        "mobile_no", "customer_primary_address",
                                         "custom_birthday","customer_location_primary",
                                         "customer_details"],
                                 start=page_size*(page_number-1), 
