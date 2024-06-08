@@ -3,7 +3,7 @@ import frappe
 from mbw_dms.api.common import gen_response ,exception_handle
 import calendar
 
-# Báo cáo KPI
+# Báo cáo KPI web
 @frappe.whitelist(methods='GET')
 def kpi_report(**kwargs):
     try:

@@ -59,13 +59,10 @@ def list_customer(**kwargs):
 
         customers = frappe.db.get_all("Customer",
                                 filters=my_filter,
-                                fields=["name", "customer_name",
-                                        "customer_code","customer_type", 
-                                        "customer_group", "territory",
-                                        "industry", "image","website", 
-                                        "mobile_no", "customer_primary_address",
-                                        "custom_birthday","customer_location_primary",
-                                        "customer_details"],
+                                fields=["name", "customer_name", "customer_code","customer_type", 
+                                        "customer_group", "territory", "industry", "image", "website", 
+                                        "mobile_no", "customer_primary_address", "custom_birthday",
+                                        "customer_location_primary", "customer_details"],
                                 start=page_size*(page_number-1), 
                                 page_length=page_size)
                                 
@@ -115,10 +112,11 @@ def customer_detail(name):
         doc_customer["address"] = address
         doc_customer["contacts"] = contacts
         doc_customer["routers"] = list_router_frequency
-        doc_customer["customer_location_primary"] = null_location( doc_customer["customer_location_primary"] )
+        doc_customer["customer_location_primary"] = null_location( doc_customer["customer_location_primary"])
+
         if doc_customer["image"] and not doc_customer["image"].startswith("http"):
             from frappe.utils import get_url
-            doc_customer["image"] = (get_url() +  doc_customer["image"]).replace(" ","%20")
+            doc_customer["image"] = (get_url() +  doc_customer["image"]).replace(" ", "%20")
         for address in  doc_customer["address"]:
             address.address_location = null_location(address.address_location)
         return gen_response(200, "", doc_customer)
@@ -274,14 +272,14 @@ def create_customer(**kwargs):
         frappe.db.commit()
         return gen_response(201, "Thành công", {"name": new_customer.name})
     except Exception as e:
-        if 'new_customer' in locals() and new_customer is not None:
-            frappe.db.delete("Customer",new_customer.name)
-        if 'new_address_cus' in locals() and new_address_cus is not None:
-            frappe.db.delete("Address",new_address_cus.name)
-        if 'new_contact' in locals() and new_contact is not None:
-            frappe.db.delete("Contact",new_contact.name)
-        if 'new_address_contact' in locals() and new_address_contact is not None:
-            frappe.db.delete("Contact",new_address_contact.name)
+        if "new_customer" in locals() and new_customer is not None:
+            frappe.db.delete("Customer", new_customer.name)
+        if "new_address_cus" in locals() and new_address_cus is not None:
+            frappe.db.delete("Address", new_address_cus.name)
+        if "new_contact" in locals() and new_contact is not None:
+            frappe.db.delete("Contact", new_contact.name)
+        if "new_address_contact" in locals() and new_address_contact is not None:
+            frappe.db.delete("Contact", new_address_contact.name)
         return exception_handle(e)
     
 # Danh sách lãnh thổ 
@@ -405,7 +403,7 @@ def get_customer_addresses(customer_name):
 def get_contact(customer_name):
     contact = frappe.get_all("Contact",
         filters={"link_name": customer_name},
-        fields=['name','first_name', "phone", "is_primary_contact", "is_billing_contact"]
+        fields=["name", "first_name", "phone", "is_primary_contact", "is_billing_contact"]
     )
     return gen_response(200, "Thành công", contact)
 
@@ -424,13 +422,13 @@ def list_router(customer_name):
 @frappe.whitelist(methods="GET")
 def list_sale_person():
     try:
-        sale_person = frappe.get_all("Sales Person", filters={"enabled": 1}, fields=['name','sales_person_name'])
+        sale_person = frappe.get_all("Sales Person", filters={"enabled": 1}, fields=["name", "sales_person_name"])
         return gen_response(200, "Thành công", sale_person)
     except Exception as e:
         return exception_handle(e)
 
 # Lấy danh sách khách hàng có địa chỉ
-@frappe.whitelist(methods='GET')
+@frappe.whitelist(methods="GET")
 def get_customer_has_location(**kwargs):
     try:
         sql_query = """

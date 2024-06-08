@@ -3,7 +3,7 @@ import frappe
 from mbw_dms.api.common import gen_response, exception_handle
 from mbw_dms.api.validators import validate_filter_timestamp
 
-@frappe.whitelist(methods='GET')
+@frappe.whitelist(methods="GET")
 def first_checkin_report(**kwargs):
     try:
         filters = {}

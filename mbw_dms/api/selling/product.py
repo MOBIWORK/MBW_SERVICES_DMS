@@ -100,6 +100,7 @@ def list_product(**kwargs):
             item["details"] = frappe.get_all("Item Price", filters={"item_code": item.get('item_code'), "price_list": price_list}, fields=["uom", "price_list", "price_list_rate", "valid_from", "currency"])
             if not item["details"]:
                 item["details"] = frappe.get_all("Item Price", filters={"item_code": item.get('item_code'), "price_list": default_selling_price_list}, fields=["uom", "price_list", "price_list_rate", "valid_from", "currency"])
+
             item["unit"] = frappe.db.get_all("UOM Conversion Detail", {"parent" : item.get("name")}, ["uom", "conversion_factor"])
             item["stock"] = frappe.db.get_all("Stock Entry Detail", {"item_code": item.get("item_code")}, ["t_warehouse", "qty"])
             item["item_tax_template"] = frappe.db.get_all("Item Tax", {"parent": item["name"]}, ["item_tax_template"])
@@ -257,7 +258,7 @@ def list_uom(**kwargs):
         return exception_handle(e)
     
 # List warehouse
-@frappe.whitelist(methods='GET')
+@frappe.whitelist(methods="GET")
 def list_warehouse(**kwargs):
     try:
         kwargs = frappe._dict(kwargs)
@@ -281,6 +282,7 @@ def list_vat(**kwargs):
         company = kwargs.get("company") if kwargs.get("company") else ""
         Taxes = frappe.qb.DocType("Sales Taxes and Charges Template")
         TaxesCharges = frappe.qb.DocType("Sales Taxes and Charges")
+        
         detail_taxes = (frappe.qb.from_(Taxes)
                             .inner_join(TaxesCharges)
                             .on(Taxes.name == TaxesCharges.parent)

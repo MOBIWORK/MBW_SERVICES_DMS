@@ -1,5 +1,6 @@
 import frappe
-from mbw_dms.api.validators import  (validate_filter)
+from mbw_dms.api.validators import validate_filter
+
 # Tạo mới checkin
 @frappe.whitelist()
 def create_checkin(**kwargs):
