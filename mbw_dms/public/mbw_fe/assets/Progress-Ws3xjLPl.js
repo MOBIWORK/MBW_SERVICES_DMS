@@ -1,1 +1,0 @@
-import{P as s,ab as t,bv as e}from"./index-ZqUxRnba.js";function n(){return s.jsxs(s.Fragment,{children:[s.jsx(t,{children:s.jsx("title",{children:"Progress"})}),s.jsx(e,{status:"500",title:"500",subTitle:"Trang đang tiến hành."})]})}export{n as default};

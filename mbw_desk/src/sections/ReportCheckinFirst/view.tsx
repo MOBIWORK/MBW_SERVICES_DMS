@@ -18,7 +18,7 @@ import {
   message,
 } from "antd";
 import type { TableColumnsType } from "antd";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { AxiosService } from "@/services/server";
 import useDebounce from "@/hooks/useDebount";
 import { DatePickerProps } from "antd/lib";
@@ -30,6 +30,7 @@ import { rsData, rsDataFrappe } from "@/types/response";
 import { employee } from "@/types/employeeFilter";
 import { typecustomer } from "../ReportSales/data";
 import { useForm } from "antd/es/form/Form";
+import { useResize } from "@/hooks";
 
 interface DataCheckinFirst {
   key: React.Key;
@@ -185,6 +186,27 @@ export default function ReportCheckinFirst() {
   const [sales_team, setTeamSale] = useState<string>();
   const [keySearch4, setKeySearch4] = useState("");
   let seachbykey = useDebounce(keySearch4);
+  const containerRef1 = useRef(null);
+  const size = useResize();
+  const [containerHeight, setContainerHeight] = useState<any>(0);
+  const [scrollYTable1, setScrollYTable1] = useState<number>(size?.h * 0.52);
+
+  useEffect(() => {
+    setScrollYTable1(size.h * 0.52);
+  }, [size]);
+
+  useEffect(() => {
+    const containerElement = containerRef1.current;
+    if (containerElement) {
+      const resizeObserver = new ResizeObserver((entries) => {
+        for (let entry of entries) {
+          setContainerHeight(entry.contentRect.height);
+        }
+      });
+      resizeObserver.observe(containerElement);
+      return () => resizeObserver.disconnect();
+    }
+  }, [containerRef1]);  
 
   const onChange: DatePickerProps["onChange"] = (dateString: any) => {
     if (dateString === null || dateString === undefined) {
@@ -371,20 +393,20 @@ export default function ReportCheckinFirst() {
   ]);
 
   const handleSearchFilter = (val: any) => {
-    if(val.customergroup) {
-      setCustomerGroup(val.customergroup)
-    }else {
-      setCustomerGroup("")
+    if (val.customergroup) {
+      setCustomerGroup(val.customergroup);
+    } else {
+      setCustomerGroup("");
     }
-    if(val.customertype) {
-      setCustomerType(val.customertype)
-    }else {
-      setCustomerType("")
+    if (val.customertype) {
+      setCustomerType(val.customertype);
+    } else {
+      setCustomerType("");
     }
-    if(val.territory) {
-      setTerritory(val.territory)
-    }else {
-      setTerritory("")
+    if (val.territory) {
+      setTerritory(val.territory);
+    } else {
+      setTerritory("");
     }
   };
 
@@ -499,7 +521,11 @@ export default function ReportCheckinFirst() {
                     dropdownRender={() => (
                       <DropDownCustom title={"Bộ lọc"}>
                         <div className="">
-                          <Form layout="vertical" form={formFilter} onFinish={handleSearchFilter}>
+                          <Form
+                            layout="vertical"
+                            form={formFilter}
+                            onFinish={handleSearchFilter}
+                          >
                             <FormItemCustom
                               name="customertype"
                               label={"Loại khách hàng"}
@@ -581,7 +607,7 @@ export default function ReportCheckinFirst() {
             </Col>
           </Row>
 
-          <div className="pt-5">
+          <div ref={containerRef1} className="pt-5">
             <TableCustom
               dataSource={dataReport?.data?.map(
                 (dataCheckin: DataCheckinFirst) => {
@@ -592,16 +618,24 @@ export default function ReportCheckinFirst() {
                 }
               )}
               bordered
-              pagination={{
-                defaultPageSize: PAGE_SIZE,
-                total,
-                showSizeChanger: false,
-                onChange(page) {
-                  setPage(page);
-                },
+              scroll={{
+                x: 'max-content',
+                y: containerHeight < 400 ? undefined : scrollYTable1,
               }}
+              pagination={
+                total && total > PAGE_SIZE
+                  ? {
+                    pageSize: PAGE_SIZE,
+                    showSizeChanger: false,
+                    total,
+                    current: page,
+                    onChange(page) {
+                      setPage(page);
+                    },
+                  }
+                  : false
+              }
               columns={columns}
-              scroll={{ x: true }}
             />
           </div>
         </div>

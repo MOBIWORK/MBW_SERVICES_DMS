@@ -20,7 +20,7 @@ import {
 } from "antd";
 import type { TableColumnsType } from "antd";
 import { psorder, typecustomer } from "../ReportSales/data";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import dayjs from "dayjs";
 import { AxiosService } from "../../services/server";
 import useDebounce from "../../hooks/useDebount";
@@ -31,6 +31,7 @@ import { rsData, rsDataFrappe } from "@/types/response";
 import { listSale } from "@/types/listSale";
 import { LuFilter, LuFilterX } from "react-icons/lu";
 import { useForm } from "antd/es/form/Form";
+import { useResize } from "@/hooks";
 
 interface DataTypeCustomNew {
   key: React.Key;
@@ -66,6 +67,8 @@ const columns: TableColumnsType<DataTypeCustomNew> = [
     title: "STT",
     dataIndex: "stt",
     key: "stt",
+    className: "!text-center",
+    width: 60,
     render: (_, record: any, index: number) => (
       <div className="text-center">{index + 1}</div>
     ),
@@ -167,13 +170,17 @@ const columns: TableColumnsType<DataTypeCustomNew> = [
     title: "VT đầu",
     dataIndex: "first_checkin",
     key: "first_checkin",
-    render: (_, record: any) => <div>{record.first_checkin}</div>,
+    render: (value) => {
+      return value ? <p>{dayjs(value * 1000).format("DD/MM/YYYY")}</p> : <></>;
+    },
   },
   {
     title: "VT cuối",
     dataIndex: "last_checkin",
     key: "last_checkin",
-    render: (_, record: any) => <div>{record.last_checkin}</div>,
+    render: (value) => {
+      return value ? <p>{dayjs(value * 1000).format("DD/MM/YYYY")}</p> : <></>;
+    },
   },
   {
     title: <div className="!text-right">Số đơn hàng</div>,
@@ -219,6 +226,27 @@ export default function ReportCustomNew() {
   const [sales_team, setTeamSale] = useState<string>();
   const [keySearch4, setKeySearch4] = useState("");
   let seachbykey = useDebounce(keySearch4);
+  const containerRef1 = useRef(null);
+  const size = useResize();
+  const [containerHeight, setContainerHeight] = useState<any>(0);
+  const [scrollYTable1, setScrollYTable1] = useState<number>(size?.h * 0.52);
+
+  useEffect(() => {
+    setScrollYTable1(size.h * 0.52);
+  }, [size]);
+
+  useEffect(() => {
+    const containerElement = containerRef1.current;
+    if (containerElement) {
+      const resizeObserver = new ResizeObserver((entries) => {
+        for (let entry of entries) {
+          setContainerHeight(entry.contentRect.height);
+        }
+      });
+      resizeObserver.observe(containerElement);
+      return () => resizeObserver.disconnect();
+    }
+  }, [containerRef1]); 
 
   const onChange: DatePickerProps["onChange"] = (dateString: any) => {
     console.log(dateString);
@@ -608,7 +636,7 @@ export default function ReportCustomNew() {
             </Col>
           </Row>
 
-          <div className="pt-5">
+          <div ref={containerRef1} className="pt-5">
             <TableCustom
               dataSource={dataCustomNew?.data?.map(
                 (dataSale: DataTypeCustomNew) => {
@@ -620,15 +648,23 @@ export default function ReportCustomNew() {
               )}
               bordered
               columns={columns}
-              pagination={{
-                defaultPageSize: PAGE_SIZE,
-                total,
-                showSizeChanger: false,
-                onChange(page) {
-                  setPage(page);
-                },
+              scroll={{
+                x: 3000,
+                y: containerHeight < 400 ? undefined : scrollYTable1,
               }}
-              scroll={{ x: true }}
+              pagination={
+                total && total > PAGE_SIZE
+                  ? {
+                    pageSize: PAGE_SIZE,
+                    showSizeChanger: false,
+                    total,
+                    current: page,
+                    onChange(page) {
+                      setPage(page);
+                    },
+                  }
+                  : false
+              }
               summary={() => {
                 return (
                   <Table.Summary.Row>

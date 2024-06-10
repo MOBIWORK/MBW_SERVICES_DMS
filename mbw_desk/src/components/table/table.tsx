@@ -130,6 +130,7 @@ export const TableCustom = styled(Table)<{
         font-weight: 500;
         letter-spacing: 0.12em;
         color: #8094ae;
+        padding: 10px!important;
       }
     }
     .ant-table-thead

@@ -8,7 +8,7 @@ import {
 import { DatePicker, Select, Table, TreeSelect, Form } from "antd";
 import { monthAll } from "./data";
 import { DatePickerProps } from "antd/lib";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AxiosService } from "../../services/server";
 import { rsData, rsDataFrappe } from "../../types/response";
 import { employee } from "../../types/employeeFilter";
@@ -16,6 +16,7 @@ import useDebounce from "../../hooks/useDebount";
 import dayjs from "dayjs";
 import { translationUrl, treeArray } from "../../util";
 import { listSale } from "../../types/listSale";
+import { useResize } from "@/hooks";
 
 const { Column, ColumnGroup } = TableCustom;
 
@@ -76,6 +77,27 @@ export default function ReportKPI() {
   const [fmonth, setFmonth] = useState(month);
   const [fyear, setFYear] = useState("");
   const [total, setTotal] = useState<number>(0);
+  const containerRef1 = useRef(null);
+  const size = useResize();
+  const [containerHeight, setContainerHeight] = useState<any>(0);
+  const [scrollYTable1, setScrollYTable1] = useState<number>(size?.h * 0.52);
+
+  useEffect(() => {
+    setScrollYTable1(size.h * 0.52);
+  }, [size]);
+
+  useEffect(() => {
+    const containerElement = containerRef1.current;
+    if (containerElement) {
+      const resizeObserver = new ResizeObserver((entries) => {
+        for (let entry of entries) {
+          setContainerHeight(entry.contentRect.height);
+        }
+      });
+      resizeObserver.observe(containerElement);
+      return () => resizeObserver.disconnect();
+    }
+  }, [containerRef1]);  
 
   const onChange: DatePickerProps["onChange"] = (date) => {
     setFYear(date?.["$y"].toString());
@@ -239,22 +261,30 @@ export default function ReportKPI() {
             </FormItemCustom>
           </Form>
           {/* {routersTable?.map(router => ({ key: router.name, ...router }))} */}
-          <div className="pt-5">
+          <div ref={containerRef1} className="pt-5">
             <TableCustom
               dataSource={dataReort?.data?.map((report: any) => ({
                 key: report.name,
                 ...report,
               }))}
               bordered
-              scroll={{ x: true }}
-              pagination={{
-                defaultPageSize: PAGE_SIZE,
-                total,
-                showSizeChanger: false,
-                onChange(page) {
-                  setPage(page);
-                },
+              scroll={{
+                x: 'max-content',
+                y: containerHeight < 400 ? undefined : scrollYTable1,
               }}
+              pagination={
+                total && total > PAGE_SIZE
+                  ? {
+                    pageSize: PAGE_SIZE,
+                    showSizeChanger: false,
+                    total,
+                    current: page,
+                    onChange(page) {
+                      setPage(page);
+                    },
+                  }
+                  : false
+              }
               summary={() => {
                 return (
                   <Table.Summary.Row>
@@ -265,35 +295,50 @@ export default function ReportKPI() {
                     <Table.Summary.Cell index={4} className="text-center">
                       {dataReort?.sum?.tong_kh_vt}
                     </Table.Summary.Cell>
-                    <Table.Summary.Cell index={5} className="text-center underline text-[#1877F2]">
+                    <Table.Summary.Cell
+                      index={5}
+                      className="text-center underline text-[#1877F2]"
+                    >
                       {dataReort?.sum?.tong_th_vt}
                     </Table.Summary.Cell>
                     <Table.Summary.Cell index={6}></Table.Summary.Cell>
                     <Table.Summary.Cell index={7} className="text-center">
                       {dataReort?.sum?.tong_kh_vt_dn}
                     </Table.Summary.Cell>
-                    <Table.Summary.Cell index={8} className="text-center underline text-[#1877F2]">
+                    <Table.Summary.Cell
+                      index={8}
+                      className="text-center underline text-[#1877F2]"
+                    >
                       {dataReort?.sum?.tong_th_vt_dn}
                     </Table.Summary.Cell>
                     <Table.Summary.Cell index={9}></Table.Summary.Cell>
                     <Table.Summary.Cell index={10} className="text-center">
                       {dataReort?.sum?.tong_kh_dat_hang}
                     </Table.Summary.Cell>
-                    <Table.Summary.Cell index={11} className="text-center underline text-[#1877F2]">
+                    <Table.Summary.Cell
+                      index={11}
+                      className="text-center underline text-[#1877F2]"
+                    >
                       {dataReort?.sum?.tong_th_dat_hang}
                     </Table.Summary.Cell>
                     <Table.Summary.Cell index={12}></Table.Summary.Cell>
                     <Table.Summary.Cell index={13} className="text-center">
                       {dataReort?.sum?.tong_kh_kh_moi}
                     </Table.Summary.Cell>
-                    <Table.Summary.Cell index={14} className="text-center underline text-[#1877F2]">
+                    <Table.Summary.Cell
+                      index={14}
+                      className="text-center underline text-[#1877F2]"
+                    >
                       {dataReort?.sum?.tong_th_kh_moi}
                     </Table.Summary.Cell>
                     <Table.Summary.Cell index={15}></Table.Summary.Cell>
                     <Table.Summary.Cell index={16} className="text-center">
                       {dataReort?.sum?.tong_kh_don_hang}
                     </Table.Summary.Cell>
-                    <Table.Summary.Cell index={17} className="text-center underline text-[#1877F2]">
+                    <Table.Summary.Cell
+                      index={17}
+                      className="text-center underline text-[#1877F2]"
+                    >
                       {dataReort?.sum?.tong_th_don_hang}
                     </Table.Summary.Cell>
                     <Table.Summary.Cell index={18}></Table.Summary.Cell>
@@ -302,7 +347,10 @@ export default function ReportKPI() {
                         dataReort?.sum?.tong_kh_doanh_so
                       )}
                     </Table.Summary.Cell>
-                    <Table.Summary.Cell index={20} className="text-center underline text-[#1877F2]">
+                    <Table.Summary.Cell
+                      index={20}
+                      className="text-center underline text-[#1877F2]"
+                    >
                       {Intl.NumberFormat().format(
                         dataReort?.sum?.tong_th_doanh_so
                       )}
@@ -313,7 +361,10 @@ export default function ReportKPI() {
                         dataReort?.sum?.tong_kh_doanh_thu
                       )}
                     </Table.Summary.Cell>
-                    <Table.Summary.Cell index={23} className="text-center underline text-[#1877F2]">
+                    <Table.Summary.Cell
+                      index={23}
+                      className="text-center underline text-[#1877F2]"
+                    >
                       {Intl.NumberFormat().format(
                         dataReort?.sum?.tong_th_doanh_thu
                       )}
@@ -322,21 +373,30 @@ export default function ReportKPI() {
                     <Table.Summary.Cell index={25} className="text-center">
                       {dataReort?.sum?.tong_kh_san_lg}
                     </Table.Summary.Cell>
-                    <Table.Summary.Cell index={26} className="text-center underline text-[#1877F2]">
+                    <Table.Summary.Cell
+                      index={26}
+                      className="text-center underline text-[#1877F2]"
+                    >
                       {dataReort?.sum?.tong_th_san_lg}
                     </Table.Summary.Cell>
                     <Table.Summary.Cell index={27}></Table.Summary.Cell>
                     <Table.Summary.Cell index={28} className="text-center">
                       {dataReort?.sum?.tong_kh_sku}
                     </Table.Summary.Cell>
-                    <Table.Summary.Cell index={29} className="text-center underline text-[#1877F2]">
+                    <Table.Summary.Cell
+                      index={29}
+                      className="text-center underline text-[#1877F2]"
+                    >
                       {dataReort?.sum?.tong_th_sku}
                     </Table.Summary.Cell>
                     <Table.Summary.Cell index={30}></Table.Summary.Cell>
                     <Table.Summary.Cell index={31} className="text-center">
                       {dataReort?.sum?.tong_kh_so_gio_lam_viec}
                     </Table.Summary.Cell>
-                    <Table.Summary.Cell index={32} className="text-center underline text-[#1877F2]">
+                    <Table.Summary.Cell
+                      index={32}
+                      className="text-center underline text-[#1877F2]"
+                    >
                       {dataReort?.sum?.tong_th_so_gio_lam_viec}
                     </Table.Summary.Cell>
                     <Table.Summary.Cell index={33}></Table.Summary.Cell>
@@ -350,6 +410,7 @@ export default function ReportKPI() {
                 key="stt"
                 fixed="left"
                 className="!text-center"
+                width={60}
                 render={(_: any, record: any, index: number) => index + 1}
               />
               <Column
@@ -380,16 +441,26 @@ export default function ReportKPI() {
                 title="Nhóm bán hàng"
                 dataIndex="nhom_ban_hang"
                 key="nhom_ban_hang"
-                render={(_, record: any) => (
-                  <div>{record.nhom_ban_hang}</div>
-                )}
+                render={(_, record: any) => <div>{record.nhom_ban_hang}</div>}
               />
               <ColumnGroup
                 className="!whitespace-normal !min-w-[210px] !text-center"
                 title="Số khách hàng viếng thăm"
               >
-                <Column className="!text-center" title="KH" width={70} dataIndex="kh_vt" key="kh_vt" />
-                <Column className="!text-center underline text-[#1877F2]" title="TH" width={70} dataIndex="th_vt" key="th_vt" />
+                <Column
+                  className="!text-center"
+                  title="KH"
+                  width={70}
+                  dataIndex="kh_vt"
+                  key="kh_vt"
+                />
+                <Column
+                  className="!text-center underline text-[#1877F2]"
+                  title="TH"
+                  width={70}
+                  dataIndex="th_vt"
+                  key="th_vt"
+                />
                 <Column
                   className="!text-center"
                   title="TL"
@@ -433,21 +504,21 @@ export default function ReportKPI() {
                 title="Số khách hàng đặt hàng"
               >
                 <Column
-                className="!text-center"
+                  className="!text-center"
                   title="KH"
                   width={70}
                   dataIndex="kh_dat_hang"
                   key="kh_dat_hang"
                 />
                 <Column
-                className="!text-center underline text-[#1877F2]"
+                  className="!text-center underline text-[#1877F2]"
                   title="TH"
                   width={70}
                   dataIndex="th_dat_hang"
                   key="th_dat_hang"
                 />
                 <Column
-                className="!text-center"
+                  className="!text-center"
                   title="TL"
                   width={70}
                   dataIndex="tl_dat_hang"
@@ -462,21 +533,21 @@ export default function ReportKPI() {
                 title="Số khách hàng thêm mới"
               >
                 <Column
-                className="!text-center"
+                  className="!text-center"
                   title="KH"
                   width={70}
                   dataIndex="kh_kh_moi"
                   key="kh_kh_moi"
                 />
                 <Column
-                className="!text-center underline text-[#1877F2]"
+                  className="!text-center underline text-[#1877F2]"
                   title="TH"
                   width={70}
                   dataIndex="th_kh_moi"
                   key="th_kh_moi"
                 />
                 <Column
-                className="!text-center"
+                  className="!text-center"
                   title="TL"
                   width={70}
                   dataIndex="tl_kh_moi"
@@ -492,21 +563,21 @@ export default function ReportKPI() {
                 width={210}
               >
                 <Column
-                className="!text-center"
+                  className="!text-center"
                   title="KH"
                   width={70}
                   dataIndex="kh_don_hang"
                   key="kh_don_hang"
                 />
                 <Column
-                className="!text-center underline text-[#1877F2]"
+                  className="!text-center underline text-[#1877F2]"
                   title="TH"
                   width={70}
                   dataIndex="th_don_hang"
                   key="th_don_hang"
                 />
                 <Column
-                className="!text-center"
+                  className="!text-center"
                   title="TL"
                   width={70}
                   dataIndex="tl_don_hang"
@@ -522,7 +593,7 @@ export default function ReportKPI() {
                 width={210}
               >
                 <Column
-                className="!text-center"
+                  className="!text-center"
                   title="KH"
                   dataIndex="kh_doanh_so"
                   key="kh_doanh_so"
@@ -531,7 +602,7 @@ export default function ReportKPI() {
                   )}
                 />
                 <Column
-                className="!text-center underline text-[#1877F2]"
+                  className="!text-center underline text-[#1877F2]"
                   title="TH"
                   width={70}
                   dataIndex="th_doanh_so"
@@ -541,7 +612,7 @@ export default function ReportKPI() {
                   )}
                 />
                 <Column
-                className="!text-center"
+                  className="!text-center"
                   title="TL"
                   width={70}
                   dataIndex="tl_don_hang"
@@ -557,7 +628,7 @@ export default function ReportKPI() {
                 width={210}
               >
                 <Column
-                className="!text-center"
+                  className="!text-center"
                   title="KH"
                   width={70}
                   dataIndex="kh_doanh_thu"
@@ -567,7 +638,7 @@ export default function ReportKPI() {
                   )}
                 />
                 <Column
-                className="!text-center underline text-[#1877F2]"
+                  className="!text-center underline text-[#1877F2]"
                   title="TH"
                   width={70}
                   dataIndex="th_doanh_thu"
@@ -577,7 +648,7 @@ export default function ReportKPI() {
                   )}
                 />
                 <Column
-                className="!text-center"
+                  className="!text-center"
                   title="TL"
                   width={70}
                   dataIndex="tl_doanh_thu"
@@ -593,21 +664,21 @@ export default function ReportKPI() {
                 width={210}
               >
                 <Column
-                className="!text-center"
+                  className="!text-center"
                   title="KH"
                   width={70}
                   dataIndex="kh_san_lg"
                   key="kh_san_lg"
                 />
                 <Column
-                className="!text-center underline text-[#1877F2]"
+                  className="!text-center underline text-[#1877F2]"
                   title="TH"
                   width={70}
                   dataIndex="th_san_lg"
                   key="th_san_lg"
                 />
                 <Column
-                className="!text-center"
+                  className="!text-center"
                   title="TL"
                   width={70}
                   dataIndex="tl_san_luong"
@@ -622,10 +693,22 @@ export default function ReportKPI() {
                 title="SKU"
                 width={210}
               >
-                <Column className="!text-center" title="KH" width={70} dataIndex="kh_sku" key="kh_sku" />
-                <Column className="!text-center underline text-[#1877F2]" title="TH" width={70} dataIndex="th_sku" key="th_sku" />
                 <Column
-                className="!text-center"
+                  className="!text-center"
+                  title="KH"
+                  width={70}
+                  dataIndex="kh_sku"
+                  key="kh_sku"
+                />
+                <Column
+                  className="!text-center underline text-[#1877F2]"
+                  title="TH"
+                  width={70}
+                  dataIndex="th_sku"
+                  key="th_sku"
+                />
+                <Column
+                  className="!text-center"
                   title="TL"
                   width={70}
                   dataIndex="tl_sku"
@@ -641,21 +724,21 @@ export default function ReportKPI() {
                 width={210}
               >
                 <Column
-                className="!text-center"
+                  className="!text-center"
                   title="KH"
                   width={70}
                   dataIndex="kh_so_gio_lam_viec"
                   key="kh_so_gio_lam_viec"
                 />
                 <Column
-                className="!text-center underline text-[#1877F2]"
+                  className="!text-center underline text-[#1877F2]"
                   title="TH"
                   width={70}
                   dataIndex="th_so_gio_lam_viec"
                   key="th_so_gio_lam_viec"
                 />
                 <Column
-                className="!text-center"
+                  className="!text-center"
                   title="TL"
                   width={70}
                   dataIndex="tl_so_gio_lam_viec"

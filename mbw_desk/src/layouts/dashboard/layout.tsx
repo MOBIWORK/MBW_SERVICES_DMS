@@ -20,7 +20,7 @@ const SiderCustome = styled(Sider)`
 export default function DashboardLayout({ children }: Props) {
   const [collapsed, setCollapsed] = useState(false);
   return (
-    <Layout className="overflow-hidden h-screen">
+    <Layout className="overflow-y-auto h-screen">
         <SiderCustome className="!bg-[#fff]" style={{height:"unset"}} width={!collapsed ? 250 : 78} collapsible collapsed={collapsed} trigger={<AvatarComponent mini={collapsed}/>} >            
             <MenuLeft handleCollapsed = {setCollapsed} collapsed={collapsed}/>
           </SiderCustome>
