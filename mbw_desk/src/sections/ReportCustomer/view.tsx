@@ -774,7 +774,9 @@ export default function ReportCustomer() {
           <div className="pt-5">
             <TableCustom
               columns={columns}
-              scroll={{ x: true }}
+              scroll={{ x: true,y:400 }}
+              bordered
+              $border
               expandable={{ expandedRowRender, defaultExpandedRowKeys: ["0"] }}
               dataSource={dataCustomer?.data?.map((dataCus: DataCustomer) => {
                 return {
@@ -791,6 +793,7 @@ export default function ReportCustomer() {
                 },
               }}
               rowHoverable={false}
+              
             />
           </div>
           <div className=""></div>

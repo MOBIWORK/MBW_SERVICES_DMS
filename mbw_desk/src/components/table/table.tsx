@@ -8,7 +8,7 @@ export const TableCustom = styled(Table)<{
 & .ant-table-container .ant-table-tbody tr.ant-table-expanded-row:hover>td.ant-table-cell {
   background: #F4F6F8!important;
 }
-& .ant-table-content>table {
+& .ant-table-container table {
   border-left: ${(props) => (props.$border ? "" : "none")}!important;
   border-right: ${(props) => (props.$border ? "" : "none")}!important;
 
