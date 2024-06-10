@@ -254,10 +254,10 @@ def create_checkin_inventory(body):
                 if 'quantity' in item and 'item_price' in item:
                     item['total_cost'] = item['quantity'] * item['item_price']
                 item_info =frappe.db.get_value("Item",item.get("item_code"),["item_name"], as_dict=1)
-                item["item_name"] = item_info.item_name
+                item["item_name"]=item_info.item_name if item_info else ""
             item["update_bycode"] = employee.get("name")
             item["update_byname"] = employee.get("fullname")
-            item["update_at"] = time_now_utc()
+            item["update_at"] = time_now_utc().date()
             doc.append("items", item)
             
         doc.insert()
@@ -296,7 +296,7 @@ def create_checkin_image(body):
         if create_by:
             description += f"create: {create_by}\\n"
         if create_time:
-            description += f"create: {create_time}\\n"
+            description += f"cDMSreate: {create_time}\\n"
         description= description.rstrip('\\n')
         try:
             rsUpload = upload_image_s3(image=image,description=description)
