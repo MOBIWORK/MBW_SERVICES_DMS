@@ -164,6 +164,7 @@ const columns: TableColumnsType<DataSaleOrder> = [
   },
   {
     title: <div className="text-right">Tổng tiền (VNĐ)</div>,
+    width: 160,
     dataIndex: "grand_total",
     key: "grand_total",
     render: (_, record: any) => (

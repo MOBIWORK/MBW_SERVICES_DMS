@@ -61,6 +61,7 @@ const columns: TableColumnsType<DataCheckinFirst> = [
     title: "STT",
     dataIndex: "stt",
     key: "stt",
+    width: 60,
     render: (_, record: any, index: number) => (
       <div className="text-center">{index + 1}</div>
     ),
@@ -111,7 +112,11 @@ const columns: TableColumnsType<DataCheckinFirst> = [
     title: "Người liên hệ",
     dataIndex: "contact_person",
     key: "contact_person",
-    render: (_, record: any) => <div>{record.contact_person}</div>,
+    render: (_, record: any) => (
+      <div className="!w-[175px] truncate hover:whitespace-normal">
+        {record.contact_person}
+      </div>
+    ),
   },
   {
     title: "SDT",
@@ -206,7 +211,7 @@ export default function ReportCheckinFirst() {
       resizeObserver.observe(containerElement);
       return () => resizeObserver.disconnect();
     }
-  }, [containerRef1]);  
+  }, [containerRef1]);
 
   const onChange: DatePickerProps["onChange"] = (dateString: any) => {
     if (dateString === null || dateString === undefined) {
@@ -619,20 +624,20 @@ export default function ReportCheckinFirst() {
               )}
               bordered
               scroll={{
-                x: 'max-content',
+                x: 3000,
                 y: containerHeight < 400 ? undefined : scrollYTable1,
               }}
               pagination={
                 total && total > PAGE_SIZE
                   ? {
-                    pageSize: PAGE_SIZE,
-                    showSizeChanger: false,
-                    total,
-                    current: page,
-                    onChange(page) {
-                      setPage(page);
-                    },
-                  }
+                      pageSize: PAGE_SIZE,
+                      showSizeChanger: false,
+                      total,
+                      current: page,
+                      onChange(page) {
+                        setPage(page);
+                      },
+                    }
                   : false
               }
               columns={columns}
