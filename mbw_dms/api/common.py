@@ -4,7 +4,7 @@ import frappe
 from bs4 import BeautifulSoup
 from frappe import _
 from frappe.utils import cstr
-from datetime import datetime, timezone, timedelta
+from datetime import datetime
 import base64
 from frappe.core.doctype.file.utils import delete_file
 from frappe.utils.file_manager import save_file
@@ -22,19 +22,14 @@ BASE_URL = frappe.utils.get_request_site_address()
 
 def time_now_utc():
     now_utc = datetime.now(pytz.utc)
-    hcm_timezone = pytz.timezone('Asia/Ho_Chi_Minh')
+    hcm_timezone = pytz.timezone("Asia/Ho_Chi_Minh")
     time_now = now_utc.astimezone(hcm_timezone)
     return time_now
 
 def convert_utc_time(timestamp:float):
     dt = datetime.fromtimestamp(timestamp)
-
-    # Xác định múi giờ của 'Asia/Ho_Chi_Minh'
-    hcm_timezone = pytz.timezone('Asia/Ho_Chi_Minh')  # UTC+7 cho múi giờ 'Asia/Ho_Chi_Minh'
-
-    # Áp dụng múi giờ 'Asia/Ho_Chi_Minh' cho đối tượng datetime
-    dt_hcm = dt.replace(tzinfo=hcm_timezone)
-
+    hcm_timezone = pytz.timezone("Asia/Ho_Chi_Minh")         # Xác định múi giờ của 'Asia/Ho_Chi_Minh'
+    dt_hcm = dt.replace(tzinfo=hcm_timezone)        # Áp dụng múi giờ 'Asia/Ho_Chi_Minh' cho đối tượng datetime
     return dt_hcm
 
 def this_week() :
@@ -49,8 +44,7 @@ def this_week() :
 def gen_response(status, message, result=[]):
     frappe.response["http_status_code"] = status
     if status == 500:
-        frappe.response["message"] = BeautifulSoup(
-            str(message), features="lxml").get_text()
+        frappe.response["message"] = BeautifulSoup(str(message), features="lxml").get_text()
     else:
         frappe.response["message"] = message
     frappe.response["result"] = result
@@ -75,12 +69,7 @@ def generate_key(user):
 def get_employee_by_user(user, fields=["name"]):
     if isinstance(fields, str):
         fields = [fields]
-    emp_data = frappe.db.get_value(
-        "Employee",
-        {"user_id": user},
-        fields,
-        as_dict=1,
-    )
+    emp_data = frappe.db.get_value("Employee", {"user_id": user}, fields, as_dict=1)
     return emp_data
 
 
@@ -91,85 +80,80 @@ def get_language():
     return lang
 
 def exception_handle(e):
-    frappe.log_error(title="DMS Mobile App Error",
-                     message=frappe.get_traceback())
-    print(frappe.response)
+    frappe.log_error(title="DMS Mobile App Error", message=frappe.get_traceback())
     return gen_response(406, cstr(e),{})
 
-def routers_name_of_customer(router=False, thisWeek = False,view_mode='list',more_filters=False):
-    queryFilters = {"is_deleted": 0,"status":"Active"}
+def routers_name_of_customer(router=False, thisWeek = False, view_mode="list", more_filters=False):
+    queryFilters = {"is_deleted": 0, "status": "Active"}
     user_id = get_user_id()
+
     if user_id.name != "Administrator":
         employee = get_employee_by_user(user = user_id.email)
         if not employee:
             return gen_response("404", _("Employee not registered"))
-        queryFilters['employee'] = employee.name
+        queryFilters["employee"] = employee.name
 
     if router:
-        queryFilters['channel_code'] = ["in",router]
+        queryFilters["channel_code"] = ["in", router]
    
     # lay danh sach theo ngay
-    if thisWeek or view_mode=="map":
+    if thisWeek or view_mode == "map":
         from mbw_dms.api.common import weekday
         today= datetime.now()
         thu_trong_tuan, tuan_trong_thang = weekday(today)
-        queryFilters.update({"travel_date": ["between",["Không giới hạn",thu_trong_tuan]]})
-        queryFilters.update({"frequency": ["like",tuan_trong_thang]})  
+        queryFilters.update({"travel_date": ["between", ["Không giới hạn", thu_trong_tuan]]})
+        queryFilters.update({"frequency": ["like", tuan_trong_thang]})  
+
     if more_filters:
         queryFilters.update(more_filters)
-    list_router = frappe.db.get_all('DMS Router',filters=queryFilters, pluck='name',distinct=True)
+    list_router = frappe.db.get_all("DMS Router", filters=queryFilters, pluck="name", distinct=True)
     return list_router
 
-def customers_code_router(router=False,routersName=[],thisWeek = False,view_mode='list'):
-    
+def customers_code_router(router=False, routersName=[], thisWeek = False, view_mode="list"):
     list_customer = []
     for router_name in routersName:
-        detail_router = frappe.get_doc("DMS Router",{"name":router_name}).as_dict()
-        customer = detail_router.get('customers')
+        detail_router = frappe.get_doc("DMS Router", {"name": router_name}).as_dict()
+        customer = detail_router.get("customers")
         if view_mode == "map" or (router and not thisWeek):
             from mbw_dms.api.common import weekday
             today= datetime.now()
             thu_trong_tuan, tuan_trong_thang = weekday(today)
-            customer = pydash.filter_(detail_router.get('customers'),lambda value: (value.frequency.find(str(int(tuan_trong_thang))) != -1))
+            customer = pydash.filter_(detail_router.get("customers"),lambda value: (value.frequency.find(str(int(tuan_trong_thang))) != -1))
         list_customer += customer
+
     list_customer_name = []
     for customer in list_customer:
-        list_customer_name.append(customer.get('customer_code'))   
+        list_customer_name.append(customer.get("customer_code"))   
     return list_customer_name 
 
 
 def get_user_id():
     headers = frappe.local.request.headers.get("Authorization")
     usrPass = headers.split(" ")[1]
-    str_b64Val = base64.b64decode(usrPass).decode('utf-8')
+    str_b64Val = base64.b64decode(usrPass).decode("utf-8")
     list_key = str_b64Val.split(':')
     api_key = list_key[0]
-    user_id = frappe.db.get_value('User', {"api_key": api_key},['name','email',"full_name"],as_dict=1)
+    user_id = frappe.db.get_value("User", {"api_key": api_key},["name", "email", "full_name"],as_dict=1)
     return user_id
 
 def get_employee_id():
     try:
         user_id = get_user_id()
-        return get_employee_by_user(user_id.get('name')).get('name')
+        return get_employee_by_user(user_id.get("name")).get("name")
     except:
         return ""
 
 def get_employee_info():
     try:
         user_id = get_user_id()
-        return get_employee_by_user(user_id.get('email'),["name","user_id","fullname"])
+        return get_employee_by_user(user_id.get("email"),["name", "user_id", "fullname"])
     except:
         return ""
 
 def get_employee_by_name(name, fields=["name"]):
     if isinstance(fields, str):
         fields = [fields]
-    emp_data = frappe.db.get_value(
-        "Employee",
-        {"name": name},
-        fields,
-        as_dict=1,
-    )
+    emp_data = frappe.db.get_value("Employee", {"name": name}, fields, as_dict=1)
     return emp_data
 
 
@@ -179,7 +163,7 @@ def validate_image(user_image):
     return user_image
     
 def get_datetime_now():
-    return datetime.now(pytz.timezone('Asia/Ho_Chi_Minh')).replace(tzinfo=None)
+    return datetime.now(pytz.timezone("Asia/Ho_Chi_Minh")).replace(tzinfo=None)
 
 # Get employee reports
 def get_report_doc(report_name):
@@ -216,7 +200,7 @@ def null_location(location):
 
 
 def create_address(new_address,link_cs_address) :
-    current_address_cs = frappe.db.get_value("Address",{"address_title":new_address.get("address_title")},["name","address_location"],as_dict=1)
+    current_address_cs = frappe.db.get_value("Address", {"address_title": new_address.get("address_title")}, ["name", "address_location"], as_dict=1)
     if current_address_cs:
         current_address_cs = frappe.get_doc("Address",current_address_cs.get("name"))
         current_address_cs.address_location = new_address.get("address_location")
@@ -229,33 +213,33 @@ def create_address(new_address,link_cs_address) :
     else:
         new_address_doc = frappe.new_doc("Address")
         for key,value in new_address.items():
-            setattr(new_address_doc,key,value)
+            setattr(new_address_doc, key, value)
         if link_cs_address:
-            new_address_doc.append("links",link_cs_address)
+            new_address_doc.append("links", link_cs_address)
         new_address_doc.save()
         current_address_cs = new_address_doc
     return current_address_cs
 
 
-def create_address_current(address_title,new_location,link_cs_address) :
-    current_address = frappe.db.get_value("Address",address_title,["name","address_location"],as_dict=1)
+def create_address_current(address_title, new_location, link_cs_address) :
+    current_address = frappe.db.get_value("Address", address_title, ["name", "address_location"], as_dict=1)
     if current_address:
-        current_address_cs = frappe.get_doc("Address",current_address.get("name"))
-        current_address_cs.address_location =new_location
+        current_address_cs = frappe.get_doc("Address", current_address.get("name"))
+        current_address_cs.address_location = new_location
         if link_cs_address:
             links = current_address_cs.links
             find_cs = pydash.filter_(links, lambda cs: cs.get("link_doctype") ==  link_cs_address.get("link_doctype") and cs.get("link_name") != link_cs_address.get("link_name"))
             find_cs.append(link_cs_address)
-            current_address_cs.set("links",find_cs)        
+            current_address_cs.set("links", find_cs)        
         current_address_cs.save()
     else:
         new_address_doc = frappe.new_doc("Address")
         new_address = handle_address(address_title)
         if new_address:
             for key,value in new_address.items():
-                setattr(new_address_doc,key,value)
+                setattr(new_address_doc, key, value)
             if link_cs_address:
-                new_address_doc.append("links",link_cs_address)
+                new_address_doc.append("links", link_cs_address)
             new_address_doc.save()
             current_address_cs = new_address_doc
         else :
@@ -263,26 +247,26 @@ def create_address_current(address_title,new_location,link_cs_address) :
     return current_address_cs
 
 def handle_address(address_title) : 
-    address_oop =  {"address_title": address_title}
+    address_oop = {"address_title": address_title}
     arr_address = address_title.split(",")
-    arr_address = pydash.map_(arr_address,lambda x : x.strip())
+    arr_address = pydash.map_(arr_address, lambda x : x.strip())
     lenAdd = len(arr_address)
-    if len ==1:
+    if len == 1:
         return False
-    elif len ==2:
+    elif len == 2:
         address_oop.update({               
-                        "address_line1":arr_address[0], 
+                        "address_line1": arr_address[0], 
                         "city": arr_address[1],  
                     })
-    elif len ==3:
+    elif len == 3:
         address_oop.update({               
-                        "address_line1":arr_address[0], 
+                        "address_line1": arr_address[0], 
                         "county": arr_address[1],
                         "city": arr_address[2],  
                     })
-    elif len ==4:
+    elif len == 4:
         address_oop.update({               
-                        "address_line1":arr_address[0], 
+                        "address_line1": arr_address[0], 
                         "state": arr_address[1],
                         "county": arr_address[2],
                         "city": arr_address[3],  
@@ -295,39 +279,34 @@ def handle_address(address_title) :
                     })
         address_line1 = ",".join(arr_address[:-3])
         address_oop.update({
-            "address_line1":address_line1,
+            "address_line1": address_line1,
         })
     city_info = frappe.db.get_value(doctype="DMS Province", filters={"ten_tinh": ["like", f"%{address_oop.city}%"]}, fieldname=["ma_tinh"])
     if not city_info:
         return False
     else:
-        address_oop.update({               
-                        "city":city_info,  
-                    })
+        address_oop.update({"city": city_info,})
+
     if address_oop.county:
         district_info = frappe.db.get_value(doctype="DMS District", filters={"ten_huyen": ["like", f"%{address_oop.county}%"]}, fieldname=["ma_huyen"])
         if district_info :
-             address_oop.update({               
-                         "county": district_info,
-                    })
+             address_oop.update({"county": district_info,})
         else:
             del address_oop["county"]                   
      
     if address_oop.state:
         ward_info = frappe.db.get_value(doctype="DMS Ward", filters={"ten_xa": ["like", f"%{address_oop.state}%"]}, fieldname=["ma_xa"])
         if ward_info:
-            address_oop.update({
-            "state": ward_info,
-            })
+            address_oop.update({"state": ward_info,})
         else:
             del address_oop["state"]
     return address_oop
+
 def post_image(name_image, faceimage, doc_type, doc_name):
     # save file and insert Doctype File
     file_name = name_image + "_"+ str(datetime.now().timestamp()) + "_.png"
     imgdata = base64.b64decode(faceimage)
-    doc_file = save_file(file_name, imgdata, doc_type, doc_name,
-                         folder=None, decode=False, is_private=0, df=None)
+    doc_file = save_file(file_name, imgdata, doc_type, doc_name, folder=None, decode=False, is_private=0, df=None)
 
     # delete image copy
     path_file = "/files/" + file_name
@@ -336,18 +315,21 @@ def post_image(name_image, faceimage, doc_type, doc_name):
     return file_url
 
 def add_text_to_image(file_name, imgdata, description):
-    ## add text to image
+    # add text to image
     # save image
-    doc_file = save_file(file_name, imgdata, "", "",
-                     folder=None, decode=False, is_private=0, df=None)
+    doc_file = save_file(file_name, imgdata, "", "", folder=None, decode=False, is_private=0, df=None)
+
     # Open an Image
-    path_file = frappe.get_site_path('public') + doc_file.file_url                
+    path_file = frappe.get_site_path("public") + doc_file.file_url                
     img = Image.open(path_file)
+
     # Call draw Method to add 2D graphics in an image
     I1 = ImageDraw.Draw(img)
+
     # Custom font style and font size
     font_size = 15
-    myFont = ImageFont.truetype('FreeMono.ttf', font_size)
+    myFont = ImageFont.truetype("FreeMono.ttf", font_size)
+
     # Add Text to an image
     lines = []
     position = (10, 10)
@@ -355,6 +337,7 @@ def add_text_to_image(file_name, imgdata, description):
     image_width, image_height = img.size
     max_width = img.width - 2 * (x + y)
     font_color = (255, 0, 0)
+
     for line in description.split("\\n"):
         # Split line into words
         words = line.split()
@@ -371,16 +354,16 @@ def add_text_to_image(file_name, imgdata, description):
     for line in lines:
         I1.text((x, y), line, font=myFont, fill=font_color)
         y += font_size
+
     # get image base64
     buffered = io.BytesIO()
     img.save(buffered, format="PNG")
     image_base64_new = base64.b64decode(base64.b64encode(buffered.getvalue()))
     
     # delete file
-    frappe.delete_doc('File', doc_file.name)
+    frappe.delete_doc("File", doc_file.name)
     path_file = "/files/" + file_name
     delete_file(path_file)
-    ##
     return image_base64_new
 
 def upload_image_s3(image,description):
@@ -389,9 +372,10 @@ def upload_image_s3(image,description):
     # bucket_name_s3 = "mbw-dms"
     endpoint_s3 = settings.get('endpoint_s3')
     imgdata = base64.b64decode(image)
-    bucket_domain =frappe.local.site.replace('.','-')
+    bucket_domain = frappe.local.site.replace('.','-')
     file_name = "checkin_" + \
         "_" + str(datetime.now()).replace(" ","_") + ".png"
+    
     if description:
         imgdata_new = add_text_to_image(file_name, imgdata, description)
     else:
@@ -405,10 +389,11 @@ def upload_image_s3(image,description):
         create_my_minio('DMS Settings').put_object(bucket_name=bucket_name_s3, object_name=f"{bucket_domain}/{file_name}", data=io.BytesIO(imgdata_new))
     except Exception as e:
         print(e)
+
     # data response
     data = {}
     data["file_url"] = f"https://{endpoint_s3}/{object_name}"
-    data['status'] = True
+    data["status"] = True
     return data
 
 # Lấy ra các field của doctype con
@@ -437,7 +422,7 @@ class ArrayMethod():
     def __init__(self, data=[]):
       self.main = data
     
-    def find(self,callback):
+    def find(self, callback):
         for value in self.main :
             if callback(value):
                 return value
@@ -456,19 +441,18 @@ class ArrayMethod():
         return array
     
 def weekday(time:datetime):
-    # print(time.strftime("%A"),time)
     first_week_month = time.replace(day=1)
     W_first = float(first_week_month.strftime("%W"))
-    listngay = ('Chủ nhật', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7')
+    listngay = ("Chủ nhật", "Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7")
     anh_xa_ngay_sang_so = {
-    "Monday": 1,
-    "Tuesday": 2,
-    "Wednesday": 3,
-    "Thursday": 4,
-    "Friday": 5,
-    "Saturday": 6,
-    "Sunday": 0
-}
+        "Monday": 1,
+        "Tuesday": 2,
+        "Wednesday": 3,
+        "Thursday": 4,
+        "Friday": 5,
+        "Saturday": 6,
+        "Sunday": 0
+    }
     thu_trong_tuan = listngay[anh_xa_ngay_sang_so[time.strftime("%A")]]
     w = float(time.strftime("%W"))
     tuan =(w - W_first) + 1 if (w - W_first) + 1 <5 else 1

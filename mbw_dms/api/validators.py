@@ -10,22 +10,22 @@ def validate_email(value):
         raise ValueError(f"Email phải có độ dài từ nhỏ hơn 50 ký tự!")
     rule = re.compile(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
     if not rule.search(value):
-        raise ValueError(f'Email {value} không đúng định dạng!')
+        raise ValueError(f"Email {value} không đúng định dạng!")
     return value
 
 
 # Kiểm tra định dạng số điện thoại truyền lên có đúng định dạng không
 def validate_phone_number(value):
     if not value:
-        raise ValueError('Vui lòng nhập số điện thoại!')
+        raise ValueError("Vui lòng nhập số điện thoại!")
     rule = re.compile(r'(^[+0-9]{1,3})*([0-9]{10,11}$)')
     if not rule.search(value):
-        raise ValueError('Số điện thoại %s không đúng định dạng!' % value)
+        raise ValueError("Số điện thoại %s không đúng định dạng!" % value)
     return value
 
 
 # Kiểm tra trường bắt buộc có dữ liệu truyền lên không được để trống (required=True)
-def validate_not_none(value,field=""):
+def validate_not_none(value, field=None):
     if not value:
         raise ValueError(f"Vui lòng nhập dữ liệu: {field}")
     return value
@@ -44,9 +44,9 @@ def validate_date(value):
         time = time.replace(hour=0, minute=0, second=0, microsecond=0)
         return str(time)
     except ValueError as e:
-        raise Exception('Không đúng định dạng timestamp `%s`' % value)
+        raise Exception("Không đúng định dạng timestamp `%s`" % value)
     except:
-        raise Exception('Không đúng định dạng timestamp `%s`' % value)
+        raise Exception("Không đúng định dạng timestamp `%s`" % value)
 
 import pytz
 # Kiểm tra trường datetime truyền lên
@@ -58,13 +58,13 @@ def validate_datetime(value):
         local_time = utc_time.replace(tzinfo=pytz.utc).astimezone(local_timezone)
         return str(local_time).split('+')[0]
     except ValueError as e:
-        raise Exception('Không đúng định dạng timestamp `%s`' % value)
+        raise Exception("Không đúng định dạng timestamp `%s`" % value)
     except:
-        raise Exception('Không đúng định dạng timestamp `%s`' % value)
+        raise Exception("Không đúng định dạng timestamp `%s`" % value)
 
 
 # Kiểm tra độ dài giá trị truyền lên có hợp lệ không
-def validate_length(name='Giá trị', min=None, max=None):
+def validate_length(name="Giá trị", min=None, max=None):
     def validate(value):
         if min and max:
             if min <= len(value) <= max:
@@ -95,12 +95,12 @@ def validate_choice(choice):
 # Kiểm tra giá trị Boolean truyền lên
 def validate_int_bool(number):
     try:
-        if number == None or number == '':
+        if number == None or number == "":
             return None
         number = int(number)
         return bool(number)
     except:
-        raise ValueError(f'Giá trị `{number}` không đúng định dạng. (Chỉ nhận giá trị 0, 1)')
+        raise ValueError(f"Giá trị `{number}` không đúng định dạng. (Chỉ nhận giá trị 0, 1)")
 
 
 # Kiểm tra định dạng timestamp truyền lên trong bộ lọc
@@ -108,24 +108,24 @@ def validate_filter_timestamp(type=None):
     def validate(value):
         try:
             value = float(value)
-            if type == 'start':
-                time = datetime.fromtimestamp(value).strftime('%Y-%m-%d') + ' 00:00:00'
-            elif type == 'end':
-                time = datetime.fromtimestamp(value).strftime('%Y-%m-%d') + ' 23:59:59'
+            if type == "start":
+                time = datetime.fromtimestamp(value).strftime("%Y-%m-%d") + " 00:00:00"
+            elif type == "end":
+                time = datetime.fromtimestamp(value).strftime("%Y-%m-%d") + " 23:59:59"
             else:
                 time = datetime.fromtimestamp(value)
 
             return time
         except ValueError as e:
             if value:
-                raise Exception('%s không đúng định dạng timestamp' % value)
+                raise Exception("%s không đúng định dạng timestamp" % value)
             else:
-                raise Exception('Vui lòng điền đúng định dạng timestamp')
+                raise Exception("Vui lòng điền đúng định dạng timestamp")
         except:
             if value:
-                raise Exception('%s không phải là định dạng timestamp' % value)
+                raise Exception("%s không phải là định dạng timestamp" % value)
             else:
-                raise Exception('Vui lòng điền đúng định dạng timestamp')
+                raise Exception("Vui lòng điền đúng định dạng timestamp")
     return validate
 
 
@@ -134,20 +134,20 @@ def validate_filter_timestamp(type=None):
 def validate_timestamp_in_date(value):
         try:
             value = float(value)
-            start_time = datetime.fromtimestamp(value).strftime('%Y-%m-%d') + ' 00:00:00'
-            end_time = datetime.fromtimestamp(value).strftime('%Y-%m-%d') + ' 23:59:59'
+            start_time = datetime.fromtimestamp(value).strftime("%Y-%m-%d") + " 00:00:00"
+            end_time = datetime.fromtimestamp(value).strftime("%Y-%m-%d") + " 23:59:59"
 
             return start_time,end_time
         except ValueError as e:
             if value:
-                raise Exception('%s không đúng định dạng timestamp' % value)
+                raise Exception("%s không đúng định dạng timestamp" % value)
             else:
-                raise Exception('Vui lòng điền đúng định dạng timestamp')
+                raise Exception("Vui lòng điền đúng định dạng timestamp")
         except:
             if value:
-                raise Exception('%s không phải là định dạng timestamp' % value)
+                raise Exception("%s không phải là định dạng timestamp" % value)
             else:
-                raise Exception('Vui lòng điền đúng định dạng timestamp')
+                raise Exception("Vui lòng điền đúng định dạng timestamp")
 
 
 # Kiểm tra định dạng kiểu dữ liệu
@@ -158,6 +158,7 @@ def validate_type(type_value=None):
         else:
             raise Exception(f"{value} ont type : {type_value}")
     return validate
+
 # Kiểm tra định dạng enum
 def validate_enum(type_value=None):
     def validate(value):
@@ -166,6 +167,8 @@ def validate_enum(type_value=None):
         else:
             raise Exception(f"{value} invalid")
     return validate
+
+
 def validate_filter(type_check,type=None,value=None):
     validate = {
         "email": validate_email,

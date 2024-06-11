@@ -17,24 +17,24 @@ def update_kpi_monthly(doc, method):
 
     # Kiểm tra đã tồn tại bản ghi KPI của tháng này chưa
     existing_monthly_summary = frappe.get_all(
-        'DMS Summary KPI Monthly',
-        filters={'thang': month, 'nam': year, 'nhan_vien_ban_hang': user_name},
-        fields=['name']
+        "DMS Summary KPI Monthly",
+        filters={"thang": month, "nam": year, "nhan_vien_ban_hang": user_name},
+        fields=["name"]
     )
     grand_totals = doc.grand_total
 
     if existing_monthly_summary:
-        monthly_summary_doc = frappe.get_doc('DMS Summary KPI Monthly', existing_monthly_summary[0]['name'])
+        monthly_summary_doc = frappe.get_doc("DMS Summary KPI Monthly", existing_monthly_summary[0]["name"])
         monthly_summary_doc.doanh_thu_thang += grand_totals
         monthly_summary_doc.save(ignore_permissions=True)
     else:
         monthly_summary_doc = frappe.get_doc({
-            'doctype': 'DMS Summary KPI Monthly',
-            'nam': year,
-            'thang': month,
-            'nhan_vien_ban_hang': user_name,
-            'nhom_ban_hang': sales_team,
-            'doanh_thu_thang': grand_totals,
+            "doctype": "DMS Summary KPI Monthly",
+            "nam": year,
+            "thang": month,
+            "nhan_vien_ban_hang": user_name,
+            "nhom_ban_hang": sales_team,
+            "doanh_thu_thang": grand_totals,
         })
         monthly_summary_doc.insert(ignore_permissions=True)
 
@@ -53,14 +53,10 @@ def update_kpi_monthly_on_cancel(doc, method):
     user_name = frappe.get_value("Sales Person", {"name": sales_person}, "employee")
 
     # Kiểm tra đã tồn tại bản ghi KPI của tháng này chưa
-    existing_monthly_summary = frappe.get_all(
-        'DMS Summary KPI Monthly',
-        {'thang': month, 'nam': year, 'nhan_vien_ban_hang': user_name},
-        'name'
-    )
+    existing_monthly_summary = frappe.get_value("DMS Summary KPI Monthly", {"thang": month, "nam": year, "nhan_vien_ban_hang": user_name}, "name")
     grand_totals = doc.grand_total
     if existing_monthly_summary:
-        monthly_summary_doc = frappe.get_doc('DMS Summary KPI Monthly', existing_monthly_summary)
+        monthly_summary_doc = frappe.get_doc("DMS Summary KPI Monthly", existing_monthly_summary)
         monthly_summary_doc.doanh_thu_thang -= grand_totals
         monthly_summary_doc.save(ignore_permissions=True)
     else:

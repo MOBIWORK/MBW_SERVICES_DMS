@@ -21,85 +21,60 @@ from mbw_dms.api.validators import (
 )
 from mbw_dms.api import configs
 import pydash
-from frappe.query_builder import (Field,DocType)
+from frappe.query_builder import (Field, DocType)
+from frappe.query_builder.functions import Count
+
 # Danh sách khách hàng
 @frappe.whitelist(methods="GET")
 def list_customer(**kwargs):
     try:
         kwargs = frappe._dict(kwargs)
+        page_size = int(kwargs.get("page_size", 20))
+        page_number = 1 if not kwargs.get("page") or int(kwargs.get("page")) <= 0 else int(kwargs.get("page"))
+
         name = kwargs.get("name")
-        customer_name = kwargs.get("customer_name")
         search_key = kwargs.get("search_key")
         customer_type = kwargs.get("customer_type")
         customer_group = kwargs.get("customer_group")
         from_date = validate_filter_timestamp("start")(kwargs.get("from_date")) if kwargs.get("from_date") else None
         to_date = validate_filter_timestamp("end")(kwargs.get("to_date")) if kwargs.get("to_date") else None
+
         routers = routers_name_of_customer()
         if not routers or len(routers) == 0 :
             return gen_response(200, "", [])
+        
         customers_name = customers_code_router(routersName=routers)
+
         CustomerDoc = DocType("Customer")
-        # version cũ
-        # my_filter = {
-        #     "customer_code": ["in", customers_name]
-        # }
 
-        # page_size = int(kwargs.get("page_size", 20))
-        # page_number = 1 if not kwargs.get("page") or int(kwargs.get("page")) <= 0 else int(kwargs.get("page"))
-        # if name:
-        #     my_filter["name"] = ["like", f"%{name}%"]
-        # if customer_name:
-        #     my_filter["customer_name"] = ["like", f"%{customer_name}%"]
-        # if customer_type:
-        #     my_filter["customer_type"] = ["like", f"%{customer_type}%"]
-        # if customer_group:
-        #     my_filter["customer_group"] = ["like", f"%{customer_group}%"]
-        # if search_key:
-        #     my_filter["search_key"] = ["or", f"%{search_key}%"]
-        # if from_date and to_date:
-        #     my_filter["custom_birthday"] = ["between", [from_date, to_date]]
-        # my_filter["disabled"] = 0
-
-        # customers = frappe.db.get_all("Customer",
-        #                         filters=my_filter,
-        #                         fields=["name", "customer_name", "customer_code","customer_type", 
-        #                                 "customer_group", "territory", "industry", "image", "website", 
-        #                                 "mobile_no", "customer_primary_address", "custom_birthday",
-        #                                 "customer_location_primary", "customer_details"],
-        #                         start=page_size*(page_number-1), 
-        #                         page_length=page_size)
-                                
-        # record = frappe.db.count("Customer", filters=my_filter)
-        # version mới
-        page_size = int(kwargs.get("page_size", 20))
-        page_number = 1 if not kwargs.get("page") or int(kwargs.get("page")) <= 0 else int(kwargs.get("page"))
         def CustomerField(name):
             return CustomerDoc[name]
 
-        my_filter =( CustomerField("customer_code").isin(customers_name) & CustomerField("disabled").eq(0))
+        my_filter = (CustomerField("customer_code").isin(customers_name) & CustomerField("disabled").eq(0))
         if name:
             my_filter = (my_filter & CustomerField("name").eq(name))
         if customer_type:
-            my_filter=(my_filter & CustomerField("customer_type").eq(customer_type))
+            my_filter = (my_filter & CustomerField("customer_type").eq(customer_type))
         if customer_group:
-            my_filter= (my_filter & CustomerField("customer_group").eq(customer_group))
+            my_filter = (my_filter & CustomerField("customer_group").eq(customer_group))
         if search_key:
-            my_filter = (my_filter & ( CustomerField("customer_name").like(f"%{search_key}%") | CustomerField("customer_code").like(f"%{search_key}%") ))
+            my_filter = (my_filter & ( CustomerField("customer_name").like(f"%{search_key}%") | CustomerField("customer_code").like(f"%{search_key}%")))
         if from_date and to_date:
-            my_filter = (my_filter & CustomerField("custom_birthday").between(from_date,to_date))
+            my_filter = (my_filter & CustomerField("custom_birthday").between(from_date, to_date))
+
         select_field = ["name", "customer_name", "customer_code","customer_type", 
-                                        "customer_group", "territory", "industry", "image", "website", 
-                                        "mobile_no", "customer_primary_address", "custom_birthday",
-                                        "customer_location_primary", "customer_details"]
-        customers =( frappe.qb.from_(CustomerDoc)
+                        "customer_group", "territory", "industry", "image", "website", 
+                        "mobile_no", "customer_primary_address", "custom_birthday",
+                        "customer_location_primary", "customer_details"]
+        
+        customers = (frappe.qb.from_(CustomerDoc)
                     .select(*select_field)
                     .where(my_filter)
                     .limit(page_size)
                     .offset(page_size*(page_number-1))
                     ).run(as_dict=True)
-        record = len(frappe.qb.from_(CustomerDoc).where(my_filter).select(*select_field).run(as_dict=True))
-
-
+        record = frappe.qb.from_(CustomerDoc).where(my_filter).select(Count("*")).run(as_dict=1)
+        total = record[0].get("COUNT(*)")
 
         for customer in customers:
             if customer.customer_location_primary == "":
@@ -110,13 +85,13 @@ def list_customer(**kwargs):
             customer["image"] = validate_image(customer.get("image"))
             customer["contact"] = get_contact(customer.get("name"))
             customer["address"] = get_customer_addresses(customer.get("name"))
-            customer["cre_limid"] = frappe.db.get_all("Customer Credit Limit", {"parent" : customer.get("name")}, ["credit_limit"])
+            customer["cre_limid"] = frappe.db.get_all("Customer Credit Limit", {"parent": customer.get("name")}, ["credit_limit"])
 
         return gen_response(200, "Thành công", {
             "data": customers,
             "page_number": page_number,
             "page_size": page_size,
-            "total": record
+            "total": total
         })
     except Exception as e:
         return exception_handle(e)
@@ -126,7 +101,7 @@ def list_customer(**kwargs):
 @frappe.whitelist(methods="GET")
 def customer_detail(name):
     try: 
-        doc_customer = frappe.get_doc("Customer",name).as_dict()
+        doc_customer = frappe.get_doc("Customer", name).as_dict()
 
         routers = routers_name_of_customer(more_filters={"customer_code": doc_customer.customer_code})
         address = frappe.db.get_all("Address", {"link_doctype": "Customer", "link_name": doc_customer.name}, ["name", "address_title", "address_location", "is_primary_address", "is_shipping_address"])
@@ -135,9 +110,9 @@ def customer_detail(name):
         list_router_frequency = []
 
         for name in routers:
-            router = frappe.get_doc("DMS Router",name).as_dict()
+            router = frappe.get_doc("DMS Router", name).as_dict()
             customers = router.customers
-            this_customer = pydash.find(customers,lambda x: x.customer_code == doc_customer.customer_code)
+            this_customer = pydash.find(customers, lambda x: x.customer_code == doc_customer.customer_code)
             if this_customer:
                 list_router_frequency += [{"frequency": this_customer.frequency, "router_name": router.channel_name, "router_code": router.channel_code}]
 
@@ -149,7 +124,7 @@ def customer_detail(name):
 
         if doc_customer["image"] and not doc_customer["image"].startswith("http"):
             from frappe.utils import get_url
-            doc_customer["image"] = (get_url() +  doc_customer["image"]).replace(" ", "%20")
+            doc_customer["image"] = (get_url() + doc_customer["image"]).replace(" ", "%20")
         for address in  doc_customer["address"]:
             address.address_location = null_location(address.address_location)
         return gen_response(200, "", doc_customer)
@@ -249,10 +224,11 @@ def create_customer(**kwargs):
         # Tạo mới contact khách hàng
         if contact and contact.get("first_name"):
             new_contact = frappe.new_doc("Contact")
-            contact_fields = ["first_name", "address_contact","phone"]
+            contact_fields = ["first_name", "address_contact", "phone"]
             for key, value in contact.items():
                 if key in contact_fields:
                     new_contact.set(key, value)
+
             new_contact.is_primary_contact = 1
             new_contact.is_billing_contact = 1
 
@@ -262,8 +238,8 @@ def create_customer(**kwargs):
             })
             new_contact.append("phone_nos", {
                 "phone": phone_number,
-                "is_primary_phone":1,
-                "is_primary_mobile_no":1
+                "is_primary_phone": 1,
+                "is_primary_mobile_no": 1
             })
             new_contact.insert()
             # Tạo mới địa chỉ contact
@@ -287,7 +263,7 @@ def create_customer(**kwargs):
 
         # xử lý thêm ảnh khách hàng
         if kwargs.get("image"):
-            new_customer.image = post_image(name_image='', faceimage=kwargs.get("image"), doc_type="Customer", doc_name=new_customer.name)
+            new_customer.image = post_image(name_image="", faceimage=kwargs.get("image"), doc_type="Customer", doc_name=new_customer.name)
             new_customer.save()
 
         # Thêm khách hàng vào tuyến 
@@ -304,6 +280,7 @@ def create_customer(**kwargs):
 
         frappe.db.commit()
         return gen_response(201, "Thành công", {"name": new_customer.name})
+    
     except Exception as e:
         if "new_customer" in locals() and new_customer is not None:
             frappe.db.delete("Customer", new_customer.name)
@@ -319,7 +296,7 @@ def create_customer(**kwargs):
 @frappe.whitelist(methods="GET")
 def list_territory():
     try:
-        territory = frappe.db.get_list('Territory', fields=["name", "territory_name"])
+        territory = frappe.db.get_list("Territory", fields=["name", "territory_name"])
         return gen_response(200, "Thành công", territory)
     except Exception as e:
         return exception_handle(e)
