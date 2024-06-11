@@ -21,8 +21,7 @@ from mbw_dms.api.validators import (
 )
 from mbw_dms.api import configs
 import pydash
-
-
+from frappe.query_builder import (Field,DocType)
 # Danh sách khách hàng
 @frappe.whitelist(methods="GET")
 def list_customer(**kwargs):
@@ -30,6 +29,7 @@ def list_customer(**kwargs):
         kwargs = frappe._dict(kwargs)
         name = kwargs.get("name")
         customer_name = kwargs.get("customer_name")
+        search_key = kwargs.get("search_key")
         customer_type = kwargs.get("customer_type")
         customer_group = kwargs.get("customer_group")
         from_date = validate_filter_timestamp("start")(kwargs.get("from_date")) if kwargs.get("from_date") else None
@@ -38,35 +38,68 @@ def list_customer(**kwargs):
         if not routers or len(routers) == 0 :
             return gen_response(200, "", [])
         customers_name = customers_code_router(routersName=routers)
-        
-        my_filter = {
-            "customer_code": ["in", customers_name]
-        }
+        CustomerDoc = DocType("Customer")
+        # version cũ
+        # my_filter = {
+        #     "customer_code": ["in", customers_name]
+        # }
 
+        # page_size = int(kwargs.get("page_size", 20))
+        # page_number = 1 if not kwargs.get("page") or int(kwargs.get("page")) <= 0 else int(kwargs.get("page"))
+        # if name:
+        #     my_filter["name"] = ["like", f"%{name}%"]
+        # if customer_name:
+        #     my_filter["customer_name"] = ["like", f"%{customer_name}%"]
+        # if customer_type:
+        #     my_filter["customer_type"] = ["like", f"%{customer_type}%"]
+        # if customer_group:
+        #     my_filter["customer_group"] = ["like", f"%{customer_group}%"]
+        # if search_key:
+        #     my_filter["search_key"] = ["or", f"%{search_key}%"]
+        # if from_date and to_date:
+        #     my_filter["custom_birthday"] = ["between", [from_date, to_date]]
+        # my_filter["disabled"] = 0
+
+        # customers = frappe.db.get_all("Customer",
+        #                         filters=my_filter,
+        #                         fields=["name", "customer_name", "customer_code","customer_type", 
+        #                                 "customer_group", "territory", "industry", "image", "website", 
+        #                                 "mobile_no", "customer_primary_address", "custom_birthday",
+        #                                 "customer_location_primary", "customer_details"],
+        #                         start=page_size*(page_number-1), 
+        #                         page_length=page_size)
+                                
+        # record = frappe.db.count("Customer", filters=my_filter)
+        # version mới
         page_size = int(kwargs.get("page_size", 20))
         page_number = 1 if not kwargs.get("page") or int(kwargs.get("page")) <= 0 else int(kwargs.get("page"))
-        if name:
-            my_filter["name"] = ["like", f"%{name}%"]
-        if customer_name:
-            my_filter["customer_name"] = ["like", f"%{customer_name}%"]
-        if customer_type:
-            my_filter["customer_type"] = ["like", f"%{customer_type}%"]
-        if customer_group:
-            my_filter["customer_group"] = ["like", f"%{customer_group}%"]
-        if from_date and to_date:
-            my_filter["custom_birthday"] = ["between", [from_date, to_date]]
-        my_filter["disabled"] = 0
+        def CustomerField(name):
+            return CustomerDoc[name]
 
-        customers = frappe.db.get_all("Customer",
-                                filters=my_filter,
-                                fields=["name", "customer_name", "customer_code","customer_type", 
+        my_filter =( CustomerField("customer_code").isin(customer_name) and CustomerField("disabled").eq(0))
+        if name:
+            my_filter = (my_filter & CustomerField("name").eq(name))
+        if customer_type:
+            my_filter=(my_filter & CustomerField("customer_type").eq(customer_type))
+        if customer_group:
+            my_filter= (my_filter & CustomerField("customer_group").eq(customer_group))
+        if search_key:
+            my_filter = (my_filter & ( CustomerField("customer_name").like(f"%{search_key}%") | CustomerField("customer_code").like(f"%{search_key}%") ))
+        if from_date and to_date:
+            my_filter = (my_filter & CustomerField("custom_birthday").between(from_date,to_date))
+        select_field = ["name", "customer_name", "customer_code","customer_type", 
                                         "customer_group", "territory", "industry", "image", "website", 
                                         "mobile_no", "customer_primary_address", "custom_birthday",
-                                        "customer_location_primary", "customer_details"],
-                                start=page_size*(page_number-1), 
-                                page_length=page_size)
-                                
-        record = frappe.db.count("Customer", filters=my_filter)
+                                        "customer_location_primary", "customer_details"]
+        customers =( frappe.qb.from_(CustomerDoc)
+                    .select(*select_field)
+                    .where(my_filter)
+                    .limit(page_size)
+                    .offset(page_size*(page_number-1))
+                    ).run(as_dict=True)
+        record = len(frappe.qb.from_(CustomerDoc).where(my_filter).select(*select_field).run(as_dict=True))
+
+
 
         for customer in customers:
             if customer.customer_location_primary == "":
