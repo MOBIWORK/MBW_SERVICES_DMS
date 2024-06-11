@@ -91,6 +91,7 @@ def get_router(id):
 @frappe.whitelist(methods="GET")
 def get_customer_router(data):
     try:     
+        from pypika import Order
         user= get_user_id()
         # Cấu hình ngoại tuyến từ dms setting
         search_key = data.get("search_key")
@@ -158,11 +159,7 @@ def get_customer_router(data):
                 customers = pydash.filter_(customers, lambda value: (value.frequency.find(str(int(tuan_trong_thang))) != -1) and (detail_router.get("travel_date") == thu_trong_tuan or detail_router.get("travel_date") == "Không giới hạn") )          
             list_customer += customers
 
-        sort = "customer_name desc"
-        if order_by: 
-            sort = f"customer_name {order_by}"
-
-        # Chuyển mảng danh sách khách hàng về id
+        # Chuyển mả,ng danh sách khách hàng về id
         list_customer_name = []
         for customer in list_customer:
             list_customer_name.append(customer.get('customer_code'))
@@ -179,6 +176,8 @@ def get_customer_router(data):
             list_customer_name = list_checkin_code
         elif checkin_status == "not_checkin":
             list_customer_name = pydash.filter_(list_customer_name,lambda x: x not in list_checkin_code)
+
+        
         FiltersCustomer = {"customer_code": ["in", list_customer_name]}
         FiltersCustomer["disabled"] = 0
 
@@ -194,12 +193,46 @@ def get_customer_router(data):
         fields_customer = [
             'name','customer_primary_address'
             ,'customer_code','customer_location_primary','mobile_no'
-            ,'customer_name'
-            ,'UNIX_TIMESTAMP(custom_birthday) as birthday'
+            ,'customer_name',"custom_birthday"
+            # ,'UNIX_TIMESTAMP(custom_birthday) as birthday'
             ]
-        
+        # filter sql
+        from pypika import (Order,Query,Table)
+        CustomerDoc = frappe.qb.DocType("Customer")
+        def CustomerField(name):
+            return CustomerDoc[name]
+        FilterSQLCustomer = CustomerDoc.customer_code.isin(list_customer_name) & CustomerDoc.disabled.eq(0)
+        if birthday_from and birthday_to:
+            FilterSQLCustomer = FilterSQLCustomer & CustomerField("birthday").between(birthday_from,birthday_to)
+        if customer_group:
+            FilterSQLCustomer = FilterSQLCustomer & CustomerField("customer_group").eq(customer_group)
+        if customer_type:
+            FilterSQLCustomer = FilterSQLCustomer & CustomerField("customer_type").eq(customer_type)
+
+        if search_key:
+            FilterSQLCustomer = FilterSQLCustomer & CustomerField("customer_name").like(f"%{search_key}%")
+
         if(view_mode == 'list'):
-            detail_customer = frappe.db.get_all('Customer',filters= FiltersCustomer,fields=fields_customer,start=page_size*(page_number-1), page_length=page_size,order_by=sort,distinct=True)
+            # detail_customer = frappe.db.get_all('Customer',
+            #                                     filters= FiltersCustomer,
+            #                                     fields=fields_customer, 
+            #                                    order_by=sort,
+            #                                    start=page_size*(page_number-1), 
+            #                                    page_length=page_size,
+            #                                    distinct=True,
+            #                                    )
+            # v2
+            from pypika import CustomFunction
+            UNIX_TIMESTAMP = CustomFunction('UNIX_TIMESTAMP', ['day'])
+            detail_customer =( (frappe.qb.from_(CustomerDoc)
+                               .select(*fields_customer,UNIX_TIMESTAMP(CustomerDoc.custom_birthday).as_("birthday") )
+                               .where(FilterSQLCustomer)
+                               .orderby("customer_name",order = frappe.qb.terms.Order.asc if order_by == "asc" else frappe.qb.terms.Order.desc)
+                               .limit(page_size)
+                               .offset(page_size*(page_number-1))
+                               .distinct())
+                                .run(as_dict=1)
+                                )
         else:
             fields_customer= [
             'name'
