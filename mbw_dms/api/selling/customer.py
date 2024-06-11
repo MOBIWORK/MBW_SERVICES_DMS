@@ -326,8 +326,9 @@ def list_territory():
     
 # Chỉnh sửa khách hàng
 @frappe.whitelist(methods="PUT")
-def update_customer(name, **kwargs):
+def update_customer(**kwargs):
     try:
+        name = kwargs.get("name")
         if frappe.db.exists("Customer", name, cache=True):
             customer = frappe.get_doc("Customer", name)
             

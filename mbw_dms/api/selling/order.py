@@ -17,25 +17,25 @@ import json
 
 # Lấy danh sách đơn hàng
 @frappe.whitelist(allow_guest=True,methods="GET")
-def get_list_sales_order(**filters):
+def get_list_sales_order(**kwargs):
     try:
-        status = filters.get("status")
-        from_date = validate_filter_timestamp("start")(filters.get("from_date")) if filters.get("from_date") else None
-        to_date = validate_filter_timestamp("end")(filters.get("to_date")) if filters.get("to_date") else None
-        page_size =  int(filters.get("page_size", 20))
-        page_number = int(filters.get("page_number")) if filters.get("page_number") and int(filters.get("page_number")) > 0 else 1
+        status = kwargs.get("status")
+        from_date = validate_filter_timestamp("start")(kwargs.get("from_date")) if kwargs.get("from_date") else None
+        to_date = validate_filter_timestamp("end")(kwargs.get("to_date")) if kwargs.get("to_date") else None
+        page_size =  int(kwargs.get("page_size", 20))
+        page_number = int(kwargs.get("page_number")) if kwargs.get("page_number") and int(kwargs.get("page_number")) > 0 else 1
 
         query = {}
         if from_date and to_date:
             query["creation"] = ["between", [from_date, to_date]]
         if status is not None and status != "All":
             query["status"] = validate_choice(configs.status_order)(status)
-        if filters.get("customer_name"):
-            query["customer_name"] = filters.get("customer_name")
-        if filters.get("customer"):
-            query["customer"] = filters.get("customer")
-        if filters.get("name"):
-            query["name"] = filters.get("name")
+        if kwargs.get("customer_name"):
+            query["customer_name"] = kwargs.get("customer_name")
+        if kwargs.get("customer"):
+            query["customer"] = kwargs.get("customer")
+        if kwargs.get("name"):
+            query["name"] = kwargs.get("name")
             
         sale_orders =frappe.db.get_list("Sales Order", 
                                        filters=query, 
@@ -64,14 +64,15 @@ def get_list_sales_order(**filters):
         exception_handle(e)
 
 
-# Chi tiết đơn hàng
-def sales_order_detail(name):
-    if frappe.db.exists("Sales Order", name, cache=True):
-        SalesOrder = frappe.qb.DocType("Sales Order")
-        Customer = frappe.qb.DocType("Customer")
+# Chi tiết đơn hàng, phiếu trả hàng
+def so_si_detail(doctype, name):
+    SalesOrder = frappe.qb.DocType(doctype)
+    Customer = frappe.qb.DocType("Customer")
+    SalesOrderTaxes = frappe.qb.DocType("Sales Taxes and Charges")
+    Employee = frappe.qb.DocType("Employee")
+
+    if doctype == "Sales Order" and frappe.db.exists(doctype, name, cache=True):
         SalesOrderItem = frappe.qb.DocType("Sales Order Item")
-        SalesOrderTaxes = frappe.qb.DocType("Sales Taxes and Charges")
-        Employee = frappe.qb.DocType("Employee")
 
         # Lấy ra các trường trong đơn hàng
         field_detail_sales = ["total", "grand_total", "customer_code", "customer", "customer_name", "customer_address", "delivery_date", "set_warehouse", "total_taxes_and_charges", "apply_discount_on", "additional_discount_percentage", "discount_amount", "contact_person", "rounded_total", "status"]
@@ -87,47 +88,62 @@ def sales_order_detail(name):
                 .select(
                     Customer.customer_code, SalesOrder.customer, SalesOrder.customer_name, SalesOrder.customer_address, UNIX_TIMESTAMP(SalesOrder.delivery_date).as_("delivery_date"), SalesOrder.set_warehouse, SalesOrder.total, SalesOrder.grand_total,
                     SalesOrder.taxes_and_charges, SalesOrder.total_taxes_and_charges, SalesOrder.apply_discount_on, SalesOrder.additional_discount_percentage, SalesOrder.discount_amount, SalesOrder.contact_person, SalesOrder.status
-                )).run(as_dict =1)
+                )).run(as_dict=1)
+    
+    if doctype == "Sales Invoice" and frappe.db.exists(doctype, name, cache=True):
+        SalesOrderItem = frappe.qb.DocType("Sales Invoice Item")
+        field_detail_sales = ["total", "grand_total", "customer", "customer_name", "address_display", "posting_date", "set_warehouse", "taxes_and_charges", "total_taxes_and_charges", "apply_discount_on", "additional_discount_percentage", "discount_amount", "contact_person", "rounded_total"]
+
+        detail = (frappe.qb.from_(SalesOrder)
+                .inner_join(SalesOrderItem)
+                .on(SalesOrder.name == SalesOrderItem.parent)
+                .inner_join(Customer)
+                .on(Customer.name == SalesOrder.customer)
+                .where(SalesOrder.name == name)
+                .select(
+                    Customer.customer_code, SalesOrder.customer, SalesOrder.customer_name, SalesOrder.address_display, UNIX_TIMESTAMP(SalesOrder.posting_date).as_("posting_date"), SalesOrder.set_warehouse, SalesOrder.total, SalesOrder.grand_total,
+                    SalesOrder.taxes_and_charges, SalesOrder.total_taxes_and_charges, SalesOrder.apply_discount_on, SalesOrder.additional_discount_percentage, SalesOrder.discount_amount, SalesOrder.contact_person, SalesOrder.rounded_total,
+                    SalesOrderItem.name, SalesOrderItem.item_name, SalesOrderItem.item_code, SalesOrderItem.qty, SalesOrderItem.uom, SalesOrderItem.amount, SalesOrderItem.discount_amount, SalesOrderItem.discount_percentage                        
+                )).run(as_dict=1)
         
-        # Lấy ra giá trị tax
-        detail_taxes = (frappe.qb.from_(SalesOrder)
-                        .inner_join(SalesOrderTaxes)
-                        .on(SalesOrder.name == SalesOrderTaxes.parent)
-                        .where(SalesOrder.name == name)
-                        .select(SalesOrderTaxes.tax_amount)).run(as_dict =1)
-        
-        # Lấy ra thông tin nhân viên bán hàng
-        employee = (frappe.qb.from_(SalesOrder)
-                        .inner_join(Employee)
-                        .on(SalesOrder.owner == Employee.user_id)
-                        .where(SalesOrder.name == name)
-                        .select(Employee.employee_name, Employee.cell_number, Employee.current_address)).run(as_dict =1)
-        
-        # Lấy ra chi tiết đơn hàng
-        detail_order = {"list_items": []}
-        if len(detail) > 0:
-            for key_item, value in detail[0].items() :
-                if key_item in field_detail_sales:                    
-                    detail_order.setdefault(key_item,value)
-            detail_order["list_items"] = get_items(master_doc="Sales Order", master_name=name)
-                
-        if len(detail_taxes) > 0 :
-            detail_order = {**detail_order, **detail_taxes[0]}
-        
-        if len(employee) > 0:
-            detail_order = {**detail_order, **employee[0]}
-        return detail_order
-    else:
-        return []
+    # Lấy ra giá trị tax
+    detail_taxes = (frappe.qb.from_(SalesOrder)
+                    .inner_join(SalesOrderTaxes)
+                    .on(SalesOrder.name == SalesOrderTaxes.parent)
+                    .where(SalesOrder.name == name)
+                    .select(SalesOrderTaxes.tax_amount)).run(as_dict=1)
+    
+    # Lấy ra thông tin nhân viên bán hàng
+    employee = (frappe.qb.from_(SalesOrder)
+                    .inner_join(Employee)
+                    .on(SalesOrder.owner == Employee.user_id)
+                    .where(SalesOrder.name == name)
+                    .select(Employee.employee_name, Employee.cell_number, Employee.current_address)).run(as_dict=1)
+    
+    # Lấy ra chi tiết đơn hàng
+    detail_order = {"list_items": []}
+    if len(detail) > 0:
+        for key_item, value in detail[0].items() :
+            if key_item in field_detail_sales:                    
+                detail_order.setdefault(key_item, value)
+        detail_order["list_items"] = get_items(master_doc=doctype, master_name=name)
+            
+    if len(detail_taxes) > 0 :
+        detail_order = {**detail_order, **detail_taxes[0]}
+    
+    if len(employee) > 0:
+        detail_order = {**detail_order, **employee[0]}
+    return detail_order
+    
 
 @frappe.whitelist(methods="GET")
-def get_sale_order(name):
+def get_so_si(doctype, name):
     try:
-        if frappe.db.exists("Sales Order", name, cache=True):
-            order_details = sales_order_detail(name)
+        if frappe.db.exists(doctype, name, cache=True):
+            order_details = so_si_detail(doctype, name)
             return gen_response(200, "Thành công", order_details)
         else:
-            return gen_response(406, f"Không tồn tại đơn hàng {name}")
+            return gen_response(406, f"Không tồn tại đơn hàng (phiếu trả hàng) {name}")
     except Exception as e:
         return exception_handle(e)
 
@@ -213,10 +229,11 @@ def create_sale_order(**kwargs):
         
         new_order.insert()
         frappe.db.commit()
-        detail_order = sales_order_detail(new_order.name)
-        return gen_response(201, "Thành công",  {
+        detail_order = so_si_detail(doctype="Sales Order", name=new_order.name)
+
+        return gen_response(201, "Thành công", {
             "detail_order": detail_order,
-            "sales_orser": new_order.name
+            "name": new_order.name
             })
        
     except Exception as e:
@@ -333,8 +350,12 @@ def create_return_order(**kwargs):
 
         new_order.insert()
         frappe.db.commit()
-        return gen_response(201, "Thành công", {"name": new_order.name})
-        
+        detail_invoice = so_si_detail(doctype="Sales Invoice", name=new_order.name)
+        print('========================= detail_invoice: ', detail_invoice, flush=True)
+
+        return gen_response(201, "Thành công", {
+            "detail_invoice": detail_invoice,
+            "name": new_order.name})
     except Exception as e:
         return exception_handle(e)
 
@@ -473,7 +494,7 @@ def get_sale_order_by_checkin_id(doctype, **kwargs):
                             Customer.customer_code, SalesOrder.customer, SalesOrder.customer_name, SalesOrder.address_display, UNIX_TIMESTAMP(SalesOrder.delivery_date).as_("delivery_date"), SalesOrder.set_warehouse, SalesOrder.total, SalesOrder.grand_total
                             ,SalesOrder.taxes_and_charges, SalesOrder.total_taxes_and_charges, SalesOrder.apply_discount_on, SalesOrder.additional_discount_percentage, SalesOrder.discount_amount, SalesOrder.contact_person, SalesOrder.rounded_total
                             ,SalesOrderItem.name, SalesOrderItem.item_name, SalesOrderItem.item_code, SalesOrderItem.qty, SalesOrderItem.uom, SalesOrderItem.amount, SalesOrderItem.discount_amount, SalesOrderItem.discount_percentage                        
-                        )).run(as_dict =1)
+                        )).run(as_dict=1)
                 
             if doctype == "Sales Invoice":
                 SalesOrderItem = frappe.qb.DocType("Sales Invoice Item")
@@ -489,14 +510,14 @@ def get_sale_order_by_checkin_id(doctype, **kwargs):
                             Customer.customer_code, SalesOrder.customer, SalesOrder.customer_name, SalesOrder.address_display, UNIX_TIMESTAMP(SalesOrder.posting_date).as_("posting_date"), SalesOrder.set_warehouse, SalesOrder.total, SalesOrder.grand_total,
                             SalesOrder.taxes_and_charges, SalesOrder.total_taxes_and_charges, SalesOrder.apply_discount_on, SalesOrder.additional_discount_percentage, SalesOrder.discount_amount, SalesOrder.contact_person, SalesOrder.rounded_total,
                             SalesOrderItem.name, SalesOrderItem.item_name, SalesOrderItem.item_code, SalesOrderItem.qty, SalesOrderItem.uom, SalesOrderItem.amount, SalesOrderItem.discount_amount, SalesOrderItem.discount_percentage                        
-                        )).run(as_dict =1)
+                        )).run(as_dict=1)
                 
             detail_taxes = (frappe.qb.from_(SalesOrder)
                             .inner_join(SalesOrderTaxes)
                             .on(SalesOrder.name == SalesOrderTaxes.parent)
                             .where(SalesOrder.name == detail_sales_order)
                             .select(SalesOrderTaxes.tax_amount,SalesOrderTaxes.rate,SalesOrderTaxes.account_head,SalesOrderTaxes.charge_type,)
-                            ).run(as_dict =1)
+                            ).run(as_dict=1)
             
             detail_order = {"list_items": []}
             if len(detail) > 0 :
@@ -538,12 +559,12 @@ def get_items(master_doc, master_name):
     return result
 
 @frappe.whitelist(methods="DELETE")
-def delete_sales_order(name, **kwargs):
+def delete_sales_order(doctype, name):
     try:
-        if frappe.db.exists("Sales Oder", name):
-            so = frappe.get_doc("Sales Order", name)
+        if frappe.db.exists(doctype, name):
+            so = frappe.get_doc(doctype, name)
             if so.docstatus == 0:
-                frappe.db.delete("Sales Order",{"name": name})
+                frappe.db.delete(doctype, {"name": name})
                 return gen_response(200, "Thành công")
             else:
                 return gen_response(406, "Chỉ có thể xóa đơn hàng ở trạng thái nháp")
