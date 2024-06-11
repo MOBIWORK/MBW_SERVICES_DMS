@@ -19,7 +19,7 @@ import {
   message,
 } from "antd";
 import type { TableColumnsType } from "antd";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AxiosService } from "../../services/server";
 import dayjs from "dayjs";
 import useDebounce from "../../hooks/useDebount";
@@ -30,6 +30,7 @@ import { employee } from "@/types/employeeFilter";
 import { listSale } from "@/types/listSale";
 import { LuFilter, LuFilterX } from "react-icons/lu";
 import { useForm } from "antd/es/form/Form";
+import { useResize } from "@/hooks";
 
 interface DataSaleOrder {
   key: React.Key;
@@ -78,6 +79,7 @@ const columns: TableColumnsType<DataSaleOrder> = [
     title: "Đơn đặt",
     dataIndex: "name",
     key: "name",
+    width: 100,
     render: (_, record: any) => (
       <div>
         <a
@@ -94,24 +96,28 @@ const columns: TableColumnsType<DataSaleOrder> = [
     title: "Khách hàng",
     dataIndex: "customer",
     key: "customer",
+    width: 120,
     render: (_, record: any) => <div>{record.customer}</div>,
   },
   {
     title: "Khu vực",
     dataIndex: "territory",
     key: "territory",
+    width: 120,
     render: (_, record: any) => <div>{record.territory}</div>,
   },
   {
     title: "Kho",
     dataIndex: "set_warehouse",
     key: "set_warehouse",
+    width: 80,
     render: (_, record: any) => <div>{record.set_warehouse}</div>,
   },
   {
     title: "Ngày tạo",
     dataIndex: "posting_date",
     key: "posting_date",
+    width: 120,
     render: (_, record: any) => (
       <div>{dayjs(record.posting_date * 1000).format("DD/MM/YYYY")}</div>
     ),
@@ -120,12 +126,14 @@ const columns: TableColumnsType<DataSaleOrder> = [
     title: "Nhân viên",
     dataIndex: "employee",
     key: "employee",
+    width: 120,
     render: (_, record: any) => <div>{record.employee}</div>,
   },
   {
     title: <div className="text-right">Thành tiền (VNĐ)</div>,
     dataIndex: "total",
     key: "total",
+    width: 140,
     render: (_, record: any) => (
       <div className="!text-right">
         {Intl.NumberFormat().format(record.total)}
@@ -136,6 +144,7 @@ const columns: TableColumnsType<DataSaleOrder> = [
     title: <div className="text-right">Tiền VAT (VNĐ)</div>,
     dataIndex: "tax_amount",
     key: "tax_amount",
+    width: 140,
     render: (_, record: any) => (
       <div className="text-right">
         {Intl.NumberFormat().format(record.tax_amount)}
@@ -146,6 +155,7 @@ const columns: TableColumnsType<DataSaleOrder> = [
     title: <div className="text-right">Chiết khấu (VNĐ)</div>,
     dataIndex: "discount_amount",
     key: "discount_amount",
+    width: 160,
     render: (_, record: any) => (
       <div className="text-right">
         {Intl.NumberFormat().format(record.discount_amount)}
@@ -154,6 +164,7 @@ const columns: TableColumnsType<DataSaleOrder> = [
   },
   {
     title: <div className="text-right">Tổng tiền (VNĐ)</div>,
+    width: 160,
     dataIndex: "grand_total",
     key: "grand_total",
     render: (_, record: any) => (
@@ -194,6 +205,27 @@ export default function ReportSales() {
   let seachbykey = useDebounce(keySearch4);
   const [listSales, setListSales] = useState<any[]>([]);
   const [sales_team, setTeamSale] = useState<string>();
+  const containerRef1 = useRef(null);
+  const size = useResize();
+  const [containerHeight, setContainerHeight] = useState<any>(0);
+  const [scrollYTable1, setScrollYTable1] = useState<number>(size?.h * 0.52);
+
+  useEffect(() => {
+    setScrollYTable1(size.h * 0.52);
+  }, [size]);
+
+  useEffect(() => {
+    const containerElement = containerRef1.current;
+    if (containerElement) {
+      const resizeObserver = new ResizeObserver((entries) => {
+        for (let entry of entries) {
+          setContainerHeight(entry.contentRect.height);
+        }
+      });
+      resizeObserver.observe(containerElement);
+      return () => resizeObserver.disconnect();
+    }
+  }, [containerRef1]);
 
   const expandedRowRender = (recordTable: any) => {
     const columns: TableColumnsType<DataItem> = [
@@ -260,6 +292,7 @@ export default function ReportSales() {
     ];
     return (
       <Table
+        bordered
         columns={columns}
         dataSource={recordTable.items.map((item: DataItem) => {
           return {
@@ -478,25 +511,25 @@ export default function ReportSales() {
   };
 
   const handleSearchFilter = (val: any) => {
-    if(val.company) {
-      setCompany(val.company)
-    }else {
-      setCompany("")
+    if (val.company) {
+      setCompany(val.company);
+    } else {
+      setCompany("");
     }
-    if(val.customer) {
-      setCustomer(val.customer)
-    }else {
-      setCustomer("")
+    if (val.customer) {
+      setCustomer(val.customer);
+    } else {
+      setCustomer("");
     }
     if (val.territory) {
-      setTerritory(val.territory)
+      setTerritory(val.territory);
     } else {
-      setTerritory("")
+      setTerritory("");
     }
-    if(val.warehouse) {
-      setWarehouse(val.warehouse)
-    }else {
-      setWarehouse("")
+    if (val.warehouse) {
+      setWarehouse(val.warehouse);
+    } else {
+      setWarehouse("");
     }
   };
 
@@ -522,10 +555,7 @@ export default function ReportSales() {
         }
       >
         <div className="bg-white rounded-2xl pt-4 pb-7 border-[#DFE3E8] border-[0.2px] border-solid">
-          <Row
-            gutter={[16, 16]}
-            className="justify-between items-end w-full"
-          >
+          <Row gutter={[16, 16]} className="justify-between items-end w-full">
             <Col>
               <Row gutter={[8, 8]}>
                 <Col className="mx-4 w-full" span={24}>
@@ -714,7 +744,7 @@ export default function ReportSales() {
             </Col>
           </Row>
 
-          <div className="pt-5">
+          <div ref={containerRef1} className="pt-5">
             <TableCustom
               dataSource={dataSaleOrder?.data?.map(
                 (dataSale: DataSaleOrder) => {
@@ -726,16 +756,25 @@ export default function ReportSales() {
               )}
               expandable={{ expandedRowRender, defaultExpandedRowKeys: ["0"] }}
               bordered
+              $border
               columns={columns}
-              scroll={{ x: true }}
-              pagination={{
-                defaultPageSize: PAGE_SIZE,
-                total,
-                showSizeChanger: false,
-                onChange(page) {
-                  setPage(page);
-                },
+              scroll={{
+                x: true,
+                y: containerHeight < 380 ? undefined : scrollYTable1,
               }}
+              pagination={
+                total && total > PAGE_SIZE
+                  ? {
+                    pageSize: PAGE_SIZE,
+                    showSizeChanger: false,
+                    total,
+                    current: page,
+                    onChange(page) {
+                      setPage(page);
+                    },
+                  }
+                  : false
+              }
               summary={() => {
                 return (
                   <Table.Summary.Row>

@@ -94,7 +94,7 @@ def sales_order_detail(name):
                         .inner_join(SalesOrderTaxes)
                         .on(SalesOrder.name == SalesOrderTaxes.parent)
                         .where(SalesOrder.name == name)
-                        .select(SalesOrderTaxes.tax_amount, SalesOrderTaxes.rate.as_("rate_tax"))).run(as_dict =1)
+                        .select(SalesOrderTaxes.tax_amount)).run(as_dict =1)
         
         # Lấy ra thông tin nhân viên bán hàng
         employee = (frappe.qb.from_(SalesOrder)
@@ -214,7 +214,10 @@ def create_sale_order(**kwargs):
         new_order.insert()
         frappe.db.commit()
         detail_order = sales_order_detail(new_order.name)
-        return gen_response(201, "Thành công",  {"detail_order": detail_order})
+        return gen_response(201, "Thành công",  {
+            "detail_order": detail_order,
+            "sales_orser": new_order.name
+            })
        
     except Exception as e:
         return exception_handle(e)

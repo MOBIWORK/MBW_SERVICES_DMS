@@ -19,7 +19,7 @@ import {
   message,
 } from "antd";
 import type { TableColumnsType } from "antd";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AxiosService } from "../../services/server";
 import dayjs from "dayjs";
 import useDebounce from "../../hooks/useDebount";
@@ -30,6 +30,7 @@ import { rsData, rsDataFrappe } from "@/types/response";
 import { listSale } from "@/types/listSale";
 import { useForm } from "antd/es/form/Form";
 import { LuFilter, LuFilterX } from "react-icons/lu";
+import { useResize } from "@/hooks";
 
 interface DataSaleOrder {
   key: React.Key;
@@ -195,6 +196,27 @@ export default function ReportSalesOrder() {
   let keySearchWarehouse = useDebounce(keySWarehouse, 500);
   const [keySearch4, setKeySearch4] = useState("");
   let seachbykey = useDebounce(keySearch4);
+  const containerRef1 = useRef(null);
+  const size = useResize();
+  const [containerHeight, setContainerHeight] = useState<any>(0);
+  const [scrollYTable1, setScrollYTable1] = useState<number>(size?.h * 0.52);
+
+  useEffect(() => {
+    setScrollYTable1(size.h * 0.52);
+  }, [size]);
+
+  useEffect(() => {
+    const containerElement = containerRef1.current;
+    if (containerElement) {
+      const resizeObserver = new ResizeObserver((entries) => {
+        for (let entry of entries) {
+          setContainerHeight(entry.contentRect.height);
+        }
+      });
+      resizeObserver.observe(containerElement);
+      return () => resizeObserver.disconnect();
+    }
+  }, [containerRef1]);
 
   const expandedRowRender = (recordTable: any) => {
     const columns: TableColumnsType<DataItem> = [
@@ -259,6 +281,7 @@ export default function ReportSalesOrder() {
     ];
     return (
       <Table
+        bordered
         columns={columns}
         dataSource={recordTable.items.map((item: DataItem) => {
           return {
@@ -477,25 +500,25 @@ export default function ReportSalesOrder() {
   };
 
   const handleSearchFilter = (val: any) => {
-    if(val.company) {
-      setCompany(val.company)
-    }else {
-      setCompany("")
+    if (val.company) {
+      setCompany(val.company);
+    } else {
+      setCompany("");
     }
-    if(val.customer) {
-      setCustomer(val.customer)
-    }else {
-      setCustomer("")
+    if (val.customer) {
+      setCustomer(val.customer);
+    } else {
+      setCustomer("");
     }
     if (val.territory) {
-      setTerritory(val.territory)
+      setTerritory(val.territory);
     } else {
-      setTerritory("")
+      setTerritory("");
     }
-    if(val.warehouse) {
-      setWarehouse(val.warehouse)
-    }else {
-      setWarehouse("")
+    if (val.warehouse) {
+      setWarehouse(val.warehouse);
+    } else {
+      setWarehouse("");
     }
   };
 
@@ -709,7 +732,7 @@ export default function ReportSalesOrder() {
             </Col>
           </Row>
 
-          <div className="pt-5">
+          <div ref={containerRef1} className="pt-5">
             <TableCustom
               dataSource={dataSaleOrder?.data?.map(
                 (dataSale: DataSaleOrder) => {
@@ -721,16 +744,25 @@ export default function ReportSalesOrder() {
               )}
               expandable={{ expandedRowRender, defaultExpandedRowKeys: ["0"] }}
               bordered
+              $border
               columns={columns}
-              scroll={{ x: true }}
-              pagination={{
-                defaultPageSize: PAGE_SIZE,
-                total,
-                showSizeChanger: false,
-                onChange(page) {
-                  setPage(page);
-                },
+              scroll={{
+                x: true,
+                y: containerHeight < 380 ? undefined : scrollYTable1,
               }}
+              pagination={
+                total && total > PAGE_SIZE
+                  ? {
+                    pageSize: PAGE_SIZE,
+                    showSizeChanger: false,
+                    total,
+                    current: page,
+                    onChange(page) {
+                      setPage(page);
+                    },
+                  }
+                  : false
+              }
               summary={() => {
                 console.log("sale", dataSaleOrder);
 

@@ -20,7 +20,7 @@ import {
 } from "antd";
 import type { DatePickerProps, TableColumnsType } from "antd";
 import { LuFilter, LuFilterX } from "react-icons/lu";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AxiosService } from "../../services/server";
 import dayjs from "dayjs";
 import { useForm } from "antd/es/form/Form";
@@ -29,6 +29,7 @@ import { translationUrl, treeArray } from "@/util";
 import { rsData, rsDataFrappe } from "@/types/response";
 import { listSale } from "@/types/listSale";
 import { employee } from "@/types/employeeFilter";
+import { useResize } from "@/hooks";
 
 interface DataCustomer {
   key: React.Key;
@@ -80,6 +81,7 @@ const columns: TableColumnsType<DataCustomer> = [
     title: "Loại khách hàng",
     dataIndex: "customer_type",
     key: "customer_type",
+    width: 175,
   },
   {
     title: "Địa chỉ",
@@ -123,6 +125,28 @@ export default function ReportCustomer() {
   const [listCustomer, setListCustomer] = useState<any[]>([]);
   const [keySCustomer, setKeySCustomer] = useState("");
   let keySearchCustomer = useDebounce(keySCustomer, 500);
+  const containerRef1 = useRef(null);
+  const size = useResize();
+  const [containerHeight, setContainerHeight] = useState<any>(0);
+  const [scrollYTable1, setScrollYTable1] = useState<number>(size?.h * 0.52);
+
+  useEffect(() => {
+    setScrollYTable1(size.h * 0.52);
+  }, [size]);
+
+  useEffect(() => {
+    const containerElement = containerRef1.current;
+    if (containerElement) {
+      const resizeObserver = new ResizeObserver((entries) => {
+        for (let entry of entries) {
+          setContainerHeight(entry.contentRect.height);
+        }
+      });
+      resizeObserver.observe(containerElement);
+      return () => resizeObserver.disconnect();
+    }
+  }, [containerRef1]);
+
   const expandedRowRender = (recordTable: any) => {
     const columns: TableColumnsType<ExpandedDataType> = [
       {
@@ -204,6 +228,7 @@ export default function ReportCustomer() {
     ];
     return (
       <Table
+        bordered
         columns={columns}
         dataSource={recordTable.items.map((item: ExpandedDataType) => {
           return {
@@ -771,10 +796,13 @@ export default function ReportCustomer() {
               </div>
             </Col>
           </Row>
-          <div className="pt-5">
+          <div ref={containerRef1} className="pt-5">
             <TableCustom
               columns={columns}
-              scroll={{ x: true,y:400 }}
+              scroll={{
+                x: true,
+                y: containerHeight < 300 ? undefined : scrollYTable1,
+              }}
               bordered
               $border
               expandable={{ expandedRowRender, defaultExpandedRowKeys: ["0"] }}
@@ -784,16 +812,20 @@ export default function ReportCustomer() {
                   key: dataCus.name,
                 };
               })}
-              pagination={{
-                defaultPageSize: PAGE_SIZE,
-                total,
-                showSizeChanger: false,
-                onChange(page) {
-                  setPage(page);
-                },
-              }}
+              pagination={
+                total && total > PAGE_SIZE
+                  ? {
+                    pageSize: PAGE_SIZE,
+                    showSizeChanger: false,
+                    total,
+                    current: page,
+                    onChange(page) {
+                      setPage(page);
+                    },
+                  }
+                  : false
+              }
               rowHoverable={false}
-              
             />
           </div>
           <div className=""></div>
