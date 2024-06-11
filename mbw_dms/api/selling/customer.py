@@ -76,7 +76,7 @@ def list_customer(**kwargs):
         def CustomerField(name):
             return CustomerDoc[name]
 
-        my_filter =( CustomerField("customer_code").isin(customer_name) and CustomerField("disabled").eq(0))
+        my_filter =( CustomerField("customer_code").isin(customers_name) & CustomerField("disabled").eq(0))
         if name:
             my_filter = (my_filter & CustomerField("name").eq(name))
         if customer_type:

@@ -351,6 +351,7 @@ def create_return_order(**kwargs):
         new_order.insert()
         frappe.db.commit()
         detail_invoice = so_si_detail(doctype="Sales Invoice", name=new_order.name)
+        print('========================= detail_invoice: ', detail_invoice, flush=True)
 
         return gen_response(201, "Thành công", {
             "detail_invoice": detail_invoice,
