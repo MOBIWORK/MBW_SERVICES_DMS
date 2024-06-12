@@ -102,8 +102,7 @@ def so_si_detail(doctype, name):
                 .where(SalesOrder.name == name)
                 .select(
                     Customer.customer_code, SalesOrder.customer, SalesOrder.customer_name, SalesOrder.address_display, UNIX_TIMESTAMP(SalesOrder.posting_date).as_("posting_date"), SalesOrder.set_warehouse, SalesOrder.total, SalesOrder.grand_total,
-                    SalesOrder.taxes_and_charges, SalesOrder.total_taxes_and_charges, SalesOrder.apply_discount_on, SalesOrder.additional_discount_percentage, SalesOrder.discount_amount, SalesOrder.contact_person, SalesOrder.rounded_total,
-                    SalesOrderItem.name, SalesOrderItem.item_name, SalesOrderItem.item_code, SalesOrderItem.qty, SalesOrderItem.uom, SalesOrderItem.amount, SalesOrderItem.discount_amount, SalesOrderItem.discount_percentage                        
+                    SalesOrder.taxes_and_charges, SalesOrder.total_taxes_and_charges, SalesOrder.apply_discount_on, SalesOrder.additional_discount_percentage, SalesOrder.discount_amount, SalesOrder.contact_person, SalesOrder.rounded_total                       
                 )).run(as_dict=1)
         
     # Lấy ra giá trị tax
@@ -351,7 +350,6 @@ def create_return_order(**kwargs):
         new_order.insert()
         frappe.db.commit()
         detail_invoice = so_si_detail(doctype="Sales Invoice", name=new_order.name)
-        print('========================= detail_invoice: ', detail_invoice, flush=True)
 
         return gen_response(201, "Thành công", {
             "detail_invoice": detail_invoice,

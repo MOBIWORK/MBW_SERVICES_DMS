@@ -172,18 +172,18 @@ def validate_enum(type_value=None):
 def validate_filter(type_check,type=None,value=None):
     validate = {
         "email": validate_email,
-        "phone_number" :validate_phone_number,
+        "phone_number": validate_phone_number,
         "require": validate_not_none,
         "require_field": validate_not_none_field,
         "date": validate_date,
-        "datetime":validate_datetime,
-        "length":validate_length(type),
-        "choice":validate_choice,
+        "datetime": validate_datetime,
+        "length": validate_length(type),
+        "choice": validate_choice,
         "boolean": validate_int_bool,
         "timestamp": validate_filter_timestamp(type),
         "type": validate_type(type),
         "enum": validate_enum(type),
-        "in_date":validate_timestamp_in_date
+        "in_date": validate_timestamp_in_date
     }
 
     return validate[type_check](value)

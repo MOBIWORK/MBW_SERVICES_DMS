@@ -11,8 +11,7 @@ def existing_customer(customer_name, start_date, end_date, current_user):
                 "docstatus": 1,
                 "creation": ("between", [start_date, end_date]), 
                 "customer_name": customer_name, 
-                "owner": current_user
-                },
+                "owner": current_user},
         fields=["name"]
     )
     return existing_cus
@@ -47,19 +46,25 @@ def update_kpi_monthly(doc, method):
     cus_name = doc.customer
     existing_cus = existing_customer(customer_name=cus_name, start_date=start_date, end_date=end_date, current_user=doc.owner)
 
+    total_so = 0
+    total_uom = 0
     if existing_monthly_summary:
         monthly_summary_doc = frappe.get_doc("DMS Summary KPI Monthly", existing_monthly_summary)
         if len(existing_cus) > 1:
+            total_so += 1
+            total_uom += len(uom)
             monthly_summary_doc.so_don_hang += 1
             monthly_summary_doc.doanh_so_thang += grand_totals
             monthly_summary_doc.san_luong += sum(qty)
-            monthly_summary_doc.sku += len(uom)
+            monthly_summary_doc.sku = round((float(total_uom) / total_so), 2)
         else:
+            total_so += 1
+            total_uom += len(uom)
             monthly_summary_doc.so_don_hang += 1
             monthly_summary_doc.doanh_so_thang += grand_totals
             monthly_summary_doc.so_kh_dat_hang += 1
             monthly_summary_doc.san_luong += sum(qty)
-            monthly_summary_doc.sku += len(uom)
+            monthly_summary_doc.sku = round((float(total_uom) / total_so), 2)
         monthly_summary_doc.save(ignore_permissions=True)
     else:
         monthly_summary_doc = frappe.get_doc({
@@ -101,6 +106,8 @@ def update_kpi_monthly_on_cancel(doc, method):
     # Kiểm tra đã tồn tại bản ghi KPI của tháng này chưa
     existing_monthly_summary = frappe.get_value("DMS Summary KPI Monthly", {"thang": month, "nam": year, "nhan_vien_ban_hang": user_name}, "name")
 
+    total_so = 0
+    total_uom = 0
     if existing_monthly_summary:
         monthly_summary_doc = frappe.get_doc("DMS Summary KPI Monthly", existing_monthly_summary)
         grand_totals = doc.grand_total
@@ -108,6 +115,8 @@ def update_kpi_monthly_on_cancel(doc, method):
         existing_cus = existing_customer(customer_name=cus_name, start_date=start_date, end_date=end_date, current_user=doc.owner)
 
         if len(existing_cus) == 0:
+            total_so -= 1
+            total_uom -= len(uom)
             monthly_summary_doc.so_don_hang -= 1
             monthly_summary_doc.doanh_so_thang -= grand_totals
             monthly_summary_doc.san_luong -= sum(qty)
