@@ -23,14 +23,17 @@ def report_web_visit(**kwargs):
         if sales_team:
             filters.append(f"sp.parent_sales_person='{sales_team}'")
         if sales_person:
-            filters.append(f"st.sales_person='{sales_person}'")
+            filters.append(f"sp.sales_person='{sales_person}'")
 
         where_conditions = " AND ".join(filters)
         
         sql_query = """
-            SELECT ck.
+            SELECT ck.kh_ten, ck.kh_diachi, ck.checkin_giovao, ck.checkin_giora, ck.checkin_dungtuyen, ck.checkin_trangthaicuahang,
+            cus.customer_type, cus.customer_group, cus.mobile_no as phone, cus.customer_primary_contact as contact
             FROM `tabDMS Checkin` ck
-            JOIN 
+            JOIN `tabCustomer` cus ON ck.kh_ten = cus.name
+            JOIN `tabSales Person` sp ON ck.createbyname = sp.employee
+            GROUP BY sp.name
         """
 
     except Exception as e:

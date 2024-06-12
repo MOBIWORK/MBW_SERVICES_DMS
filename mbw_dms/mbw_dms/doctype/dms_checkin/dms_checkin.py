@@ -197,7 +197,7 @@ def create_checkin(kwargs):
             "checkin_khoangcach", "checkin_trangthaicuahang", "checkin_donhang",
             "checkin_long", "checkin_lat", "checkin_dochinhxac", "checkin_pinvao", "checkin_pinra",
             "checkout_khoangcach", "checkinvalidate_khoangcachcheckin",
-            "checkinvalidate_khoangcachcheckout", "createdbyemail", "createbyname", 
+            "checkinvalidate_khoangcachcheckout", "createdbyemail",
         ]
         datetime_keys = ["checkin_timegps"]
         date_keys = ["createddate", "checkin_giovao", "checkin_giora"]
@@ -212,6 +212,10 @@ def create_checkin(kwargs):
 
         if kwargs.get("checkin_giora"):
             new_checkin.set("is_checkout", 1)
+        
+        user_id = frappe.session.user
+        employee_id = frappe.get_value("Employee", {"user_id": user_id}, "name")
+        new_checkin.createbyname = employee_id
 
         employee = get_user_id()
         new_checkin.set("createbyname", employee.get("full_name"))

@@ -95,7 +95,7 @@ def customer_report(**kwargs):
             filters_cus["creation"] = ["between", [from_date, to_date]]
         
         where_cons = " AND ".join(filters)
-        sql_count = f""" SELECT COUNT(*) FROM `tabCustomer`"""
+        sql_count = f"""SELECT COUNT(*) FROM `tabCustomer`"""
         if where_cons:
             sql_count += " WHERE {}".format(where_cons)
         customer_count = frappe.db.sql(sql_count, as_dict=True)

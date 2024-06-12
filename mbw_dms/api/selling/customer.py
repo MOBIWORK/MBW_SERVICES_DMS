@@ -156,6 +156,11 @@ def delete_customer(name):
 # Thêm mới khách hàng
 @frappe.whitelist(methods="POST")
 def create_customer(**kwargs):
+    new_customer = None
+    new_address_cus = None
+    new_contact = None
+    new_address_contact = None
+
     try:
         # Check dữ liệu đầu vào
         phone_number = ""
@@ -165,7 +170,7 @@ def create_customer(**kwargs):
         if contact and contact.get("phone"):
             phone_number = validate_phone_number(contact.get("phone"))
         json_location = ""
-        if address.get("latitude") and address.get("longitude"):
+        if address and address.get("latitude") and address.get("longitude"):
             json_location = json.dumps({"long": address.get("longitude"), "lat": address.get("latitude")})
             
         # Tạo mới khách hàng
@@ -282,14 +287,14 @@ def create_customer(**kwargs):
         return gen_response(201, "Thành công", {"name": new_customer.name})
     
     except Exception as e:
-        if "new_customer" in locals() and new_customer is not None:
-            frappe.db.delete("Customer", new_customer.name)
-        if "new_address_cus" in locals() and new_address_cus is not None:
-            frappe.db.delete("Address", new_address_cus.name)
-        if "new_contact" in locals() and new_contact is not None:
-            frappe.db.delete("Contact", new_contact.name)
-        if "new_address_contact" in locals() and new_address_contact is not None:
-            frappe.db.delete("Contact", new_address_contact.name)
+        if new_customer and new_customer.name:
+            frappe.delete_doc("Customer", new_customer.name)
+        if new_address_cus and new_address_cus.name:
+            frappe.delete_doc("Address", new_address_cus.name)
+        if new_contact and new_contact.name:
+            frappe.delete_doc("Contact", new_contact.name)
+        if new_address_contact and new_address_contact.name:
+            frappe.delete_doc("Address", new_address_contact.name)
         return exception_handle(e)
     
 # Danh sách lãnh thổ 

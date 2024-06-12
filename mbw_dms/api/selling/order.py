@@ -562,7 +562,7 @@ def delete_sales_order(doctype, name):
         if frappe.db.exists(doctype, name):
             so = frappe.get_doc(doctype, name)
             if so.docstatus == 0:
-                frappe.db.delete(doctype, {"name": name})
+                frappe.delete_doc(doctype, {"name": name})
                 return gen_response(200, "Thành công")
             else:
                 return gen_response(406, "Chỉ có thể xóa đơn hàng ở trạng thái nháp")
