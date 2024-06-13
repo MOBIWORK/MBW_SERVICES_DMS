@@ -8,7 +8,7 @@ def check_duplicate_import(doc, method):
         'employee': doc.employee
     })
     if existing:
-        frappe.throw(_('Duplicate entry for channel code: {0} and employee: {1}').format(doc.channel_code, doc.employee))
+        frappe.throw(_('Duplicate entry for channel code: {0} by employee: {1}').format(doc.channel_code, doc.employee))
 
 # Thêm phương thức này vào class Doctype của bạn nếu cần
 # class YourDoctypeName(Document):
