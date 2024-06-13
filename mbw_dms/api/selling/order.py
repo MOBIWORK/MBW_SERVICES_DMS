@@ -422,21 +422,6 @@ def edit_return_order(name, **kwargs):
     except Exception as e:
         return exception_handle(e)
 
-# Xóa phiếu trả hàng
-@frappe.whitelist(methods="DELETE")
-def delete_return_order(name, **kwargs):
-    try:
-        if frappe.db.exists("Sales Invoice", name, cache=True):
-            return_order = frappe.get_doc("Sales Invoice", name)
-            if return_order.docstatus == 0:
-                frappe.delete_doc("Sales Invoice", name)
-                return gen_response(200, "Thành công", [])
-            else:
-                return gen_response(400, "Xóa đơn trả hàng không thành công")
-        else:
-            return gen_response(406, f"Không tồn tại {name}")
-    except Exception as e:
-        exception_handle(e)
 
 # Xóa items trong phiếu trả hàng
 @frappe.whitelist(methods="DELETE")
@@ -562,7 +547,7 @@ def delete_sales_order(doctype, name):
         if frappe.db.exists(doctype, name):
             so = frappe.get_doc(doctype, name)
             if so.docstatus == 0:
-                frappe.delete_doc(doctype, {"name": name})
+                frappe.delete_doc(doctype, name)
                 return gen_response(200, "Thành công")
             else:
                 return gen_response(406, "Chỉ có thể xóa đơn hàng ở trạng thái nháp")
