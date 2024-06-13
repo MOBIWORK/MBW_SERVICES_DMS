@@ -128,6 +128,7 @@ const columns: TableColumnsType<DataSaleOrder> = [
     title: <div className="text-right">Thành tiền (VNĐ)</div>,
     dataIndex: "total",
     key: "total",
+    width: 160,
     render: (_, record: any) => (
       <div className="!text-right">
         {Intl.NumberFormat().format(record.total)}
@@ -138,6 +139,7 @@ const columns: TableColumnsType<DataSaleOrder> = [
     title: <div className="text-right">Tiền VAT (VNĐ)</div>,
     dataIndex: "tax_amount",
     key: "tax_amount",
+    width: 160,
     render: (_, record: any) => (
       <div className="!text-right">
         {Intl.NumberFormat().format(record.tax_amount)}
@@ -148,6 +150,7 @@ const columns: TableColumnsType<DataSaleOrder> = [
     title: <div className="text-right">Chiết khấu (VNĐ)</div>,
     dataIndex: "discount_amount",
     key: "discount_amount",
+    width: 160,
     render: (_, record: any) => (
       <div className="!text-right">
         {Intl.NumberFormat().format(record.discount_amount)}
@@ -158,6 +161,7 @@ const columns: TableColumnsType<DataSaleOrder> = [
     title: <div className="text-right">Tổng tiền (VNĐ)</div>,
     dataIndex: "grand_total",
     key: "grand_total",
+    width: 160,
     render: (_, record: any) => (
       <div className="!text-right">
         {Intl.NumberFormat().format(record.grand_total)}

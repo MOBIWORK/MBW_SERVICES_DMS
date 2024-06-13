@@ -19,21 +19,21 @@ def create_employee_and_sales_team(doc, method):
 
 # Tạo mới ObjectID
 def create_objid_employee(doc, method):
-    projectId = frappe.get_doc('DMS Settings').ma_du_an
+    projectId = frappe.get_doc("DMS Settings").ma_du_an
     if projectId is None:
         frappe.throw("Chưa có Project ID")
         return
     api_key = frappe.get_doc('DMS Settings').api_key
-    api_url = f'{API_URL_TRACKING}/{projectId}/object'
+    api_url = f"{API_URL_TRACKING}/{projectId}/object"
     params = {"api_key": api_key}
     data_post = {
-        'name': frappe.session.user,
-        'type': 'driver'
+        "name": frappe.session.user,
+        "type": "driver"
     }
     response = requests.post(api_url, params=params, json=data_post)
     if response.status_code == 200:
         new_info = response.json()
-        doc.object_id = new_info['results'].get('_id')
+        doc.object_id = new_info["results"].get("_id")
         doc.save()
     else:
         frappe.msgprint(f"Lỗi khi gọi API tạo mới object ID: {response.status_code}")

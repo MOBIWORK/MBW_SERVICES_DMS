@@ -14,16 +14,16 @@ class DMSProvince(Document):
     pass
 
 # Danh sánh tỉnh/thành phố
-@frappe.whitelist(methods='GET')
+@frappe.whitelist(methods="GET")
 def list_province():
     try:
-        list_provinces = frappe.db.get_list('DMS Province', fields=['name', 'ma_tinh', 'ten_tinh'], order_by='ma_tinh asc')
+        list_provinces = frappe.db.get_list("DMS Province", fields=["name", "ma_tinh", "ten_tinh"], order_by="ma_tinh asc")
         return gen_response(200, "Thành công", list_provinces)
     except Exception as e:
         return exception_handle(e)
     
 # Lấy id tỉnh thành
-@frappe.whitelist(methods='GET')
+@frappe.whitelist(methods="GET")
 def get_id_location(kwargs):
     try:
         province_name = kwargs.get("province_name")
@@ -45,5 +45,5 @@ def get_id_location(kwargs):
     
 @frappe.whitelist(methods="GET", allow_guest=True)
 def get_name_city(name):
-    return gen_response(200, "Thành công", frappe.db.get_value('DMS Province', {"name": name}, 'ten_tinh'))
+    return gen_response(200, "Thành công", frappe.db.get_value("DMS Province", {"name": name}, "ten_tinh"))
 

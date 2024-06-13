@@ -23,5 +23,5 @@ status_order = {
     'To Deliver': 'Chờ vận chuyển',
     'Completed': 'Hoàn thành',
     'Cancelled': 'Đã hủy',
-    "All": ""
+    'All': ''
 }

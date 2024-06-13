@@ -130,6 +130,11 @@ export default function ReportCustomer() {
   const [containerHeight, setContainerHeight] = useState<any>(0);
   const [scrollYTable1, setScrollYTable1] = useState<number>(size?.h * 0.52);
 
+  const containerRef2 = useRef(null);
+  const size2 = useResize();
+  const [containerHeight2, setContainerHeight2] = useState<any>(0);
+  const [scrollYTable2, setScrollYTable2] = useState<number>(size2?.h * 0.28);
+
   useEffect(() => {
     setScrollYTable1(size.h * 0.52);
   }, [size]);
@@ -227,17 +232,20 @@ export default function ReportCustomer() {
       },
     ];
     return (
-      <Table
-        bordered
-        columns={columns}
-        dataSource={recordTable.items.map((item: ExpandedDataType) => {
-          return {
-            ...item,
-            key: item.item_code,
-          };
-        })}
-        pagination={false}
-      />
+      <div>
+        <Table
+          bordered
+          columns={columns}
+          dataSource={recordTable.items.map((item: ExpandedDataType) => {
+            return {
+              ...item,
+              key: item.item_code,
+            };
+          })}
+          scroll={{ y: 280 }}
+          pagination={false}
+        />
+      </div>
     );
   };
 
@@ -815,14 +823,14 @@ export default function ReportCustomer() {
               pagination={
                 total && total > PAGE_SIZE
                   ? {
-                    pageSize: PAGE_SIZE,
-                    showSizeChanger: false,
-                    total,
-                    current: page,
-                    onChange(page) {
-                      setPage(page);
-                    },
-                  }
+                      pageSize: PAGE_SIZE,
+                      showSizeChanger: false,
+                      total,
+                      current: page,
+                      onChange(page) {
+                        setPage(page);
+                      },
+                    }
                   : false
               }
               rowHoverable={false}

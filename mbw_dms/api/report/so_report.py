@@ -144,7 +144,7 @@ def list_company(**kwargs):
         name = kwargs.get("name")
         if name:
             filter_company["name"] = ["like", f"%{name}%"]
-        list_company = frappe.db.get_list('Company', filters=filter_company, fields=["name", "company_name"])
+        list_company = frappe.db.get_list("Company", filters=filter_company, fields=["name", "company_name"])
         return gen_response(200, "Thành công", list_company)
     except Exception as e:
         return exception_handle(e)

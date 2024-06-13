@@ -16,14 +16,14 @@ class DMSDistrict(Document):
 
 
 # Danh sách quận/huyện
-@frappe.whitelist(methods='GET')
+@frappe.whitelist(methods="GET")
 def list_district(kwargs):
     try:
-        list_districts = frappe.db.get_list('DMS District', filters={'ma_tinh_thanh': validate_not_none(kwargs.get('ma_tinh'),"mã tỉnh")}, fields=['name', 'ma_huyen', 'ten_huyen', 'ma_tinh_thanh'], order_by='ma_huyen asc')
-        return gen_response(200, 'Thành công', list_districts)
+        list_districts = frappe.db.get_list("DMS District", filters={'ma_tinh_thanh': validate_not_none(kwargs.get("ma_tinh"), "mã tỉnh")}, fields=["name", "ma_huyen", "ten_huyen", "ma_tinh_thanh"], order_by="ma_huyen asc")
+        return gen_response(200, "Thành công", list_districts)
     except Exception as e:
         return exception_handle(e)
     
 @frappe.whitelist(methods="GET", allow_guest=True)
 def get_name_district(name):
-    return gen_response(200, "Thành công", frappe.db.get_value('DMS District', {"name": name}, 'ten_huyen'))
+    return gen_response(200, "Thành công", frappe.db.get_value("DMS District", {"name": name}, "ten_huyen"))
