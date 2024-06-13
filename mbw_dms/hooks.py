@@ -265,6 +265,9 @@ doc_events = {
     "Sales Order": {
         "on_submit": "mbw_dms.controllers.dms_sales_order.update_kpi_monthly",
         "on_cancel": "mbw_dms.controllers.dms_sales_order.update_kpi_monthly_on_cancel"
+    },
+    "DMS Router": {
+        "before_insert": "mbw_dms.controllers.dms_router.check_duplicate_import"
     }
 }
 
