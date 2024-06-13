@@ -245,7 +245,7 @@ def create_customer(**kwargs):
             new_address_cus.insert()
             new_customer.customer_primary_address = new_address_cus.name
             new_customer.save()
-
+        print("============================",new_customer)
         # Tạo mới contact khách hàng
         if contact and contact.get("first_name"):
             new_contact = frappe.new_doc("Contact")

@@ -193,7 +193,8 @@ def get_customer_router(data):
         fields_customer = [
             'name','customer_primary_address'
             ,'customer_code','customer_location_primary','mobile_no'
-            ,'customer_name',"custom_birthday"
+            ,'customer_name',"custom_birthday",
+            "customer_type","customer_group"
             # ,'UNIX_TIMESTAMP(custom_birthday) as birthday'
             ]
         # filter sql
