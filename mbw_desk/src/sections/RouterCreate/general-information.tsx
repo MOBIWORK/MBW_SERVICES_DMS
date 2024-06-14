@@ -1,4 +1,10 @@
-import React, { memo, useContext, useEffect, useState } from "react";
+import React, {
+  memo,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 import { FormItemCustom } from "../../components/form-item/form-item";
 import { Col, Input, Select, TreeSelect } from "antd";
 import RowCustom from "./styled";
@@ -7,85 +13,48 @@ import { rsData, rsDataFrappe } from "../../types/response";
 import { listSale } from "../../types/listSale";
 import { AxiosService } from "../../services/server";
 import { employee } from "../../types/employeeFilter";
-import useDebounce from "../../hooks/useDebount"
+import useDebounce from "../../hooks/useDebount";
 import { treeArray } from "../../util";
 import { SaleGroupContext } from "./view";
+import SelectEmpl from "./components/selectEmpl";
 
-// let timeout: ReturnType<typeof setTimeout> | null;
-// let currentValue: string;
+export default memo(function GeneralInformation({ form }: { form: any }) {
 
-// const fetch = (value: string, callback: Function) => {
-//   console.log(value);
-  
-//   if (timeout) {
-//     clearTimeout(timeout);
-//     timeout = null;
-//   }
-//   currentValue = value;
-
-//   const fake = () => {
-//     //call api tại đây 
-//     callback(value)
-//   };
-//   if (value) {
-//     timeout = setTimeout(fake, 300);
-//   } else {
-//     callback("");
-//   }
-// };
-export default memo(function GeneralInformation({form}:{form :any}) {
-  
-  // const { getFieldDecorator, setFieldsValue } = form;
-  const [keySearch, setKeySearch] = useState("");
-  let seachbykey = useDebounce(keySearch)
   const [listSales, setListSales] = useState<any[]>([]);
-  const [listEmployees, setListEmployees] = useState<any[]>([]);
-  // const [saleEmp,setSaleEmp] = useState<string>()
-  const {teamSale,setTeamSale} = useContext(SaleGroupContext)
+  const { teamSale, setTeamSale } = useContext(SaleGroupContext);
+  
   useEffect(() => {
     (async () => {
       try {
         let rsSales: rsData<listSale[]> = await AxiosService.get(
           "/api/method/mbw_dms.api.router.get_team_sale"
         );
-        console.log("tree",treeArray({data: rsSales.result.map((team_sale:listSale) => ({
-          title: team_sale.name,
-          value: team_sale.name,
-          ...team_sale
-        })),keyValue: "value", parentField: "parent_sales_person"}));
-        const TREE_SALES = treeArray({data: rsSales.result.map((team_sale:listSale) => ({
-          title: team_sale.name,
-          value: team_sale.name,
-          ...team_sale
-        })),keyValue: "value", parentField: "parent_sales_person"})
-        setListSales(TREE_SALES)
-        
-      } catch (error) {
-        
-      }
+        console.log(
+          "tree",
+          treeArray({
+            data: rsSales.result.map((team_sale: listSale) => ({
+              title: team_sale.name,
+              value: team_sale.name,
+              ...team_sale,
+            })),
+            keyValue: "value",
+            parentField: "parent_sales_person",
+          })
+        );
+        const TREE_SALES = treeArray({
+          data: rsSales.result.map((team_sale: listSale) => ({
+            title: team_sale.name,
+            value: team_sale.name,
+            ...team_sale,
+          })),
+          keyValue: "value",
+          parentField: "parent_sales_person",
+        });
+        setListSales(TREE_SALES);
+      } catch (error) {}
     })();
   }, []);
-  useEffect(() => {
-    (async() => {
-      try {
-        let rsEmployee: rsDataFrappe<employee[]> = await AxiosService.get("/api/method/mbw_dms.api.router.get_sale_person",{
-        params: {
-          team_sale:teamSale,
-          key_search: seachbykey
-        }
-        }
-          );
-     let {message:results} = rsEmployee  
-      setListEmployees(results.map((employee_filter:employee) => ({
-        value: employee_filter.employee_code,
-        label: employee_filter.employee_name || employee_filter.employee_code
-      })))
-        
-      } catch (error) {
-        
-      }
-    })()
-  },[teamSale,seachbykey])
+
   return (
     <div className="p-4 pb-[58px]">
       <RowCustom>
@@ -103,20 +72,19 @@ export default memo(function GeneralInformation({form}:{form :any}) {
       <RowCustom>
         <Col span={12}>
           <FormItemCustom label="Team sale" name="team_sale" required>
-            <TreeSelect showSearch treeData={listSales}  onChange={(value:string) => {
-              setTeamSale(value)
-              form.setFieldsValue({"employee":undefined})
-            }}/>
+            <TreeSelect
+              showSearch
+              treeData={listSales}
+              onChange={(value: string) => {
+                setTeamSale(value);
+                form.setFieldsValue({ employee: undefined });
+              }}
+            />
           </FormItemCustom>
         </Col>
         <Col span={12}>
           <FormItemCustom label="Nhân viên" name="employee" required>
-            <Select 
-            showSearch
-            onSearch={setKeySearch}
-            options={listEmployees}
-            allowClear
-            />
+            <SelectEmpl teamSale={teamSale} callback={(value:string) => form.setFieldsValue({ employee: value })}/>
           </FormItemCustom>
         </Col>
       </RowCustom>
@@ -134,4 +102,4 @@ export default memo(function GeneralInformation({form}:{form :any}) {
       </RowCustom>
     </div>
   );
-})
+});
