@@ -205,6 +205,8 @@ def get_customer_router(data):
         FilterSQLCustomer = CustomerDoc.disabled.eq(0)
         if len(list_customer_name) >0:
             FilterSQLCustomer = CustomerDoc.customer_code.isin(list_customer_name) & FilterSQLCustomer
+        elif len(list_customer_name) == 0 :
+            FilterSQLCustomer = False & FilterSQLCustomer
         if birthday_from and birthday_to:
             FilterSQLCustomer = FilterSQLCustomer & CustomerField("birthday").between(birthday_from,birthday_to)
         if customer_group:
