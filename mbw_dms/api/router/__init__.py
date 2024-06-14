@@ -15,8 +15,8 @@ def get_router(id):
 # danh sach khach hang cham soc
 @frappe.whitelist()
 def get_customer_router(**kwargs):
-    from mbw_dms.mbw_dms.doctype.dms_router.dms_router import get_customer_router
-    return get_customer_router(data=kwargs)
+    from mbw_dms.mbw_dms.doctype.dms_router.dms_router import get_customer_router_v2
+    return get_customer_router_v2(data=kwargs)
 
 #danh sach khach hang import
 @frappe.whitelist(methods="POST")
@@ -76,3 +76,30 @@ def get_all_router():
 def router_query(doctype, txt, searchfield, start, page_len, filters):
     from mbw_dms.mbw_dms.doctype.dms_router.dms_router import router_query
     return router_query(doctype=doctype, txt=txt, searchfield=searchfield, start=start, page_len=page_len, filters=filters)
+
+
+
+@frappe.whitelist()
+def test_distance(**location):
+    long = location.get("long")
+    lat = location.get("lat")
+
+    query = """
+    SELECT name,customer_name,
+        (6371 * 2 * ASIN(SQRT(POWER(SIN((%(lat)s - CAST(JSON_UNQUOTE(JSON_EXTRACT(customer_location_primary, '$.lat')) AS DECIMAL(9,6))) * PI() / 180 / 2), 2) + 
+            COS(%(lat)s * PI() / 180) * COS(CAST(JSON_UNQUOTE(JSON_EXTRACT(customer_location_primary, '$.lat')) AS DECIMAL(9,6)) * PI() / 180) * 
+            POWER(SIN((%(long)s - CAST(JSON_UNQUOTE(JSON_EXTRACT(customer_location_primary, '$.long')) AS DECIMAL(9,6))) * PI() / 180 / 2), 2)))) AS distance
+    FROM `tabCustomer`
+    ORDER BY distance ASC
+    LIMIT 20;
+    """
+    
+    data = frappe.db.sql(query, {'lat': lat, 'long': long}, as_dict=True)
+    return data
+
+
+# danh sach khach hang cham soc
+@frappe.whitelist()
+def get_customer_router_v2(**kwargs):
+    from mbw_dms.mbw_dms.doctype.dms_router.dms_router import get_customer_router_v2
+    return get_customer_router_v2(data=kwargs)

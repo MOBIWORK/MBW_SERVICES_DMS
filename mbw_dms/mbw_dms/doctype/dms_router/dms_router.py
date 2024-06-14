@@ -632,3 +632,191 @@ def router_query(doctype, txt, searchfield, start, page_len, filters):
 		),
 		{"txt": "%%%s%%" % txt, "_txt": txt.replace("%", ""), "start": start, "page_len": page_len},
 	)
+
+
+
+
+# danh sach khach hang cham soc
+@frappe.whitelist(methods="GET")
+def get_customer_router_v2(data):
+    try:     
+        from pypika import Order
+        user= get_user_id()
+        # Cấu hình ngoại tuyến từ dms setting
+        search_key = data.get("search_key")
+        view_mode = validate_filter(value=data.get('view_mode'), type=['list','map'], type_check='enum') if data.get('view_mode') else 'list'
+
+        # Phân trang
+        page_size =  int(data.get('page_size', 20))
+        page_number = int(data.get('page_number') ) if data.get('page_number') and int(data.get('page_number')) > 0 else 1
+
+        # Bộ lọc tuyến
+        router_filter = validate_filter(type_check='type', type=str, value=data.get('router')).split(";") if data.get('router') else False
+
+        # Bộ lọc khách hàng
+        order_by = data.get('order_by')
+        birthday_from = validate_filter(type_check='timestamp', type='start', value=data.get('birthday_from')) if data.get('birthday_from') else False
+        birthday_to = validate_filter(type_check='timestamp', type='end', value=data.get('birthday_to')) if data.get('birthday_to') else False
+        customer_group = data.get('customer_group')
+        customer_type = data.get('customer_type')
+        lat=data.get("lat")
+        long=data.get("long")
+        ## trang thái viếng thăm
+        checkin_status = validate_filter(type_check="enum",type=("all","is_checkin","not_checkin"),value=data.get("checkin_status") or "all",) 
+
+        # Chỉ lấy những tuyến đang hoạt động
+        queryFilters = {"is_deleted": 0, "status": "Active"}
+
+        # Nếu là admin thì lấy tất cả tuyến hoạt động, nếu là nhân viên chỉ lấy nhân viên chăm sốc tuyến đấy
+        user_id = get_user_id()
+        if user_id.name != "Administrator":
+            employee = get_employee_by_user(user = user_id.email)
+            if not employee:
+                return gen_response("404", _("Employee not registered"))
+            queryFilters['employee'] = employee.name
+        # Thêm bộ lọc tuyến
+        if router_filter:
+            queryFilters['channel_code'] = ["in", router_filter]
+        # Lấy thứ hôm nay và tuần này
+        from mbw_dms.api.common import weekday
+        today= time_now_utc()
+        thu_trong_tuan, tuan_trong_thang = weekday(today)
+
+        # Dịch vụ lấy khách hàng hiển thị cho map: chỉu tuyến hôm nay và tuần này
+        if view_mode == "map":
+            queryFilters.update({"travel_date": ["in", ["Không giới hạn", thu_trong_tuan]]})
+            queryFilters.update({"frequency": ["like", f"%{int(tuan_trong_thang)}%"]})  
+         
+        # Lấy danh sách tuyến theo bộ lọc tuyến
+        list_routers = frappe.db.get_all('DMS Router', filters=queryFilters, fields=["channel_code", "name", "travel_date"], distinct=True)
+        list_customer = []
+        list_customer_in_route= []
+        router_today = ""
+        for router in list_routers:
+            router_name = router.name
+            detail_router = frappe.get_doc("DMS Router", {"name":router_name}).as_dict()
+            customers = detail_router.get('customers')
+
+            # Danh sách id khách hàng đúng tuyến
+            if (router.travel_date == thu_trong_tuan or router.travel_date == "Không giới hạn"):
+                if router.travel_date == thu_trong_tuan:
+                    router_today = router.channel_code
+                customer_in_router = pydash.filter_(customers, lambda value: (value.frequency.find(str(int(tuan_trong_thang))) != -1))    
+                customer_in_router_name = pydash.map_(customer_in_router, lambda x:x.customer_code)
+                list_customer_in_route += customer_in_router_name
+
+            # Danh sách khách hàng hiển thị trên map
+            if view_mode == "map":
+                customers = pydash.filter_(customers, lambda value: (value.frequency.find(str(int(tuan_trong_thang))) != -1) and (detail_router.get("travel_date") == thu_trong_tuan or detail_router.get("travel_date") == "Không giới hạn") )          
+            list_customer += customers
+
+        # Chuyển mả,ng danh sách khách hàng về id
+        list_customer_name = []
+        for customer in list_customer:
+            list_customer_name.append(customer.get('customer_code'))
+
+        # Nếu truyền lên tuyến hôm nay thì chỉ trả về đúng tuyến
+        if router_filter and router_today != "" and router_today == router_filter[0]:
+            list_customer_name = list_customer_in_route
+
+        # lấy ra ds khách hàng đã checkin        
+        start_time,end_time=validate_filter(type_check="in_date",value=datetime.now().timestamp())
+        list_checkin = frappe.db.get_all("DMS Checkin",{"kh_ma": ["in",list_customer_name],"creation": ["between",[start_time,end_time]], "createdbyemail":user.get("email")},["is_checkout","kh_ma"]) 
+        list_checkin_code = pydash.map_(list_checkin,lambda x:x.kh_ma)
+        if checkin_status == "is_checkin":
+            list_customer_name = list_checkin_code
+        elif checkin_status == "not_checkin":
+            list_customer_name = pydash.filter_(list_customer_name,lambda x: x not in list_checkin_code)
+
+        #filter length
+        FiltersCustomer = {"customer_code": ["in", list_customer_name]}
+        FiltersCustomer["disabled"] = 0
+
+        if birthday_from and birthday_to:
+            FiltersCustomer["birthday"] =["between",[birthday_from,birthday_to]]
+        if customer_group:
+            FiltersCustomer['customer_group'] =customer_group
+        if customer_type:
+            FiltersCustomer['customer_type'] =customer_type
+        if search_key:
+            FiltersCustomer['customer_name'] =["like",f"%{search_key}%"]
+        # filter query
+        filters = "WHERE disabled = 0"
+        if list_customer_name:
+            customer_names = ", ".join(f"'{name}'" for name in list_customer_name)
+            filters += f" AND customer_code IN ({customer_names})"
+        if birthday_from and birthday_to:
+            filters += f" AND birthday BETWEEN '{birthday_from}' AND '{birthday_to}'"
+        
+        if customer_group:
+            filters += f" AND customer_group = '{customer_group}'"
+        
+        if customer_type:
+            filters += f" AND customer_type = '{customer_type}'"
+        
+        if search_key:
+            filters += f" AND customer_name LIKE '%{search_key}%'"
+        field_order = data.get("field_order")
+        order_by_field = "customer_name" if field_order == 'customer_name' or not field_order else "distance"
+        order_direction = "ASC" if order_by == "asc" else "DESC"
+        query = f"""
+            SELECT name, customer_primary_address, customer_code, customer_location_primary, mobile_no,
+                customer_name, custom_birthday, customer_type, customer_group,
+                UNIX_TIMESTAMP(custom_birthday) as birthday
+            FROM `tabCustomer`
+            {filters}
+            ORDER BY {order_by_field} {order_direction}
+            LIMIT {page_size} OFFSET {page_size * (page_number - 1)}
+            """
+        if long and lat :
+            query = f"""
+            SELECT name, customer_primary_address, customer_code, customer_location_primary, mobile_no,
+                customer_name, custom_birthday, customer_type, customer_group,
+                UNIX_TIMESTAMP(custom_birthday) as birthday,
+                (6371000 * 2 * ASIN(SQRT(POWER(SIN(RADIANS({lat} - CAST(JSON_UNQUOTE(JSON_EXTRACT(customer_location_primary, '$.lat')) AS DECIMAL(9,6))) / 2), 2) + 
+                COS(RADIANS({lat})) * COS(RADIANS(CAST(JSON_UNQUOTE(JSON_EXTRACT(customer_location_primary, '$.lat')) AS DECIMAL(9,6)))) * 
+                POWER(SIN(RADIANS({long} - CAST(JSON_UNQUOTE(JSON_EXTRACT(customer_location_primary, '$.long')) AS DECIMAL(9,6))) / 2), 2)))) AS distance
+            FROM `tabCustomer`
+            {filters}
+            ORDER BY {order_by_field} {order_direction}
+            LIMIT {page_size} OFFSET {page_size * (page_number - 1)}
+            """
+        
+        if(view_mode == 'list'):           
+
+    # Thực thi truy vấn
+            detail_customer = frappe.db.sql(query, as_dict=True) if len(list_customer_name) > 0 else []
+        else:
+            fields_customer= [
+            'name'
+            ,'customer_code','customer_location_primary',
+            "customer_primary_address"
+            ]
+            FiltersCustomer.update({"customer_location_primary": ["is", "set"]})
+            detail_customer = frappe.db.get_all('Customer',filters= filters,fields=fields_customer)    
+
+        for customer in detail_customer:
+            address_name = customer["customer_primary_address"]
+            customer["customer_primary_address"]=frappe.db.get_value("Address",{"name": address_name},["address_title","address_line1","city","county","state"],as_dict=1)
+            customer['is_checkin'] = False
+            # start_time,end_time=validate_filter(type_check="in_date",value=datetime.now().timestamp())
+            # checkin = frappe.db.get_value("DMS Checkin",{"kh_ma":customer.get('customer_code'),"creation": ["between",[start_time,end_time]]},["is_checkout"],as_dict=1)
+            
+            customer['is_checkin'] = customer["customer_code"] in list_checkin_code
+            customer["is_route"] = False
+            if customer.customer_code in list_customer_in_route:
+                customer["is_route"] = True
+        
+        total_customer= len( frappe.db.get_all('Customer',filters= FiltersCustomer)) if len(list_customer_name) > 0 else 0
+        for customer in detail_customer:
+            customer.customer_location_primary = null_location(customer.customer_location_primary)
+
+        return gen_response(200, _("Vị trí của bạn không xác định") if field_order =="distance" and long and lat else "", {
+            "data": detail_customer,
+            "total": total_customer,
+            "page_size": page_size,
+            "page_number": page_number
+        })
+    except Exception as e :
+        exception_handle(e)
+
