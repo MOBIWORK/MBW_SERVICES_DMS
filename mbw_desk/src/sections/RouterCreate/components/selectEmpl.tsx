@@ -7,7 +7,7 @@ import React, { useEffect, useState } from 'react'
 
 interface Props {}
 
-function SelectEmpl({teamSale,callback}: {teamSale: string,callback:any}) {
+function SelectEmpl({teamSale,callback,defaultValue}: {teamSale: string,callback:any,defaultValue:string}) {
     const [keySearch, setKeySearch] = useState("");
     const [employee,setEmployee] = useState<string | undefined>()
     let seachbykey = useDebounce(keySearch);
@@ -45,6 +45,7 @@ function SelectEmpl({teamSale,callback}: {teamSale: string,callback:any}) {
       useEffect(() => {
         setEmployee(undefined)
       },[teamSale])
+      useEffect(() => {setEmployee(defaultValue)},[defaultValue])
     return (
         <Select
             showSearch

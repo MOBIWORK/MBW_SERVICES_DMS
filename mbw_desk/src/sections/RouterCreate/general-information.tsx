@@ -17,8 +17,9 @@ import useDebounce from "../../hooks/useDebount";
 import { treeArray } from "../../util";
 import { SaleGroupContext } from "./view";
 import SelectEmpl from "./components/selectEmpl";
+import { FormInstance } from "antd/lib";
 
-export default memo(function GeneralInformation({ form }: { form: any }) {
+export default memo(function GeneralInformation({ form }: { form: FormInstance }) {
 
   const [listSales, setListSales] = useState<any[]>([]);
   const { teamSale, setTeamSale } = useContext(SaleGroupContext);
@@ -84,7 +85,7 @@ export default memo(function GeneralInformation({ form }: { form: any }) {
         </Col>
         <Col span={12}>
           <FormItemCustom label="Nhân viên" name="employee" required>
-            <SelectEmpl teamSale={teamSale} callback={(value:string) => form.setFieldsValue({ employee: value })}/>
+            <SelectEmpl teamSale={teamSale} callback={(value:string) => form.setFieldsValue({ employee: value })} defaultValue={form.getFieldValue("employee")}/>
           </FormItemCustom>
         </Col>
       </RowCustom>
