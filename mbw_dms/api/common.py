@@ -200,7 +200,8 @@ def null_location(location):
 
 
 def create_address(new_address,link_cs_address) :
-    current_address_cs = frappe.db.get_value("Address", {"address_title": new_address.get("address_title")}, ["name", "address_location"], as_dict=1)
+    address_title= new_address.get("address_title")
+    current_address_cs = frappe.db.get_value("Address", {"address_title":["like" ,f"%{address_title}%"]}, ["name", "address_location"], as_dict=1)
     if current_address_cs:
         current_address_cs = frappe.get_doc("Address",current_address_cs.get("name"))
         current_address_cs.address_location = new_address.get("address_location")
@@ -222,7 +223,7 @@ def create_address(new_address,link_cs_address) :
 
 
 def create_address_current(address_title, new_location, link_cs_address) :
-    current_address = frappe.db.get_value("Address", address_title, ["name", "address_location"], as_dict=1)
+    current_address = frappe.db.get_value("Address", {"name": ["like",f"%{address_title}%"]}, ["name", "address_location"], as_dict=1)
     if current_address:
         current_address_cs = frappe.get_doc("Address", current_address.get("name"))
         current_address_cs.address_location = new_location

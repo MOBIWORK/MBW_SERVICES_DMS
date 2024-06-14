@@ -202,14 +202,15 @@ def get_customer_router(data):
         CustomerDoc = frappe.qb.DocType("Customer")
         def CustomerField(name):
             return CustomerDoc[name]
-        FilterSQLCustomer = CustomerDoc.customer_code.isin(list_customer_name) & CustomerDoc.disabled.eq(0)
+        FilterSQLCustomer = CustomerDoc.disabled.eq(0)
+        if len(list_customer_name) >0:
+            FilterSQLCustomer = CustomerDoc.customer_code.isin(list_customer_name) & FilterSQLCustomer
         if birthday_from and birthday_to:
             FilterSQLCustomer = FilterSQLCustomer & CustomerField("birthday").between(birthday_from,birthday_to)
         if customer_group:
             FilterSQLCustomer = FilterSQLCustomer & CustomerField("customer_group").eq(customer_group)
         if customer_type:
             FilterSQLCustomer = FilterSQLCustomer & CustomerField("customer_type").eq(customer_type)
-
         if search_key:
             FilterSQLCustomer = FilterSQLCustomer & CustomerField("customer_name").like(f"%{search_key}%")
 
