@@ -2,7 +2,7 @@ import useDebounce from '@/hooks/useDebount';
 import { AxiosService } from '@/services/server';
 import { employee } from '@/types/employeeFilter';
 import { rsDataFrappe } from '@/types/response';
-import { Select } from 'antd';
+import { Select, Spin } from 'antd';
 import React, { useEffect, useState } from 'react'
 
 interface Props {}
@@ -12,13 +12,14 @@ function SelectEmpl({teamSale,callback}: {teamSale: string,callback:any}) {
     const [employee,setEmployee] = useState<string | undefined>()
     let seachbykey = useDebounce(keySearch);
     const [listEmployees, setListEmployees] = useState<any[]>([]);
-
+    const [fetching, setFetching] = useState(false);
     function changeEmployee(value: string|undefined){
         setEmployee(value)
         callback(value)
     }
     useEffect(() => {
         (async () => {
+          setFetching(true)
           try {
             let rsEmployee: rsDataFrappe<employee[]> = await AxiosService.get(
               "/api/method/mbw_dms.api.router.get_sale_person",
@@ -38,6 +39,7 @@ function SelectEmpl({teamSale,callback}: {teamSale: string,callback:any}) {
               }))
             );
           } catch (error) {}
+          setFetching(false)
         })();
       }, [teamSale, seachbykey]);
       useEffect(() => {
@@ -56,6 +58,7 @@ function SelectEmpl({teamSale,callback}: {teamSale: string,callback:any}) {
             })()}
             allowClear
             filterOption={false}
+            notFoundContent={fetching ? <Spin size="small" /> : null}
       />
     )
 }
