@@ -413,8 +413,8 @@ def update_customer(**kwargs):
                         if not credit_limit_updated:
                             # Thêm mới credit limit
                             customer.append("credit_limits", credit_limits_data)
+                            customer.save()
             
-            customer.save()
             frappe.db.commit()
             return gen_response(200, "ok")
         else:
