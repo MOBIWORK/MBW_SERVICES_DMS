@@ -20,6 +20,37 @@ import pydash
 
 BASE_URL = frappe.utils.get_request_site_address()
 
+class CommonHandle() :
+    @staticmethod
+    def time_now_utc():
+        now_utc = datetime.now(pytz.utc)
+        hcm_timezone = pytz.timezone("Asia/Ho_Chi_Minh")
+        time_now = now_utc.astimezone(hcm_timezone)
+        return time_now
+    @staticmethod
+    def get_employee_by_user(user, fields=["name"]):
+        if isinstance(fields, str):
+            fields = [fields]
+        emp_data = frappe.db.get_value("Employee", {"user_id": user}, fields, as_dict=1)
+        return emp_data
+    
+    @staticmethod
+    def get_user_id():
+        headers = frappe.local.request.headers.get("Authorization")
+        usrPass = headers.split(" ")[1]
+        str_b64Val = base64.b64decode(usrPass).decode("utf-8")
+        list_key = str_b64Val.split(':')
+        api_key = list_key[0]
+        user_id = frappe.db.get_value("User", {"api_key": api_key},["name", "email", "full_name"],as_dict=1)
+        return user_id
+    @staticmethod
+    def get_employee_id():
+        try:
+            user_id = get_user_id()
+            return get_employee_by_user(user_id.get("name")).get("name")
+        except:
+            return ""
+
 def time_now_utc():
     now_utc = datetime.now(pytz.utc)
     hcm_timezone = pytz.timezone("Asia/Ho_Chi_Minh")

@@ -185,6 +185,7 @@ class DMSCheckin(Document):
         else:
             return
 
+    
 
 # Tạo mới checkin
 @frappe.whitelist(methods="POST")
@@ -595,3 +596,4 @@ def list_inventory(kwargs):
         return gen_response(200, "Thành công", inventory)
     except Exception as e:
         return exception_handle(e)
+    

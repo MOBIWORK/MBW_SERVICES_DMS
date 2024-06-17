@@ -18,7 +18,6 @@ def find(filters = {}, options = ["*"],page_length = 20, page =1,order = "name d
 	start = (page -1) * page_length
 	results = frappe.db.get_list(DocName, filters=filters,fields= options, start=start,
     page_length=page_length,
-	parent_doctype=DocName,
 	distinct=True
 	)	
 	fieldChil = [ "name",
@@ -60,10 +59,16 @@ def find(filters = {}, options = ["*"],page_length = 20, page =1,order = "name d
 						filters_product = filters_product & (value.exp_time <=  data.get("data").get("expire_to"))
 					else:
 						filters_product = filters_product & True
-				if data.get("data").get("update_at_from"):
-					filters_product = filters_product & (value.update_at >=  data.get("data").get("update_at_from"))
-				if  data.get("data").get("update_at_to"):
-					filters_product = filters_product & (value.update_at <=  data.get("data").get("update_at_to"))
+				if value.update_at and (data.get("data").get("update_at_from") or data.get("data").get("update_at_to") ):
+					if data.get("data").get("update_at_from"):
+						print("update_at_from",value.update_at,"::",data.get("data").get("update_at_from"))
+
+						filters_product = filters_product & (value.update_at >= data.get("data").get("update_at_from"))
+					if  data.get("data").get("update_at_to"):
+						print("update to",value.update_at,"::",data.get("data").get("update_at_to"))
+						filters_product = filters_product & (value.update_at <=  data.get("data").get("update_at_to") )
+				else :
+					return False
 				return filters_product
 			items = pydash.filter_(items,filterFunction)
 			def chooseField(value) :
@@ -77,8 +82,7 @@ def find(filters = {}, options = ["*"],page_length = 20, page =1,order = "name d
 			inven["items"] = items
 			inven["create_time"] = inven["create_time"].timestamp()
 	
-
-	count = len(frappe.db.get_list(DocName, filters=filters))
+	count = len(frappe.db.get_list(DocName, filters=filters,distinct=True))
 	return {
 		"data": results,
 		"total": count,

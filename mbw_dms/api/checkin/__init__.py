@@ -1,6 +1,7 @@
 import frappe
 from mbw_dms.api.validators import validate_filter
-
+from mbw_dms.mbw_dms.doctype.dms_checkin.dms_checkin  import DMSCheckin
+from mbw_dms.api.common import CommonHandle
 # Tạo mới checkin
 @frappe.whitelist()
 def create_checkin(**kwargs):
@@ -41,3 +42,4 @@ def cancel_checkout(**kwargs):
 def list_inventory(**kwargs):
     from mbw_dms.mbw_dms.doctype.dms_checkin.dms_checkin import list_inventory
     return list_inventory(kwargs=kwargs)
+
