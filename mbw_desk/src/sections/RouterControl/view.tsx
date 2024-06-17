@@ -36,6 +36,8 @@ import { translationUrl, treeArray } from "@/util";
 import { listSale } from "@/types/listSale";
 import { SyncOutlined } from "@ant-design/icons";
 import { useResize } from "@/hooks";
+import SearchEmployee from "./components/searchEmployee";
+import { SelectCommon, TreeSelectCommon } from "@/components/select/select";
 // ----------------------------------------------------------------------
 
 function RouterControl() {
@@ -263,26 +265,6 @@ function RouterControl() {
     })();
   }, []);
 
-  useEffect(() => {
-    (async () => {
-      let rsEmployee: rsDataFrappe<employee[]> = await AxiosService.get(
-        "/api/method/mbw_dms.api.router.get_sale_person",
-        {
-          params: {
-            team_sale: team_sale,
-            key_search: seachbykey,
-          },
-        }
-      );
-      let { message: results } = rsEmployee;
-      setListEmployees(
-        results.map((employee_filter: employee) => ({
-          value: employee_filter.employee_code,
-          label: employee_filter.employee_name || employee_filter.employee_code,
-        }))
-      );
-    })();
-  }, [team_sale, seachbykey]);
 
   useEffect(() => {
     let heightHeader = 0
@@ -417,9 +399,9 @@ function RouterControl() {
               <Col span={14} className="hidden lg:block">
                 <Row gutter={8}>
                   {/* bộ lọc tuyến  */}
-                  <Col span={6} className="!min-w-[175px]">
-                    <FormItemCustom name="router">
-                      <Select
+                  <Col span={6}>
+                      <SelectCommon
+                        className="!w-full"
                         // labelInValue
                         mode="multiple"
                         filterOption={false}
@@ -454,18 +436,19 @@ function RouterControl() {
                           );
                         }}
                       />
-                    </FormItemCustom>
                   </Col>
                   {/* lọc nhân viên mới */}
-                  <Col span={6}>
-                    <FormItemCustom className="w-full border-none mr-2">
-                      <TreeSelect
+                  <Col span={6} >
+                    
+                      <TreeSelectCommon
                         showSearch
                         placeholder="Nhóm bán hàng"
                         allowClear
                         treeData={listSales}
-                        onChange={(value: string) => {
-                          setTeamSale(value);
+                        value={team_sale}
+                        onChange={ (newValue: string,...rest):void => {
+                          console.log(newValue);
+                          setTeamSale(newValue);
                         }}
                         dropdownStyle={{
                           maxHeight: 400,
@@ -473,43 +456,22 @@ function RouterControl() {
                           minWidth: 400,
                         }}
                       />
-                    </FormItemCustom>
+                      {/* <FormItemCustom className="w-full border-none mr-2">
+                    </FormItemCustom> */}
                   </Col>
 
-                  <Col span={6}>
-                    <FormItemCustom className="w-full border-none mr-2">
-                      <Select
-                        className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
-                        options={listEmployees}
-                        showSearch
-                        placeholder="Nhân viên chăm sóc"
-                        defaultValue={""}
-                        notFoundContent={null}
-                        onSearch={setKeySearch4}
-                        onChange={(value) => {
-                          setEmployee(value);
-                        }}
-                        allowClear
-                        dropdownStyle={{
-                          maxHeight: 400,
-                          overflow: "auto",
-                          minWidth: 300,
-                        }}
-                      />
-                    </FormItemCustom>
+                  <Col span={6} >
+                    <SearchEmployee setEmployee={setEmployee} employee={employee} isdeletedField={isdeletedField} team_sale={team_sale}/>
                   </Col>
                   {/* lọc trạng thái */}
                   <Col span={6}>
-                    <FormItemCustom className="w-[150px] border-none">
-                      <Select
-                        className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
-                        optionFilterProp="children"
+                      <SelectCommon
                         placeholder="Trạng thái"
                         onChange={onChange}
                         onSearch={onSearch}
+                        value={status}
                         filterOption={filterOption}
                         onClear={() => setStatus(undefined)}
-                        defaultValue=""
                         options={[
                           {
                             value: "Active",
@@ -522,6 +484,7 @@ function RouterControl() {
                         ]}
                         allowClear
                       />
+                    <FormItemCustom className="w-[150px] border-none">
                     </FormItemCustom>
                   </Col>
                 </Row>
@@ -582,9 +545,11 @@ function RouterControl() {
                           onChange(page, pageSize) {
                             setPage(page);
                           },
+                          showSizeChanger:false
                         }
                       : false
                   }
+                  
                   scroll={{
                     x: "max-content",
                     y:scrollYTable

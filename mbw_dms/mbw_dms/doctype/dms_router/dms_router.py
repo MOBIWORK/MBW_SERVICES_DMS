@@ -757,7 +757,9 @@ def get_customer_router_v2(data):
         if search_key:
             filters += f" AND customer_name LIKE '%{search_key}%'"
         field_order = data.get("field_order")
-        order_by_field = "customer_name" if field_order == 'customer_name' or not field_order else "distance"
+        order_by_field = "customer_name" 
+        if field_order == 'distance'  and long and lat :
+            order_by_field = "distance" 
         order_direction = "ASC" if order_by == "asc" else "DESC"
         query = f"""
             SELECT name, customer_primary_address, customer_code, customer_location_primary, mobile_no,
