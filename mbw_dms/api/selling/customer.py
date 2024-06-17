@@ -341,7 +341,7 @@ def update_customer(**kwargs):
                 elif key in date_fields:
                     custom_birthday = validate_date(value)
                     customer.set(key, custom_birthday)
-
+            customer.save()
             # Thay đổi ảnh
             if kwargs.get("image"):
                 customer.image = post_image(name_image="", faceimage=kwargs.get("image"), doc_type="Customer", doc_name=customer.name)
