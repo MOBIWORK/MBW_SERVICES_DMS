@@ -247,7 +247,9 @@ doc_events = {
         "on_update": "mbw_dms.mbw_dms.doctype.address.address.update_address"
     },
     "Customer": {
-        "on_update": "mbw_dms.controllers.dms_customer.update_location"
+        "on_update": "mbw_dms.controllers.dms_customer.update_location",
+        "after_insert": "mbw_dms.controllers.dms_customer.update_kpi_monthly",
+        "after_delete": "mbw_dms.controllers.dms_customer.update_kpi_monthly_after_delete"
     },
     # "User": {
     #     "after_insert": "mbw_dms.controllers.dms_users.create_employee_and_sales_team"

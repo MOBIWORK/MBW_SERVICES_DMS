@@ -116,12 +116,12 @@ def update_kpi_monthly_on_cancel(doc, method):
             monthly_summary_doc.doanh_so_thang -= grand_totals
             monthly_summary_doc.san_luong -= sum(qty)
             monthly_summary_doc.so_kh_dat_hang -= 1
-            monthly_summary_doc.sku = round((float(total_uom) / (monthly_summary_doc.so_don_hang)), 2)
+            monthly_summary_doc.sku = round((float(total_uom) / (monthly_summary_doc.so_don_hang)), 2) if monthly_summary_doc.so_don_hang > 0 else 0
         else:
             monthly_summary_doc.so_don_hang -= 1
             monthly_summary_doc.doanh_so_thang -= grand_totals
             monthly_summary_doc.san_luong -= sum(qty)
-            monthly_summary_doc.sku = round((float(total_uom) / (monthly_summary_doc.so_don_hang)), 2)
+            monthly_summary_doc.sku = round((float(total_uom) / (monthly_summary_doc.so_don_hang)), 2) if monthly_summary_doc.so_don_hang > 0 else 0
         monthly_summary_doc.save(ignore_permissions=True)
     else:
         return
