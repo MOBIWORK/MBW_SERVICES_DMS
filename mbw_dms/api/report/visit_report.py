@@ -1,6 +1,8 @@
 import frappe
 from mbw_dms.api.common import gen_response, exception_handle
 from mbw_dms.api.validators import validate_filter_timestamp
+from mbw_dms.api.configs import day_name_translation
+import datetime
 
 @frappe.whitelist(methods="GET")
 def report_web_visit(**kwargs):
@@ -28,13 +30,26 @@ def report_web_visit(**kwargs):
         where_conditions = " AND ".join(filters)
         
         sql_query = """
-            SELECT ck.kh_ten, ck.kh_diachi, ck.checkin_giovao, ck.checkin_giora, ck.checkin_dungtuyen, ck.checkin_trangthaicuahang,
-            cus.customer_type, cus.customer_group, cus.mobile_no as phone, cus.customer_primary_contact as contact
+            SELECT sp.employee as sales_person_id, sp.name as sales_person_name, sp.parent_sales_person, UNIX_TIMESTAMP(ck.creation) as date
             FROM `tabDMS Checkin` ck
             JOIN `tabCustomer` cus ON ck.kh_ten = cus.name
             JOIN `tabSales Person` sp ON ck.createbyname = sp.employee
-            GROUP BY sp.name
+            JOIN `tabAttendance` att ON att.employee = sp.employee
         """
 
+        if where_conditions:
+            sql_query += " WHERE {}".format(where_conditions)
+        sql_query += " LIMIT %s OFFSET %s"
+
+        limit = page_size
+        offset = (page_number - 1) * limit
+        list_visits = frappe.db.sql(sql_query, (limit, offset), as_dict=True)
+        for i in list_visits:
+            date = datetime.datetime.fromtimestamp(i["date"])
+            day = date.strftime("%A")
+            day_of_week = day_name_translation[day]
+            i["day_of_week"] = day_of_week
+
+        return gen_response(200, "Thành công", list_visits)
     except Exception as e:
         return exception_handle(e)

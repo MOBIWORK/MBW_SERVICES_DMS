@@ -684,7 +684,7 @@ def new_customer_report(kwargs):
 		user_id = frappe.session.user
 		filters["owner"] = user_id
 
-		list_customers = frappe.db.get_all("Customer", filters=filters, fields=["name", "customer_name", "customer_code", "customer_type", "customer_group", "UNIX_TIMESTAMP(creation) as date_collection", "customer_primary_address as address"])
+		list_customers = frappe.get_all("Customer", filters=filters, fields=["name", "customer_name", "customer_code", "customer_type", "customer_group", "UNIX_TIMESTAMP(creation) as date_collection", "customer_primary_address as address"])
 		data["total_new_cus"] = frappe.db.count("Customer", filters=filters)
 
 		return gen_response(200, "Thành công", {
