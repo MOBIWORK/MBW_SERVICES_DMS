@@ -305,13 +305,13 @@ def create_customer(**kwargs):
         return gen_response(201, "Thành công", {"name": new_customer.name})
     except Exception as e:
         if "new_customer" in locals() and new_customer is not None and new_customer.name is not None:
-            frappe.delete_doc("Customer", new_customer.name)
+            frappe.delete_doc("Customer", new_customer.name,ignore_permissions=True)
         if "new_address_cus" in locals() and new_address_cus is not None  and new_address_cus.name is not None :
-            frappe.delete_doc("Address", new_address_cus.name)
+            frappe.delete_doc("Address", new_address_cus.name,ignore_permissions=True)
         if "new_contact" in locals() and new_contact is not None  and new_contact.name is not None:
-            frappe.delete_doc("Contact", new_contact.name)
+            frappe.delete_doc("Contact", new_contact.name,ignore_permissions=True)
         if "new_address_contact" in locals() and new_address_contact is not None  and new_address_contact.name is not None:
-            frappe.delete_doc("Contact", new_address_contact.name)
+            frappe.delete_doc("Contact", new_address_contact.name,ignore_permissions=True)
         return exception_handle(e)
     
 # Danh sách lãnh thổ 
