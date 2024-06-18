@@ -228,7 +228,7 @@ export default function ReportSalesOrder() {
         title: "STT",
         dataIndex: "stt",
         key: "stt",
-        render: (_, record: any, index) => index + 1,
+        render: (_, record: any, index) => <div className="text-center">{index + 1}</div>,
       },
       { title: "Mã sản phẩm", dataIndex: "item_code", key: "item_code" },
       { title: "Tên sản phẩm", dataIndex: "item_name", key: "item_name" },
@@ -768,7 +768,6 @@ export default function ReportSalesOrder() {
                   : false
               }
               summary={() => {
-                console.log("sale", dataSaleOrder);
 
                 return (
                   <Table.Summary.Row>

@@ -34,6 +34,27 @@ export const FormItemCustom = styled(Form.Item)<{ disabled?: boolean }>`
   }
 }
 
+.custom-select-container {
+  position: relative;
+  width: 200px;
+}
+
+.custom-placeholder {
+  position: absolute;
+  top: 50%;
+  left: 12px;
+  transform: translateY(-50%);
+  color: #bfbfbf;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.custom-select .ant-select-selector {
+  height: 100%;
+  position: relative;
+  background: transparent;
+}
+
 .ant-select-selector,.ant-form-item .ant-form-item-control-input,.ant-select-single {
   border-radius: 8px;
   height: 28px!important;

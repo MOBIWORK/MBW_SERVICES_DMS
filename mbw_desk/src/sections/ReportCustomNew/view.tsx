@@ -74,22 +74,10 @@ const columns: TableColumnsType<DataTypeCustomNew> = [
     ),
   },
   {
-    title: "Phòng ban",
-    dataIndex: "department",
-    key: "department",
-    render: (_, record: any) => <div>{record.department}</div>,
-  },
-  {
-    title: "Mã nhân viên",
-    dataIndex: "employee_id",
-    key: "employee_id",
-    render: (_, record: any) => <div>{record.employee_id}</div>,
-  },
-  {
-    title: "Tên nhân viên",
-    dataIndex: "employee_name",
-    key: "employee_name",
-    render: (_, record: any) => <div>{record.employee_name}</div>,
+    title: "Nhóm bán hàng",
+    dataIndex: "sales_team",
+    key: "sales_team",
+    render: (_, record: any) => <div>{record.sales_team}</div>,
   },
   {
     title: "Mã khách hàng",

@@ -1,9 +1,10 @@
-import { VerticalAlignBottomOutlined } from "@ant-design/icons";
+import { SyncOutlined, VerticalAlignBottomOutlined } from "@ant-design/icons";
 import {
   ContentFrame,
   DropDownCustom,
   FormItemCustom,
   HeaderPage,
+  SelectCommon,
   TableCustom,
 } from "../../components";
 import {
@@ -17,6 +18,8 @@ import {
   InputNumber,
   Select,
   TreeSelect,
+  Input,
+  message,
 } from "antd";
 import type { DatePickerProps, TableColumnsType } from "antd";
 import { LuFilter, LuFilterX } from "react-icons/lu";
@@ -30,6 +33,7 @@ import { rsData, rsDataFrappe } from "@/types/response";
 import { listSale } from "@/types/listSale";
 import { employee } from "@/types/employeeFilter";
 import { useResize } from "@/hooks";
+import { TreeSelectCommon } from "@/components/select/select";
 
 interface DataCustomer {
   key: React.Key;
@@ -103,9 +107,6 @@ export default function ReportCustomer() {
   const [total_to, setTotalTo] = useState<number>();
   const [item, setItem] = useState<any[]>([]);
   const [item_code, setItemCode] = useState("");
-  const onChange: DatePickerProps["onChange"] = (dateString: any) => {
-    console.log(dateString);
-  };
   const PAGE_SIZE = 20;
   const [page, setPage] = useState<number>(1);
   const [total, setTotal] = useState<number>(0);
@@ -129,11 +130,9 @@ export default function ReportCustomer() {
   const size = useResize();
   const [containerHeight, setContainerHeight] = useState<any>(0);
   const [scrollYTable1, setScrollYTable1] = useState<number>(size?.h * 0.52);
-
-  const containerRef2 = useRef(null);
-  const size2 = useResize();
-  const [containerHeight2, setContainerHeight2] = useState<any>(0);
-  const [scrollYTable2, setScrollYTable2] = useState<number>(size2?.h * 0.28);
+  const [startDate, setStartDate] = useState<any>(null);
+  const [endDate, setEndDate] = useState<any>(null);
+  const [refresh, setRefresh] = useState<boolean>(false);
 
   useEffect(() => {
     setScrollYTable1(size.h * 0.52);
@@ -158,12 +157,24 @@ export default function ReportCustomer() {
         title: <div className="text-center">STT</div>,
         dataIndex: "stt",
         key: "stt",
+        width: 60,
         render: (_, record: any, index) => (
           <div className="text-center">{index + 1}</div>
         ),
       },
-      { title: "Mã sản phẩm", dataIndex: "item_code", key: "item_code" },
-      { title: "Tên sản phẩm", dataIndex: "item_name", key: "item_name" },
+      {
+        title: "Mã sản phẩm",
+        dataIndex: "item_code",
+        key: "item_code",
+        className: "truncate",
+      },
+      {
+        title: "Tên sản phẩm",
+        dataIndex: "item_name",
+        key: "item_name",
+        width: 250,
+        className: "truncate",
+      },
       {
         title: "Hạn sử dụng",
         dataIndex: "exp_time",
@@ -247,6 +258,38 @@ export default function ReportCustomer() {
         />
       </div>
     );
+  };
+
+  const onChange1: DatePickerProps["onChange"] = (date) => {
+    if (endDate && date && date.isAfter(endDate)) {
+      message.error("Từ ngày phải nhỏ hơn hoặc bằng Đến ngày");
+    } else {
+      setStartDate(date);
+    }
+  };
+
+  const onChange2: DatePickerProps["onChange"] = (date) => {
+    if (startDate && date && date.isBefore(startDate)) {
+      message.error("Đến ngày phải lớn hơn hoặc bằng Từ ngày");
+    } else {
+      setEndDate(date);
+    }
+  };
+
+  const disabledStartDate = (current: any) => {
+    return endDate ? current && current.isAfter(endDate, "day") : false;
+  };
+
+  const disabledEndDate = (current: any) => {
+    return startDate ? current && current.isBefore(startDate, "day") : false;
+  };
+
+  const disabledStartDate1 = (current: any) => {
+    return endDate ? current && current.isAfter(endDate, "day") : false;
+  };
+
+  const disabledEndDate1 = (current: any) => {
+    return startDate ? current && current.isBefore(startDate, "day") : false;
   };
 
   const handleSearchFilter = (val: any) => {
@@ -453,6 +496,7 @@ export default function ReportCustomer() {
     unit,
     employee,
     customer,
+    refresh
   ]);
 
   return (
@@ -463,10 +507,19 @@ export default function ReportCustomer() {
             title="Báo cáo tồn kho khách hàng"
             buttons={[
               {
+                // label: "Xuất excel",
+                icon: <SyncOutlined className="text-xl" />,
+                size: "18px",
+                className: "flex mr-2 ",
+                action: () => {
+                  setRefresh((prev) => !prev);
+                },
+              },
+              {
                 label: "Xuất dữ liệu",
                 type: "primary",
                 icon: <VerticalAlignBottomOutlined className="text-xl" />,
-                size: "20px",
+                size: "18px",
                 className: "flex items-center",
                 action: () => {
                   translationUrl("/app/data-export/Data%20Export");
@@ -478,131 +531,113 @@ export default function ReportCustomer() {
       >
         <div className="bg-white rounded-2xl pt-4 pb-7 border-[#DFE3E8] border-[0.2px] border-solid">
           <Row gutter={[16, 16]} className="justify-between items-end w-full">
-            <Col>
+            <Col className="ml-4">
               <Row gutter={[8, 8]}>
-                <Col className="mx-4 w-full" span={24}>
-                  <Form
-                    layout="vertical"
-                    className="flex flex-wrap justify-start items-center "
-                  >
-                    <FormItemCustom
-                      label={"Sản phẩm"}
-                      className="w-[200px] border-none mr-2"
-                    >
-                      <Select
-                        optionFilterProp="children"
-                        filterOption={false}
-                        onSearch={(value: string) => setKeyItem(value)}
-                        onSelect={(value) => {
-                          setItemCode(value);
-                        }}
-                        placeholder={<>Tất cả sản phẩm</>}
-                        notFoundContent={null}
-                        options={item}
-                        allowClear
-                        onClear={() => setItemCode("")}
-                        optionRender={(option) => {
-                          return (
-                            <>
-                              <div className="text-sm">
-                                <p
-                                  role="img"
-                                  aria-label={option.data.label}
-                                  className="my-1"
-                                >
-                                  {option.data.label}
-                                </p>
-                                <span className="text-xs !font-semibold">
-                                  {option.data.des}
-                                </span>
-                              </div>
-                            </>
-                          );
-                        }}
-                      />
-                    </FormItemCustom>
+                <Col span={6}>
+                  <SelectCommon
+                    optionFilterProp="children"
+                    filterOption={false}
+                    className="custom-select"
+                    showSearch
+                    onSearch={(value: string) => setKeyItem(value)}
+                    onSelect={(value: any) => {
+                      setItemCode(value);
+                    }}
+                    placeholder={<>Tất cả sản phẩm</>}
+                    notFoundContent={null}
+                    options={item}
+                    allowClear
+                    onClear={() => setItemCode("")}
+                    optionRender={(option) => {
+                      return (
+                        <>
+                          <div className="text-sm">
+                            <p
+                              role="img"
+                              aria-label={option.data.label}
+                              className="my-1"
+                            >
+                              {option.data.label}
+                            </p>
+                            <span className="text-xs !font-semibold">
+                              {option.data.des}
+                            </span>
+                          </div>
+                        </>
+                      );
+                    }}
+                  />
+                </Col>
 
-                    <FormItemCustom
-                      label={"Đơn vị tính"}
-                      className="w-[200px] border-none mr-2"
-                    >
-                      <Select
-                        placeholder="Tất cả đơn vị tính"
-                        options={listUnit}
-                        onSelect={(value) => {
-                          setUnit(value);
-                        }}
-                        onSearch={(value: string) => {
-                          setKeySUnit(value);
-                        }}
-                        onClear={() => setUnit("")}
-                        filterOption={false}
-                        allowClear
-                      />
-                    </FormItemCustom>
+                <Col span={6}>
+                  <SelectCommon
+                    placeholder="Tất cả đơn vị tính"
+                    options={listUnit}
+                    showSearch
+                    onSelect={(value: any) => {
+                      setUnit(value);
+                    }}
+                    onSearch={(value: string) => {
+                      setKeySUnit(value);
+                    }}
+                    onClear={() => setUnit("")}
+                    filterOption={false}
+                    allowClear
+                  />
+                </Col>
 
-                    <FormItemCustom
-                      label={"Nhóm bán hàng"}
-                      className="w-[200px] border-none mr-2"
-                    >
-                      <TreeSelect
-                        placeholder="Tất cả nhóm bán hàng"
-                        allowClear
-                        treeData={listSales}
-                        onChange={(value: string) => {
-                          setTeamSale(value);
-                        }}
-                        dropdownStyle={{
-                          maxHeight: 400,
-                          overflow: "auto",
-                          minWidth: 350,
-                        }}
-                      />
-                    </FormItemCustom>
+                <Col span={6}>
+                  <TreeSelectCommon
+                    placeholder="Tất cả nhóm bán hàng"
+                    allowClear
+                    treeData={listSales}
+                    onChange={(value: string) => {
+                      setTeamSale(value);
+                    }}
+                    dropdownStyle={{
+                      maxHeight: 400,
+                      overflow: "auto",
+                      minWidth: 350,
+                    }}
+                  />
+                </Col>
 
-                    <FormItemCustom
-                      label={"Người kiểm tồn"}
-                      name="employee"
-                      className="w-[200px] border-none mr-2"
-                    >
-                      <Select
-                        filterOption={false}
-                        notFoundContent={null}
-                        allowClear
-                        placeholder="Tất cả người kiểm tồn"
-                        onSearch={(value: string) => {
-                          setKeySearch4(value);
-                        }}
-                        options={listEmployees}
-                        onSelect={(value) => {
-                          setEmployee(value);
-                        }}
-                        onClear={() => {
-                          setEmployee("");
-                        }}
-                      />
-                    </FormItemCustom>
+                <Col span={6}>
+                  <SelectCommon
+                    filterOption={false}
+                    notFoundContent={null}
+                    allowClear
+                    showSearch
+                    placeholder="Tất cả người kiểm tồn"
+                    onSearch={(value: string) => {
+                      setKeySearch4(value);
+                    }}
+                    options={listEmployees}
+                    onSelect={(value) => {
+                      setEmployee(value);
+                    }}
+                    onClear={() => {
+                      setEmployee("");
+                    }}
+                  />
+                </Col>
 
-                    <FormItemCustom
-                      label="Khách hàng"
-                      className="w-[200px] border-none mr-2"
-                    >
-                      <Select
-                        className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
-                        options={listCustomer}
-                        onSelect={(value) => {
-                          setCustomer(value);
-                        }}
-                        onSearch={(value: string) => {
-                          setKeySCustomer(value);
-                        }}
-                        onClear={() => setCustomer("")}
-                        filterOption={false}
-                        allowClear
-                        placeholder="Tất cả khách hàng"
-                      />
-                    </FormItemCustom>
-                  </Form>
+                <Col span={6}>
+                  <SelectCommon
+                    className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
+                    options={listCustomer}
+                    onSelect={(value: any) => {
+                      setCustomer(value);
+                    }}
+                    onSearch={(value: string) => {
+                      setKeySCustomer(value);
+                    }}
+                    showSearch
+                    onClear={() => setCustomer("")}
+                    filterOption={false}
+                    allowClear
+                    placeholder="Tất cả khách hàng"
+                  />
                 </Col>
               </Row>
             </Col>
@@ -610,7 +645,7 @@ export default function ReportCustomer() {
               <div className="flex flex-wrap items-center">
                 <div className="flex justify-center items-center mr-4">
                   <Dropdown
-                    className="!h-9"
+                    className="!h-8"
                     trigger={["click"]}
                     placement="bottomRight"
                     dropdownRender={() => (
@@ -632,7 +667,8 @@ export default function ReportCustomer() {
                                   <DatePicker
                                     format={"DD-MM-YYYY"}
                                     className="!bg-[#F4F6F8]"
-                                    onChange={onChange}
+                                    onChange={onChange1}
+                                    disabledDate={disabledStartDate}
                                   />
                                 </FormItemCustom>
                               </Col>
@@ -647,7 +683,8 @@ export default function ReportCustomer() {
                                   <DatePicker
                                     format={"DD-MM-YYYY"}
                                     className="!bg-[#F4F6F8]"
-                                    onChange={onChange}
+                                    onChange={onChange2}
+                                    disabledDate={disabledEndDate}
                                   />
                                 </FormItemCustom>
                               </Col>
@@ -668,7 +705,8 @@ export default function ReportCustomer() {
                                   <DatePicker
                                     format={"DD-MM-YYYY"}
                                     className="!bg-[#F4F6F8]"
-                                    onChange={onChange}
+                                    onChange={onChange1}
+                                    disabledDate={disabledStartDate1}
                                   />
                                 </FormItemCustom>
                               </Col>
@@ -683,7 +721,8 @@ export default function ReportCustomer() {
                                   <DatePicker
                                     format={"DD-MM-YYYY"}
                                     className="!bg-[#F4F6F8]"
-                                    onChange={onChange}
+                                    onChange={onChange2}
+                                    disabledDate={disabledEndDate1}
                                   />
                                 </FormItemCustom>
                               </Col>
@@ -741,6 +780,7 @@ export default function ReportCustomer() {
                                     controls={false}
                                     className="!bg-[#F5F7FA] w-full"
                                     placeholder="0"
+                                    formatter={value => value?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
                                     suffix="VND"
                                   />
                                 </FormItemCustom>
@@ -757,6 +797,7 @@ export default function ReportCustomer() {
                                     controls={false}
                                     className="!bg-[#F5F7FA] w-full"
                                     placeholder="0"
+                                    formatter={value => value?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
                                     suffix="VND"
                                   />
                                 </FormItemCustom>
@@ -791,13 +832,13 @@ export default function ReportCustomer() {
                   >
                     <Button
                       onClick={(e: any) => e.preventDefault()}
-                      className="flex items-center text-nowrap !text-[13px] !leading-[21px] !font-normal  border-r-[0.1px] rounded-r-none h-9"
+                      className="flex items-center text-nowrap !text-[13px] !leading-[21px] !font-normal  border-r-[0.1px] rounded-r-none !h-8"
                       icon={<LuFilter style={{ fontSize: "20px" }} />}
                     >
                       Bộ lọc
                     </Button>
                   </Dropdown>
-                  <Button className="border-l-[0.1px] rounded-l-none !h-9">
+                  <Button className="border-l-[0.1px] rounded-l-none !h-8">
                     <LuFilterX style={{ fontSize: "20px" }} />
                   </Button>
                 </div>
