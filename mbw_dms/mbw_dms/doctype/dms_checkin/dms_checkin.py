@@ -557,7 +557,7 @@ def send_checkin_to_ekgis(doc):
         api_url_checkin=f"{API_URL}/{projectId}/{objectId}"
         ext = {"customer_name": doc.kh_ten, "address": doc.kh_diachi}
         json_object = json.dumps(ext)
-
+        import pytz
         data_checkin = {
             "projectid":projectId,
             "objectid": objectId,
@@ -569,10 +569,10 @@ def send_checkin_to_ekgis(doc):
             "battery_checkin": doc.checkin_pinvao,
             "battery_checkout": doc.checkin_pinra,
             "accuracy": doc.checkin_dochinhxac,
-            "time_checkin": doc.checkin_giovao,
+            "time_checkin": doc.checkin_giovao.astimezone(pytz.utc),
             "time_checkout": "",
             "ext": json_object,
-            "createddate": doc.createddate,
+            "createddate": doc.createddate.astimezone(pytz.utc),
             "timestamp": ""
         }
         response_checkin = requests.post(api_url_checkin, params=params, json=data_checkin)
