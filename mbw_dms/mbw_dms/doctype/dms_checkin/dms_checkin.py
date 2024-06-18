@@ -123,8 +123,8 @@ class DMSCheckin(Document):
             "mbw_dms.mbw_dms.doctype.dms_checkin.dms_checkin.send_checkin_to_ekgis",
             queue="default",                        # one of short, default, long
             timeout=None,                           # pass timeout manually
-            is_async=False,                         # if this is True, method is run in worker
-            now=True,                               # if this is True, method is run directly (not in a worker) 
+            is_async=True,                         # if this is True, method is run in worker
+            now=False,                               # if this is True, method is run directly (not in a worker) 
             job_name=None,                          # specify a job name
             enqueue_after_commit=True,              # enqueue the job after the database commit is done at the end of the request
             at_front=False,                         # put the job at the front of the queue
