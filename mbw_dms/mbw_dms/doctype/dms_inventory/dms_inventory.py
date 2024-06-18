@@ -40,6 +40,7 @@ def find(filters = {}, options = ["*"],page_length = 20, page =1,order = "name d
 			def filterFunction(value) :
 				filters_product = True
 				if  data.get("data").get("item_unit"):
+					print("unit filter",value.item_unit, "==" , data.get("data").get("item_unit"),(value.item_unit ==  data.get("data").get("item_unit")))
 					if value.item_unit:
 						filters_product = filters_product & (value.item_unit ==  data.get("data").get("item_unit"))
 					else:
@@ -67,10 +68,10 @@ def find(filters = {}, options = ["*"],page_length = 20, page =1,order = "name d
 						filters_product = filters_product & (value.update_at <=  data.get("data").get("update_at_to") )
 				# không có bộ lọc thì lấy tât cả
 				elif not (data.get("data").get("update_at_from") and data.get("data").get("update_at_to") ):
-					return True
+					return filters_product& True
 				# ko có thời gian mà có bộ lọc thì ko lấy
 				else :
-					return False
+					return filters_product &False
 				return filters_product
 			items = pydash.filter_(items,filterFunction)
 			def chooseField(value) :
