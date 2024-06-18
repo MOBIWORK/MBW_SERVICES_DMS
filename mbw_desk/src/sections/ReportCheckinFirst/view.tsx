@@ -67,10 +67,10 @@ const columns: TableColumnsType<DataCheckinFirst> = [
     ),
   },
   {
-    title: "Phòng/nhóm",
-    dataIndex: "department",
-    key: "department",
-    render: (_, record: any) => <div>{record.department}</div>,
+    title: "Nhóm bán hàng",
+    dataIndex: "sales_team",
+    key: "sales_team",
+    render: (_, record: any) => <div>{record.sales_team}</div>,
   },
   {
     title: "Mã nhân viên",
