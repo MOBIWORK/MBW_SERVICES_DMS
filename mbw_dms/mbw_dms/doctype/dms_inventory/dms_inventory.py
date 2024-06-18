@@ -59,14 +59,16 @@ def find(filters = {}, options = ["*"],page_length = 20, page =1,order = "name d
 						filters_product = filters_product & (value.exp_time <=  data.get("data").get("expire_to"))
 					else:
 						filters_product = filters_product & True
+				# có bộ lọc thời gian cập nhật thì chỉ lấy những item có trhoiwf gian cập nhật
 				if value.update_at and (data.get("data").get("update_at_from") or data.get("data").get("update_at_to") ):
 					if data.get("data").get("update_at_from"):
-						print("update_at_from",value.update_at,"::",data.get("data").get("update_at_from"))
-
 						filters_product = filters_product & (value.update_at >= data.get("data").get("update_at_from"))
 					if  data.get("data").get("update_at_to"):
-						print("update to",value.update_at,"::",data.get("data").get("update_at_to"))
 						filters_product = filters_product & (value.update_at <=  data.get("data").get("update_at_to") )
+				# không có bộ lọc thì lấy tât cả
+				elif not (data.get("data").get("update_at_from") and data.get("data").get("update_at_to") ):
+					return True
+				# ko có thời gian mà có bộ lọc thì ko lấy
 				else :
 					return False
 				return filters_product
