@@ -569,10 +569,10 @@ def send_checkin_to_ekgis(doc):
             "battery_checkin": doc.checkin_pinvao,
             "battery_checkout": doc.checkin_pinra,
             "accuracy": doc.checkin_dochinhxac,
-            "time_checkin": doc.checkin_giovao.astimezone(pytz.utc),
+            "time_checkin": pytz.timezone("Asia/Ho_Chi_Minh").localize(doc.checkin_giovao).astimezone(pytz.utc),
             "time_checkout": "",
             "ext": json_object,
-            "createddate": doc.createddate.astimezone(pytz.utc),
+            "createddate":pytz.timezone("Asia/Ho_Chi_Minh").localize(doc.createddate).astimezone(pytz.utc),
             "timestamp": ""
         }
         response_checkin = requests.post(api_url_checkin, params=params, json=data_checkin)
