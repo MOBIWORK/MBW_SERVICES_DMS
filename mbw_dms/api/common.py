@@ -335,16 +335,20 @@ def handle_address(address_title) :
     return address_oop
 
 def post_image(name_image, faceimage, doc_type, doc_name):
-    # save file and insert Doctype File
-    file_name = name_image + "_"+ str(datetime.now().timestamp()) + "_.png"
-    imgdata = base64.b64decode(faceimage)
-    doc_file = save_file(file_name, imgdata, doc_type, doc_name, folder=None, decode=False, is_private=0, df=None)
+    try: 
+        # save file and insert Doctype File
+        file_name = name_image + "_"+ str(datetime.now()) + "_.png"
+        imgdata = base64.b64decode(faceimage)
+        doc_file = save_file(file_name, faceimage, doc_type, doc_name, folder=None, decode=True, is_private=0, df=None)
 
-    # delete image copy
-    path_file = "/files/" + file_name
-    delete_file(path_file)
-    file_url = BASE_URL + doc_file.get('file_url')
-    return file_url
+        # delete image copy
+        path_file = "/files/" + file_name
+        delete_file(path_file)
+        file_url = BASE_URL + doc_file.get('file_url')
+        return file_url
+    except Exception as e:
+        print("error update image",e)
+        raise ValueError(e)
 
 def add_text_to_image(file_name, imgdata, description):
     # add text to image

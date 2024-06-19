@@ -152,7 +152,7 @@
  "icon": "fa fa-map-marker",
  "idx": 5,
  "links": [],
- "modified": "2024-04-13 11:07:23.494368",
+ "modified": "2024-06-19 15:11:00.127547",
  "modified_by": "Administrator",
  "module": "MBW DMS",
  "name": "Address",
@@ -213,6 +213,7 @@
   },
   {
    "create": 1,
+   "delete": 1,
    "if_owner": 1,
    "print": 1,
    "read": 1,

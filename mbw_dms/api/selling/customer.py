@@ -146,6 +146,7 @@ def customer_detail(name):
         doc_customer["contacts"] = contacts
         doc_customer["routers"] = list_router_frequency
         doc_customer["customer_location_primary"] = null_location( doc_customer["customer_location_primary"])
+        doc_customer["credit_limits"] = doc_customer["credit_limits"][0].credit_limit if len(doc_customer["credit_limits"])>0 else 0 
 
         if doc_customer["image"] and not doc_customer["image"].startswith("http"):
             from frappe.utils import get_url
@@ -304,13 +305,13 @@ def create_customer(**kwargs):
         frappe.db.commit()
         return gen_response(201, "Thành công", {"name": new_customer.name})
     except Exception as e:
-        if "new_customer" in locals() and new_customer is not None and new_customer.name is not None:
+        if "new_customer" in locals() and new_customer is not None :
             frappe.delete_doc("Customer", new_customer.name,ignore_permissions=True)
-        if "new_address_cus" in locals() and new_address_cus is not None  and new_address_cus.name is not None :
+        if "new_address_cus" in locals() and new_address_cus is not None:
             frappe.delete_doc("Address", new_address_cus.name,ignore_permissions=True)
-        if "new_contact" in locals() and new_contact is not None  and new_contact.name is not None:
+        if "new_contact" in locals() and new_contact is not None :
             frappe.delete_doc("Contact", new_contact.name,ignore_permissions=True)
-        if "new_address_contact" in locals() and new_address_contact is not None  and new_address_contact.name is not None:
+        if "new_address_contact" in locals() and new_address_contact is not None  :
             frappe.delete_doc("Contact", new_address_contact.name,ignore_permissions=True)
         return exception_handle(e)
     
