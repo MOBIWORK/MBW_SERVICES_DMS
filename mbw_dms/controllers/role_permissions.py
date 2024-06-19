@@ -30,7 +30,7 @@ def update_permissions(doctype_name, sales_user_role, sales_manager_role):
     # Nếu không có quyền tồn tại, thì tạo mới quyền
     if not existing_sales_user_perms:
     # Cập nhật quyền cho vai trò "Sales User"
-        if doctype_name not in ["DMS Province", "DMS District", "DMS Ward", "DMS First Checkin Customer", "DMS Logs", "DMS FakeGPS", "DMS Inventory Items", "DMS Inventory", "DMS Type of problem", "DMS Problem Monitor", "DMS Settings", "DMS Checkin", "DMS Log", "DMS Basic Authen Settings"]:
+        if doctype_name not in ["DMS Album", "DMS Router", "DMS Router Customer", "DMS Province", "DMS District", "DMS Ward", "DMS First Checkin Customer", "DMS Logs", "DMS FakeGPS", "DMS Inventory Items", "DMS Inventory", "DMS Type of problem", "DMS Problem Monitor", "DMS Settings", "DMS Checkin", "DMS Log", "DMS Basic Authen Settings"]:
             frappe.get_doc({
                 "doctype": "Custom DocPerm",
                 "parent": doctype_name,

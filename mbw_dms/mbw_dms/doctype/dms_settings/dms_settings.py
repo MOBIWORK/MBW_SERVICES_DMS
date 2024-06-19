@@ -12,6 +12,7 @@ class DMSSettings(Document):
     def on_update(self):
         frappe.cache.delete_value("website-config")
         frappe.cache.delete_value("ProjectID")
+        
     @frappe.whitelist(methods='POST')
     def config_web(self):
         try:
