@@ -146,7 +146,7 @@ def customer_detail(name):
         doc_customer["contacts"] = contacts
         doc_customer["routers"] = list_router_frequency
         doc_customer["customer_location_primary"] = null_location( doc_customer["customer_location_primary"])
-        doc_customer["credit_limits"] = doc_customer["credit_limits"][0].credit_limit if len(doc_customer["credit_limits"])>0 else 0 
+        # doc_customer["credit_limits"] = doc_customer["credit_limits"][0].credit_limit if len(doc_customer["credit_limits"])>0 else 0  
 
         if doc_customer["image"] and not doc_customer["image"].startswith("http"):
             from frappe.utils import get_url
