@@ -1,11 +1,11 @@
-import { VerticalAlignBottomOutlined } from "@ant-design/icons";
+import { SyncOutlined, VerticalAlignBottomOutlined } from "@ant-design/icons";
 import {
   ContentFrame,
   FormItemCustom,
   HeaderPage,
   TableCustom,
 } from "../../components";
-import { DatePicker, Select, Table, TreeSelect, Form } from "antd";
+import { DatePicker, Select, Table, TreeSelect, Form, Row, Col } from "antd";
 import { monthAll } from "./data";
 import { DatePickerProps } from "antd/lib";
 import { useEffect, useRef, useState } from "react";
@@ -17,6 +17,7 @@ import dayjs from "dayjs";
 import { translationUrl, treeArray } from "../../util";
 import { listSale } from "../../types/listSale";
 import { useResize } from "@/hooks";
+import { SelectCommon, TreeSelectCommon } from "@/components/select/select";
 
 const { Column, ColumnGroup } = TableCustom;
 
@@ -81,6 +82,7 @@ export default function ReportKPI() {
   const size = useResize();
   const [containerHeight, setContainerHeight] = useState<any>(0);
   const [scrollYTable1, setScrollYTable1] = useState<number>(size?.h * 0.52);
+  const [refresh, setRefresh] = useState<boolean>(false);
 
   useEffect(() => {
     setScrollYTable1(size.h * 0.52);
@@ -97,7 +99,7 @@ export default function ReportKPI() {
       resizeObserver.observe(containerElement);
       return () => resizeObserver.disconnect();
     }
-  }, [containerRef1]);  
+  }, [containerRef1]);
 
   const onChange: DatePickerProps["onChange"] = (date) => {
     setFYear(date?.["$y"].toString());
@@ -164,7 +166,7 @@ export default function ReportKPI() {
       setDataReport(rsData?.result);
       setTotal(rsData?.result?.totals);
     })();
-  }, [fmonth, fyear, sales_team, employee, page]);
+  }, [fmonth, fyear, sales_team, employee, page, refresh]);
 
   return (
     <>
@@ -174,10 +176,18 @@ export default function ReportKPI() {
             title="Báo cáo KPI"
             buttons={[
               {
+                icon: <SyncOutlined className="text-xl" />,
+                size: "18px",
+                className: "flex mr-2 ",
+                action: () => {
+                  setRefresh((prev) => !prev);
+                },
+              },
+              {
                 label: "Xuất dữ liệu",
                 type: "primary",
                 icon: <VerticalAlignBottomOutlined className="text-xl" />,
-                size: "20px",
+                size: "18px",
                 className: "flex items-center",
                 action: () => {
                   translationUrl("/app/data-export/Data%20Export");
@@ -188,43 +198,31 @@ export default function ReportKPI() {
         }
       >
         <div className="bg-white rounded-2xl pt-4 pb-7 border-[#DFE3E8] border-[0.2px] border-solid">
-          <Form
-            layout="vertical"
-            className="flex justify-start items-center px-4"
-          >
-            <FormItemCustom
-              label={"Tháng"}
-              className="border-none mr-2 w-[200px]"
-            >
-              <Select
-                className="!bg-[#F4F6F8] options:bg-[#F4F6F8] !h-7 rounded-lg mt-[-2px]"
+          <Row  className="px-4 flex-auto" gutter={[8, 8]}>
+            <Col span={4}>
+              <SelectCommon
+                className="!bg-[#F4F6F8]"
                 defaultValue={month}
                 options={monthAll}
                 onChange={(value: string) => {
                   setFmonth(value);
                 }}
-                showSearch
               />
-            </FormItemCustom>
-            <FormItemCustom
-              label={"Năm"}
-              className="border-none mr-2 w-[200px]"
-            >
+            </Col>
+            <Col span={4}>
               <DatePicker
-                className="!bg-[#F4F6F8] !h-7 rounded-lg mt-[-2px]"
+                className="!bg-[#F4F6F8] w-full rounded-lg h-7"
                 onChange={onChange}
-                placeholder="Tất cả "
+                placeholder="Chọn năm"
                 picker="year"
                 defaultValue={dayjs().startOf("year")}
               />
-            </FormItemCustom>
-            <FormItemCustom
-              label={"Nhóm bán hàng"}
-              className="border-none mr-2 w-[200px]"
-            >
-              <TreeSelect
+            </Col>
+            <Col span={4}>
+              <TreeSelectCommon
                 placeholder="Tất cả nhóm bán hàng"
                 allowClear
+                showSearch
                 treeData={listSales}
                 onChange={(value: string) => {
                   setTeamSale(value);
@@ -232,34 +230,31 @@ export default function ReportKPI() {
                 dropdownStyle={{
                   maxHeight: 400,
                   overflow: "auto",
-                  minWidth: 400,
+                  minWidth: 350,
                 }}
               />
-            </FormItemCustom>
-
-            <FormItemCustom
-              label={"Nhân viên"}
-              className="border-none mr-2 w-[200px]"
-              name="employee"
-            >
-              <Select
+            </Col>
+            <Col span={4}>
+              <SelectCommon
                 filterOption={false}
                 notFoundContent={null}
                 allowClear
+                showSearch
                 placeholder="Tất cả nhân viên"
                 onSearch={(value: string) => {
                   setKeySearch4(value);
                 }}
                 options={listEmployees}
-                onSelect={(value) => {
+                onSelect={(value: any) => {
                   setEmployee(value);
                 }}
                 onClear={() => {
                   setEmployee("");
                 }}
               />
-            </FormItemCustom>
-          </Form>
+            </Col>
+          </Row>
+
           {/* {routersTable?.map(router => ({ key: router.name, ...router }))} */}
           <div ref={containerRef1} className="pt-5">
             <TableCustom
@@ -269,20 +264,20 @@ export default function ReportKPI() {
               }))}
               bordered
               scroll={{
-                x: 'max-content',
+                x: "max-content",
                 y: containerHeight < 400 ? undefined : scrollYTable1,
               }}
               pagination={
                 total && total > PAGE_SIZE
                   ? {
-                    pageSize: PAGE_SIZE,
-                    showSizeChanger: false,
-                    total,
-                    current: page,
-                    onChange(page) {
-                      setPage(page);
-                    },
-                  }
+                      pageSize: PAGE_SIZE,
+                      showSizeChanger: false,
+                      total,
+                      current: page,
+                      onChange(page) {
+                        setPage(page);
+                      },
+                    }
                   : false
               }
               summary={() => {

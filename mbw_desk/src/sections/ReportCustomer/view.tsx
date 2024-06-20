@@ -507,7 +507,6 @@ export default function ReportCustomer() {
             title="Báo cáo tồn kho khách hàng"
             buttons={[
               {
-                // label: "Xuất excel",
                 icon: <SyncOutlined className="text-xl" />,
                 size: "18px",
                 className: "flex mr-2 ",
@@ -590,6 +589,7 @@ export default function ReportCustomer() {
                   <TreeSelectCommon
                     placeholder="Tất cả nhóm bán hàng"
                     allowClear
+                    showSearch
                     treeData={listSales}
                     onChange={(value: string) => {
                       setTeamSale(value);
@@ -613,7 +613,7 @@ export default function ReportCustomer() {
                       setKeySearch4(value);
                     }}
                     options={listEmployees}
-                    onSelect={(value) => {
+                    onSelect={(value: any) => {
                       setEmployee(value);
                     }}
                     onClear={() => {
@@ -668,6 +668,7 @@ export default function ReportCustomer() {
                                     format={"DD-MM-YYYY"}
                                     className="!bg-[#F4F6F8]"
                                     onChange={onChange1}
+                                    placeholder="Chọn ngày"
                                     disabledDate={disabledStartDate}
                                   />
                                 </FormItemCustom>
@@ -684,6 +685,7 @@ export default function ReportCustomer() {
                                     format={"DD-MM-YYYY"}
                                     className="!bg-[#F4F6F8]"
                                     onChange={onChange2}
+                                    placeholder="Chọn ngày"
                                     disabledDate={disabledEndDate}
                                   />
                                 </FormItemCustom>
@@ -706,6 +708,7 @@ export default function ReportCustomer() {
                                     format={"DD-MM-YYYY"}
                                     className="!bg-[#F4F6F8]"
                                     onChange={onChange1}
+                                    placeholder="Chọn ngày"
                                     disabledDate={disabledStartDate1}
                                   />
                                 </FormItemCustom>
@@ -722,6 +725,7 @@ export default function ReportCustomer() {
                                     format={"DD-MM-YYYY"}
                                     className="!bg-[#F4F6F8]"
                                     onChange={onChange2}
+                                    placeholder="Chọn ngày"
                                     disabledDate={disabledEndDate1}
                                   />
                                 </FormItemCustom>
@@ -877,7 +881,6 @@ export default function ReportCustomer() {
               rowHoverable={false}
             />
           </div>
-          <div className=""></div>
         </div>
       </ContentFrame>
     </>
