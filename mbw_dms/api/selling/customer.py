@@ -216,14 +216,14 @@ def create_customer(**kwargs):
                 new_customer.set(key, customer_type)
         
         user_id = frappe.session.user
-        employee_name = frappe.get_value("Employee", {"user_id": user_id}, "name")
-        sale_person = frappe.get_value("Sales Person", {"employee": employee_name}, "parent_sales_person")
+        employee_name = frappe.db.get_value("Employee", {"user_id": user_id}, ["name","company"],as_dict=1)
+        sale_person = frappe.get_value("Sales Person", {"employee": employee_name.name}, "parent_sales_person")
         new_customer.custom_sales_manager = sale_person
 
         new_customer.customer_location_primary = json_location
 
         new_customer.append("credit_limits", {
-            "company": kwargs.get("company"),
+            "company": employee_name.company or "",
             "credit_limit": kwargs.get("credit_limit")
         })
         new_customer.insert()
@@ -329,6 +329,10 @@ def list_territory():
 @frappe.whitelist(methods="PUT")
 def update_customer(**kwargs):
     try:
+        employee=CommonHandle.get_employee_info()
+        company = ""
+        if employee:
+            company = employee.get("company")
         name = kwargs.get("name")
         if frappe.db.exists("Customer", name, cache=True):
             customer = frappe.get_doc("Customer", name)
@@ -404,23 +408,31 @@ def update_customer(**kwargs):
             
             # Chỉnh sửa hạn mức công nợ
             if "credit_limits" in kwargs:
-                credit_limits_data_list = kwargs.get("credit_limits")
-                if credit_limits_data_list:
-                    for credit_limits_data in credit_limits_data_list:
-                        credit_name = credit_limits_data.get("name")
-                        credit_limit_updated = False
-                        if credit_name:
-                            # Cập nhật credit limit đã tồn tại
-                            for credit_limit in customer.credit_limits:
-                                if credit_limit.name == credit_name:
-                                    credit_limit.credit_limit = credit_limits_data.get("credit_limit")
-                                    credit_limit.company = credit_limits_data.get("company", credit_limit.company)
-                                    credit_limit_updated = True
-                                    break
-                        if not credit_limit_updated:
-                            # Thêm mới credit limit
-                            customer.append("credit_limits", credit_limits_data)
-                            customer.save()
+                credit_limits = kwargs.get("credit_limits")
+                credit_limit_current =  customer.credit_limits
+                credit_limit_current_orther = pydash.filter_(credit_limit_current,lambda x: x.company!=company)
+                credit_limit_current_orther.append({
+                    "company": company,
+                    "credit_limit":credit_limits[0]
+                })
+                customer.set("credit_limits",credit_limit_current_orther)
+                customer.save()
+                # if credit_limits_data_list:
+                #     for credit_limits_data in credit_limits_data_list:
+                #         credit_name = credit_limits_data.get("name")
+                #         credit_limit_updated = False
+                #         if credit_name:
+                #             # Cập nhật credit limit đã tồn tại
+                #             for credit_limit in customer.credit_limits:
+                #                 if credit_limit.name == credit_name:
+                #                     credit_limit.credit_limit = credit_limits_data.get("credit_limit")
+                #                     credit_limit.company = credit_limits_data.get("company", credit_limit.company)
+                #                     credit_limit_updated = True
+                #                     break
+                #         if not credit_limit_updated:
+                #             # Thêm mới credit limit
+                #             customer.append("credit_limits", credit_limits_data)
+                #             customer.save()
             
             frappe.db.commit()
             return gen_response(200, "ok")

@@ -177,7 +177,7 @@ def get_employee_id():
 def get_employee_info():
     try:
         user_id = get_user_id()
-        return get_employee_by_user(user_id.get("email"),["name", "user_id", "fullname"])
+        return get_employee_by_user(user_id.get("email"),["name", "user_id", "fullname","company"])
     except:
         return ""
 
@@ -539,3 +539,5 @@ def get_all_parent_sales_persons(sales_person):
     return parent_sales_persons
 
 CommonHandle.create_address = staticmethod(create_address)
+
+CommonHandle.get_employee_info = staticmethod(get_employee_info)
