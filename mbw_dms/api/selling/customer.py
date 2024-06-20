@@ -10,7 +10,8 @@ from mbw_dms.api.common import (
     get_value_child_doctype,
     routers_name_of_customer,
     customers_code_router,
-    null_location
+    null_location,
+    CommonHandle
 )
 from mbw_dms.api.validators import (
     validate_date, 
@@ -347,25 +348,29 @@ def update_customer(**kwargs):
             if kwargs.get("image"):
                 customer.image = post_image(name_image="", faceimage=kwargs.get("image"), doc_type="Customer", doc_name=customer.name)
                 customer.save()
-            
+            link_cs_address = {
+                "link_doctype":"Customer",
+                "link_name": name
+                }
             # Cập nhật hoặc thêm mới địa chỉ
             if "address" in kwargs:
                 address_data_list = kwargs.get("address")
-                if address_data_list:
+                if len(address_data_list)>0:
                     for address_data in address_data_list:
-                        address_name = address_data.get("name")
-                        if address_name and frappe.db.exists("Address", address_name):
-                            address = frappe.get_doc("Address", address_name)
-                            address.update(address_data)
-                            address.save(ignore_permissions=True)
-                        else:
-                            address = frappe.new_doc("Address")
-                            address.update(address_data)
-                            address.append("links", {
-                                "link_doctype": "Customer",
-                                "link_name": name
-                            })
-                            address.insert(ignore_permissions=True)
+                        CommonHandle.create_address(address_data,link_cs_address)
+                        # address_name = address_data.get("name")
+                        # if address_name and frappe.db.exists("Address", address_name):
+                        #     address = frappe.get_doc("Address", address_name)
+                        #     address.update(address_data)
+                        #     address.save(ignore_permissions=True)
+                        # else:
+                        #     address = frappe.new_doc("Address")
+                        #     address.update(address_data)
+                        #     address.append("links", {
+                        #         "link_doctype": "Customer",
+                        #         "link_name": name
+                        #     })
+                        #     address.insert(ignore_permissions=True)
             
             # Cập nhật hoặc thêm mới liên hệ
             if "contact" in kwargs:
@@ -389,7 +394,8 @@ def update_customer(**kwargs):
             # Chỉnh sửa tuyến
             if "router" in kwargs:
                 routers_data = kwargs.get("router")
-                if routers_data:
+                if len(routers_data)>0:
+                    routers_data= routers_data[0]
                     router_name = routers_data.get("router_name")
                     if router_name and frappe.db.exists("DMS Router Customer", {"parent": router_name, "customer_name": name}):
                         router = frappe.get_doc("DMS Router Customer", {"parent": router_name, "customer_name": name})
