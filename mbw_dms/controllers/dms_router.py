@@ -5,7 +5,8 @@ def check_duplicate_import(doc, method):
     existing = frappe.db.exists({
         'doctype': 'DMS Router',
         'channel_code': doc.channel_code,
-        'employee': doc.employee
+        'employee': doc.employee,
+        "is_deleted": 0
     })
     if existing:
         frappe.throw(_('Duplicate entry for channel code: {0} by employee: {1}').format(doc.channel_code, doc.employee))
