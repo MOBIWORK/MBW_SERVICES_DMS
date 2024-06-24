@@ -155,6 +155,7 @@ def create_sale_order(**kwargs):
         new_order = frappe.new_doc("Sales Order")
         user_name = frappe.get_value("Employee", {"user_id": frappe.session.user}, "name")
         sales_person = frappe.get_value("Sales Person", {"employee": user_name}, "name")
+        ignore_pricing_rule = kwargs.get("ignore_pricing_rule")
 
         # Dữ liệu bắn lên để tạo sale order mới
         discount_percent = float(kwargs.get("additional_discount_percentage", 0))
@@ -184,6 +185,7 @@ def create_sale_order(**kwargs):
         for item_data in items:
             rate = float(item_data.get("rate", 0))
             discount_percentage = float(item_data.get("discount_percentage", 0))
+            discount_amount = float(item_data.get("discount_amount", 0))
             item_tax_template = item_data.get("item_tax_template")
             tax_rate = float(item_data.get("item_tax_rate", 0))
             
@@ -192,6 +194,7 @@ def create_sale_order(**kwargs):
                 "qty": item_data.get("qty"),
                 "uom": item_data.get("uom"),
                 "discount_percentage": discount_percentage,
+                "discount_amount": discount_amount,
                 "item_tax_template": item_tax_template,
                 "item_tax_rate": tax_rate
             })
