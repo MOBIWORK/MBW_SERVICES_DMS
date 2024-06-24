@@ -73,7 +73,7 @@ def list_customer(**kwargs):
         # record = frappe.db.count("Customer", filters=my_filter)
         # version mới
         page_size = int(kwargs.get("page_size", 20))
-        page_number = 1 if not kwargs.get("page") or int(kwargs.get("page")) <= 0 else int(kwargs.get("page"))
+        page_number = 1 if not kwargs.get("page_number") or int(kwargs.get("page_number")) <= 0 else int(kwargs.get("page_number"))
         def CustomerField(name):
             return CustomerDoc[name]
 
