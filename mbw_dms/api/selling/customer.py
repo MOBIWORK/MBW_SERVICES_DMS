@@ -93,15 +93,13 @@ def list_customer(**kwargs):
                                         "mobile_no", "customer_primary_address", "custom_birthday",
                                         "customer_location_primary", "customer_details"]
         customers =( frappe.qb.from_(CustomerDoc)
+                    .distinct()
                     .select(*select_field)
                     .where(my_filter)
                     .limit(page_size)
                     .offset(page_size*(page_number-1))
                     ).run(as_dict=True)
-        record = len(frappe.qb.from_(CustomerDoc).where(my_filter).select(*select_field).run(as_dict=True))
-
-
-
+        record = len(frappe.qb.from_(CustomerDoc).where(my_filter).select(*select_field).distinct().run(as_dict=True))
         for customer in customers:
             if customer.customer_location_primary == "":
                 customer.customer_location_primary = None
