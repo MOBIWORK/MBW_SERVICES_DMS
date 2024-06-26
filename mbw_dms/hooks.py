@@ -251,9 +251,6 @@ doc_events = {
         "after_insert": "mbw_dms.controllers.dms_customer.update_kpi_monthly",
         "after_delete": "mbw_dms.controllers.dms_customer.update_kpi_monthly_after_delete"
     },
-    # "User": {
-    #     "after_insert": "mbw_dms.controllers.dms_users.create_employee_and_sales_team"
-    # },
     "Sales Person": {
         "on_update": "mbw_dms.controllers.dms_sales_person.create_user_permission"
     },
