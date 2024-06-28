@@ -327,10 +327,7 @@ def list_territory():
 @frappe.whitelist(methods="PUT")
 def update_customer(**kwargs):
     try:
-        employee=CommonHandle.get_employee_info()
-        company = ""
-        if employee:
-            company = employee.get("company")
+        company = frappe.get_value("Employee", {"user_id": frappe.session.user}, "company")
         name = kwargs.get("name")
         if frappe.db.exists("Customer", name, cache=True):
             customer = frappe.get_doc("Customer", name)
