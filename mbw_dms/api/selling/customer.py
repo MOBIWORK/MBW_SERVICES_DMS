@@ -360,19 +360,6 @@ def update_customer(**kwargs):
                 if len(address_data_list)>0:
                     for address_data in address_data_list:
                         CommonHandle.create_address(address_data,link_cs_address)
-                        # address_name = address_data.get("name")
-                        # if address_name and frappe.db.exists("Address", address_name):
-                        #     address = frappe.get_doc("Address", address_name)
-                        #     address.update(address_data)
-                        #     address.save(ignore_permissions=True)
-                        # else:
-                        #     address = frappe.new_doc("Address")
-                        #     address.update(address_data)
-                        #     address.append("links", {
-                        #         "link_doctype": "Customer",
-                        #         "link_name": name
-                        #     })
-                        #     address.insert(ignore_permissions=True)
             
             # Cập nhật hoặc thêm mới liên hệ
             if "contact" in kwargs:
@@ -396,13 +383,14 @@ def update_customer(**kwargs):
             # Chỉnh sửa tuyến
             if "router" in kwargs:
                 routers_data = kwargs.get("router")
-                if len(routers_data)>0:
+                if len(routers_data) > 0:
                     routers_data= routers_data[0]
                     router_name = routers_data.get("router_name")
                     if router_name and frappe.db.exists("DMS Router Customer", {"parent": router_name, "customer_name": name}):
                         router = frappe.get_doc("DMS Router Customer", {"parent": router_name, "customer_name": name})
                         router.frequency = routers_data.get("frequency")
                         router.save()
+            frappe.db.commit()
             
             # Chỉnh sửa hạn mức công nợ
             if "credit_limits" in kwargs:
@@ -411,27 +399,11 @@ def update_customer(**kwargs):
                 credit_limit_current_orther = pydash.filter_(credit_limit_current,lambda x: x.company!=company)
                 credit_limit_current_orther.append({
                     "company": company,
-                    "credit_limit":credit_limits[0]
+                    "credit_limit": credit_limits[0]
                 })
-                customer.set("credit_limits",credit_limit_current_orther)
-                customer.save()
-                # if credit_limits_data_list:
-                #     for credit_limits_data in credit_limits_data_list:
-                #         credit_name = credit_limits_data.get("name")
-                #         credit_limit_updated = False
-                #         if credit_name:
-                #             # Cập nhật credit limit đã tồn tại
-                #             for credit_limit in customer.credit_limits:
-                #                 if credit_limit.name == credit_name:
-                #                     credit_limit.credit_limit = credit_limits_data.get("credit_limit")
-                #                     credit_limit.company = credit_limits_data.get("company", credit_limit.company)
-                #                     credit_limit_updated = True
-                #                     break
-                #         if not credit_limit_updated:
-                #             # Thêm mới credit limit
-                #             customer.append("credit_limits", credit_limits_data)
-                #             customer.save()
-            
+                customer.set("credit_limits", credit_limit_current_orther)
+                customer.save(ignore_version=True)
+
             frappe.db.commit()
             return gen_response(200, "ok")
         else:
