@@ -196,6 +196,7 @@ def create_sale_order(**kwargs):
                 "qty": item_data.get("qty"),
                 "uom": item_data.get("uom"),
                 "discount_percentage": discount_percentage,
+                "discount_amount": discount_amount,
                 "item_tax_template": item_tax_template,
                 "item_tax_rate": tax_rate
             })
