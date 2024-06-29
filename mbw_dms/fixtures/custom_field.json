@@ -914,7 +914,7 @@
   "mandatory_depends_on": null,
   "modified": "2024-01-22 10:22:16.317178",
   "module": "MBW DMS",
-  "name": "Address-custom_device_location",
+  "name": "Address-custom_address_location",
   "no_copy": 0,
   "non_negative": 0,
   "options": null,
