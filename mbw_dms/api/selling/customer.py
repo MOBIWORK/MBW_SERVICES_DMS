@@ -356,13 +356,20 @@ def update_customer(**kwargs):
             # Chỉnh sửa hạn mức công nợ
             if "credit_limits" in kwargs:
                 credit_limits = kwargs.get("credit_limits")
-                credit_limit_current =  customer.credit_limits
-                credit_limit_current_orther = pydash.filter_(credit_limit_current,lambda x: x.company!=company)
-                credit_limit_current_orther.append({
-                    "company": company,
+                # credit_limit_current =  customer.credit_limits
+                # print("==============",credit_limit_current)
+                # credit_limit_current_orther = pydash.filter_(credit_limit_current,lambda x: x.company!=company)
+                # credit_limit_current_orther = pydash.map_(credit_limit_current_orther,lambda x: {
+                #     "company": x.company,
+                #     "credit_limit": x.credit_limit
+                # })
+                # credit_limit_current_orther.append({
+                #     "company": company,
+                #     "credit_limit": credit_limits[0]
+                # })
+                customer.set("credit_limits", [{
                     "credit_limit": credit_limits[0]
-                })
-                customer.set("credit_limits", credit_limit_current_orther)
+                }])
                 customer.save(ignore_version=True)
             if "address" in kwargs:
                 address_data_list = kwargs.get("address")
