@@ -5,6 +5,7 @@ UNIX_TIMESTAMP = CustomFunction('UNIX_TIMESTAMP', ['day'])
 from mbw_dms.api.common import (
     exception_handle,
     gen_response,
+    CommonHandle
 )
 from mbw_dms.api.validators import (
     validate_filter_timestamp,
@@ -14,49 +15,82 @@ from mbw_dms.api.validators import (
 )
 from mbw_dms.api import configs
 import json
+from frappe.model.base_document import get_controller
+
 
 # Lấy danh sách đơn hàng
 @frappe.whitelist(allow_guest=True,methods="GET")
 def get_list_sales_order(**kwargs):
     try:
+        def add_query(query,condition ) :
+            if query == "" :
+                return condition
+            else:
+                return f"{query} AND {condition}" 
         status = kwargs.get("status")
         from_date = validate_filter_timestamp("start")(kwargs.get("from_date")) if kwargs.get("from_date") else None
         to_date = validate_filter_timestamp("end")(kwargs.get("to_date")) if kwargs.get("to_date") else None
         page_size =  int(kwargs.get("page_size", 20))
         page_number = int(kwargs.get("page_number")) if kwargs.get("page_number") and int(kwargs.get("page_number")) > 0 else 1
-
+        print("pafe",page_number,page_size)
+        search_key = kwargs.get("search_key")
         query = {}
-        if from_date and to_date:
-            query["creation"] = ["between", [from_date, to_date]]
-        if status is not None and status != "All":
-            query["status"] = validate_choice(configs.status_order)(status)
-        if kwargs.get("customer_name"):
-            query["customer_name"] = kwargs.get("customer_name")
-        if kwargs.get("customer"):
-            query["customer"] = kwargs.get("customer")
-        if kwargs.get("name"):
-            query["name"] = kwargs.get("name")
-            
-        sale_orders =frappe.db.get_list("Sales Order", 
-                                       filters=query, 
-                                       fields=["customer", "customer_name", "name",
-                                               "(customer_address) as address_display",
-                                               "UNIX_TIMESTAMP(po_date) as po_date",
-                                               "UNIX_TIMESTAMP(delivery_date) as delivery_date",
-                                               "UNIX_TIMESTAMP(creation) as creation", "grand_total",
-                                               "rounding_adjustment", "rounded_total", "status", "sales_person"], 
-                                       order_by="delivery_date desc", 
-                                       start=page_size*(page_number-1), 
-                                       page_length=page_size,
-                                       parent_doctype="Sales Order")
+        where = "WHERE so.name IS NOT NULL "
+        user_info = CommonHandle.get_user_id()
+        if user_info.name != "Administrator":
+            employee =CommonHandle.get_employee_by_user(user = user_info.email)
+            if not employee:
+                return gen_response("404", _("Employee not registered"))
+            employee_name = employee.get('name')
+            sale_person = frappe.db.get_value("Sales Person",{"employee": employee_name},["name"])
+            if not sale_person:
+                return gen_response("404", _("Sales Person not registered"))
+            where = add_query(where,f"st.sales_person = '{sale_person}'")
+
         
+        if from_date and to_date:
+            where = add_query(where,f"creation BETWEEN '{from_date}' AND '{to_date}' ")
+        if status is not None and status != "All":
+            where = add_query(where,f"status = '{validate_choice(configs.status_order)(status)}'")
+        if kwargs.get("customer_name"):
+            customer_name = kwargs.get("customer_name")
+            where = add_query(where,f"so.customer_name = '{customer_name}'")
+        if kwargs.get("customer"):
+            customer = kwargs.get("customer")
+            where = add_query(where,f"so.customer = '{customer}'")
+        if kwargs.get("name"):
+            name = kwargs.get("name")
+            where = add_query(where,f"so.name = '{name}'")
+
+        if search_key:
+            where = add_query(where,f"so.customer_name like '%{search_key}%' or so.name LIKE '%{search_key}%' or so.customer LIKE '%{search_key}%'")
+        # new query
+        sql_query = f"""
+                    SELECT  so.customer ,  so.customer_name ,  so.name ,
+                             (so.customer_address) as address_display ,
+                             UNIX_TIMESTAMP(so.po_date) as po_date ,
+                             UNIX_TIMESTAMP(so.delivery_date) as delivery_date ,
+                             UNIX_TIMESTAMP(so.creation) as creation ,  so.grand_total ,
+                             so.rounding_adjustment ,  so.rounded_total ,  so.status , st.*
+                    FROM `tabSales Order` so
+                    JOIN `tabSales Team` st ON so.name = st.parent
+                    {where}
+                    ORDER BY delivery_date DESC
+                    LIMIT {page_size} OFFSET {page_size * (page_number - 1)}
+                    """
+        sale_orders = frappe.db.sql(sql_query,as_dict=True)
         for sale_order in sale_orders:
             sale_order["custom_id"] = frappe.db.get_value("Customer", {"name": sale_order["customer"]}, "customer_code")
         total_order = len(frappe.db.get_list("Sales Order", filters=query))
-
+        total_order = frappe.db.sql(f"""
+                            SELECT  COUNT(*) AS total
+                    FROM `tabSales Order` so
+                    JOIN `tabSales Team` st ON so.name = st.parent
+                    {where}
+                        """,as_dict=True)
         return gen_response(200, "Thành công",{
             "data": sale_orders,
-            "total": total_order,
+            "total": total_order[0].total,
             "page_size": page_size,
             "page_number": page_number
         })

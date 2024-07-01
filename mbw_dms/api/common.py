@@ -541,3 +541,5 @@ def get_all_parent_sales_persons(sales_person):
 CommonHandle.create_address = staticmethod(create_address)
 
 CommonHandle.get_employee_info = staticmethod(get_employee_info)
+
+CommonHandle.get_user_id = staticmethod(get_user_id)
