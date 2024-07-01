@@ -26,6 +26,9 @@ class DMSCheckin(Document):
         self.check_router()
         self.update_data_first_checkin()
 
+    def after_delete(self):
+        self.update_kpi_monthly_after_delete()
+
     def existing_checkin(self, kh_ma, start_date, end_date, current_user):
         existing_checkin = frappe.get_all(
             "DMS Checkin",
@@ -118,6 +121,61 @@ class DMSCheckin(Document):
                 })
                 monthly_summary_doc.insert(ignore_permissions=True)
 
+    def update_kpi_monthly_after_delete(self):
+        # Lấy ngày tháng để truy xuất dữ liệu
+        month = int(nowdate().split('-')[1])
+        year = int(nowdate().split('-')[0])
+        start_date_str = f"{year:04d}-{month:02d}-01"
+        last_day_of_month = calendar.monthrange(year, month)[1]
+        end_date_str = f"{year:04d}-{month:02d}-{last_day_of_month:02d}"
+        start_date = frappe.utils.getdate(start_date_str)
+        end_date = frappe.utils.getdate(end_date_str)
+
+        # Lấy id của nhân viên
+        user_id = frappe.session.user
+        user_name = frappe.get_value("Employee", {"user_id": user_id}, "name")
+        # Lấy tuyến của nhân viên
+        router_employee = frappe.get_all("DMS Router", filters = {"employee": user_name}, fields = ["travel_date"])
+        list_travel_date = [router["travel_date"] for router in router_employee]
+
+        # Lấy thứ của ngày
+        days = datetime.date.today()
+        date = days.weekday()
+        # Chuyển đổi sang tên của ngày trong tuần
+        date_in_week = ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ Nhật"]
+        name_date = date_in_week[date]
+
+        # Kiểm tra xem khách hàng đã thực hiện checkin trong tháng này hay chưa
+        kh_ma = self.kh_ma
+        exists_checkin = self.existing_checkin(kh_ma=kh_ma, start_date=start_date, end_date=end_date, current_user=user_id)
+
+        # Kiểm tra đã tồn tại bản ghi KPI của tháng này chưa
+        existing_monthly_summary = frappe.get_all(
+            "DMS Summary KPI Monthly",
+            {"thang": month, "nam": year, "nhan_vien_ban_hang": user_name},
+            "name"
+        )
+
+        if len(exists_checkin) > 1:
+            if existing_monthly_summary:
+                monthly_summary_doc = frappe.get_doc("DMS Summary KPI Monthly", existing_monthly_summary)
+                monthly_summary_doc.so_kh_vt_luot -= 1
+                if name_date in list_travel_date:
+                    monthly_summary_doc.solan_vt_dungtuyen -= 1
+                else:
+                    monthly_summary_doc.solan_vt_ngoaituyen -= 1
+                monthly_summary_doc.save(ignore_permissions=True)
+        else:
+            if existing_monthly_summary:
+                monthly_summary_doc = frappe.get_doc("DMS Summary KPI Monthly", existing_monthly_summary)
+                monthly_summary_doc.so_kh_vt_luot -= 1
+                monthly_summary_doc.so_kh_vt_duynhat -= 1
+                if name_date in list_travel_date:
+                    monthly_summary_doc.solan_vt_dungtuyen -= 1
+                else:
+                    monthly_summary_doc.solan_vt_ngoaituyen -= 1
+                monthly_summary_doc.save(ignore_permissions=True)
+
     def send_data_to_ekgis(self):
         frappe.enqueue(
             "mbw_dms.mbw_dms.doctype.dms_checkin.dms_checkin.send_checkin_to_ekgis",
@@ -186,7 +244,6 @@ class DMSCheckin(Document):
             return
 
     
-
 # Tạo mới checkin
 @frappe.whitelist(methods="POST")
 def create_checkin(kwargs):

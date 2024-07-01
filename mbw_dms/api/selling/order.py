@@ -204,7 +204,7 @@ def create_sale_order(**kwargs):
             new_order.additional_discount_percentage = discount_percent                                     # Phần trăm chiết khấu
 
         new_order.checkin_id = kwargs.get("checkin_id")
-
+        new_order.ignore_pricing_rule = ignore_pricing_rule
         # Thêm mới sales team
         new_order.append("sales_team", {
             "sales_person": sales_person,
@@ -219,10 +219,12 @@ def create_sale_order(**kwargs):
         for item_data in items:
             rate = float(item_data.get("rate", 0))
             discount_percentage = float(item_data.get("discount_percentage", 0))
-            discount_amount = float(item_data.get("discount_amount", 0))
+            discount_amount = item_data.get("discount_amount", 0)
             item_tax_template = item_data.get("item_tax_template")
             tax_rate = float(item_data.get("item_tax_rate", 0))
-            
+            if discount_amount > 0:
+                discount_percentage = discount_amount / rate * 100
+
             new_order.append("items", {
                 "item_code": item_data.get("item_code"),
                 "qty": item_data.get("qty"),
