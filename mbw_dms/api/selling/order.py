@@ -219,18 +219,14 @@ def create_sale_order(**kwargs):
         for item_data in items:
             rate = float(item_data.get("rate", 0))
             discount_percentage = float(item_data.get("discount_percentage", 0))
-            discount_amount = item_data.get("discount_amount", 0)
             item_tax_template = item_data.get("item_tax_template")
             tax_rate = float(item_data.get("item_tax_rate", 0))
-            if discount_amount > 0:
-                discount_percentage = discount_amount / rate * 100
 
             new_order.append("items", {
                 "item_code": item_data.get("item_code"),
                 "qty": item_data.get("qty"),
                 "uom": item_data.get("uom"),
                 "discount_percentage": discount_percentage,
-                "discount_amount": discount_amount,
                 "item_tax_template": item_tax_template,
                 "item_tax_rate": tax_rate
             })
@@ -264,9 +260,17 @@ def create_sale_order(**kwargs):
         customer = frappe.get_doc("Customer", kwargs.customer)
         customer.has_sales_order = 1
         customer.save()
-        
+
         new_order.insert()
-        frappe.db.commit()
+    
+        sales_order_doc = frappe.get_doc("Sales Order", new_order.name)
+        for item in sales_order_doc.items:
+            discount_amount = next((data["discount_amount"] for data in items if data["item_code"] == item.item_code), 0)
+            item.discount_amount = discount_amount
+            if discount_amount > 0:
+                item.discount_percentage = discount_amount / rate * 100
+            item.db_update()
+        
         detail_order = so_si_detail(doctype="Sales Order", name=new_order.name)
 
         return gen_response(201, "Thành công", {
