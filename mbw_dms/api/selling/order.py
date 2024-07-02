@@ -265,14 +265,15 @@ def create_sale_order(**kwargs):
     
         sales_order_doc = frappe.get_doc("Sales Order", new_order.name)
         for item in sales_order_doc.items:
-            discount_amount = next((data["discount_amount"] for data in items if data["item_code"] == item.item_code), 0)
+            discount_amount = next((data.get("discount_amount") for data in items if data.get("discount_amount") and data["item_code"] == item.item_code), 0)
             item.discount_amount = discount_amount
             if discount_amount > 0:
-                item.discount_percentage = discount_amount / rate * 100
-            item.db_update()
+                item.discount_percentage = round(discount_amount / rate * 100, 3)
+                item.rate = item.rate - discount_amount
+                item.db_update()
         
         detail_order = so_si_detail(doctype="Sales Order", name=new_order.name)
-        print("TTTTTTTTTTTTT",detail_order)
+        
         return gen_response(201, "Thành công", {
             "detail_order": detail_order,
             "name": new_order.name
