@@ -145,13 +145,14 @@ def customer_detail(name):
         doc_customer["contacts"] = contacts
         doc_customer["routers"] = list_router_frequency
         doc_customer["customer_location_primary"] = null_location( doc_customer["customer_location_primary"])
-        # doc_customer["credit_limits"] = doc_customer["credit_limits"][0].credit_limit if len(doc_customer["credit_limits"])>0 else 0  
+        doc_customer["credit_limits"] = pydash.map_(doc_customer["credit_limits"],lambda x: x.credit_limit) if len(doc_customer["credit_limits"])>0 else[ 0 ] 
 
         if doc_customer["image"] and not doc_customer["image"].startswith("http"):
             from frappe.utils import get_url
             doc_customer["image"] = (get_url() +  doc_customer["image"]).replace(" ", "%20")
         for address in  doc_customer["address"]:
             address.address_location = null_location(address.address_location)
+        print("doc_customer",doc_customer)
         return gen_response(200, "", doc_customer)
     except Exception as e:
         exception_handle(e)
@@ -222,7 +223,8 @@ def create_customer(**kwargs):
 
         new_customer.append("credit_limits", {
             "company": employee_name.company or "",
-            "credit_limit": kwargs.get("credit_limit")
+            "credit_limit": kwargs.get("credit_limit"),
+            "bypass_credit_limit_check":1
         })
         new_customer.insert()
 
@@ -327,7 +329,8 @@ def list_territory():
 @frappe.whitelist(methods="PUT")
 def update_customer(**kwargs):
     try:
-        company = frappe.get_value("Employee", {"user_id": frappe.session.user}, "company")
+        print("khh",kwargs)
+        # company = frappe.get_value("Employee", {"user_id": frappe.session.user}, "company")
         name = kwargs.get("name")
         if frappe.db.exists("Customer", name, cache=True):
             customer = frappe.get_doc("Customer", name)
@@ -368,9 +371,10 @@ def update_customer(**kwargs):
                 #     "credit_limit": credit_limits[0]
                 # })
                 customer.set("credit_limits", [{
-                    "credit_limit": credit_limits[0]
+                    "credit_limit": credit_limits[0],
+                    "bypass_credit_limit_check":1
                 }])
-                customer.save(ignore_version=True)
+                customer.save()
             if "address" in kwargs:
                 address_data_list = kwargs.get("address")
                 if len(address_data_list)>0:

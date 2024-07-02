@@ -264,11 +264,15 @@ def create_sale_order(**kwargs):
         customer = frappe.get_doc("Customer", kwargs.customer)
         customer.has_sales_order = 1
         customer.save()
-        
+            # Print the JSON format
+        new_order_json = json.dumps(new_order.as_dict(), indent=4)
+        print("ooooooooo",new_order_json)
+
         new_order.insert()
+
         frappe.db.commit()
         detail_order = so_si_detail(doctype="Sales Order", name=new_order.name)
-
+        print("TTTTTTTTTTTTT",detail_order)
         return gen_response(201, "Thành công", {
             "detail_order": detail_order,
             "name": new_order.name
