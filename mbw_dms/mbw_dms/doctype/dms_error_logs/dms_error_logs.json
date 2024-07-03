@@ -1,0 +1,73 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2024-07-03 08:55:03.207022",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "time_error",
+  "orgid",
+  "user",
+  "api",
+  "screen",
+  "detail"
+ ],
+ "fields": [
+  {
+   "default": "Now",
+   "fieldname": "time_error",
+   "fieldtype": "Datetime",
+   "label": "Th\u1eddi gian l\u1ed7i"
+  },
+  {
+   "fieldname": "orgid",
+   "fieldtype": "Data",
+   "label": "T\u1ed5 ch\u1ee9c"
+  },
+  {
+   "fieldname": "user",
+   "fieldtype": "Link",
+   "label": "T\u00e0i kho\u1ea3n",
+   "options": "User"
+  },
+  {
+   "fieldname": "api",
+   "fieldtype": "Data",
+   "label": "Api"
+  },
+  {
+   "fieldname": "screen",
+   "fieldtype": "Data",
+   "label": "Screen"
+  },
+  {
+   "fieldname": "detail",
+   "fieldtype": "Long Text",
+   "label": "Chi ti\u1ebft l\u1ed7i"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2024-07-03 09:10:21.230412",
+ "modified_by": "Administrator",
+ "module": "MBW DMS",
+ "name": "DMS Error Logs",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
