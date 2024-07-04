@@ -11,8 +11,11 @@ from mbw_dms.api.common import (
     routers_name_of_customer,
     customers_code_router,
     null_location,
-    CommonHandle
+    CommonHandle,
+    create_address_current,
+    create_address
 )
+
 from mbw_dms.api.validators import (
     validate_date, 
     validate_phone_number, 
@@ -384,16 +387,43 @@ def update_customer(**kwargs):
             # Cập nhật hoặc thêm mới liên hệ
             if "contact" in kwargs:
                 contacts_data_list = kwargs.get("contact")
+                print("contacts_data_list",contacts_data_list)
                 if contacts_data_list:
                     for contact_data in contacts_data_list:
                         contact_name = contact_data.get("name")
+                        link_cs_address= {
+                            "link_doctype": "Contact",
+                            "link_name": contact_name 
+                        }
+                        new_address = {}
+                        if contact_data.get("city") and  contact_data.get("address_line1") :
+                            new_address =  {
+                                "address_line1": contact_data.get("address_line1"),
+                                "address_title":contact_data.get("address_title"),
+                                "city": contact_data.get("city"),
+                                "county": contact_data.get("county"),
+                                "state": contact_data.get("state"),
+                            }
+                        contact_data = {
+                            "first_name": contact_data.get("first_name"),
+                            "is_billing_contact": contact_data.get("is_billing_contact"),
+                            "is_primary_contact": contact_data.get("is_primary_contact"),
+                            "last_name": contact_data.get("last_name"),
+                            "phone": contact_data.get("phone")
+                        }
                         if contact_name and frappe.db.exists("Contact", contact_name):
                             contact = frappe.get_doc("Contact", contact_name)
+                            if new_address :
+                                address_current = create_address(new_address=new_address,link_cs_address=link_cs_address)
+                                contact_data.update({"address" :address_current.name})
                             contact.update(contact_data)
                             contact.save(ignore_permissions=True)
                         else:
                             contact = frappe.new_doc("Contact")
-                            contact.update(contact_data)
+                            address_current = create_address(new_address=new_address,link_cs_address=link_cs_address)
+                            if new_address :
+                                address_current = create_address(new_address=new_address,link_cs_address=link_cs_address)
+                                contact_data.update({"address" :address_current.name})
                             contact.append("links", {
                                 "link_doctype": "Customer",
                                 "link_name": name
