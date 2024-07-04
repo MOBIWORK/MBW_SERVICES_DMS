@@ -538,6 +538,49 @@ def get_all_parent_sales_persons(sales_person):
 
     return parent_sales_persons
 
+
+
+
+# lấy con tất cả các con nhóm bán hàng của nhân viên
+def get_sales_group_child(sale_person = "Sales Team",is_group=1):
+    query_sale= f"""
+        WITH RECURSIVE Tree AS (
+        SELECT 
+            sales_person_name,
+            parent_sales_person,
+            name,
+            employee,
+            is_group
+        FROM 
+            `tabSales Person`
+        WHERE 
+            name = '{sale_person}'
+
+        UNION ALL
+
+        SELECT 
+            child.sales_person_name,
+            child.parent_sales_person,
+            child.name,
+            child.employee,
+            child.is_group
+        FROM 
+            `tabSales Person` child
+        INNER JOIN Tree parent ON parent.name = child.parent_sales_person
+    )
+
+    SELECT * FROM Tree
+    WHERE is_group = {is_group};
+        """
+    
+    sales_persons = frappe.db.sql(query_sale,as_dict=1)
+    if is_group == 1:
+        employee_codes = pydash.map_(sales_persons,lambda x: x.employee)
+        employee_id_users = frappe.db.get_all("Employee",filters={"name": ["in",employee_codes]},fields=["user_id"])
+        employee_id_users = pydash.map_(employee_id_users,lambda x: x.user_id)
+        return employee_codes,employee_id_users
+    else:
+        return  sales_persons
 CommonHandle.create_address = staticmethod(create_address)
 
 CommonHandle.get_employee_info = staticmethod(get_employee_info)
