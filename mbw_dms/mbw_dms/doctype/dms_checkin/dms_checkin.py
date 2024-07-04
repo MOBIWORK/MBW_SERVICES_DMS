@@ -271,7 +271,12 @@ def create_checkin(kwargs):
 
         if kwargs.get("checkin_giora"):
             new_checkin.set("is_checkout", 1)
-        
+        images = kwargs.get("listImage")
+        if images: 
+            for image in images:
+                new_checkin.append("checkin_hinhanh",{
+                    "url_image":image
+                })
         user_id = frappe.session.user
         employee_id = frappe.get_value("Employee", {"user_id": user_id}, "name")
         new_checkin.createbyname = employee_id
