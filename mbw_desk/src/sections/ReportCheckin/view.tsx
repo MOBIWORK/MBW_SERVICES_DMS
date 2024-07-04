@@ -1,61 +1,49 @@
-import { VerticalAlignBottomOutlined } from "@ant-design/icons";
+import { SyncOutlined, VerticalAlignBottomOutlined } from "@ant-design/icons";
 import {
   ContentFrame,
-  FormItemCustom,
+  DropDownCustom,
   HeaderPage,
+  SelectCommon,
   TableCustom,
 } from "../../components";
-import { Col, DatePicker, Form, Row, Select, Table, TreeSelect } from "antd";
+import {
+  Button,
+  Col,
+  DatePicker,
+  Dropdown,
+  Form,
+  Row,
+  Table,
+} from "antd";
 import { DatePickerProps, TableColumnsType } from "antd/lib";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import useDebounce from "../../hooks/useDebount";
 import { rsData, rsDataFrappe } from "../../types/response";
 import { AxiosService } from "../../services/server";
 import { employee } from "../../types/employeeFilter";
-import { area, customergroup, typecustomer } from "../ReportSales/data";
 import { treeArray } from "@/util";
 import { listSale } from "@/types/listSale";
 import dayjs from "dayjs";
-
-interface DataCheckin {
-  key: React.Key;
-  name: string;
-  stt?: number;
-  employee_code: string;
-  employee_name: string;
-  saleperson: string;
-  days: string;
-  date: string;
-  startwork: string;
-  checkin: string;
-  kmauto: number;
-  kmmove: number;
-  speed: number;
-  note?: string;
-}
-
-interface ExpandedDataType {
-  key: React.Key;
-  customer: string;
-  customer_code: string;
-  address: string;
-  typecustomer: string;
-  groupcustomer: string;
-  phonenumber: string;
-  contact: string;
-  checkin: string;
-  checkout: string;
-  timecheckin: string;
-  addresscheckin: string;
-  distance: string;
-}
+import { TreeSelectCommon } from "@/components/select/select";
+import { TrueCheck } from "@/icons/true-check";
+import { FalseCheck } from "@/icons/false-check";
+import { typecustomer } from "../ReportSales/data";
+import { useForm } from "antd/es/form/Form";
+import { LuFilter, LuFilterX } from "react-icons/lu";
+import { useResize } from "@/hooks";
 
 const startOfMonth: any = dayjs().startOf("month");
 const endOfMonth: any = dayjs().endOf("month");
+let start = Date.parse(startOfMonth["$d"]) / 1000;
+let end = Date.parse(endOfMonth["$d"]) / 1000;
 
-const columnsCheckin: TableColumnsType<DataCheckin> = [
+const columnsCheckin: any = [
   {
-    title: "STT",
+    title: (
+      <div className="relative">
+        <span className="absolute -top-[11px] -left-8">STT</span>
+      </div>
+    ),
     dataIndex: "stt",
     key: "stt",
     render: (_, record: any, index: number) => index + 1,
@@ -64,128 +52,91 @@ const columnsCheckin: TableColumnsType<DataCheckin> = [
     title: "Mã nhân viên",
     dataIndex: "employee_code",
     key: "employee_code",
-    render: (_, record: any) => (
-      <div className="!w-[160px]">{record.employee_code}</div>
-    ),
   },
   {
     title: "Tên nhân viên",
     dataIndex: "employee_name",
     key: "employee_name",
-    render: (_, record: any) => (
-      <div className="!w-[160px]">{record.employee_name}</div>
-    ),
   },
   {
     title: "Nhóm bán hàng",
-    dataIndex: "saleperson",
-    key: "saleperson",
-    render: (_, record: any) => (
-      <div className="!w-[160px]">{record.saleperson}</div>
-    ),
+    dataIndex: "sale_group",
+    key: "sale_group",
   },
   {
     title: "Ngày",
-    dataIndex: "days",
-    key: "days",
-    render: (_, record: any) => <div className="!w-[160px]">{record.days}</div>,
+    dataIndex: "create_time",
+    key: "create_time",
+    render: (value: any) => <div>{dayjs.unix(value).format("DD/MM/YYYY")}</div>,
   },
   {
     title: "Thứ",
-    dataIndex: "date",
-    key: "date",
-    render: (_, record: any) => <div className="!w-[160px]">{record.date}</div>,
+    dataIndex: "create_time",
+    key: "create_time",
+    render: (value: any) => <div>{dayjs.unix(value).format("dddd")}</div>,
   },
   {
     title: "Giờ làm",
-    dataIndex: "startwork",
-    key: "startwork",
-    render: (_, record: any) => (
-      <div className="!w-[160px]">{record.startwork}</div>
+    className: "!text-center",
+    dataIndex: "total_time",
+    key: "total_time",
+    render: (value: any) => (
+      <div className="!text-center">{parseFloat((value / 60).toFixed(2))}</div>
     ),
   },
   {
     title: "Giờ viếng thăm",
-    dataIndex: "checkin",
-    key: "checkin",
-    render: (_, record: any) => (
-      <div className="!w-[160px]">{record.checkin}</div>
+    dataIndex: "total_work",
+    className: "!text-center",
+    key: "total_work",
+    render: (value: any) => (
+      <div className="!text-center">{parseFloat((value / 60).toFixed(2))}</div>
     ),
   },
   {
     title: "Số km tự động (km)",
     dataIndex: "kmauto",
+    className: "!text-center",
     key: "kmauto",
-    render: (_, record: any) => (
-      <div className="!w-[160px]">{record.kmauto}</div>
+    render: (value: any) => (
+      <div className="!text-center">{value ? value : "-"}</div>
     ),
   },
   {
     title: "Số km di chuyển (km)",
+    className: "!text-center",
     dataIndex: "kmmove",
     key: "kmmove",
-    render: (_, record: any) => (
-      <div className="!w-[160px]">{record.kmmove}</div>
+    render: (value: any) => (
+      <div className="!text-center">{value ? value : "-"}</div>
     ),
   },
   {
     title: "Vận tốc (km/h)",
     dataIndex: "speed",
+    className: "!text-center",
     key: "kmmove",
-    render: (_, record: any) => (
-      <div className="!w-[160px]">{record.kmmove}</div>
-    ),
-  },
-  {
-    title: "Ghi chú",
-    key: "note",
-    render: () => (
-      <div className="!w-[160px]">
-        <a>Xem ghi chú</a>
-      </div>
+    render: (value: any) => (
+      <div className="!text-center">{value ? value : "-"}</div>
     ),
   },
 ];
 
-// const data: DataCheckin[] = [
-//   {
-//     key: "KDA",
-//     name: "7382jsd",
-//     employee_code: "HHH-1",
-//     employee_name: "Thiên Khuyển",
-//     saleperson: "KV MB",
-//     days: "20/1/2024",
-//     date: "Thứ 4",
-//     startwork: "08:00",
-//     checkin: "12:30",
-//     kmauto: 5,
-//     kmmove: 15,
-//     speed: 56,
-//   },
-//   {
-//     key: "HUDS",
-//     name: "7382jsd",
-//     employee_code: "HHH-1",
-//     employee_name: "Tần Sương",
-//     saleperson: "KV MN",
-//     days: "20/2/2024",
-//     date: "Thứ 3",
-//     startwork: "08:00",
-//     checkin: "12:30",
-//     kmauto: 19,
-//     kmmove: 20,
-//     speed: 23,
-//   },
-// ];
-
 export default function ReportCheckin() {
+  const [dataCheckin, setDataCheckin] = useState<any>([]);
+  const [total, setTotal] = useState<number>(0);
+  const PAGE_SIZE = 20;
+  const [page, setPage] = useState<number>(1);
   const [listEmployees, setListEmployees] = useState<any[]>([]);
   const [listSales, setListSales] = useState<any[]>([]);
   const [sales_team, setTeamSale] = useState<string>();
+  const [formFilter] = useForm();
   const [keySearch4, setKeySearch4] = useState("");
   const [employee, setEmployee] = useState<string>();
+  const [from_date, setFromDate] = useState<any>(start);
+  const [to_date, setToDate] = useState<any>(end);
   let seachbykey = useDebounce(keySearch4);
-  const [keyS3, setKeyS3] = useState("");
+  const [refresh, setRefresh] = useState<boolean>(false);
   const [customer_type, setCustomerType] = useState("");
   const [listCustomerGroup, setListCustomerGroup] = useState<any[]>([]);
   const [customer_group, setCustomerGroup] = useState("");
@@ -195,11 +146,75 @@ export default function ReportCheckin() {
   const [listTerritory, setListTerritory] = useState<any[]>([]);
   const [keySTerritory, setKeySTerritory] = useState("");
   let keySearchTerritory = useDebounce(keySTerritory, 500);
+  const containerRef1 = useRef(null);
+  const size = useResize();
+  const [containerHeight, setContainerHeight] = useState<any>(0);
+  const [scrollYTable1, setScrollYTable1] = useState<number>(size?.h * 0.52);
 
-  let keySearch3 = useDebounce(keyS3, 300);
+  useEffect(() => {
+    setScrollYTable1(size.h * 0.52);
+  }, [size]);
 
-  const onChange: DatePickerProps["onChange"] = (dateString) => {
-    console.log(dateString);
+  useEffect(() => {
+    const containerElement = containerRef1.current;
+    if (containerElement) {
+      const resizeObserver = new ResizeObserver((entries) => {
+        for (let entry of entries) {
+          setContainerHeight(entry.contentRect.height);
+        }
+      });
+      resizeObserver.observe(containerElement);
+      return () => resizeObserver.disconnect();
+    }
+  }, [containerRef1]);
+
+
+  const onChange: DatePickerProps["onChange"] = (dateString: any) => {
+    if (dateString === null || dateString === undefined) {
+      setFromDate("");
+    } else if (
+      endOfMonth &&
+      dateString &&
+      dateString.isAfter(endOfMonth, "day")
+    ) {
+      message.error("Từ ngày phải nhỏ hơn hoặc bằng Đến ngày");
+    } else {
+      let fDate = Date.parse(dateString["$d"]) / 1000;
+      setFromDate(fDate);
+    }
+  };
+
+  const onChange1: DatePickerProps["onChange"] = (dateString: any) => {
+    if (dateString === null || dateString === undefined) {
+      setToDate("");
+    } else if (
+      startOfMonth &&
+      dateString &&
+      dateString.isBefore(startOfMonth, "day")
+    ) {
+      message.error("Đến ngày phải lớn hơn hoặc bằng Từ ngày");
+    } else {
+      let tDate = Date.parse(dateString["$d"]) / 1000;
+      setToDate(tDate);
+    }
+  };
+
+  const handleSearchFilter = (val: any) => {
+    if (val.customergroup) {
+      setCustomerGroup(val.customergroup);
+    } else {
+      setCustomerGroup("");
+    }
+    if (val.customertype) {
+      setCustomerType(val.customertype);
+    } else {
+      setCustomerType("");
+    }
+    if (val.territory) {
+      setTerritory(val.territory);
+    } else {
+      setTerritory("");
+    }
   };
 
   useEffect(() => {
@@ -292,158 +307,191 @@ export default function ReportCheckin() {
     })();
   }, [keySearchTerritory]);
 
-  const expandedRowRender = (record: any) => {
-    const columns: TableColumnsType<ExpandedDataType> = [
+  const expandedRowRender = (recordTable: any) => {
+    const columns: TableColumnsType<any> = [
       {
         title: "Khách hàng",
         dataIndex: "customer",
         key: "customer",
-        render: (_, record, index) => (
-          <div className="!w-[200]">
-            <div>{record.customer}</div>
+        render: (_, record) => (
+          <div>
+            <div>{record.customer_name}</div>
             <div className="text-[#637381]">{record.customer_code}</div>
           </div>
         ),
       },
       {
         title: "Địa chỉ",
-        dataIndex: "address",
-        key: "address",
-        render: (_, record, index) => (
-          <div className="!w-[160]">
-            <div>{record.address}</div>
-          </div>
+        dataIndex: "customer_address",
+        key: "customer_address",
+        render: (_, record) => (
+          <div className="truncate">{record.customer_address}</div>
         ),
       },
       {
         title: "Loại khách",
-        dataIndex: "typecustomer",
-        key: "typecustomer",
-        render: (_, record, index) => (
-          <div className="!w-[160]">
-            <div>{record.typecustomer}</div>
-          </div>
-        ),
+        dataIndex: "customer_type",
+        key: "customer_type",
+        render: (_, record) => <div>{record.customer_type}</div>,
       },
       {
         title: "Nhóm khách",
-        dataIndex: "groupcustomer",
-        key: "groupcustomer",
-        render: (_, record, index) => (
-          <div className="!w-[160]">
-            <div>{record.groupcustomer}</div>
-          </div>
-        ),
+        dataIndex: "customer_group",
+        key: "customer_group",
+        render: (_, record) => <div>{record.customer_group}</div>,
       },
       {
         title: "Số điện thoại",
-        dataIndex: "phonenumber",
-        key: "phonenumber",
-        render: (_, record, index) => (
-          <div className="!w-[160]">
-            <div>{record.phonenumber}</div>
-          </div>
-        ),
+        dataIndex: "customer_sdt",
+        key: "customer_sdt",
+        render: (_, record) => <div>{record.customer_sdt}</div>,
       },
       {
         title: "Liên hệ",
-        dataIndex: "contact",
-        key: "contact",
-        render: (_, record, index) => (
-          <div className="!w-[160]">
-            <div>{record.contact}</div>
-          </div>
-        ),
+        dataIndex: "customer_contact",
+        key: "customer_contact",
+        render: (_, record) => <div>{record.customer_contact}</div>,
       },
       {
         title: "Checkin",
         dataIndex: "checkin",
         key: "checkin",
-        render: (_, record, index) => (
-          <div className="!w-[160]">
-            <div>{record.checkin}</div>
-          </div>
+        render: (_, record) => (
+          <div className="!text-center">{record.checkin}</div>
         ),
       },
       {
         title: "Checkout",
         dataIndex: "checkout",
         key: "checkout",
-        render: (_, record, index) => (
-          <div className="!w-[160]">
-            <div>{record.checkout}</div>
-          </div>
+        render: (_, record) => (
+          <div className="!text-center">{record.checkout}</div>
         ),
       },
       {
         title: "Số giờ viếng thăm",
-        dataIndex: "timecheckin",
-        key: "timecheckin",
-        render: (_, record, index) => (
-          <div className="!w-[160]">
-            <div>{record.timecheckin}</div>
+        dataIndex: "time_check",
+        key: "time_check",
+        render: (value: any) => (
+          <div className="!text-center">
+            {parseFloat((value / 60).toFixed(2))}
           </div>
         ),
       },
       {
         title: "Địa chỉ checkin",
-        dataIndex: "addresscheckin",
-        key: "addresscheckin",
-        render: (_, record, index) => (
-          <div className="!w-[160]">
-            <div>{record.addresscheckin}</div>
+        dataIndex: "checkin_address",
+        key: "checkin_address",
+        render: (_, record) => (
+            <div>{record.checkin_address}</div>
+        ),
+      },
+      {
+        title: "Khoảng cách",
+        dataIndex: "distance",
+        key: "distance",
+        render: (_, record) => (
+          <div className="!text-center">
+            {parseFloat(record.distance).toFixed(2)}
           </div>
         ),
       },
       {
-        title: "Khoảng cách checkin(km)",
-        dataIndex: "distance",
-        key: "distance",
-        render: (_, record, index) => (
-          <div className="!w-[160]">
-            <div>{record.distance}</div>
+        title: "Thiết bị",
+        dataIndex: "device",
+        key: "device",
+        render: (value: any) => (
+          <div className="!text-center">{value ? value : "-"}</div>
+        ),
+      },
+      {
+        title: "Số ảnh chụp",
+        dataIndex: "total_image",
+        key: "total_image",
+        render: (_, record) => (
+          <div className="!text-center">{record.total_image}</div>
+        ),
+      },
+      {
+        title: "Đúng tuyến",
+        dataIndex: "is_router",
+        key: "is_router",
+        render: (value: any) => (
+          <div className="!text-center">
+            {value === "1" ? <TrueCheck /> : <FalseCheck />}
           </div>
         ),
       },
+      {
+        title: "Đơn hàng",
+        dataIndex: "is_order",
+        key: "is_order",
+        render: (value: any) => (
+          <div className="!text-center">
+            {value === "1" ? <TrueCheck /> : <FalseCheck />}
+          </div>
+        ),
+      },
+      {
+        title: "Ghi tồn",
+        dataIndex: "is_check_inventory",
+        key: "is_check_inventory",
+        render: (value: any) => (
+          <div className="!text-center">
+            {value === "1" ? <TrueCheck /> : <FalseCheck />}
+          </div>
+        ),
+      },
+      {
+        title: "Ghi chú",
+        dataIndex: "note",
+        key: "note",
+        render: (value: any) => (
+          <div className="!text-center">{value ? value : "-"}</div>
+        ),
+      },
     ];
-    // const dataEx = [
-    //   {
-    //     customer: "Khách hàng 1",
-    //     customer_code:"KH1",
-    //     address: "Hà Nội",
-    //     typecustomer: "Loại khách hàng",
-    //     groupcustomer: "Nhóm khác hàng",
-    //     phonenumber: "012312393",
-    //     contact: "88 Tây Hồ",
-    //     checkin: "07:00",
-    //     checkout: "07:15",
-    //     timecheckin: "15 phút",
-    //     addresscheckin: "Hòang Thành Thăng Long",
-    //     distance: "0.2",
-    //   },
-    //   {
-    //     customer: "Khách hàng 2",
-    //     customer_code:"KH2",
-    //     address: "Hà Nội",
-    //     typecustomer: "Loại khách hàng",
-    //     groupcustomer: "Nhóm khác hàng",
-    //     phonenumber: "0928167294",
-    //     contact: "892 Lạc Long Quân",
-    //     checkin: "07:00",
-    //     checkout: "07:15",
-    //     timecheckin: "15 phút",
-    //     addresscheckin: "Phong Nha Kẻ Bàng",
-    //     distance: "0.2",
-    //   }
-    // ];
     return (
       <Table
+        dataSource={recordTable?.customers?.map((item: any) => {
+          let id = Math.random();
+          return {
+            ...item,
+            key: id,
+          };
+        })}
+        // scroll={{ y: 280 }}
         columns={columns}
         pagination={false}
-        // dataSource={dataEx}
       />
     );
   };
+
+  useEffect(() => {
+    (async () => {
+      const rsData = await AxiosService.get(
+        "/api/method/mbw_dms.api.report.checkin_report.checkin_report_info",
+        {
+          params: {
+            page_size: PAGE_SIZE,
+            page_number: page,
+            from_date: from_date,
+            to_date: to_date,
+            employee: employee,
+            sale_group: sales_team,
+            territory: territory,
+            customer_group: customer_group,
+            customer_type: customer_type,
+          },
+        }
+      );
+
+      let { result } = rsData;
+
+      setDataCheckin(result);
+      setTotal(result?.totals);
+    })();
+  }, [page, from_date, to_date, refresh, sales_team, employee, customer_group, customer_type]);
 
   return (
     <>
@@ -453,10 +501,18 @@ export default function ReportCheckin() {
             title="Báo cáo viếng thăm"
             buttons={[
               {
+                icon: <SyncOutlined className="text-xl" />,
+                size: "18px",
+                className: "flex mr-2 ",
+                action: () => {
+                  setRefresh((prev) => !prev);
+                },
+              },
+              {
                 label: "Xuất dữ liệu",
                 type: "primary",
                 icon: <VerticalAlignBottomOutlined className="text-xl" />,
-                size: "20px",
+                size: "18px",
                 className: "flex items-center",
               },
             ]}
@@ -464,137 +520,194 @@ export default function ReportCheckin() {
         }
       >
         <div className="bg-white rounded-2xl pt-4 pb-7  border-[#DFE3E8] border-[0.2px] border-solid">
-          <Form
-            layout="vertical"
-            className="flex flex-wrap justify-start px-4 items-center"
-          >
-            <Row gutter={[8, 8]}>
-              <FormItemCustom
-                label={"Từ ngày"}
-                className="border-none mr-2 w-[200px]"
-              >
-                <DatePicker
-                  format={"DD-MM-YYYY"}
-                  className="!bg-[#F4F6F8] !h-7 rounded-lg mt-[-2px]"
-                  placeholder="Từ ngày"
-                  onChange={onChange}
-                  defaultValue={startOfMonth}
-                />
-              </FormItemCustom>
-              <FormItemCustom
-                label={"Đến ngày"}
-                className="border-none mr-2 w-[200px]"
-              >
-                <DatePicker
-                  format={"DD-MM-YYYY"}
-                  className="!bg-[#F4F6F8] !h-7 rounded-lg mt-[-2px]"
-                  placeholder="Đến ngày"
-                  onChange={onChange}
-                  defaultValue={endOfMonth}
-                />
-              </FormItemCustom>
-              <FormItemCustom
-                label={"Nhóm bán hàng"}
-                className="border-none mr-2 w-[200px]"
-              >
-                <TreeSelect
-                  placeholder="Tất cả nhóm bán hàng"
-                  allowClear
-                  treeData={listSales}
-                  onChange={(value: string) => {
-                    setTeamSale(value);
-                  }}
-                  dropdownStyle={{
-                    maxHeight: 400,
-                    overflow: "auto",
-                    minWidth: 400,
-                  }}
-                />
-              </FormItemCustom>
-              <FormItemCustom
-                label={"Nhân viên"}
-                className="border-none mr-2 w-[200px]"
-                name="employee"
-              >
-                <Select
-                  filterOption={false}
-                  notFoundContent={null}
-                  allowClear
-                  placeholder="Tất cả nhân viên"
-                  onSearch={(value: string) => {
-                    setKeySearch4(value);
-                  }}
-                  options={listEmployees}
-                  onSelect={(value) => {
-                    setEmployee(value);
-                  }}
-                  onClear={() => {
-                    setEmployee("");
-                  }}
-                />
-              </FormItemCustom>
-              <FormItemCustom
-                label={"Loại khách hàng"}
-                className="border-none mr-2 w-[200px]"
-              >
-                <Select
-                  options={typecustomer}
-                  placeholder="Tất cả loại khách hàng"
-                  filterOption={false}
-                  allowClear
-                  onSelect={(value) => {
-                    setCustomerType(value);
-                  }}
-                  onClear={() => setCustomerType("")}
-                />
-              </FormItemCustom>
-              <FormItemCustom
-                label={"Nhóm khác hàng"}
-                className="border-none mr-2 w-[200px]"
-              >
-                <Select
-                  className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
-                  options={listCustomerGroup}
-                  onSelect={(value) => {
-                    setCustomerGroup(value);
-                  }}
-                  onSearch={(value: string) => {
-                    setKeySCustomerGroup(value);
-                  }}
-                  onClear={() => setCustomerGroup("")}
-                  filterOption={false}
-                  allowClear
-                  placeholder="Tất cả nhóm khách hàng"
-                />
-              </FormItemCustom>
-              <FormItemCustom
-                label={"Khu vực"}
-                className="border-none mr-2 w-[200px]"
-              >
-                <Select
-                  className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
-                  options={listTerritory}
-                  onSelect={(value) => {
-                    setTerritory(value);
-                  }}
-                  onSearch={(value: string) => {
-                    setKeySTerritory(value);
-                  }}
-                  onClear={() => setTerritory("")}
-                  filterOption={false}
-                  allowClear
-                  placeholder="Tất cả khu vực"
-                />
-              </FormItemCustom>
-            </Row>
-          </Form>
-          <div className="pt-5">
+          <Row gutter={[16, 16]} className="justify-between items-end w-full">
+            <Col className="ml-4">
+              <Row gutter={[8, 8]}>
+                <Col span={5}>
+                  <DatePicker
+                    format={"DD-MM-YYYY"}
+                    className="!bg-[#F4F6F8] w-full rounded-lg h-7"
+                    placeholder="Từ ngày"
+                    onChange={onChange}
+                    defaultValue={startOfMonth}
+                  />
+                </Col>
+                <Col span={5}>
+                  <DatePicker
+                    format={"DD-MM-YYYY"}
+                    className="!bg-[#F4F6F8] w-full rounded-lg h-7"
+                    onChange={onChange1}
+                    placeholder="Đến ngày"
+                    defaultValue={endOfMonth}
+                  />
+                </Col>
+                <Col span={7}>
+                  <TreeSelectCommon
+                    placeholder="Tất cả nhóm bán hàng"
+                    allowClear
+                    showSearch
+                    treeData={listSales}
+                    onChange={(value: string) => {
+                      setTeamSale(value);
+                    }}
+                    dropdownStyle={{
+                      maxHeight: 400,
+                      overflow: "auto",
+                      minWidth: 350,
+                    }}
+                  />
+                </Col>
+                <Col span={7}>
+                  <SelectCommon
+                    filterOption={false}
+                    notFoundContent={null}
+                    allowClear
+                    showSearch
+                    placeholder="Tất cả nhân viên"
+                    onSearch={(value: string) => {
+                      setKeySearch4(value);
+                    }}
+                    options={listEmployees}
+                    onSelect={(value: any) => {
+                      setEmployee(value);
+                    }}
+                    onClear={() => {
+                      setEmployee("");
+                    }}
+                  />
+                </Col>
+              </Row>
+            </Col>
+            <Col className="!ml-4">
+              <div className="flex flex-wrap items-center">
+                <div className="flex justify-center items-center mr-4">
+                  <Dropdown
+                    className="!h-8"
+                    placement="bottomRight"
+                    trigger={["click"]}
+                    dropdownRender={() => (
+                      <DropDownCustom title={"Bộ lọc"}>
+                        <div className="">
+                          <Form
+                            layout="vertical"
+                            form={formFilter}
+                            onFinish={handleSearchFilter}
+                          >
+                            <Form.Item
+                              name="customertype"
+                              label={"Loại khách hàng"}
+                              className="w-[468px] border-none"
+                            >
+                              <SelectCommon
+                                className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
+                                options={typecustomer}
+                                allowClear
+                                showSearch
+                                placeholder="Tất cả loại khách hàng"
+                              />
+                            </Form.Item>
+
+                            <Form.Item
+                              name="customergroup"
+                              label={"Nhóm khách hàng"}
+                              className="w-[468px] border-none"
+                            >
+                              <SelectCommon
+                                className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
+                                options={listCustomerGroup}
+                                allowClear
+                                onSearch={(value: string) => {
+                                  setKeySCustomerGroup(value);
+                                }}
+                                showSearch
+                                placeholder="Tất cả nhóm khách hàng"
+                              />
+                            </Form.Item>
+
+                            <Form.Item
+                              name="territory"
+                              label={"Khu vực"}
+                              className="w-[468px] border-none"
+                            >
+                              <SelectCommon
+                                className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
+                                options={listTerritory}
+                                allowClear
+                                onSearch={(value: string) => {
+                                  setKeySTerritory(value);
+                                }}
+                                showSearch
+                                placeholder="Tất cẩ khu vực"
+                              />
+                            </Form.Item>
+                          </Form>
+                        </div>
+                        <Row className="justify-between pt-6 pb-4">
+                          <div></div>
+                          <div>
+                            <Button
+                              className="mr-3"
+                              onClick={(ev: any) => {
+                                ev.preventDefault();
+                                formFilter.resetFields();
+                              }}
+                            >
+                              Đặt lại
+                            </Button>
+                            <Button
+                              type="primary"
+                              onClick={() => {
+                                formFilter.submit();
+                              }}
+                            >
+                              Áp dụng
+                            </Button>
+                          </div>
+                        </Row>
+                      </DropDownCustom>
+                    )}
+                  >
+                    <Button
+                      onClick={(e: any) => e.preventDefault()}
+                      className="flex items-center text-nowrap !text-[13px] !leading-[21px] !font-normal  border-r-[0.1px] rounded-r-none h-8"
+                      icon={<LuFilter style={{ fontSize: "20px" }} />}
+                    >
+                      Bộ lọc
+                    </Button>
+                  </Dropdown>
+                  <Button className="border-l-[0.1px] rounded-l-none !h-8">
+                    <LuFilterX style={{ fontSize: "20px" }} />
+                  </Button>
+                </div>
+              </div>
+            </Col>
+          </Row>
+          <div ref={containerRef1} className="pt-5">
             <TableCustom
               bordered
-              scroll={{ x: true }}
+              dataSource={dataCheckin?.data?.map((report: any) => ({
+                key: report.name,
+                ...report,
+              }))}
+              pagination={
+                total && total > PAGE_SIZE
+                  ? {
+                      pageSize: PAGE_SIZE,
+                      showSizeChanger: false,
+                      total,
+                      current: page,
+                      onChange(page) {
+                        setPage(page);
+                      },
+                    }
+                  : false
+              }
+              scroll={{
+                x: true,
+                y: containerHeight < 300 ? undefined : scrollYTable1,
+              }}
               columns={columnsCheckin}
               expandable={{ expandedRowRender, defaultExpandedRowKeys: ["0"] }}
-              // dataSource={data}
             />
           </div>
         </div>
