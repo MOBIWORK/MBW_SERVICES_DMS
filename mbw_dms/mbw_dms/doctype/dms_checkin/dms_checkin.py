@@ -698,7 +698,21 @@ def get_report(filters={}):
         where =  f"{where} AND dc.createddate <= '{to_date}'"
     print("where",where)
     query = f"""
-        WITH NumberedGroups AS (SELECT 
+
+        WITH ImageCounts AS (
+            SELECT 
+                dc.name AS checkin_name, 
+                COUNT(dci.url_image) AS total_image
+            FROM 
+                `tabDMS Checkin` dc
+            JOIN 
+                `tabDMS Checkin Image` dci ON dc.name = dci.parent
+            GROUP BY
+                dc.name
+        ),
+
+        
+         NumberedGroups AS (SELECT 
             dc.createdbyemail AS employee_id, 
             dc.name, 
             dc.createbyname AS employee_name, 
@@ -722,6 +736,7 @@ def get_report(filters={}):
                         '"checkout":"',DATE_FORMAT(dc.checkin_giora, '%H:%i') , '",', 
                         '"distance":"', dc.checkin_khoangcach, '",', 
                         '"is_router":"', dc.checkin_dungtuyen, '",', 
+                        '"total_image":"',  ic.total_image, '",', 
                         '"is_check_inventory":"', dc.is_check_inventory, '",', 
                         '"is_order":"', IF(dc.checkin_donhang IS NOT NULL AND dc.checkin_donhang != '', True, False), '",', 
                         '"time_check":"', TIMESTAMPDIFF(MINUTE, dc.checkin_giovao, dc.checkin_giora), '"}}'
@@ -732,6 +747,9 @@ def get_report(filters={}):
             ROW_NUMBER() OVER (ORDER BY dc.createddate) AS row_num
         FROM 
             `tabDMS Checkin` dc
+        JOIN ImageCounts ic
+        ON
+            dc.name = ic.checkin_name
         INNER JOIN `tabCustomer` cs
         ON 
             dc.kh_ma = cs.customer_code
