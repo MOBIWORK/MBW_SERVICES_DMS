@@ -702,10 +702,10 @@ def get_report(filters={}):
         WITH ImageCounts AS (
             SELECT 
                 dc.name AS checkin_name, 
-                COUNT(dci.url_image) AS total_image
+                COALESCE(COUNT(dci.url_image), 0) AS total_image
             FROM 
                 `tabDMS Checkin` dc
-            JOIN 
+            LEFT JOIN 
                 `tabDMS Checkin Image` dci ON dc.name = dci.parent
             GROUP BY
                 dc.name
@@ -728,15 +728,15 @@ def get_report(filters={}):
                         '{{"customer_name":"', dc.kh_ten, '",',
                         '"customer_code":"', dc.kh_ma, '",', 
                         '"customer_address":"', dc.kh_diachi, '",', 
-                        '"customer_type":"', cs.customer_type, '",', 
-                        '"customer_group":"', cs.customer_group, '",', 
-                        '"customer_sdt":"', cs.mobile_no, '",', 
-                        '"customer_contact":"', cs.customer_primary_contact, '",', 
+                        '"customer_type":"', COALESCE( cs.customer_type,'') , '",', 
+                        '"customer_group":"',COALESCE( cs.customer_group,''), '",', 
+                        '"customer_sdt":"', COALESCE(cs.mobile_no,''), '",', 
+                        '"customer_contact":"', COALESCE(  cs.customer_primary_contact,'') , '",', 
                         '"checkin":"',DATE_FORMAT(dc.checkin_giovao, '%H:%i'), '",', 
                         '"checkout":"',DATE_FORMAT(dc.checkin_giora, '%H:%i') , '",', 
                         '"distance":"', dc.checkin_khoangcach, '",', 
                         '"is_router":"', dc.checkin_dungtuyen, '",', 
-                        '"total_image":"',  ic.total_image, '",', 
+                        '"total_image":"',  COALESCE(ic.total_image, 0), '",', 
                         '"is_check_inventory":"', dc.is_check_inventory, '",', 
                         '"is_order":"', IF(dc.checkin_donhang IS NOT NULL AND dc.checkin_donhang != '', True, False), '",', 
                         '"time_check":"', TIMESTAMPDIFF(MINUTE, dc.checkin_giovao, dc.checkin_giora), '"}}'
@@ -747,16 +747,16 @@ def get_report(filters={}):
             ROW_NUMBER() OVER (ORDER BY dc.createddate) AS row_num
         FROM 
             `tabDMS Checkin` dc
-        JOIN ImageCounts ic
+        LEFT JOIN ImageCounts ic
         ON
             dc.name = ic.checkin_name
-        INNER JOIN `tabCustomer` cs
+        LEFT JOIN`tabCustomer` cs
         ON 
             dc.kh_ma = cs.customer_code
         LEFT JOIN `tabEmployee` te
         ON
             te.user_id = dc.createdbyemail
-        RIGHT JOIN `tabSales Person` sp
+        LEFT JOIN `tabSales Person` sp
         ON
             sp.employee = te.name
         {where}
@@ -770,8 +770,28 @@ def get_report(filters={}):
     """
 
     report = frappe.db.sql(query, as_dict=1)
-    print("report",report)
     for row in report:
         row['customers'] = json.loads(row['customers']) if row['customers'] else []
-    return gen_response(200,"",report)
+    query2 = f"""
+        SELECT COUNT(*) AS number_of_groups FROM (SELECT 
+            te.name AS employee_code,
+            DATE(dc.createddate) AS creation_date,
+            COUNT(*) AS total_records
+        FROM 
+            `tabDMS Checkin` dc
+        INNER JOIN `tabCustomer` cs ON dc.kh_ma = cs.customer_code
+        LEFT JOIN `tabEmployee` te ON te.user_id = dc.createdbyemail
+        RIGHT JOIN `tabSales Person` sp ON sp.employee = te.name
+        {where}
+        GROUP BY 
+            te.name, DATE(dc.createddate))  AS grouped_counts
+        """
+    total = frappe.db.sql(query2,as_dict=1)
+    print(total)
+    return gen_response(200,"",{
+        "data": report,
+        "total": total[0].number_of_groups,
+        "page_size": page_size,
+        "page_number": page_number
+    })
     pass
