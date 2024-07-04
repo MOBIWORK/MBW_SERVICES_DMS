@@ -271,6 +271,7 @@ def create_sale_order(**kwargs):
                 item.discount_percentage = round(discount_amount / rate * 100, 3)
                 item.rate = item.rate - discount_amount
                 item.db_update()
+                sales_order_doc.save()
         
         detail_order = so_si_detail(doctype="Sales Order", name=new_order.name)
         
