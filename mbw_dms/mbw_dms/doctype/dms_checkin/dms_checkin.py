@@ -663,135 +663,172 @@ def list_inventory(kwargs):
 
 
 def get_report(filters={}):
-    from_date = validate_filter(type_check="timestamp_to_date",type="start",value=filters.get("from_date"))
-    to_date = validate_filter(type_check="timestamp_to_date",type="end",value=filters.get("to_date"))
-    employee = filters.get("employee")
-    sale_group = filters.get("sale_group")
-    customer_type = filters.get("customer_type")
-    customer_group = filters.get("customer_group")
-    territory = filters.get("territory")
-    page_size =  cint(filters.get("page_size", 20))
-    page_number = cint(filters.get("page_number", 1))
-    offset= page_size*(page_number-1)
-    where = "WHERE createdbyemail IS NOT NULL AND is_checkout = 1"
-    if employee:
-        employee_info = frappe.db.get_value("Employee",employee,["user_id"],as_dict=1)
-        where = f"{where} AND dc.createdbyemail = '{employee_info.user_id}'"
-    if territory:
-        employee_info = frappe.db.get_all("Customer",{"territory":territory},["customer_code"])
-        customer_code_list = pydash.map_(employee_info,lambda x :x.customer_code)
-        customers = ", ".join(f"'{customer_code}'" for customer_code in customer_code_list)
-        where = f"{where} AND dc.kh_ma IN ({customers})"
-    if customer_group:
-        customers_list = frappe.db.get_all("Customer",{"customer_group":customer_group},["customer_code"])
-        customer_code_list = pydash.map_(customers_list,lambda x :x.customer_code)
-        customers = ", ".join(f"'{customer_code}'" for customer_code in customer_code_list)
-        where = f"{where} AND dc.kh_ma IN ({customers})"
-    if customer_type:
-        customers_list = frappe.db.get_all("Customer",{"customer_type":customer_type},["customer_code"])
-        customer_code_list = pydash.map_(customers_list,lambda x :x.customer_code)
-        customers = ", ".join(f"'{customer_code}'" for customer_code in customer_code_list)
-        where = f"{where} AND dc.kh_ma IN ({customers})"
-    if from_date:
-        where =  f"{where} AND dc.createddate >= '{from_date}'"
-    if to_date:
-        where =  f"{where} AND dc.createddate <= '{to_date}'"
-    print("where",where)
-    query = f"""
+    try:
 
-        WITH ImageCounts AS (
+        from_date = validate_filter(type_check="timestamp_to_date",type="start",value=filters.get("from_date"))
+        to_date = validate_filter(type_check="timestamp_to_date",type="end",value=filters.get("to_date"))
+        employee = filters.get("employee")
+        sale_group = filters.get("sale_group")
+        customer_type = filters.get("customer_type")
+        customer_group = filters.get("customer_group")
+        territory = filters.get("territory")
+        page_size =  cint(filters.get("page_size", 20))
+        page_number = cint(filters.get("page_number", 1))
+        offset= page_size*(page_number-1)
+        where = "WHERE createdbyemail IS NOT NULL AND is_checkout = 1"
+        if sale_group:
+            query_sale= f"""
+            WITH RECURSIVE Tree AS (
             SELECT 
-                dc.name AS checkin_name, 
-                COALESCE(COUNT(dci.url_image), 0) AS total_image
+                sales_person_name,
+                parent_sales_person,
+                name,
+                employee,
+                is_group
+            FROM 
+                `tabSales Person`
+            WHERE 
+                name = '{sale_group}'
+
+            UNION ALL
+
+            SELECT 
+                child.sales_person_name,
+                child.parent_sales_person,
+                child.name,
+                child.employee,
+                child.is_group
+            FROM 
+                `tabSales Person` child
+            INNER JOIN Tree parent ON parent.name = child.parent_sales_person
+        )
+
+        SELECT * FROM Tree
+        WHERE is_group = 0;
+            """
+            sales_person = frappe.db.sql(query_sale,as_dict=1)
+            employee_codes = pydash.map_(sales_person,lambda x: x.employee)
+            employee_id_users = frappe.db.get_all("Employee",filters={"name": ["in",employee_codes]},fields=["user_id"])
+            employee_id_users = pydash.map_(employee_id_users,lambda x: x.user_id)
+            employees =  ", ".join(f"'{user_id}'" for user_id in employee_id_users)
+            where = f"{where} AND dc.createdbyemail in ({employees})"
+        if employee:
+            employee_info = frappe.db.get_value("Employee",employee,["user_id"],as_dict=1)
+            where = f"{where} AND dc.createdbyemail = '{employee_info.user_id}'"
+        if territory:
+            employee_info = frappe.db.get_all("Customer",{"territory":territory},["customer_code"])
+            customer_code_list = pydash.map_(employee_info,lambda x :x.customer_code)
+            customers = ", ".join(f"'{customer_code}'" for customer_code in customer_code_list)
+            where = f"{where} AND dc.kh_ma IN ({customers})"
+        if customer_group:
+            customers_list = frappe.db.get_all("Customer",{"customer_group":customer_group},["customer_code"])
+            customer_code_list = pydash.map_(customers_list,lambda x :x.customer_code)
+            customers = ", ".join(f"'{customer_code}'" for customer_code in customer_code_list)
+            where = f"{where} AND dc.kh_ma IN ({customers})"
+        if customer_type:
+            customers_list = frappe.db.get_all("Customer",{"customer_type":customer_type},["customer_code"])
+            customer_code_list = pydash.map_(customers_list,lambda x :x.customer_code)
+            customers = ", ".join(f"'{customer_code}'" for customer_code in customer_code_list)
+            where = f"{where} AND dc.kh_ma IN ({customers})"
+        if from_date:
+            where =  f"{where} AND dc.createddate >= '{from_date}'"
+        if to_date:
+            where =  f"{where} AND dc.createddate <= '{to_date}'"
+        query = f"""
+
+            WITH ImageCounts AS (
+                SELECT 
+                    dc.name AS checkin_name, 
+                    COALESCE(COUNT(dci.url_image), 0) AS total_image
+                FROM 
+                    `tabDMS Checkin` dc
+                LEFT JOIN 
+                    `tabDMS Checkin Image` dci ON dc.name = dci.parent
+                GROUP BY
+                    dc.name
+            ),
+
+            
+            NumberedGroups AS (SELECT 
+                dc.createdbyemail AS employee_id, 
+                dc.name, 
+                dc.createbyname AS employee_name, 
+                UNIX_TIMESTAMP(dc.createddate) as create_time,
+                te.name AS employee_code,
+                sp.parent_sales_person AS sale_group,
+                SUM(TIMESTAMPDIFF(MINUTE, dc.checkin_giovao, dc.checkin_giora)) as total_time,
+                TIMESTAMPDIFF(MINUTE, MIN(dc.checkin_giovao), MAX(dc.checkin_giora)) as total_work,
+                CONCAT(
+                    '[', 
+                    GROUP_CONCAT(
+                        CONCAT(
+                            '{{"customer_name":"', dc.kh_ten, '",',
+                            '"customer_code":"', dc.kh_ma, '",', 
+                            '"customer_address":"', dc.kh_diachi, '",', 
+                            '"customer_type":"', COALESCE( cs.customer_type,'') , '",', 
+                            '"customer_group":"',COALESCE( cs.customer_group,''), '",', 
+                            '"customer_sdt":"', COALESCE(cs.mobile_no,''), '",', 
+                            '"customer_contact":"', COALESCE(  cs.customer_primary_contact,'') , '",', 
+                            '"checkin":"',DATE_FORMAT(dc.checkin_giovao, '%H:%i'), '",', 
+                            '"checkout":"',DATE_FORMAT(dc.checkin_giora, '%H:%i') , '",', 
+                            '"distance":"', dc.checkin_khoangcach, '",', 
+                            '"is_router":"', dc.checkin_dungtuyen, '",', 
+                            '"total_image":"',  COALESCE(ic.total_image, 0), '",', 
+                            '"is_check_inventory":"', dc.is_check_inventory, '",', 
+                            '"is_order":"', IF(dc.checkin_donhang IS NOT NULL AND dc.checkin_donhang != '', True, False), '",', 
+                            '"time_check":"', TIMESTAMPDIFF(MINUTE, dc.checkin_giovao, dc.checkin_giora), '"}}'
+                        ) SEPARATOR ','
+                    ),
+                    ']'
+                ) AS customers,
+                ROW_NUMBER() OVER (ORDER BY dc.createddate) AS row_num
             FROM 
                 `tabDMS Checkin` dc
-            LEFT JOIN 
-                `tabDMS Checkin Image` dci ON dc.name = dci.parent
-            GROUP BY
-                dc.name
-        ),
-
-        
-         NumberedGroups AS (SELECT 
-            dc.createdbyemail AS employee_id, 
-            dc.name, 
-            dc.createbyname AS employee_name, 
-            UNIX_TIMESTAMP(dc.createddate) as create_time,
-            te.name AS employee_code,
-            sp.parent_sales_person AS sale_group,
-            SUM(TIMESTAMPDIFF(MINUTE, dc.checkin_giovao, dc.checkin_giora)) as total_time,
-            TIMESTAMPDIFF(MINUTE, MIN(dc.checkin_giovao), MAX(dc.checkin_giora)) as total_work,
-            CONCAT(
-                '[', 
-                GROUP_CONCAT(
-                    CONCAT(
-                        '{{"customer_name":"', dc.kh_ten, '",',
-                        '"customer_code":"', dc.kh_ma, '",', 
-                        '"customer_address":"', dc.kh_diachi, '",', 
-                        '"customer_type":"', COALESCE( cs.customer_type,'') , '",', 
-                        '"customer_group":"',COALESCE( cs.customer_group,''), '",', 
-                        '"customer_sdt":"', COALESCE(cs.mobile_no,''), '",', 
-                        '"customer_contact":"', COALESCE(  cs.customer_primary_contact,'') , '",', 
-                        '"checkin":"',DATE_FORMAT(dc.checkin_giovao, '%H:%i'), '",', 
-                        '"checkout":"',DATE_FORMAT(dc.checkin_giora, '%H:%i') , '",', 
-                        '"distance":"', dc.checkin_khoangcach, '",', 
-                        '"is_router":"', dc.checkin_dungtuyen, '",', 
-                        '"total_image":"',  COALESCE(ic.total_image, 0), '",', 
-                        '"is_check_inventory":"', dc.is_check_inventory, '",', 
-                        '"is_order":"', IF(dc.checkin_donhang IS NOT NULL AND dc.checkin_donhang != '', True, False), '",', 
-                        '"time_check":"', TIMESTAMPDIFF(MINUTE, dc.checkin_giovao, dc.checkin_giora), '"}}'
-                    ) SEPARATOR ','
-                ),
-                ']'
-            ) AS customers,
-            ROW_NUMBER() OVER (ORDER BY dc.createddate) AS row_num
-        FROM 
-            `tabDMS Checkin` dc
-        LEFT JOIN ImageCounts ic
-        ON
-            dc.name = ic.checkin_name
-        LEFT JOIN`tabCustomer` cs
-        ON 
-            dc.kh_ma = cs.customer_code
-        LEFT JOIN `tabEmployee` te
-        ON
-            te.user_id = dc.createdbyemail
-        LEFT JOIN `tabSales Person` sp
-        ON
-            sp.employee = te.name
-        {where}
-        GROUP BY 
-            employee_code,  DATE(dc.createddate)
-        )
-        
-        SELECT *
-        FROM NumberedGroups
-        WHERE row_num > {offset} AND row_num <= {offset} + {page_size};
-    """
-
-    report = frappe.db.sql(query, as_dict=1)
-    for row in report:
-        row['customers'] = json.loads(row['customers']) if row['customers'] else []
-    query2 = f"""
-        SELECT COUNT(*) AS number_of_groups FROM (SELECT 
-            te.name AS employee_code,
-            DATE(dc.createddate) AS creation_date,
-            COUNT(*) AS total_records
-        FROM 
-            `tabDMS Checkin` dc
-        INNER JOIN `tabCustomer` cs ON dc.kh_ma = cs.customer_code
-        LEFT JOIN `tabEmployee` te ON te.user_id = dc.createdbyemail
-        RIGHT JOIN `tabSales Person` sp ON sp.employee = te.name
-        {where}
-        GROUP BY 
-            te.name, DATE(dc.createddate))  AS grouped_counts
+            LEFT JOIN ImageCounts ic
+            ON
+                dc.name = ic.checkin_name
+            LEFT JOIN`tabCustomer` cs
+            ON 
+                dc.kh_ma = cs.customer_code
+            LEFT JOIN `tabEmployee` te
+            ON
+                te.user_id = dc.createdbyemail
+            LEFT JOIN `tabSales Person` sp
+            ON
+                sp.employee = te.name
+            {where}
+            GROUP BY 
+                employee_code,  DATE(dc.createddate)
+            )
+            
+            SELECT *
+            FROM NumberedGroups
+            WHERE row_num > {offset} AND row_num <= {offset} + {page_size};
         """
-    total = frappe.db.sql(query2,as_dict=1)
-    print(total)
-    return gen_response(200,"",{
-        "data": report,
-        "total": total[0].number_of_groups,
-        "page_size": page_size,
-        "page_number": page_number
-    })
-    pass
+
+        report = frappe.db.sql(query, as_dict=1)
+        for row in report:
+            row['customers'] = json.loads(row['customers']) if row['customers'] else []
+        query2 = f"""
+            SELECT COUNT(*) AS number_of_groups FROM (SELECT 
+                te.name AS employee_code,
+                DATE(dc.createddate) AS creation_date,
+                COUNT(*) AS total_records
+            FROM 
+                `tabDMS Checkin` dc
+            INNER JOIN `tabCustomer` cs ON dc.kh_ma = cs.customer_code
+            LEFT JOIN `tabEmployee` te ON te.user_id = dc.createdbyemail
+            RIGHT JOIN `tabSales Person` sp ON sp.employee = te.name
+            {where}
+            GROUP BY 
+                te.name, DATE(dc.createddate))  AS grouped_counts
+            """
+        total = frappe.db.sql(query2,as_dict=1)
+        return gen_response(200,"",{
+            "data": report,
+            "total": total[0].number_of_groups,
+            "page_size": page_size,
+            "page_number": page_number
+        })
+    except Exception as e:
+        return exception_handle(e)
