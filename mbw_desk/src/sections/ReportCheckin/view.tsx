@@ -453,6 +453,7 @@ export default function ReportCheckin() {
     ];
     return (
       <Table
+        bordered
         dataSource={recordTable?.customers?.map((item: any) => {
           let id = Math.random();
           return {
@@ -685,6 +686,7 @@ export default function ReportCheckin() {
           <div ref={containerRef1} className="pt-5">
             <TableCustom
               bordered
+              $border
               dataSource={dataCheckin?.data?.map((report: any) => ({
                 key: report.name,
                 ...report,
