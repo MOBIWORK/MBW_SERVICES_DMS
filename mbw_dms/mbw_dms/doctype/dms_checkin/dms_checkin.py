@@ -19,6 +19,7 @@ from frappe.utils import nowdate
 import calendar
 from mbw_dms.api.ekgis.constant import API_URL, API_URL_TRACKING
 import pydash
+from frappe.utils import cint
 class DMSCheckin(Document):
     def after_insert(self):
         self.update_kpi_monthly()
@@ -654,3 +655,100 @@ def list_inventory(kwargs):
     except Exception as e:
         return exception_handle(e)
     
+
+
+def get_report(filters={}):
+    from_date = validate_filter(type_check="timestamp_to_date",type="start",value=filters.get("from_date"))
+    to_date = validate_filter(type_check="timestamp_to_date",type="end",value=filters.get("to_date"))
+    employee = filters.get("employee")
+    sale_group = filters.get("sale_group")
+    customer_type = filters.get("customer_type")
+    customer_group = filters.get("customer_group")
+    territory = filters.get("territory")
+    page_size =  cint(filters.get("page_size", 20))
+    page_number = cint(filters.get("page_number", 1))
+    offset= page_size*(page_number-1)
+    where = "WHERE createdbyemail IS NOT NULL AND is_checkout = 1"
+    if employee:
+        employee_info = frappe.db.get_value("Employee",employee,["user_id"],as_dict=1)
+        where = f"{where} AND dc.createdbyemail = '{employee_info.user_id}'"
+    if territory:
+        employee_info = frappe.db.get_all("Customer",{"territory":territory},["customer_code"])
+        customer_code_list = pydash.map_(employee_info,lambda x :x.customer_code)
+        customers = ", ".join(f"'{customer_code}'" for customer_code in customer_code_list)
+        where = f"{where} AND dc.kh_ma IN ({customers})"
+    if customer_group:
+        customers_list = frappe.db.get_all("Customer",{"customer_group":customer_group},["customer_code"])
+        customer_code_list = pydash.map_(customers_list,lambda x :x.customer_code)
+        customers = ", ".join(f"'{customer_code}'" for customer_code in customer_code_list)
+        where = f"{where} AND dc.kh_ma IN ({customers})"
+    if customer_type:
+        customers_list = frappe.db.get_all("Customer",{"customer_type":customer_type},["customer_code"])
+        customer_code_list = pydash.map_(customers_list,lambda x :x.customer_code)
+        customers = ", ".join(f"'{customer_code}'" for customer_code in customer_code_list)
+        where = f"{where} AND dc.kh_ma IN ({customers})"
+    if from_date:
+        where =  f"{where} AND dc.createddate >= '{from_date}'"
+    if to_date:
+        where =  f"{where} AND dc.createddate <= '{to_date}'"
+    print("where",where)
+    query = f"""
+        WITH NumberedGroups AS (SELECT 
+            dc.createdbyemail AS employee_id, 
+            dc.name, 
+            dc.createbyname AS employee_name, 
+            UNIX_TIMESTAMP(dc.createddate) as create_time,
+            te.name AS employee_code,
+            sp.parent_sales_person AS sale_group,
+            SUM(TIMESTAMPDIFF(MINUTE, dc.checkin_giovao, dc.checkin_giora)) as total_time,
+            TIMESTAMPDIFF(MINUTE, MIN(dc.checkin_giovao), MAX(dc.checkin_giora)) as total_work,
+            CONCAT(
+                '[', 
+                GROUP_CONCAT(
+                    CONCAT(
+                        '{{"customer_name":"', dc.kh_ten, '",',
+                        '"customer_code":"', dc.kh_ma, '",', 
+                        '"customer_address":"', dc.kh_diachi, '",', 
+                        '"customer_type":"', cs.customer_type, '",', 
+                        '"customer_group":"', cs.customer_group, '",', 
+                        '"customer_sdt":"', cs.mobile_no, '",', 
+                        '"customer_contact":"', cs.customer_primary_contact, '",', 
+                        '"checkin":"',DATE_FORMAT(dc.checkin_giovao, '%H:%i'), '",', 
+                        '"checkout":"',DATE_FORMAT(dc.checkin_giora, '%H:%i') , '",', 
+                        '"distance":"', dc.checkin_khoangcach, '",', 
+                        '"is_router":"', dc.checkin_dungtuyen, '",', 
+                        '"is_check_inventory":"', dc.is_check_inventory, '",', 
+                        '"is_order":"', IF(dc.checkin_donhang IS NOT NULL AND dc.checkin_donhang != '', True, False), '",', 
+                        '"time_check":"', TIMESTAMPDIFF(MINUTE, dc.checkin_giovao, dc.checkin_giora), '"}}'
+                    ) SEPARATOR ','
+                ),
+                ']'
+            ) AS customers,
+            ROW_NUMBER() OVER (ORDER BY dc.createddate) AS row_num
+        FROM 
+            `tabDMS Checkin` dc
+        INNER JOIN `tabCustomer` cs
+        ON 
+            dc.kh_ma = cs.customer_code
+        LEFT JOIN `tabEmployee` te
+        ON
+            te.user_id = dc.createdbyemail
+        RIGHT JOIN `tabSales Person` sp
+        ON
+            sp.employee = te.name
+        {where}
+        GROUP BY 
+            employee_code,  DATE(dc.createddate)
+        )
+        
+        SELECT *
+        FROM NumberedGroups
+        WHERE row_num > {offset} AND row_num <= {offset} + {page_size};
+    """
+
+    report = frappe.db.sql(query, as_dict=1)
+    print("report",report)
+    for row in report:
+        row['customers'] = json.loads(row['customers']) if row['customers'] else []
+    return gen_response(200,"",report)
+    pass

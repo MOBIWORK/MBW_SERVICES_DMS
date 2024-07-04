@@ -32,7 +32,8 @@
   "createbyname",
   "checkin_id",
   "checkin_dungtuyen",
-  "is_checkout"
+  "is_checkout",
+  "is_check_inventory"
  ],
  "fields": [
   {
@@ -141,6 +142,7 @@
    "label": "Checkin validate kho\u00e1ng c\u00e1ch check out"
   },
   {
+   "default": "Now",
    "fieldname": "createddate",
    "fieldtype": "Datetime",
    "label": "Ng\u00e0y t\u1ea1o"
@@ -171,11 +173,17 @@
    "fieldname": "is_checkout",
    "fieldtype": "Check",
    "label": "Checkout"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_check_inventory",
+   "fieldtype": "Check",
+   "label": "Ki\u1ec3m t\u1ed3n"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-05-07 11:26:35.856697",
+ "modified": "2024-07-04 10:42:41.057064",
  "modified_by": "Administrator",
  "module": "MBW DMS",
  "name": "DMS Checkin",
