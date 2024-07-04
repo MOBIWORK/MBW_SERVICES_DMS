@@ -254,7 +254,7 @@ def create_checkin(kwargs):
         normal_keys = [
             "kh_ma", "kh_ten", "kh_diachi", "kh_long", "kh_lat",
             "checkin_khoangcach", "checkin_trangthaicuahang", "checkin_donhang",
-            "checkin_long", "checkin_lat","checkin_address", "checkin_dochinhxac", "checkin_pinvao", "checkin_pinra",
+            "checkin_long", "checkin_lat", "checkin_dochinhxac", "checkin_pinvao", "checkin_pinra",
             "checkout_khoangcach", "checkinvalidate_khoangcachcheckin",
             "checkinvalidate_khoangcachcheckout", "createdbyemail",
         ]
@@ -284,7 +284,24 @@ def create_checkin(kwargs):
         employee = get_user_id()
         new_checkin.set("createbyname", employee.get("full_name"))
         new_checkin.set("createdbyemail", employee.get("email"))
+        address = ""
+        try:
+            settings = frappe.db.get_singles_dict("DMS Settings")
+            lat = kwargs.get("checkin_lat")
+            lon = kwargs.get("checkin_long")
+            key = settings.get("api_key")
+            url = f"https://api.ekgis.vn/v1/place/geocode/reverse/address?latlng={lat},{lon}&gg=1&api_key={key}"
+            if not key:
+                return gen_response(400, _("Not found setting key map"))
 
+            # call geolocation
+            response = requests.get(url)
+            address = json.loads(response.text).get("results")
+            print("address",address)
+        except Exception as e:
+            print("Lỗi lấy địa chỉ",e)
+            address = ""
+        new_checkin.set("checkin_address", address)
         new_checkin.insert(ignore_permissions=True)
         frappe.db.commit()
         return gen_response(201, "Thành công", {"name": new_checkin.name})
