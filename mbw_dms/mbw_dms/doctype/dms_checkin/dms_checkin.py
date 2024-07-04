@@ -254,7 +254,7 @@ def create_checkin(kwargs):
         normal_keys = [
             "kh_ma", "kh_ten", "kh_diachi", "kh_long", "kh_lat",
             "checkin_khoangcach", "checkin_trangthaicuahang", "checkin_donhang",
-            "checkin_long", "checkin_lat", "checkin_dochinhxac", "checkin_pinvao", "checkin_pinra",
+            "checkin_long", "checkin_lat","checkin_address", "checkin_dochinhxac", "checkin_pinvao", "checkin_pinra",
             "checkout_khoangcach", "checkinvalidate_khoangcachcheckin",
             "checkinvalidate_khoangcachcheckout", "createdbyemail",
         ]
@@ -765,6 +765,7 @@ def get_report(filters={}):
                             '{{"customer_name":"', dc.kh_ten, '",',
                             '"customer_code":"', dc.kh_ma, '",', 
                             '"customer_address":"', dc.kh_diachi, '",', 
+                            '"checkin_address":"', dc.checkin_address, '",', 
                             '"customer_type":"', COALESCE( cs.customer_type,'') , '",', 
                             '"customer_group":"',COALESCE( cs.customer_group,''), '",', 
                             '"customer_sdt":"', COALESCE(cs.mobile_no,''), '",', 
