@@ -416,6 +416,7 @@ def update_customer(**kwargs):
                             contact.update(contact_data_update)
                             contact_phone = contact.as_dict().get("phone_nos")
                             new_contact_phone = pydash.map_(contact_phone, lambda x: x.update({"is_primary_mobile_no":0}))
+                            new_contact_phone = pydash.filter_(contact_phone, lambda x: x.phone != contact_data_update.get("phone"))
                             new_contact_phone.append({"phone": contact_data_update.get("phone") ,"is_primary_mobile_no":1})
                             contact.set("phone_nos",  new_contact_phone)
                             contact.save()
@@ -432,9 +433,9 @@ def update_customer(**kwargs):
                                 "link_name": name
                             })
                             contact.insert()
-                    if contact_data_update.get("is_primary_contact") == 1 :
-                        customer.set("customer_primary_contact",contact.name)
-                        customer.save()
+                        if contact_data_update.get("is_primary_contact") == 1 :
+                            customer.set("customer_primary_contact",contact.name)
+                            customer.save()
             # Chỉnh sửa tuyến
             if "router" in kwargs:
                 routers_data = kwargs.get("router")
