@@ -432,7 +432,7 @@ def update_customer(**kwargs):
                                 })
                             contact.append("links", {
                                 "link_doctype": "Customer",
-                                "link_name": contact_data
+                                "link_name": name
                             })
                             contact.insert()
 
