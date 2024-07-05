@@ -371,11 +371,16 @@ def update_customer(**kwargs):
                 customer.save()
             if "address" in kwargs:
                 address_data_list = kwargs.get("address")
+                print("11111111111111111111111111111111111111111111111 \n",address_data_list)
                 if len(address_data_list)>0:
+                    print("================================================================================================================")
                     for address_data in address_data_list:
+                        print(address_data,"\n")
                         current_address = CommonHandle.create_address(address_data,link_cs_address)
                         if address_data.get("is_primary_address") ==1:
+                            customer = frappe.get_doc("Customer", name)
                             customer.set("customer_primary_address",current_address.name)
+                            customer.save()
             # Cập nhật hoặc thêm mới liên hệ
             if "contact" in kwargs:
                 contacts_data_list = kwargs.get("contact")
@@ -438,6 +443,7 @@ def update_customer(**kwargs):
                             })
                             contact.insert()
                         if contact_data_update.get("is_primary_contact") == 1 :
+                            customer = frappe.get_doc("Customer", name)
                             customer.set("customer_primary_contact",contact.name)
                             customer.save()
             # Chỉnh sửa tuyến
