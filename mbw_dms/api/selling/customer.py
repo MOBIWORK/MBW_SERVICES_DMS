@@ -332,7 +332,7 @@ def list_territory():
 @frappe.whitelist(methods="PUT")
 def update_customer(**kwargs):
     try:
-        print("khh",kwargs)
+        # print("khh",kwargs)
         # company = frappe.get_value("Employee", {"user_id": frappe.session.user}, "company")
         name = kwargs.get("name")
         if frappe.db.exists("Customer", name, cache=True):
@@ -387,7 +387,7 @@ def update_customer(**kwargs):
             # Cập nhật hoặc thêm mới liên hệ
             if "contact" in kwargs:
                 contacts_data_list = kwargs.get("contact")
-                print("contacts_data_list",contacts_data_list)
+                print("contacts_data_list",contacts_data_list,"\n")
                 if contacts_data_list:
                     for contact_data in contacts_data_list:
                         contact_name = contact_data.get("name")
@@ -414,7 +414,8 @@ def update_customer(**kwargs):
                             "link_doctype": "Contact",
                             "link_name": contact_name 
                             }
-                            if new_address :
+                            if not not new_address :
+                                print("here",contact_name,new_address)
                                 address_current = create_address(new_address=new_address,link_cs_address=link_cs_address)
                                 contact_data.update({"address" :address_current.name})
                             contact.update(contact_data)
