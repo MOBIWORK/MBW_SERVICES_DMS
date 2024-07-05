@@ -50,9 +50,9 @@ def visit_report():
 		kpi = {}
 
 		# Lấy Kpi tháng vt lượt
-		monthly_summary = frappe.get_value("DMS Summary KPI Monthly", {"thang": month, "nam": year, "nhan_vien_ban_hang": user_name}, "so_kh_vt_duynhat")
+		monthly_summary = frappe.get_value("DMS Summary KPI Monthly", {"thang": month, "nam": year, "nhan_vien_ban_hang": user_name}, "so_kh_vt_luot")
 		# Lấy Kpi nhân viên vt
-		kpi_employee = frappe.get_value("DMS KPI", {"ngay_hieu_luc_tu": (">=", start_date), "ngay_hieu_luc_den": ("<=", end_date), "nhan_vien_ban_hang": user_name}, "so_kh_vt_duynhat")
+		kpi_employee = frappe.get_value("DMS KPI", {"ngay_hieu_luc_tu": (">=", start_date), "ngay_hieu_luc_den": ("<=", end_date), "nhan_vien_ban_hang": user_name}, "so_kh_vt_luot")
 		
 		if monthly_summary and kpi_employee:
 			kpi = {
@@ -717,13 +717,13 @@ def kpi_targets(kwargs):
 		monthly_summary = frappe.get_all(
         "DMS Summary KPI Monthly",
         filters={"thang": month, "nam": year, "nhan_vien_ban_hang": user_name},
-        fields=["name", "nam", "thang", "nhan_vien_ban_hang", "doanh_thu_thang", "doanh_so_thang", "so_kh_vt_duynhat", "so_kh_moi", "so_don_hang"]
+        fields=["name", "nam", "thang", "nhan_vien_ban_hang", "doanh_thu_thang", "doanh_so_thang", "so_kh_vt_luot", "so_kh_moi", "so_don_hang"]
       	)
 
     	# Lấy Kpi nhân viên
 		kpi_employee = frappe.get_all("DMS KPI",
                 filters={"ngay_hieu_luc_tu": (">=", start_date), "ngay_hieu_luc_den": ("<=", end_date), "nhan_vien_ban_hang": user_name},
-                fields=["so_kh_vt_duynhat", "so_kh_moi", "so_don_hang", "doanh_so", "doanh_thu"])
+                fields=["so_kh_vt_luot", "so_kh_moi", "so_don_hang", "doanh_so", "doanh_thu"])
         
     	# Tính toán chỉ số KPI nếu có dữ liệu
 		kpi = None
@@ -739,16 +739,16 @@ def kpi_targets(kwargs):
 				"th_don_hang": monthly_summary[0]["so_don_hang"],
 				"kh_don_hang": kpi_employee[0]["so_don_hang"],
 				"cl_don_hang": kpi_employee[0]["so_don_hang"] - monthly_summary[0]['so_don_hang'],
-				"th_vieng_tham": monthly_summary[0]["so_kh_vt_duynhat"],
-				"kh_vieng_tham": kpi_employee[0]["so_kh_vt_duynhat"],
-				"cl_vieng_tham": kpi_employee[0]["so_kh_vt_duynhat"] - monthly_summary[0]["so_kh_vt_duynhat"],
+				"th_vieng_tham": monthly_summary[0]["so_kh_vt_luot"],
+				"kh_vieng_tham": kpi_employee[0]["so_kh_vt_luot"],
+				"cl_vieng_tham": kpi_employee[0]["so_kh_vt_luot"] - monthly_summary[0]["so_kh_vt_luot"],
 				"th_kh_moi": monthly_summary[0]["so_kh_moi"],
 				"kh_kh_moi": kpi_employee[0]["so_kh_moi"],
 				"cl_kh_moi": kpi_employee[0]["so_kh_moi"] - monthly_summary[0]["so_kh_moi"],
                 "ti_le_doanh_thu": round(float(monthly_summary[0]["doanh_thu_thang"] / kpi_employee[0]["doanh_thu"]) * 100, 2),
                 "ti_le_doanh_so": round(float(monthly_summary[0]["doanh_so_thang"] / kpi_employee[0]["doanh_so"]) * 100, 2),
                 "ti_le_don_hang": round(float(monthly_summary[0]["so_don_hang"] / kpi_employee[0]["so_don_hang"]) * 100, 2),
-                "ti_le_vieng_tham": round(float(monthly_summary[0]["so_kh_vt_duynhat"] / kpi_employee[0]["so_kh_vt_duynhat"]) * 100, 2),
+                "ti_le_vieng_tham": round(float(monthly_summary[0]["so_kh_vt_luot"] / kpi_employee[0]["so_kh_vt_luot"]) * 100, 2),
                 "ti_le_kh_moi": round(float(monthly_summary[0]["so_kh_moi"] / kpi_employee[0]["so_kh_moi"]) * 100, 2)
             }
 
