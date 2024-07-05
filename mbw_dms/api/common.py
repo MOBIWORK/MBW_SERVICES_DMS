@@ -241,8 +241,9 @@ def create_address(new_address,link_cs_address) :
             find_cs = pydash.filter_(links, lambda cs: cs.get("link_doctype") ==  link_cs_address.get("link_doctype") and cs.get("link_name") != link_cs_address.get("link_name"))
             find_cs.append(link_cs_address)
             current_address_cs.set("links",find_cs) 
-        for key,value in new_address.items():
-            setattr(current_address_cs, key, value)       
+        # for key,value in new_address.items():
+        #     current_address_cs.set(key,value)
+        #     setattr(current_address_cs, key, value)       
         current_address_cs.save()
     else:
         new_address_doc = frappe.new_doc("Address")
