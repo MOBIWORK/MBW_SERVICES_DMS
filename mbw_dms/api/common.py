@@ -586,3 +586,30 @@ CommonHandle.create_address = staticmethod(create_address)
 CommonHandle.get_employee_info = staticmethod(get_employee_info)
 
 CommonHandle.get_user_id = staticmethod(get_user_id)
+
+def test_box(cb):
+    try:
+        cb()
+    except SyntaxError as e:
+        print(f"Syntax error detected: {e}")
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
+CommonHandle.test_box = staticmethod(test_box)
+import base64
+def check_base64(sb):
+    try:
+        # Kiểm tra nếu đầu vào là chuỗi byte, nếu không thì chuyển đổi
+        if isinstance(sb, str):
+            sb_bytes = sb.encode('ascii')
+        else:
+            sb_bytes = sb
+
+        # Giải mã chuỗi base64
+        base64.b64decode(sb_bytes)
+        
+        # Kiểm tra xem chuỗi có hợp lệ (không thừa ký tự) không
+        return base64.b64encode(base64.b64decode(sb_bytes)).decode('ascii') == sb
+    except Exception:
+        return False
+CommonHandle.check_base64 = staticmethod(check_base64)

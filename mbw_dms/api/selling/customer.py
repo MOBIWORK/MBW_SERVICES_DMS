@@ -341,7 +341,6 @@ def update_customer(**kwargs):
             # Cập nhật các trường cơ bản của khách hàng
             fields = ["customer_code", "customer_name", "customer_group", "territory", "customer_details", "website", "customer_type"]
             date_fields = ["custom_birthday"]
-
             for key, value in kwargs.items():
                 if key in fields:
                     customer.set(key, value)
@@ -350,29 +349,21 @@ def update_customer(**kwargs):
                     customer.set(key, custom_birthday)
             customer.save()
             # Thay đổi ảnh
-            if kwargs.get("image") and not customer.image in kwargs.get("image"):
-                customer.image = post_image(name_image="", faceimage=kwargs.get("image"), doc_type="Customer", doc_name=customer.name)
+            if  (not customer.image and kwargs.get("image")) or( kwargs.get("image") and not customer.image in kwargs.get("image")):
+                is_base64 = CommonHandle.check_base64(kwargs.get("image"))
+                if is_base64:
+                    customer.image = post_image(name_image="", faceimage=kwargs.get("image"), doc_type="Customer", doc_name=customer.name)
+                else: 
+                    customer.image  = kwargs.get("image")
                 customer.save()
             link_cs_address = {
                 "link_doctype":"Customer",
                 "link_name": name
                 }
             # Cập nhật hoặc thêm mới địa chỉ
-            
             # Chỉnh sửa hạn mức công nợ
             if "credit_limits" in kwargs:
                 credit_limits = kwargs.get("credit_limits")
-                # credit_limit_current =  customer.credit_limits
-                # print("==============",credit_limit_current)
-                # credit_limit_current_orther = pydash.filter_(credit_limit_current,lambda x: x.company!=company)
-                # credit_limit_current_orther = pydash.map_(credit_limit_current_orther,lambda x: {
-                #     "company": x.company,
-                #     "credit_limit": x.credit_limit
-                # })
-                # credit_limit_current_orther.append({
-                #     "company": company,
-                #     "credit_limit": credit_limits[0]
-                # })
                 customer.set("credit_limits", [{
                     "credit_limit": credit_limits[0],
                     "bypass_credit_limit_check":1
@@ -383,15 +374,17 @@ def update_customer(**kwargs):
                 if len(address_data_list)>0:
                     for address_data in address_data_list:
                         CommonHandle.create_address(address_data,link_cs_address)
-            
             # Cập nhật hoặc thêm mới liên hệ
             if "contact" in kwargs:
                 contacts_data_list = kwargs.get("contact")
-                print("contacts_data_list",contacts_data_list,"\n")
+                
+                new_address = {}
+                # link_cs_address= {
+                # "link_doctype": "Contact",
+                # "link_name": contact_name 
+                # }
                 if contacts_data_list:
                     for contact_data in contacts_data_list:
-                        contact_name = contact_data.get("name")
-                        
                         new_address = {}
                         if contact_data.get("city") and  contact_data.get("address_line1") :
                             new_address =  {
@@ -401,42 +394,47 @@ def update_customer(**kwargs):
                                 "county": contact_data.get("county"),
                                 "state": contact_data.get("state"),
                             }
-                        contact_data = {
-                            "first_name": contact_data.get("first_name"),
-                            "is_billing_contact": contact_data.get("is_billing_contact"),
-                            "is_primary_contact": contact_data.get("is_primary_contact"),
-                            "last_name": contact_data.get("last_name"),
-                            "phone": contact_data.get("phone")
+                        
+                        contact_name = contact_data.get("name") if contact_data.get("name") else False
+                        contact_data_update = {
+                        "first_name": contact_data.get("first_name"),
+                        "is_billing_contact": contact_data.get("is_billing_contact"),
+                        "is_primary_contact": contact_data.get("is_primary_contact"),
+                        "last_name": contact_data.get("last_name"),
+                        "phone": contact_data.get("phone")
                         }
-                        if contact_name and frappe.db.exists("Contact", contact_name):
+                        if contact_data and frappe.db.exists("Contact", contact_name):
                             contact = frappe.get_doc("Contact", contact_name)
                             link_cs_address= {
                             "link_doctype": "Contact",
                             "link_name": contact_name 
                             }
-                            if not not new_address :
-                                print("here",contact_name,new_address)
+                            if not not new_address:
+                                # current address
                                 address_current = create_address(new_address=new_address,link_cs_address=link_cs_address)
-                                contact_data.update({"address" :address_current.name})
-                            contact.update(contact_data)
-                            contact.save(ignore_permissions=True)
-                        else:
+                                contact_data_update.update({"address": address_current.name})
+                            contact.update(contact_data_update)
+                            contact_phone = contact.as_dict().get("phone_nos")
+                            new_contact_phone = pydash.map_(contact_phone, lambda x: x.update({"is_primary_mobile_no":0}))
+                            new_contact_phone.append({"phone": contact_data_update.get("phone") ,"is_primary_mobile_no":1})
+                            contact.set("phone_nos",  new_contact_phone)
+                            contact.save()
+                        else: 
                             contact = frappe.new_doc("Contact")
-                            link_cs_address= {}
-                            address_current = create_address(new_address=new_address,link_cs_address=link_cs_address)
-                            if new_address :
-                                address_current = create_address(new_address=new_address,link_cs_address=link_cs_address)
-                                contact_data.update({"address" :address_current.name})
-                                address_current.append("links", {
-                                    "link_doctype": "Contact",
-                                    "link_name": contact_name.name
-                                })
+                            if not not new_address:
+                                # current address
+                                address_current = create_address(new_address=new_address)
+                                contact_data_update.update({"address": address_current.name})
+                            contact.update(contact_data_update)
+                            contact.append("phone_nos", {"phone": contact_data_update.get("phone") ,"is_primary_mobile_no":1})
                             contact.append("links", {
-                                "link_doctype": "Customer",
+                                "link_doctype":"Customer",
                                 "link_name": name
                             })
                             contact.insert()
-
+                    if contact_data_update.get("is_primary_contact") == 1 :
+                        customer.set("customer_primary_contact",contact.name)
+                        customer.save()
             # Chỉnh sửa tuyến
             if "router" in kwargs:
                 routers_data = kwargs.get("router")
@@ -454,6 +452,7 @@ def update_customer(**kwargs):
         else:
             return gen_response(406, f"Không tồn tại {name}")
     except Exception as e:
+        print(e)
         return exception_handle(e)
 
 
