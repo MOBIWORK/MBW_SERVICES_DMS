@@ -236,7 +236,7 @@ def create_address(new_address,link_cs_address) :
     if current_address_cs:
         current_address_cs = frappe.get_doc("Address",current_address_cs.get("name"))
         current_address_cs.address_location = new_address.get("address_location")
-        if link_cs_address:
+        if not not link_cs_address:
             links = current_address_cs.links
             find_cs = pydash.filter_(links, lambda cs: cs.get("link_doctype") ==  link_cs_address.get("link_doctype") and cs.get("link_name") != link_cs_address.get("link_name"))
             find_cs.append(link_cs_address)

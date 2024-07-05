@@ -357,10 +357,7 @@ def update_customer(**kwargs):
                 else: 
                     customer.image  = kwargs.get("image")
                 customer.save()
-            link_cs_address = {
-                "link_doctype":"Customer",
-                "link_name": name
-                }
+            
             # Cập nhật hoặc thêm mới địa chỉ
             # Chỉnh sửa hạn mức công nợ
             if "credit_limits" in kwargs:
@@ -372,10 +369,14 @@ def update_customer(**kwargs):
                 }])
                 customer.save()
             if "address" in kwargs:
+                link_cs_address = {
+                "link_doctype":"Customer",
+                "link_name": name
+                }
                 address_data_list = kwargs.get("address")
                 if len(address_data_list)>0:
                     for address_data in address_data_list:
-                        current_address = CommonHandle.create_address(address_data,link_cs_address)
+                        current_address = create_address(address_data,link_cs_address)
                         if address_data.get("is_primary_address") == 1:
                             customer = frappe.get_doc("Customer", name)
                             customer.set("customer_primary_address",current_address.name)
@@ -427,7 +428,7 @@ def update_customer(**kwargs):
                             contact = frappe.new_doc("Contact")
                             if not not new_address:
                                 # current address
-                                address_current = create_address(new_address=new_address)
+                                address_current = create_address(new_address)
                                 contact_data_update.update({"address": address_current.name})
                             contact.update(contact_data_update)
                             if contact_data_update.get("phone"):
