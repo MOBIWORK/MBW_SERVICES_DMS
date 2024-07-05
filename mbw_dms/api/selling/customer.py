@@ -414,11 +414,12 @@ def update_customer(**kwargs):
                                 address_current = create_address(new_address=new_address,link_cs_address=link_cs_address)
                                 contact_data_update.update({"address": address_current.name})
                             contact.update(contact_data_update)
-                            contact_phone = contact.as_dict().get("phone_nos")
-                            new_contact_phone = pydash.map_(contact_phone, lambda x: x.update({"is_primary_mobile_no":0}))
-                            new_contact_phone = pydash.filter_(contact_phone, lambda x: x.phone != contact_data_update.get("phone"))
-                            new_contact_phone.append({"phone": contact_data_update.get("phone") ,"is_primary_mobile_no":1})
-                            contact.set("phone_nos",  new_contact_phone)
+                            if contact_data_update.get("phone"):
+                                contact_phone = contact.as_dict().get("phone_nos")
+                                new_contact_phone = pydash.map_(contact_phone, lambda x: x.update({"is_primary_mobile_no":0}))
+                                new_contact_phone = pydash.filter_(contact_phone, lambda x: x.phone != contact_data_update.get("phone"))
+                                new_contact_phone.append({"phone": contact_data_update.get("phone") ,"is_primary_mobile_no":1})
+                                contact.set("phone_nos",  new_contact_phone)
                             contact.save()
                         else: 
                             contact = frappe.new_doc("Contact")
@@ -427,7 +428,8 @@ def update_customer(**kwargs):
                                 address_current = create_address(new_address=new_address)
                                 contact_data_update.update({"address": address_current.name})
                             contact.update(contact_data_update)
-                            contact.append("phone_nos", {"phone": contact_data_update.get("phone") ,"is_primary_mobile_no":1})
+                            if contact_data_update.get("phone"):
+                                contact.append("phone_nos", {"phone": contact_data_update.get("phone") ,"is_primary_mobile_no":1})
                             contact.append("links", {
                                 "link_doctype":"Customer",
                                 "link_name": name
