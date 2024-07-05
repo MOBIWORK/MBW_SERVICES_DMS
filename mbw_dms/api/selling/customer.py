@@ -373,7 +373,9 @@ def update_customer(**kwargs):
                 address_data_list = kwargs.get("address")
                 if len(address_data_list)>0:
                     for address_data in address_data_list:
-                        CommonHandle.create_address(address_data,link_cs_address)
+                        current_address = CommonHandle.create_address(address_data,link_cs_address)
+                        if address_data.get("is_primary_address") ==1:
+                            customer.set("customer_primary_address",current_address.name)
             # Cập nhật hoặc thêm mới liên hệ
             if "contact" in kwargs:
                 contacts_data_list = kwargs.get("contact")
