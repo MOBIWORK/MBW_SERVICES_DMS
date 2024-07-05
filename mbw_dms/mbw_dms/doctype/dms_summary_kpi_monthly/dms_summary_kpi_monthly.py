@@ -32,13 +32,13 @@ def get_kpi_monthly():
         monthly_summary = frappe.get_all(
 				"DMS Summary KPI Monthly",
 				filters={"thang": month, "nam": year, "nhan_vien_ban_hang": user_name},
-				fields=["name", "nam", "thang", "nhan_vien_ban_hang", "doanh_thu_thang", "doanh_so_thang", "so_kh_vt_duynhat", "so_kh_moi", "so_don_hang"]
+				fields=["name", "nam", "thang", "nhan_vien_ban_hang", "doanh_thu_thang", "doanh_so_thang", "so_kh_vt_luot", "so_kh_moi", "so_don_hang"]
 			)
 
 		# Lấy Kpi nhân viên
         kpi_employee = frappe.get_all("DMS KPI",
                 filters={"ngay_hieu_luc_tu": (">=", start_date), "ngay_hieu_luc_den": ("<=", end_date), "nhan_vien_ban_hang": user_name},
-                fields=["so_kh_vt_duynhat", "so_kh_moi", "so_don_hang", "doanh_so", "doanh_thu"]
+                fields=["so_kh_vt_luot", "so_kh_moi", "so_don_hang", "doanh_so", "doanh_thu"]
             )
         
         kpi = None
@@ -49,7 +49,7 @@ def get_kpi_monthly():
                 "doanh_thu": round(float(monthly_summary[0]["doanh_thu_thang"]/kpi_employee[0]["doanh_thu"]) * 100, 2),
                 "doanh_so": round(float(monthly_summary[0]["doanh_so_thang"]/kpi_employee[0]["doanh_so"]) * 100, 2),
                 "don_hang": round(float(monthly_summary[0]["so_don_hang"]/kpi_employee[0]["so_don_hang"]) * 100, 2),
-                "vieng_tham": round(float(monthly_summary[0]["so_kh_vt_duynhat"]/kpi_employee[0]["so_kh_vt_duynhat"]) * 100, 2),
+                "vieng_tham": round(float(monthly_summary[0]["so_kh_vt_luot"]/kpi_employee[0]["so_kh_vt_luot"]) * 100, 2),
                 "kh_moi": round(float(monthly_summary[0]["so_kh_moi"]/kpi_employee[0]["so_kh_moi"]) * 100, 2)
             }
 

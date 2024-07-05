@@ -70,10 +70,10 @@ class DMSCheckin(Document):
         exists_checkin = self.existing_checkin(kh_ma=kh_ma, start_date=start_date, end_date=end_date, current_user=user_id)
 
         # Kiểm tra đã tồn tại bản ghi KPI của tháng này chưa
-        existing_monthly_summary = frappe.get_all(
+        existing_monthly_summary = frappe.get_value(
             "DMS Summary KPI Monthly",
-            filters={"thang": month, "nam": year, "nhan_vien_ban_hang": user_name},
-            fields=["name"]
+            {"thang": month, "nam": year, "nhan_vien_ban_hang": user_name},
+            "name"
         )
         sales_team = frappe.get_value("DMS KPI", {"nhan_vien_ban_hang": user_name}, "nhom_ban_hang")
 
@@ -81,6 +81,7 @@ class DMSCheckin(Document):
             if existing_monthly_summary:
                 monthly_summary_doc = frappe.get_doc("DMS Summary KPI Monthly", existing_monthly_summary[0]["name"])
                 monthly_summary_doc.so_kh_vt_luot += 1
+                monthly_summary_doc.so_kh_vt_duynhat -= 1
                 if name_date in list_travel_date:
                     monthly_summary_doc.solan_vt_dungtuyen += 1
                 else:
@@ -151,7 +152,7 @@ class DMSCheckin(Document):
         exists_checkin = self.existing_checkin(kh_ma=kh_ma, start_date=start_date, end_date=end_date, current_user=user_id)
 
         # Kiểm tra đã tồn tại bản ghi KPI của tháng này chưa
-        existing_monthly_summary = frappe.get_all(
+        existing_monthly_summary = frappe.get_value(
             "DMS Summary KPI Monthly",
             {"thang": month, "nam": year, "nhan_vien_ban_hang": user_name},
             "name"
