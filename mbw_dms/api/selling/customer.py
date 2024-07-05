@@ -391,10 +391,7 @@ def update_customer(**kwargs):
                 if contacts_data_list:
                     for contact_data in contacts_data_list:
                         contact_name = contact_data.get("name")
-                        link_cs_address= {
-                            "link_doctype": "Contact",
-                            "link_name": contact_name 
-                        }
+                        
                         new_address = {}
                         if contact_data.get("city") and  contact_data.get("address_line1") :
                             new_address =  {
@@ -413,6 +410,10 @@ def update_customer(**kwargs):
                         }
                         if contact_name and frappe.db.exists("Contact", contact_name):
                             contact = frappe.get_doc("Contact", contact_name)
+                            link_cs_address= {
+                            "link_doctype": "Contact",
+                            "link_name": contact_name 
+                            }
                             if new_address :
                                 address_current = create_address(new_address=new_address,link_cs_address=link_cs_address)
                                 contact_data.update({"address" :address_current.name})
@@ -420,13 +421,18 @@ def update_customer(**kwargs):
                             contact.save(ignore_permissions=True)
                         else:
                             contact = frappe.new_doc("Contact")
+                            link_cs_address= {}
                             address_current = create_address(new_address=new_address,link_cs_address=link_cs_address)
                             if new_address :
                                 address_current = create_address(new_address=new_address,link_cs_address=link_cs_address)
                                 contact_data.update({"address" :address_current.name})
+                                address_current.append("links", {
+                                    "link_doctype": "Contact",
+                                    "link_name": contact_name.name
+                                })
                             contact.append("links", {
                                 "link_doctype": "Customer",
-                                "link_name": name
+                                "link_name": contact_data
                             })
                             contact.insert()
 
