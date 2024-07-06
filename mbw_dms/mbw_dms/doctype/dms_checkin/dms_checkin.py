@@ -250,6 +250,7 @@ class DMSCheckin(Document):
 @frappe.whitelist(methods="POST")
 def create_checkin(kwargs):
     try:
+        print("checkout",kwargs)
         new_checkin = frappe.new_doc("DMS Checkin")
 
         normal_keys = [
@@ -257,10 +258,10 @@ def create_checkin(kwargs):
             "checkin_khoangcach", "checkin_trangthaicuahang", "checkin_donhang",
             "checkin_long", "checkin_lat", "checkin_dochinhxac", "checkin_pinvao", "checkin_pinra",
             "checkout_khoangcach", "checkinvalidate_khoangcachcheckin",
-            "checkinvalidate_khoangcachcheckout", "createdbyemail",
+            "checkinvalidate_khoangcachcheckout", "createdbyemail","checkin_id"
         ]
         datetime_keys = ["checkin_timegps"]
-        date_keys = ["createddate", "checkin_giovao", "checkin_giora"]
+        date_keys = ["checkin_giovao", "checkin_giora"]
         for key, value in kwargs.items():
             if key in normal_keys:
                 new_checkin.set(key, value)
@@ -302,8 +303,13 @@ def create_checkin(kwargs):
         except Exception as e:
             print("Lỗi lấy địa chỉ",e)
             address = ""
-        new_checkin.set("checkin_address", address)
-        new_checkin.insert(ignore_permissions=True)
+        new_checkin.set("checkin_address", address,"\n")
+        print("new_checkin",new_checkin.as_dict())
+        try:
+            # validate_fields(new_checkin.as_dict())
+            new_checkin.insert(ignore_permissions=True)
+        except Exception as e:
+            print("loi insert::::::::::::::",e)
         frappe.db.commit()
         return gen_response(201, "Thành công", {"name": new_checkin.name})
     
@@ -851,3 +857,53 @@ def get_report(filters={}):
         })
     except Exception as e:
         return exception_handle(e)
+    
+def validate_fields(data):
+    field_descriptions = {
+        "kh_ma": "Data",
+        "kh_ten": "Data",
+        "kh_diachi": "Data",
+        "kh_long": "Float",
+        "kh_lat": "Float",
+        "checkin_giovao": "Datetime",
+        "checkin_giora": "Datetime",
+        "checkin_pinvao": "Int",
+        "checkin_pinra": "Int",
+        "checkin_khoangcach": "Float",
+        "checkin_trangthaicuahang": "Check",
+        "checkin_donhang": "Data",
+        "checkin_hinhanh": "Table",
+        "checkin_long": "Float",
+        "checkin_lat": "Float",
+        "checkin_address": "Data",
+        "checkin_timegps": "Time",
+        "checkin_dochinhxac": "Float",
+        "checkout_khoangcach": "Float",
+        "checkinvalidate_khoangcachcheckin": "Float",
+        "checkinvalidate_khoangcachcheckout": "Float",
+        "createddate": "Datetime",
+        "createdbyemail": "Data",
+        "createbyname": "Data",
+        "checkin_id": "Data",
+        "checkin_dungtuyen": "Check",
+        "is_checkout": "Check",
+        "is_check_inventory": "Check"
+    }
+
+    for field, field_type in field_descriptions.items():
+        value = data.get(field)
+        try:
+            if field_type == "Float":
+                float(value)
+            elif field_type == "Int":
+                int(value)
+            # elif field_type == "Datetime":
+            #     datetime.strptime(value, "%Y-%m-%d %H:%M:%S")
+            # elif field_type == "Time":
+            #     datetime.strptime(value, "%H:%M:%S").time()
+            elif field_type == "Check":
+                assert value in [0, 1]
+            # Data and Table can be left as they are string or list
+            print(f"{field}: {value} (Valid)")
+        except (ValueError, TypeError, AssertionError) as e:
+            print(f"Error in field {field}: {value} ({e})")
