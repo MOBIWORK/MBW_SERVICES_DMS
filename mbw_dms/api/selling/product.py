@@ -98,12 +98,15 @@ def list_product(**kwargs):
         for item in items:
             item["image"] = validate_image(item.get("image"))
             item["details"] = frappe.get_all("Item Price", filters={"item_code": item.get('item_code'), "price_list": price_list}, fields=["uom", "price_list", "price_list_rate", "valid_from", "currency"])
-            if not item["details"]:
+            if not price_list and not item["details"]:
                 item_price_default = frappe.get_all("Item Price", filters={"item_code": item.get('item_code'), "price_list": default_selling_price_list}, fields=["uom", "price_list", "price_list_rate", "valid_from", "currency"])
                 if item_price_default:
                     item["details"] = item_price_default
                 else:
                     item["details"] = [{"price_list_rate": 0}]
+            
+            if price_list and not item["details"]:
+                item["details"] = [{"price_list_rate": 0}]
 
             item["unit"] = frappe.db.get_all("UOM Conversion Detail", {"parent" : item.get("name")}, ["uom", "conversion_factor"])
             item["stock"] = frappe.db.get_all("Stock Entry Detail", {"item_code": item.get("item_code")}, ["t_warehouse", "qty"])
