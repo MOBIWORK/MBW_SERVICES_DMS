@@ -234,7 +234,13 @@ def create_address(new_address,link_cs_address) :
     try: 
         field_not_in = ["primary", "address_title", "name"]
         address_title= new_address.get("address_title")
-        current_address_cs = frappe.db.get_value("Address", {"address_title":["like" ,f"{address_title}%"]}, ["name", "address_location"], as_dict=1)
+        filter= {}
+        if address_title: 
+            filter = {"address_title":["like" ,f"{address_title}%"]}
+        if new_address.get("name"):
+            filter = {"name" : new_address.get("name")}
+        
+        current_address_cs = frappe.db.get_value("Address", filter, ["name", "address_location"], as_dict=1)
         if current_address_cs:
             current_address_cs = frappe.get_doc("Address",current_address_cs.get("name"))
             for key,value in new_address.items():
