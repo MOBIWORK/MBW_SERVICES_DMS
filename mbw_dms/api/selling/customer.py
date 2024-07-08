@@ -378,7 +378,7 @@ def update_customer(**kwargs):
                 if len(address_data_list)>0:
                     for address_data in address_data_list:
                         current_address = create_address(address_data,link_cs_address)
-                        if address_data.get("is_primary_address") == 1:
+                        if address_data.get("primary") == 1:
                             customer = frappe.get_doc("Customer", name)
                             customer.set("customer_primary_address",current_address.name)
                             customer.save()
