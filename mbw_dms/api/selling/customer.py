@@ -132,7 +132,7 @@ def customer_detail(name):
         doc_customer = frappe.get_doc("Customer",name).as_dict()
 
         routers = routers_name_of_customer(more_filters={"customer_code": doc_customer.customer_code})
-        address = frappe.db.get_all("Address", {"link_doctype": "Customer", "link_name": doc_customer.name}, ["name", "address_title", "address_location", "is_primary_address", "is_shipping_address"])
+        address = frappe.db.get_all("Address", {"link_doctype": "Customer", "link_name": doc_customer.name}, ["name", "address_title", "address_location", "is_primary_address", "is_shipping_address","city","county","state"])
         contacts = frappe.db.get_all("Contact", {"link_doctype": "Customer", "link_name": doc_customer.name}, ["name", "first_name", "last_name", "address", "phone","mobile_no"])
 
         list_router_frequency = []
@@ -333,7 +333,7 @@ def list_territory():
 @frappe.whitelist(methods="PUT")
 def update_customer(**kwargs):
     try:
-        # print("khh",kwargs)
+        print("khh",kwargs)
         # company = frappe.get_value("Employee", {"user_id": frappe.session.user}, "company")
         name = kwargs.get("name")
         if frappe.db.exists("Customer", name, cache=True):
@@ -429,7 +429,7 @@ def update_customer(**kwargs):
                             contact = frappe.new_doc("Contact")
                             if not not new_address:
                                 # current address
-                                address_current = create_address(new_address)
+                                address_current = create_address(new_address,{})
                                 contact_data_update.update({"address": address_current.name})
                             contact.update(contact_data_update)
                             if contact_data_update.get("phone"):
