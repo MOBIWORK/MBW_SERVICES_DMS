@@ -133,7 +133,7 @@ def customer_detail(name):
 
         routers = routers_name_of_customer(more_filters={"customer_code": doc_customer.customer_code})
         address = frappe.db.get_all("Address", {"link_doctype": "Customer", "link_name": doc_customer.name}, ["name", "address_title", "address_location", "is_primary_address", "is_shipping_address"])
-        contacts = frappe.db.get_all("Contact", {"link_doctype": "Customer", "link_name": doc_customer.name}, ["name", "first_name", "last_name", "address", "phone"])
+        contacts = frappe.db.get_all("Contact", {"link_doctype": "Customer", "link_name": doc_customer.name}, ["name", "first_name", "last_name", "address", "phone","mobile_no"])
 
         list_router_frequency = []
 
@@ -337,8 +337,7 @@ def update_customer(**kwargs):
         # company = frappe.get_value("Employee", {"user_id": frappe.session.user}, "company")
         name = kwargs.get("name")
         if frappe.db.exists("Customer", name, cache=True):
-            customer = frappe.get_doc("Customer", name)
-            
+            customer = frappe.get_doc("Customer", name)            
             # Cập nhật các trường cơ bản của khách hàng
             fields = ["customer_code", "customer_name", "customer_group", "territory", "customer_details", "website", "customer_type"]
             date_fields = ["custom_birthday"]
@@ -349,21 +348,21 @@ def update_customer(**kwargs):
                     custom_birthday = validate_date(value)
                     customer.set(key, custom_birthday)
             customer.save()
+            frappe.db.commit()
             # Thay đổi ảnh
             if  (not customer.image and kwargs.get("image")) or( kwargs.get("image") and not customer.image in kwargs.get("image")):
                 is_base64 = CommonHandle.check_base64(kwargs.get("image"))
+                customer = frappe.get_doc("Customer", name)
                 if is_base64:
                     customer.image = post_image(name_image="", faceimage=kwargs.get("image"), doc_type="Customer", doc_name=customer.name)
                 else: 
                     customer.image  = kwargs.get("image")
                 customer.save()
-            link_cs_address = {
-                "link_doctype":"Customer",
-                "link_name": name
-                }
+            
             # Cập nhật hoặc thêm mới địa chỉ
             # Chỉnh sửa hạn mức công nợ
             if "credit_limits" in kwargs:
+                customer = frappe.get_doc("Customer", name)
                 credit_limits = kwargs.get("credit_limits")
                 customer.set("credit_limits", [{
                     "credit_limit": credit_limits[0],
@@ -371,14 +370,15 @@ def update_customer(**kwargs):
                 }])
                 customer.save()
             if "address" in kwargs:
+                link_cs_address = {
+                "link_doctype":"Customer",
+                "link_name": name
+                }
                 address_data_list = kwargs.get("address")
-                print("11111111111111111111111111111111111111111111111 \n",address_data_list)
                 if len(address_data_list)>0:
-                    print("================================================================================================================")
                     for address_data in address_data_list:
-                        print(address_data,"\n")
-                        current_address = CommonHandle.create_address(address_data,link_cs_address)
-                        if address_data.get("is_primary_address") ==1:
+                        current_address = create_address(address_data,link_cs_address)
+                        if address_data.get("is_primary_address") == 1:
                             customer = frappe.get_doc("Customer", name)
                             customer.set("customer_primary_address",current_address.name)
                             customer.save()
@@ -387,10 +387,6 @@ def update_customer(**kwargs):
                 contacts_data_list = kwargs.get("contact")
                 
                 new_address = {}
-                # link_cs_address= {
-                # "link_doctype": "Contact",
-                # "link_name": contact_name 
-                # }
                 if contacts_data_list:
                     for contact_data in contacts_data_list:
                         new_address = {}
@@ -433,7 +429,7 @@ def update_customer(**kwargs):
                             contact = frappe.new_doc("Contact")
                             if not not new_address:
                                 # current address
-                                address_current = create_address(new_address=new_address)
+                                address_current = create_address(new_address)
                                 contact_data_update.update({"address": address_current.name})
                             contact.update(contact_data_update)
                             if contact_data_update.get("phone"):
