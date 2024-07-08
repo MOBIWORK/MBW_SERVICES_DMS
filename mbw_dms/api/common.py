@@ -231,29 +231,37 @@ def null_location(location):
 
 
 def create_address(new_address,link_cs_address) :
-    address_title= new_address.get("address_title")
-    current_address_cs = frappe.db.get_value("Address", {"address_title":["like" ,f"{address_title}%"]}, ["name", "address_location"], as_dict=1)
-    if current_address_cs:
-        current_address_cs = frappe.get_doc("Address",current_address_cs.get("name"))
-        for key,value in new_address.items():
-            current_address_cs.set(key,value)
-            setattr(current_address_cs, key, value)       
-        current_address_cs.address_location = new_address.get("address_location")
-        if not not link_cs_address:
-            links = current_address_cs.links
-            find_cs = pydash.filter_(links, lambda cs: cs.get("link_doctype") ==  link_cs_address.get("link_doctype") and cs.get("link_name") != link_cs_address.get("link_name"))
-            find_cs.append(link_cs_address)
-            current_address_cs.set("links",find_cs) 
-        current_address_cs.save()
-    else:
-        new_address_doc = frappe.new_doc("Address")
-        for key,value in new_address.items():
-            setattr(new_address_doc, key, value)
-        if link_cs_address:
-            new_address_doc.append("links", link_cs_address)
-        new_address_doc.save()
-        current_address_cs = new_address_doc
-    return current_address_cs
+    try: 
+        field_not_in = ["primary", "address_title", "name"]
+        address_title= new_address.get("address_title")
+        current_address_cs = frappe.db.get_value("Address", {"address_title":["like" ,f"{address_title}%"]}, ["name", "address_location"], as_dict=1)
+        if current_address_cs:
+            current_address_cs = frappe.get_doc("Address",current_address_cs.get("name"))
+            for key,value in new_address.items():
+                print(current_address_cs.get("name"))
+                if key not in field_not_in:
+                    print(key,":",value,"\n") 
+                    current_address_cs.set(key,value)    
+            current_address_cs.address_location = new_address.get("address_location")
+            if not not link_cs_address:
+                links = current_address_cs.links
+                find_cs = pydash.filter_(links, lambda cs: cs.get("link_doctype") ==  link_cs_address.get("link_doctype") and cs.get("link_name") != link_cs_address.get("link_name"))
+                find_cs.append(link_cs_address)
+                current_address_cs.set("links",find_cs) 
+            current_address_cs.save()
+        else:
+            new_address_doc = frappe.new_doc("Address")
+            for key,value in new_address.items():
+                setattr(new_address_doc, key, value)
+            if link_cs_address:
+                new_address_doc.append("links", link_cs_address)
+            new_address_doc.save()
+            current_address_cs = new_address_doc
+        frappe.db.commit()
+        return current_address_cs
+    except Exception as e :
+        print(e),
+        raise TypeError(e)
 
 
 def create_address_current(address_title, new_location, link_cs_address) :
