@@ -66,12 +66,12 @@ def get_list_sales_order(**kwargs):
             where = add_query(where,f"so.customer_name like '%{search_key}%' or so.name LIKE '%{search_key}%' or so.customer LIKE '%{search_key}%'")
         # new query
         sql_query = f"""
-                    SELECT  so.customer ,  so.customer_name ,  so.name ,
-                             (so.customer_address) as address_display ,
-                             UNIX_TIMESTAMP(so.po_date) as po_date ,
-                             UNIX_TIMESTAMP(so.delivery_date) as delivery_date ,
-                             UNIX_TIMESTAMP(so.creation) as creation ,  so.grand_total ,
-                             so.rounding_adjustment ,  so.rounded_total ,  so.status , st.*
+                    SELECT so.customer, so.customer_name,  so.name,
+                            (so.customer_address) as address_display ,
+                            UNIX_TIMESTAMP(so.po_date) as po_date ,
+                            UNIX_TIMESTAMP(so.delivery_date) as delivery_date ,
+                            UNIX_TIMESTAMP(so.creation) as creation, so.grand_total ,
+                            so.rounding_adjustment, so.rounded_total, so.status , st.*
                     FROM `tabSales Order` so
                     JOIN `tabSales Team` st ON so.name = st.parent
                     {where}
@@ -84,10 +84,10 @@ def get_list_sales_order(**kwargs):
         total_order = len(frappe.db.get_list("Sales Order", filters=query))
         total_order = frappe.db.sql(f"""
                             SELECT  COUNT(*) AS total
-                    FROM `tabSales Order` so
-                    JOIN `tabSales Team` st ON so.name = st.parent
-                    {where}
-                        """,as_dict=True)
+                            FROM `tabSales Order` so
+                            JOIN `tabSales Team` st ON so.name = st.parent
+                            {where}
+                            """,as_dict=True)
         return gen_response(200, "Thành công",{
             "data": sale_orders,
             "total": total_order[0].total,
