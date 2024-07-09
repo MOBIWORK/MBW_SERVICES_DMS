@@ -136,22 +136,22 @@ def customer_detail(name):
         contacts = frappe.db.get_all("Contact", {"link_doctype": "Customer", "link_name": doc_customer.name}, ["name", "first_name", "last_name", "address", "phone","mobile_no"])
 
         list_router_frequency = []
-
-        for name in routers:
-            router = frappe.get_doc("DMS Router",name).as_dict()
-            customers = router.customers
-            this_customer = pydash.find(customers,lambda x: x.customer_code == doc_customer.customer_code)
-            if this_customer:
-                list_router_frequency += [{"frequency": this_customer.frequency, "router_name": router.channel_name, "router_code": router.channel_code}]
-
+        if not not routers:
+            for name in routers:
+                router = frappe.get_doc("DMS Router",name).as_dict()
+                customers = router.customers
+                this_customer = pydash.find(customers,lambda x: x.customer_code == doc_customer.customer_code)
+                if this_customer:
+                    list_router_frequency += [{"frequency": this_customer.frequency, "router_name": router.channel_name, "router_code": router.channel_code}]
+ 
+        print("doc customer==========",doc_customer)
         doc_customer = pydash.pick_by(doc_customer, lambda value,key: key not in ["docstatus", "idx", "naming_series", "is_internal_customer", "language", "so_required", "dn_required", "is_frozen", "disabled", "doctype"])       
         doc_customer["address"] = address
         doc_customer["contacts"] = contacts
         doc_customer["routers"] = list_router_frequency
         doc_customer["customer_location_primary"] = null_location( doc_customer["customer_location_primary"])
-        doc_customer["address"] = pydash.map_(address,lambda x: {**x,"primary": 1 if x.name == doc_customer.customer_primary_address else 0})
+        doc_customer["address"] = pydash.map_(address,lambda x: {**x,"primary": 1 if x.name == doc_customer.get("customer_primary_address") else 0})
         doc_customer["credit_limits"] = pydash.map_(doc_customer["credit_limits"],lambda x: x.credit_limit) if len(doc_customer["credit_limits"])>0 else[ 0 ] 
-
         if doc_customer["image"] and not doc_customer["image"].startswith("http"):
             from frappe.utils import get_url
             doc_customer["image"] = (get_url() +  doc_customer["image"]).replace(" ", "%20")
