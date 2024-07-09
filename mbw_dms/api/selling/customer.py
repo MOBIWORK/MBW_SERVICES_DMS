@@ -146,9 +146,10 @@ def customer_detail(name):
             address_contact = contact.address
             if address_contact:
                 doc_address = frappe.db.get_value("Address",address_contact,["city","state","county","address_title"],as_dict=1)
-                contact.update({
-                    "detail_address": doc_address
-                })
+                for key,value in doc_address.items() :
+                    contact.update({
+                        key:value
+                    })
         doc_customer = pydash.pick_by(doc_customer, lambda value,key: key not in ["docstatus", "idx", "naming_series", "is_internal_customer", "language", "so_required", "dn_required", "is_frozen", "disabled", "doctype"])       
         doc_customer["address"] = address
         doc_customer["contacts"] = contacts
@@ -163,6 +164,7 @@ def customer_detail(name):
             address_in.update({
                 "address_location": null_location(address_in.get("address_location")) if address_in.get("address_location") is not None else None
             })
+        doc_customer["contacts"] = pydash.map_(doc_customer["contacts"],lambda x: {**x,"primary": 1 if x.name == doc_customer.get("customer_primary_contact") else 0})
         return gen_response(200, "", doc_customer)
     except Exception as e:
         exception_handle(e)
