@@ -130,11 +130,12 @@ def list_customer(**kwargs):
 def customer_detail(name):
     try: 
         doc_customer = frappe.get_doc("Customer",name).as_dict()
-
+        filter_cs = {"link_doctype": "Customer", "link_name": doc_customer.name}
         routers = routers_name_of_customer(more_filters={"customer_code": doc_customer.customer_code})
-        address = frappe.db.get_all("Address", {"link_doctype": "Customer", "link_name": doc_customer.name}, ["name", "address_title", "address_location", "is_primary_address", "is_shipping_address","city","county","state"])
-        contacts = frappe.db.get_all("Contact", {"link_doctype": "Customer", "link_name": doc_customer.name}, ["name", "first_name", "last_name", "address", "phone","mobile_no"])
-
+        address = frappe.db.get_all("Address", filters= filter_cs,fields= ["name", "address_title", "address_location", "is_primary_address", "is_shipping_address","city","county","state"])
+        contacts = frappe.db.get_all("Contact",filters=  filter_cs,fields= ["name", "first_name", "last_name", "address", "phone","mobile_no"])
+        print("address",address)
+        print("contacts",contacts)
         list_router_frequency = []
         if not not routers:
             for name in routers:
@@ -144,7 +145,6 @@ def customer_detail(name):
                 if this_customer:
                     list_router_frequency += [{"frequency": this_customer.frequency, "router_name": router.channel_name, "router_code": router.channel_code}]
  
-        print("doc customer==========",doc_customer)
         doc_customer = pydash.pick_by(doc_customer, lambda value,key: key not in ["docstatus", "idx", "naming_series", "is_internal_customer", "language", "so_required", "dn_required", "is_frozen", "disabled", "doctype"])       
         doc_customer["address"] = address
         doc_customer["contacts"] = contacts
@@ -155,9 +155,10 @@ def customer_detail(name):
         if doc_customer["image"] and not doc_customer["image"].startswith("http"):
             from frappe.utils import get_url
             doc_customer["image"] = (get_url() +  doc_customer["image"]).replace(" ", "%20")
-        for address in  doc_customer["address"]:
-            address.address_location = null_location(address.address_location)
-        print("doc_customer",doc_customer)
+        for address_in in doc_customer["address"]:
+            address_in.update({
+                "address_location": null_location(address_in.get("address_location")) if address_in.get("address_location") is not None else None
+            })
         return gen_response(200, "", doc_customer)
     except Exception as e:
         exception_handle(e)
