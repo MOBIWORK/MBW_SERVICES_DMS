@@ -259,14 +259,17 @@ def create_checkin(kwargs):
             "checkin_long", "checkin_lat", "checkin_dochinhxac",
             "checkout_khoangcach", "checkinvalidate_khoangcachcheckin",
             "checkinvalidate_khoangcachcheckout", "createdbyemail","checkin_id","checkin_dungtuyen",
-            "is_check_inventory"
+            "is_check_inventory","is_route"
         ]
         int_key = [ "checkin_pinvao", "checkin_pinra"]
         datetime_keys = ["checkin_timegps"]
         date_keys = ["checkin_giovao", "checkin_giora"]
         for key, value in kwargs.items():
             if key in normal_keys:
-                new_checkin.set(key, value)
+                if key == "is_route":
+                    new_checkin.set("checkin_dungtuyen", value)
+                else:
+                    new_checkin.set(key, value)
             if key in int_key:
                 new_checkin.set(key,int( value))
             elif key in datetime_keys:
