@@ -258,7 +258,8 @@ def create_checkin(kwargs):
             "checkin_khoangcach", "checkin_trangthaicuahang", "checkin_donhang",
             "checkin_long", "checkin_lat", "checkin_dochinhxac",
             "checkout_khoangcach", "checkinvalidate_khoangcachcheckin",
-            "checkinvalidate_khoangcachcheckout", "createdbyemail","checkin_id"
+            "checkinvalidate_khoangcachcheckout", "createdbyemail","checkin_id","checkin_dungtuyen",
+            "is_check_inventory"
         ]
         int_key = [ "checkin_pinvao", "checkin_pinra"]
         datetime_keys = ["checkin_timegps"]
