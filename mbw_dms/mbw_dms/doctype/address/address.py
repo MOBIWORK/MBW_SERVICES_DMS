@@ -2,6 +2,7 @@
 # For license information, please see license.txt
 
 import frappe
+from frappe import _
 from frappe.model.document import Document
 import json
 class Address(Document):
@@ -9,7 +10,6 @@ class Address(Document):
 
 
 def update_address(doc,method=None):
-
 	for link in doc.links:
 		if link.link_doctype == "Customer":
 			customer = frappe.get_doc("Customer",{
