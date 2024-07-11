@@ -829,6 +829,7 @@ def get_customer_router_v2(data):
 
         return gen_response(200, _("Vị trí của bạn không xác định") if field_order =="distance" and long and lat else "", {
             "data": detail_customer,
+            "total_checkin": len(list_checkin_code),
             "total": total_customer,
             "page_size": page_size,
             "page_number": page_number
