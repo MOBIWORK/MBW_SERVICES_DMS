@@ -13,6 +13,7 @@ import {
   Dropdown,
   Form,
   message,
+  Modal,
   Row,
   Table,
 } from "antd";
@@ -32,6 +33,8 @@ import { typecustomer } from "../ReportSales/data";
 import { useForm } from "antd/es/form/Form";
 import { LuFilter, LuFilterX } from "react-icons/lu";
 import { useResize } from "@/hooks";
+import { ModalDetail } from "./components/ModalCheckin";
+import Detailmodal from "./Detailmodal";
 
 const startOfMonth: any = dayjs().startOf("month");
 const endOfMonth: any = dayjs().endOf("month");
@@ -152,6 +155,21 @@ export default function ReportCheckin() {
   const [containerHeight, setContainerHeight] = useState<any>(0);
   const [scrollYTable1, setScrollYTable1] = useState<number>(size?.h * 0.52);
 
+  const [modal, setModal] = useState<{
+    open: boolean;
+    id: any;
+  }>({
+    open: false,
+    id: null,
+  });
+
+  const closeModal = () => {
+    setModal({
+      open: false,
+      id: null,
+    });
+  };
+
   useEffect(() => {
     setScrollYTable1(size.h * 0.52);
   }, [size]);
@@ -168,7 +186,6 @@ export default function ReportCheckin() {
       return () => resizeObserver.disconnect();
     }
   }, [containerRef1]);
-
 
   const onChange: DatePickerProps["onChange"] = (dateString: any) => {
     if (dateString === null || dateString === undefined) {
@@ -325,6 +342,7 @@ export default function ReportCheckin() {
         title: "Địa chỉ",
         dataIndex: "customer_address",
         key: "customer_address",
+        width: 200,
         render: (_, record) => (
           <div className="truncate">{record.customer_address}</div>
         ),
@@ -356,6 +374,7 @@ export default function ReportCheckin() {
       {
         title: "Checkin",
         dataIndex: "checkin",
+        className: "!text-center",
         key: "checkin",
         render: (_, record) => (
           <div className="!text-center">{record.checkin}</div>
@@ -364,6 +383,7 @@ export default function ReportCheckin() {
       {
         title: "Checkout",
         dataIndex: "checkout",
+        className: "!text-center",
         key: "checkout",
         render: (_, record) => (
           <div className="!text-center">{record.checkout}</div>
@@ -383,13 +403,12 @@ export default function ReportCheckin() {
         title: "Địa chỉ checkin",
         dataIndex: "checkin_address",
         key: "checkin_address",
-        render: (_, record) => (
-            <div>{record.checkin_address}</div>
-        ),
+        render: (_, record) => <div>{record.checkin_address}</div>,
       },
       {
         title: "Khoảng cách",
         dataIndex: "distance",
+        className: "!text-center",
         key: "distance",
         render: (_, record) => (
           <div className="!text-center">
@@ -408,6 +427,7 @@ export default function ReportCheckin() {
       {
         title: "Số ảnh chụp",
         dataIndex: "total_image",
+        className: "!text-center",
         key: "total_image",
         render: (_, record) => (
           <div className="!text-center">{record.total_image}</div>
@@ -416,6 +436,7 @@ export default function ReportCheckin() {
       {
         title: "Đúng tuyến",
         dataIndex: "is_router",
+        className: "!text-center",
         key: "is_router",
         render: (value: any) => (
           <div className="!text-center">
@@ -426,6 +447,7 @@ export default function ReportCheckin() {
       {
         title: "Đơn hàng",
         dataIndex: "is_order",
+        className: "!text-center",
         key: "is_order",
         render: (value: any) => (
           <div className="!text-center">
@@ -436,6 +458,7 @@ export default function ReportCheckin() {
       {
         title: "Ghi tồn",
         dataIndex: "is_check_inventory",
+        className: "!text-center",
         key: "is_check_inventory",
         render: (value: any) => (
           <div className="!text-center">
@@ -445,10 +468,24 @@ export default function ReportCheckin() {
       },
       {
         title: "Ghi chú",
-        dataIndex: "note",
-        key: "note",
+        dataIndex: "checkin_id",
+        key: "checkin_id",
         render: (value: any) => (
-          <div className="!text-center">{value ? value : "-"}</div>
+          <div className="!text-left">
+            {value ? (
+              <div onClick={() => {
+                // console.log(value);
+                setModal({
+                  open: true,
+                  id: value
+                });
+              }} className="text-[#1877F2] text-sm font-medium- !text-left cursor-pointer underline">
+                Xem ghi chú
+              </div>
+            ) : (
+              "-"
+            )}
+          </div>
         ),
       },
     ];
@@ -462,7 +499,7 @@ export default function ReportCheckin() {
             key: id,
           };
         })}
-        // scroll={{ y: 280 }}
+        scroll={{ x: 2500, y: 280 }}
         columns={columns}
         pagination={false}
       />
@@ -493,7 +530,16 @@ export default function ReportCheckin() {
       setDataCheckin(result);
       setTotal(result?.totals);
     })();
-  }, [page, from_date, to_date, refresh, sales_team, employee, customer_group, customer_type]);
+  }, [
+    page,
+    from_date,
+    to_date,
+    refresh,
+    sales_team,
+    employee,
+    customer_group,
+    customer_type,
+  ]);
 
   return (
     <>
@@ -714,6 +760,15 @@ export default function ReportCheckin() {
             />
           </div>
         </div>
+        <ModalDetail
+          title={<div className="font-bold text-lg leading-7 text-[#212B36] p-4">Ghi chú</div>}
+          open={modal.open}
+          onCancel={closeModal}
+          footer={false}
+          width={800}
+        >
+          <Detailmodal id={modal.id}/>
+        </ModalDetail>
       </ContentFrame>
     </>
   );
