@@ -93,13 +93,21 @@ def list_note(kwargs):
     try:
         my_filter = {}
         name = kwargs.get('name')
+        page_size =  int(kwargs.get('page_size', 20))
+        page_number = int(kwargs.get('page_number')) if kwargs.get('page_number') and int(kwargs.get('page_number')) >= 1 else 1
         custom_checkin_id = kwargs.get('custom_checkin_id')
         if name:
             my_filter["name"] = ['like', f'%{name}%']
         if custom_checkin_id:
             my_filter["custom_checkin_id"] = ['like', f'%{custom_checkin_id}%']
-        list_note = frappe.get_all('Note',filters=my_filter ,fields=["name", "title", "content", "creation","custom_checkin_id"])
-        return gen_response(200, "Thành công", list_note)
+        list_note = frappe.get_all('Note',filters=my_filter ,fields=["name", "title", "content", "creation","custom_checkin_id"], start=page_size*(page_number-1), page_length=page_size)
+        totals = frappe.db.count("Note", filters=my_filter)
+        return gen_response(200, "Thành công", {
+            "data": list_note,
+            "totals": totals,
+            "page_number": page_number,
+            "page_size": page_size
+        })
     except Exception as e:
         return exception_handle(e)
     

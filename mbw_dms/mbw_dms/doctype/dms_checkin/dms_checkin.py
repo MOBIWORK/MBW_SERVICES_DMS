@@ -280,11 +280,11 @@ def create_checkin(kwargs):
 
         if kwargs.get("checkin_giora"):
             new_checkin.set("is_checkout", 1)
-        images = kwargs.get("listImage")
-        if images: 
+        images = frappe.db.get_all("DMS Album Image", {"checkin_id": kwargs.get("checkin_id")},["image_url"])
+        if len(images) > 0 : 
             for image in images:
                 new_checkin.append("checkin_hinhanh",{
-                    "url_image":image
+                    "url_image":image.image_url
                 })
         user_id = frappe.session.user
         employee_id = frappe.get_value("Employee", {"user_id": user_id}, "name")
@@ -315,6 +315,7 @@ def create_checkin(kwargs):
         print("new_checkin",new_checkin.as_dict())
         try:
             # validate_fields(new_checkin.as_dict())
+            print("new_checkin===============================",new_checkin)
             new_checkin.insert(ignore_permissions=True)
         except Exception as e:
             print("loi insert::::::::::::::",e)
