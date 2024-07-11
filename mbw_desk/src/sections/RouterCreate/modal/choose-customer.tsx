@@ -1,5 +1,5 @@
 import { Button, Col, Input, Modal, Pagination, Row } from "antd";
-import React, { useContext, useEffect, useState } from "react";
+import React, { BaseSyntheticEvent, useContext, useEffect, useState } from "react";
 import { FormItemCustom, TableCustom, TagCustom } from "@/components";
 import { CloseOutlined, SearchOutlined } from "@ant-design/icons";
 import { LuFilter, LuFilterX } from "react-icons/lu";
@@ -16,8 +16,9 @@ import { useForm } from "antd/es/form/Form";
 import { AxiosService } from "../../../services/server";
 import { CustomerContext, SaleGroupContext } from "../view";
 import { GlobalContext } from "@/App";
-type key = "customer_type"| "customer_group"| "city"| "district"|"ward"
-type filterType = key[]
+import useDebounce from "@/hooks/useDebount";
+type key = "customer_type" | "customer_group" | "city" | "district" | "ward";
+type filterType = key[];
 
 const columnSelectCustomer: ColumnsType<CustomerType> = [
   ...commonTable,
@@ -35,13 +36,17 @@ const columnSelectCustomer: ColumnsType<CustomerType> = [
   ...commonColumnCustomer,
 ];
 
-const handleFilter = (filters:filterType): Array<any> => {
+const handleFilter = (filters: filterType): Array<any> => {
   let arrayFilter: any[] = [];
   for (let key_search in filters) {
     if (filters[key_search]) {
       arrayFilter = [
         ...arrayFilter,
-        { key: [FilterForm[key_search as key]], value: filters[key_search],key2: key_search},
+        {
+          key: [FilterForm[key_search as key]],
+          value: filters[key_search],
+          key2: key_search,
+        },
       ];
     }
   }
@@ -49,106 +54,123 @@ const handleFilter = (filters:filterType): Array<any> => {
 };
 
 type Props = {
-  closeModal:() => void
-}
+  closeModal: () => void;
+};
 
-export function ChooseCustomer({closeModal}:Props) {
-  const {setCustomerRouter,customerRouter} = useContext(CustomerContext)
-  const {errorMsg} = useContext(GlobalContext)
-  const {teamSale} = useContext(SaleGroupContext)
-
+export function ChooseCustomer({ closeModal }: Props) {
+  const { setCustomerRouter, customerRouter } = useContext(CustomerContext);
+  const { errorMsg } = useContext(GlobalContext);
+  const { teamSale } = useContext(SaleGroupContext);
+  const [inputKey,setInputKey] = useState<string>("")
+  const search_key = useDebounce(inputKey)
   const [form] = useForm();
-  const [page_number,setPageNumber] = useState<number>(1)
-  const [customerChoose, setCustomerChoose] = useState<{[key:number]:CustomerType[]}>({1: []});
-  const [customerList, setCustomerList] =
-    useState<CustomerType[]>([]);
+  const [page_number, setPageNumber] = useState<number>(1);
+  const [customerChoose, setCustomerChoose] = useState<{
+    [key: number]: CustomerType[];
+  }>({ 1: [] });
+  const [customerList, setCustomerList] = useState<CustomerType[]>([]);
   const [filter, setFilter] = useState<{}>({});
   const [openFilter, setOpenFilter] = useState<boolean>(false);
-  const PAGE_SIZE=20
-  const [total_Customer,setTotalNumber] = useState<number>(40)
+  const PAGE_SIZE = 20;
+  const [total_Customer, setTotalNumber] = useState<number>(40);
   const rowSelection = {
-    selectedRowKeys: customerChoose[page_number] ? customerChoose[page_number].map(value => value.customer_code) : [],
+    selectedRowKeys: customerChoose[page_number]
+      ? customerChoose[page_number].map((value) => value.customer_code)
+      : [],
     onChange: (selectedRowKeys: React.Key[], selectedRows: CustomerType[]) => {
       setCustomerChoose((prev) => {
-          return ({
-            ...prev,
-            [page_number]: selectedRows
-          })
+        return {
+          ...prev,
+          [page_number]: selectedRows,
+        };
       });
     },
   };
 
   const handleSubmitFilter = () => {
-    form.submit()
-    setOpenFilter(false)
-  }
+    form.submit();
+    setOpenFilter(false);
+  };
 
-  const handleClearFilter = (fil?:any) => {
-    if(fil) {
-        let newFilter = {...filter}
-        delete newFilter[fil.key2]
-        form.setFieldsValue(newFilter)
-        setFilter(prev => {
-            delete prev[fil.key2]
-            return {...prev}
-        })
-        
-    }else {
-        form.resetFields()
-        setFilter({})
+  const handleClearFilter = (fil?: any) => {
+    if (fil) {
+      let newFilter:any = { ...filter };
+      delete newFilter[fil.key2];
+      form.setFieldsValue(newFilter);
+      setFilter((prev:any) => {
+        delete prev[fil.key2];
+        return { ...prev };
+      });
+    } else {
+      form.resetFields();
+      setFilter({});
     }
-  }
- 
+  };
 
-  const handleAddCustomer =() => {
-    let chooseC = Object.keys(customerChoose).reduce((prev:any[],now:string) => {
-      let now2 = Number.parseInt(now)
-      return ([...prev,...customerChoose[now2]])
-    },[])    
-    setCustomerRouter([...customerRouter,...chooseC.filter(customer => !customerRouter.map((cs:CustomerType) => cs.customer_code).includes( customer.customer_code))].map(customer => {
-      if(!customer.frequency) customer.frequency = "1;2;3;4"
-      return customer
-    }))
-    
-    closeModal()
-  }
-  useEffect(()=> {
-    (async() => {
+  const handleAddCustomer = () => {
+    let chooseC = Object.keys(customerChoose).reduce(
+      (prev: any[], now: string) => {
+        let now2 = Number.parseInt(now);
+        return [...prev, ...customerChoose[now2]];
+      },
+      []
+    );
+    setCustomerRouter(
+      [
+        ...customerRouter,
+        ...chooseC.filter(
+          (customer) =>
+            !customerRouter
+              .map((cs: CustomerType) => cs.customer_code)
+              .includes(customer.customer_code)
+        ),
+      ].map((customer) => {
+        if (!customer.frequency) customer.frequency = "1;2;3;4";
+        return customer;
+      })
+    );
+
+    closeModal();
+  };
+  useEffect(() => {
+    (async () => {
       try {
         // quang yêu cầu chỉ hiển thị danh sách khách hàng khi chọn sale manager
-      const rsCustomer = await AxiosService.get('/api/method/mbw_dms.api.router.get_customer',{
-        params: {
-          ...filter,
-          teamSale,
-          page_size: PAGE_SIZE,
-          page_number
-        }
-      })
-      setCustomerList(rsCustomer?.result?.data)
-      setTotalNumber(rsCustomer.result?.total)
-      } catch (error:any) {
-        errorMsg(error)
+        const rsCustomer = await AxiosService.get(
+          "/api/method/mbw_dms.api.router.get_customer",
+          {
+            params: {
+              ...filter,
+              teamSale,
+              search_key,
+              page_size: PAGE_SIZE,
+              page_number,
+            },
+          }
+        );
+        setCustomerList(rsCustomer?.result?.data);
+        setTotalNumber(rsCustomer.result?.total);
+      } catch (error) {
+        errorMsg(error);
       }
-      
-      
-    })()
-  },[filter,page_number,teamSale])
+    })();
+  }, [filter, page_number, teamSale,search_key]);
   // useEffect(() => {
   // if(customerList.length>0)     {
   //   let csCode = customerList.map(cs => cs.customer_code)
   //   let selectedPage = selected.filter(csSelect => csCode.includes(csSelect.customer_code))
   //   console.log("selected",{csCode,selectedPage});
-    
+
   //   setCustomerChoose((prev)=> {
   //     console.log("prev",prev);
-      
+
   //     if(prev[page_number] && prev[page_number].length > 0){
   //       console.log("chọn cũ");
-        
+
   //       return prev
   //     }else{
   //       console.log("chọn mới",selectedPage);
-        
+
   //       if(Object.keys(prev).length > 0) {
   //         return {...prev,[page_number]: selectedPage}
 
@@ -158,10 +180,10 @@ export function ChooseCustomer({closeModal}:Props) {
   //     }
 
   //   })
-    
+
   // }
   // },[selected,page_number,customerList])
-  
+
   return (
     <>
       <Row className="justify-between">
@@ -170,6 +192,8 @@ export function ChooseCustomer({closeModal}:Props) {
             <Input
               placeholder="Tìm kiếm khách hàng"
               prefix={<SearchOutlined />}
+              onChange={(e:BaseSyntheticEvent)=> setInputKey(e.target.value)}
+              value={inputKey}
             />
           </FormItemCustom>
           <div className="flex justify-center items-center ml-4">
@@ -190,30 +214,38 @@ export function ChooseCustomer({closeModal}:Props) {
         </Col>
         <Col className="inline-flex items-center">
           <span className="mr-4">
-            Đã chọn {Object.keys(customerChoose).reduce((prev,now:any) => prev + customerChoose[now].length,0)} khách hàng
-
+            Đã chọn{" "}
+            {Object.keys(customerChoose).reduce(
+              (prev, now: any) => prev + customerChoose[now].length,
+              0
+            )}{" "}
+            khách hàng
           </span>
-          <Button type="primary" onClick={handleAddCustomer}>Thêm</Button>
+          <Button type="primary" onClick={handleAddCustomer}>
+            Thêm
+          </Button>
         </Col>
       </Row>
       <div className="py-5 px-4">
         <span>{customerList.length} kết quả hiển thị</span>
         {handleFilter(filter as any).length > 0 && (
           <Row className="items-center">
-            {handleFilter(filter  as any).map((fil: any) => (
-              <TagCustom closeIcon={<CloseOutlined />} onClose={() => {
-                handleClearFilter(fil)
-              }}>
+            {handleFilter(filter as any).map((fil: any) => (
+              <TagCustom
+                closeIcon={<CloseOutlined />}
+                onClose={() => {
+                  handleClearFilter(fil);
+                }}
+              >
                 {fil.key}: {fil.value}
               </TagCustom>
             ))}
-            
           </Row>
         )}
       </div>
       <div className="-mx-6">
         <TableCustom
-          scroll={{y: 500 }}
+          scroll={{ y: 500 }}
           rowSelection={{
             type: "checkbox",
             ...rowSelection,
@@ -227,9 +259,15 @@ export function ChooseCustomer({closeModal}:Props) {
         />
       </div>
       <Row className="justify-end mt-2">
-        <Pagination showSizeChanger={false} defaultCurrent={page_number} pageSize={PAGE_SIZE}  total={total_Customer} onChange={(page,pageSize) => {
-          setPageNumber(page);          
-        }}/>
+        <Pagination
+          showSizeChanger={false}
+          defaultCurrent={page_number}
+          pageSize={PAGE_SIZE}
+          total={total_Customer}
+          onChange={(page, pageSize) => {
+            setPageNumber(page);
+          }}
+        />
       </Row>
       <Modal
         width={451}

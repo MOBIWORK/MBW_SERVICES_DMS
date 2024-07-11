@@ -482,23 +482,33 @@ def get_customer(filters):
         customer_group = filters.get('customer_group')
         customer_type = filters.get('customer_type')
         customer_name = filters.get('customer_name')
+        search_key = filters.get("search_key")
         teamSale = filters.get('teamSale')
         queryFilters = {}
+        queryFilters2 = {}
+        queryFilters["disabled"] = 0
+        # queryFilters2["disabled"] = 0
         if not teamSale:
             return gen_response(500,_("Sale manager is invalid"),{})
         else:
             queryFilters["custom_sales_manager"] = teamSale
+            # queryFilters2["custom_sales_manager"] = teamSale
         city = filters.get('city')
         district = filters.get('district')
         ward = filters.get('ward')
         if customer_type:
             queryFilters['customer_type'] = customer_type
+            # queryFilters2['customer_type'] = customer_type
         if customer_group:
             queryFilters['customer_group'] = customer_group
+            # queryFilters2['customer_group'] = customer_group
         if customer_name:
             queryFilters['customer_name'] = ['like',f"%{customer_name}%"]
+            # queryFilters2['customer_name'] = ['like',f"%{customer_name}%"]
+        if search_key :
+            queryFilters2['customer_name'] = ['like',f"%{search_key}%"]
+            queryFilters2['customer_code'] = ['like',f"%{search_key}%"]
         
-        queryFilters["disabled"] = 0
 
         if city or district or ward:
             Address = frappe.qb.DocType("Address")
@@ -520,11 +530,12 @@ def get_customer(filters):
             for customers in listCustomer:
                 list_customer += customers
             queryFilters['name'] = ['in',list_customer]
-
+        print(queryFilters,"-",queryFilters2)
         data = frappe.db.get_list(
-            "Customer",
-            queryFilters,
-            ["name",'customer_code',"customer_name",'UNIX_TIMESTAMP(custom_birthday) as custom_birthday',
+            doctype = "Customer",
+            filters = queryFilters,
+            or_filters = queryFilters2,
+            fields = ["name",'customer_code',"customer_name",'UNIX_TIMESTAMP(custom_birthday) as custom_birthday',
              "customer_location_primary", "customer_type", "customer_name",
              "customer_primary_address as display_address", "mobile_no as phone_number"],
             start=page_size*(page_number-1), 
@@ -538,8 +549,9 @@ def get_customer(filters):
                 customer["lat"] =json.loads(customer['customer_location_primary'] ).get('lat')
 
         total = len(frappe.db.get_list(
-            "Customer",
-            queryFilters))
+            doctype = "Customer",
+            filters = queryFilters,
+            or_filters = queryFilters2,))
         return gen_response(200,"",{
             "data":data,
             "total": total,
