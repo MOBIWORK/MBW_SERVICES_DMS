@@ -796,6 +796,7 @@ def get_report(filters={}):
                         CONCAT(
                             '{{"customer_name":"', dc.kh_ten, '",',
                             '"customer_code":"', dc.kh_ma, '",', 
+                            '"checkin_id":"', dc.checkin_id, '",', 
                             '"customer_address":"', dc.kh_diachi, '",', 
                             '"checkin_address":"', dc.checkin_address, '",', 
                             '"customer_type":"', COALESCE( cs.customer_type,'') , '",', 
