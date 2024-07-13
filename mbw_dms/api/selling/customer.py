@@ -132,7 +132,7 @@ def customer_detail(name):
         doc_customer = frappe.get_doc("Customer",name).as_dict()
         filter_cs = {"link_doctype": "Customer", "link_name": doc_customer.name}
         routers = routers_name_of_customer(more_filters={"customer_code": doc_customer.customer_code})
-        address = frappe.db.get_all("Address", filters= filter_cs,fields= ["name", "address_title", "address_location", "is_primary_address", "is_shipping_address","city","county","state"])
+        address = frappe.db.get_all("Address", filters= filter_cs,fields= ["name", "address_title", "address_location", "is_primary_address", "is_shipping_address","city","county","state","address_line1"])
         contacts = frappe.db.get_all("Contact",filters=  filter_cs,fields= ["name", "first_name", "last_name", "address", "phone","mobile_no"])
         list_router_frequency = []
         if not not routers:
@@ -145,7 +145,7 @@ def customer_detail(name):
         for contact in contacts: 
             address_contact = contact.address
             if address_contact:
-                doc_address = frappe.db.get_value("Address",address_contact,["city","state","county","address_title"],as_dict=1)
+                doc_address = frappe.db.get_value("Address",address_contact,["city","state","county","address_title","address_line1"],as_dict=1)
                 for key,value in doc_address.items() :
                     contact.update({
                         key:value

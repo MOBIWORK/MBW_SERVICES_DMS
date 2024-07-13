@@ -61,12 +61,14 @@ def get_customer_inventory(**body):
             filters.update({"total_qty": [">=", float(qty_inven_from)]})
         if qty_inven_to:
             filters.update({"total_qty": ["<=", float(qty_inven_to)]})
+        # if qty_inven_from and qty_inven_to: 
+        #     filters.update({"total_qty": ["between",[qty_inven_from,qty_inven_to]]})
         if total_from:
             filters.update({"total_cost": [">=", float(total_from)]})
         if total_to:
             filters.update({"total_cost": ["<=", float(total_to)]})
-        if total_from and total_to:
-            filters.update({"total_cost": ["between", [total_from,total_to]]})
+        # if total_from and total_to: 
+        #     filters.update({"total_cost": ["between",[float(total_from),float(total_to)]]})
         if customer:
             customer_code = frappe.db.get_value("Customer",customer,["customer_code"],as_dict=1)
             if customer_code:                
@@ -75,6 +77,7 @@ def get_customer_inventory(**body):
                 message= _("Custoemr not have Code")
         if employee:
            filters.update({"create_by": employee})
+        filters.update({"total_cost": ["between",[12000,90000000]]})
         print("filters",filters)
         return gen_response(200,message,find(filters=filters, page_length=page_size,page=page_number,data= {
             "expire_from" :expire_from,

@@ -58,6 +58,7 @@
    "reqd": 1
   },
   {
+   "default": "0",
    "fieldname": "total_cost",
    "fieldtype": "Float",
    "label": "T\u1ed5ng gi\u00e1 tr\u1ecb"
@@ -80,7 +81,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-05-29 15:55:47.337529",
+ "modified": "2024-07-13 11:10:33.492130",
  "modified_by": "Administrator",
  "module": "MBW DMS",
  "name": "DMS Inventory",
