@@ -34,49 +34,49 @@ def get_customer_inventory(**body):
         employee = body.get("employee")
         message = ""
         # tao filter
-        filters = {}
+        filters = []
         if employee_sale:
-            filters.update({"create_by": employee_sale})
+            filters.append(["create_by","=",employee_sale])
         if item_code:
-            filters.update({"item_code": item_code})
+            filters.append(["item_code","=" ,item_code])
         if expire_from:
             expire_from = datetime.fromtimestamp(float(expire_from)).date()
-            filters.update({"exp_time": [">=",expire_from]})
+            filters.append(["exp_time",">=",expire_from])
         if expire_to:
             expire_to = datetime.fromtimestamp(float(expire_to)).date()
-            filters.update({"exp_time": ["<=",expire_to]})
-        if expire_from and expire_to:
-            filters.update({"exp_time": ["between",[expire_from,expire_to]]})
+            filters.append(["exp_time","<=",expire_to])
+        # if expire_from and expire_to:
+        #     filters.append(["exp_time","between",[expire_from,expire_to]])
         if update_at_from:
             update_at_from = datetime.fromtimestamp(float(update_at_from)).date()
-            filters.update({"update_at": [">=",update_at_from]})
+            filters.append(["update_at",">=",update_at_from])
         if update_at_to:
             update_at_to = datetime.fromtimestamp(float(update_at_to)).date()
-            filters.update({"update_at": ["<=",update_at_to]})
-        if update_at_from and update_at_to: 
-            filters.update({"update_at": ["between",[update_at_from,update_at_to]]})
+            filters.append(["update_at","<=",update_at_to])
+        # if update_at_from and update_at_to: 
+        #     filters.append(["update_at","between",[update_at_from,update_at_to]])
         if unit_product:
-            filters.update({"item_unit" : unit_product})
+            filters.append(["item_unit","=" ,unit_product])
         if qty_inven_from:
-            filters.update({"total_qty": [">=", float(qty_inven_from)]})
+            filters.append(["total_qty",">=", float(qty_inven_from)])
         if qty_inven_to:
-            filters.update({"total_qty": ["<=", float(qty_inven_to)]})
+            filters.append(["total_qty","<=", float(qty_inven_to)])
         # if qty_inven_from and qty_inven_to: 
-        #     filters.update({"total_qty": ["between",[qty_inven_from,qty_inven_to]]})
+        #     filters.append(["total_qty": ["between",[qty_inven_from,qty_inven_to]]])
         if total_from:
-            filters.update({"total_cost": [">=", float(total_from)]})
+            filters.append(["total_cost",">=", float(total_from)])
         if total_to:
-            filters.update({"total_cost": ["<=", float(total_to)]})
+            filters.append(["total_cost","<=", float(total_to)])
         # if total_from and total_to: 
-        #     filters.update({"total_cost": ["between",[float(total_from),float(total_to)]]})
+        #     filters.append(["total_cost": ["between",[float(total_from),float(total_to)]]])
         if customer:
             customer_code = frappe.db.get_value("Customer",customer,["customer_code"],as_dict=1)
             if customer_code:                
-                filters.update({"customer_code": customer_code.get("customer_code")})
+                filters.append(["customer_code","=", customer_code.get("customer_code")])
             else :
                 message= _("Custoemr not have Code")
         if employee:
-           filters.update({"create_by": employee})
+           filters.append(["create_by","=",employee])
         print("filters",filters)
         return gen_response(200,message,find(filters=filters, page_length=page_size,page=page_number,data= {
             "expire_from" :expire_from,
