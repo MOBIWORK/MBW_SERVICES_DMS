@@ -77,7 +77,6 @@ def get_customer_inventory(**body):
                 message= _("Custoemr not have Code")
         if employee:
            filters.update({"create_by": employee})
-        filters.update({"total_cost": ["between",[12000,90000000]]})
         print("filters",filters)
         return gen_response(200,message,find(filters=filters, page_length=page_size,page=page_number,data= {
             "expire_from" :expire_from,
