@@ -826,7 +826,7 @@ def get_customer_router_v2(data):
         total_customer= len( frappe.db.get_all('Customer',filters= FiltersCustomer)) if len(list_customer_name) > 0 else 0
         for customer in detail_customer:
             customer.customer_location_primary = null_location(customer.customer_location_primary)
-
+        
         return gen_response(200, _("Vị trí của bạn không xác định") if field_order =="distance" and long and lat else "", {
             "data": detail_customer,
             "total_checkin": len(list_checkin_code),
