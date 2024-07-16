@@ -7,8 +7,6 @@ import calendar
 @frappe.whitelist(methods='GET')
 def kpi_report(**kwargs):
     try:
-        filters = []
-
         page_size =  int(kwargs.get("page_size", 20))
         page_number = int(kwargs.get("page_number")) if kwargs.get("page_number") and int(kwargs.get("page_number")) >= 1 else 1
         employee = kwargs.get("employee")
@@ -20,6 +18,8 @@ def kpi_report(**kwargs):
         end_date_str = f"{year:04d}-{month:02d}-{last_day_of_month:02d}"
         start_date = frappe.utils.getdate(start_date_str)
         end_date = frappe.utils.getdate(end_date_str)
+        
+        filters = []
 
         if employee:
             filters.append(f"mo.nhan_vien_ban_hang='{employee}'")
@@ -35,7 +35,7 @@ def kpi_report(**kwargs):
         where_condition = " AND ".join(filters)
         
         sql_query = """
-            SELECT mo.nhan_vien_ban_hang, mo.nhom_ban_hang,mo.so_kh_vt_luot as th_vt, kpi.so_kh_vt_luot as kh_vt, mo.so_kh_vt_duynhat as th_vt_dn, kpi.so_kh_vt_duynhat as kh_vt_dn, mo.so_kh_dat_hang as th_dat_hang, kpi.so_kh_dathang as kh_dat_hang, mo.so_don_hang as th_don_hang, kpi.so_don_hang as kh_don_hang,
+            SELECT mo.nhan_vien_ban_hang, mo.nhom_ban_hang, mo.so_kh_vt_luot as th_vt, kpi.so_kh_vt_luot as kh_vt, mo.so_kh_vt_duynhat as th_vt_dn, kpi.so_kh_vt_duynhat as kh_vt_dn, mo.so_kh_dat_hang as th_dat_hang, kpi.so_kh_dathang as kh_dat_hang, mo.so_don_hang as th_don_hang, kpi.so_don_hang as kh_don_hang,
             mo.so_kh_moi as th_kh_moi, kpi.so_kh_moi as kh_kh_moi, mo.doanh_so_thang as th_doanh_so, kpi.doanh_so as kh_doanh_so, mo.doanh_thu_thang as th_doanh_thu, kpi.doanh_thu as kh_doanh_thu, mo.san_luong as th_san_lg, kpi.san_luong as kh_san_lg, mo.sku as th_sku, kpi.sku as kh_sku, mo.so_gio_lam_viec as th_so_gio_lam_viec, kpi.so_gio_lam_viec as kh_so_gio_lam_viec
             FROM `tabDMS KPI` kpi
             LEFT JOIN `tabDMS Summary KPI Monthly` mo ON kpi.nhan_vien_ban_hang = mo.nhan_vien_ban_hang
@@ -81,33 +81,43 @@ def kpi_report(**kwargs):
         }
         for i in data:
             i["ten_nv"] =  frappe.get_value("Employee", {"name": i["nhan_vien_ban_hang"]}, "employee_name")
+
             i["tl_vt"] = 0
             if i["kh_vt"] != 0:
                 i["tl_vt"] = round(i["th_vt"] / i["kh_vt"]*100, 2)
+
             i["tl_vt_dn"] = 0
             if i["kh_vt_dn"] != 0:
                 i["tl_vt_dn"] = round(i["th_vt_dn"] / i["kh_vt_dn"]*100, 2)
+
             i["tl_dat_hang"] = 0
             if i["kh_dat_hang"] != 0:
                 i["tl_dat_hang"] = round(i["th_dat_hang"] / i["kh_dat_hang"]*100, 2)
+
             i["tl_don_hang"] = 0
             if i["kh_don_hang"] != 0:
                 i["tl_don_hang"] = round(i["th_don_hang"] / i["kh_don_hang"]*100, 2)
+
             i["tl_kh_moi"] = 0
             if i["kh_kh_moi"] != 0:
                 i["tl_kh_moi"] = round(i["th_kh_moi"] / i["kh_kh_moi"]*100, 2)
+
             i["tl_doanh_so"] = 0
             if i["kh_doanh_so"] != 0:
                 i["tl_doanh_so"] = round(i["th_doanh_so"] / i["kh_doanh_so"]*100, 2)
+
             i["tl_doanh_thu"] = 0
             if i["kh_doanh_thu"] != 0:
                 i["tl_doanh_thu"] = round(i["th_doanh_thu"] / i["kh_doanh_thu"]*100, 2)
+
             i["tl_san_luong"] = 0
             if i["kh_san_lg"] != 0:
                 i["tl_san_luong"] = round(i["th_san_lg"] / i["kh_san_lg"]*100, 2)
+
             i["tl_sku"] = 0
             if i["kh_sku"] != 0:
                 i["tl_sku"] = round(i["th_sku"] / i["kh_sku"]*100, 2)
+
             i["tl_so_gio_lam_viec"] = 0
             if i["kh_so_gio_lam_viec"] != 0:
                 i["tl_so_gio_lam_viec"] = round(i["th_so_gio_lam_viec"] / i["kh_so_gio_lam_viec"]*100, 2)

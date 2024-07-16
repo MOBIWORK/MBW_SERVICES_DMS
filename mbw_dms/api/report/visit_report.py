@@ -17,15 +17,15 @@ def report_web_visit(**kwargs):
         sales_person = kwargs.get("sales_person")
 
         if from_date and to_date:
-            filters["creation"] = ["between", [from_date, to_date]]
+            filters.append(f"ck.creation BETWEEN '{from_date}' AND '{to_date}'")
         elif from_date:
-            filters["creation"] = [">=", from_date]
+            filters.append(f"ck.creation >= '{from_date}'")
         elif to_date:
-            filters["creation"] = ["<=", to_date]
+            filters.append(f"ck.creation <= '{to_date}'")
         if sales_team:
             filters.append(f"sp.parent_sales_person='{sales_team}'")
         if sales_person:
-            filters.append(f"sp.sales_person='{sales_person}'")
+            filters.append(f"sp.name='{sales_person}'")
 
         where_conditions = " AND ".join(filters)
         
