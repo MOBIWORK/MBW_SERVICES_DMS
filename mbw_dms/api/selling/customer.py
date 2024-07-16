@@ -389,14 +389,14 @@ def update_customer(**kwargs):
                             "last_name": contact_data.get("last_name"),
                             "phone": contact_data.get("phone")
                         }
-                        
+
                         if contact_data and frappe.db.exists("Contact", contact_name):
                             contact = frappe.get_doc("Contact", contact_name)
                             link_cs_address= {
                                 "link_doctype": "Contact",
                                 "link_name": contact_name 
                             }
-                            if not not new_address:
+                            if bool(new_address):
                                 # current address
                                 address_current = create_address(new_address=new_address,link_cs_address=link_cs_address)
                                 contact_data_update.update({"address": address_current.name})
@@ -409,9 +409,9 @@ def update_customer(**kwargs):
                                 new_contact_phone.append({"phone": contact_data_update.get("phone") ,"is_primary_mobile_no":1})
                                 contact.set("phone_nos",  new_contact_phone)
                             contact.save()
-                        else: 
+                        else:
                             contact = frappe.new_doc("Contact")
-                            if not not new_address:
+                            if bool(new_address):
                                 # current address
                                 address_current = create_address(new_address,{})
                                 contact_data_update.update({"address": address_current.name})
