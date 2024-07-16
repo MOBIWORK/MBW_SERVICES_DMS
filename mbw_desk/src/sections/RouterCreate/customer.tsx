@@ -103,9 +103,9 @@ export default memo(function Customer() {
         <Col className="flex-1">
           <Row gutter={8}>
             <Col span={6} className="text-[#1677ff]">
-              <FormItemCustom>
-                <SelectCommon placeholder="Thêm khách hàng" options={addCustomerOption} onSelect={handeOpen} />
-              </FormItemCustom>
+                <SelectCommon placeholder="Thêm khách hàng" options={addCustomerOption} onSelect={handeOpen} $h={36}/>
+              {/* <FormItemCustom>
+              </FormItemCustom> */}
             </Col>
             {viewMode == 'list' ? <Col span={6}>
               <FormItemCustom>
