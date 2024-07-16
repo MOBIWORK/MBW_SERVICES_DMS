@@ -135,7 +135,7 @@ export const listMenu: MenuItem[] = [
       {
         label: (
           <Link className={"text-[#212B36] hover:text-[#212B36]"} to="/report-customer">
-              Báo cáo tồn kho khách hàng
+              Tồn kho khách hàng
           </Link>
         ),
         key: "report-customer",
@@ -143,7 +143,7 @@ export const listMenu: MenuItem[] = [
       {
         label: (
           <Link className={"text-[#212B36] hover:text-[#212B36]"} to="/report-kpi">
-              Báo cáo KPI
+              Thống kê KPI
           </Link>
         ),
         key: "report_kpi",
@@ -151,7 +151,7 @@ export const listMenu: MenuItem[] = [
       {
         label: (
           <Link className={"text-[#212B36] hover:text-[#212B36]"} to="/report-checkin">
-              Báo cáo viếng thăm
+              Viếng thăm
           </Link>
         ),
         key: "report-checkin",
@@ -159,7 +159,7 @@ export const listMenu: MenuItem[] = [
       {
         label: (
           <Link className={"text-[#212B36] hover:text-[#212B36]"} to="/report-sales">
-              Báo cáo tổng hợp bán hàng
+              Tổng hợp bán hàng
           </Link>
         ),
         key: "report-sales",
@@ -167,7 +167,7 @@ export const listMenu: MenuItem[] = [
       {
         label: (
           <Link className={"text-[#212B36] hover:text-[#212B36]"} to="/report-saleorder">
-              Báo cáo tổng hợp đặt hàng
+              Tổng hợp đặt hàng
           </Link>
         ),
         key: "report-saleorder",
@@ -175,7 +175,7 @@ export const listMenu: MenuItem[] = [
       {
         label: (
           <Link className={"text-[#212B36] hover:text-[#212B36]"} to="/report-custom-new">
-              Báo cáo khách hàng mới
+              Khách hàng mới
           </Link>
         ),
         key: "report-custom-new",
@@ -183,7 +183,7 @@ export const listMenu: MenuItem[] = [
       {
         label: (
           <Link className={"text-[#212B36] hover:text-[#212B36]"} to="/report-checkin-first">
-              Báo cáo thống kê khách hàng viếng thăm lần đầu
+              Thống kê khách hàng viếng thăm lần đầu
             
           </Link>
         ),
