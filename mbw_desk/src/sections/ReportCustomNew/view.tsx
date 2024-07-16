@@ -147,6 +147,10 @@ const columns: TableColumnsType<DataTypeCustomNew> = [
     title: "Nguồn",
     dataIndex: "f1",
     key: "f1",
+    className: "!text-center",
+    render: (value: any) => (
+      <div className="!text-center">{value ? value : "-"}</div>
+    ),
   },
   {
     title: <div className="!text-right">Số lần VT</div>,
@@ -203,6 +207,8 @@ export default function ReportCustomNew() {
   const [keySDepartment, setKeySDepartment] = useState("");
   const [customer_type, setCustomerType] = useState("");
   let keySearchDepartment = useDebounce(keySDepartment, 500);
+  const [from_date, setFromDate] = useState<any>(start);
+  const [to_date, setToDate] = useState<any>(end);
   const [customer_group, setCustomerGroup] = useState("");
   const [listCustomerGroup, setListCustomerGroup] = useState<any[]>([]);
   const [keySCustomerGroup, setKeySCustomerGroup] = useState("");
@@ -240,11 +246,33 @@ export default function ReportCustomNew() {
   }, [containerRef1]);
 
   const onChange: DatePickerProps["onChange"] = (dateString: any) => {
-    console.log(dateString);
+    if (dateString === null || dateString === undefined) {
+      setFromDate("");
+    } else if (
+      endOfMonth &&
+      dateString &&
+      dateString.isAfter(endOfMonth, "day")
+    ) {
+      message.error("Từ ngày phải nhỏ hơn hoặc bằng Đến ngày");
+    } else {
+      let fDate = Date.parse(dateString["$d"]) / 1000;
+      setFromDate(fDate);
+    }
   };
 
   const onChange1: DatePickerProps["onChange"] = (dateString: any) => {
-    console.log(dateString);
+    if (dateString === null || dateString === undefined) {
+      setToDate("");
+    } else if (
+      startOfMonth &&
+      dateString &&
+      dateString.isBefore(startOfMonth, "day")
+    ) {
+      message.error("Đến ngày phải lớn hơn hoặc bằng Từ ngày");
+    } else {
+      let tDate = Date.parse(dateString["$d"]) / 1000;
+      setToDate(tDate);
+    }
   };
 
   const handleSearchFilter = (val: any) => {
@@ -399,12 +427,13 @@ export default function ReportCustomNew() {
             employee: employee,
             has_sales_order: has_sales_order,
             department: department,
+            from_date: from_date,
+            to_date: to_date,
           },
         }
       );
 
       let { result } = rsData;
-      console.log("result", result);
       setDataCustomNew(result);
       setTotal(result?.totals_cus);
     })();
@@ -416,7 +445,9 @@ export default function ReportCustomNew() {
     employee,
     has_sales_order,
     department,
-    refresh
+    refresh,
+    from_date,
+    to_date,
   ]);
   return (
     <>
@@ -639,7 +670,7 @@ export default function ReportCustomNew() {
               columns={columns}
               scroll={{
                 x: 3000,
-                y: containerHeight < 400 ? undefined : scrollYTable1,
+                y: 400,
               }}
               pagination={
                 total && total > PAGE_SIZE
@@ -670,20 +701,19 @@ export default function ReportCustomNew() {
                     <Table.Summary.Cell index={10}></Table.Summary.Cell>
                     <Table.Summary.Cell index={11}></Table.Summary.Cell>
                     <Table.Summary.Cell index={12}></Table.Summary.Cell>
-                    <Table.Summary.Cell index={13}></Table.Summary.Cell>
-                    <Table.Summary.Cell index={14}></Table.Summary.Cell>
-                    <Table.Summary.Cell index={15}>
+                    <Table.Summary.Cell index={13}>
                       <div className="text-right">
                         {dataCustomNew?.sum?.sum_checkin}
                       </div>
                     </Table.Summary.Cell>
-                    <Table.Summary.Cell index={16}></Table.Summary.Cell>
-                    <Table.Summary.Cell index={17}></Table.Summary.Cell>
-                    <Table.Summary.Cell index={18}>
+                    <Table.Summary.Cell index={14}></Table.Summary.Cell>
+                    <Table.Summary.Cell index={15}></Table.Summary.Cell>
+                    <Table.Summary.Cell index={16}>
                       <div className="text-right">
                         {dataCustomNew?.sum?.sum_so}
                       </div>
                     </Table.Summary.Cell>
+                    <Table.Summary.Cell index={17}></Table.Summary.Cell>
                   </Table.Summary.Row>
                 );
               }}
