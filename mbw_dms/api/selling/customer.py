@@ -12,7 +12,6 @@ from mbw_dms.api.common import (
     customers_code_router,
     null_location,
     CommonHandle,
-    create_address_current,
     create_address
 )
 
@@ -26,14 +25,15 @@ from mbw_dms.api.validators import (
 )
 from mbw_dms.api import configs
 import pydash
-from frappe.query_builder import (Field,DocType)
+from frappe.query_builder import (Field, DocType)
+from frappe.query_builder.functions import Count
+
 # Danh sách khách hàng
 @frappe.whitelist(methods="GET")
 def list_customer(**kwargs):
     try:
         kwargs = frappe._dict(kwargs)
         name = kwargs.get("name")
-        customer_name = kwargs.get("customer_name")
         search_key = kwargs.get("search_key")
         customer_type = kwargs.get("customer_type")
         customer_group = kwargs.get("customer_group")
@@ -43,67 +43,40 @@ def list_customer(**kwargs):
         if not routers or len(routers) == 0 :
             return gen_response(200, "", [])
         customers_name = customers_code_router(routersName=routers)
+
         CustomerDoc = DocType("Customer")
-        # version cũ
-        # my_filter = {
-        #     "customer_code": ["in", customers_name]
-        # }
-
-        # page_size = int(kwargs.get("page_size", 20))
-        # page_number = 1 if not kwargs.get("page") or int(kwargs.get("page")) <= 0 else int(kwargs.get("page"))
-        # if name:
-        #     my_filter["name"] = ["like", f"%{name}%"]
-        # if customer_name:
-        #     my_filter["customer_name"] = ["like", f"%{customer_name}%"]
-        # if customer_type:
-        #     my_filter["customer_type"] = ["like", f"%{customer_type}%"]
-        # if customer_group:
-        #     my_filter["customer_group"] = ["like", f"%{customer_group}%"]
-        # if search_key:
-        #     my_filter["search_key"] = ["or", f"%{search_key}%"]
-        # if from_date and to_date:
-        #     my_filter["custom_birthday"] = ["between", [from_date, to_date]]
-        # my_filter["disabled"] = 0
-
-        # customers = frappe.db.get_all("Customer",
-        #                         filters=my_filter,
-        #                         fields=["name", "customer_name", "customer_code","customer_type", 
-        #                                 "customer_group", "territory", "industry", "image", "website", 
-        #                                 "mobile_no", "customer_primary_address", "custom_birthday",
-        #                                 "customer_location_primary", "customer_details"],
-        #                         start=page_size*(page_number-1), 
-        #                         page_length=page_size)
-                                
-        # record = frappe.db.count("Customer", filters=my_filter)
-        # version mới
         page_size = int(kwargs.get("page_size", 20))
         page_number = 1 if not kwargs.get("page_number") or int(kwargs.get("page_number")) <= 0 else int(kwargs.get("page_number"))
         def CustomerField(name):
             return CustomerDoc[name]
 
-        my_filter =( CustomerField("customer_code").isin(customers_name) & CustomerField("disabled").eq(0))
+        my_filter = (CustomerField("customer_code").isin(customers_name) & CustomerField("disabled").eq(0))
         if name:
             my_filter = (my_filter & CustomerField("name").eq(name))
         if customer_type:
-            my_filter=(my_filter & CustomerField("customer_type").eq(customer_type))
+            my_filter = (my_filter & CustomerField("customer_type").eq(customer_type))
         if customer_group:
-            my_filter= (my_filter & CustomerField("customer_group").eq(customer_group))
+            my_filter = (my_filter & CustomerField("customer_group").eq(customer_group))
         if search_key:
             my_filter = (my_filter & ( CustomerField("customer_name").like(f"%{search_key}%") | CustomerField("customer_code").like(f"%{search_key}%") ))
         if from_date and to_date:
             my_filter = (my_filter & CustomerField("custom_birthday").between(from_date,to_date))
+
         select_field = ["name", "customer_name", "customer_code","customer_type", 
                                         "customer_group", "territory", "industry", "image", "website", 
                                         "mobile_no", "customer_primary_address", "custom_birthday",
                                         "customer_location_primary", "customer_details"]
-        customers =( frappe.qb.from_(CustomerDoc)
+        
+        customers = (frappe.qb.from_(CustomerDoc)
                     .distinct()
                     .select(*select_field)
                     .where(my_filter)
                     .limit(page_size)
                     .offset(page_size*(page_number-1))
                     ).run(as_dict=True)
-        record = len(frappe.qb.from_(CustomerDoc).where(my_filter).select(*select_field).distinct().run(as_dict=True))
+        
+        record = frappe.qb.from_(CustomerDoc).where(my_filter).select(Count('*')).distinct().run(as_dict=True)
+
         for customer in customers:
             if customer.customer_location_primary == "":
                 customer.customer_location_primary = None
@@ -119,7 +92,7 @@ def list_customer(**kwargs):
             "data": customers,
             "page_number": page_number,
             "page_size": page_size,
-            "total": record
+            "total": record[0]['COUNT(*)']
         })
     except Exception as e:
         return exception_handle(e)
@@ -132,10 +105,10 @@ def customer_detail(name):
         doc_customer = frappe.get_doc("Customer",name).as_dict()
         filter_cs = {"link_doctype": "Customer", "link_name": doc_customer.name}
         routers = routers_name_of_customer(more_filters={"customer_code": doc_customer.customer_code})
-        address = frappe.db.get_all("Address", filters= filter_cs,fields= ["name", "address_title", "address_location", "is_primary_address", "is_shipping_address","city","county","state","address_line1"])
-        contacts = frappe.db.get_all("Contact",filters=  filter_cs,fields= ["name", "first_name", "last_name", "address", "phone","mobile_no"])
+        address = frappe.db.get_all("Address", filters=filter_cs, fields = ["name", "address_title", "address_location", "is_primary_address", "is_shipping_address","city","county","state","address_line1"])
+        contacts = frappe.db.get_all("Contact", filters=filter_cs, fields = ["name", "first_name", "last_name", "address", "phone","mobile_no"])
         list_router_frequency = []
-        if not not routers:
+        if bool(routers):
             for name in routers:
                 router = frappe.get_doc("DMS Router",name).as_dict()
                 customers = router.customers
@@ -156,7 +129,8 @@ def customer_detail(name):
         doc_customer["routers"] = list_router_frequency
         doc_customer["customer_location_primary"] = null_location( doc_customer["customer_location_primary"])
         doc_customer["address"] = pydash.map_(address,lambda x: {**x,"primary": 1 if x.name == doc_customer.get("customer_primary_address") else 0})
-        doc_customer["credit_limits"] = pydash.map_(doc_customer["credit_limits"],lambda x: x.credit_limit) if len(doc_customer["credit_limits"])>0 else[ 0 ] 
+        doc_customer["credit_limits"] = pydash.map_(doc_customer["credit_limits"],lambda x: x.credit_limit) if len(doc_customer["credit_limits"]) > 0 else[ 0 ] 
+
         if doc_customer["image"] and not doc_customer["image"].startswith("http"):
             from frappe.utils import get_url
             doc_customer["image"] = (get_url() +  doc_customer["image"]).replace(" ", "%20")
@@ -165,12 +139,12 @@ def customer_detail(name):
                 "address_location": null_location(address_in.get("address_location")) if address_in.get("address_location") is not None else None
             })
         doc_customer["contacts"] = pydash.map_(doc_customer["contacts"],lambda x: {**x,"primary": 1 if x.name == doc_customer.get("customer_primary_contact") else 0})
-        return gen_response(200, "", doc_customer)
+        return gen_response(200, "Thành công", doc_customer)
     except Exception as e:
         exception_handle(e)
 
 
-# list customer type Company Individual
+# list customer type
 @frappe.whitelist(methods="GET")
 def list_customer_type():
     try:
@@ -227,7 +201,7 @@ def create_customer(**kwargs):
                 new_customer.set(key, customer_type)
         
         user_id = frappe.session.user
-        employee_name = frappe.db.get_value("Employee", {"user_id": user_id}, ["name","company"],as_dict=1)
+        employee_name = frappe.db.get_value("Employee", {"user_id": user_id}, ["name", "company"],as_dict=1)
         sale_person = frappe.get_value("Sales Person", {"employee": employee_name.name}, "parent_sales_person")
         new_customer.custom_sales_manager = sale_person
 
@@ -236,7 +210,7 @@ def create_customer(**kwargs):
         new_customer.append("credit_limits", {
             "company": employee_name.company or "",
             "credit_limit": kwargs.get("credit_limit"),
-            "bypass_credit_limit_check":1
+            "bypass_credit_limit_check": 1
         })
         new_customer.insert()
 
@@ -341,8 +315,6 @@ def list_territory():
 @frappe.whitelist(methods="PUT")
 def update_customer(**kwargs):
     try:
-        print("khh",kwargs)
-        # company = frappe.get_value("Employee", {"user_id": frappe.session.user}, "company")
         name = kwargs.get("name")
         if frappe.db.exists("Customer", name, cache=True):
             customer = frappe.get_doc("Customer", name)            
@@ -356,50 +328,52 @@ def update_customer(**kwargs):
                     custom_birthday = validate_date(value)
                     customer.set(key, custom_birthday)
             customer.save()
-            frappe.db.commit()
+            
             # Thay đổi ảnh
-            if  (not customer.image and kwargs.get("image")) or( kwargs.get("image") and not customer.image in kwargs.get("image")):
+            if kwargs.get("image") and (not customer.image or customer.image != kwargs.get("image")):
                 is_base64 = CommonHandle.check_base64(kwargs.get("image"))
                 customer = frappe.get_doc("Customer", name)
                 if is_base64:
                     customer.image = post_image(name_image="", faceimage=kwargs.get("image"), doc_type="Customer", doc_name=customer.name)
                 else: 
-                    customer.image  = kwargs.get("image")
+                    customer.image = kwargs.get("image")
                 customer.save()
             
-            # Cập nhật hoặc thêm mới địa chỉ
             # Chỉnh sửa hạn mức công nợ
-            if "credit_limits" in kwargs:
+            if kwargs.get("credit_limits"):
                 customer = frappe.get_doc("Customer", name)
                 credit_limits = kwargs.get("credit_limits")
                 customer.set("credit_limits", [{
-                    "credit_limit": credit_limits[0],
+                    "credit_limit": credit_limits,
                     "bypass_credit_limit_check":1
                 }])
                 customer.save()
-            if "address" in kwargs:
+
+            # Cập nhật hoặc thêm mới địa chỉ
+            if kwargs.get("address"):
                 link_cs_address = {
-                "link_doctype":"Customer",
-                "link_name": name
+                    "link_doctype": "Customer",
+                    "link_name": name
                 }
                 address_data_list = kwargs.get("address")
-                if len(address_data_list)>0:
+                if len(address_data_list) > 0:
                     for address_data in address_data_list:
-                        current_address = create_address(address_data,link_cs_address)
+                        current_address = create_address(address_data, link_cs_address)
                         if address_data.get("primary") == 1:
                             customer = frappe.get_doc("Customer", name)
-                            customer.set("customer_primary_address",current_address.name)
+                            customer.set("customer_primary_address", current_address.name)
                             customer.save()
+
             # Cập nhật hoặc thêm mới liên hệ
-            if "contact" in kwargs:
+            if kwargs.get("contact"):
                 contacts_data_list = kwargs.get("contact")
                 
                 new_address = {}
                 if contacts_data_list:
                     for contact_data in contacts_data_list:
                         new_address = {}
-                        if contact_data.get("city") and  contact_data.get("address_line1") :
-                            new_address =  {
+                        if contact_data.get("city") and contact_data.get("address_line1") :
+                            new_address = {
                                 "address_line1": contact_data.get("address_line1"),
                                 "address_title":contact_data.get("address_title"),
                                 "city": contact_data.get("city"),
@@ -409,23 +383,25 @@ def update_customer(**kwargs):
                         
                         contact_name = contact_data.get("name") if contact_data.get("name") else False
                         contact_data_update = {
-                        "first_name": contact_data.get("first_name"),
-                        "is_billing_contact": contact_data.get("is_billing_contact"),
-                        "is_primary_contact": contact_data.get("is_primary_contact"),
-                        "last_name": contact_data.get("last_name"),
-                        "phone": contact_data.get("phone")
+                            "first_name": contact_data.get("first_name"),
+                            "is_billing_contact": contact_data.get("is_billing_contact"),
+                            "is_primary_contact": contact_data.get("is_primary_contact"),
+                            "last_name": contact_data.get("last_name"),
+                            "phone": contact_data.get("phone")
                         }
+                        
                         if contact_data and frappe.db.exists("Contact", contact_name):
                             contact = frappe.get_doc("Contact", contact_name)
                             link_cs_address= {
-                            "link_doctype": "Contact",
-                            "link_name": contact_name 
+                                "link_doctype": "Contact",
+                                "link_name": contact_name 
                             }
                             if not not new_address:
                                 # current address
                                 address_current = create_address(new_address=new_address,link_cs_address=link_cs_address)
                                 contact_data_update.update({"address": address_current.name})
                             contact.update(contact_data_update)
+
                             if contact_data_update.get("phone"):
                                 contact_phone = contact.as_dict().get("phone_nos")
                                 new_contact_phone = pydash.map_(contact_phone, lambda x: x.update({"is_primary_mobile_no":0}))
@@ -440,6 +416,7 @@ def update_customer(**kwargs):
                                 address_current = create_address(new_address,{})
                                 contact_data_update.update({"address": address_current.name})
                             contact.update(contact_data_update)
+
                             if contact_data_update.get("phone"):
                                 contact.append("phone_nos", {"phone": contact_data_update.get("phone") ,"is_primary_mobile_no":1})
                             contact.append("links", {
@@ -451,24 +428,21 @@ def update_customer(**kwargs):
                             customer = frappe.get_doc("Customer", name)
                             customer.set("customer_primary_contact",contact.name)
                             customer.save()
+
             # Chỉnh sửa tuyến
-            if "router" in kwargs:
+            if kwargs.get("router"):
                 routers_data = kwargs.get("router")
-                if len(routers_data) > 0:
-                    routers_data= routers_data[0]
-                    router_name = routers_data.get("router_name")
-                    if router_name and frappe.db.exists("DMS Router Customer", {"parent": router_name, "customer_name": name}):
-                        router = frappe.get_doc("DMS Router Customer", {"parent": router_name, "customer_name": name})
-                        router.frequency = routers_data.get("frequency")
-                        router.save()
-            
+                router_name = routers_data.get("router_name")
+                if router_name and frappe.db.exists("DMS Router Customer", {"parent": router_name, "customer_name": name}):
+                    router = frappe.get_doc("DMS Router Customer", {"parent": router_name, "customer_name": name})
+                    router.frequency = routers_data.get("frequency")
+                    router.save()
             
             frappe.db.commit()
-            return gen_response(200, "ok")
+            return gen_response(200, "Cập nhật thông tin khách hàng thành công")
         else:
-            return gen_response(406, f"Không tồn tại {name}")
+            return gen_response(406, f"Không tồn tại khách hàng {name}")
     except Exception as e:
-        print(e)
         return exception_handle(e)
 
 
@@ -531,10 +505,10 @@ def get_customer_has_location(**kwargs):
 @frappe.whitelist(methods="DELETE")
 def remove_contact_address(**kwarg):
     try: 
-        customer = validate_filter(value= (kwarg.get("customer"),"customer"),type_check="require_field") 
-        name = validate_filter(value= (kwarg.get("name"),"name"),type_check="require_field") 
-        type_remove = validate_filter(value= (kwarg.get("type"),"customer"),type_check="require_field") 
-        final_type = validate_filter(value=type_remove,type_check="enum",type=["contact","address"])
+        customer = validate_filter(value=(kwarg.get("customer"), "customer"), type_check="require_field") 
+        name = validate_filter(value=(kwarg.get("name"), "name"), type_check="require_field") 
+        type_remove = validate_filter(value=(kwarg.get("type"), "customer"), type_check="require_field") 
+        final_type = validate_filter(value=type_remove, type_check="enum", type=["contact", "address"])
         doctype = {
             "contact": "Contact",
             "address": "Address"
