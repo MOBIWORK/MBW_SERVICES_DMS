@@ -101,6 +101,7 @@ function RouterControl() {
 
   const onChange = (value: string) => {
     setStatus(value);
+    setPage(1)
   };
 
   const onSearch = (value: string) => {
@@ -407,6 +408,7 @@ function RouterControl() {
                         filterOption={false}
                         onChange={(value) => {
                           setRouter(value);
+                          setPage(1)
                         }}
                         onDeselect={(value) => {
                           setRouter((prev) =>
@@ -449,6 +451,7 @@ function RouterControl() {
                         onChange={ (newValue: string,...rest):void => {
                           console.log(newValue);
                           setTeamSale(newValue);
+                          setPage(1)
                         }}
                         dropdownStyle={{
                           maxHeight: 400,
@@ -461,7 +464,10 @@ function RouterControl() {
                   </Col>
 
                   <Col span={6} >
-                    <SearchEmployee setEmployee={setEmployee} employee={employee} isdeletedField={isdeletedField} team_sale={team_sale}/>
+                    <SearchEmployee setEmployee={(value) =>{
+                      setEmployee(value)
+                      setPage(1)
+                    }} employee={employee} isdeletedField={isdeletedField} team_sale={team_sale}/>
                   </Col>
                   {/* lọc trạng thái */}
                   <Col span={6}>
@@ -542,6 +548,7 @@ function RouterControl() {
                       ? {
                           pageSize: PAGE_SIZE,
                           total,
+                          current: page,
                           onChange(page, pageSize) {
                             setPage(page);
                           },
