@@ -240,9 +240,14 @@ def create_address(new_address, link_cs_address) :
         if new_address.get("name"):
             filter = {"name": new_address.get("name")}
         
-        current_address_cs = frappe.db.get_value("Address", filter, ["name", "address_location"], as_dict=1)
+        current_address_cs = None
+        
+        if frappe.db.exists("Address", filter):
+            current_address_cs = frappe.db.get_value("Address", filter, ["name", "address_location"], as_dict=1)
+
         if current_address_cs:
             current_address_cs = frappe.get_doc("Address", current_address_cs.get("name"))
+            
             for key, value in new_address.items():
                 if key not in field_not_in:
                     current_address_cs.set(key, value)    
@@ -254,14 +259,16 @@ def create_address(new_address, link_cs_address) :
                 find_cs.append(link_cs_address)
                 current_address_cs.set("links", find_cs) 
             current_address_cs.save()
+
         else:
             new_address_doc = frappe.new_doc("Address")
-            for key,value in new_address.items():
+            for key, value in new_address.items():
                 setattr(new_address_doc, key, value)
             if link_cs_address:
                 new_address_doc.append("links", link_cs_address)
             new_address_doc.save()
             current_address_cs = new_address_doc
+
         frappe.db.commit()
         return current_address_cs
     
