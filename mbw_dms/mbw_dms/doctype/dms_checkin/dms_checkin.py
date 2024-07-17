@@ -711,40 +711,43 @@ def get_report(filters={}):
         where = "WHERE createdbyemail IS NOT NULL AND is_checkout = 1"
         if sale_group:
             query_sale= f"""
-            WITH RECURSIVE Tree AS (
-            SELECT 
-                sales_person_name,
-                parent_sales_person,
-                name,
-                employee,
-                is_group
-            FROM 
-                `tabSales Person`
-            WHERE 
-                name = '{sale_group}'
+                            WITH RECURSIVE Tree AS (
+                            SELECT 
+                                sales_person_name,
+                                parent_sales_person,
+                                name,
+                                employee,
+                                is_group
+                            FROM 
+                                `tabSales Person`
+                            WHERE 
+                                name = '{sale_group}'
 
-            UNION ALL
+                            UNION ALL
 
-            SELECT 
-                child.sales_person_name,
-                child.parent_sales_person,
-                child.name,
-                child.employee,
-                child.is_group
-            FROM 
-                `tabSales Person` child
-            INNER JOIN Tree parent ON parent.name = child.parent_sales_person
-        )
+                            SELECT 
+                                child.sales_person_name,
+                                child.parent_sales_person,
+                                child.name,
+                                child.employee,
+                                child.is_group
+                            FROM 
+                                `tabSales Person` child
+                            INNER JOIN Tree parent ON parent.name = child.parent_sales_person
+                            )
 
-        SELECT * FROM Tree
-        WHERE is_group = 0;
-            """
+                            SELECT * FROM Tree
+                            WHERE is_group = 0;
+                        """
             sales_person = frappe.db.sql(query_sale,as_dict=1)
-            employee_codes = pydash.map_(sales_person,lambda x: x.employee)
-            employee_id_users = frappe.db.get_all("Employee",filters={"name": ["in",employee_codes]},fields=["user_id"])
-            employee_id_users = pydash.map_(employee_id_users,lambda x: x.user_id)
-            employees =  ", ".join(f"'{user_id}'" for user_id in employee_id_users)
-            where = f"{where} AND dc.createdbyemail in ({employees})"
+            if len(sales_person)>0:
+                employee_codes = pydash.map_(sales_person,lambda x: x.employee)
+                employee_id_users = frappe.db.get_all("Employee",filters={"name": ["in",employee_codes]},fields=["user_id"])
+                employee_id_users = pydash.map_(employee_id_users,lambda x: x.user_id)
+                employees =  ", ".join(f"'{user_id}'" for user_id in employee_id_users)
+                where = f"{where} AND dc.createdbyemail in ({employees})"
+            else :
+                where = f"{where} AND dc.createdbyemail IS NULL"
         if employee:
             employee_info = frappe.db.get_value("Employee",employee,["user_id"],as_dict=1)
             where = f"{where} AND dc.createdbyemail = '{employee_info.user_id}'"
