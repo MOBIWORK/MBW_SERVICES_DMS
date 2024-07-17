@@ -534,6 +534,7 @@ export default function ReportSales() {
     } else {
       setWarehouse("");
     }
+    setPage(1);
   };
 
   return (
@@ -616,6 +617,7 @@ export default function ReportSales() {
                     options={listEmployees}
                     onSelect={(value: any) => {
                       setEmployee(value);
+                      setPage(1);
                     }}
                     onClear={() => {
                       setEmployee("");
