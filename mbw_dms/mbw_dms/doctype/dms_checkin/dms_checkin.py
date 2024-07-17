@@ -795,23 +795,25 @@ def get_report(filters={}):
                     '[', 
                     GROUP_CONCAT(
                         CONCAT(
-                            '{{"customer_name":"', dc.kh_ten, '",',
+                            '{{
+                            "customer_name":"', dc.kh_ten, '",',
                             '"customer_code":"', dc.kh_ma, '",', 
-                            '"checkin_id":"', dc.checkin_id, '",', 
-                            '"customer_address":"', dc.kh_diachi, '",', 
-                            '"checkin_address":"', dc.checkin_address, '",', 
-                            '"customer_type":"', COALESCE( cs.customer_type,'') , '",', 
-                            '"customer_group":"',COALESCE( cs.customer_group,''), '",', 
-                            '"customer_sdt":"', COALESCE(cs.mobile_no,''), '",', 
-                            '"customer_contact":"', COALESCE(  cs.customer_primary_contact,'') , '",', 
+                            '"checkin_id":"',COALESCE(dc.checkin_id,'') , '",', 
+                            '"customer_address":"',COALESCE(dc.kh_diachi,''), '",', 
+                            '"checkin_address":"', COALESCE(dc.checkin_address,'') , '",', 
                             '"checkin":"',DATE_FORMAT(dc.checkin_giovao, '%H:%i'), '",', 
                             '"checkout":"',DATE_FORMAT(dc.checkin_giora, '%H:%i') , '",', 
-                            '"distance":"', dc.checkin_khoangcach, '",', 
+                            '"distance":"',COALESCE( dc.checkin_khoangcach,''), '",', 
                             '"is_router":"', dc.checkin_dungtuyen, '",', 
                             '"total_image":"',  COALESCE(ic.total_image, 0), '",', 
                             '"is_check_inventory":"', dc.is_check_inventory, '",', 
                             '"is_order":"', IF(dc.checkin_donhang IS NOT NULL AND dc.checkin_donhang != '', True, False), '",', 
-                            '"time_check":"', TIMESTAMPDIFF(MINUTE, dc.checkin_giovao, dc.checkin_giora), '"}}'
+                            '"customer_contact":"',COALESCE( cs.customer_primary_contact,''), '",', 
+                            '"customer_type":"', COALESCE( cs.customer_type,'') , '",', 
+                            '"customer_group":"',COALESCE( cs.customer_group,''), '",', 
+                            '"customer_sdt":"', COALESCE(cs.mobile_no,''), '",', 
+                            '"time_check":"', TIMESTAMPDIFF(MINUTE, dc.checkin_giovao, dc.checkin_giora), '"
+                            }}'
                         ) SEPARATOR ','
                     ),
                     ']'
