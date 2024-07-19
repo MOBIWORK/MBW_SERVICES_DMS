@@ -244,7 +244,6 @@ def create_address(new_address, link_cs_address) :
         
         if frappe.db.exists("Address", filter):
             current_address_cs = frappe.db.get_value("Address", filter, ["name", "address_location"], as_dict=1)
-
         if current_address_cs:
             current_address_cs = frappe.get_doc("Address", current_address_cs.get("name"))
             

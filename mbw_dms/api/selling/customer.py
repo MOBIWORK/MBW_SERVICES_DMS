@@ -315,6 +315,7 @@ def list_territory():
 @frappe.whitelist(methods="PUT")
 def update_customer(**kwargs):
     try:
+        print("kwargs",kwargs)
         name = kwargs.get("name")
         if frappe.db.exists("Customer", name, cache=True):
             customer = frappe.get_doc("Customer", name)            
@@ -343,7 +344,7 @@ def update_customer(**kwargs):
                 customer = frappe.get_doc("Customer", name)
                 credit_limits = kwargs.get("credit_limits")
                 customer.set("credit_limits", [{
-                    "credit_limit": credit_limits,
+                    "credit_limit": credit_limits[0],
                     "bypass_credit_limit_check":1
                 }])
                 customer.save()
