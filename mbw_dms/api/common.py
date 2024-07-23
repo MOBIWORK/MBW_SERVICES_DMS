@@ -565,19 +565,22 @@ def get_all_parent_sales_persons(sales_person):
 
 
 # lấy con tất cả các con nhóm bán hàng của nhân viên
-def get_sales_group_child(sale_person = "Sales Team",is_group=1):
+def get_sales_group_child(sale_person = "Sales Team",is_group=1,query=""):
     query_sale= f"""
         WITH RECURSIVE Tree AS (
         SELECT 
-            sales_person_name,
-            parent_sales_person,
-            name,
-            employee,
-            is_group
+            sp.sales_person_name,
+            sp.parent_sales_person,
+            sp.name,
+            sp.employee,
+            sp.is_group,
+            em.employee_name
         FROM 
-            `tabSales Person`
+            `tabSales Person` sp
+        LEFT JOIN `tabEmployee` em
+        ON sp.employee = em.name
         WHERE 
-            name = '{sale_person}'
+            sp.name = '{sale_person}'
 
         UNION ALL
 
@@ -586,17 +589,21 @@ def get_sales_group_child(sale_person = "Sales Team",is_group=1):
             child.parent_sales_person,
             child.name,
             child.employee,
-            child.is_group
+            child.is_group,
+            em.employee_name
         FROM 
             `tabSales Person` child
+        LEFT JOIN `tabEmployee` em
+        ON child.employee = em.name
         INNER JOIN Tree parent ON parent.name = child.parent_sales_person
     )
 
     SELECT * FROM Tree
-    WHERE is_group = {is_group};
+    {query}
         """
     
     sales_persons = frappe.db.sql(query_sale,as_dict=1)
+    print("sales_persons",sales_persons)
     if is_group == 1:
         employee_codes = pydash.map_(sales_persons,lambda x: x.employee)
         employee_id_users = frappe.db.get_all("Employee",filters={"name": ["in",employee_codes]},fields=["user_id"])

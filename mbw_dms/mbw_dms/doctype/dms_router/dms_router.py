@@ -7,7 +7,7 @@ import json
 from frappe.model.document import Document
 from pypika import CustomFunction
 
-from mbw_dms.api.common import exception_handle, gen_response,get_language,get_user_id,get_employee_by_user, time_now_utc,null_location
+from mbw_dms.api.common import exception_handle, gen_response,get_language,get_user_id,get_employee_by_user, time_now_utc,null_location,get_sales_group_child
 from frappe.desk.reportview import get_filters_cond, get_match_cond
 from erpnext.controllers.queries import get_fields
 from mbw_dms.api.validators import validate_filter 
@@ -441,6 +441,7 @@ def get_team_sale():
     except Exception as e:
         exception_handle(e)
 
+# lấy nhân viên theo teamsale
 @frappe.whitelist(methods="GET")
 def get_sale_person(data):
     try:
@@ -478,6 +479,27 @@ def get_sale_person(data):
         return employees
     except Exception as e:
         exception_handle(e)
+
+
+
+# lấy nhân viên theo teamsale gồm cả quản lý
+@frappe.whitelist(methods="GET")
+def get_sale_person_v2(data) :
+    team_sale = data.get('team_sale')
+    key_search = data.get('key_search')
+    query = ""
+    if key_search:
+        employees = frappe.db.get_list("Employee", filters={"employee_name": ["like", f"%{key_search}%"]},pluck ="name")
+        if len(employees) > 0 :
+            employee_in = ",".join(employees)
+            query = f"WHERE employee in ({employee_in})"
+        else :
+            return gen_response(200,"",[])
+    sale =  get_sales_group_child(sale_person=team_sale,is_group=0,query=query)
+    sale = pydash.filter_(sale ,lambda x: x.employee)
+    sale = pydash.map_(sale, lambda x: {"employee_code":x.employee,"employee_name": x.employee_name})
+    return sale
+
 
 # danh sách customer cho web
 @frappe.whitelist(methods="GET")

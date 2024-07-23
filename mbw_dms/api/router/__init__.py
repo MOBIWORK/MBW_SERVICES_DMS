@@ -51,8 +51,8 @@ def get_team_sale():
 
 @frappe.whitelist()
 def get_sale_person(**kwargs):
-    from mbw_dms.mbw_dms.doctype.dms_router.dms_router import get_sale_person
-    return get_sale_person(data=kwargs)
+    from mbw_dms.mbw_dms.doctype.dms_router.dms_router import get_sale_person_v2
+    return get_sale_person_v2(data=kwargs)
 
 @frappe.whitelist()
 def get_customer(**kwargs):
