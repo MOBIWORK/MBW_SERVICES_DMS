@@ -27,6 +27,7 @@ export default memo(function Customer() {
   let searchCustomer = useDebounce(keyS, 1000)
   const { warningMsg,
     errorMsg,
+    successMsg
   } = useContext(GlobalContext)
   const [viewMode, setViewMode] = useState('list')
   const [openChoose, setOpenChoose] = useState<boolean>(false)
@@ -69,7 +70,6 @@ export default memo(function Customer() {
       // console.log("=============json data==========",jsonData      );
       
       setDataImport(jsonData)
-      console.log("file======",file);
       file.status = "done"
       setFile([file])
     };
@@ -97,7 +97,7 @@ export default memo(function Customer() {
         return customer
       })
       setCustomerRouter((prev: any) => [...prev, ...rsImport.result])
-      warningMsg("Add record from local!")
+      successMsg("Add record from local!")
       setOpenImport(false)
 
     } catch (err: any) {
