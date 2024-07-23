@@ -327,8 +327,7 @@ def update_customer(**kwargs):
                 elif key in date_fields and value != None:
                     custom_birthday = validate_date(value)
                     customer.set(key, custom_birthday)
-            customer.save()
-            
+
             # Thay đổi ảnh
             if kwargs.get("image") and (not customer.image or customer.image != kwargs.get("image")):
                 is_base64 = CommonHandle.check_base64(kwargs.get("image"))
@@ -344,7 +343,7 @@ def update_customer(**kwargs):
                 customer = frappe.get_doc("Customer", name)
                 credit_limits = kwargs.get("credit_limits")
                 customer.set("credit_limits", [{
-                    "credit_limit": credit_limits,
+                    "credit_limit": credit_limits[0],
                     "bypass_credit_limit_check":1
                 }])
                 customer.save()
@@ -438,6 +437,7 @@ def update_customer(**kwargs):
                     router.frequency = routers_data.get("frequency")
                     router.save()
             
+            customer.save()
             frappe.db.commit()
             return gen_response(200, "Cập nhật thông tin khách hàng thành công")
         else:

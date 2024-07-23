@@ -503,7 +503,10 @@ function RouterControl() {
                       placement="bottomRight"
                       dropdownRender={(menu) => (
                         <DropDownCustom title="Bộ lọc">
-                          <Filter action={setFilter} form={form} />
+                          <Filter action={(value: any) =>{
+                            setFilter(value);
+                            setPage(1);
+                          }} form={form} />
                         </DropDownCustom>
                       )}
                     >

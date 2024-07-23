@@ -103,7 +103,7 @@ const columnsCheckin: any = [
     className: "!text-center",
     key: "kmauto",
     render: (value: any) => (
-      <div className="!text-center">{value ? value : "-"}</div>
+      <div className="!text-center">{value ? value : <div className="min-w-[30px]">-</div>}</div>
     ),
   },
   {
@@ -112,7 +112,7 @@ const columnsCheckin: any = [
     dataIndex: "kmmove",
     key: "kmmove",
     render: (value: any) => (
-      <div className="!text-center">{value ? value : "-"}</div>
+      <div className="!text-center">{value ? value : <div className="min-w-[40px]">-</div>}</div>
     ),
   },
   {
@@ -121,7 +121,7 @@ const columnsCheckin: any = [
     className: "!text-center",
     key: "kmmove",
     render: (value: any) => (
-      <div className="!text-center">{value ? value : "-"}</div>
+      <div className="!text-center">{value ? value : <div className="min-w-[20px]">-</div>}</div>
     ),
   },
 ];
@@ -233,6 +233,7 @@ export default function ReportCheckin() {
     } else {
       setTerritory("");
     }
+    setPage(1);
   };
 
   useEffect(() => {
@@ -420,6 +421,7 @@ export default function ReportCheckin() {
         title: "Thiết bị",
         dataIndex: "device",
         key: "device",
+        className: "!text-center",
         render: (value: any) => (
           <div className="!text-center">{value ? value : "-"}</div>
         ),
@@ -499,7 +501,7 @@ export default function ReportCheckin() {
             key: id,
           };
         })}
-        scroll={{ x: 2500, y: 280 }}
+        scroll={{ x: 2700, y: 280 }}
         columns={columns}
         pagination={false}
       />
@@ -618,6 +620,7 @@ export default function ReportCheckin() {
                     options={listEmployees}
                     onSelect={(value: any) => {
                       setEmployee(value);
+                      setPage(1);
                     }}
                     onClear={() => {
                       setEmployee("");

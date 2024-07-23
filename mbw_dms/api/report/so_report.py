@@ -110,9 +110,10 @@ def si_report(**kwargs):
 
         sale_invoices = frappe.db.get_list("Sales Invoice", 
                                        filters=filters, 
-                                       fields=["name", "customer", "territory", "set_warehouse", "UNIX_TIMESTAMP(posting_date) as posting_date", "total", "grand_total", "company", "owner", "discount_amount"], 
+                                       fields=["name", "customer", "territory", "set_warehouse", "UNIX_TIMESTAMP(posting_date) as posting_date", "total", "grand_total", "company", "owner"], 
                                        start=page_size*(page_number-1), page_length=page_size)
         for i in sale_invoices:
+            i["discount_amount"] = 0
             if i["owner"] == "Administrator":
                 i["employee"] = "Administrator"
             else:
@@ -122,6 +123,8 @@ def si_report(**kwargs):
             totals["sum_total"] += i["total"]
             if i["tax_amount"]:
                 totals["sum_vat"] += i["tax_amount"]
+            for j in i["items"]:
+                i["discount_amount"] += j['discount_amount']
             totals["sum_discount_amount"] += i["discount_amount"]
             totals["sum_grand_total"] += i["grand_total"]
 

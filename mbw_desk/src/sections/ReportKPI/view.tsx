@@ -206,6 +206,7 @@ export default function ReportKPI() {
                 options={monthAll}
                 onChange={(value: string) => {
                   setFmonth(value);
+                  setPage(1);
                 }}
               />
             </Col>
@@ -226,6 +227,7 @@ export default function ReportKPI() {
                 treeData={listSales}
                 onChange={(value: string) => {
                   setTeamSale(value);
+                  setPage(1);
                 }}
                 dropdownStyle={{
                   maxHeight: 400,
@@ -247,6 +249,7 @@ export default function ReportKPI() {
                 options={listEmployees}
                 onSelect={(value: any) => {
                   setEmployee(value);
+                  setPage(1);
                 }}
                 onClear={() => {
                   setEmployee("");

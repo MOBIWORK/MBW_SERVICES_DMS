@@ -21,15 +21,17 @@ def update_address(doc,method=None):
 					frappe.msgprint(f"update location for Customer : {link.link_name}", )
 					customer.save(ignore_permissions = True)
 	if doc.is_new() != False:
-		from  frappe.model.rename_doc import update_document_title
-		update_document_title(doctype= "Address",
-								docname= doc.name,
-								name= doc.address_title,
-								title= doc.address_title,
-								enqueue= True,
-								merge= 0,
-								freeze= True,
-								freeze_message= "Updating related fields..."
-							)
+		current_address = frappe.db.exists("Address", doc.address_title)
+		if not current_address:
+			from  frappe.model.rename_doc import update_document_title
+			update_document_title(doctype= "Address",
+									docname= doc.name,
+									name= doc.address_title,
+									title= doc.address_title,
+									enqueue= True,
+									merge= 0,
+									freeze= True,
+									freeze_message= "Updating related fields..."
+								)
 	frappe.db.commit()
 	pass

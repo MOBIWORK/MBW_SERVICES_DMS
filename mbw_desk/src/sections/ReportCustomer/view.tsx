@@ -337,6 +337,7 @@ export default function ReportCustomer() {
     } else {
       setUpdateTo(undefined);
     }
+    setPage(1);
   };
 
   useEffect(() => {
@@ -496,7 +497,8 @@ export default function ReportCustomer() {
     unit,
     employee,
     customer,
-    refresh
+    refresh,
+    PAGE_SIZE
   ]);
 
   return (
@@ -541,6 +543,7 @@ export default function ReportCustomer() {
                     onSearch={(value: string) => setKeyItem(value)}
                     onSelect={(value: any) => {
                       setItemCode(value);
+                      setPage(1);
                     }}
                     placeholder={<>Tất cả sản phẩm</>}
                     notFoundContent={null}
@@ -575,6 +578,7 @@ export default function ReportCustomer() {
                     showSearch
                     onSelect={(value: any) => {
                       setUnit(value);
+                      setPage(1);
                     }}
                     onSearch={(value: string) => {
                       setKeySUnit(value);
@@ -611,6 +615,7 @@ export default function ReportCustomer() {
                     placeholder="Tất cả người kiểm tồn"
                     onSearch={(value: string) => {
                       setKeySearch4(value);
+                      setPage(1);
                     }}
                     options={listEmployees}
                     onSelect={(value: any) => {
@@ -628,6 +633,7 @@ export default function ReportCustomer() {
                     options={listCustomer}
                     onSelect={(value: any) => {
                       setCustomer(value);
+                      setPage(1);
                     }}
                     onSearch={(value: string) => {
                       setKeySCustomer(value);

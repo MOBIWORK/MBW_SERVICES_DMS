@@ -297,6 +297,7 @@ export default function ReportCustomNew() {
     } else {
       setHasSaleOrder(undefined);
     }
+    setPage(1);
   };
 
   useEffect(() => {
@@ -530,6 +531,7 @@ export default function ReportCustomNew() {
                     options={listEmployees}
                     onSelect={(value: any) => {
                       setEmployee(value);
+                      setPage(1);
                     }}
                     onClear={() => {
                       setEmployee("");
