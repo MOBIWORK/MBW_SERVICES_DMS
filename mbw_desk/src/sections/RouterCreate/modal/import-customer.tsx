@@ -5,14 +5,17 @@ import { message, Upload } from 'antd';
 const { Dragger } = Upload;
 
 interface importProps {
-  handleFile: any
+  handleFile: any,
+  removeFile: any,
+  files: any
 }
-export function ImportCustomer({handleFile}: importProps) {
+export function ImportCustomer({handleFile,files,removeFile}: importProps) {
   const props: UploadProps = {
     name: 'file',
     // multiple: false,
     accept: ".xls,.xlsx",
-    action: 'https://run.mocky.io/v3/435e224c-44fb-4773-9faf-380c5e6a2188',
+    fileList: files,
+    // action: "",
     onChange(info) {
       const { status } = info.file;
       if (status !== 'uploading') {
@@ -25,9 +28,7 @@ export function ImportCustomer({handleFile}: importProps) {
       handleFile(file)
       
     },
-    onDrop(e) {
-      // console.log('Dropped files', e.dataTransfer.files,e);
-    },
+    onRemove:removeFile
   };
   return (
     <Dragger {...props}>

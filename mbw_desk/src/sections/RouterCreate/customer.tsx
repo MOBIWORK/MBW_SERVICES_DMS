@@ -1,4 +1,4 @@
-import React, { memo, useContext, useEffect, useRef, useState } from "react";
+import React, { memo, useCallback, useContext, useEffect, useRef, useState } from "react";
 import { Button, Col, Input, Modal, Radio, Row } from "antd";
 import { FormItemCustom } from "../../components/form-item";
 import { SelectCommon } from '@/components'
@@ -17,6 +17,8 @@ import Optimize from "./components/optimize";
 import { GlobalContext } from "@/App";
 import { CustomerType } from "./type";
 import useDebounce from "@/hooks/useDebount";
+import type { UploadFile } from 'antd';
+
 
 export default memo(function Customer() {
   const { setCustomerRouter, customerRouter, refCustomer } = useContext(CustomerContext)
@@ -30,6 +32,7 @@ export default memo(function Customer() {
   const [openChoose, setOpenChoose] = useState<boolean>(false)
   const [openImport, setOpenImport] = useState<boolean>(false)
   const [dataImport, setDataImport] = useState<any[]>([])
+  const [files,setFile] = useState<UploadFile[]>([])
   const handeClose = (type: 'Choose' | 'Import' | null) => {
     switch (type) {
       case "Choose":
@@ -66,10 +69,16 @@ export default memo(function Customer() {
       // console.log("=============json data==========",jsonData      );
       
       setDataImport(jsonData)
+      console.log("file======",file);
+      file.status = "done"
+      setFile([file])
     };
     reader.readAsArrayBuffer(file);
   }
 
+  const handleRemove = useCallback((file:any) => {
+    setFile(prev => prev.filter((fl:any) => fl.uid!= file.uid))
+  },[])
   const handleImportCusTomer = async () => {
     let importCustomers = getAttrInArray(dataImport, ["Mã khách hàng", "Tên khách hàng", "Tần suất"], { isNull: false })
     const customer_codes = importCustomers.map(customer => customer["Mã khách hàng"])
@@ -161,7 +170,7 @@ export default memo(function Customer() {
         </>}
         onOk={handleImportCusTomer}
       >
-        <ImportCustomer handleFile={handleUpdateFile} />
+        <ImportCustomer handleFile={handleUpdateFile} files={files} removeFile={handleRemove}/>
       </Modal>
     </>
   );

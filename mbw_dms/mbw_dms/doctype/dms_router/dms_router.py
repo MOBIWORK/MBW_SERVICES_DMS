@@ -283,10 +283,16 @@ def get_customers_import(data):
             ,'UNIX_TIMESTAMP(custom_birthday) as birthday'
             ]
         message= ""
-        list_customer = frappe.db.get_list('Customer',filters= FiltersCustomer,fields=fields_customer)      
+        list_customer = frappe.db.get_list('Customer',filters= FiltersCustomer,fields=fields_customer) 
+        list_codes = pydash.map_(list_customer,lambda x: x.customer_code)
+
+        list_codes_not_in = pydash.filter_(list_customer_codes,lambda x: x not in list_codes )
+        list_codes_not_in = ",".join(list_codes_not_in)
+        status  =200     
         if len(list_customer_codes) != len(list_customer): 
-            message =  i18n.t('translate.some_data_not_in_database', locale=get_language()) 
-        return gen_response(200,message, list_customer)
+            message =  _("Error: Some customer not found: "+list_codes_not_in) 
+            status = 500
+        return gen_response(status,message, list_customer)
     except Exception as e :
         exception_handle(e)
 #them tuyen
