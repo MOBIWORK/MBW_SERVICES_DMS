@@ -458,6 +458,7 @@ export default function ReportKPI() {
                   width={70}
                   dataIndex="th_vt"
                   key="th_vt"
+                  render={(_, record: any) => <div>{record?.kpi_month[0].th_vt}</div>}
                 />
                 <Column
                   className="!text-center"
@@ -485,6 +486,7 @@ export default function ReportKPI() {
                   width={70}
                   dataIndex="th_vt_dn"
                   key="th_vt_dn"
+                  render={(_, record: any) => <div>{record?.kpi_month[0].th_vt_dn}</div>}
                 />
                 <Column
                   className="!text-center"
@@ -514,6 +516,7 @@ export default function ReportKPI() {
                   width={70}
                   dataIndex="th_dat_hang"
                   key="th_dat_hang"
+                  render={(_, record: any) => <div>{record?.kpi_month[0].th_dat_hang}</div>}
                 />
                 <Column
                   className="!text-center"
@@ -543,6 +546,7 @@ export default function ReportKPI() {
                   width={70}
                   dataIndex="th_kh_moi"
                   key="th_kh_moi"
+                  render={(_, record: any) => <div>{record?.kpi_month[0].th_kh_moi}</div>}
                 />
                 <Column
                   className="!text-center"
@@ -573,6 +577,7 @@ export default function ReportKPI() {
                   width={70}
                   dataIndex="th_don_hang"
                   key="th_don_hang"
+                  render={(_, record: any) => <div>{record?.kpi_month[0].th_don_hang}</div>}
                 />
                 <Column
                   className="!text-center"
@@ -606,7 +611,7 @@ export default function ReportKPI() {
                   dataIndex="th_doanh_so"
                   key="th_doanh_so"
                   render={(_: any, record: DataTypeKPI) => (
-                    <>{Intl.NumberFormat().format(record.th_doanh_so)}</>
+                    <>{Intl.NumberFormat().format(record?.kpi_month[0].th_doanh_so)}</>
                   )}
                 />
                 <Column
@@ -642,7 +647,7 @@ export default function ReportKPI() {
                   dataIndex="th_doanh_thu"
                   key="th_doanh_thu"
                   render={(_: any, record: DataTypeKPI) => (
-                    <>{Intl.NumberFormat().format(record.th_doanh_thu)}</>
+                    <>{Intl.NumberFormat().format(record?.kpi_month[0].th_doanh_thu)}</>
                   )}
                 />
                 <Column
@@ -674,6 +679,7 @@ export default function ReportKPI() {
                   width={70}
                   dataIndex="th_san_lg"
                   key="th_san_lg"
+                  render={(_, record: any) => <div>{record?.kpi_month[0].th_san_lg}</div>}
                 />
                 <Column
                   className="!text-center"
@@ -704,6 +710,7 @@ export default function ReportKPI() {
                   width={70}
                   dataIndex="th_sku"
                   key="th_sku"
+                  render={(_, record: any) => <div>{record?.kpi_month[0].th_sku}</div>}
                 />
                 <Column
                   className="!text-center"
@@ -734,6 +741,7 @@ export default function ReportKPI() {
                   width={70}
                   dataIndex="th_so_gio_lam_viec"
                   key="th_so_gio_lam_viec"
+                  render={(_, record: any) => <div>{record?.kpi_month[0].th_so_gio_lam_viec}</div>}
                 />
                 <Column
                   className="!text-center"
