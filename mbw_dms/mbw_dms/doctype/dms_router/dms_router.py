@@ -290,7 +290,7 @@ def get_customers_import(data):
         list_codes_not_in = ",".join(list_codes_not_in)
         status  =200     
         if len(list_customer_codes) != len(list_customer): 
-            message =  _("Error: Some customer not found: "+list_codes_not_in) 
+            message =  _("Error: Some customer not found: ")+list_codes_not_in
             status = 500
         return gen_response(status,message, list_customer)
     except Exception as e :
