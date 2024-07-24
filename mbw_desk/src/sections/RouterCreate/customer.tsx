@@ -93,10 +93,12 @@ export default memo(function Customer() {
         let import_frequency = importCustomers.find(cs => cs["Mã khách hàng"] == customer.customer_code)
         if(import_frequency) {
           customer["frequency"] = import_frequency["Tần suất"]
+        }else {
+          customer["frequency"] = "1;2;3;4"
         }
         return customer
       })
-      setCustomerRouter((prev: any) => [...prev, ...rsImport.result])
+      setCustomerRouter((prev: any) => [...prev,... list_customer_import])
       successMsg("Add record from local!")
       setOpenImport(false)
 
