@@ -319,22 +319,23 @@ def create_checkin(kwargs):
         except Exception as e:
             print("loi insert::::::::::::::",e)
         #send mail
-        try:
-            notes = frappe.db.get_all("Note", {"custom_checkin_id": kwargs.get("checkin_id")})
-            print("notes",notes)
-            for note in notes:
-                current_note = frappe.get_doc("Note",note.name)
-                memory_send = current_note.as_dict().custom_memory_send_to
-                print("note",current_note,memory_send)
-                for mail in memory_send:
-                    print("amil",mail,mail.get("send_to"))
-                    current_note.append("seen_by", {
-                        "user": mail.get("send_to")
-                    })
-                print("currrent",current_note.as_dict())
-                current_note.save()
-        except Exception as e:
-            print("loi send mail::::::::::::::",e)    
+        notes = frappe.db.get_all("Note", {"custom_checkin_id": kwargs.get("checkin_id")},["*"])
+        for note in notes:
+            current_note = frappe.get_doc("Note",note.name)
+            memory_send = current_note.as_dict().custom_memory_send_to
+            # create new note
+            new_note = frappe.new_doc('Note')
+            new_note.title = note.get('title')
+            new_note.content = note.get("content")
+            for mail in memory_send:
+                new_note.append("seen_by", {
+                    "user": mail.get("send_to")
+                })
+            new_note.custom_checkin_id = note.get("custom_checkin_id")
+            new_note.public = 1
+            new_note.insert(ignore_permissions=True) 
+            frappe.delete_doc("Note",note.name)
+            frappe.db.commit()
         frappe.db.commit()
         return gen_response(201, "Thành công", {"name": new_checkin.name})
     

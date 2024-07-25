@@ -58,6 +58,7 @@ def create_proble_monitor(kwargs):
 @frappe.whitelist(methods="POST")
 def create_note(kwargs):
     try:
+        print("kw",kwargs)
         new_note = frappe.new_doc('Note')
         new_note.title = kwargs.get('title')
         new_note.content = validate_not_none(kwargs.get('content'))
@@ -68,6 +69,7 @@ def create_note(kwargs):
         new_note.custom_checkin_id = validate_not_none(kwargs.get('custom_checkin_id'))
         new_note.public = 1
         new_note.insert(ignore_permissions=True) 
+        frappe.db.commit()
         return gen_response(201, "Tạo mới thành công", {"name": new_note.name})
     except Exception as e:
         return exception_handle(e)    
