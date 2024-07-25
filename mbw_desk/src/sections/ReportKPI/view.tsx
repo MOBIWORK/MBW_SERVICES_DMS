@@ -458,7 +458,7 @@ export default function ReportKPI() {
                   width={70}
                   dataIndex="th_vt"
                   key="th_vt"
-                  render={(_, record: any) => <div>{record?.kpi_month[0].th_vt}</div>}
+                  render={(_, record: any) => <div>{record?.kpi_month[0] ? record?.kpi_month[0]?.th_vt : 0}</div>}
                 />
                 <Column
                   className="!text-center"
@@ -486,7 +486,7 @@ export default function ReportKPI() {
                   width={70}
                   dataIndex="th_vt_dn"
                   key="th_vt_dn"
-                  render={(_, record: any) => <div>{record?.kpi_month[0].th_vt_dn}</div>}
+                  render={(_, record: any) => <div>{record?.kpi_month[0] ? record?.kpi_month[0]?.th_vt_dn : 0}</div>}
                 />
                 <Column
                   className="!text-center"
@@ -516,7 +516,7 @@ export default function ReportKPI() {
                   width={70}
                   dataIndex="th_dat_hang"
                   key="th_dat_hang"
-                  render={(_, record: any) => <div>{record?.kpi_month[0].th_dat_hang}</div>}
+                  render={(_, record: any) => <div>{record?.kpi_month[0] ? record?.kpi_month[0]?.th_dat_hang : 0}</div>}
                 />
                 <Column
                   className="!text-center"
@@ -546,7 +546,7 @@ export default function ReportKPI() {
                   width={70}
                   dataIndex="th_kh_moi"
                   key="th_kh_moi"
-                  render={(_, record: any) => <div>{record?.kpi_month[0].th_kh_moi}</div>}
+                  render={(_, record: any) => <div>{record?.kpi_month[0] ? record?.kpi_month[0]?.th_kh_moi : 0}</div>}
                 />
                 <Column
                   className="!text-center"
@@ -577,7 +577,7 @@ export default function ReportKPI() {
                   width={70}
                   dataIndex="th_don_hang"
                   key="th_don_hang"
-                  render={(_, record: any) => <div>{record?.kpi_month[0].th_don_hang}</div>}
+                  render={(_, record: any) => <div>{record?.kpi_month[0] ? record?.kpi_month[0]?.th_don_hang : 0}</div>}
                 />
                 <Column
                   className="!text-center"
@@ -610,8 +610,8 @@ export default function ReportKPI() {
                   width={70}
                   dataIndex="th_doanh_so"
                   key="th_doanh_so"
-                  render={(_: any, record: DataTypeKPI) => (
-                    <>{Intl.NumberFormat().format(record?.kpi_month[0].th_doanh_so)}</>
+                  render={(_: any, record: any) => (
+                    <>{record?.kpi_month[0] ? Intl.NumberFormat().format(record?.kpi_month[0]?.th_doanh_so) : 0}</>
                   )}
                 />
                 <Column
@@ -646,8 +646,8 @@ export default function ReportKPI() {
                   width={70}
                   dataIndex="th_doanh_thu"
                   key="th_doanh_thu"
-                  render={(_: any, record: DataTypeKPI) => (
-                    <>{Intl.NumberFormat().format(record?.kpi_month[0].th_doanh_thu)}</>
+                  render={(_: any, record: any) => (
+                    <>{record?.kpi_month[0] ? Intl.NumberFormat().format(record?.kpi_month[0]?.th_doanh_thu) : 0}</>
                   )}
                 />
                 <Column
@@ -679,7 +679,7 @@ export default function ReportKPI() {
                   width={70}
                   dataIndex="th_san_lg"
                   key="th_san_lg"
-                  render={(_, record: any) => <div>{record?.kpi_month[0].th_san_lg}</div>}
+                  render={(_, record: any) => <div>{record?.kpi_month[0] ? record?.kpi_month[0]?.th_san_lg : 0}</div>}
                 />
                 <Column
                   className="!text-center"
@@ -710,7 +710,7 @@ export default function ReportKPI() {
                   width={70}
                   dataIndex="th_sku"
                   key="th_sku"
-                  render={(_, record: any) => <div>{record?.kpi_month[0].th_sku}</div>}
+                  render={(_, record: any) => <div>{record?.kpi_month[0] ? record?.kpi_month[0]?.th_sku : 0}</div>}
                 />
                 <Column
                   className="!text-center"
@@ -741,7 +741,7 @@ export default function ReportKPI() {
                   width={70}
                   dataIndex="th_so_gio_lam_viec"
                   key="th_so_gio_lam_viec"
-                  render={(_, record: any) => <div>{record?.kpi_month[0].th_so_gio_lam_viec}</div>}
+                  render={(_, record: any) => <div>{record?.kpi_month[0] ? record?.kpi_month[0]?.th_so_gio_lam_viec : 0}</div>}
                 />
                 <Column
                   className="!text-center"
