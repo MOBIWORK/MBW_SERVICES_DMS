@@ -294,6 +294,7 @@ def create_checkin(kwargs):
         new_checkin.set("createbyname", employee.get("full_name"))
         new_checkin.set("createdbyemail", employee.get("email"))
         address = ""
+
         try:
             settings = frappe.db.get_singles_dict("DMS Settings")
             lat = kwargs.get("checkin_lat")
@@ -317,6 +318,15 @@ def create_checkin(kwargs):
             # validate_fields(new_checkin.as_dict())
             print("new_checkin===============================",new_checkin)
             new_checkin.insert(ignore_permissions=True)
+            #send mail
+            notes = frappe.db.get_all("Note", {"custom_checkin_id": kwargs.get("checkin_id")})
+            for note in notes:
+                current_note = frappe.get_doc("Note",note.name)
+                memory_send = current_note.get("custom_memory_send_to")
+                for mail in memory_send:
+                    current_note.append("seen_by", {
+                        "user": mail.get("send_to")
+                    })
         except Exception as e:
             print("loi insert::::::::::::::",e)
         frappe.db.commit()
@@ -591,6 +601,8 @@ def cancel_checkout(data):
         gen_response(200,i18n.t("translate.successfully", locale=get_language()), [])
         checkin_id = data.get("checkin_id")
         customer_id = data.get("customer_id")
+        # Xóa note
+        frappe.delete_doc("Note", {"custom_checkin_id": checkin_id})
         # Xóa đơn hàng
         frappe.db.delete("Sales Order", {"checkin_id": checkin_id})
         # Xóa phiếu trả hàng

@@ -62,8 +62,8 @@ def create_note(kwargs):
         new_note.title = kwargs.get('title')
         new_note.content = validate_not_none(kwargs.get('content'))
         for email in kwargs.get("email"):
-            new_note.append("seen_by", {
-                "user": email
+            new_note.append("custom_memory_send_to", {
+                "send_to": email
             })
         new_note.custom_checkin_id = validate_not_none(kwargs.get('custom_checkin_id'))
         new_note.public = 1
