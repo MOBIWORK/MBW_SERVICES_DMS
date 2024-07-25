@@ -327,6 +327,7 @@ def create_checkin(kwargs):
                     current_note.append("seen_by", {
                         "user": mail.get("send_to")
                     })
+                current_note.save()
         except Exception as e:
             print("loi insert::::::::::::::",e)
         frappe.db.commit()
