@@ -315,21 +315,26 @@ def create_checkin(kwargs):
         new_checkin.set("checkin_address", address,"\n")
         print("new_checkin",new_checkin.as_dict())
         try:
-            # validate_fields(new_checkin.as_dict())
-            print("new_checkin===============================",new_checkin)
-            new_checkin.insert(ignore_permissions=True)
-            #send mail
+            new_checkin.insert(ignore_permissions=True)            
+        except Exception as e:
+            print("loi insert::::::::::::::",e)
+        #send mail
+        try:
             notes = frappe.db.get_all("Note", {"custom_checkin_id": kwargs.get("checkin_id")})
+            print("notes",notes)
             for note in notes:
                 current_note = frappe.get_doc("Note",note.name)
-                memory_send = current_note.get("custom_memory_send_to")
+                memory_send = current_note.as_dict().custom_memory_send_to
+                print("note",current_note,memory_send)
                 for mail in memory_send:
+                    print("amil",mail,mail.get("send_to"))
                     current_note.append("seen_by", {
                         "user": mail.get("send_to")
                     })
+                print("currrent",current_note.as_dict())
                 current_note.save()
         except Exception as e:
-            print("loi insert::::::::::::::",e)
+            print("loi send mail::::::::::::::",e)    
         frappe.db.commit()
         return gen_response(201, "Thành công", {"name": new_checkin.name})
     
