@@ -569,7 +569,7 @@ def get_items(master_doc, master_name):
     master_doc = frappe.get_doc(master_doc, master_name).as_dict()
     items = master_doc["items"]
 
-    fields_to_get = ["name", "item_name", "item_code", "rate", "qty", "uom", "amount", "discount_amount", "discount_percentage", "is_free_item", "item_tax_rate"]
+    fields_to_get = ["name", "item_name", "item_code", "rate", "qty", "uom", "amount", "discount_amount", "discount_percentage", "is_free_item", "item_tax_rate", "price list rate"]
     result = []
 
     for item in items:
