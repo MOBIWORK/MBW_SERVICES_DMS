@@ -93,3 +93,22 @@ def find(filters = {},filters_or={}, options = ["*"],page_length = 20, page =1,o
 		"page_number": page,
 		"page_size": page_length
 		}
+
+def find_v2(where,page_length = 20, page =1,order_by = "modified desc",is_children = True,**data):
+	start = (page -1) * page_length
+	query = f"""
+		SELECT 
+			DISTINCT di.*,
+			GROUP_CONCAT(dii.* ORDER BY dii.* SEPARATOR ', ') AS items
+		FROM 
+			DMS Inventory di
+		INNER JOIN 
+			DMS Inventory Items dii
+		ON 
+			di.name = dii.parent
+		ORDER BY 
+			di.modified desc
+		{where}
+		GROUP BY 
+			di.customer_code
+	"""
