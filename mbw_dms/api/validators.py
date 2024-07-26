@@ -33,7 +33,7 @@ def validate_not_none(value, field=None):
 
 def validate_not_none_field(value):
     if not value[0]:
-        raise ValueError(f"Vui lòng nhập dữ liệu! {value[1]}")
+        raise ValueError(f"Vui lòng nhập dữ liệu: {value[1]}")
     return value[0]
 
 # Kiểm tra trường date truyền lên

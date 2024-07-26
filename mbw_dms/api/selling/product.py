@@ -27,6 +27,7 @@ def list_product(**kwargs):
         page_number = cint(kwargs.get("page_number", 1))
         if page_number <= 0:
             page_number = 1
+        warehouse = kwargs.get("warehouse")
 
         price_lisr_cg = None
         price_list = None
@@ -55,7 +56,7 @@ def list_product(**kwargs):
                                     fields=["name", "item_code", "item_name", "item_group", 
                                             "stock_uom", "min_order_qty", "description",
                                             "brand", "country_of_origin", "image",
-                                            "custom_industry", "end_of_life", "total_projected_qty"],
+                                            "custom_industry", "end_of_life"],
                                     start=page_size * (page_number - 1),
                                     page_length=page_size)
         for item in items:
@@ -67,6 +68,8 @@ def list_product(**kwargs):
             
             images_links = pydash.map_(images, return_fiel)
             item["custom_images_item"] = images_links
+
+            item["total_projected_qty"] = get_bin_item(warehouse, item.item_code)[0].projected_qty
 
         # Lấy danh sách các sản phẩm mà người dùng có quyền truy cập
         user = frappe.session.user
@@ -300,3 +303,22 @@ def list_vat(**kwargs):
     except Exception as e:
         return exception_handle(e)
     
+def get_bin_item(warehouse, item_code):
+    bin = frappe.qb.DocType("Bin")
+    query = (
+		frappe.qb.from_(bin)
+		.select(
+			bin.projected_qty,
+		)
+		.orderby(bin.warehouse)
+	)
+
+    if warehouse:
+        query = query.where(bin.warehouse == warehouse)
+
+    if item_code:
+        query = query.where(bin.item_code == item_code)
+    bin_list = query.run(as_dict=True)
+    print('========================= value: ', bin_list, flush=True)
+
+    return bin_list
