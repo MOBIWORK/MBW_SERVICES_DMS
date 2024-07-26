@@ -250,6 +250,7 @@ class DMSCheckin(Document):
 @frappe.whitelist(methods="POST")
 def create_checkin(kwargs):
     try:
+        
         print("checkout",kwargs)
         new_checkin = frappe.new_doc("DMS Checkin")
 
@@ -322,20 +323,28 @@ def create_checkin(kwargs):
         notes = frappe.db.get_all("Note", {"custom_checkin_id": kwargs.get("checkin_id")},["*"])
         for note in notes:
             current_note = frappe.get_doc("Note",note.name)
-            memory_send = current_note.as_dict().custom_memory_send_to
-            # create new note
-            new_note = frappe.new_doc('Note')
-            new_note.title = note.get('title')
-            new_note.content = note.get("content")
+            memory_send = current_note.as_dict().seen_by
             for mail in memory_send:
-                new_note.append("seen_by", {
-                    "user": mail.get("send_to")
-                })
-            new_note.custom_checkin_id = note.get("custom_checkin_id")
-            new_note.public = 1
-            new_note.insert(ignore_permissions=True) 
-            frappe.delete_doc("Note",note.name)
-            frappe.db.commit()
+                
+                try:
+                    STANDARD_USERS = ("Guest", "Administrator")
+                    from frappe.utils import get_formatted_email
+                    sender = (
+                        frappe.session.user not in STANDARD_USERS and get_formatted_email(frappe.session.user) or None
+                    )
+                
+                    frappe.sendmail(
+                        recipients=mail.get("user"),
+                        sender=None,
+                        subject=note.get("title"),
+                        message=note.get("content"),
+                        delayed=False,
+                        retry=3
+                    )
+                    print("send mail end")
+                except Exception as e:
+                    print("something error send mail",e)
+            
         frappe.db.commit()
         return gen_response(201, "Thành công", {"name": new_checkin.name})
     
