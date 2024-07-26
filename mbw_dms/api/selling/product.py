@@ -69,7 +69,10 @@ def list_product(**kwargs):
             images_links = pydash.map_(images, return_fiel)
             item["custom_images_item"] = images_links
 
-            item["total_projected_qty"] = get_bin_item(warehouse, item.item_code)[0].projected_qty
+            if get_bin_item(warehouse, item.item_code):
+                item["total_projected_qty"] = get_bin_item(warehouse, item.item_code)[0].projected_qty
+            else:
+                item["total_projected_qty"] = 0
 
         # Lấy danh sách các sản phẩm mà người dùng có quyền truy cập
         user = frappe.session.user
