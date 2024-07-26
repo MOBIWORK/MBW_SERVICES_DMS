@@ -230,8 +230,8 @@ export default function ReportCustomer() {
       },
       {
         title: "Người kiểm tồn",
-        dataIndex: "update_byname",
-        key: "update_byname",
+        dataIndex: "employee_name",
+        key: "employee_name",
         render: (_, record: any) => (
           <>
             <div>{record.update_byname}</div>
