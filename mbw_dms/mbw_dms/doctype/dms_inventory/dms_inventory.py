@@ -32,7 +32,7 @@ def find(filters = {},filters_or={}, options = ["*"],page_length = 20, page =1,o
 		for inven in results:
 			dataitem = frappe.get_doc("DMS Inventory",inven.get("name"))
 			employee = frappe.get_value("Employee",inven.get("create_by"),["employee_name"])
-			inven["employee_name"] = employee
+			
 			items = []
 			if dataitem :
 				items = dataitem.get("items")
@@ -75,6 +75,7 @@ def find(filters = {},filters_or={}, options = ["*"],page_length = 20, page =1,o
 			items = pydash.filter_(items,filterFunction)
 			def chooseField(value) :
 				new_value =  pydash.pick(value,fieldChil)
+				new_value["employee_name"] = employee
 				if new_value["exp_time"]:
 					new_value["exp_time"] = datetime.combine(new_value["exp_time"], datetime.min.time()).timestamp()
 				if new_value.get('update_at'):
@@ -83,6 +84,7 @@ def find(filters = {},filters_or={}, options = ["*"],page_length = 20, page =1,o
 			items = pydash.map_(items,chooseField)
 			inven["items"] = items
 			inven["create_time"] = inven["create_time"].timestamp()
+			# items["employee_name"] = employee
 	
 	count = len(frappe.db.get_list(DocName, filters=filters,distinct=True))
 	return {
