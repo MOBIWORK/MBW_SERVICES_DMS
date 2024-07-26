@@ -335,7 +335,7 @@ def create_checkin(kwargs):
                 
                     frappe.sendmail(
                         recipients=mail.get("user"),
-                        sender=None,
+                        sender=sender,
                         subject=note.get("title"),
                         message=note.get("content"),
                         delayed=False,
