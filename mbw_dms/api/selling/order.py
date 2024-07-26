@@ -189,6 +189,7 @@ def create_sale_order(**kwargs):
         user_name = frappe.get_value("Employee", {"user_id": frappe.session.user}, "name")
         sales_person = frappe.get_value("Sales Person", {"employee": user_name}, "name")
         ignore_pricing_rule = kwargs.get("ignore_pricing_rule")
+        price_list = kwargs.get("price_list")
 
         # Dữ liệu bắn lên để tạo sale order mới
         discount_percent = float(kwargs.get("additional_discount_percentage", 0))
@@ -197,6 +198,7 @@ def create_sale_order(**kwargs):
         new_order.customer = validate_not_none(kwargs.customer)     
         new_order.delivery_date = validate_date(kwargs.delivery_date)                                   # Ngày giao
         new_order.set_warehouse = validate_not_none(kwargs.get("set_warehouse"))                        # Kho hàng
+        new_order.selling_price_list = price_list
 
         if apply_discount_on is not None:
             new_order.apply_discount_on = validate_choice(configs.discount_type)(apply_discount_on)         # Loại Chiết khấu
