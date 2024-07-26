@@ -105,7 +105,7 @@ def list_product(**kwargs):
             item["image"] = validate_image(item.get("image"))
             item["details"] = frappe.get_all("Item Price", filters={"item_code": item.get('item_code'), "price_list": price_list}, fields=["uom", "price_list", "price_list_rate", "valid_from", "currency"])
             if not price_list and not item["details"]:
-                item_price_default = frappe.get_all("Item Price", filters={"item_code": item.get('item_code'), "price_list": default_selling_price_list}, fields=["uom", "price_list", "price_list_rate", "valid_from", "currency"])
+                item_price_default = frappe.get_all("Item Price", filters={"item_code": item.get("item_code"), "price_list": default_selling_price_list}, fields=["uom", "price_list", "price_list_rate", "valid_from", "currency"])
                 if item_price_default:
                     item["details"] = item_price_default
                 else:
