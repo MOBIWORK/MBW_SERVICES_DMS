@@ -236,7 +236,7 @@ export default function ReportCustomer() {
           <>
             <div>{record.employee_name}</div>
             <div className="font-normal text-sm leading-[21px] text-[#637381]">
-              {record.update_bycode}
+              {record.create_by}
             </div>
           </>
         ),

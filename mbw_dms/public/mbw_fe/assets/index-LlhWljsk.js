@@ -1,0 +1,1 @@
+import{L as s,am as a}from"./index-5tpa7YeI.js";function o({children:e,title:t}){return s.jsxs("div",{className:a("bg-white shadow-lg mt-0 p-4 rounded-lg"),children:[s.jsx("div",{className:"font-medium text-base text-[#212B36] mb-4",children:t}),e]})}export{o as D};
