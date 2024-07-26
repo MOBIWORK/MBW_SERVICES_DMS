@@ -53,8 +53,9 @@
   },
   {
    "fieldname": "create_by",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "label": "Ng\u01b0\u1eddi T\u1ea1o",
+   "options": "Employee",
    "reqd": 1
   },
   {
@@ -81,7 +82,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-07-13 11:10:33.492130",
+ "modified": "2024-07-26 11:45:54.190664",
  "modified_by": "Administrator",
  "module": "MBW DMS",
  "name": "DMS Inventory",

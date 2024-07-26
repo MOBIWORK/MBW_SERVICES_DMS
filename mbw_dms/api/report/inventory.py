@@ -78,7 +78,8 @@ def get_customer_inventory(**body):
         if employee:
            filters.append(["create_by","=",employee])
         print("filters",filters)
-        return gen_response(200,message,find(filters=filters, page_length=page_size,page=page_number,data= {
+        options= ["*"]
+        return gen_response(200,message,find(filters=filters,options=options, page_length=page_size,page=page_number,data= {
             "expire_from" :expire_from,
             "expire_to":expire_to,
             "update_at_from" :update_at_from,

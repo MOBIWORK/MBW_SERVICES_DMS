@@ -14,9 +14,9 @@ DocName = "DMS Inventory"
 DocNameChild = "DMS Inventory Items"
 Inventory = frappe.qb.DocType(DocName)
 InventoryItem = frappe.qb.DocType(DocNameChild)
-def find(filters = {}, options = ["*"],page_length = 20, page =1,order = "name desc",is_children = True,**data) :
+def find(filters = {},filters_or={}, options = ["*"],page_length = 20, page =1,order_by = "modified desc",is_children = True,**data) :
 	start = (page -1) * page_length
-	results = frappe.db.get_list(DocName, filters=filters,fields= options, start=start,page_length=page_length,distinct=True)	
+	results = frappe.db.get_list(DocName, filters=filters,or_filters=filters_or,fields= options,order_by=order_by, start=start,page_length=page_length,distinct=True)	
 	fieldChil = [ "name",
 			  	"item_code",
 				"item_name",
@@ -31,6 +31,8 @@ def find(filters = {}, options = ["*"],page_length = 20, page =1,order = "name d
 	if(is_children): 
 		for inven in results:
 			dataitem = frappe.get_doc("DMS Inventory",inven.get("name"))
+			employee = frappe.get_value("Employee",inven.get("create_by"),["employee_name"])
+			inven["employee_name"] = employee
 			items = []
 			if dataitem :
 				items = dataitem.get("items")
