@@ -1,6 +1,7 @@
 import frappe
 
-from mbw_dms.api.common import gen_response ,exception_handle
+from mbw_dms.api.common import gen_response, exception_handle
+from mbw_dms.api.validators import validate_filter_timestamp
 import calendar
 
 # Báo cáo KPI web
@@ -25,9 +26,9 @@ def kpi_report(**kwargs):
         filters = []
 
         if employee:
-            filters.append(f"nhan_vien_ban_hang='{employee}'")
+            filters.append(f"nhan_vien_ban_hang = '{employee}'")
         if sales_team:
-            filters.append(f"nhom_ban_hang='{sales_team}'")
+            filters.append(f"nhom_ban_hang = '{sales_team}'")
         if bool(start_date):
             filters.append(f"ngay_hieu_luc_tu >= '{start_date}'")
         if bool(end_date):
@@ -166,5 +167,61 @@ def kpi_report(**kwargs):
             "page_size": page_size,
             "totals": count_data[0]['COUNT(*)']
         })
+    except Exception as e:
+        return exception_handle(e)
+    
+
+# Chi tiết viếng thăm
+@frappe.whitelist(methods="GET")
+def kpi_visit_detail(**kwargs):
+    try:
+        filters = {}
+        from_date = validate_filter_timestamp(type="start")(kwargs.get("from_date")) if kwargs.get("from_date") else None
+        to_date = validate_filter_timestamp(type="end")(kwargs.get("to_date")) if kwargs.get("to_date") else None
+        page_size =  int(kwargs.get("page_size", 20))
+        page_number = int(kwargs.get("page_number")) if kwargs.get("page_number") and int(kwargs.get("page_number")) >=1 else 1
+        employee = kwargs.get("employee")
+
+        if from_date and to_date:
+            filters["creation"] = ["between", [from_date, to_date]]
+        if employee:
+            filters["createbyname"] = employee
+        
+        data = frappe.get_all("DMS Checkin", filters=filters, fields=["kh_ma", "kh_ten", "kh_diachi", "checkin_giovao", "checkin_khoangcach"], start=page_size*(page_number-1), page_length=page_size)
+        return gen_response(200, "Thành công", data)
+    
+    except Exception as e:
+        return exception_handle(e)
+    
+
+# Chi tiết số kh viếng thăm duy nhất
+@frappe.whitelist(methods="GET")
+def kpi_only_visit_detail(**kwargs):
+    try:
+        filters = {}
+        from_date = validate_filter_timestamp(type="start")(kwargs.get("from_date")) if kwargs.get("from_date") else None
+        to_date = validate_filter_timestamp(type="end")(kwargs.get("to_date")) if kwargs.get("to_date") else None
+        page_size =  int(kwargs.get("page_size", 20))
+        page_number = int(kwargs.get("page_number")) if kwargs.get("page_number") and int(kwargs.get("page_number")) >=1 else 1
+        employee = kwargs.get("employee")
+
+        if from_date and to_date:
+            filters["creation"] = ["between", [from_date, to_date]]
+        if employee:
+            filters["createbyname"] = employee
+        
+        data = frappe.get_all("DMS Checkin", filters=filters, fields=["kh_ma", "kh_ten", "kh_diachi", "checkin_giovao", "checkin_khoangcach"], start=page_size*(page_number-1), page_length=page_size)
+        kh_ma_count = {}
+        for i in data:
+            kh_ma = i["kh_ma"]
+            if kh_ma in kh_ma_count:
+                kh_ma_count[kh_ma] += 1
+            else:
+                kh_ma_count[kh_ma] = 1
+
+        unique_data = [i for i in data if kh_ma_count[i["kh_ma"]] == 1]
+
+        return gen_response(200, "Thành công", unique_data)
+
     except Exception as e:
         return exception_handle(e)

@@ -504,23 +504,25 @@ def get_customer_has_location(**kwargs):
     
 @frappe.whitelist(methods="DELETE")
 def remove_contact_address(**kwarg):
-    try: 
+    try:
         customer = validate_filter(value=(kwarg.get("customer"), "customer"), type_check="require_field") 
         name = validate_filter(value=(kwarg.get("name"), "name"), type_check="require_field") 
-        type_remove = validate_filter(value=(kwarg.get("type"), "customer"), type_check="require_field") 
+        type_remove = validate_filter(value=(kwarg.get("type"), "type"), type_check="require_field") 
         final_type = validate_filter(value=type_remove, type_check="enum", type=["contact", "address"])
         doctype = {
             "contact": "Contact",
             "address": "Address"
         }
 
-        doc_delete = frappe.get_doc(doctype[final_type],name)
+        doc_delete = frappe.get_doc(doctype[final_type], name)
         if doc_delete: 
             dynamic_link = doc_delete.links
             find_not_customer = pydash.filter_(dynamic_link, lambda x: (x.link_doctype == "Customer" and x.link_name != customer) or x.link_doctype != "Customer" )
-            doc_delete.set("links",find_not_customer)
+            doc_delete.set("links", find_not_customer)
             doc_delete.save()
+
+            frappe.delete_doc(doctype[final_type], name)
             frappe.db.commit()
-        return gen_response(200,"")
+        return gen_response(200, "")
     except Exception as e :
         return exception_handle(e)

@@ -1,6 +1,6 @@
 import frappe
 
-from mbw_dms.api.common import gen_response ,exception_handle, get_child_values_doc
+from mbw_dms.api.common import gen_response ,exception_handle, get_child_values_doc, get_value_child_doctype
 from mbw_dms.api.validators import validate_filter_timestamp
 
 # Báo cáo tổng hợp đặt hàng
@@ -32,7 +32,6 @@ def so_report(**kwargs):
             filters["owner"] = kwargs.get("employee")
         filters["docstatus"] = 1
 
-
         field_items = ["name", "item_name", "item_code", "item_group", "brand", "rate", "qty", "amount", "discount_amount", "discount_percentage"]
         totals = {
             "sum_total": 0,
@@ -42,17 +41,21 @@ def so_report(**kwargs):
         }
 
         sale_orders = frappe.db.get_list("Sales Order", 
-                                       filters=filters, 
-                                       fields=["name", "customer", "territory", "set_warehouse", "UNIX_TIMESTAMP(transaction_date) as transaction_date", "total", "grand_total", "company", "owner", "discount_amount"], 
-                                       order_by="transaction_date desc", 
-                                       start=page_size*(page_number-1), page_length=page_size)
+                        filters=filters, 
+                        fields=["name", "customer", "territory", "set_warehouse", "UNIX_TIMESTAMP(transaction_date) as transaction_date", "total", "grand_total", "company", "owner", "discount_amount"], 
+                        order_by="transaction_date desc", 
+                        start=page_size*(page_number-1), page_length=page_size)
+        
         for i in sale_orders:
-            if i["owner"] == "Administrator":
-                i["employee"] = "Administrator"
-            else:
-                i["employee"] = frappe.get_value("Employee", {"user_id": i["owner"]}, "employee_name")
+            st = get_value_child_doctype("Sales Order", i["name"], "sales_team")
+            i["employee"] = ""
+            for j in st:
+                if j.created_by == 1:
+                    employee = frappe.get_value("Sales Person", {"name": j.sales_person}, "employee")
+                    i["employee"] = frappe.get_value("Employee", {"name": employee}, "employee_name")
             i["tax_amount"] = frappe.get_value("Sales Taxes and Charges", {"parent": i["name"]}, "tax_amount")
             i["items"] = get_child_values_doc(doctype="Sales Order", master_name=i["name"], fields_to_get=field_items, chil_name="items")
+
             totals["sum_total"] += i["total"]
             if i["tax_amount"]:
                 totals["sum_vat"] += i["tax_amount"]
@@ -92,7 +95,7 @@ def si_report(**kwargs):
             filters["customer"] = kwargs.get("customer")
         if kwargs.get("territory"):
             filters["territory"] = kwargs.get("territory")
-        if kwargs.get('warehouse'):
+        if kwargs.get("warehouse"):
             filters["set_warehouse"] = kwargs.get("warehouse")
         if kwargs.get("company"):
             filters["company"] = kwargs.get("company")
@@ -109,17 +112,21 @@ def si_report(**kwargs):
         }
 
         sale_invoices = frappe.db.get_list("Sales Invoice", 
-                                       filters=filters, 
-                                       fields=["name", "customer", "territory", "set_warehouse", "UNIX_TIMESTAMP(posting_date) as posting_date", "total", "grand_total", "company", "owner"], 
-                                       start=page_size*(page_number-1), page_length=page_size)
+                            filters=filters, 
+                            fields=["name", "customer", "territory", "set_warehouse", "UNIX_TIMESTAMP(posting_date) as posting_date", "total", "grand_total", "company", "owner"], 
+                            start=page_size*(page_number-1), page_length=page_size)
+        
         for i in sale_invoices:
             i["discount_amount"] = 0
-            if i["owner"] == "Administrator":
-                i["employee"] = "Administrator"
-            else:
-                i["employee"] = frappe.get_value("Employee", {"user_id": i["owner"]}, "employee_name")
+            st = get_value_child_doctype("Sales Invoice", i["name"], "sales_team")
+            i["employee"] = ""
+            for j in st:
+                if j.created_by == 1:
+                    employee = frappe.get_value("Sales Person", {"name": j.sales_person}, "employee")
+                    i["employee"] = frappe.get_value("Employee", {"name": employee}, "employee_name")
             i["tax_amount"] = frappe.get_value("Sales Taxes and Charges", {"parent": i["name"]}, "tax_amount")
             i["items"] = get_child_values_doc(doctype="Sales Invoice", master_name=i["name"], fields_to_get=field_items, chil_name="items")
+
             totals["sum_total"] += i["total"]
             if i["tax_amount"]:
                 totals["sum_vat"] += i["tax_amount"]
