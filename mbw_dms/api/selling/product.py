@@ -23,7 +23,7 @@ def list_product(**kwargs):
         brand = kwargs.get("brand")
         custom_industry = kwargs.get("industry")
         item_group = kwargs.get("item_group")
-        page_size =  cint(kwargs.get("page_size", 20))
+        page_size = cint(kwargs.get("page_size", 20))
         page_number = cint(kwargs.get("page_number", 1))
         if page_number <= 0:
             page_number = 1
@@ -61,6 +61,7 @@ def list_product(**kwargs):
                                     page_length=page_size)
         for item in items:
             item_doc = frappe.get_doc("Item", item.get("name"))
+            barcodes = item_doc.barcodes
             images = item_doc.custom_images_item or []
 
             def return_fiel(value):
@@ -68,6 +69,8 @@ def list_product(**kwargs):
             
             images_links = pydash.map_(images, return_fiel)
             item["custom_images_item"] = images_links
+            item["barcodes"] = barcodes[0].barcode if barcodes else ""
+            item["barcode_type"] = barcodes[0].barcode_type if barcodes else ""
 
             if get_bin_item(warehouse, item.item_code):
                 item["total_projected_qty"] = get_bin_item(warehouse, item.item_code)[0].projected_qty
@@ -179,11 +182,15 @@ def list_product_campaign(**kwargs):
         
         for item in items:
             item_doc = frappe.get_doc("Item", item.get("name"))
+            barcodes = item_doc.barcodes
             images = item_doc.custom_images_item or []
             def return_fiel(value):
                 return pydash.pick(value, "link_image")
+            
             images_links = pydash.map_(images, return_fiel)
             item["custom_images_item"] = images_links
+            item["barcodes"] = barcodes[0].barcode
+            item["barcode_type"] = barcodes[0].barcode_type
 
         # Lấy danh sách các sản phẩm mà người dùng có quyền truy cập
         user = frappe.session.user

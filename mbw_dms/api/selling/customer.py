@@ -105,8 +105,8 @@ def customer_detail(name):
         doc_customer = frappe.get_doc("Customer",name).as_dict()
         filter_cs = {"link_doctype": "Customer", "link_name": doc_customer.name}
         routers = routers_name_of_customer(more_filters={"customer_code": doc_customer.customer_code})
-        address = frappe.db.get_all("Address", filters=filter_cs, fields = ["name", "address_title", "address_location", "is_primary_address", "is_shipping_address","city","county","state","address_line1"])
-        contacts = frappe.db.get_all("Contact", filters=filter_cs, fields = ["name", "first_name", "last_name", "address", "phone","mobile_no"])
+        address = frappe.db.get_all("Address", filters=filter_cs, fields = ["name", "address_title", "address_location", "is_primary_address", "is_shipping_address", "city", "county", "state", "address_line1"])
+        contacts = frappe.db.get_all("Contact", filters=filter_cs, fields = ["name", "first_name", "last_name", "address", "phone", "mobile_no"])
         list_router_frequency = []
         if bool(routers):
             for name in routers:
@@ -115,21 +115,23 @@ def customer_detail(name):
                 this_customer = pydash.find(customers,lambda x: x.customer_code == doc_customer.customer_code)
                 if this_customer:
                     list_router_frequency += [{"frequency": this_customer.frequency, "router_name": router.channel_name, "router_code": router.channel_code}]
+
         for contact in contacts: 
             address_contact = contact.address
             if address_contact:
-                doc_address = frappe.db.get_value("Address",address_contact,["city","state","county","address_title","address_line1"],as_dict=1)
-                for key,value in doc_address.items() :
+                doc_address = frappe.db.get_value("Address", address_contact, ["city", "state", "county", "address_title", "address_line1"], as_dict=1)
+                for key, value in doc_address.items() :
                     contact.update({
                         key:value
                     })
-        doc_customer = pydash.pick_by(doc_customer, lambda value,key: key not in ["docstatus", "idx", "naming_series", "is_internal_customer", "language", "so_required", "dn_required", "is_frozen", "disabled", "doctype"])       
+
+        doc_customer = pydash.pick_by(doc_customer, lambda value, key: key not in ["docstatus", "idx", "naming_series", "is_internal_customer", "language", "so_required", "dn_required", "is_frozen", "disabled", "doctype"])       
         doc_customer["address"] = address
         doc_customer["contacts"] = contacts
         doc_customer["routers"] = list_router_frequency
-        doc_customer["customer_location_primary"] = null_location( doc_customer["customer_location_primary"])
+        doc_customer["customer_location_primary"] = null_location(doc_customer["customer_location_primary"])
         doc_customer["address"] = pydash.map_(address,lambda x: {**x,"primary": 1 if x.name == doc_customer.get("customer_primary_address") else 0})
-        doc_customer["credit_limits"] = pydash.map_(doc_customer["credit_limits"],lambda x: x.credit_limit) if len(doc_customer["credit_limits"]) > 0 else[ 0 ] 
+        doc_customer["credit_limits"] = pydash.map_(doc_customer["credit_limits"], lambda x: x.credit_limit) if len(doc_customer["credit_limits"]) > 0 else[ 0 ] 
 
         if doc_customer["image"] and not doc_customer["image"].startswith("http"):
             from frappe.utils import get_url
@@ -138,7 +140,7 @@ def customer_detail(name):
             address_in.update({
                 "address_location": null_location(address_in.get("address_location")) if address_in.get("address_location") is not None else None
             })
-        doc_customer["contacts"] = pydash.map_(doc_customer["contacts"],lambda x: {**x,"primary": 1 if x.name == doc_customer.get("customer_primary_contact") else 0})
+        doc_customer["contacts"] = pydash.map_(doc_customer["contacts"],lambda x: {**x, "primary": 1 if x.name == doc_customer.get("customer_primary_contact") else 0})
         return gen_response(200, "Thành công", doc_customer)
     except Exception as e:
         exception_handle(e)
@@ -501,7 +503,8 @@ def get_customer_has_location(**kwargs):
         return gen_response(200, "Thành công", list_customers)
     except Exception as e:
         return exception_handle(e)
-    
+
+
 @frappe.whitelist(methods="DELETE")
 def remove_contact_address(**kwarg):
     try:
@@ -514,15 +517,26 @@ def remove_contact_address(**kwarg):
             "address": "Address"
         }
 
-        doc_delete = frappe.get_doc(doctype[final_type], name)
-        if doc_delete: 
-            dynamic_link = doc_delete.links
-            find_not_customer = pydash.filter_(dynamic_link, lambda x: (x.link_doctype == "Customer" and x.link_name != customer) or x.link_doctype != "Customer" )
-            doc_delete.set("links", find_not_customer)
-            doc_delete.save()
+        if name:
+            if final_type == "address":
+                    frappe.db.sql("""
+                        UPDATE `tabCustomer` 
+                        SET customer_primary_address=NULL, primary_address=NULL 
+                        WHERE name=%s AND customer_primary_address=%s
+                    """, (customer, name))
 
-            frappe.delete_doc(doctype[final_type], name)
-            frappe.db.commit()
-        return gen_response(200, "")
+            elif final_type == "contact":
+                frappe.db.sql("""
+                    UPDATE `tabCustomer` 
+                    SET customer_primary_contact=NULL, mobile_no=NULL, email_id=NULL
+                    WHERE name=%s AND customer_primary_contact=%s
+                """, (customer, name))
+
+                contact = frappe.get_doc("Contact", name)
+                if contact.address:
+                    frappe.db.delete("Address", contact.address)
+        
+            frappe.db.delete(doctype[final_type], name)
+        return gen_response(200, "Thành công")
     except Exception as e :
         return exception_handle(e)
