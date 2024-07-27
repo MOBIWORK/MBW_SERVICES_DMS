@@ -566,6 +566,7 @@ def get_all_parent_sales_persons(sales_person):
 
 # lấy con tất cả các con nhóm bán hàng của nhân viên
 def get_sales_group_child(sale_person = "Sales Team",is_group=1,query=""):
+    print("Sale",sale_person)
     query_sale= f"""
         WITH RECURSIVE Tree AS (
         SELECT 
@@ -643,3 +644,15 @@ def check_base64(sb):
     except Exception:
         return False
 CommonHandle.check_base64 = staticmethod(check_base64)
+
+
+
+
+def buildQuery(query,condition):
+    if query == "":
+        query = f"WHERE {condition}"
+    else:
+        query = f"{query} AND {condition}"
+    return query
+
+CommonHandle.buildQuery = staticmethod(buildQuery)

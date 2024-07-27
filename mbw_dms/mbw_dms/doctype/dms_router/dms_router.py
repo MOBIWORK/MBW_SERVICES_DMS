@@ -485,7 +485,7 @@ def get_sale_person(data):
 # lấy nhân viên theo teamsale gồm cả quản lý
 @frappe.whitelist(methods="GET")
 def get_sale_person_v2(data) :
-    team_sale = data.get('team_sale')
+    team_sale = data.get('team_sale',"Sales Team")
     key_search = data.get('key_search')
     query = ""
     if key_search:

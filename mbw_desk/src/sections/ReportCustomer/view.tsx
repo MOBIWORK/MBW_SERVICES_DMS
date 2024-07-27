@@ -234,7 +234,7 @@ export default function ReportCustomer() {
         key: "update_byname",
         render: (_, record: any) => (
           <>
-            <div>{record.employee_name}</div>
+            <div>{record.update_byname}</div>
             <div className="font-normal text-sm leading-[21px] text-[#637381]">
               {record.update_bycode}
             </div>

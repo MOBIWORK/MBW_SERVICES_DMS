@@ -94,21 +94,92 @@ def find(filters = {},filters_or={}, options = ["*"],page_length = 20, page =1,o
 		"page_size": page_length
 		}
 
-def find_v2(where,page_length = 20, page =1,order_by = "modified desc",is_children = True,**data):
-	start = (page -1) * page_length
+def find_v2(where,page_length = 20, page =1,order_by = "modified desc",**data):
+	offset = (page -1) * page_length
 	query = f"""
-		SELECT 
-			DISTINCT di.*,
-			GROUP_CONCAT(dii.* ORDER BY dii.* SEPARATOR ', ') AS items
-		FROM 
-			DMS Inventory di
-		INNER JOIN 
-			DMS Inventory Items dii
-		ON 
-			di.name = dii.parent
-		ORDER BY 
-			di.modified desc
-		{where}
-		GROUP BY 
-			di.customer_code
+    WITH NumberedGroups AS (
+        SELECT 
+            di.*,
+            CONCAT(
+                '[',
+                GROUP_CONCAT(
+                    CONCAT(
+                       '{{"item_code":"', IFNULL(dii.item_code, ''), '",',
+                            '"item_name":"', IFNULL(dii.item_name, ''), '",',
+                            '"item_price":"', IFNULL(dii.item_price, ''), '",',
+								'"item_unit":"', IFNULL(dii.item_unit, ''), '",',
+								'"update_at":"', IFNULL(UNIX_TIMESTAMP(dii.update_at), ''), '",',
+								'"update_byname":"', IFNULL(dii.update_byname, ''), '",',
+								'"update_bycode":"', IFNULL(dii.update_bycode, ''), '",',
+								'"quantity":"', IFNULL(dii.quantity, ''), '",',
+								'"exp_time":"', IFNULL(UNIX_TIMESTAMP(dii.exp_time), '') , '"}}'
+							) SEPARATOR ','
+					),
+					']'
+				) AS items,
+				ROW_NUMBER() OVER (ORDER BY di.modified) AS row_num
+			FROM 
+				`tabDMS Inventory` di
+			LEFT JOIN 
+				`tabDMS Inventory Items` dii
+			ON 
+				di.name = dii.parent
+			{where}
+			GROUP BY 
+				di.customer_code
+			ORDER BY 
+				{order_by}
+		)
+		SELECT *
+		FROM NumberedGroups
+		WHERE row_num > {offset} AND row_num <= {offset} + {page_length};
 	"""
+
+	results = frappe.db.sql(query,as_dict=1)
+	query2 = f"""
+			WITH NumberedGroups AS (
+        SELECT 
+            di.*,
+            CONCAT(
+                '[',
+                GROUP_CONCAT(
+                    CONCAT(
+                       '{{"item_code":"', IFNULL(dii.item_code, ''), '",',
+                            '"item_name":"', IFNULL(dii.item_name, ''), '",',
+                            '"item_price":"', IFNULL(dii.item_price, ''), '",',
+								'"item_unit":"', IFNULL(dii.item_unit, ''), '",',
+								'"update_at":"', IFNULL(UNIX_TIMESTAMP(dii.update_at), ''), '",',
+								'"update_byname":"', IFNULL(dii.update_byname, ''), '",',
+								'"update_bycode":"', IFNULL(dii.update_bycode, ''), '",',
+								'"quantity":"', IFNULL(dii.quantity, ''), '",',
+								'"exp_time":"', IFNULL(UNIX_TIMESTAMP(dii.exp_time), '') , '"}}'
+							) SEPARATOR ','
+					),
+					']'
+				) AS items,
+				ROW_NUMBER() OVER (ORDER BY di.modified) AS row_num
+			FROM 
+				`tabDMS Inventory` di
+			LEFT JOIN 
+				`tabDMS Inventory Items` dii
+			ON 
+				di.name = dii.parent
+			{where}
+			GROUP BY 
+				di.customer_code
+			ORDER BY 
+				{order_by}
+		)
+		SELECT COUNT(name) 
+		FROM NumberedGroups
+		"""
+	lenRs = frappe.db.sql(query2,as_dict=1)[0]["COUNT(name)"]
+	for row in results:
+		import json
+		row['items'] = json.loads(row['items']) if row['items'] else []
+	return {
+		"data": results,
+		"total": lenRs,
+		"page_number": page,
+		"page_size": page_length
+		}
