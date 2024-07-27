@@ -491,8 +491,9 @@ def get_sale_person_v2(data) :
     if key_search:
         employees = frappe.db.get_list("Employee", filters={"employee_name": ["like", f"%{key_search}%"]},pluck ="name")
         if len(employees) > 0 :
-            employee_in = ",".join(employees)
-            query = f"WHERE employee in ({employee_in})"
+            
+            employee_in = "','".join(employees)
+            query = f"WHERE employee in ('{employee_in}')"
         else :
             return gen_response(200,"",[])
     sale =  get_sales_group_child(sale_person=team_sale,is_group=0,query=query)
