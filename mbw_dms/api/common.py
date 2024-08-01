@@ -229,6 +229,31 @@ def null_location(location):
             location = None
     return location
 
+def update_address(new_address, link_cs_address, name_cus):
+    try:
+        if new_address.get("name"):
+            name_add = new_address.get("name")
+            frappe.db.sql("""
+                    UPDATE `tabCustomer` 
+                    SET customer_primary_address=NULL, primary_address=NULL 
+                    WHERE name=%s AND customer_primary_address LIKE %s
+                """, (name_cus, f"{name_add}%"))
+            
+            frappe.db.delete("Address", name_add)
+
+        new_address_doc = frappe.new_doc("Address")
+        for key, value in new_address.items():
+            setattr(new_address_doc, key, value)
+        if link_cs_address:
+            new_address_doc.append("links", link_cs_address)
+        new_address_doc.save()
+        current_address_cs = new_address_doc
+
+        frappe.db.commit()
+        return current_address_cs
+    
+    except Exception as e :
+        raise TypeError(e)
 
 def create_address(new_address, link_cs_address) :
     try: 
@@ -272,7 +297,6 @@ def create_address(new_address, link_cs_address) :
         return current_address_cs
     
     except Exception as e :
-        print(e)
         raise TypeError(e)
 
 

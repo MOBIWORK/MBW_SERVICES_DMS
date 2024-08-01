@@ -12,7 +12,8 @@ from mbw_dms.api.common import (
     customers_code_router,
     null_location,
     CommonHandle,
-    create_address
+    create_address,
+    update_address
 )
 
 from mbw_dms.api.validators import (
@@ -359,7 +360,7 @@ def update_customer(**kwargs):
                 address_data_list = kwargs.get("address")
                 if len(address_data_list) > 0:
                     for address_data in address_data_list:
-                        current_address = create_address(address_data, link_cs_address)
+                        current_address = update_address(address_data, link_cs_address, name)
                         if address_data.get("primary") == 1:
                             customer = frappe.get_doc("Customer", name)
                             customer.set("customer_primary_address", current_address.name)
@@ -399,7 +400,7 @@ def update_customer(**kwargs):
                             }
                             if bool(new_address):
                                 # current address
-                                address_current = create_address(new_address=new_address,link_cs_address=link_cs_address)
+                                address_current = create_address(new_address=new_address, link_cs_address=link_cs_address)
                                 contact_data_update.update({"address": address_current.name})
                             contact.update(contact_data_update)
 
