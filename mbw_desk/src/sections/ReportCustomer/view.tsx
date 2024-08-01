@@ -615,11 +615,11 @@ export default function ReportCustomer() {
                     placeholder="Tất cả người kiểm tồn"
                     onSearch={(value: string) => {
                       setKeySearch4(value);
-                      setPage(1);
                     }}
                     options={listEmployees}
                     onSelect={(value: any) => {
                       setEmployee(value);
+                      setPage(1);
                     }}
                     onClear={() => {
                       setEmployee("");

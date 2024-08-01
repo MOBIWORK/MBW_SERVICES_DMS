@@ -77,9 +77,20 @@ const columns: TableColumnsType<DataTypeCustomNew> = [
     ),
   },
   {
+    title: "Mã nhân viên",
+    dataIndex: "name",
+    key: "name",
+  },
+  {
+    title: "Tên nhân viên",
+    dataIndex: "employee_name",
+    key: "employee_name",
+  },
+  {
     title: "Nhóm bán hàng",
     dataIndex: "sales_team",
     key: "sales_team",
+    width: 200,
     render: (_, record: any) => <div>{record.sales_team}</div>,
   },
   {
@@ -104,7 +115,10 @@ const columns: TableColumnsType<DataTypeCustomNew> = [
     title: "Nhóm khách hàng",
     dataIndex: "customer_group",
     key: "customer_group",
-    render: (_, record: any) => <div>{record.customer_group}</div>,
+    width: 170,
+    render: (_, record: any) => (
+      <div className="truncate">{record.customer_group}</div>
+    ),
   },
   {
     title: "Người liên hệ",
@@ -134,7 +148,9 @@ const columns: TableColumnsType<DataTypeCustomNew> = [
     title: "Địa chỉ",
     dataIndex: "address",
     key: "address",
-    render: (_, record: any) => <div>{record.contribution}</div>,
+    render: (_, record: any) => (
+      <div className="truncate">{record.address}</div>
+    ),
   },
   {
     title: "Ngày thu thập",
@@ -436,7 +452,17 @@ export default function ReportCustomNew() {
       );
 
       let { result } = rsData;
-      setDataCustomNew(result);
+      console.log({result});
+      
+      setDataCustomNew({
+        ...result,
+        data: result.data?.map((dataSale: any) => {
+          return {
+            ...dataSale,
+            key: dataSale.cus_id,
+          }
+        }),
+      });
       setTotal(result?.totals_cus);
     })();
   }, [
@@ -451,6 +477,9 @@ export default function ReportCustomNew() {
     from_date,
     to_date,
   ]);
+
+console.log(dataCustomNew?.data);
+
   return (
     <>
       <ContentFrame
@@ -661,14 +690,7 @@ export default function ReportCustomNew() {
 
           <div ref={containerRef1} className="pt-5">
             <TableCustom
-              dataSource={dataCustomNew?.data?.map(
-                (dataSale: DataTypeCustomNew) => {
-                  return {
-                    ...dataSale,
-                    key: dataSale.name,
-                  };
-                }
-              )}
+              dataSource={dataCustomNew?.data}
               bordered
               columns={columns}
               scroll={{
@@ -681,45 +703,45 @@ export default function ReportCustomNew() {
                       pageSize: PAGE_SIZE,
                       showSizeChanger: false,
                       total,
-                      current: page,
-                      onChange(page) {
-                        setPage(page);
+                      current: dataCustomNew.page_number,
+                      onChange(p) {
+                        setPage(p);
                       },
                     }
                   : false
               }
-              summary={() => {
-                return (
-                  <Table.Summary.Row>
-                    <Table.Summary.Cell index={0}></Table.Summary.Cell>
-                    <Table.Summary.Cell index={1}>Tổng</Table.Summary.Cell>
-                    <Table.Summary.Cell index={2}></Table.Summary.Cell>
-                    <Table.Summary.Cell index={3}></Table.Summary.Cell>
-                    <Table.Summary.Cell index={4}></Table.Summary.Cell>
-                    <Table.Summary.Cell index={5}></Table.Summary.Cell>
-                    <Table.Summary.Cell index={6}></Table.Summary.Cell>
-                    <Table.Summary.Cell index={7}></Table.Summary.Cell>
-                    <Table.Summary.Cell index={8}></Table.Summary.Cell>
-                    <Table.Summary.Cell index={9}></Table.Summary.Cell>
-                    <Table.Summary.Cell index={10}></Table.Summary.Cell>
-                    <Table.Summary.Cell index={11}></Table.Summary.Cell>
-                    <Table.Summary.Cell index={12}></Table.Summary.Cell>
-                    <Table.Summary.Cell index={13}>
-                      <div className="text-right">
-                        {dataCustomNew?.sum?.sum_checkin}
-                      </div>
-                    </Table.Summary.Cell>
-                    <Table.Summary.Cell index={14}></Table.Summary.Cell>
-                    <Table.Summary.Cell index={15}></Table.Summary.Cell>
-                    <Table.Summary.Cell index={16}>
-                      <div className="text-right">
-                        {dataCustomNew?.sum?.sum_so}
-                      </div>
-                    </Table.Summary.Cell>
-                    <Table.Summary.Cell index={17}></Table.Summary.Cell>
-                  </Table.Summary.Row>
-                );
-              }}
+              // summary={() => {
+              //   return (
+              //     <Table.Summary.Row>
+              //       <Table.Summary.Cell index={0}></Table.Summary.Cell>
+              //       <Table.Summary.Cell index={1}>Tổng</Table.Summary.Cell>
+              //       <Table.Summary.Cell index={2}></Table.Summary.Cell>
+              //       <Table.Summary.Cell index={3}></Table.Summary.Cell>
+              //       <Table.Summary.Cell index={4}></Table.Summary.Cell>
+              //       <Table.Summary.Cell index={5}></Table.Summary.Cell>
+              //       <Table.Summary.Cell index={6}></Table.Summary.Cell>
+              //       <Table.Summary.Cell index={7}></Table.Summary.Cell>
+              //       <Table.Summary.Cell index={8}></Table.Summary.Cell>
+              //       <Table.Summary.Cell index={9}></Table.Summary.Cell>
+              //       <Table.Summary.Cell index={10}></Table.Summary.Cell>
+              //       <Table.Summary.Cell index={11}></Table.Summary.Cell>
+              //       <Table.Summary.Cell index={12}></Table.Summary.Cell>
+              //       <Table.Summary.Cell index={13}>
+              //         <div className="text-right">
+              //           {dataCustomNew?.sum?.sum_checkin}
+              //         </div>
+              //       </Table.Summary.Cell>
+              //       <Table.Summary.Cell index={14}></Table.Summary.Cell>
+              //       <Table.Summary.Cell index={15}></Table.Summary.Cell>
+              //       <Table.Summary.Cell index={16}>
+              //         <div className="text-right">
+              //           {dataCustomNew?.sum?.sum_so}
+              //         </div>
+              //       </Table.Summary.Cell>
+              //       <Table.Summary.Cell index={17}></Table.Summary.Cell>
+              //     </Table.Summary.Row>
+              //   );
+              // }}
             />
           </div>
         </div>

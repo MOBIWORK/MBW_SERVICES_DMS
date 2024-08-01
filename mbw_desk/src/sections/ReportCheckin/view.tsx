@@ -103,7 +103,9 @@ const columnsCheckin: any = [
     className: "!text-center",
     key: "kmauto",
     render: (value: any) => (
-      <div className="!text-center">{value ? value : <div className="min-w-[30px]">-</div>}</div>
+      <div className="!text-center">
+        {value ? value : <div className="min-w-[30px]">-</div>}
+      </div>
     ),
   },
   {
@@ -112,7 +114,9 @@ const columnsCheckin: any = [
     dataIndex: "kmmove",
     key: "kmmove",
     render: (value: any) => (
-      <div className="!text-center">{value ? value : <div className="min-w-[40px]">-</div>}</div>
+      <div className="!text-center">
+        {value ? value : <div className="min-w-[40px]">-</div>}
+      </div>
     ),
   },
   {
@@ -121,7 +125,9 @@ const columnsCheckin: any = [
     className: "!text-center",
     key: "kmmove",
     render: (value: any) => (
-      <div className="!text-center">{value ? value : <div className="min-w-[20px]">-</div>}</div>
+      <div className="!text-center">
+        {value ? value : <div className="min-w-[20px]">-</div>}
+      </div>
     ),
   },
 ];
@@ -154,6 +160,8 @@ export default function ReportCheckin() {
   const size = useResize();
   const [containerHeight, setContainerHeight] = useState<any>(0);
   const [scrollYTable1, setScrollYTable1] = useState<number>(size?.h * 0.52);
+  const [startDate, setStartDate] = useState<any>(null);
+  const [endDate, setEndDate] = useState<any>(null);
 
   const [modal, setModal] = useState<{
     open: boolean;
@@ -191,9 +199,9 @@ export default function ReportCheckin() {
     if (dateString === null || dateString === undefined) {
       setFromDate("");
     } else if (
-      endOfMonth &&
+      to_date &&
       dateString &&
-      dateString.isAfter(endOfMonth, "day")
+      dateString.isAfter(dayjs.unix(to_date), "day")
     ) {
       message.error("Từ ngày phải nhỏ hơn hoặc bằng Đến ngày");
     } else {
@@ -206,15 +214,27 @@ export default function ReportCheckin() {
     if (dateString === null || dateString === undefined) {
       setToDate("");
     } else if (
-      startOfMonth &&
+      from_date &&
       dateString &&
-      dateString.isBefore(startOfMonth, "day")
+      dateString.isBefore(dayjs.unix(from_date), "day")
     ) {
       message.error("Đến ngày phải lớn hơn hoặc bằng Từ ngày");
     } else {
       let tDate = Date.parse(dateString["$d"]) / 1000;
       setToDate(tDate);
     }
+  };
+
+  const disabledStartDate = (current: any) => {
+    return to_date
+      ? current && current.isAfter(dayjs.unix(to_date), "day")
+      : false;
+  };
+
+  const disabledEndDate = (current: any) => {
+    return from_date
+      ? current && current.isBefore(dayjs.unix(from_date), "day")
+      : false;
   };
 
   const handleSearchFilter = (val: any) => {
@@ -475,13 +495,16 @@ export default function ReportCheckin() {
         render: (value: any) => (
           <div className="!text-left">
             {value ? (
-              <div onClick={() => {
-                // console.log(value);
-                setModal({
-                  open: true,
-                  id: value
-                });
-              }} className="text-[#1877F2] text-sm font-medium- !text-left cursor-pointer underline">
+              <div
+                onClick={() => {
+                  // console.log(value);
+                  setModal({
+                    open: true,
+                    id: value,
+                  });
+                }}
+                className="text-[#1877F2] text-sm font-medium- !text-left cursor-pointer underline"
+              >
                 Xem ghi chú
               </div>
             ) : (
@@ -580,6 +603,7 @@ export default function ReportCheckin() {
                     placeholder="Từ ngày"
                     onChange={onChange}
                     defaultValue={startOfMonth}
+                    disabledDate={disabledStartDate}
                   />
                 </Col>
                 <Col span={5}>
@@ -589,6 +613,7 @@ export default function ReportCheckin() {
                     onChange={onChange1}
                     placeholder="Đến ngày"
                     defaultValue={endOfMonth}
+                    disabledDate={disabledEndDate}
                   />
                 </Col>
                 <Col span={7}>
@@ -764,13 +789,17 @@ export default function ReportCheckin() {
           </div>
         </div>
         <ModalDetail
-          title={<div className="font-bold text-lg leading-7 text-[#212B36] p-4">Ghi chú</div>}
+          title={
+            <div className="font-bold text-lg leading-7 text-[#212B36] p-4">
+              Ghi chú
+            </div>
+          }
           open={modal.open}
           onCancel={closeModal}
           footer={false}
           width={800}
         >
-          <Detailmodal id={modal.id}/>
+          <Detailmodal id={modal.id} />
         </ModalDetail>
       </ContentFrame>
     </>

@@ -487,9 +487,9 @@ export default function ReportSales() {
     if (dateString === null || dateString === undefined) {
       setFromDate("");
     } else if (
-      endOfMonth &&
+      to_date &&
       dateString &&
-      dateString.isAfter(endOfMonth, "day")
+      dateString.isAfter(dayjs.unix(to_date), "day")
     ) {
       message.error("Từ ngày phải nhỏ hơn hoặc bằng Đến ngày");
     } else {
@@ -502,15 +502,27 @@ export default function ReportSales() {
     if (dateString === null || dateString === undefined) {
       setToDate("");
     } else if (
-      startOfMonth &&
+      from_date &&
       dateString &&
-      dateString.isBefore(startOfMonth, "day")
+      dateString.isBefore(dayjs.unix(from_date), "day")
     ) {
       message.error("Đến ngày phải lớn hơn hoặc bằng Từ ngày");
     } else {
       let tDate = Date.parse(dateString["$d"]) / 1000;
       setToDate(tDate);
     }
+  };
+
+  const disabledStartDate = (current: any) => {
+    return to_date
+      ? current && current.isAfter(dayjs.unix(to_date), "day")
+      : false;
+  };
+
+  const disabledEndDate = (current: any) => {
+    return from_date
+      ? current && current.isBefore(dayjs.unix(from_date), "day")
+      : false;
   };
 
   const handleSearchFilter = (val: any) => {
@@ -577,6 +589,7 @@ export default function ReportSales() {
                     placeholder="Từ ngày"
                     onChange={onChange}
                     defaultValue={startOfMonth}
+                    disabledDate={disabledStartDate}
                   />
                 </Col>
                 <Col span={5}>
@@ -586,6 +599,7 @@ export default function ReportSales() {
                     onChange={onChange1}
                     placeholder="Đến ngày"
                     defaultValue={endOfMonth}
+                    disabledDate={disabledEndDate}
                   />
                 </Col>
                 <Col span={7}>
