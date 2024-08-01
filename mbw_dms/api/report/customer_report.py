@@ -39,14 +39,21 @@ def customer_report(**kwargs):
         where_conditions = " AND ".join(filters)
         sql_query = """
             SELECT cus.name as cus_id, cus.owner, UNIX_TIMESTAMP(cus.creation) as creation, cus.customer_name, cus.customer_code, cus.customer_type, cus.tax_id, cus.customer_group, cus.territory, cus.customer_primary_contact as contact, cus.customer_primary_address as address,
-            cus.mobile_no as phone, st.sales_person, sp.parent_sales_person as sales_team
+            cus.mobile_no as phone, cus.custom_sales_manager as sales_team, emp.name, emp.employee_name
             FROM `tabCustomer` cus
-            LEFT JOIN `tabSales Team` st ON cus.name = st.parent
-            LEFT JOIN `tabSales Person` sp ON st.sales_person = sp.name
+            LEFT JOIN `tabEmployee` emp ON cus.owner = emp.user_id
         """
         if where_conditions:
             sql_query += " WHERE {}".format(where_conditions)
         sql_query += " LIMIT %s OFFSET %s"
+
+        sql_query_count = """
+            SELECT COUNT(*)
+            FROM `tabCustomer` cus
+            LEFT JOIN `tabSales Team` st ON cus.name = st.parent
+            LEFT JOIN `tabSales Person` sp ON st.sales_person = sp.name
+        """
+        count_customers = frappe.db.sql(sql_query_count, as_dict=1)
         
         limit = page_size
         offset = (page_number - 1) * limit
@@ -88,7 +95,7 @@ def customer_report(**kwargs):
                     i["last_sale_order"] = last_so[0].creation
         
             # Tổng số khách hàng
-            customer_count = len(list_customers)
+            customer_count = count_customers[0]["COUNT(*)"]
 
         return gen_response(200, "Thành công", {
             "data": list_customers,
