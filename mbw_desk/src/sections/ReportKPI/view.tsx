@@ -21,45 +21,6 @@ import { SelectCommon, TreeSelectCommon } from "@/components/select/select";
 
 const { Column, ColumnGroup } = TableCustom;
 
-interface DataTypeKPI {
-  key: React.Key;
-  name: string;
-  stt?: number;
-  nhan_vien_ban_hang: string;
-  ten_nv: string;
-  nhom_ban_hang: string;
-  kh_vt: number;
-  th_vt: number;
-  tl_vt: number;
-  kh_vt_dn: number;
-  th_vt_dn: number;
-  tl_vt_dn: number;
-  kh_dat_hang: number;
-  th_dat_hang: number;
-  tl_dat_hang: number;
-  kh_kh_moi: number;
-  th_kh_moi: number;
-  tl_kh_moi: number;
-  kh_don_hang: number;
-  th_don_hang: number;
-  tl_don_hang: number;
-  kh_doanh_so: number;
-  th_doanh_so: number;
-  tl_doanh_so: number;
-  kh_doanh_thu: number;
-  th_doanh_thu: number;
-  tl_doanh_thu: number;
-  kh_san_lg: number;
-  th_san_lg: number;
-  tl_san_luong: number;
-  kh_sku: number;
-  th_sku: number;
-  tl_sku: number;
-  kh_so_gio_lam_viec: number;
-  th_so_gio_lam_viec: number;
-  tl_so_gio_lam_viec: number;
-  total?: number;
-}
 
 const currentMonth = dayjs().month() + 1; // Lấy tháng hiện tại (đánh số từ 0)
 const month = currentMonth.toString();
@@ -76,7 +37,7 @@ export default function ReportKPI() {
   const PAGE_SIZE = 20;
   const [dataReort, setDataReport] = useState<any[]>([]);
   const [fmonth, setFmonth] = useState(month);
-  const [fyear, setFYear] = useState("");
+  const [fyear, setFYear] = useState(year);
   const [total, setTotal] = useState<number>(0);
   const containerRef1 = useRef(null);
   const size = useResize();
@@ -101,7 +62,7 @@ export default function ReportKPI() {
     }
   }, [containerRef1]);
 
-  const onChange: DatePickerProps["onChange"] = (date) => {
+  const onChange: DatePickerProps["onChange"] = (date: any) => {
     setFYear(date?.["$y"].toString());
   };
 
@@ -146,9 +107,6 @@ export default function ReportKPI() {
   }, [sales_team, seachbykey]);
 
   useEffect(() => {
-    if (fyear === undefined || fyear === "") {
-      setFYear(year);
-    }
     (async () => {
       const rsData = await AxiosService.get(
         "/api/method/mbw_dms.api.report.kpi.kpi_report",
@@ -216,6 +174,7 @@ export default function ReportKPI() {
                 onChange={onChange}
                 placeholder="Chọn năm"
                 picker="year"
+                allowClear={false}
                 defaultValue={dayjs().startOf("year")}
               />
             </Col>
@@ -466,7 +425,7 @@ export default function ReportKPI() {
                   width={70}
                   dataIndex="tl_vt"
                   key="tl_vt"
-                  render={(_: any, record: DataTypeKPI) => <>{record.tl_vt}%</>}
+                  render={(_: any, record: any) => <>{record.tl_vt}%</>}
                 />
               </ColumnGroup>
               <ColumnGroup
@@ -494,7 +453,7 @@ export default function ReportKPI() {
                   width={70}
                   dataIndex="tl_vt_dn"
                   key="tl_vt_dn"
-                  render={(_: any, record: DataTypeKPI) => (
+                  render={(_: any, record: any) => (
                     <>{record.tl_vt_dn}%</>
                   )}
                 />
@@ -524,7 +483,7 @@ export default function ReportKPI() {
                   width={70}
                   dataIndex="tl_dat_hang"
                   key="tl_dat_hang"
-                  render={(_: any, record: DataTypeKPI) => (
+                  render={(_: any, record: any) => (
                     <>{record.tl_dat_hang}%</>
                   )}
                 />
@@ -554,7 +513,7 @@ export default function ReportKPI() {
                   width={70}
                   dataIndex="tl_kh_moi"
                   key="tl_kh_moi"
-                  render={(_: any, record: DataTypeKPI) => (
+                  render={(_: any, record: any) => (
                     <>{record.tl_kh_moi}%</>
                   )}
                 />
@@ -585,7 +544,7 @@ export default function ReportKPI() {
                   width={70}
                   dataIndex="tl_don_hang"
                   key="tl_don_hang"
-                  render={(_: any, record: DataTypeKPI) => (
+                  render={(_: any, record: any) => (
                     <>{record.tl_don_hang}%</>
                   )}
                 />
@@ -600,7 +559,7 @@ export default function ReportKPI() {
                   title="KH"
                   dataIndex="kh_doanh_so"
                   key="kh_doanh_so"
-                  render={(_: any, record: DataTypeKPI) => (
+                  render={(_: any, record: any) => (
                     <>{Intl.NumberFormat().format(record.kh_doanh_so)}</>
                   )}
                 />
@@ -620,7 +579,7 @@ export default function ReportKPI() {
                   width={70}
                   dataIndex="tl_don_hang"
                   key="tl_don_hang"
-                  render={(_: any, record: DataTypeKPI) => (
+                  render={(_: any, record: any) => (
                     <>{record.tl_don_hang}%</>
                   )}
                 />
@@ -636,7 +595,7 @@ export default function ReportKPI() {
                   width={70}
                   dataIndex="kh_doanh_thu"
                   key="kh_doanh_thu"
-                  render={(_: any, record: DataTypeKPI) => (
+                  render={(_: any, record: any) => (
                     <>{Intl.NumberFormat().format(record.kh_doanh_thu)}</>
                   )}
                 />
@@ -656,7 +615,7 @@ export default function ReportKPI() {
                   width={70}
                   dataIndex="tl_doanh_thu"
                   key="tl_doanh_thu"
-                  render={(_: any, record: DataTypeKPI) => (
+                  render={(_: any, record: any) => (
                     <>{record.tl_doanh_thu}%</>
                   )}
                 />
@@ -687,7 +646,7 @@ export default function ReportKPI() {
                   width={70}
                   dataIndex="tl_san_luong"
                   key="tl_san_luong"
-                  render={(_: any, record: DataTypeKPI) => (
+                  render={(_: any, record: any) => (
                     <>{record.tl_san_luong}%</>
                   )}
                 />
@@ -718,7 +677,7 @@ export default function ReportKPI() {
                   width={70}
                   dataIndex="tl_sku"
                   key="tl_sku"
-                  render={(_: any, record: DataTypeKPI) => (
+                  render={(_: any, record: any) => (
                     <>{record.tl_sku}%</>
                   )}
                 />
@@ -749,7 +708,7 @@ export default function ReportKPI() {
                   width={70}
                   dataIndex="tl_so_gio_lam_viec"
                   key="tl_so_gio_lam_viec"
-                  render={(_: any, record: DataTypeKPI) => (
+                  render={(_: any, record: any) => (
                     <>{record.tl_so_gio_lam_viec}%</>
                   )}
                 />

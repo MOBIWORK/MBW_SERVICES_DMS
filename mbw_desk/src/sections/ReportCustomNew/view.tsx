@@ -91,7 +91,7 @@ const columns: TableColumnsType<DataTypeCustomNew> = [
     dataIndex: "sales_team",
     key: "sales_team",
     width: 200,
-    render: (_, record: any) => <div>{record.sales_team}</div>,
+    render: (_, record: any) => <div className="whitespace-normal">{record.sales_team}</div>,
   },
   {
     title: "Mã khách hàng",
@@ -117,7 +117,7 @@ const columns: TableColumnsType<DataTypeCustomNew> = [
     key: "customer_group",
     width: 170,
     render: (_, record: any) => (
-      <div className="truncate">{record.customer_group}</div>
+      <div className="truncate hover:whitespace-normal">{record.customer_group}</div>
     ),
   },
   {
@@ -149,7 +149,7 @@ const columns: TableColumnsType<DataTypeCustomNew> = [
     dataIndex: "address",
     key: "address",
     render: (_, record: any) => (
-      <div className="truncate">{record.address}</div>
+      <div className="truncate hover:whitespace-normal">{record.address}</div>
     ),
   },
   {
