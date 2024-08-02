@@ -20,6 +20,7 @@ import calendar
 from mbw_dms.api.ekgis.constant import API_URL, API_URL_TRACKING
 import pydash
 from frappe.utils import cint
+
 class DMSCheckin(Document):
     def after_insert(self):
         self.update_kpi_monthly()
@@ -725,7 +726,6 @@ def list_inventory(kwargs):
 
 def get_report(filters={}):
     try:
-
         from_date = validate_filter(type_check="timestamp_to_date",type="start",value=filters.get("from_date"))
         to_date = validate_filter(type_check="timestamp_to_date",type="end",value=filters.get("to_date"))
         employee = filters.get("employee")
@@ -799,7 +799,6 @@ def get_report(filters={}):
         if to_date:
             where =  f"{where} AND dc.createddate <= '{to_date}'"
         query = f"""
-
             WITH ImageCounts AS (
                 SELECT 
                     dc.name AS checkin_name, 
@@ -811,7 +810,6 @@ def get_report(filters={}):
                 GROUP BY
                     dc.name
             ),
-
             
             NumberedGroups AS (SELECT 
                 dc.createdbyemail AS employee_id, 
