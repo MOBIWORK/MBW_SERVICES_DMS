@@ -53,6 +53,8 @@ def customer_report(**kwargs):
             LEFT JOIN `tabSales Team` st ON cus.name = st.parent
             LEFT JOIN `tabSales Person` sp ON st.sales_person = sp.name
         """
+        if where_conditions:
+            sql_query_count += " WHERE {}".format(where_conditions)
         count_customers = frappe.db.sql(sql_query_count, as_dict=1)
         
         limit = page_size

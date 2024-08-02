@@ -251,7 +251,6 @@ class DMSCheckin(Document):
 @frappe.whitelist(methods="POST")
 def create_checkin(kwargs):
     try:
-        
         print("checkout",kwargs)
         new_checkin = frappe.new_doc("DMS Checkin")
 
@@ -312,14 +311,13 @@ def create_checkin(kwargs):
                 address = json.loads(response.text).get("results")
                 print("address",address)
         except Exception as e:
-            print("Lỗi lấy địa chỉ",e)
+            print("Lỗi lấy địa chỉ", e)
             address = ""
-        new_checkin.set("checkin_address", address,"\n")
-        print("new_checkin",new_checkin.as_dict())
+        new_checkin.set("checkin_address", address, "\n")
         try:
             new_checkin.insert(ignore_permissions=True)            
         except Exception as e:
-            print("loi insert::::::::::::::",e)
+            print("Lỗi insert ::::::::::::::", e)
         #send mail
         notes = frappe.db.get_all("Note", {"custom_checkin_id": kwargs.get("checkin_id")},["*"])
         for note in notes:
@@ -342,7 +340,7 @@ def create_checkin(kwargs):
                         delayed=False,
                         retry=3
                     )
-                    print("send mail end")
+                    # print("send mail end")
                 except Exception as e:
                     print("something error send mail",e)
             
