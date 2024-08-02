@@ -91,7 +91,9 @@ const columns: TableColumnsType<DataTypeCustomNew> = [
     dataIndex: "sales_team",
     key: "sales_team",
     width: 200,
-    render: (_, record: any) => <div className="whitespace-normal">{record.sales_team}</div>,
+    render: (_, record: any) => (
+      <div className="whitespace-normal">{record.sales_team}</div>
+    ),
   },
   {
     title: "Mã khách hàng",
@@ -117,7 +119,9 @@ const columns: TableColumnsType<DataTypeCustomNew> = [
     key: "customer_group",
     width: 170,
     render: (_, record: any) => (
-      <div className="truncate hover:whitespace-normal">{record.customer_group}</div>
+      <div className="truncate hover:whitespace-normal">
+        {record.customer_group}
+      </div>
     ),
   },
   {
@@ -452,15 +456,15 @@ export default function ReportCustomNew() {
       );
 
       let { result } = rsData;
-      console.log({result});
-      
+      console.log({ result });
+
       setDataCustomNew({
         ...result,
         data: result.data?.map((dataSale: any) => {
           return {
             ...dataSale,
             key: dataSale.cus_id,
-          }
+          };
         }),
       });
       setTotal(result?.totals_cus);
@@ -478,7 +482,7 @@ export default function ReportCustomNew() {
     to_date,
   ]);
 
-console.log(dataCustomNew?.data);
+  console.log(dataCustomNew?.data);
 
   return (
     <>
@@ -726,19 +730,21 @@ console.log(dataCustomNew?.data);
                     <Table.Summary.Cell index={10}></Table.Summary.Cell>
                     <Table.Summary.Cell index={11}></Table.Summary.Cell>
                     <Table.Summary.Cell index={12}></Table.Summary.Cell>
-                    <Table.Summary.Cell index={13}>
+                    <Table.Summary.Cell index={13}></Table.Summary.Cell>
+                    <Table.Summary.Cell index={14}></Table.Summary.Cell>
+                    <Table.Summary.Cell index={15}>
                       <div className="text-right">
                         {dataCustomNew?.sum?.sum_checkin}
                       </div>
                     </Table.Summary.Cell>
-                    <Table.Summary.Cell index={14}></Table.Summary.Cell>
-                    <Table.Summary.Cell index={15}></Table.Summary.Cell>
-                    <Table.Summary.Cell index={16}>
+                    <Table.Summary.Cell index={16}></Table.Summary.Cell>
+                    <Table.Summary.Cell index={17}></Table.Summary.Cell>
+                    <Table.Summary.Cell index={18}>
                       <div className="text-right">
                         {dataCustomNew?.sum?.sum_so}
                       </div>
                     </Table.Summary.Cell>
-                    <Table.Summary.Cell index={17}></Table.Summary.Cell>
+                    <Table.Summary.Cell index={19}></Table.Summary.Cell>
                   </Table.Summary.Row>
                 );
               }}
