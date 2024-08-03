@@ -377,8 +377,8 @@ def update_customer(**kwargs):
                             customer.save()
 
             # Cập nhật hoặc thêm mới liên hệ
-            if kwargs.get("contact"):
-                contacts_data_list = kwargs.get("contact")
+            if kwargs.get("contacts"):
+                contacts_data_list = kwargs.get("contacts")
                 
                 new_address = {}
                 contact_data_update = {}
@@ -391,7 +391,7 @@ def update_customer(**kwargs):
                         WHERE name=%s AND customer_primary_contact=%s
                     """, (name, contact_name))
 
-                    contact = frappe.get_doc("Contact", name)
+                    contact = frappe.get_doc("Contact", contact_name)
                     if contact:
                         if contact.address:
                             frappe.db.delete("Address", contact.address)
@@ -404,6 +404,7 @@ def update_customer(**kwargs):
                             "city": contact_data.get("city"),
                             "county": contact_data.get("county"),
                             "state": contact_data.get("state"),
+                            "address": contact_data.get("address")
                         }
                     
                     contact_data_update = {
@@ -428,11 +429,12 @@ def update_customer(**kwargs):
 
                     if bool(new_address):
                         link_cs_address= {
-                            "link_doctype": "Contact",
-                            "link_name": new_contact.name 
+                            "link_doctype": "Customer",
+                            "link_name": name 
                         }
-                        address_current = update_address(new_address, link_cs_address, {})
+                        address_current = update_address(new_address, link_cs_address, name_cus=name, json_location=None)
                         new_contact.address = address_current.name
+                        new_contact.save()
 
                     if contact_data_update.get("is_primary_contact") == 1 :
                         customer = frappe.get_doc("Customer", name)

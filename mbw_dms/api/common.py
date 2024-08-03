@@ -231,13 +231,13 @@ def null_location(location):
 
 def update_address(new_address, link_cs_address, name_cus, json_location):
     try:
-        field_not_in = ["longitude", "latitude", "address_location"]
+        field_not_in = ["longitude", "latitude", "address_location", "address"]
         if new_address.get("name"):
             name_add = new_address.get("name")
             if bool(name_cus):
                 frappe.db.sql("""
                         UPDATE `tabCustomer` 
-                        SET customer_primary_address=NULL, primary_address=NULL 
+                        SET customer_primary_address=NULL, primary_address=NULL, customer_location_primary=NULL
                         WHERE name=%s AND customer_primary_address LIKE %s
                     """, (name_cus, f"{name_add}%"))
             

@@ -676,12 +676,11 @@ def router_query(doctype, txt, searchfield, start, page_len, filters):
 
 
 
-
 # danh sach khach hang cham soc
 @frappe.whitelist(methods="GET")
 def get_customer_router_v2(data):
     try:     
-        print("=======================data::::",data)
+        # print("=======================data::::",data)
         from pypika import Order
         user= get_user_id()
         # Cấu hình ngoại tuyến từ dms setting
@@ -830,7 +829,7 @@ def get_customer_router_v2(data):
 
     # Thực thi truy vấn
             detail_customer = frappe.db.sql(query, as_dict=True) if len(list_customer_name) > 0 else []
-            print("len=========================",len(detail_customer))
+            # print("len=========================",len(detail_customer))
         else:
             fields_customer= [
             'name'
