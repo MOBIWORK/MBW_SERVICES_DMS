@@ -385,14 +385,14 @@ def update_customer(**kwargs):
                 if contacts_data_list:
                     contact_data = contacts_data_list[0]
                     contact_name = contact_data.get("name")
-                    frappe.db.sql("""
-                        UPDATE `tabCustomer` 
-                        SET customer_primary_contact=NULL, mobile_no=NULL, email_id=NULL
-                        WHERE name=%s AND customer_primary_contact=%s
-                    """, (name, contact_name))
+                    if frappe.db.exists("Contact", contact_name):
+                        frappe.db.sql("""
+                            UPDATE `tabCustomer` 
+                            SET customer_primary_contact=NULL, mobile_no=NULL, email_id=NULL
+                            WHERE name=%s AND customer_primary_contact=%s
+                        """, (name, contact_name))
 
-                    contact = frappe.get_doc("Contact", contact_name)
-                    if contact:
+                        contact = frappe.get_doc("Contact", contact_name)
                         if contact.address:
                             frappe.db.delete("Address", contact.address)
                         frappe.db.delete("Contact", contact_name)
