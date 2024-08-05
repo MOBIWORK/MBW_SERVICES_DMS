@@ -329,6 +329,5 @@ def get_bin_item(warehouse, item_code):
     if item_code:
         query = query.where(bin.item_code == item_code)
     bin_list = query.run(as_dict=True)
-    print('========================= value: ', bin_list, flush=True)
 
     return bin_list
