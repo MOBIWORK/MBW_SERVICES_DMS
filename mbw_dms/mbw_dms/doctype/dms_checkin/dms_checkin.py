@@ -78,11 +78,20 @@ class DMSCheckin(Document):
         )
         sales_team = frappe.get_value("DMS KPI", {"nhan_vien_ban_hang": user_name}, "nhom_ban_hang")
 
+        checkin_giovao = self.checkin_giovao
+        checkin_giora = self.checkin_giora
+        time_in = datetime.datetime.strptime(checkin_giovao, "%Y-%m-%d %H:%M:%S")
+        time_out = datetime.datetime.strptime(checkin_giora, "%Y-%m-%d %H:%M:%S")
+        seconds_worked = time_out.timestamp() - time_in.timestamp()
+        time_work = seconds_worked / 3600
+
         if len(exists_checkin) > 1:
             if existing_monthly_summary:
                 monthly_summary_doc = frappe.get_doc("DMS Summary KPI Monthly", existing_monthly_summary)
+
                 monthly_summary_doc.so_kh_vt_luot += 1
-                monthly_summary_doc.so_kh_vt_duynhat -= 1
+                monthly_summary_doc.so_kh_vt_duynhat -= 1 if monthly_summary_doc.so_kh_vt_duynhat >= 1 else 0
+                monthly_summary_doc.so_gio_lam_viec += time_work
                 if name_date in list_travel_date:
                     monthly_summary_doc.solan_vt_dungtuyen += 1
                 else:
@@ -97,7 +106,8 @@ class DMSCheckin(Document):
                     "nhom_ban_hang": sales_team,
                     "so_kh_vt_luot": 1,
                     "solan_vt_dungtuyen": 1 if name_date in list_travel_date else 0,
-                    "solan_vt_ngoaituyen": 1 if name_date not in list_travel_date else 0
+                    "solan_vt_ngoaituyen": 1 if name_date not in list_travel_date else 0,
+                    "so_gio_lam_viec": time_work
                 })
                 monthly_summary_doc.insert(ignore_permissions=True)
         else:
