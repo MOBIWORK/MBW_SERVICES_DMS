@@ -190,7 +190,7 @@ def kpi_visit_detail(**kwargs):
         if employee:
             filters["createdbyemail"] = user_id
         
-        data = frappe.get_all("DMS Checkin", filters=filters, fields=["kh_ma", "kh_ten", "kh_diachi", "checkin_giovao", "checkin_khoangcach"], start=page_size*(page_number-1), page_length=page_size)
+        data = frappe.get_all("DMS Checkin", filters=filters, fields=["name", "kh_ma", "kh_ten", "kh_diachi", "checkin_giovao", "checkin_khoangcach"], start=page_size*(page_number-1), page_length=page_size)
         totals = frappe.db.count("DMS Checkin", filters=filters)
         return gen_response(200, "Thành công", {
             "data": data,
@@ -221,7 +221,7 @@ def kpi_only_visit_detail(**kwargs):
         if employee:
             filters["createdbyemail"] = user_id
 
-        all_data = frappe.get_all("DMS Checkin", filters=filters, fields=["kh_ma", "kh_ten", "kh_diachi", "checkin_giovao", "checkin_khoangcach"])
+        all_data = frappe.get_all("DMS Checkin", filters=filters, fields=["name", "kh_ma", "kh_ten", "kh_diachi", "checkin_giovao", "checkin_khoangcach"])
 
         # Đếm số lượng mã khách hàng không trùng lặp
         kh_ma_count = {}
@@ -540,7 +540,7 @@ def kpi_time_work_detail(**kwargs):
         if from_date and to_date:
             filters["creation"] = ["between", [from_date, to_date]]
 
-        data = frappe.get_all("DMS Checkin", filters=filters, fields=["kh_ma", "kh_ten", "kh_diachi", "UNIX_TIMESTAMP(createddate) as create_date", "checkin_giovao", "checkin_giora"], start=page_size*(page_number-1), page_length=page_size)
+        data = frappe.get_all("DMS Checkin", filters=filters, fields=["name", "kh_ma", "kh_ten", "kh_diachi", "UNIX_TIMESTAMP(createddate) as create_date", "checkin_giovao", "checkin_giora"], start=page_size*(page_number-1), page_length=page_size)
         totals = frappe.db.count("DMS Checkin", filters=filters)
         for i in data:
             i["so_gio_lam"] = i["checkin_giora"] - i["checkin_giovao"]
