@@ -181,11 +181,14 @@ def kpi_visit_detail(**kwargs):
         page_size =  int(kwargs.get("page_size", 20))
         page_number = int(kwargs.get("page_number")) if kwargs.get("page_number") and int(kwargs.get("page_number")) >=1 else 1
         employee = kwargs.get("employee")
+        user_id = None
+        if employee:
+            user_id = frappe.get_value("Employee", {"name": employee}, "user_id")
 
         if from_date and to_date:
             filters["creation"] = ["between", [from_date, to_date]]
         if employee:
-            filters["createbyname"] = employee
+            filters["createdbyemail"] = user_id
         
         data = frappe.get_all("DMS Checkin", filters=filters, fields=["kh_ma", "kh_ten", "kh_diachi", "checkin_giovao", "checkin_khoangcach"], start=page_size*(page_number-1), page_length=page_size)
         return gen_response(200, "Thành công", {
@@ -197,7 +200,6 @@ def kpi_visit_detail(**kwargs):
     except Exception as e:
         return exception_handle(e)
     
-
 # Chi tiết số kh viếng thăm duy nhất
 @frappe.whitelist(methods="GET")
 def kpi_only_visit_detail(**kwargs):
@@ -208,11 +210,14 @@ def kpi_only_visit_detail(**kwargs):
         page_size =  int(kwargs.get("page_size", 20))
         page_number = int(kwargs.get("page_number")) if kwargs.get("page_number") and int(kwargs.get("page_number")) >=1 else 1
         employee = kwargs.get("employee")
+        user_id = None
+        if employee:
+            user_id = frappe.get_value("Employee", {"name": employee}, "user_id")
 
         if from_date and to_date:
             filters["creation"] = ["between", [from_date, to_date]]
         if employee:
-            filters["createbyname"] = employee
+            filters["createdbyemail"] = user_id
         
         data = frappe.get_all("DMS Checkin", filters=filters, fields=["kh_ma", "kh_ten", "kh_diachi", "checkin_giovao", "checkin_khoangcach"], start=page_size*(page_number-1), page_length=page_size)
 
