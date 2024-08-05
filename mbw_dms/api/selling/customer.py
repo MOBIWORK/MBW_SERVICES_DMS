@@ -236,6 +236,7 @@ def create_customer(**kwargs):
             new_address_cus.insert()
             new_customer.customer_primary_address = new_address_cus.name
             new_customer.save()
+
         # Tạo mới contact khách hàng
         if contact and contact.get("first_name"):
             new_contact = frappe.new_doc("Contact")
@@ -359,8 +360,12 @@ def update_customer(**kwargs):
                 }
                 address_data_list = kwargs.get("address")
                 if len(address_data_list) > 0:
+                    json_location = ""
                     for address_data in address_data_list:
-                        current_address = update_address(address_data, link_cs_address, name)
+                        if address_data.get("latitude") and address_data.get("longitude"):
+                            json_location = json.dumps({"long": address_data.get("longitude"), "lat": address_data.get("latitude")})
+                        current_address = update_address(address_data, link_cs_address, name, json_location)
+                        customer.customer_location_primary = json_location
                         if address_data.get("primary") == 1:
                             customer = frappe.get_doc("Customer", name)
                             customer.set("customer_primary_address", current_address.name)
@@ -415,7 +420,7 @@ def update_customer(**kwargs):
                             contact = frappe.new_doc("Contact")
                             if bool(new_address):
                                 # current address
-                                address_current = create_address(new_address,{})
+                                address_current = create_address(new_address, {})
                                 contact_data_update.update({"address": address_current.name})
                             contact.update(contact_data_update)
 

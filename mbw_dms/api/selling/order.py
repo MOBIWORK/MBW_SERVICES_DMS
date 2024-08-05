@@ -15,7 +15,6 @@ from mbw_dms.api.validators import (
 )
 from mbw_dms.api import configs
 import json
-from frappe.model.base_document import get_controller
 
 
 # Lấy danh sách đơn hàng
@@ -27,6 +26,7 @@ def get_list_sales_order(**kwargs):
                 return condition
             else:
                 return f"{query} AND {condition}" 
+            
         status = kwargs.get("status")
         from_date = validate_filter_timestamp("start")(kwargs.get("from_date")) if kwargs.get("from_date") else None
         to_date = validate_filter_timestamp("end")(kwargs.get("to_date")) if kwargs.get("to_date") else None
@@ -35,11 +35,13 @@ def get_list_sales_order(**kwargs):
         search_key = kwargs.get("search_key")
 
         where = "WHERE so.name IS NOT NULL"
+
         user_info = CommonHandle.get_user_id()
         if user_info.name != "Administrator":
             employee = CommonHandle.get_employee_by_user(user = user_info.email)
             if not employee:
                 return gen_response("404", _("Employee not registered"))
+            
             employee_name = employee.get('name')
             sale_person = frappe.db.get_value("Sales Person", {"employee": employee_name}, ["name"])
             if not sale_person:
@@ -222,6 +224,7 @@ def create_sale_order(**kwargs):
             discount_percentage = float(item_data.get("discount_percentage", 0))
             item_tax_template = item_data.get("item_tax_template")
             tax_rate = float(item_data.get("item_tax_rate", 0))
+            description = item_data.get("description")
 
             new_order.append("items", {
                 "item_code": item_data.get("item_code"),
@@ -229,7 +232,8 @@ def create_sale_order(**kwargs):
                 "uom": item_data.get("uom"),
                 "discount_percentage": discount_percentage,
                 "item_tax_template": item_tax_template,
-                "item_tax_rate": tax_rate
+                "item_tax_rate": tax_rate,
+                "description": description
             })
             
             item_amount = (rate - rate * discount_percentage / 100) * float(item_data.get("qty"))
@@ -571,7 +575,7 @@ def get_items(master_doc, master_name):
     master_doc = frappe.get_doc(master_doc, master_name).as_dict()
     items = master_doc["items"]
 
-    fields_to_get = ["name", "item_name", "item_code", "rate", "qty", "uom", "amount", "discount_amount", "discount_percentage", "is_free_item", "item_tax_rate", "price_list_rate"]
+    fields_to_get = ["name", "item_name", "item_code", "rate", "qty", "uom", "amount", "discount_amount", "discount_percentage", "is_free_item", "item_tax_rate", "price_list_rate", "description"]
     result = []
 
     for item in items:
