@@ -11,7 +11,7 @@ import os
 from frappe.desk.utils import provide_binary_file
 from mbw_dms.api.exports.make_excel import MakeExcel
 import json
-@frappe.whitelist(allow_guest=True,methods="GET")
+@frappe.whitelist(methods="GET")
 def export_excel(**kwarg):
     report_type  = kwarg.get("report_type","")
     filter = kwarg.get("data_filter")
@@ -30,6 +30,7 @@ def export_excel(**kwarg):
         # Lấy hàm từ module
         function_to_call = getattr(module, function_name)
         data = function_to_call({**filter,"is_excel": True})
+        print("data===================",data)
         #xử lý tạo excel
         create_xlsx = MakeExcel(report_type,data,filter.get("month"),filter.get("year"))
         xlsx_file = create_xlsx.make()

@@ -62,10 +62,10 @@ class MakeExcel :
         self.data_footer = data.get("sum")
         self.description_data = []
         self.org_info(report_type)
+        print("self.description_data",self.description_data)
     # lấy thông tin tổ chức 
     def org_info(self,report_type):
         if len(self.description_data) == 0 :
-
             employee_info = get_employee_info()
             if employee_info != "":
                 employee_info = frappe._dict(employee_info)
@@ -73,10 +73,11 @@ class MakeExcel :
                     gen_response(500,_("Accout not in any company!"))
                 company_info = frappe.db.get_value("Company",employee_info.company,["name","phone_no"],as_dict=1)
                 address = frappe.db.get_all(doctype= "Address",filters= {"link_doctype": "Company", "link_name" : employee_info.company},fields=["*"])
+                address_title = address[0].address_title if len(address) >0 else ""
                 self.description_data = [
                     ["", employee_info.company, "", "", "", ""],
                     ["", f"Điện thoại: {company_info.phone_no}", "", "", "", ""],
-                    ["", f"Địa chỉ: {address[0].address_title}", "", "", "", ""],
+                    ["", f"Địa chỉ: {address_title}", "", "", "", ""],
                     ["", "", "", "", "", ""],
                     ["", name_report[report_type], "", "", "", ""],
                     ["", f"Tháng: {self.month} - Năm: {self.year} ", "", "", "", ""]
@@ -86,7 +87,8 @@ class MakeExcel :
     def make(self):
         self.make_description_header()
         self.make_header()
-        self.make_table()
+        if len(self.data_content) > 0:
+            self.make_table()
         self.make_footer()
         xlsx_file = BytesIO()
         wb.save(xlsx_file)
