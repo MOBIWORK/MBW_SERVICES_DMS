@@ -19,12 +19,7 @@ import Detailchekinfirst from "./modal/Detailchekinfirst";
 import DetailOrder from "./modal/DetailOrder";
 import DetailCustomer from "./modal/DetailCustomer";
 import DetailTotalOrder from "./modal/DetailTotalOrder";
-import Detailsales from "./modal/Detailsales";
-import Detailrevenue from "./modal/Detailrevenue";
-import DetailWork from "./modal/DetailWork";
-import DetailQty from "./modal/DetailQty";
-import DetailSku from "./modal/DetailSku";
-
+import { saveAs } from "file-saver";
 const { Column, ColumnGroup } = TableCustom;
 
 const currentMonth = dayjs().month() + 1;
@@ -90,46 +85,6 @@ export default function ReportKPI() {
     id: null,
   });
 
-  const [modalSale, setModalSale] = useState<{
-    open: boolean;
-    id: any;
-  }>({
-    open: false,
-    id: null,
-  });
-
-  const [modalReven, setModalReven] = useState<{
-    open: boolean;
-    id: any;
-  }>({
-    open: false,
-    id: null,
-  });
-
-  const [modalQty, setModalQty] = useState<{
-    open: boolean;
-    id: any;
-  }>({
-    open: false,
-    id: null,
-  });
-
-  const [modalSku, setModalSku] = useState<{
-    open: boolean;
-    id: any;
-  }>({
-    open: false,
-    id: null,
-  });
-
-  const [modalWork, setModalWork] = useState<{
-    open: boolean;
-    id: any;
-  }>({
-    open: false,
-    id: null,
-  });
-
   const closeModal = () => {
     setModal({
       open: false,
@@ -160,41 +115,6 @@ export default function ReportKPI() {
 
   const closeModalTotal = () => {
     setModalTotal({
-      open: false,
-      id: null,
-    });
-  };
-
-  const closeModalSale = () => {
-    setModalSale({
-      open: false,
-      id: null,
-    });
-  };
-
-  const closeModalReven = () => {
-    setModalReven({
-      open: false,
-      id: null,
-    });
-  };
-
-  const closeModalWork = () => {
-    setModalWork({
-      open: false,
-      id: null,
-    });
-  };
-
-  const closeModalQty = () => {
-    setModalQty({
-      open: false,
-      id: null,
-    });
-  };
-
-  const closeModalSku = () => {
-    setModalSku({
       open: false,
       id: null,
     });
@@ -302,8 +222,30 @@ export default function ReportKPI() {
                 icon: <VerticalAlignBottomOutlined className="text-xl" />,
                 size: "18px",
                 className: "flex items-center",
-                action: () => {
-                  translationUrl("/app/data-export/Data%20Export");
+                action: async () => {
+                  try {
+                    console.log("datyaa");
+
+                    const response = await AxiosService.get(
+                      "/api/method/mbw_dms.api.exports.export_excel.export_excel",
+                      {
+                        params: {
+                          report_type: "Report KPI",
+                          data_filter: {
+                            month: fmonth,
+                            year: fyear,
+                          },
+                        },
+                        responseType: "arraybuffer",
+                      }
+                    );
+                    const blob = new Blob([response]);
+                    console.log(blob);
+
+                    saveAs(blob, "report.xlsx");
+                  } catch (err) {
+                    console.log("error", err);
+                  }
                 },
               },
             ]}
@@ -765,23 +707,13 @@ export default function ReportKPI() {
                   dataIndex="th_doanh_so"
                   key="th_doanh_so"
                   render={(_: any, record: any) => (
-                    <div
-                      onClick={() => {
-                        setModalSale({
-                          open: true,
-                          id: {
-                            employee: record?.nhan_vien_ban_hang,
-                            name_employee: record?.ten_nv,
-                          },
-                        });
-                      }}
-                    >
+                    <>
                       {record?.kpi_month[0]
                         ? Intl.NumberFormat().format(
                             record?.kpi_month[0]?.th_doanh_so
                           )
                         : 0}
-                    </div>
+                    </>
                   )}
                 />
                 <Column
@@ -815,23 +747,13 @@ export default function ReportKPI() {
                   dataIndex="th_doanh_thu"
                   key="th_doanh_thu"
                   render={(_: any, record: any) => (
-                    <div
-                      onClick={() => {
-                        setModalReven({
-                          open: true,
-                          id: {
-                            employee: record?.nhan_vien_ban_hang,
-                            name_employee: record?.ten_nv,
-                          },
-                        });
-                      }}
-                    >
+                    <>
                       {record?.kpi_month[0]
                         ? Intl.NumberFormat().format(
                             record?.kpi_month[0]?.th_doanh_thu
                           )
                         : 0}
-                    </div>
+                    </>
                   )}
                 />
                 <Column
@@ -862,17 +784,7 @@ export default function ReportKPI() {
                   dataIndex="th_san_lg"
                   key="th_san_lg"
                   render={(_, record: any) => (
-                    <div
-                      onClick={() => {
-                        setModalQty({
-                          open: true,
-                          id: {
-                            employee: record?.nhan_vien_ban_hang,
-                            name_employee: record?.ten_nv,
-                          },
-                        });
-                      }}
-                    >
+                    <div>
                       {record?.kpi_month[0]
                         ? record?.kpi_month[0]?.th_san_lg
                         : 0}
@@ -907,17 +819,7 @@ export default function ReportKPI() {
                   dataIndex="th_sku"
                   key="th_sku"
                   render={(_, record: any) => (
-                    <div
-                      onClick={() => {
-                        setModalSku({
-                          open: true,
-                          id: {
-                            employee: record?.nhan_vien_ban_hang,
-                            name_employee: record?.ten_nv,
-                          },
-                        });
-                      }}
-                    >
+                    <div>
                       {record?.kpi_month[0] ? record?.kpi_month[0]?.th_sku : 0}
                     </div>
                   )}
@@ -950,17 +852,7 @@ export default function ReportKPI() {
                   dataIndex="th_so_gio_lam_viec"
                   key="th_so_gio_lam_viec"
                   render={(_, record: any) => (
-                    <div
-                      onClick={() => {
-                        setModalWork({
-                          open: true,
-                          id: {
-                            employee: record?.nhan_vien_ban_hang,
-                            name_employee: record?.ten_nv,
-                          },
-                        });
-                      }}
-                    >
+                    <div>
                       {record?.kpi_month[0]
                         ? record?.kpi_month[0]?.th_so_gio_lam_viec
                         : 0}
@@ -1066,96 +958,6 @@ export default function ReportKPI() {
           >
             <DetailTotalOrder
               employee={modalTotal.id?.employee}
-              month={fmonth}
-              year={fyear}
-            />
-          </ModalDetail>
-
-          <ModalDetail
-            title={
-              <div className="font-semibold text-2xl leading-[22px] text-[#222222] px-4 pt-4">
-                Doanh số - {modalSale.id?.name_employee}
-              </div>
-            }
-            open={modalSale.open}
-            onCancel={closeModalSale}
-            footer={false}
-            width={1120}
-          >
-            <Detailsales
-              employee={modalSale.id?.employee}
-              month={fmonth}
-              year={fyear}
-            />
-          </ModalDetail>
-
-          <ModalDetail
-            title={
-              <div className="font-semibold text-2xl leading-[22px] text-[#222222] px-4 pt-4">
-                Doanh thu - {modalReven.id?.name_employee}
-              </div>
-            }
-            open={modalReven.open}
-            onCancel={closeModalReven}
-            footer={false}
-            width={1120}
-          >
-            <Detailrevenue
-              employee={modalReven.id?.employee}
-              month={fmonth}
-              year={fyear}
-            />
-          </ModalDetail>
-
-          <ModalDetail
-            title={
-              <div className="font-semibold text-2xl leading-[22px] text-[#222222] px-4 pt-4">
-                Sản lượng - {modalQty.id?.name_employee}
-              </div>
-            }
-            open={modalQty.open}
-            onCancel={closeModalQty}
-            footer={false}
-            width={1120}
-          >
-            <DetailQty
-              employee={modalQty.id?.employee}
-              month={fmonth}
-              year={fyear}
-            />
-          </ModalDetail>
-
-          <ModalDetail
-            title={
-              <div className="font-semibold text-2xl leading-[22px] text-[#222222] px-4 pt-4">
-                SKU - {modalSku.id?.name_employee}
-              </div>
-            }
-            open={modalSku.open}
-            onCancel={closeModalSku}
-            footer={false}
-            width={1120}
-          >
-            <DetailSku
-              employee={modalSku.id?.employee}
-              month={fmonth}
-              year={fyear}
-            />
-          </ModalDetail>
-
-          <ModalDetail
-            title={
-              <div className="font-semibold text-2xl leading-[22px] text-[#222222] px-4 pt-4">
-                Số giờ làm việc - {modalWork.id?.name_employee}
-              </div>
-            }
-            open={modalWork.open}
-            onCancel={closeModalWork}
-            footer={false}
-            width={1120}
-          >
-            <DetailWork
-              employee={modalWork.id?.employee}
               month={fmonth}
               year={fyear}
             />

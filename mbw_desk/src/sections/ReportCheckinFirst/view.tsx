@@ -317,7 +317,7 @@ export default function ReportCheckinFirst() {
       let { message: results } = rsEmployee;
       setListEmployees(
         results.map((employee_filter: employee) => ({
-          value: employee_filter.employee_code,
+          value: employee_filter.employee_name,
           label: employee_filter.employee_name || employee_filter.employee_code,
         }))
       );
@@ -383,7 +383,7 @@ export default function ReportCheckinFirst() {
             page_size: PAGE_SIZE,
             page_number: page,
             department: department,
-            employee: employee,
+            sales_person: employee,
             customer_group: customer_group,
             customer_type: customer_type,
             territory: territory,
@@ -394,8 +394,6 @@ export default function ReportCheckinFirst() {
       );
 
       let { result } = rsData;
-
-      console.log("dt", result);
 
       setDataReport(result);
       setTotal(result?.totals);

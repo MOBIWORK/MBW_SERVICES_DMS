@@ -458,7 +458,8 @@ export default function ReportCustomNew() {
             customer_type: customer_type,
             customer_group: customer_group,
             territory: territory,
-            employee: employee,
+            sales_person: employee,
+            sales_team: sales_team,
             has_sales_order: has_sales_order,
             department: department,
             from_date: from_date,
@@ -492,6 +493,7 @@ export default function ReportCustomNew() {
     refresh,
     from_date,
     to_date,
+    sales_team
   ]);
 
   return (

@@ -52,6 +52,7 @@
   "devDependencies": {
     "@faker-js/faker": "^8.4.1",
     "@types/antd": "^1.0.0",
+    "@types/file-saver": "^2.0.7",
     "@types/node": "^20.10.7",
     "@types/react": "^18.2.43",
     "@types/react-dom": "^18.2.17",
