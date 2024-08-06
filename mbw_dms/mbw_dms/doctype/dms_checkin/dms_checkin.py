@@ -20,6 +20,7 @@ import calendar
 from mbw_dms.api.ekgis.constant import API_URL, API_URL_TRACKING
 import pydash
 from frappe.utils import cint
+
 class DMSCheckin(Document):
     def after_insert(self):
         self.update_kpi_monthly()
@@ -77,11 +78,20 @@ class DMSCheckin(Document):
         )
         sales_team = frappe.get_value("DMS KPI", {"nhan_vien_ban_hang": user_name}, "nhom_ban_hang")
 
+        checkin_giovao = self.checkin_giovao
+        checkin_giora = self.checkin_giora
+        time_in = datetime.datetime.strptime(checkin_giovao, "%Y-%m-%d %H:%M:%S")
+        time_out = datetime.datetime.strptime(checkin_giora, "%Y-%m-%d %H:%M:%S")
+        seconds_worked = time_out.timestamp() - time_in.timestamp()
+        time_work = seconds_worked / 3600
+
         if len(exists_checkin) > 1:
             if existing_monthly_summary:
-                monthly_summary_doc = frappe.get_doc("DMS Summary KPI Monthly", existing_monthly_summary[0]["name"])
+                monthly_summary_doc = frappe.get_doc("DMS Summary KPI Monthly", existing_monthly_summary)
+
                 monthly_summary_doc.so_kh_vt_luot += 1
-                monthly_summary_doc.so_kh_vt_duynhat -= 1
+                monthly_summary_doc.so_kh_vt_duynhat -= 1 if monthly_summary_doc.so_kh_vt_duynhat >= 1 else 0
+                monthly_summary_doc.so_gio_lam_viec += time_work
                 if name_date in list_travel_date:
                     monthly_summary_doc.solan_vt_dungtuyen += 1
                 else:
@@ -96,12 +106,13 @@ class DMSCheckin(Document):
                     "nhom_ban_hang": sales_team,
                     "so_kh_vt_luot": 1,
                     "solan_vt_dungtuyen": 1 if name_date in list_travel_date else 0,
-                    "solan_vt_ngoaituyen": 1 if name_date not in list_travel_date else 0
+                    "solan_vt_ngoaituyen": 1 if name_date not in list_travel_date else 0,
+                    "so_gio_lam_viec": time_work
                 })
                 monthly_summary_doc.insert(ignore_permissions=True)
         else:
             if existing_monthly_summary:
-                monthly_summary_doc = frappe.get_doc("DMS Summary KPI Monthly", existing_monthly_summary[0]["name"])
+                monthly_summary_doc = frappe.get_doc("DMS Summary KPI Monthly", existing_monthly_summary)
                 monthly_summary_doc.so_kh_vt_luot += 1
                 monthly_summary_doc.so_kh_vt_duynhat += 1
                 if name_date in list_travel_date:
@@ -250,8 +261,6 @@ class DMSCheckin(Document):
 @frappe.whitelist(methods="POST")
 def create_checkin(kwargs):
     try:
-        
-        print("checkout",kwargs)
         new_checkin = frappe.new_doc("DMS Checkin")
 
         normal_keys = [
@@ -299,26 +308,24 @@ def create_checkin(kwargs):
         try:
             settings = frappe.db.get_singles_dict("DMS Settings")
             lat = kwargs.get("checkin_lat")
-            lon = kwargs.get("checkin_long")
-            if lat and lon: 
+            long = kwargs.get("checkin_long")
+            if lat and long: 
                 key = settings.get("api_key")
-                url = f"https://api.ekgis.vn/v1/place/geocode/reverse/address?latlng={lat},{lon}&gg=1&api_key={key}"
+                url = f"https://api.ekgis.vn/v1/place/geocode/reverse/address?latlng={lat},{long}&gg=1&api_key={key}"
                 if not key:
                     return gen_response(400, _("Not found setting key map"))
 
                 # call geolocation
                 response = requests.get(url)
                 address = json.loads(response.text).get("results")
-                print("address",address)
+
         except Exception as e:
-            print("Lỗi lấy địa chỉ",e)
+            print("Lỗi lấy địa chỉ", e)
             address = ""
-        new_checkin.set("checkin_address", address,"\n")
-        print("new_checkin",new_checkin.as_dict())
-        try:
-            new_checkin.insert(ignore_permissions=True)            
-        except Exception as e:
-            print("loi insert::::::::::::::",e)
+
+        new_checkin.set("checkin_address", address, "\n")
+        new_checkin.insert(ignore_permissions=True)
+            
         #send mail
         notes = frappe.db.get_all("Note", {"custom_checkin_id": kwargs.get("checkin_id")},["*"])
         for note in notes:
@@ -341,9 +348,8 @@ def create_checkin(kwargs):
                         delayed=False,
                         retry=3
                     )
-                    print("send mail end")
                 except Exception as e:
-                    print("something error send mail",e)
+                    print("something error send mail", e)
             
         frappe.db.commit()
         return gen_response(201, "Thành công", {"name": new_checkin.name})
@@ -609,7 +615,6 @@ def update_address_customer_checkin(body):
         exception_handle(e)
 
 
-
 # cancel checkout
 @frappe.whitelist(methods="DELETE")
 def cancel_checkout(data):
@@ -620,29 +625,29 @@ def cancel_checkout(data):
         # Xóa note
         frappe.delete_doc("Note", {"custom_checkin_id": checkin_id})
         # Xóa đơn hàng
-        frappe.db.delete("Sales Order", {"checkin_id": checkin_id})
+        frappe.delete_doc("Sales Order", {"checkin_id": checkin_id})
         # Xóa phiếu trả hàng
-        frappe.db.delete("Sales Invoice", {"checkin_id": checkin_id})
+        frappe.delete_doc("Sales Invoice", {"checkin_id": checkin_id})
         # Xóa album ảnh
-        frappe.db.delete("DMS Album Image", {"checkin_id": checkin_id})
+        frappe.delete_doc("DMS Album Image", {"checkin_id": checkin_id})
         # Xóa check tồn kho
-        frappe.db.delete("DMS Inventory", {"checkin_id": checkin_id})
+        frappe.delete_doc("DMS Inventory", {"checkin_id": checkin_id})
         address = frappe.db.get_all("Address", {"link_title": checkin_id}, ["name"])
 
-        if len(address)>0:
+        if len(address) > 0:
             address = address[0]
-            address = frappe.get_doc("Address",address.get("name"))
+            address = frappe.get_doc("Address", address.get("name"))
             links = address.links
             find_not_cs = pydash.filter_(links, lambda cs:cs.get("link_title") != checkin_id)
-            address.set("links",find_not_cs)
+            address.set("links", find_not_cs)
             address.save()
-            customer = frappe.get_doc("Customer",customer_id)
-            customer.set("customer_primary_address",None)
-            customer.set("customer_location_primary",None)
+            customer = frappe.get_doc("Customer", customer_id)
+            customer.set("customer_primary_address", None)
+            customer.set("customer_location_primary", None)
             customer.save(ignore_permissions = True)
         frappe.db.commit()
         # xoá địa chỉ
-        return gen_response(200,"",{})
+        return gen_response(200, "", {})
     except Exception as e :
         exception_handle(e)
 
@@ -725,7 +730,6 @@ def list_inventory(kwargs):
 
 def get_report(filters={}):
     try:
-
         from_date = validate_filter(type_check="timestamp_to_date",type="start",value=filters.get("from_date"))
         to_date = validate_filter(type_check="timestamp_to_date",type="end",value=filters.get("to_date"))
         employee = filters.get("employee")
@@ -799,7 +803,6 @@ def get_report(filters={}):
         if to_date:
             where =  f"{where} AND dc.createddate <= '{to_date}'"
         query = f"""
-
             WITH ImageCounts AS (
                 SELECT 
                     dc.name AS checkin_name, 
@@ -811,7 +814,6 @@ def get_report(filters={}):
                 GROUP BY
                     dc.name
             ),
-
             
             NumberedGroups AS (SELECT 
                 dc.createdbyemail AS employee_id, 
