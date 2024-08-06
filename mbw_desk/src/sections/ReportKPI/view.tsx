@@ -1,11 +1,6 @@
 import { SyncOutlined, VerticalAlignBottomOutlined } from "@ant-design/icons";
-import {
-  ContentFrame,
-  FormItemCustom,
-  HeaderPage,
-  TableCustom,
-} from "../../components";
-import { DatePicker, Select, Table, TreeSelect, Form, Row, Col } from "antd";
+import { ContentFrame, HeaderPage, TableCustom } from "../../components";
+import { DatePicker, Table, Row, Col } from "antd";
 import { monthAll } from "./data";
 import { DatePickerProps } from "antd/lib";
 import { useEffect, useRef, useState } from "react";
@@ -18,11 +13,21 @@ import { translationUrl, treeArray } from "../../util";
 import { listSale } from "../../types/listSale";
 import { useResize } from "@/hooks";
 import { SelectCommon, TreeSelectCommon } from "@/components/select/select";
+import { ModalDetail } from "../ReportCheckin/components/ModalCheckin";
+import Detailcheckin from "./modal/Detailcheckin";
+import Detailchekinfirst from "./modal/Detailchekinfirst";
+import DetailOrder from "./modal/DetailOrder";
+import DetailCustomer from "./modal/DetailCustomer";
+import DetailTotalOrder from "./modal/DetailTotalOrder";
+import Detailsales from "./modal/Detailsales";
+import Detailrevenue from "./modal/Detailrevenue";
+import DetailWork from "./modal/DetailWork";
+import DetailQty from "./modal/DetailQty";
+import DetailSku from "./modal/DetailSku";
 
 const { Column, ColumnGroup } = TableCustom;
 
-
-const currentMonth = dayjs().month() + 1; // Lấy tháng hiện tại (đánh số từ 0)
+const currentMonth = dayjs().month() + 1;
 const month = currentMonth.toString();
 const year = dayjs().format("YYYY");
 
@@ -44,6 +49,156 @@ export default function ReportKPI() {
   const [containerHeight, setContainerHeight] = useState<any>(0);
   const [scrollYTable1, setScrollYTable1] = useState<number>(size?.h * 0.52);
   const [refresh, setRefresh] = useState<boolean>(false);
+
+  const [modal, setModal] = useState<{
+    open: boolean;
+    id: any;
+  }>({
+    open: false,
+    id: null,
+  });
+
+  const [modalCheckF, setModalCheckF] = useState<{
+    open: boolean;
+    id: any;
+  }>({
+    open: false,
+    id: null,
+  });
+
+  const [modalOder, setModalOrder] = useState<{
+    open: boolean;
+    id: any;
+  }>({
+    open: false,
+    id: null,
+  });
+
+  const [modalCustomer, setModalCustomer] = useState<{
+    open: boolean;
+    id: any;
+  }>({
+    open: false,
+    id: null,
+  });
+
+  const [modalTotal, setModalTotal] = useState<{
+    open: boolean;
+    id: any;
+  }>({
+    open: false,
+    id: null,
+  });
+
+  const [modalSale, setModalSale] = useState<{
+    open: boolean;
+    id: any;
+  }>({
+    open: false,
+    id: null,
+  });
+
+  const [modalReven, setModalReven] = useState<{
+    open: boolean;
+    id: any;
+  }>({
+    open: false,
+    id: null,
+  });
+
+  const [modalQty, setModalQty] = useState<{
+    open: boolean;
+    id: any;
+  }>({
+    open: false,
+    id: null,
+  });
+
+  const [modalSku, setModalSku] = useState<{
+    open: boolean;
+    id: any;
+  }>({
+    open: false,
+    id: null,
+  });
+
+  const [modalWork, setModalWork] = useState<{
+    open: boolean;
+    id: any;
+  }>({
+    open: false,
+    id: null,
+  });
+
+  const closeModal = () => {
+    setModal({
+      open: false,
+      id: null,
+    });
+  };
+
+  const closeModalCheckF = () => {
+    setModalCheckF({
+      open: false,
+      id: null,
+    });
+  };
+
+  const closeModalOder = () => {
+    setModalOrder({
+      open: false,
+      id: null,
+    });
+  };
+
+  const closeModalCustomer = () => {
+    setModalCustomer({
+      open: false,
+      id: null,
+    });
+  };
+
+  const closeModalTotal = () => {
+    setModalTotal({
+      open: false,
+      id: null,
+    });
+  };
+
+  const closeModalSale = () => {
+    setModalSale({
+      open: false,
+      id: null,
+    });
+  };
+
+  const closeModalReven = () => {
+    setModalReven({
+      open: false,
+      id: null,
+    });
+  };
+
+  const closeModalWork = () => {
+    setModalWork({
+      open: false,
+      id: null,
+    });
+  };
+
+  const closeModalQty = () => {
+    setModalQty({
+      open: false,
+      id: null,
+    });
+  };
+
+  const closeModalSku = () => {
+    setModalSku({
+      open: false,
+      id: null,
+    });
+  };
 
   useEffect(() => {
     setScrollYTable1(size.h * 0.52);
@@ -156,7 +311,7 @@ export default function ReportKPI() {
         }
       >
         <div className="bg-white rounded-2xl pt-4 pb-7 border-[#DFE3E8] border-[0.2px] border-solid">
-          <Row  className="px-4 flex-auto" gutter={[8, 8]}>
+          <Row className="px-4 flex-auto" gutter={[8, 8]}>
             <Col span={4}>
               <SelectCommon
                 className="!bg-[#F4F6F8]"
@@ -252,50 +407,35 @@ export default function ReportKPI() {
                     <Table.Summary.Cell index={4} className="text-center">
                       {dataReort?.sum?.tong_kh_vt}
                     </Table.Summary.Cell>
-                    <Table.Summary.Cell
-                      index={5}
-                      className="text-center underline text-[#1877F2]"
-                    >
+                    <Table.Summary.Cell index={5} className="text-center">
                       {dataReort?.sum?.tong_th_vt}
                     </Table.Summary.Cell>
                     <Table.Summary.Cell index={6}></Table.Summary.Cell>
                     <Table.Summary.Cell index={7} className="text-center">
                       {dataReort?.sum?.tong_kh_vt_dn}
                     </Table.Summary.Cell>
-                    <Table.Summary.Cell
-                      index={8}
-                      className="text-center underline text-[#1877F2]"
-                    >
+                    <Table.Summary.Cell index={8} className="text-center">
                       {dataReort?.sum?.tong_th_vt_dn}
                     </Table.Summary.Cell>
                     <Table.Summary.Cell index={9}></Table.Summary.Cell>
                     <Table.Summary.Cell index={10} className="text-center">
                       {dataReort?.sum?.tong_kh_dat_hang}
                     </Table.Summary.Cell>
-                    <Table.Summary.Cell
-                      index={11}
-                      className="text-center underline text-[#1877F2]"
-                    >
+                    <Table.Summary.Cell index={11} className="text-center">
                       {dataReort?.sum?.tong_th_dat_hang}
                     </Table.Summary.Cell>
                     <Table.Summary.Cell index={12}></Table.Summary.Cell>
                     <Table.Summary.Cell index={13} className="text-center">
                       {dataReort?.sum?.tong_kh_kh_moi}
                     </Table.Summary.Cell>
-                    <Table.Summary.Cell
-                      index={14}
-                      className="text-center underline text-[#1877F2]"
-                    >
+                    <Table.Summary.Cell index={14} className="text-center">
                       {dataReort?.sum?.tong_th_kh_moi}
                     </Table.Summary.Cell>
                     <Table.Summary.Cell index={15}></Table.Summary.Cell>
                     <Table.Summary.Cell index={16} className="text-center">
                       {dataReort?.sum?.tong_kh_don_hang}
                     </Table.Summary.Cell>
-                    <Table.Summary.Cell
-                      index={17}
-                      className="text-center underline text-[#1877F2]"
-                    >
+                    <Table.Summary.Cell index={17} className="text-center">
                       {dataReort?.sum?.tong_th_don_hang}
                     </Table.Summary.Cell>
                     <Table.Summary.Cell index={18}></Table.Summary.Cell>
@@ -304,10 +444,7 @@ export default function ReportKPI() {
                         dataReort?.sum?.tong_kh_doanh_so
                       )}
                     </Table.Summary.Cell>
-                    <Table.Summary.Cell
-                      index={20}
-                      className="text-center underline text-[#1877F2]"
-                    >
+                    <Table.Summary.Cell index={20} className="text-center">
                       {Intl.NumberFormat().format(
                         dataReort?.sum?.tong_th_doanh_so
                       )}
@@ -318,10 +455,7 @@ export default function ReportKPI() {
                         dataReort?.sum?.tong_kh_doanh_thu
                       )}
                     </Table.Summary.Cell>
-                    <Table.Summary.Cell
-                      index={23}
-                      className="text-center underline text-[#1877F2]"
-                    >
+                    <Table.Summary.Cell index={23} className="text-center">
                       {Intl.NumberFormat().format(
                         dataReort?.sum?.tong_th_doanh_thu
                       )}
@@ -330,30 +464,21 @@ export default function ReportKPI() {
                     <Table.Summary.Cell index={25} className="text-center">
                       {dataReort?.sum?.tong_kh_san_lg}
                     </Table.Summary.Cell>
-                    <Table.Summary.Cell
-                      index={26}
-                      className="text-center underline text-[#1877F2]"
-                    >
+                    <Table.Summary.Cell index={26} className="text-center">
                       {dataReort?.sum?.tong_th_san_lg}
                     </Table.Summary.Cell>
                     <Table.Summary.Cell index={27}></Table.Summary.Cell>
                     <Table.Summary.Cell index={28} className="text-center">
                       {dataReort?.sum?.tong_kh_sku}
                     </Table.Summary.Cell>
-                    <Table.Summary.Cell
-                      index={29}
-                      className="text-center underline text-[#1877F2]"
-                    >
+                    <Table.Summary.Cell index={29} className="text-center">
                       {dataReort?.sum?.tong_th_sku}
                     </Table.Summary.Cell>
                     <Table.Summary.Cell index={30}></Table.Summary.Cell>
                     <Table.Summary.Cell index={31} className="text-center">
                       {dataReort?.sum?.tong_kh_so_gio_lam_viec}
                     </Table.Summary.Cell>
-                    <Table.Summary.Cell
-                      index={32}
-                      className="text-center underline text-[#1877F2]"
-                    >
+                    <Table.Summary.Cell index={32} className="text-center">
                       {dataReort?.sum?.tong_th_so_gio_lam_viec}
                     </Table.Summary.Cell>
                     <Table.Summary.Cell index={33}></Table.Summary.Cell>
@@ -417,7 +542,21 @@ export default function ReportKPI() {
                   width={70}
                   dataIndex="th_vt"
                   key="th_vt"
-                  render={(_, record: any) => <div>{record?.kpi_month[0] ? record?.kpi_month[0]?.th_vt : 0}</div>}
+                  render={(_, record: any) => (
+                    <div
+                      onClick={() => {
+                        setModal({
+                          open: true,
+                          id: {
+                            employee: record?.nhan_vien_ban_hang,
+                            name_employee: record?.ten_nv,
+                          },
+                        });
+                      }}
+                    >
+                      {record?.kpi_month[0] ? record?.kpi_month[0]?.th_vt : 0}
+                    </div>
+                  )}
                 />
                 <Column
                   className="!text-center"
@@ -445,7 +584,23 @@ export default function ReportKPI() {
                   width={70}
                   dataIndex="th_vt_dn"
                   key="th_vt_dn"
-                  render={(_, record: any) => <div>{record?.kpi_month[0] ? record?.kpi_month[0]?.th_vt_dn : 0}</div>}
+                  render={(_, record: any) => (
+                    <div
+                      onClick={() => {
+                        setModalCheckF({
+                          open: true,
+                          id: {
+                            employee: record?.nhan_vien_ban_hang,
+                            name_employee: record?.ten_nv,
+                          },
+                        });
+                      }}
+                    >
+                      {record?.kpi_month[0]
+                        ? record?.kpi_month[0]?.th_vt_dn
+                        : 0}
+                    </div>
+                  )}
                 />
                 <Column
                   className="!text-center"
@@ -453,9 +608,7 @@ export default function ReportKPI() {
                   width={70}
                   dataIndex="tl_vt_dn"
                   key="tl_vt_dn"
-                  render={(_: any, record: any) => (
-                    <>{record.tl_vt_dn}%</>
-                  )}
+                  render={(_: any, record: any) => <>{record.tl_vt_dn}%</>}
                 />
               </ColumnGroup>
               <ColumnGroup
@@ -475,7 +628,23 @@ export default function ReportKPI() {
                   width={70}
                   dataIndex="th_dat_hang"
                   key="th_dat_hang"
-                  render={(_, record: any) => <div>{record?.kpi_month[0] ? record?.kpi_month[0]?.th_dat_hang : 0}</div>}
+                  render={(_, record: any) => (
+                    <div
+                      onClick={() => {
+                        setModalOrder({
+                          open: true,
+                          id: {
+                            employee: record?.nhan_vien_ban_hang,
+                            name_employee: record?.ten_nv,
+                          },
+                        });
+                      }}
+                    >
+                      {record?.kpi_month[0]
+                        ? record?.kpi_month[0]?.th_dat_hang
+                        : 0}
+                    </div>
+                  )}
                 />
                 <Column
                   className="!text-center"
@@ -483,9 +652,7 @@ export default function ReportKPI() {
                   width={70}
                   dataIndex="tl_dat_hang"
                   key="tl_dat_hang"
-                  render={(_: any, record: any) => (
-                    <>{record.tl_dat_hang}%</>
-                  )}
+                  render={(_: any, record: any) => <>{record.tl_dat_hang}%</>}
                 />
               </ColumnGroup>
               <ColumnGroup
@@ -505,7 +672,23 @@ export default function ReportKPI() {
                   width={70}
                   dataIndex="th_kh_moi"
                   key="th_kh_moi"
-                  render={(_, record: any) => <div>{record?.kpi_month[0] ? record?.kpi_month[0]?.th_kh_moi : 0}</div>}
+                  render={(_, record: any) => (
+                    <div
+                      onClick={() => {
+                        setModalCustomer({
+                          open: true,
+                          id: {
+                            employee: record?.nhan_vien_ban_hang,
+                            name_employee: record?.ten_nv,
+                          },
+                        });
+                      }}
+                    >
+                      {record?.kpi_month[0]
+                        ? record?.kpi_month[0]?.th_kh_moi
+                        : 0}
+                    </div>
+                  )}
                 />
                 <Column
                   className="!text-center"
@@ -513,9 +696,7 @@ export default function ReportKPI() {
                   width={70}
                   dataIndex="tl_kh_moi"
                   key="tl_kh_moi"
-                  render={(_: any, record: any) => (
-                    <>{record.tl_kh_moi}%</>
-                  )}
+                  render={(_: any, record: any) => <>{record.tl_kh_moi}%</>}
                 />
               </ColumnGroup>
               <ColumnGroup
@@ -536,7 +717,23 @@ export default function ReportKPI() {
                   width={70}
                   dataIndex="th_don_hang"
                   key="th_don_hang"
-                  render={(_, record: any) => <div>{record?.kpi_month[0] ? record?.kpi_month[0]?.th_don_hang : 0}</div>}
+                  render={(_, record: any) => (
+                    <div
+                      onClick={() => {
+                        setModalTotal({
+                          open: true,
+                          id: {
+                            employee: record?.nhan_vien_ban_hang,
+                            name_employee: record?.ten_nv,
+                          },
+                        });
+                      }}
+                    >
+                      {record?.kpi_month[0]
+                        ? record?.kpi_month[0]?.th_don_hang
+                        : 0}
+                    </div>
+                  )}
                 />
                 <Column
                   className="!text-center"
@@ -544,9 +741,7 @@ export default function ReportKPI() {
                   width={70}
                   dataIndex="tl_don_hang"
                   key="tl_don_hang"
-                  render={(_: any, record: any) => (
-                    <>{record.tl_don_hang}%</>
-                  )}
+                  render={(_: any, record: any) => <>{record.tl_don_hang}%</>}
                 />
               </ColumnGroup>
               <ColumnGroup
@@ -570,7 +765,23 @@ export default function ReportKPI() {
                   dataIndex="th_doanh_so"
                   key="th_doanh_so"
                   render={(_: any, record: any) => (
-                    <>{record?.kpi_month[0] ? Intl.NumberFormat().format(record?.kpi_month[0]?.th_doanh_so) : 0}</>
+                    <div
+                      onClick={() => {
+                        setModalSale({
+                          open: true,
+                          id: {
+                            employee: record?.nhan_vien_ban_hang,
+                            name_employee: record?.ten_nv,
+                          },
+                        });
+                      }}
+                    >
+                      {record?.kpi_month[0]
+                        ? Intl.NumberFormat().format(
+                            record?.kpi_month[0]?.th_doanh_so
+                          )
+                        : 0}
+                    </div>
                   )}
                 />
                 <Column
@@ -579,9 +790,7 @@ export default function ReportKPI() {
                   width={70}
                   dataIndex="tl_don_hang"
                   key="tl_don_hang"
-                  render={(_: any, record: any) => (
-                    <>{record.tl_don_hang}%</>
-                  )}
+                  render={(_: any, record: any) => <>{record.tl_don_hang}%</>}
                 />
               </ColumnGroup>
               <ColumnGroup
@@ -606,7 +815,23 @@ export default function ReportKPI() {
                   dataIndex="th_doanh_thu"
                   key="th_doanh_thu"
                   render={(_: any, record: any) => (
-                    <>{record?.kpi_month[0] ? Intl.NumberFormat().format(record?.kpi_month[0]?.th_doanh_thu) : 0}</>
+                    <div
+                      onClick={() => {
+                        setModalReven({
+                          open: true,
+                          id: {
+                            employee: record?.nhan_vien_ban_hang,
+                            name_employee: record?.ten_nv,
+                          },
+                        });
+                      }}
+                    >
+                      {record?.kpi_month[0]
+                        ? Intl.NumberFormat().format(
+                            record?.kpi_month[0]?.th_doanh_thu
+                          )
+                        : 0}
+                    </div>
                   )}
                 />
                 <Column
@@ -615,9 +840,7 @@ export default function ReportKPI() {
                   width={70}
                   dataIndex="tl_doanh_thu"
                   key="tl_doanh_thu"
-                  render={(_: any, record: any) => (
-                    <>{record.tl_doanh_thu}%</>
-                  )}
+                  render={(_: any, record: any) => <>{record.tl_doanh_thu}%</>}
                 />
               </ColumnGroup>
               <ColumnGroup
@@ -638,7 +861,23 @@ export default function ReportKPI() {
                   width={70}
                   dataIndex="th_san_lg"
                   key="th_san_lg"
-                  render={(_, record: any) => <div>{record?.kpi_month[0] ? record?.kpi_month[0]?.th_san_lg : 0}</div>}
+                  render={(_, record: any) => (
+                    <div
+                      onClick={() => {
+                        setModalQty({
+                          open: true,
+                          id: {
+                            employee: record?.nhan_vien_ban_hang,
+                            name_employee: record?.ten_nv,
+                          },
+                        });
+                      }}
+                    >
+                      {record?.kpi_month[0]
+                        ? record?.kpi_month[0]?.th_san_lg
+                        : 0}
+                    </div>
+                  )}
                 />
                 <Column
                   className="!text-center"
@@ -646,9 +885,7 @@ export default function ReportKPI() {
                   width={70}
                   dataIndex="tl_san_luong"
                   key="tl_san_luong"
-                  render={(_: any, record: any) => (
-                    <>{record.tl_san_luong}%</>
-                  )}
+                  render={(_: any, record: any) => <>{record.tl_san_luong}%</>}
                 />
               </ColumnGroup>
               <ColumnGroup
@@ -669,7 +906,21 @@ export default function ReportKPI() {
                   width={70}
                   dataIndex="th_sku"
                   key="th_sku"
-                  render={(_, record: any) => <div>{record?.kpi_month[0] ? record?.kpi_month[0]?.th_sku : 0}</div>}
+                  render={(_, record: any) => (
+                    <div
+                      onClick={() => {
+                        setModalSku({
+                          open: true,
+                          id: {
+                            employee: record?.nhan_vien_ban_hang,
+                            name_employee: record?.ten_nv,
+                          },
+                        });
+                      }}
+                    >
+                      {record?.kpi_month[0] ? record?.kpi_month[0]?.th_sku : 0}
+                    </div>
+                  )}
                 />
                 <Column
                   className="!text-center"
@@ -677,9 +928,7 @@ export default function ReportKPI() {
                   width={70}
                   dataIndex="tl_sku"
                   key="tl_sku"
-                  render={(_: any, record: any) => (
-                    <>{record.tl_sku}%</>
-                  )}
+                  render={(_: any, record: any) => <>{record.tl_sku}%</>}
                 />
               </ColumnGroup>
               <ColumnGroup
@@ -700,7 +949,23 @@ export default function ReportKPI() {
                   width={70}
                   dataIndex="th_so_gio_lam_viec"
                   key="th_so_gio_lam_viec"
-                  render={(_, record: any) => <div>{record?.kpi_month[0] ? record?.kpi_month[0]?.th_so_gio_lam_viec : 0}</div>}
+                  render={(_, record: any) => (
+                    <div
+                      onClick={() => {
+                        setModalWork({
+                          open: true,
+                          id: {
+                            employee: record?.nhan_vien_ban_hang,
+                            name_employee: record?.ten_nv,
+                          },
+                        });
+                      }}
+                    >
+                      {record?.kpi_month[0]
+                        ? record?.kpi_month[0]?.th_so_gio_lam_viec
+                        : 0}
+                    </div>
+                  )}
                 />
                 <Column
                   className="!text-center"
@@ -715,6 +980,186 @@ export default function ReportKPI() {
               </ColumnGroup>
             </TableCustom>
           </div>
+          <ModalDetail
+            title={
+              <div className="font-semibold text-2xl leading-[22px] text-[#222222] px-4 pt-4">
+                Số khách hàng viếng thăm - {modal.id?.name_employee}
+              </div>
+            }
+            open={modal.open}
+            onCancel={closeModal}
+            footer={false}
+            width={1120}
+          >
+            <Detailcheckin
+              employee={modal.id?.employee}
+              month={fmonth}
+              year={fyear}
+            />
+          </ModalDetail>
+
+          <ModalDetail
+            title={
+              <div className="font-semibold text-2xl leading-[22px] text-[#222222] px-4 pt-4">
+                Số khách hàng viếng thăm duy nhất -{" "}
+                {modalCheckF.id?.name_employee}
+              </div>
+            }
+            open={modalCheckF.open}
+            onCancel={closeModalCheckF}
+            footer={false}
+            width={1120}
+          >
+            <Detailchekinfirst
+              employee={modalCheckF.id?.employee}
+              month={fmonth}
+              year={fyear}
+            />
+          </ModalDetail>
+
+          <ModalDetail
+            title={
+              <div className="font-semibold text-2xl leading-[22px] text-[#222222] px-4 pt-4">
+                Số khách hàng đặt hàng - {modalOder.id?.name_employee}
+              </div>
+            }
+            open={modalOder.open}
+            onCancel={closeModalOder}
+            footer={false}
+            width={1120}
+          >
+            <DetailOrder
+              employee={modalOder.id?.employee}
+              month={fmonth}
+              year={fyear}
+            />
+          </ModalDetail>
+
+          <ModalDetail
+            title={
+              <div className="font-semibold text-2xl leading-[22px] text-[#222222] px-4 pt-4">
+                Số khách hàng thêm mới - {modalCustomer.id?.name_employee}
+              </div>
+            }
+            open={modalCustomer.open}
+            onCancel={closeModalCustomer}
+            footer={false}
+            width={1120}
+          >
+            <DetailCustomer
+              employee={modalCustomer.id?.employee}
+              month={fmonth}
+              year={fyear}
+            />
+          </ModalDetail>
+
+          <ModalDetail
+            title={
+              <div className="font-semibold text-2xl leading-[22px] text-[#222222] px-4 pt-4">
+                Số đơn hàng - {modalTotal.id?.name_employee}
+              </div>
+            }
+            open={modalTotal.open}
+            onCancel={closeModalTotal}
+            footer={false}
+            width={1120}
+          >
+            <DetailTotalOrder
+              employee={modalTotal.id?.employee}
+              month={fmonth}
+              year={fyear}
+            />
+          </ModalDetail>
+
+          <ModalDetail
+            title={
+              <div className="font-semibold text-2xl leading-[22px] text-[#222222] px-4 pt-4">
+                Doanh số - {modalSale.id?.name_employee}
+              </div>
+            }
+            open={modalSale.open}
+            onCancel={closeModalSale}
+            footer={false}
+            width={1120}
+          >
+            <Detailsales
+              employee={modalSale.id?.employee}
+              month={fmonth}
+              year={fyear}
+            />
+          </ModalDetail>
+
+          <ModalDetail
+            title={
+              <div className="font-semibold text-2xl leading-[22px] text-[#222222] px-4 pt-4">
+                Doanh thu - {modalReven.id?.name_employee}
+              </div>
+            }
+            open={modalReven.open}
+            onCancel={closeModalReven}
+            footer={false}
+            width={1120}
+          >
+            <Detailrevenue
+              employee={modalReven.id?.employee}
+              month={fmonth}
+              year={fyear}
+            />
+          </ModalDetail>
+
+          <ModalDetail
+            title={
+              <div className="font-semibold text-2xl leading-[22px] text-[#222222] px-4 pt-4">
+                Sản lượng - {modalQty.id?.name_employee}
+              </div>
+            }
+            open={modalQty.open}
+            onCancel={closeModalQty}
+            footer={false}
+            width={1120}
+          >
+            <DetailQty
+              employee={modalQty.id?.employee}
+              month={fmonth}
+              year={fyear}
+            />
+          </ModalDetail>
+
+          <ModalDetail
+            title={
+              <div className="font-semibold text-2xl leading-[22px] text-[#222222] px-4 pt-4">
+                SKU - {modalSku.id?.name_employee}
+              </div>
+            }
+            open={modalSku.open}
+            onCancel={closeModalSku}
+            footer={false}
+            width={1120}
+          >
+            <DetailSku
+              employee={modalSku.id?.employee}
+              month={fmonth}
+              year={fyear}
+            />
+          </ModalDetail>
+
+          <ModalDetail
+            title={
+              <div className="font-semibold text-2xl leading-[22px] text-[#222222] px-4 pt-4">
+                Số giờ làm việc - {modalWork.id?.name_employee}
+              </div>
+            }
+            open={modalWork.open}
+            onCancel={closeModalWork}
+            footer={false}
+            width={1120}
+          >
+            <DetailWork
+              employee={modalWork.id?.employee}
+              month={fmonth}
+              year={fyear}
+            />
+          </ModalDetail>
         </div>
       </ContentFrame>
     </>
