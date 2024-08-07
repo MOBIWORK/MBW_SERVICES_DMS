@@ -37,7 +37,6 @@ interface DataCheckinFirst {
   key: React.Key;
   name: string;
   stt?: number;
-  department: string;
   employee_id: string;
   employee_name: string;
   customer_name: string;
@@ -81,9 +80,9 @@ const columns: TableColumnsType<DataCheckinFirst> = [
   },
   {
     title: "Tên nhân viên",
-    dataIndex: "employee_name",
-    key: "employee_name",
-    render: (_, record: any) => <div>{record.employee_name}</div>,
+    dataIndex: "sales_person",
+    key: "sales_person",
+    render: (_, record: any) => <div>{record.sales_person}</div>,
   },
   {
     title: "Mã khách hàng",
@@ -169,14 +168,8 @@ export default function ReportCheckinFirst() {
   const PAGE_SIZE = 20;
   const [formFilter] = useForm();
   const [page, setPage] = useState<number>(1);
-  const [listDepartment, setListDepartment] = useState<any[]>([]);
-  const [department, setDepartment] = useState("");
-  const [keySDepartment, setKeySDepartment] = useState("");
-  let keySearchDepartment = useDebounce(keySDepartment, 500);
   const [employee, setEmployee] = useState("");
   const [listEmployees, setListEmployees] = useState<any[]>([]);
-  const [keySEmployee, setKeySEmployee] = useState("");
-  let keySearchEmployee = useDebounce(keySEmployee, 500);
   const [customer_group, setCustomerGroup] = useState("");
   const [listCustomerGroup, setListCustomerGroup] = useState<any[]>([]);
   const [keySCustomerGroup, setKeySCustomerGroup] = useState("");
@@ -259,33 +252,6 @@ export default function ReportCheckinFirst() {
 
   useEffect(() => {
     (async () => {
-      let rsDepartment: any = await AxiosService.get(
-        "/api/method/frappe.desk.search.search_link",
-        {
-          params: {
-            txt: keySearchDepartment,
-            doctype: "Department",
-            ignore_user_permissions: 0,
-            query: "",
-          },
-        }
-      );
-
-      let { message: results } = rsDepartment;
-
-      console.log("Customer Group", results);
-
-      setListDepartment(
-        results.map((dtDepartment: any) => ({
-          value: dtDepartment.value.trim(),
-          label: dtDepartment.value.trim(),
-        }))
-      );
-    })();
-  }, [keySearchDepartment]);
-
-  useEffect(() => {
-    (async () => {
       let rsSales: rsData<listSale[]> = await AxiosService.get(
         "/api/method/mbw_dms.api.router.get_team_sale"
       );
@@ -317,8 +283,8 @@ export default function ReportCheckinFirst() {
       let { message: results } = rsEmployee;
       setListEmployees(
         results.map((employee_filter: employee) => ({
-          value: employee_filter.employee_name,
-          label: employee_filter.employee_name || employee_filter.employee_code,
+          value: employee_filter.sale_name,
+          label: employee_filter.sale_name || employee_filter.employee_name || employee_filter.employee_code,
         }))
       );
     })();
@@ -382,7 +348,6 @@ export default function ReportCheckinFirst() {
           params: {
             page_size: PAGE_SIZE,
             page_number: page,
-            department: department,
             sales_person: employee,
             customer_group: customer_group,
             customer_type: customer_type,
@@ -400,7 +365,6 @@ export default function ReportCheckinFirst() {
     })();
   }, [
     page,
-    department,
     employee,
     customer_group,
     customer_type,

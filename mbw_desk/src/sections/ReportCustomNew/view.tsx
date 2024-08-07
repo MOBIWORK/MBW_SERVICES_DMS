@@ -78,13 +78,14 @@ const columns: TableColumnsType<DataTypeCustomNew> = [
   },
   {
     title: "Mã nhân viên",
-    dataIndex: "name",
-    key: "name",
+    dataIndex: "sales_person_id",
+    key: "sales_person_id",
   },
   {
     title: "Tên nhân viên",
-    dataIndex: "employee_name",
-    key: "employee_name",
+    dataIndex: "sales_person",
+    key: "sales_person",
+    width: 200,
   },
   {
     title: "Nhóm bán hàng",
@@ -365,8 +366,8 @@ export default function ReportCustomNew() {
       let { message: results } = rsEmployee;
       setListEmployees(
         results.map((employee_filter: employee) => ({
-          value: employee_filter.employee_name,
-          label: employee_filter.employee_name || employee_filter.employee_code,
+          value: employee_filter.sale_name,
+          label: employee_filter.sale_name || employee_filter.employee_name || employee_filter.employee_code,
         }))
       );
     })();
@@ -469,7 +470,6 @@ export default function ReportCustomNew() {
       );
 
       let { result } = rsData;
-      console.log({ result });
 
       setDataCustomNew({
         ...result,

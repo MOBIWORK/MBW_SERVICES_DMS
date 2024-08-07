@@ -313,7 +313,8 @@ export default function ReportKPI() {
                           report_type: "Report KPI",
                           data_filter: {
                             month: fmonth,
-                            year: fyear,
+                            year: fyear
+                            //còn đẩy lên sale team sale person
                           },
                         },
                         responseType: "arraybuffer",
@@ -984,7 +985,7 @@ export default function ReportKPI() {
                       }}
                     >
                       {record?.kpi_month[0]
-                        ? record?.kpi_month[0]?.th_so_gio_lam_viec
+                        ? (record?.kpi_month[0]?.th_so_gio_lam_viec).toFixed(2)
                         : 0}
                     </div>
                   )}

@@ -125,10 +125,10 @@ const columns: TableColumnsType<DataSaleOrder> = [
   },
   {
     title: "Nhân viên",
-    dataIndex: "employee",
-    key: "employee",
+    dataIndex: "sales_person",
+    key: "sales_person",
     width: 120,
-    render: (_, record: any) => <div>{record.employee}</div>,
+    render: (_, record: any) => <div>{record.sales_person}</div>,
   },
   {
     title: <div className="text-right">Thành tiền (VNĐ)</div>,
@@ -438,10 +438,11 @@ export default function ReportSales() {
         }
       );
       let { message: results } = rsEmployee;
+      console.log("aaa", results);
       setListEmployees(
         results.map((employee_filter: employee) => ({
-          value: employee_filter.employee_code,
-          label: employee_filter.employee_name || employee_filter.employee_code,
+          value: employee_filter.sale_name,
+          label: employee_filter.sale_name || employee_filter.employee_name || employee_filter.employee_code,
         }))
       );
     })();
@@ -461,7 +462,7 @@ export default function ReportSales() {
             from_date: from_date,
             to_date: to_date,
             warehouse: warehouse,
-            employee: employee,
+            sales_person: employee,
           },
         }
       );
