@@ -70,7 +70,7 @@ class MakeExcel :
             if employee_info != "":
                 employee_info = frappe._dict(employee_info)
                 if not employee_info.company :
-                    gen_response(500,_("Accout not in any company!"))
+                    return gen_response(500,_("Account not in any company!"))
                 company_info = frappe.db.get_value("Company",employee_info.company,["name","phone_no"],as_dict=1)
                 address = frappe.db.get_all(doctype= "Address",filters= {"link_doctype": "Company", "link_name" : employee_info.company},fields=["*"])
                 address_title = address[0].address_title if len(address) >0 else ""
