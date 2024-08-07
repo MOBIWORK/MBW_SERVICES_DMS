@@ -640,6 +640,66 @@ def get_sales_group_child(sale_person = "Sales Team",is_group=1,query=""):
         return employee_codes,employee_id_users
     else:
         return  sales_persons
+# lấy con tất cả các con nhóm bán hàng của nhân viên
+def get_sales_group_child_v2(sale_person = "Sales Team",obj="all",get_employee=False):
+    query=""
+    if obj == 1:
+        query = "WHERE is_group = '1'"
+    elif obj == 0:
+        query = "WHERE is_group = '0'"
+    query_sale= f"""
+        WITH RECURSIVE Tree AS (
+        SELECT 
+            sp.sales_person_name,
+            sp.parent_sales_person,
+            sp.name,
+            sp.employee,
+            sp.is_group,
+            em.employee_name
+        FROM 
+            `tabSales Person` sp
+        LEFT JOIN `tabEmployee` em
+        ON sp.employee = em.name
+        WHERE 
+            sp.name = '{sale_person}'
+        UNION ALL
+
+        SELECT 
+            child.sales_person_name,
+            child.parent_sales_person,
+            child.name,
+            child.employee,
+            child.is_group,
+            em.employee_name
+        FROM 
+            `tabSales Person` child
+        LEFT JOIN `tabEmployee` em
+        ON child.employee = em.name
+        INNER JOIN Tree parent ON parent.name = child.parent_sales_person
+    )
+
+        SELECT * FROM Tree
+        {query}
+        """
+    # danh sách sale person theo bộ lọc
+    sales_persons = frappe.db.sql(query_sale,as_dict=1)
+    #lấy tất cả thông tin sale team theo bộ lọc
+    sales_info = sales_persons
+    if get_employee:
+        # mã nhân viên trong sanh sách
+        employee_codes = pydash.map_(sales_persons,lambda x: x.employee)
+        employee_codes = pydash.filter_(employee_codes,lambda x: bool(x))
+        employee_id_users = frappe.db.get_all("Employee",filters={"name": ["in",employee_codes]},fields=["user_id","name"])
+        # employee_id_users = pydash.map_(employee_id_users,lambda x: x.user_id)
+        for sale_p in sales_persons:
+            employee_info= {}
+            if sale_p.get("employee"):
+                employee_info = pydash.find(employee_id_users,lambda x: x.name == sale_p.get("employee") )
+            sale_p.update({
+                "employee_info":employee_info
+            })
+
+    return sales_persons
 CommonHandle.create_address = staticmethod(create_address)
 
 CommonHandle.get_employee_info = staticmethod(get_employee_info)

@@ -520,7 +520,11 @@ def get_customer(filters):
         if not teamSale:
             return gen_response(500,_("Sale manager is invalid"),{})
         else:
-            queryFilters["custom_sales_manager"] = teamSale
+            from mbw_dms.api.common import get_sales_group_child_v2
+            list_sales = get_sales_group_child_v2(sale_person= teamSale)
+            name_sale = pydash.map_(list_sales,lambda x:x.name)
+            queryFilters["custom_sales_manager"] = ["in", name_sale]
+            # queryFilters["custom_sales_manager"] =teamSale
             # queryFilters2["custom_sales_manager"] = teamSale
         city = filters.get('city')
         district = filters.get('district')
