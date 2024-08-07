@@ -336,7 +336,7 @@ def update_customer(**kwargs):
             # Thay đổi ảnh
             if kwargs.get("image") and (not customer.image or customer.image != kwargs.get("image")):
                 is_base64 = CommonHandle.check_base64(kwargs.get("image"))
-                customer = frappe.get_doc("Customer", name)
+                # customer = frappe.get_doc("Customer", name)
                 if is_base64:
                     customer.image = post_image(name_image="", faceimage=kwargs.get("image"), doc_type="Customer", doc_name=customer.name)
                 else: 
@@ -345,7 +345,7 @@ def update_customer(**kwargs):
             
             # Chỉnh sửa hạn mức công nợ
             if kwargs.get("credit_limits"):
-                customer = frappe.get_doc("Customer", name)
+                # customer = frappe.get_doc("Customer", name)
                 credit_limits = kwargs.get("credit_limits")
                 customer.set("credit_limits", [{
                     "credit_limit": credit_limits[0],
@@ -355,7 +355,7 @@ def update_customer(**kwargs):
 
             # Cập nhật hoặc thêm mới địa chỉ
             if kwargs.get("address"):
-                customer = frappe.get_doc("Customer", name)
+                # customer = frappe.get_doc("Customer", name)
                 link_cs_address = {
                     "link_doctype": "Customer",
                     "link_name": name
@@ -437,7 +437,7 @@ def update_customer(**kwargs):
                         new_contact.save()
 
                     if contact_data_update.get("is_primary_contact") == 1 :
-                        customer = frappe.get_doc("Customer", name)
+                        # customer = frappe.get_doc("Customer", name)
                         customer.set("customer_primary_contact", new_contact.name)
                         customer.save()
 

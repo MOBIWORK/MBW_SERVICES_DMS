@@ -72,8 +72,8 @@ def list_product(**kwargs):
             item["barcodes"] = barcodes[0].barcode if barcodes else ""
             item["barcode_type"] = barcodes[0].barcode_type if barcodes else ""
 
-            if get_bin_item(warehouse, item.item_code):
-                item["total_projected_qty"] = get_bin_item(warehouse, item.item_code)[0].projected_qty
+            if get_bin_item(warehouse, item.item_code, item.stock_uom):
+                item["total_projected_qty"] = get_bin_item(warehouse, item.item_code, item.stock_uom)[0].projected_qty
             else:
                 item["total_projected_qty"] = 0
 
@@ -189,8 +189,8 @@ def list_product_campaign(**kwargs):
             
             images_links = pydash.map_(images, return_fiel)
             item["custom_images_item"] = images_links
-            item["barcodes"] = barcodes[0].barcode
-            item["barcode_type"] = barcodes[0].barcode_type
+            item["barcodes"] = barcodes[0].barcode if barcodes else ""
+            item["barcode_type"] = barcodes[0].barcode_type if barcodes else ""
 
         # Lấy danh sách các sản phẩm mà người dùng có quyền truy cập
         user = frappe.session.user
@@ -313,7 +313,7 @@ def list_vat(**kwargs):
     except Exception as e:
         return exception_handle(e)
     
-def get_bin_item(warehouse, item_code):
+def get_bin_item(warehouse, item_code, item_uom):
     bin = frappe.qb.DocType("Bin")
     query = (
 		frappe.qb.from_(bin)
@@ -328,6 +328,8 @@ def get_bin_item(warehouse, item_code):
 
     if item_code:
         query = query.where(bin.item_code == item_code)
+    if item_uom:
+        query = query.where(bin.stock_uom == item_uom)
     bin_list = query.run(as_dict=True)
 
     return bin_list

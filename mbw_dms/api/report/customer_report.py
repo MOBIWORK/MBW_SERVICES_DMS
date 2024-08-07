@@ -32,16 +32,17 @@ def customer_report(**kwargs):
         if territory:
             filters.append(f"cus.territory='{territory}'")
         if sales_team:
-            filters.append(f"sp.parent_sales_person='{sales_team}'")
+            filters.append(f"cus.custom_sales_manager='{sales_team}'")
         if sales_person:
-            filters.append(f"st.sales_person='{sales_person}'")
+            filters.append(f"sp.name='{sales_person}'")
 
         where_conditions = " AND ".join(filters)
         sql_query = """
             SELECT cus.name as cus_id, cus.owner, UNIX_TIMESTAMP(cus.creation) as creation, cus.customer_name, cus.customer_code, cus.customer_type, cus.tax_id, cus.customer_group, cus.territory, cus.customer_primary_contact as contact, cus.customer_primary_address as address,
-            cus.mobile_no as phone, cus.custom_sales_manager as sales_team, emp.name, emp.employee_name
+            cus.mobile_no as phone, cus.custom_sales_manager as sales_team, emp.name as sales_person_id, sp.name as sales_person
             FROM `tabCustomer` cus
             LEFT JOIN `tabEmployee` emp ON cus.owner = emp.user_id
+            LEFT JOIN `tabSales Person` sp ON emp.name = sp.employee
         """
         if where_conditions:
             sql_query += " WHERE {}".format(where_conditions)
