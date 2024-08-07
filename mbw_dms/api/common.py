@@ -596,7 +596,6 @@ def get_all_parent_sales_persons(sales_person):
 
 # lấy con tất cả các con nhóm bán hàng của nhân viên
 def get_sales_group_child(sale_person = "Sales Team",is_group=1,query=""):
-    print("query",query)
     query_sale= f"""
         WITH RECURSIVE Tree AS (
         SELECT 

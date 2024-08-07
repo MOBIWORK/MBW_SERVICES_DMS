@@ -498,7 +498,7 @@ def get_sale_person_v2(data) :
             return gen_response(200,"",[])
     sale =  get_sales_group_child(sale_person=team_sale,is_group=0,query=query)
     sale = pydash.filter_(sale ,lambda x: x.employee)
-    sale = pydash.map_(sale, lambda x: {"employee_code":x.employee,"employee_name": x.employee_name})
+    sale = pydash.map_(sale, lambda x: {"employee_code":x.employee,"employee_name": x.employee_name,"sale_name": x.sales_person_name})
     return sale
 
 
