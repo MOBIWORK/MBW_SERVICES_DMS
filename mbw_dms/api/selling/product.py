@@ -18,7 +18,6 @@ def list_product(**kwargs):
 
         my_filter = {}
         name = kwargs.get("name")
-        name_item = kwargs.get("item_name")
         key_search = kwargs.get("key_search")
         customer = kwargs.get("customer")
         brand = kwargs.get("brand")
@@ -74,8 +73,8 @@ def list_product(**kwargs):
             item["barcodes"] = barcodes[0].barcode if barcodes else ""
             item["barcode_type"] = barcodes[0].barcode_type if barcodes else ""
 
-            if get_bin_item(warehouse, item.item_code, item.stock_uom):
-                item["total_projected_qty"] = get_bin_item(warehouse, item.item_code, item.stock_uom)[0].projected_qty
+            if get_bin_item(warehouse, item.item_code):
+                item["total_projected_qty"] = get_bin_item(warehouse, item.item_code)[0].projected_qty
             else:
                 item["total_projected_qty"] = 0
 
@@ -120,6 +119,7 @@ def list_product(**kwargs):
                 item["details"] = [{"price_list_rate": 0}]
 
             item["unit"] = frappe.db.get_all("UOM Conversion Detail", {"parent" : item.get("name")}, ["uom", "conversion_factor"])
+            
             item["stock"] = frappe.db.get_all("Stock Entry Detail", {"item_code": item.get("item_code")}, ["t_warehouse", "qty"])
             item["item_tax_template"] = frappe.db.get_all("Item Tax", {"parent": item["name"]}, ["item_tax_template"])
             if item["item_tax_template"]:
@@ -331,6 +331,5 @@ def get_bin_item(warehouse, item_code):
     if item_code:
         query = query.where(bin.item_code == item_code)
     bin_list = query.run(as_dict=True)
-    print('========================= value: ', bin_list, flush=True)
 
     return bin_list
