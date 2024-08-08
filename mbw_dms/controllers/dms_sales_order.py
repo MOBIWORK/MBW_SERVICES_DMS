@@ -125,3 +125,12 @@ def update_kpi_monthly_on_cancel(doc, method):
         monthly_summary_doc.save(ignore_permissions=True)
     else:
         return
+    
+def update_sales_person(doc, method):
+    if bool(doc.sales_team):
+        sales_person = None
+        for i in doc.sales_team:
+            if i.created_by == 1:
+                doc.custom_sales_person = sales_person
+    else:
+        pass

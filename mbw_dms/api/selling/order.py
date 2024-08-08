@@ -368,7 +368,9 @@ def create_return_order(**kwargs):
                 "uom": item_data.get("uom"),
                 "discount_percentage": discount_percentage,
                 "item_tax_template": item_tax_template,
-                "item_tax_rate": tax_rate
+                "item_tax_rate": tax_rate,
+                "rate": rate,
+                "price_list_rate": rate
             })
             item_amount = (rate - rate * discount_percentage / 100) * float(-item_data.get("qty"))
             tax_amount = item_amount * tax_rate / 100
