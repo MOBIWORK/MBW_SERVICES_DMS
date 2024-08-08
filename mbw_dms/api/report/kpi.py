@@ -101,10 +101,7 @@ def kpi_cus_so_detail(**kwargs):
         page_size =  int(kwargs.get("page_size", 20))
         page_number = int(kwargs.get("page_number")) if kwargs.get("page_number") and int(kwargs.get("page_number")) >=1 else 1
         employee = kwargs.get("employee")
-
-        user_id = None
-        if employee:
-            user_id = frappe.get_value("Employee", {"name": employee}, "user_id")
+        sales_person = frappe.get_value("Sales Person", {"employee": employee}, "name")
 
         if from_date and to_date:
             filters.append(f"so.creation BETWEEN '{from_date}' AND '{to_date}'")
@@ -113,7 +110,7 @@ def kpi_cus_so_detail(**kwargs):
         elif to_date:
             filters.append(f"so.creation <= '{to_date}'")
 
-        filters.append(f"so.owner = '{user_id}'")
+        filters.append("so.docstatus != 0")
         where_condition = " AND ".join(filters)
 
         sql_query = """
@@ -124,24 +121,26 @@ def kpi_cus_so_detail(**kwargs):
 
         if where_condition:
             sql_query += " WHERE {}".format(where_condition)
-        sql_query += " LIMIT %s OFFSET %s"
-        limit = page_size
-        offset = (page_number - 1) * limit
 
-        data = frappe.db.sql(sql_query, (limit, offset), as_dict=True)
+        all_sales_orders = frappe.db.sql(sql_query, as_dict=True)
 
-        sql_query_total = """
-            SELECT COUNT(*)
-            FROM `tabSales Order` so
-            LEFT JOIN `tabCustomer` cus ON so.customer = cus.name
-        """
-        if where_condition:
-            sql_query_total += " WHERE {}".format(where_condition)
-        totals = frappe.db.sql(sql_query_total, as_dict=1)
+        filtered_data = []
+        for i in all_sales_orders:
+            si = frappe.get_doc("Sales Order", i.so_name)
+            for st in si.sales_team:
+                if st.created_by == 1 and st.sales_person == sales_person:
+                    filtered_data.append(i)
+
+        totals = len(filtered_data)
+        
+         # Phân trang dữ liệu
+        start_idx = page_size * (page_number - 1)
+        end_idx = start_idx + page_size
+        paginated_data = filtered_data[start_idx:end_idx]
 
         return gen_response(200, "Thành công", {
-            "data": data,
-            "totals": totals[0]["COUNT(*)"],
+            "data": paginated_data,
+            "totals": totals,
             "page_number": page_number,
             "page_size": page_size,
         })
@@ -192,20 +191,31 @@ def kpi_total_so_detail(**kwargs):
         page_size =  int(kwargs.get("page_size", 20))
         page_number = int(kwargs.get("page_number")) if kwargs.get("page_number") and int(kwargs.get("page_number")) >=1 else 1
         employee = kwargs.get("employee")
+        sales_person = frappe.get_value("Sales Person", {"employee": employee}, "name")
 
-        user_id = None
-        if employee:
-            user_id = frappe.get_value("Employee", {"name": employee}, "user_id")
-        
-        filters["owner"] = user_id
+        filters["docstatus"] = ["!=", 0]
+
         if from_date and to_date:
             filters["creation"] = ["between", [from_date, to_date]]
 
-        data = frappe.get_all("Sales Order", filters=filters, fields=["name", "customer_name", "status", "UNIX_TIMESTAMP(creation) as pos_date"], start=page_size*(page_number-1), page_length=page_size)
-        totals = frappe.db.count("Sales Order", filters=filters)
+        all_sales_orders = frappe.get_all("Sales Order", filters=filters, fields=["name", "customer", "UNIX_TIMESTAMP(creation) as collec_date", "grand_total"])
+        filtered_data = []
+
+        for i in all_sales_orders:
+            so = frappe.get_doc("Sales Order", i.name)
+            for st in so.sales_team:
+                if st.created_by == 1 and st.sales_person == sales_person:
+                    filtered_data.append(i)
+
+        totals = len(filtered_data)
+        
+         # Phân trang dữ liệu
+        start_idx = page_size * (page_number - 1)
+        end_idx = start_idx + page_size
+        paginated_data = filtered_data[start_idx:end_idx]
 
         return gen_response(200, "Thành công", {
-            "data": data,
+            "data": paginated_data,
             "totals": totals,
             "page_number": page_number,
             "page_size": page_size,
@@ -225,19 +235,31 @@ def kpi_so_amount_detail(**kwargs):
         page_size =  int(kwargs.get("page_size", 20))
         page_number = int(kwargs.get("page_number")) if kwargs.get("page_number") and int(kwargs.get("page_number")) >=1 else 1
         employee = kwargs.get("employee")
-        user_id = None
-        if employee:
-            user_id = frappe.get_value("Employee", {"name": employee}, "user_id")
-        filters["owner"] = user_id
+        sales_person = frappe.get_value("Sales Person", {"employee": employee}, "name")
+
+        filters["docstatus"] = ["!=", 0]
 
         if from_date and to_date:
             filters["creation"] = ["between", [from_date, to_date]]
 
-        data = frappe.get_all("Sales Order", filters=filters, fields=["name", "customer", "UNIX_TIMESTAMP(creation) as collec_date", "grand_total"], start=page_size*(page_number-1), page_length=page_size)
-        totals = frappe.db.count("Sales Order", filters=filters)
+        all_sales_orders = frappe.get_all("Sales Order", filters=filters, fields=["name", "customer", "UNIX_TIMESTAMP(creation) as collec_date", "grand_total"])
+        filtered_data = []
+
+        for i in all_sales_orders:
+            so = frappe.get_doc("Sales Order", i.name)
+            for st in so.sales_team:
+                if st.created_by == 1 and st.sales_person == sales_person:
+                    filtered_data.append(i)
+
+        totals = len(filtered_data)
+
+         # Phân trang dữ liệu
+        start_idx = page_size * (page_number - 1)
+        end_idx = start_idx + page_size
+        paginated_data = filtered_data[start_idx:end_idx]
 
         return gen_response(200, "Thành công", {
-            "data": data,
+            "data": paginated_data,
             "totals": totals,
             "page_size": page_size,
             "page_number": page_number 
@@ -259,6 +281,7 @@ def kpi_si_amount_detail(**kwargs):
 
         if from_date and to_date:
             filters["creation"] = ["between", [from_date, to_date]]
+        filters["docstatus"] = ["!=", 0]
 
         all_sales_invoices = frappe.get_all("Sales Invoice", filters=filters, fields=["name", "customer", "UNIX_TIMESTAMP(creation) as collec_date", "grand_total"])
         filtered_data = []
@@ -296,26 +319,38 @@ def kpi_so_qty_detail(**kwargs):
         page_size =  int(kwargs.get("page_size", 20))
         page_number = int(kwargs.get("page_number")) if kwargs.get("page_number") and int(kwargs.get("page_number")) >=1 else 1
         employee = kwargs.get("employee")
-        user_id = None
-        if employee:
-            user_id = frappe.get_value("Employee", {"name": employee}, "user_id")
-        filters["owner"] = user_id
+        sales_person = frappe.get_value("Sales Person", {"employee": employee}, "name")
 
+        filters["docstatus"] = ["!=", 0]
         if from_date and to_date:
             filters["creation"] = ["between", [from_date, to_date]]
 
-        sales_orders = frappe.get_all("Sales Order", filters=filters, fields=["name", "customer", "UNIX_TIMESTAMP(creation) as create_date"], start=page_size*(page_number-1), page_length=page_size)
-        totals = frappe.db.count("Sales Order", filters=filters)
+        all_sales_orders = frappe.get_all("Sales Order", filters=filters, fields=["name", "customer", "UNIX_TIMESTAMP(creation) as create_date"])
+
+        filtered_data = []
+
+        for i in all_sales_orders:
+            so = frappe.get_doc("Sales Order", i.name)
+            for st in so.sales_team:
+                if st.created_by == 1 and st.sales_person == sales_person:
+                    filtered_data.append(i)
+
+        totals = len(filtered_data)
 
         total_qty = 0
-        for i in sales_orders:
+        for i in filtered_data:
             so = frappe.get_doc("Sales Order", i.name)
             for item in so.items:
                 total_qty += item.qty
             i["total_qty"] = total_qty
 
+        # Phân trang dữ liệu
+        start_idx = page_size * (page_number - 1)
+        end_idx = start_idx + page_size
+        paginated_data = filtered_data[start_idx:end_idx]
+
         return gen_response(200, "Thành công", {
-            "data": sales_orders,
+            "data": paginated_data,
             "totals": totals,
             "page_size": page_size,
             "page_number": page_number
