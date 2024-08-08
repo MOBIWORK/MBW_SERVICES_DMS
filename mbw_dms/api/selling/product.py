@@ -19,6 +19,7 @@ def list_product(**kwargs):
         my_filter = {}
         name = kwargs.get("name")
         name_item = kwargs.get("item_name")
+        key_search = kwargs.get("key_search")
         customer = kwargs.get("customer")
         brand = kwargs.get("brand")
         custom_industry = kwargs.get("industry")
@@ -39,11 +40,12 @@ def list_product(**kwargs):
                 price_lisr_cg = frappe.get_value("Customer Group", {"name": customers.customer_group}, "default_price_list")
                 if price_lisr_cg:
                     price_list = price_lisr_cg
-
+        filter_or = {}
         if name:
             my_filter["name"] = ["like", f'%{name}%']
-        if name_item:
-            my_filter["item_name"] = ["like", f'%{name_item}%']
+        if key_search:
+            filter_or["item_name"] = ["like", f'%{key_search}%']
+            filter_or["item_code"] = ["like", f'%{key_search}%']
         if brand:
             my_filter["brand"] = ["like", f'%{brand}%']
         if custom_industry:
@@ -52,7 +54,7 @@ def list_product(**kwargs):
             my_filter["item_group"] = ["like", f'%{item_group}%']
         my_filter["disabled"] = 0
 
-        items = frappe.db.get_list("Item", filters=my_filter,
+        items = frappe.db.get_list("Item", filters=my_filter,or_filters=filter_or,
                                     fields=["name", "item_code", "item_name", "item_group", 
                                             "stock_uom", "min_order_qty", "description",
                                             "brand", "country_of_origin", "image",
@@ -100,7 +102,7 @@ def list_product(**kwargs):
                 if item.get("name") in permitted_item:
                     permitted_items_count += 1
         else:
-            permitted_items_count = frappe.db.count("Item", filters=my_filter)
+            permitted_items_count = len( frappe.db.get_list("Item", filters=my_filter,or_filters=filter_or,))
 
         data_item = []
         default_selling_price_list = frappe.get_doc("Selling Settings").selling_price_list
