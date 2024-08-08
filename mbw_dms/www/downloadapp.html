@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        height: 100%;
+      }
+
+      .container {
+        display: flex;
+        height: 100vh;
+        overflow: hidden;
+      }
+
+      .left,
+      .right {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+      }
+
+      .left {
+        background-color: #fff;
+        width: 40%;
+        justify-content: start;
+      }
+
+      .left-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-top: 60px;
+      }
+
+      .logo {
+        width: 298px;
+        height: 298px;
+      }
+
+      .left span {
+        font-size: 50px;
+        line-height: 60px;
+        font-size: 500;
+        margin-bottom: 20px;
+      }
+
+      .left p {
+        font-size: 24px;
+        line-height: 29px;
+        font-weight: 400;
+        color: #616161;
+        margin-bottom: 20px;
+      }
+
+      .left .buttons {
+        display: flex;
+        gap: 10px;
+      }
+
+      .left .buttons a img {
+        width: 150px;
+      }
+
+      .right {
+        width: 60%;
+        height: 100vh;
+        position: relative;
+      }
+
+      .right .desktop-image {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .right .mobile-image {
+        display: none;
+      }
+
+      @media (max-width: 768px) {
+        .container {
+          flex-direction: column;
+        }
+        .left,
+        .right {
+          width: 100%;
+        }
+        .right .desktop-image {
+          display: none;
+        }
+        .logo {
+          width: 200px;
+          height: 200px;
+        }
+        .right .mobile-image {
+          display: block;
+          width: 100%;
+          height: 100%;
+        }
+      }
+
+      @media (max-width: 430px) {
+        .left-content {
+          margin-top: 20px;
+        }
+        .logo {
+          width: 200px;
+          height: 200px;
+        }
+        .left span {
+          font-size: 32px;
+          line-height: 40px;
+          font-size: 500;
+          margin-bottom: 20px;
+        }
+
+        .left p {
+          font-size: 18px;
+          line-height: 22px;
+          font-weight: 400;
+          color: #616161;
+          margin-bottom: 20px;
+        }
+        .left .buttons a img {
+          width: 120px;
+        }
+        .right .mobile-image {
+          display: block;
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="left">
+        <div class="left-content">
+          <img src="/assets/mbw_dms/img/logo.png" alt="V&T Logo" class="logo" />
+          <span>Tải ứng dụng</span>
+          <p>Ứng dụng sẽ được tải về thiết bị của bạn</p>
+          <div class="buttons">
+            <a
+              href="itms-services:///?action=download-manifest&amp;amp;url=https://store.ekgis.vn/mobiwork/public/VuThuSFA.plist"
+              target="_blank"
+              ><img src="/assets/mbw_dms/img/Ios.png" alt="App Store"
+            /></a>
+            <a href="https://store.ekgis.vn/mobiwork/public/APK/VuThuSFA.apk"
+              ><img src="/assets/mbw_dms/img/Android.png" alt="Google Play"
+            /></a>
+          </div>
+        </div>
+      </div>
+      <div class="right">
+        <img
+          src="/assets/mbw_dms/img/Pic.png"
+          alt="V&T App"
+          class="desktop-image"
+        />
+        <img
+          src="/assets/mbw_dms/img/Pickmobile.png"
+          alt="V&T App"
+          class="mobile-image"
+        />
+      </div>
+    </div>
+  </body>
+</html>

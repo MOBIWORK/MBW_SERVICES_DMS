@@ -13,7 +13,7 @@
    "label": "L\u00e3i & L\u1ed7"
   }
  ],
- "content": "[{\"id\":\"_LKEBuivWr\",\"type\":\"onboarding\",\"data\":{\"onboarding_name\":\"DMS\",\"col\":12}},{\"id\":\"kB7wjE6nMV\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"\u0110\u01a1n H\u00e0ng\",\"col\":3}},{\"id\":\"vkK4KOtlTu\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Gi\u00e1 tr\u1ecb t\u1ed3n kho\",\"col\":3}},{\"id\":\"7RS_Yx6cNi\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Doanh Thu\",\"col\":3}},{\"id\":\"ehwMiMcEOi\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Nh\u00e2n vi\u00ean\",\"col\":3}},{\"id\":\"Mhz4unYSpm\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Kh\u00e1ch h\u00e0ng doanh s\u1ed1 cao nh\u1ea5t\",\"col\":12}},{\"id\":\"KCHHZuZmKr\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Doanh s\u1ed1\",\"col\":6}},{\"id\":\"Y0S0j-3pKT\",\"type\":\"chart\",\"data\":{\"chart_name\":\"L\u00e3i & L\u1ed7\",\"col\":6}},{\"id\":\"X3_s1a8hqy\",\"type\":\"paragraph\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Your Shortcut</b></span>\",\"col\":12}},{\"id\":\"FfNze3DCzh\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Sales Order\",\"col\":4}},{\"id\":\"rhmv7Megti\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Item\",\"col\":4}},{\"id\":\"a2J4I86bYe\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Customer\",\"col\":4}},{\"id\":\"U-fT3n3tWH\",\"type\":\"paragraph\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Report &amp; Masters</b></span>\",\"col\":12}},{\"id\":\"D06bWLNFkz\",\"type\":\"custom_block\",\"data\":{\"custom_block_name\":\"DMS Router Web\",\"col\":4}},{\"id\":\"8mTBqrsAyp\",\"type\":\"card\",\"data\":{\"card_name\":\"Danh m\u1ee5c kh\u00e1c\",\"col\":4}},{\"id\":\"p0j0M9QJKr\",\"type\":\"card\",\"data\":{\"card_name\":\"C\u1ea5u h\u00ecnh\",\"col\":4}},{\"id\":\"4S3r7ZKW7P\",\"type\":\"card\",\"data\":{\"card_name\":\"B\u00e1o c\u00e1o ch\u00ednh\",\"col\":4}},{\"id\":\"vE9N32WLLI\",\"type\":\"card\",\"data\":{\"card_name\":\"B\u00e1o c\u00e1o kh\u00e1c\",\"col\":4}}]",
+ "content": "[{\"id\":\"_LKEBuivWr\",\"type\":\"onboarding\",\"data\":{\"onboarding_name\":\"DMS\",\"col\":12}},{\"id\":\"kB7wjE6nMV\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"\u0110\u01a1n H\u00e0ng\",\"col\":3}},{\"id\":\"vkK4KOtlTu\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Gi\u00e1 tr\u1ecb t\u1ed3n kho\",\"col\":3}},{\"id\":\"7RS_Yx6cNi\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Doanh Thu\",\"col\":3}},{\"id\":\"ehwMiMcEOi\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Nh\u00e2n vi\u00ean\",\"col\":3}},{\"id\":\"Mhz4unYSpm\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Kh\u00e1ch h\u00e0ng doanh s\u1ed1 cao nh\u1ea5t\",\"col\":12}},{\"id\":\"KCHHZuZmKr\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Doanh s\u1ed1\",\"col\":6}},{\"id\":\"Y0S0j-3pKT\",\"type\":\"chart\",\"data\":{\"chart_name\":\"L\u00e3i & L\u1ed7\",\"col\":6}},{\"id\":\"X3_s1a8hqy\",\"type\":\"paragraph\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Your Shortcut</b></span>\",\"col\":12}},{\"id\":\"FfNze3DCzh\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Sales Order\",\"col\":3}},{\"id\":\"rhmv7Megti\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Item\",\"col\":3}},{\"id\":\"a2J4I86bYe\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Customer\",\"col\":3}},{\"id\":\"VAAeUuR9_D\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"T\u1ea3i \u1ee9ng d\u1ee5ng\",\"col\":3}},{\"id\":\"U-fT3n3tWH\",\"type\":\"paragraph\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Report &amp; Masters</b></span>\",\"col\":12}},{\"id\":\"D06bWLNFkz\",\"type\":\"custom_block\",\"data\":{\"custom_block_name\":\"DMS Router Web\",\"col\":4}},{\"id\":\"8mTBqrsAyp\",\"type\":\"card\",\"data\":{\"card_name\":\"Danh m\u1ee5c kh\u00e1c\",\"col\":4}},{\"id\":\"p0j0M9QJKr\",\"type\":\"card\",\"data\":{\"card_name\":\"C\u1ea5u h\u00ecnh\",\"col\":4}},{\"id\":\"4S3r7ZKW7P\",\"type\":\"card\",\"data\":{\"card_name\":\"B\u00e1o c\u00e1o ch\u00ednh\",\"col\":4}},{\"id\":\"vE9N32WLLI\",\"type\":\"card\",\"data\":{\"card_name\":\"B\u00e1o c\u00e1o kh\u00e1c\",\"col\":4}}]",
  "creation": "2024-04-13 08:43:09.840522",
  "custom_blocks": [
   {
@@ -318,8 +318,8 @@
    "type": "Link"
   }
  ],
- "modified": "2024-05-15 09:06:40.435273",
- "modified_by": "tungda@mobiwork.vn",
+ "modified": "2024-08-08 15:26:23.115247",
+ "modified_by": "Administrator",
  "module": "MBW DMS",
  "name": "DMS",
  "number_cards": [
@@ -354,6 +354,13 @@
    "link_to": "Sales Order",
    "stats_filter": "[]",
    "type": "DocType"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "T\u1ea3i \u1ee9ng d\u1ee5ng",
+   "type": "URL",
+   "url": "/downloadapp"
   },
   {
    "color": "Grey",
