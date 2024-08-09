@@ -119,7 +119,7 @@ def list_product(**kwargs):
                 item["details"] = [{"price_list_rate": 0}]
 
             item["unit"] = frappe.db.get_all("UOM Conversion Detail", {"parent" : item.get("name")}, ["uom", "conversion_factor"])
-            
+
             item["stock"] = frappe.db.get_all("Stock Entry Detail", {"item_code": item.get("item_code")}, ["t_warehouse", "qty"])
             item["item_tax_template"] = frappe.db.get_all("Item Tax", {"parent": item["name"]}, ["item_tax_template"])
             if item["item_tax_template"]:
@@ -181,6 +181,7 @@ def list_product_campaign(**kwargs):
                                             "custom_industry", "end_of_life", "total_projected_qty"],
                                     start=page_size * (page_number - 1),
                                     page_length=page_size)
+        print("items============",items)
         
         for item in items:
             item_doc = frappe.get_doc("Item", item.get("name"))
@@ -191,8 +192,8 @@ def list_product_campaign(**kwargs):
             
             images_links = pydash.map_(images, return_fiel)
             item["custom_images_item"] = images_links
-            item["barcodes"] = barcodes[0].barcode
-            item["barcode_type"] = barcodes[0].barcode_type
+            item["barcodes"] = barcodes[0].barcode if len(barcodes) > 0 else ""
+            item["barcode_type"] = barcodes[0].barcode_type if len(barcodes) > 0 else ""
 
         # Lấy danh sách các sản phẩm mà người dùng có quyền truy cập
         user = frappe.session.user
