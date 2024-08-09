@@ -267,7 +267,7 @@ def create_sale_order(**kwargs):
         customer.save()
 
         new_order.insert()
-    
+        
         sales_order_doc = frappe.get_doc("Sales Order", new_order.name)
         for item in sales_order_doc.items:
             discount_amount = next((data.get("discount_amount") for data in items if data.get("discount_amount") and data["item_code"] == item.item_code), 0)
@@ -279,7 +279,7 @@ def create_sale_order(**kwargs):
                 sales_order_doc.save()
         
         detail_order = so_si_detail(doctype="Sales Order", name=new_order.name)
-        
+        new_order.submit()
         return gen_response(201, "Thành công", {
             "detail_order": detail_order,
             "name": new_order.name
