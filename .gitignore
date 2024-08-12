@@ -10,9 +10,10 @@ mbw_desk/.env.development
 
 mbw_desk/node_modules
 
+/node_modules
+
 /mbw_dms/www
 
 node_modules
 
 /mbw_dms/public/css/styles.output.css
-node_modules
