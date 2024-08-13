@@ -271,6 +271,9 @@ doc_events = {
     },
     "Purchase Receipt": {
         "on_submit": "mbw_dms.controllers.purchase_receipt.auto_create_purchase_invoice_pe"
+    },
+    "Delivery Note": {
+        "on_submit": "ymbw_dms.controllers.delivery_note.create_si_and_pe"
     }
 }
 
