@@ -198,7 +198,7 @@ def kpi_total_so_detail(**kwargs):
         if from_date and to_date:
             filters["creation"] = ["between", [from_date, to_date]]
 
-        all_sales_orders = frappe.get_all("Sales Order", filters=filters, fields=["name", "customer", "UNIX_TIMESTAMP(creation) as collec_date", "grand_total"])
+        all_sales_orders = frappe.get_all("Sales Order", filters=filters, fields=["name", "customer", "UNIX_TIMESTAMP(creation) as collec_date", "grand_total","status","docstatus"])
         filtered_data = []
 
         for i in all_sales_orders:
