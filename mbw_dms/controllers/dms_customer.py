@@ -1,7 +1,9 @@
 import frappe
 from frappe.utils import nowdate
 import pydash
+from datetime import datetime
 
+# Cập nhật kpi tháng
 def update_kpi_monthly(doc, method):
     # Lấy ngày tháng để truy xuất dữ liệu
     month = int(nowdate().split('-')[1])
@@ -28,7 +30,47 @@ def update_kpi_monthly(doc, method):
             "so_kh_moi": 1,
         }).insert(ignore_permissions=True)
 
+# Cập nhật kpi ngày
+def update_kpi_daily(doc, method):
+    # Lấy ngày tháng
+    today = datetime.today().date()
 
+    # Lấy id của nhân viên
+    user_name = frappe.get_value("Employee", {"user_id": doc.owner}, "name")
+
+    # Kiểm tra đã tồn tại bản ghi KPI của chưa
+    existing_daily_summary = frappe.get_value("DMS Summary KPI Daily", {"date": today, "nhan_vien_ban_hang": user_name}, "name")
+
+    if existing_daily_summary:
+        daily_summary_doc = frappe.get_doc("DMS Summary KPI Daily", existing_daily_summary)
+        daily_summary_doc.so_kh_moi += 1
+        daily_summary_doc.save(ignore_permissions=True)
+    else:
+        daily_summary_doc = frappe.get_doc({
+            "doctype": "DMS Summary KPI Daily",
+            "date": today,
+            "nhan_vien_ban_hang": user_name,
+            "so_kh_moi": 1,
+        }).insert(ignore_permissions=True)
+
+# Cập nhật kpi ngày sau khi xóa bản ghi
+def update_kpi_daily_after_delete(doc, method):
+    # Lấy ngày tháng
+    today = datetime.today().date()
+
+    # Lấy id của nhân viên
+    user_name = frappe.get_value("Employee", {"user_id": doc.owner}, "name")
+
+    # Kiểm tra đã tồn tại bản ghi KPI của chưa
+    existing_daily_summary = frappe.get_value("DMS Summary KPI Daily", {"date": today, "nhan_vien_ban_hang": user_name}, "name")
+    if existing_daily_summary:
+        daily_summary_doc = frappe.get_doc("DMS Summary KPI Daily", existing_daily_summary)
+        daily_summary_doc.so_kh_moi -= 1 if daily_summary_doc.so_kh_moi >= 1 else 0
+        daily_summary_doc.save(ignore_permissions=True)
+    else:
+        return
+
+# Cập nhật kpi tháng sau khi xóa bản ghi
 def update_kpi_monthly_after_delete(doc, method):
     # Lấy ngày tháng để truy xuất dữ liệu
     month = int(nowdate().split('-')[1])
@@ -42,7 +84,7 @@ def update_kpi_monthly_after_delete(doc, method):
 
     if existing_monthly_summary:
         monthly_summary_doc = frappe.get_doc("DMS Summary KPI Monthly", existing_monthly_summary)
-        monthly_summary_doc.so_kh_moi -= 1
+        monthly_summary_doc.so_kh_moi -= 1 if monthly_summary_doc.so_kh_moi >= 1 else 0
         monthly_summary_doc.save(ignore_permissions=True)
     else:
         return

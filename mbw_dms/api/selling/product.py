@@ -181,7 +181,6 @@ def list_product_campaign(**kwargs):
                                             "custom_industry", "end_of_life", "total_projected_qty"],
                                     start=page_size * (page_number - 1),
                                     page_length=page_size)
-        print("items============",items)
         
         for item in items:
             item_doc = frappe.get_doc("Item", item.get("name"))
