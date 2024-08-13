@@ -66,7 +66,7 @@ def list_customer(**kwargs):
         select_field = ["name", "customer_name", "customer_code","customer_type", 
                                         "customer_group", "territory", "industry", "image", "website", 
                                         "mobile_no", "customer_primary_address", "custom_birthday",
-                                        "customer_location_primary", "customer_details"]
+                                        "customer_location_primary", "customer_details","sfa_customer_type","sfa_sale_channel"]
         
         customers = (frappe.qb.from_(CustomerDoc)
                     .distinct()
@@ -185,7 +185,7 @@ def create_customer(**kwargs):
             
         # Tạo mới khách hàng
         new_customer = frappe.new_doc("Customer")
-        required_fields = ["customer_code", "customer_name", "customer_group", "territory"]
+        required_fields = ["customer_code", "customer_name", "customer_group", "territory","sfa_customer_type","sfa_sale_channel"]
         normal_fields = ["customer_details", "website"]
         date_fields = ["custom_birthday"]
         choice_fields = ["customer_type"]
@@ -324,7 +324,7 @@ def update_customer(**kwargs):
         if frappe.db.exists("Customer", name, cache=True):
             customer = frappe.get_doc("Customer", name)            
             # Cập nhật các trường cơ bản của khách hàng
-            fields = ["customer_code", "customer_name", "customer_group", "territory", "customer_details", "website", "customer_type"]
+            fields = ["customer_code", "customer_name", "customer_group", "territory", "customer_details", "website", "customer_type","sfa_customer_type","sfa_sale_channel"]
             date_fields = ["custom_birthday"]
             for key, value in kwargs.items():
                 if key in fields:
