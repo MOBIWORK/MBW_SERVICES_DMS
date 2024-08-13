@@ -23,12 +23,18 @@ from frappe.utils import cint
 
 class DMSCheckin(Document):
     def after_insert(self):
+        #thêm dữ liệu vào kpi tháng
         self.update_kpi_monthly()
+        # gửi dữ liệu ekg
         self.send_data_to_ekgis()
+        #kiểm tra đúng/ngoại tuyến
         self.check_router()
+        # cập nhật data viếng thăm lần đầu
         self.update_data_first_checkin()
 
     def after_delete(self):
+        print("---------------delete checkin: run update_kpi_monthly_after_delete --------------------------")
+        #xử lý sau khi xóa
         self.update_kpi_monthly_after_delete()
 
     def existing_checkin(self, kh_ma, start_date, end_date, current_user):
@@ -143,7 +149,8 @@ class DMSCheckin(Document):
         end_date_str = f"{year:04d}-{month:02d}-{last_day_of_month:02d}"
         start_date = frappe.utils.getdate(start_date_str)
         end_date = frappe.utils.getdate(end_date_str)
-
+        print("start_date",start_date)
+        print("end_date",end_date)
         # Lấy id của nhân viên
         user_id = frappe.session.user
         user_name = frappe.get_value("Employee", {"user_id": user_id}, "name")
@@ -172,21 +179,21 @@ class DMSCheckin(Document):
         if len(exists_checkin) > 1:
             if existing_monthly_summary:
                 monthly_summary_doc = frappe.get_doc("DMS Summary KPI Monthly", existing_monthly_summary)
-                monthly_summary_doc.so_kh_vt_luot -= 1
+                monthly_summary_doc.so_kh_vt_luot = minus_not_nega(monthly_summary_doc.so_kh_vt_luot)
                 if name_date in list_travel_date:
-                    monthly_summary_doc.solan_vt_dungtuyen -= 1
+                    monthly_summary_doc.solan_vt_dungtuyen = minus_not_nega(monthly_summary_doc.solan_vt_dungtuyen)
                 else:
-                    monthly_summary_doc.solan_vt_ngoaituyen -= 1
+                    monthly_summary_doc.solan_vt_ngoaituyen = minus_not_nega(monthly_summary_doc.solan_vt_ngoaituyen)
                 monthly_summary_doc.save(ignore_permissions=True)
         else:
             if existing_monthly_summary:
                 monthly_summary_doc = frappe.get_doc("DMS Summary KPI Monthly", existing_monthly_summary)
-                monthly_summary_doc.so_kh_vt_luot -= 1
-                monthly_summary_doc.so_kh_vt_duynhat -= 1
+                monthly_summary_doc.so_kh_vt_luot = minus_not_nega(monthly_summary_doc.so_kh_vt_luot)
+                monthly_summary_doc.so_kh_vt_duynhat = minus_not_nega(monthly_summary_doc.so_kh_vt_duynhat)
                 if name_date in list_travel_date:
-                    monthly_summary_doc.solan_vt_dungtuyen -= 1
+                    monthly_summary_doc.solan_vt_dungtuyen = minus_not_nega(monthly_summary_doc.solan_vt_dungtuyen)
                 else:
-                    monthly_summary_doc.solan_vt_ngoaituyen -= 1
+                    monthly_summary_doc.solan_vt_ngoaituyen = minus_not_nega(monthly_summary_doc.solan_vt_ngoaituyen) 
                 monthly_summary_doc.save(ignore_permissions=True)
 
     def send_data_to_ekgis(self):
@@ -256,7 +263,9 @@ class DMSCheckin(Document):
         else:
             return
 
-    
+def minus_not_nega(num,sub=1):
+    num = int(num)
+    return 0 if num <=0 else num - sub   
 # Tạo mới checkin
 @frappe.whitelist(methods="POST")
 def create_checkin(kwargs):

@@ -551,3 +551,18 @@ def remove_contact_address(**kwarg):
         return gen_response(200, "Thành công")
     except Exception as e :
         return exception_handle(e)
+
+# danh sách loại khách hàng-sfa_customer_type -linkto: DMS Customer Type
+from mbw_dms.api.common import get_list_search
+@frappe.whitelist()
+def list_dms_cs_type():
+    return gen_response(200,"",get_list_search(doctype="DMS Customer Type",reference_doctype="Customer",ignore_user_permissions=0,txt=""))
+
+
+# danh sách loại hình khách hàng - customer_type - Company/Individual/Proprietorship/Partnership
+
+
+# danh sách kênh-sfa_sale_channel - link to: DMS Sales Channel
+
+
+    

@@ -112,16 +112,24 @@ def update_kpi_monthly_on_cancel(doc, method):
 
         if len(existing_cus) == 0:
             total_uom -= len(uom)
-            monthly_summary_doc.so_don_hang -= 1
-            monthly_summary_doc.doanh_so_thang -= grand_totals
-            monthly_summary_doc.san_luong -= sum(qty)
-            monthly_summary_doc.so_kh_dat_hang -= 1
+            monthly_summary_doc.so_don_hang = minus_not_nega(monthly_summary_doc.so_don_hang)
+            monthly_summary_doc.doanh_so_thang = minus_not_nega(monthly_summary_doc.doanh_so_thang, grand_totals)
+            monthly_summary_doc.san_luong = minus_not_nega(monthly_summary_doc.san_luong, sum(qty))
+            monthly_summary_doc.so_kh_dat_hang = minus_not_nega(monthly_summary_doc.so_kh_dat_hang)
             monthly_summary_doc.sku = round((float(total_uom) / (monthly_summary_doc.so_don_hang)), 2) if monthly_summary_doc.so_don_hang > 0 else 0
         else:
-            monthly_summary_doc.so_don_hang -= 1
-            monthly_summary_doc.doanh_so_thang -= grand_totals
-            monthly_summary_doc.san_luong -= sum(qty)
+            monthly_summary_doc.so_don_hang = minus_not_nega(monthly_summary_doc.so_don_hang)
+            monthly_summary_doc.doanh_so_thang = minus_not_nega(monthly_summary_doc.doanh_so_thang,grand_totals)
+            monthly_summary_doc.san_luong = minus_not_nega(monthly_summary_doc.san_luong, sum(qty))
             monthly_summary_doc.sku = round((float(total_uom) / (monthly_summary_doc.so_don_hang)), 2) if monthly_summary_doc.so_don_hang > 0 else 0
         monthly_summary_doc.save(ignore_permissions=True)
     else:
         return
+
+
+def minus_not_nega(num,sub=1):
+    num = int(num)
+    if num <= 0 :
+        return 0
+    else:
+        return num - sub

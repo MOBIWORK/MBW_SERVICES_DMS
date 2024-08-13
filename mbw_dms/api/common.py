@@ -743,3 +743,125 @@ def buildQuery(query,condition):
     return query
 
 CommonHandle.buildQuery = staticmethod(buildQuery)
+from frappe.permissions import has_permission
+from frappe.utils import cint
+def get_list_search(
+        doctype: str,
+	    txt: str,
+        start: int = 0,
+	    page_length: int = 10,
+        reference_doctype: str | None = None,
+	    ignore_user_permissions: bool = False,
+) :
+    try:
+        start = cint(start)
+        #lấy metadata của doctype
+        meta = frappe.get_meta(doctype)
+    
+        filters = []
+        or_filters = []
+        # dựng tìm kiếm 
+        if txt:
+            field_types = {
+                "Data",
+                "Text",
+                "Small Text",
+                "Long Text",
+                "Link",
+                "Select",
+                "Read Only",
+                "Text Editor",
+            }
+            search_fields = ["name"]
+            # kiểm tra field: title field
+            if meta.title_field:
+                search_fields.append(meta.title_field)
+            # kiểm tra field: search field
+            if meta.search_fields:
+                search_fields.extend(meta.get_search_fields())
+            print("search_fields============",search_fields)
+            for f in search_fields:
+                fmeta = meta.get_field(f.strip())
+                # nếu không có doc cha
+                if not meta.translated_doctype and (f == "name" or (fmeta and fmeta.fieldtype in field_types)):
+                    or_filters.append([doctype, f.strip(), "like", f"%{txt}%"])
+
+        if meta.get("fields", {"fieldname": "enabled", "fieldtype": "Check"}):
+            filters.append([doctype, "enabled", "=", 1])
+        if meta.get("fields", {"fieldname": "disabled", "fieldtype": "Check"}):
+            filters.append([doctype, "disabled", "!=", 1])
+        # trả về 1 danh sách các search field
+        from frappe.desk.search import get_std_fields_list,get_order_by
+        fields = get_std_fields_list(meta, "name")
+        formatted_fields = [f"`tab{meta.name}`.`{f.strip()}`" for f in fields]
+        # thêm truy vấn title sau tên
+        if meta.show_title_field_in_link and meta.title_field:
+            formatted_fields.insert(1, f"`tab{meta.name}`.{meta.title_field} as `label`")
+        # lấy order
+        order_by_based_on_meta = get_order_by(doctype, meta)
+        # `idx` is number of times a document is referred, check link_count.py
+        order_by = f"`tab{doctype}`.idx desc, {order_by_based_on_meta}"
+
+        # làm sạch chuỗi truy vấn: loại bỏ sql injection
+        if not meta.translated_doctype:
+            _txt = frappe.db.escape((txt or "").replace("%", "").replace("@", ""))
+		    # xếp các dco ra kết quả tìm kiếm trước , null sau
+            _relevance = f"(1 / nullif(locate({_txt}, `tab{doctype}`.`name`), 0))"
+            formatted_fields.append(f"""{_relevance} as `_relevance`""")
+            # Since we are sorting by alias postgres needs to know number of column we are sorting
+            if frappe.db.db_type == "mariadb":
+                order_by = f"ifnull(_relevance, -9999) desc, {order_by}"
+            elif frappe.db.db_type == "postgres":
+                # Since we are sorting by alias postgres needs to know number of column we are sorting
+                order_by = f"{len(formatted_fields)} desc nulls last, {order_by}"
+        
+        ignore_permissions = doctype == "DocType" or (
+            cint(ignore_user_permissions)
+            and has_permission(
+                doctype,
+                ptype="select" if frappe.only_has_select_perm(doctype) else "read",
+                parent_doctype=reference_doctype,
+            )
+        )
+
+        values = frappe.get_list(
+            doctype,
+            filters=filters,
+            fields=formatted_fields,
+            or_filters=or_filters,
+            limit_start=start,
+            limit_page_length=None if meta.translated_doctype else page_length,
+            order_by=order_by,
+            ignore_permissions=ignore_permissions,
+            reference_doctype=reference_doctype,
+            as_list=True,
+            strict=False,
+        )
+        print("values",values)
+        # import thư viện xử lý biểu thức chính quy
+        import re
+        if meta.translated_doctype:
+		# Filtering the values array so that query is included in very element
+            values = (
+                result
+                for result in values
+                if any(
+                    re.search(f"{re.escape(txt)}.*", _(cstr(value)) or "", re.IGNORECASE)
+                    for value in result.values() 
+                )
+            )
+
+        # Sorting the values array so that relevant results always come first
+        # This will first bring elements on top in which query is a prefix of element
+        # Then it will bring the rest of the elements and sort them in lexicographical order
+        from frappe.desk.search import relevance_sorter
+        values = sorted(values, key=lambda x: relevance_sorter(x, txt, False))
+
+        # remove _relevance from results
+        if not meta.translated_doctype:
+             values = [r[:-1] for r in values]          
+
+        return values
+    except Exception as e: 
+        print("error search====",e)
+        return []

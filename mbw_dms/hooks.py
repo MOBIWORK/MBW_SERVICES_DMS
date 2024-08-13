@@ -259,15 +259,22 @@ doc_events = {
     },
     "Sales Invoice": {
         "on_submit": "mbw_dms.controllers.dms_sales_invoice.update_kpi_monthly",
+        #hủy đơn bán/trả
         "on_cancel": "mbw_dms.controllers.dms_sales_invoice.update_kpi_monthly_on_cancel"
     },
     "Sales Order": {
         "on_submit": "mbw_dms.controllers.dms_sales_order.update_kpi_monthly",
-        "on_cancel": "mbw_dms.controllers.dms_sales_order.update_kpi_monthly_on_cancel"
+        #hủy/xóa đơn hàng
+        "on_cancel": "mbw_dms.controllers.dms_sales_order.update_kpi_monthly_on_cancel",
+        "after_delete": "mbw_dms.controllers.dms_sales_order.update_kpi_monthly_on_cancel"
     },
     "DMS Router": {
         "before_insert": "mbw_dms.controllers.dms_router.check_duplicate_import"
+    },
+    "DMS Checkin" : {
+        #hủy, xóa checkin => cập nhật lại kpi: trực tiếp trong doctype
     }
+
 }
 
 on_session_creation = [

@@ -955,6 +955,7 @@ def report(kwargs):
         
         for i in data:
             emp = i.nhan_vien_ban_hang
+            # kpi nhan vien ban hang
             kpi_month = frappe.db.sql(f"""
                 SELECT so_kh_vt_luot as th_vt, so_kh_vt_duynhat as th_vt_dn, so_kh_dat_hang as th_dat_hang, so_don_hang as th_don_hang, so_kh_moi as th_kh_moi,
                 doanh_so_thang as th_doanh_so, doanh_thu_thang as th_doanh_thu, san_luong as th_san_lg, sku as th_sku, so_gio_lam_viec as th_so_gio_lam_viec

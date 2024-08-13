@@ -4,7 +4,7 @@ from mbw_dms.api.common import gen_response, exception_handle
 from mbw_dms.api.validators import validate_filter_timestamp
 import calendar
 
-# Báo cáo KPI web
+# Báo cáo KPI web- lưới tổng quan
 @frappe.whitelist(methods='GET')
 def kpi_report(**kwargs):
 
