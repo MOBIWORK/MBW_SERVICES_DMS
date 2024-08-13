@@ -18,8 +18,8 @@ const columnsDetail: any = [
   },
   {
     title: "Khách hàng",
-    dataIndex: "customer_name",
-    key: "customer_name",
+    dataIndex: "customer",
+    key: "customer",
   },
   {
     title: "Trạng thái",
@@ -41,8 +41,8 @@ const columnsDetail: any = [
   },
   {
     title: "Ngày đặt",
-    dataIndex: "pos_date",
-    key: "pos_date",
+    dataIndex: "collec_date",
+    key: "collec_date",
     render: (value: any) => {
       return (
         <>
