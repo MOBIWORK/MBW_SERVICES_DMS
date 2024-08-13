@@ -239,7 +239,6 @@ class DMSCheckin(Document):
         new_data = frappe.new_doc("DMS First Checkin Customer")
         customer_name = self.kh_ten
         existing_checkin = frappe.get_all("DMS Checkin", filters={"kh_ten": customer_name}, fields=["name"])
-
         if len(existing_checkin) == 1:
             if frappe.db.exists("Employee", {"user_id": self.owner}):
                 employee = frappe.get_doc("Employee", {"user_id": self.owner}).as_dict()
@@ -249,6 +248,7 @@ class DMSCheckin(Document):
                 new_data.employee_name = employee.employee_name
                 #nhóm bán hàng
                 new_data.sales_team = sale_team.parent_sales_person if sale_team else ""
+                new_data.sales_person = sale_team.name if sale_team else ""
             cus = frappe.get_doc("Customer", {"customer_name": customer_name}).as_dict()
             new_data.customer_name = customer_name
             new_data.customer_id = cus.customer_code
