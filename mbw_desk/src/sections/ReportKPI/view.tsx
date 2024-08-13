@@ -9,7 +9,7 @@ import { rsData, rsDataFrappe } from "../../types/response";
 import { employee } from "../../types/employeeFilter";
 import useDebounce from "../../hooks/useDebount";
 import dayjs from "dayjs";
-import { translationUrl, treeArray } from "../../util";
+import { treeArray } from "../../util";
 import { listSale } from "../../types/listSale";
 import { useResize } from "@/hooks";
 import { SelectCommon, TreeSelectCommon } from "@/components/select/select";
@@ -502,7 +502,7 @@ export default function ReportKPI() {
                       {dataReort?.sum?.tong_kh_so_gio_lam_viec}
                     </Table.Summary.Cell>
                     <Table.Summary.Cell index={32} className="text-center">
-                      {dataReort?.sum?.tong_th_so_gio_lam_viec}
+                      {Number(dataReort?.sum?.tong_th_so_gio_lam_viec).toFixed(2)}
                     </Table.Summary.Cell>
                     <Table.Summary.Cell index={33}></Table.Summary.Cell>
                   </Table.Summary.Row>
