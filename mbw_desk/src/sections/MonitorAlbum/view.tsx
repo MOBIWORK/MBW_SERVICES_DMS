@@ -165,7 +165,7 @@ export default function MonitorAlbum() {
     <>
       <HeaderPage title="Giám sát chụp ảnh khách hàng" />
       <div className="bg-white rounded-md py-7 px-4">
-        <Form layout="vertical" className="flex flex-wrap justify-start items-center">
+        <Form layout="vertical" className="flex flex-wrap justify-start items-center sticky py-1">
           <Row className="" gutter={[8, 8]}>
             <FormItemCustom label={"Ngày chụp"} className="w-[175px] border-none mr-2">
               <DatePicker
@@ -251,7 +251,7 @@ export default function MonitorAlbum() {
           </Row>
         </Form>
 
-        <div className="pt-5">
+        <div className="pt-5 max-h-[80vh] overflow-y-auto">
           <Row gutter={[16, 8]}>
             {dataAlbum.length > 0 &&
               dataAlbum.map((data: any) => (
@@ -285,6 +285,8 @@ export default function MonitorAlbum() {
               ))}
           </Row>
 
+        </div>
+      </div>
           <Modal
             width={1064}
             title="Hình ảnh khách hàng"
@@ -294,8 +296,6 @@ export default function MonitorAlbum() {
           >
             <DetailModal data={modal.id} />
           </Modal>
-        </div>
-      </div>
     </>
   );
 }

@@ -234,7 +234,7 @@ class DMSCheckin(Document):
                     if self.kh_ten == a["customer"]:
                         self.checkin_dungtuyen = 1
                         self.save()
-
+    # thêm báo cáo checkin đầu
     def update_data_first_checkin(self):
         new_data = frappe.new_doc("DMS First Checkin Customer")
         customer_name = self.kh_ten
@@ -243,10 +243,12 @@ class DMSCheckin(Document):
         if len(existing_checkin) == 1:
             if frappe.db.exists("Employee", {"user_id": self.owner}):
                 employee = frappe.get_doc("Employee", {"user_id": self.owner}).as_dict()
+                sale_team = frappe.get_doc("Sales Person", {"employee": employee.name}).as_dict() #parent_sales_person
                 new_data.department = employee.department
                 new_data.employee_id = employee.name
                 new_data.employee_name = employee.employee_name
-
+                #nhóm bán hàng
+                new_data.sales_team = sale_team.parent_sales_person if sale_team else ""
             cus = frappe.get_doc("Customer", {"customer_name": customer_name}).as_dict()
             new_data.customer_name = customer_name
             new_data.customer_id = cus.customer_code

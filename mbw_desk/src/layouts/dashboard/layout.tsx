@@ -25,7 +25,7 @@ export default function DashboardLayout({ children }: Props) {
             <MenuLeft handleCollapsed = {setCollapsed} collapsed={collapsed}/>
         </SiderCustome>
           <Content
-              className="round max-h-screen p-0 bg-[#F4F6F8] !max-w-screen"
+              className="round max-h-screen p-0 bg-[#F4F6F8] !max-w-screen !overflow-y-hidden" 
             >
               {children}
             </Content>
