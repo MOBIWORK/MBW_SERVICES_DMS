@@ -53,7 +53,7 @@ def list_product(**kwargs):
             my_filter["item_group"] = ["like", f'%{item_group}%']
         my_filter["disabled"] = 0
 
-        items = frappe.db.get_list("Item", filters=my_filter,or_filters=filter_or,
+        items = frappe.db.get_list("Item", filters=my_filter, or_filters=filter_or,
                                     fields=["name", "item_code", "item_name", "item_group", 
                                             "stock_uom", "min_order_qty", "description",
                                             "brand", "country_of_origin", "image",
@@ -101,7 +101,7 @@ def list_product(**kwargs):
                 if item.get("name") in permitted_item:
                     permitted_items_count += 1
         else:
-            permitted_items_count = len( frappe.db.get_list("Item", filters=my_filter,or_filters=filter_or,))
+            permitted_items_count = len(frappe.db.get_list("Item", filters=my_filter, or_filters=filter_or))
 
         data_item = []
         default_selling_price_list = frappe.get_doc("Selling Settings").selling_price_list
@@ -149,8 +149,9 @@ def list_product_campaign(**kwargs):
             frappe.throw(_("Không có quyền"), frappe.PermissionError)
 
         my_filter = {}
+        filter_or = {}
         name = kwargs.get("name")
-        name_item = kwargs.get("item_name")
+        key_search = kwargs.get("key_search")
         brand = kwargs.get("brand")
         custom_industry = kwargs.get("industry")
         item_group = kwargs.get("item_group")
@@ -163,8 +164,9 @@ def list_product_campaign(**kwargs):
 
         if name:
             my_filter["name"] = ["like", f'%{name}%']
-        if name_item:
-            my_filter["item_name"] = ["like", f'%{name_item}%']
+        if key_search:
+            filter_or["item_name"] = ["like", f'%{key_search}%']
+            filter_or["item_code"] = ["like", f'%{key_search}%']
         if brand:
             my_filter["brand"] = ["like", f'%{brand}%']
         if custom_industry:
@@ -174,7 +176,7 @@ def list_product_campaign(**kwargs):
         my_filter["disabled"] = 0
 
         items = frappe.db.get_list("Item",
-                                    filters=my_filter,
+                                    filters=my_filter, or_filters=filter_or,
                                     fields=["name", "item_code", "item_name", "item_group", 
                                             "stock_uom", "min_order_qty", "description",
                                             "brand", "country_of_origin", "image",
@@ -217,7 +219,7 @@ def list_product_campaign(**kwargs):
                 if item.get("name") in permitted_item:
                     permitted_items_count += 1
         else:
-            permitted_items_count = frappe.db.count("Item", filters=my_filter)
+            permitted_items_count = len(frappe.db.get_list("Item", filters=my_filter, or_filters=filter_or))
 
         data_item = []
         for item in items:
