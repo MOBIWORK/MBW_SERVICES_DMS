@@ -568,6 +568,7 @@ def get_type_customer():
         return gen_response(200, "Thành công", customer_type)
     except Exception as e:
         return exception_handle(e)
+    
 # danh sách kênh-sfa_sale_channel - link to: DMS Sales Channe
 #Danh sách Kênh khách hàng
 @frappe.whitelist(methods="GET")
