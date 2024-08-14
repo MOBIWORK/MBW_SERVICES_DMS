@@ -38,7 +38,7 @@ def create_si_and_pe(doc, method):
             "paid_to": "1121 - Tiền Việt Nam - VT",
             "paid_amount": sales_invoice.grand_total,
             "received_amount": sales_invoice.grand_total,
-            "reference_no": doc.against_sales_order,
+            "reference_no": sales_invoice.name,
             "reference_date": frappe.utils.nowdate(),
             "references": [
                 {
