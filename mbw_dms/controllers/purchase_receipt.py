@@ -52,7 +52,7 @@ def auto_create_pe(doc, method):
             "posting_date": frappe.utils.nowdate(),
             "party_type": "Supplier",
             "party": supplier,
-            "mode_of_payment": "Bank",
+            "mode_of_payment": "Bank Draft",
             "paid_from": "1121 - Tiền Việt Nam - VT",
             "paid_to": "331 - Phải trả cho người bán - VT",
             "paid_amount": total_amount,

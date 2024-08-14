@@ -25,7 +25,7 @@ def auto_create_si(doc, method):
 
     frappe.msgprint(f"Sales Invoice {sales_invoice.name} đã được tạo và duyệt thành công.")
 
-def auto_create_payment_entry(doc, method):
+def auto_create_pe(doc, method):
     # Kiểm tra nếu đã tích "Đã thanh toán" và chưa có Payment Entry
     if doc.da_thanh_toan:
         # Tìm Sales Invoice liên kết với Delivery Note
@@ -42,7 +42,7 @@ def auto_create_payment_entry(doc, method):
             "party_type": "Customer",
             "reason": "Khách hàng thanh toán",
             "party": doc.customer,
-            "mode_of_payment": "Bank",
+            "mode_of_payment": "Bank Draft",
             "paid_from": "131 - Phải thu của khách hàng - VT",
             "paid_to": "1121 - Tiền Việt Nam - VT",
             "paid_amount": frappe.db.get_value("Sales Invoice", sales_invoice, "grand_total"),
