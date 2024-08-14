@@ -1,28 +1,11 @@
 import frappe
-
+from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_invoice
 
 # Tự động tạo Purchase Invoice khi PR submit
 def auto_create_purchase_invoice(doc, method):
-    purchase_invoice = frappe.new_doc("Purchase Invoice")
+    purchase_invoice = make_purchase_invoice(source_name=doc.name)
 
-    purchase_invoice.supplier = doc.supplier
     purchase_invoice.posting_date = frappe.utils.nowdate()
-    purchase_invoice.buying_price_list = doc.buying_price_list
-
-    for i in doc.items:
-        item_data = {
-            "item_code": i.item_code,
-            "item_name": i.item_name,
-            "qty": i.qty,
-            "rate": i.base_rate,
-            "amount": i.base_amount,
-            "purchase_receipt": doc.name
-        }
-
-    purchase_invoice.append("items", item_data)
-
-    purchase_invoice.additional_discount_percentage = doc.additional_discount_percentage
-    purchase_invoice.base_discount_amount = doc.base_discount_amount
 
     purchase_invoice.insert()
     purchase_invoice.submit()

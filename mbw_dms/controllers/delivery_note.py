@@ -1,32 +1,18 @@
 import frappe
+from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_invoice
 
 def auto_create_si(doc, method):
-    # Tạo Sales Invoice khi DN submit
-    sales_invoice = frappe.get_doc({
-        "doctype": "Sales Invoice",
-        "customer": doc.customer,
-        "delivery_note": doc.name, 
-        "posting_date": frappe.utils.nowdate(),
-        "due_date": frappe.utils.add_days(frappe.utils.nowdate(), 30),
-        "items": []
-    })
+    sales_invoice = make_sales_invoice(source_name=doc.name)
 
-    for item in doc.items:
-        sales_invoice.append("items", {
-            "item_code": item.item_code,
-            "qty": item.qty,
-            "rate": item.rate,
-            "amount": item.amount,
-            "delivery_note": doc.name 
-        })
-
+    sales_invoice.due_date = frappe.utils.nowdate()
+    
     sales_invoice.insert()
     sales_invoice.submit()
 
     frappe.msgprint(f"Sales Invoice {sales_invoice.name} đã được tạo và duyệt thành công.")
 
+# Kiểm tra nếu đã tích "Đã thanh toán" và chưa có Payment Entry
 def auto_create_pe(doc, method):
-    # Kiểm tra nếu đã tích "Đã thanh toán" và chưa có Payment Entry
     if doc.da_thanh_toan:
         # Tìm Sales Invoice liên kết với Delivery Note
         sales_invoice = frappe.db.get_value("Sales Invoice Item", {"delivery_note": doc.name}, "parent")
