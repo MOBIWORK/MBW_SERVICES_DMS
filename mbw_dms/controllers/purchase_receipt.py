@@ -1,23 +1,22 @@
 import frappe
 
 
-def auto_create_purchase_invoice_pe(doc, method):
-    # Tự động tạo Purchase Invoice khi PR submit
+# Tự động tạo Purchase Invoice khi PR submit
+def auto_create_purchase_invoice(doc, method):
     purchase_invoice = frappe.new_doc("Purchase Invoice")
 
     purchase_invoice.supplier = doc.supplier
-    purchase_invoice.set_posting_time = 1
     purchase_invoice.posting_date = frappe.utils.nowdate()
     purchase_invoice.buying_price_list = doc.buying_price_list
-    purchase_invoice.purchase_receipt = doc.name
 
     for i in doc.items:
         item_data = {
-        "item_code": i.item_code,
-        "item_name": i.item_name,
-        "qty": i.qty,
-        "rate": i.base_rate,
-        "base_amount": i.base_amount
+            "item_code": i.item_code,
+            "item_name": i.item_name,
+            "qty": i.qty,
+            "rate": i.base_rate,
+            "amount": i.base_amount,
+            "purchase_receipt": doc.name
         }
 
     purchase_invoice.append("items", item_data)
@@ -28,36 +27,51 @@ def auto_create_purchase_invoice_pe(doc, method):
     purchase_invoice.insert()
     purchase_invoice.submit()
 
-    # Tự động tạo Paymwnt Entry khi PR submit
-    linked_po = frappe.get_doc("Purchase Order", doc.purchase_order)
+    frappe.msgprint(f"Purchase Invoice {purchase_invoice.name} đã tạo thành công và liên kết đến Purchase Receipt {doc.name}.")
 
-    if linked_po.da_thanh_toan:
+# Tự động tạo Payment Entry khi PR submit
+def auto_create_pe(doc, method):
+    if doc.da_thanh_toan:
+        purchase_invoice = frappe.db.get_value(
+            "Purchase Invoice Item",
+            {"purchase_receipt": doc.name},
+            "parent"
+        )
+
+        if not purchase_invoice:
+            frappe.throw("Không tìm thấy Purchase Invoice được liên kết cho Purchase Receipt này.")
+        supplier = doc.supplier
+        # Lấy thông tin từ Purchase Invoice
+        total_amount = frappe.db.get_value("Purchase Invoice", purchase_invoice, "grand_total")
+
         # Tạo Payment Entry
         payment_entry = frappe.get_doc({
             "doctype": "Payment Entry",
             "payment_type": "Pay",
-            "reason": "",
+            "reason": f"Thanh toán cho {supplier}",
             "posting_date": frappe.utils.nowdate(),
             "party_type": "Supplier",
-            "party": linked_po.supplier,
+            "party": supplier,
             "mode_of_payment": "Bank",
             "paid_from": "1121 - Tiền Việt Nam - VT",
-            "paid_to": " 331 - Phải trả cho người bán - VT",
-            "paid_amount": linked_po.grand_total,
-            "received_amount": linked_po.grand_total,
-            "reference_no": linked_po.name,
+            "paid_to": "331 - Phải trả cho người bán - VT",
+            "paid_amount": total_amount,
+            "received_amount": total_amount,
+            "reference_no": purchase_invoice,
             "reference_date": frappe.utils.nowdate(),
             "references": [
                 {
-                    "reference_doctype": "Purchase Order",
-                    "reference_name": linked_po.name,
+                    "reference_doctype": "Purchase Invoice",
+                    "reference_name": purchase_invoice,
                     "due_date": frappe.utils.nowdate(),
-                    "total_amount": linked_po.grand_total,
-                    "outstanding_amount": linked_po.grand_total,
-                    "allocated_amount": linked_po.grand_total
+                    "total_amount": total_amount,
+                    "outstanding_amount": total_amount,
+                    "allocated_amount": total_amount
                 }
             ]
         })
 
         payment_entry.insert()
         payment_entry.submit()
+
+        frappe.msgprint(f"Payment Entry {payment_entry.name} đã tạo thành công và liên kết đến Purchase Receipt {doc.name} và Purchase Invoice {purchase_invoice}.")

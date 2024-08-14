@@ -270,10 +270,12 @@ doc_events = {
         "before_insert": "mbw_dms.controllers.dms_router.check_duplicate_import"
     },
     "Purchase Receipt": {
-        "on_submit": "mbw_dms.controllers.purchase_receipt.auto_create_purchase_invoice_pe"
+        "on_submit": "mbw_dms.controllers.purchase_receipt.auto_create_purchase_invoice",
+        "on_update_after_submit": "mbw_dms.controllers.purchase_receipt.auto_create_pe"
     },
     "Delivery Note": {
-        "on_submit": "mbw_dms.controllers.delivery_note.create_si_and_pe"
+        "on_submit": "mbw_dms.controllers.delivery_note.auto_create_si",
+        "on_update_after_submit": "mbw_dms.controllers.delivery_note.auto_create_pe"
     }
 }
 
