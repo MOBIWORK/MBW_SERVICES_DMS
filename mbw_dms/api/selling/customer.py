@@ -189,7 +189,6 @@ def create_customer(**kwargs):
         normal_fields = ["customer_details", "website"]
         date_fields = ["custom_birthday"]
         choice_fields = ["customer_type"]
-
         for key, value in kwargs.items():
             if key in normal_fields:
                 new_customer.set(key, value)
@@ -202,21 +201,19 @@ def create_customer(**kwargs):
             elif key in choice_fields:
                 customer_type = validate_choice(configs.customer_type)(value)
                 new_customer.set(key, customer_type)
-        
         user_id = frappe.session.user
         employee_name = frappe.db.get_value("Employee", {"user_id": user_id}, ["name", "company"],as_dict=1)
-        sale_person = frappe.get_value("Sales Person", {"employee": employee_name.name}, "parent_sales_person")
+        sale_person = frappe.get_value("Sales Person", {"employee": employee_name.name}, "parent_sales_person") if employee_name else ""
         new_customer.custom_sales_manager = sale_person
 
         new_customer.customer_location_primary = json_location
 
         new_customer.append("credit_limits", {
-            "company": employee_name.company or "",
+            "company": employee_name.company if employee_name else "",
             "credit_limit": kwargs.get("credit_limit"),
             "bypass_credit_limit_check": 1
         })
         new_customer.insert()
-
         # Tạo mới địa chỉ khách hàng
         if address and address.get("address_title"):
             new_address_cus = frappe.new_doc("Address")
@@ -278,21 +275,25 @@ def create_customer(**kwargs):
             new_customer.save()
 
         # xử lý thêm ảnh khách hàng
+        print(":new cus",new_customer)
         if kwargs.get("image"):
             new_customer.image = post_image(name_image='', faceimage=kwargs.get("image"), doc_type="Customer", doc_name=new_customer.name)
             new_customer.save()
 
-        # Thêm khách hàng vào tuyến 
-        if router_in and router_in.get("router_name"):
-            router = frappe.get_doc("DMS Router", router_in.get("router_name"))
-            router.append("customers", {
-                "customer": new_customer.name,
-                "customer_code": new_customer.customer_code,
-                "customer_name": new_customer.customer_name,
-                "display_address": new_customer.customer_primary_address,
-                "frequency": router_in.get("frequency")
-            })
-            router.save()
+        # Thêm khách hàng vào tuyến v1
+        # if router_in and router_in.get("router_name"):
+        #     router = frappe.get_doc("DMS Router", router_in.get("router_name"))
+        #     router.append("customers", {
+        #         "customer": new_customer.name,
+        #         "customer_code": new_customer.customer_code,
+        #         "customer_name": new_customer.customer_name,
+        #         "display_address": new_customer.customer_primary_address,
+        #         "frequency": router_in.get("frequency")
+        #     })
+        #     router.save()
+        #thêm khách hàng vào tuyến v2
+        if router_in and len(router_in)>0:
+            update_customer_in_router(customer=kwargs,routers= router_in)
 
         frappe.db.commit()
         return gen_response(201, "Thành công", {"name": new_customer.name})
@@ -442,13 +443,18 @@ def update_customer(**kwargs):
                         customer.save()
 
             # Chỉnh sửa tuyến
-            if kwargs.get("router"):
-                routers_data = kwargs.get("router")
-                router_name = routers_data.get("router_name")
-                if router_name and frappe.db.exists("DMS Router Customer", {"parent": router_name, "customer_name": name}):
-                    router = frappe.get_doc("DMS Router Customer", {"parent": router_name, "customer_name": name})
-                    router.frequency = routers_data.get("frequency")
-                    router.save()
+            # if kwargs.get("router"):
+            #     routers_data = kwargs.get("router")
+            #     router_name = routers_data.get("router_name")
+            #     if router_name and frappe.db.exists("DMS Router Customer", {"parent": router_name, "customer_name": name}):
+            #         router = frappe.get_doc("DMS Router Customer", {"parent": router_name, "customer_name": name})
+            #         router.frequency = routers_data.get("frequency")
+            #         router.save()
+            # Chỉnh sửa tuyến v2
+            print("here")
+            router_in = kwargs.get("router")
+            if router_in and len(router_in)>0:
+                update_customer_in_router(customer=kwargs,routers= router_in)
             
             customer.save()
             frappe.db.commit()
@@ -580,4 +586,32 @@ def get_channel():
     except Exception as e:
         return exception_handle(e)
 
-    
+#cập nhật khách hàng vào danh sách tuyến
+def update_customer_in_router(customer={},routers=[]):
+    customer = frappe._dict(customer)
+    if isinstance(customer.address, list):
+        address = pydash.find( customer.address,lambda x:x.get("is_primary_address"))
+    else:
+        address = customer.address
+    customer_router = {
+        "customer_code": customer.customer_code or "",
+        "customer_name": customer.customer_name or "",
+        "display_address": customer.display_address or "",
+        "phone_number": customer.contact.phone if customer.contact else "",
+        "frequency":customer.frequency or "",
+        "long": address.get("longitude") if address else 0,
+        "lat":address.get("latitude") if address else 0
+    }
+    list_router = frappe.db.get_all("DMS Router",{"name": ["in",routers]},["*"])
+    print("lis",list_router)
+    for router in list_router:
+        router_doc = frappe.get_doc("DMS Router",router.get("name"))
+        cus_list = router_doc.get("customers") or []
+        exist = pydash.find(cus_list,lambda x: x.customer_code == customer.customer_code)
+        if exist:
+            cus_list = pydash.map_(cus_list,lambda x: x.update(customer_router))
+        else:
+            cus_list.append(customer_router)    
+        router_doc.set("customers",cus_list)   
+        router_doc.save(ignore_permissions=True)    
+    return
