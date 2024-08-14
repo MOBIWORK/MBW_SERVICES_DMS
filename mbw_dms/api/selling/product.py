@@ -151,7 +151,7 @@ def list_product_campaign(**kwargs):
         my_filter = {}
         filter_or = {}
         name = kwargs.get("name")
-        key_search = kwargs.get("key_search")
+        key_search = kwargs.get("item_name")
         brand = kwargs.get("brand")
         custom_industry = kwargs.get("industry")
         item_group = kwargs.get("item_group")
