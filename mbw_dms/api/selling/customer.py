@@ -13,7 +13,8 @@ from mbw_dms.api.common import (
     null_location,
     CommonHandle,
     create_address,
-    update_address
+    update_address,
+    handle_address_customer
 )
 
 from mbw_dms.api.validators import (
@@ -377,15 +378,25 @@ def update_customer(**kwargs):
                     for address_data in address_data_list:
                         if address_data.get("latitude") and address_data.get("longitude"):
                             json_location = json.dumps({"long": address_data.get("longitude"), "lat": address_data.get("latitude")})
-
-                        current_address = update_address(address_data, link_cs_address, name, json_location)
-                        if bool(json_location):
-                            customer.customer_location_primary = json_location
+                        address_data["customer_location_primary"] =    json_location
+                        #cũ
+                        # current_address = update_address(address_data, link_cs_address, name, json_location)
+                        #mới
+                        current_address = handle_address_customer(address_data,link_cs_address)
+                    address_data_primary = pydash.find(address_data_list,lambda x: x.get("primary") == 1)
+                    if address_data_primary:
+                        address_data_primary = frappe._dict(address_data_primary)
+                        address_id = address_data_primary.get("name")
+                        if address_id and frappe.db.exists("Address",address_id):
+                            doc_address = frappe.get_doc("Address",address_id)
+                        else:
+                            doc_address = frappe.get_doc("Address",{"address_title":["like",f"%{address_data_primary.address_title}%"]})
+                        try:
+                            customer = frappe.get_doc("Customer", name)      
+                            customer.set("customer_primary_address", doc_address.name)
                             customer.save()
-
-                        if address_data.get("primary") == 1:
-                            customer.set("customer_primary_address", current_address.name)
-                            customer.save()
+                        except Exception as e:
+                            print("error=====",e)
 
             # Cập nhật hoặc thêm mới liên hệ
             if kwargs.get("contacts"):
@@ -475,9 +486,8 @@ def update_customer(**kwargs):
                     at_front=False,                         # put the job at the front of the queue
                     customer=kwargs,routers= router_in                             # kwargs are passed to the method as arguments
                 )
-                # update_customer_in_router(customer=kwargs,routers= router_in)
             
-            customer.save()
+            # customer.save()
             frappe.db.commit()
             return gen_response(200, "Cập nhật thông tin khách hàng thành công")
         else:
