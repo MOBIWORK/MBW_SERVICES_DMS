@@ -4,7 +4,7 @@
 import frappe
 from frappe.model.document import Document
 from mbw_dms.api.validators import validate_filter_timestamp
-from frappe.utils import nowdate, today
+from frappe.utils import nowdate, today, getdate
 import calendar
 from collections import defaultdict 
 import datetime
@@ -19,30 +19,31 @@ from mbw_dms.api.common import (
 class DMSKPI(Document):
 	pass
 
+# Giới hạn chỉ tạo 1 KPI cho 1 nhân viên trong tháng
 def validate_create_kpi(doc, method):
-	month = int(nowdate().split('-')[1])
-	year = int(nowdate().split('-')[0])
-	start_date_str = f"{year:04d}-{month:02d}-01"
+	# Lấy ngày đầu tiên và cuối cùng của tháng
+	current_date = nowdate()
+	year, month = int(current_date[:4]), int(current_date[5:7])
+
+	start_date = getdate(f"{year:04d}-{month:02d}-01")
 	last_day_of_month = calendar.monthrange(year, month)[1]
-	end_date_str = f"{year:04d}-{month:02d}-{last_day_of_month:02d}"
-	start_date = frappe.utils.getdate(start_date_str)
-	end_date = frappe.utils.getdate(end_date_str)
+	end_date = getdate(f"{year:04d}-{month:02d}-{last_day_of_month:02d}")
 	
 	if frappe.db.exists("DMS KPI", {"ngay_hieu_luc_tu": (">=", start_date), "ngay_hieu_luc_den": ("<=", end_date), "nhan_vien_ban_hang": doc.nhan_vien_ban_hang}):
 		raise frappe.msgprint("Chỉ được tạo 1 bản KPI cho nhân viên trong 1 tháng")
 
 
-# Báo cáo kpi viếng thăm
+# Báo cáo kpi viếng thăm mobile
 @frappe.whitelist(methods="GET")
 def visit_report():
 	try:
-		month = int(nowdate().split('-')[1])
-		year = int(nowdate().split('-')[0])
-		start_date_str = f"{year:04d}-{month:02d}-01"
+		# Lấy ngày đầu tiên và cuối cùng của tháng
+		current_date = nowdate()
+		year, month = int(current_date[:4]), int(current_date[5:7])
+
+		start_date = getdate(f"{year:04d}-{month:02d}-01")
 		last_day_of_month = calendar.monthrange(year, month)[1]
-		end_date_str = f"{year:04d}-{month:02d}-{last_day_of_month:02d}"
-		start_date = frappe.utils.getdate(start_date_str)
-		end_date = frappe.utils.getdate(end_date_str)
+		end_date = getdate(f"{year:04d}-{month:02d}-{last_day_of_month:02d}")
 
 		# Lấy id của nhân viên
 		user_name = frappe.get_value("Employee", {"user_id": frappe.session.user}, "name")
@@ -54,47 +55,43 @@ def visit_report():
 		# Lấy Kpi nhân viên vt
 		kpi_employee = frappe.get_value("DMS KPI", {"ngay_hieu_luc_tu": (">=", start_date), "ngay_hieu_luc_den": ("<=", end_date), "nhan_vien_ban_hang": user_name}, "so_kh_vt_luot")
 		
-		if monthly_summary and kpi_employee:
-			kpi = {
-                "chi_tieu": kpi_employee,
-                "dat_duoc": monthly_summary,
-                "phan_tram_thuc_hien": round(float(monthly_summary / kpi_employee * 100), 2),
-            }
-
-		elif monthly_summary and not kpi_employee:
-			kpi = {
-                "chi_tieu": 0,
-                "dat_duoc": monthly_summary,
-                "phan_tram_thuc_hien": 100,
-            }
-		
-		else:
-			return gen_response(200, "Thành công", kpi)
+		if monthly_summary:
+			if kpi_employee:
+				kpi = {
+					"chi_tieu": kpi_employee,
+					"dat_duoc": monthly_summary,
+					"phan_tram_thuc_hien": round(float(monthly_summary / kpi_employee * 100), 2),
+				}
+			else:
+				kpi = {
+					"chi_tieu": 0,
+					"dat_duoc": monthly_summary,
+					"phan_tram_thuc_hien": 100,
+				}
 		
 		return gen_response(200, "Thành công", kpi)
 	except Exception as e:
 		return exception_handle(e)
 	
 
-# Báo cáo doanh số
+# Báo cáo doanh số mobile
 @frappe.whitelist(methods="GET")
 def sales_report():
 	try:
 		todays = today()
-		month = int(nowdate().split('-')[1])
-		year = int(nowdate().split('-')[0])
-		start_date_str = f"{year:04d}-{month:02d}-01"
+		current_date = nowdate()
+		year, month = int(current_date[:4]), int(current_date[5:7])
+		start_date = getdate(f"{year:04d}-{month:02d}-01")
 		last_day_of_month = calendar.monthrange(year, month)[1]
-		end_date_str = f"{year:04d}-{month:02d}-{last_day_of_month:02d}"
-		start_date = frappe.utils.getdate(start_date_str)
-		end_date = frappe.utils.getdate(end_date_str)
+		end_date = getdate(f"{year:04d}-{month:02d}-{last_day_of_month:02d}")
 
 		# Lấy id của nhân viên
-		user_id = frappe.session.user
-		employee = frappe.get_value("Employee", {"user_id": user_id}, "name")
+		employee = frappe.get_value("Employee", {"user_id": frappe.session.user}, "name")
 		sales_per = frappe.get_value("Sales Person", {"employee": employee}, "name")
         
 		kpi = {}
+		# Tạo một danh sách để lưu trữ thông tin của các đơn bán hàng
+		orders_list = []
 
 		# Lấy Kpi tháng
 		monthly_summary = frappe.get_value("DMS Summary KPI Monthly", {"thang": month, "nam": year, "nhan_vien_ban_hang": employee}, "doanh_so_thang")
@@ -102,50 +99,30 @@ def sales_report():
 		# Lấy Kpi nhân viên
 		kpi_employee = frappe.get_value("DMS KPI", {"ngay_hieu_luc_tu": (">=", start_date), "ngay_hieu_luc_den": ("<=", end_date), "nhan_vien_ban_hang": employee}, "doanh_so")
 		
-		# Tạo một danh sách để lưu trữ thông tin của các đơn bán hàng
-		orders_list = []
-		if monthly_summary and kpi_employee:
-			kpi = {
-                "dat_duoc": float(monthly_summary),
-                "phan_tram_thuc_hien": round(float(monthly_summary / kpi_employee * 100), 2),
-            }
+		if monthly_summary:
+			kpi["dat_duoc"] = float(monthly_summary)
+			kpi["phan_tram_thuc_hien"] = round(float(monthly_summary) / float(kpi_employee or 1) * 100, 2)
 
-			# Lấy danh sách đơn hàng từ đầu tháng đến hiện tại
-			sales_order = frappe.get_all("Sales Order",
-				filters={"transaction_date": ("between", [start_date,todays]), "docstatus": 1},
-				fields=["name", "grand_total", "transaction_date"]
-			)
+			if kpi_employee:
+				# Lấy danh sách đơn hàng từ đầu tháng đến hiện tại
+				sales_order = frappe.get_all("Sales Order",
+					filters={"transaction_date": ("between", [start_date, todays]), "docstatus": 1},
+					fields=["name", "grand_total", "transaction_date"]
+				)
 
-			daily_totals = defaultdict(float)
-			for order in sales_order:
-				st = get_value_child_doctype("Sales Order", order["name"], "sales_team")
-				for j in st:
-					if j.sales_person == sales_per and j.created_by == 1:
-						transaction_date = order.get("transaction_date")
-						date_str = transaction_date.strftime("%Y-%m-%d")
-						total = order.get("grand_total")
-						daily_totals[date_str] += total
+				daily_totals = defaultdict(float)
+				for order in sales_order:
+					st = get_value_child_doctype("Sales Order", order["name"], "sales_team")
+					for j in st:
+						if j.sales_person == sales_per and j.created_by == 1:
+							transaction_date = order.get("transaction_date")
+							date_str = transaction_date.strftime("%Y-%m-%d")
+							daily_totals[date_str] += order["grand_total"]
 
-			# Lặp qua từng mục trong daily_totals để tạo danh sách các đơn bán hàng
-			for date, total in daily_totals.items():
-				orders_list.append({"ngay": date, "doanh_so": total})
+				# Lặp qua từng mục trong daily_totals để tạo danh sách các đơn bán hàng
+				orders_list = [{"ngay": date, "doanh_so": total} for date, total in daily_totals.items()]
 
-		elif monthly_summary and not kpi_employee:
-			kpi = {
-                "dat_duoc": float(monthly_summary),
-                "phan_tram_thuc_hien": 100,
-            }
-		
-		else:
-			return gen_response(200, "Thành công", {
-				"kpi": {},
-				"sales_order": []
-			})
-
-		return gen_response(200, "Thành công", {
-			"kpi": kpi,
-			"sales_order": orders_list
-		})
+		return gen_response(200, "Thành công", {"kpi": kpi, "sales_order": orders_list})
 	except Exception as e:
 		return exception_handle(e)
 
@@ -155,13 +132,11 @@ def sales_report():
 def invoices_report():
 	try:
 		todays = today()
-		month = int(nowdate().split('-')[1])
-		year = int(nowdate().split('-')[0])
-		start_date_str = f"{year:04d}-{month:02d}-01"
+		current_date = nowdate()
+		year, month = int(current_date[:4]), int(current_date[5:7])
+		start_date = getdate(f"{year:04d}-{month:02d}-01")
 		last_day_of_month = calendar.monthrange(year, month)[1]
-		end_date_str = f"{year:04d}-{month:02d}-{last_day_of_month:02d}"
-		start_date = frappe.utils.getdate(start_date_str)
-		end_date = frappe.utils.getdate(end_date_str)
+		end_date = getdate(f"{year:04d}-{month:02d}-{last_day_of_month:02d}")
 
 		# Lấy id của nhân viên
 		user_id = frappe.session.user
@@ -178,49 +153,28 @@ def invoices_report():
 		# Lấy Kpi nhân viên
 		kpi_employee = frappe.get_value("DMS KPI", {"ngay_hieu_luc_tu": (">=", start_date), "ngay_hieu_luc_den": ("<=", end_date), "nhan_vien_ban_hang": employee}, "doanh_thu")
 		
-		if monthly_summary and kpi_employee:
-			kpi = {
-                "dat_duoc": float(monthly_summary),
-                "phan_tram_thuc_hien": round(float(monthly_summary / kpi_employee * 100), 2),
-            }
+		if monthly_summary:
+			kpi["dat_duoc"] = float(monthly_summary)
+			kpi["phan_tram_thuc_hien"] = round(float(monthly_summary) / float(kpi_employee or 1) * 100, 2)
 
-			# Lấy danh sách hóa đơn từ đầu tháng đến hiện tại
-			sales_invoice = frappe.get_all("Sales Invoice",
-				filters={"posting_date": ("between", [start_date, todays]), "docstatus": 1, "is_return": 0,},
-				fields=["name", "grand_total", "posting_date"]
-			)
+			if kpi_employee:
+				sales_invoice = frappe.get_all("Sales Invoice",
+                    filters={"posting_date": ("between", [start_date, todays]), "docstatus": 1, "is_return": 0},
+                    fields=["name", "grand_total", "posting_date"]
+                )
 
-			daily_totals = defaultdict(float)
-			for invoice in sales_invoice:
-				st = get_value_child_doctype("Sales Invoice", invoice["name"], "sales_team")
-				for j in st:
-					if j.sales_person == sales_per and j.created_by == 1:
-						posting_date = invoice.get("posting_date")
-						date_str = posting_date.strftime("%Y-%m-%d")
-						total = invoice.get("grand_total")
-						daily_totals[date_str] += total
-
-			# Lặp qua từng mục trong daily_totals để tạo danh sách các hóa đơn bán hàng
-			for date, total in daily_totals.items():
-				invoices_list.append({"ngay": date, "doanh_thu": total})
-
-		elif monthly_summary and not kpi_employee:
-			kpi = {
-                "dat_duoc": float(monthly_summary),
-                "phan_tram_thuc_hien": 100,
-            }
-
-		else:
-			return gen_response(200, "Thành công", {
-				"kpi": kpi,
-				"sales_invoice": invoices_list
-			})
+				daily_totals = defaultdict(float)
+				for invoice in sales_invoice:
+					sales_team = frappe.get_all("Sales Team", filters={"parent": invoice["name"]}, fields=["sales_person", "created_by"])
+					for team_member in sales_team:
+						if team_member.sales_person == sales_per and team_member.created_by == 1:
+							date_str = invoice["posting_date"].strftime("%Y-%m-%d")
+							daily_totals[date_str] += invoice["grand_total"]
+				
+				invoices_list = [{"ngay": date, "doanh_thu": total} for date, total in daily_totals.items()]
 
 		# Trả về phản hồi bao gồm cả KPI và danh sách hóa đơn bán hàng
-		return gen_response(200, "Thành công", {
-			"kpi": kpi,
-			"sales_invoice": invoices_list
-		})
+		return gen_response(200, "Thành công", {"kpi": kpi, "sales_invoice": invoices_list})
 	except Exception as e:
 		return exception_handle(e)
 	
@@ -297,7 +251,7 @@ def report_orders_invoices(customer_name):
 		return exception_handle(e)
 
 
-# Báo cáo chi tiết viếng thăm
+# Báo cáo chi tiết viếng thăm mobile
 @frappe.whitelist(methods="GET")
 def report_detail_visit(customer_name, kwargs):
 	try:
@@ -356,7 +310,6 @@ def report_detail_visit(customer_name, kwargs):
 			i["items"] = get_value_child_doctype("DMS Inventory", i["name"], "items")
 
 		# Công nợ
-
 		query_si = {}
 		if from_date and to_date:
 			query_si["creation"] = ["between", [from_date,to_date]]
@@ -518,7 +471,7 @@ def checkin_report(kwargs):
 		sales_per = frappe.get_value("Sales Person", {"employee": employee}, "name")
 
 		if from_date and to_date:
-			filters["creation"] = ["between", [from_date,to_date]]
+			filters["creation"] = ["between", [from_date, to_date]]
 		elif from_date:
 			filters["creation"] = [">=", from_date]
 		elif to_date:
@@ -561,15 +514,18 @@ def checkin_report(kwargs):
 
 		cus_not_checkin = 0
 		filtered_customers = []
+		
 		if router_employee:
 			for i in router_employee:
 				customers = get_value_child_doctype("DMS Router", i["name"], "customers")
+
 				for a in customers:
 					fre = a["frequency"]
 					week_router = []
 					frequency = fre.split(';')
 					for i in frequency:
 						week_router.append(int(i))
+
 					current_week = current_month_week()
 					if current_week in week_router:
 						# data khách hàng chưa checkin
