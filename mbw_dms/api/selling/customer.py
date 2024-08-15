@@ -293,7 +293,17 @@ def create_customer(**kwargs):
         #     router.save()
         #thêm khách hàng vào tuyến v2
         if router_in and len(router_in)>0:
-            update_customer_in_router(customer=kwargs,routers= router_in)
+            frappe.enqueue(
+                    update_customer_in_router,
+                    queue="default",                        # one of short, default, long
+                    timeout=None,                           # pass timeout manually
+                    is_async=True,                         # if this is True, method is run in worker
+                    now=False,                               # if this is True, method is run directly (not in a worker) 
+                    job_name=None,                          # specify a job name
+                    enqueue_after_commit=True,              # enqueue the job after the database commit is done at the end of the request
+                    at_front=False,                         # put the job at the front of the queue
+                    customer=kwargs,routers= router_in                             # kwargs are passed to the method as arguments
+                )
 
         frappe.db.commit()
         return gen_response(201, "Thành công", {"name": new_customer.name})
@@ -454,7 +464,18 @@ def update_customer(**kwargs):
             print("here")
             router_in = kwargs.get("router")
             if router_in and len(router_in)>0:
-                update_customer_in_router(customer=kwargs,routers= router_in)
+                frappe.enqueue(
+                    update_customer_in_router,
+                    queue="default",                        # one of short, default, long
+                    timeout=None,                           # pass timeout manually
+                    is_async=True,                         # if this is True, method is run in worker
+                    now=False,                               # if this is True, method is run directly (not in a worker) 
+                    job_name=None,                          # specify a job name
+                    enqueue_after_commit=True,              # enqueue the job after the database commit is done at the end of the request
+                    at_front=False,                         # put the job at the front of the queue
+                    customer=kwargs,routers= router_in                             # kwargs are passed to the method as arguments
+                )
+                # update_customer_in_router(customer=kwargs,routers= router_in)
             
             customer.save()
             frappe.db.commit()
@@ -593,11 +614,15 @@ def update_customer_in_router(customer={},routers=[]):
         address = pydash.find( customer.address,lambda x:x.get("primary"))
     else:
         address = customer.address
+    if isinstance(customer.contact, list):
+        contact = pydash.find( customer.contact,lambda x:x.get("primary"))
+    else:
+        contact = customer.contact
     customer_router = {
         "customer_code": customer.customer_code or "",
         "customer_name": customer.customer_name or "",
         "display_address": customer.display_address or "",
-        "phone_number": customer.contact.phone if customer.contact else "",
+        "phone_number":  contact.phone if contact else "",
         "frequency":customer.frequency or "",
         "long": address.get("longitude") if address else 0,
         "lat":address.get("latitude") if address else 0
