@@ -18,7 +18,11 @@ from datetime import datetime
 import pytz
 import pydash
 
-BASE_URL = frappe.utils.get_request_site_address()
+if frappe.local.request.headers.get('X-Forwarded-Proto', 'http') == 'https':
+    scheme = 'https'
+else:
+    scheme = 'http'
+BASE_URL = f"{scheme}://{frappe.local.request.host}"
 
 class CommonHandle() :
     @staticmethod
