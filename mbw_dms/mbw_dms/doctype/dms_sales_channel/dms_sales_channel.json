@@ -1,6 +1,7 @@
 {
  "actions": [],
  "allow_rename": 1,
+ "autoname": "field:sales_channel_name",
  "creation": "2024-05-09 15:47:03.365795",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -21,15 +22,17 @@
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Sales Channel Name",
-   "reqd": 1
+   "reqd": 1,
+   "unique": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-05-09 15:47:43.761101",
+ "modified": "2024-08-15 09:02:57.959670",
  "modified_by": "Administrator",
  "module": "MBW DMS",
  "name": "DMS Sales Channel",
+ "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [
   {
