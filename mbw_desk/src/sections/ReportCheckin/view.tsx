@@ -82,17 +82,17 @@ const columnsCheckin: any = [
   {
     title: "Giờ làm",
     className: "!text-center",
-    dataIndex: "total_time",
-    key: "total_time",
+    dataIndex: "total_work",
+    key: "total_work",
     render: (value: any) => (
       <div className="!text-center">{parseFloat((value / 60).toFixed(2))}</div>
     ),
   },
   {
     title: "Giờ viếng thăm",
-    dataIndex: "total_work",
+    dataIndex: "total_time",
     className: "!text-center",
-    key: "total_work",
+    key: "total_time",
     render: (value: any) => (
       <div className="!text-center">{parseFloat((value / 60).toFixed(2))}</div>
     ),
