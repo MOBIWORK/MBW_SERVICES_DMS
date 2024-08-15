@@ -38,8 +38,7 @@ def get_kpi_monthly():
 		# Lấy Kpi nhân viên
         kpi_employee = frappe.get_all("DMS KPI",
                 filters={"ngay_hieu_luc_tu": (">=", start_date), "ngay_hieu_luc_den": ("<=", end_date), "nhan_vien_ban_hang": user_name},
-                fields=["so_kh_vt_luot", "so_kh_moi", "so_don_hang", "doanh_so", "doanh_thu"]
-            )
+                fields=["so_kh_vt_luot", "so_kh_moi", "so_don_hang", "doanh_so", "doanh_thu"])
         
         kpi = None
 

@@ -121,3 +121,17 @@ def update_kpi_daily_on_cancel(doc, method):
         monthly_summary_doc.save(ignore_permissions=True)
     else:
         return
+    
+# Cập nhật nhân viên bán hàng
+def update_sales_person(doc, method):
+    if bool(doc.sales_team):
+        sales_person = None
+        for i in doc.sales_team:
+            if i.created_by == 1:
+                doc.sales_person = sales_person
+        
+        if bool(sales_person):
+            employee = frappe.get_value("Sales Person", {"name": sales_person}, "employee")
+            doc.phone_number = frappe.get_value("Employee", {"name": employee}, "cell_number")
+    else:
+        pass
