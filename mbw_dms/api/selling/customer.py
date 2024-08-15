@@ -590,7 +590,7 @@ def get_channel():
 def update_customer_in_router(customer={},routers=[]):
     customer = frappe._dict(customer)
     if isinstance(customer.address, list):
-        address = pydash.find( customer.address,lambda x:x.get("is_primary_address"))
+        address = pydash.find( customer.address,lambda x:x.get("primary"))
     else:
         address = customer.address
     customer_router = {
@@ -603,7 +603,6 @@ def update_customer_in_router(customer={},routers=[]):
         "lat":address.get("latitude") if address else 0
     }
     list_router = frappe.db.get_all("DMS Router",{"name": ["in",routers]},["*"])
-    print("lis",list_router)
     for router in list_router:
         router_doc = frappe.get_doc("DMS Router",router.get("name"))
         cus_list = router_doc.get("customers") or []
