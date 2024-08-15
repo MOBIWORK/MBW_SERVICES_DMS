@@ -856,7 +856,7 @@ def get_report(filters={}):
                             '"customer_type":"', COALESCE( cs.customer_type,'') , '",', 
                             '"customer_group":"',COALESCE( cs.customer_group,''), '",', 
                             '"customer_sdt":"', COALESCE(cs.mobile_no,''), '",', 
-                            '"time_check":"', TIMESTAMPDIFF(MINUTE, dc.checkin_giovao, dc.checkin_giora), '"
+                            '"time_check":"', TIMESTAMPDIFF(MINUTE, dc.checkin_giovao, dc.checkin_giora) + TIMESTAMPDIFF(SECOND, dc.checkin_giovao, dc.checkin_giora)/60, '"
                             }}'
                         ) SEPARATOR ','
                     ),
