@@ -414,7 +414,7 @@ export default function ReportCheckin() {
         key: "time_check",
         render: (value: any) => (
           <div className="!text-center">
-            {parseFloat((value / 60).toFixed(2))}
+            {parseFloat((value / 60).toFixed(3))}
           </div>
         ),
       },
