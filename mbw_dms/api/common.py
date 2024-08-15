@@ -18,7 +18,11 @@ from datetime import datetime
 import pytz
 import pydash
 
-BASE_URL = frappe.utils.get_request_site_address()
+if frappe.local.request.headers.get('X-Forwarded-Proto', 'http') == 'https':
+    scheme = 'https'
+else:
+    scheme = 'http'
+BASE_URL = f"{scheme}://{frappe.local.request.host}"
 
 class CommonHandle() :
     @staticmethod
@@ -330,6 +334,58 @@ def create_address_current(address_title, new_location, link_cs_address) :
         else :
             current_address_cs = False
     return current_address_cs
+
+
+def try_c(cb):
+    try:
+        ra= cb
+        return ra
+    except Exception as e:
+        print("=========11111111111111111111111111",e)
+#xử lý thêm mới/cập nhật địa chỉ
+def handle_address_customer(address_info,link_to_customer):
+    try:
+        key_info = ["address_title","address_type","address_line1","city","county","state","is_primary_address","is_shipping_address","customer_location_primary"]
+        address_info = frappe._dict(address_info)
+        id_address = address_info.name if address_info.name and address_info.name != "" else False
+        exit_address_title = frappe.db.exists("Address",{"address_title": ["like",f"%{address_info.address_title}%"],"name": ["!=",id_address]})
+        print("exisst============",exit_address_title,frappe.db.exists("Address",id_address))
+        if id_address and frappe.db.exists("Address",id_address):
+            doc_address =frappe.get_doc("Address",id_address)
+            #kiểm tra đã tồn tại address muốn đối sang chưa
+            if exit_address_title: 
+                links = doc_address.get("links")
+                rest_links = pydash.filter_(links,lambda x:x.get("link_doctype") != link_to_customer.get("link_doctype") and x.get("link_name") != link_to_customer.get("link_name"))
+                #xóa khách ở địa chỉ cũ nếu có nhiều khách , xóa luôn địa chỉ nếu chỉ có 1 khách liên kết
+                doc_address.set("links",rest_links)
+                doc_address.save()
+                curent_address = frappe.get_doc("Address",{"address_title": ["like",f"%{address_info.address_title}%"]})
+                curent_address.append("links",link_to_customer)
+                curent_address.save()
+                return curent_address
+            else:
+                for key,value in address_info.items():
+                    if key in key_info:
+                        doc_address.set(key,value)
+                doc_address.save()
+                return doc_address
+        else:
+            if exit_address_title: 
+                curent_address = frappe.get_doc("Address",{"address_title": ["like",f"%{address_info.address_title}%"]})
+                curent_address.append("links",link_to_customer)
+                curent_address.save()
+                return curent_address
+            else:
+                new_address = frappe.new_doc("Address")
+                for key,value in address_info.items():
+                    if key in key_info:
+                        new_address.set(key,value)
+                new_address.append("links",link_to_customer)
+                new_address.insert()
+                return new_address
+    except Exception as e :
+        print("erorr============",e)
+        return None        
 
 def handle_address(address_title) : 
     address_oop = {"address_title": address_title}

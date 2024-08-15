@@ -46,7 +46,7 @@ def kpi_visit_detail(**kwargs):
 @frappe.whitelist(methods="GET")
 def kpi_only_visit_detail(**kwargs):
     try:
-        filters = {}
+        filters = {"docstatus": 1}
         from_date = validate_filter_timestamp(type="start")(kwargs.get("from_date")) if kwargs.get("from_date") else None
         to_date = validate_filter_timestamp(type="end")(kwargs.get("to_date")) if kwargs.get("to_date") else None
         page_size = int(kwargs.get("page_size", 20))
