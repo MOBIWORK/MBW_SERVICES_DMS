@@ -90,7 +90,6 @@ class DMSCheckin(Document):
         time_out = datetime.datetime.strptime(checkin_giora, "%Y-%m-%d %H:%M:%S")
         seconds_worked = time_out.timestamp() - time_in.timestamp()
         time_work = seconds_worked / 3600
-        print("time work",time_work)
         if len(exists_checkin) > 1:
             if existing_monthly_summary:
                 monthly_summary_doc = frappe.get_doc("DMS Summary KPI Monthly", existing_monthly_summary)
@@ -179,7 +178,7 @@ class DMSCheckin(Document):
         if len(exists_checkin) > 1:
             if existing_monthly_summary:
                 monthly_summary_doc = frappe.get_doc("DMS Summary KPI Monthly", existing_monthly_summary)
-                monthly_summary_doc.so_kh_vt_luot = minus_not_nega(monthly_summary_doc.so_kh_vt_luot)
+                # monthly_summary_doc.so_kh_vt_luot = minus_not_nega(monthly_summary_doc.so_kh_vt_luot) if len(exists_checkin) > 1 else monthly_summary_doc.so_kh_vt_luot
                 if name_date in list_travel_date:
                     monthly_summary_doc.solan_vt_dungtuyen = minus_not_nega(monthly_summary_doc.solan_vt_dungtuyen)
                 else:
