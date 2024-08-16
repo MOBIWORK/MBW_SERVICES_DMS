@@ -258,13 +258,13 @@ doc_events = {
         "after_insert": "mbw_dms.controllers.dms_users.create_objid_employee"
     },
     "Sales Invoice": {
-        "on_submit": "mbw_dms.controllers.dms_sales_invoice.update_kpi_monthly",
-        "on_cancel": "mbw_dms.controllers.dms_sales_invoice.update_kpi_monthly_on_cancel",
+        "on_submit": ["mbw_dms.controllers.dms_sales_invoice.update_kpi_monthly", "mbw_dms.controllers.dms_sales_invoice.update_kpi_daily"],
+        "on_cancel": ["mbw_dms.controllers.dms_sales_invoice.update_kpi_monthly_on_cancel", "mbw_dms.controllers.dms_sales_invoice.update_kpi_daily_on_cancel"],
         "before_insert": "mbw_dms.controllers.dms_sales_invoice.update_sales_person"
     },
     "Sales Order": {
-        "on_submit": "mbw_dms.controllers.dms_sales_order.update_kpi_monthly",
-        "on_cancel": "mbw_dms.controllers.dms_sales_order.update_kpi_monthly_on_cancel",
+        "on_submit": ["mbw_dms.controllers.dms_sales_order.update_kpi_monthly", "mbw_dms.controllers.dms_sales_order.update_kpi_daily"],
+        "on_cancel": ["mbw_dms.controllers.dms_sales_order.update_kpi_monthly_on_cancel", "mbw_dms.controllers.dms_sales_order.update_kpi_daily_on_cancel"],
         "before_insert": "mbw_dms.controllers.dms_sales_order.update_sales_person"
     },
     "DMS Router": {
