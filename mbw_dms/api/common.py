@@ -24,6 +24,10 @@ else:
     scheme = 'http'
 BASE_URL = f"{scheme}://{frappe.local.request.host}"
 
+
+
+
+
 class CommonHandle() :
     @staticmethod
     def time_now_utc():
