@@ -95,7 +95,7 @@ class DMSCheckin(Document):
             if existing_monthly_summary:
                 monthly_summary_doc = frappe.get_doc("DMS Summary KPI Monthly", existing_monthly_summary)
 
-                monthly_summary_doc.so_kh_vt_luot += 1
+                # monthly_summary_doc.so_kh_vt_luot += 1
                 monthly_summary_doc.so_kh_vt_duynhat -= 1 if monthly_summary_doc.so_kh_vt_duynhat >= 1 else 0
                 monthly_summary_doc.so_gio_lam_viec += time_work
                 if name_date in list_travel_date:
