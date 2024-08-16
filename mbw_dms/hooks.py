@@ -260,12 +260,12 @@ doc_events = {
     "Sales Invoice": {
         "on_submit": "mbw_dms.controllers.dms_sales_invoice.update_kpi_monthly",
         "on_cancel": "mbw_dms.controllers.dms_sales_invoice.update_kpi_monthly_on_cancel",
-        "on_update": "mbw_dms.controllers.dms_sales_invoice.update_sales_person"
+        "before_insert": "mbw_dms.controllers.dms_sales_invoice.update_sales_person"
     },
     "Sales Order": {
         "on_submit": "mbw_dms.controllers.dms_sales_order.update_kpi_monthly",
         "on_cancel": "mbw_dms.controllers.dms_sales_order.update_kpi_monthly_on_cancel",
-        "on_update": "mbw_dms.controllers.dms_sales_order.update_sales_person"
+        "before_insert": "mbw_dms.controllers.dms_sales_order.update_sales_person"
     },
     "DMS Router": {
         "before_insert": "mbw_dms.controllers.dms_router.check_duplicate_import"
