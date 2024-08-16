@@ -349,7 +349,8 @@ def create_return_order(**kwargs):
         # Thêm mới sales team
         new_order.append("sales_team", {
             "sales_person": sales_person,
-            "allocated_percentage": 100
+            "allocated_percentage": 100,
+            "created_by": 1
         })
 
         # Thêm mới items trong đơn hàng
