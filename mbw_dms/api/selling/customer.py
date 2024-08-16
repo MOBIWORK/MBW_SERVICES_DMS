@@ -607,7 +607,7 @@ def get_type_customer():
         return exception_handle(e)
     
 # danh sách kênh-sfa_sale_channel - link to: DMS Sales Channel
-#Danh sách kênh khách hàng ++
+#Danh sách kênh khách hàng
 @frappe.whitelist(methods="GET")
 def get_channel():
     try:
