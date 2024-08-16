@@ -246,6 +246,7 @@ def update_sales_person(doc, method):
         sales_person = None
         for i in doc.sales_team:
             if i.created_by == 1:
+                sales_person = i.sales_person
                 doc.sales_person = sales_person
         
         if bool(sales_person):
