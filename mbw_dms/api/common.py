@@ -18,11 +18,14 @@ from datetime import datetime
 import pytz
 import pydash
 
-if frappe.local.request.headers.get('X-Forwarded-Proto', 'http') == 'https':
-    scheme = 'https'
-else:
-    scheme = 'http'
-BASE_URL = f"{scheme}://{frappe.local.request.host}"
+
+def get_base_url() :
+
+    if frappe.local.request.headers.get('X-Forwarded-Proto', 'http') == 'https':
+        scheme = 'https'
+    else:
+        scheme = 'http'
+    return f"{scheme}://{frappe.local.request.host}"
 
 
 
@@ -198,7 +201,7 @@ def get_employee_by_name(name, fields=["name"]):
 
 def validate_image(user_image):
     if user_image and "http" not in user_image:
-        user_image = BASE_URL + user_image
+        user_image = get_base_url() + user_image
     return user_image
     
 def get_datetime_now():
@@ -457,7 +460,7 @@ def post_image(name_image, faceimage, doc_type, doc_name):
         # delete image copy
         path_file = "/files/" + file_name
         delete_file(path_file)
-        file_url = BASE_URL + doc_file.get('file_url')
+        file_url = get_base_url() + doc_file.get('file_url')
         return file_url
     except Exception as e:
         print("error update image",e)
