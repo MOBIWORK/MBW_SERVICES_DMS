@@ -821,6 +821,7 @@ def cancel_checkout(data):
         exception_handle(e)
 
 
+# Gửi dữ liệu checkin sang EK
 def send_checkin_to_ekgis(doc):
     try:
         # Tạo mới ObjectID
@@ -896,6 +897,7 @@ def list_inventory(kwargs):
         return exception_handle(e)
     
 
+# Báo cáo viếng thăm
 def get_report(filters={}):
     try:
         from_date = validate_filter(type_check="timestamp_to_date", type="start", value=filters.get("from_date"))
@@ -907,8 +909,9 @@ def get_report(filters={}):
         territory = filters.get("territory")
         page_size =  cint(filters.get("page_size", 20))
         page_number = cint(filters.get("page_number", 1))
-        offset = page_size*(page_number-1)
+        offset = page_size * (page_number - 1)
         where = "WHERE createdbyemail IS NOT NULL AND is_checkout = 1"
+
         if sale_group:
             query_sale= f"""
                             WITH RECURSIVE Tree AS (
@@ -935,7 +938,6 @@ def get_report(filters={}):
                                 `tabSales Person` child
                             INNER JOIN Tree parent ON parent.name = child.parent_sales_person
                             )
-
                             SELECT * FROM Tree
                             WHERE is_group = 0;
                         """
@@ -954,7 +956,7 @@ def get_report(filters={}):
 
         if territory:
             employee_info = frappe.db.get_all("Customer", {"territory":territory}, ["customer_code"])
-            customer_code_list = pydash.map_(employee_info,lambda x :x.customer_code)
+            customer_code_list = pydash.map_(employee_info, lambda x :x.customer_code)
             customers = ", ".join(f"'{customer_code}'" for customer_code in customer_code_list)
             where = f"{where} AND dc.kh_ma IN ({customers})"
 
@@ -1051,6 +1053,7 @@ def get_report(filters={}):
         report = frappe.db.sql(query, as_dict=1)
         for row in report:
             row['customers'] = json.loads(row['customers']) if row['customers'] else []
+            
         query2 = f"""
             SELECT COUNT(*) AS number_of_groups FROM (SELECT 
                 te.name AS employee_code,
@@ -1066,7 +1069,8 @@ def get_report(filters={}):
                 te.name, DATE(dc.createddate))  AS grouped_counts
             """
         total = frappe.db.sql(query2,as_dict=1)
-        return gen_response(200,"",{
+
+        return gen_response(200, "", {
             "data": report,
             "total": total[0].number_of_groups,
             "page_size": page_size,
