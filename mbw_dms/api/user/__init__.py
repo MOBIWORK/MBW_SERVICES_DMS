@@ -79,7 +79,7 @@ def get_project_object_id(name):
 @frappe.whitelist(methods="GET")
 def get_employee_info_by_objid(object_id):
     try:
-        employee = frappe.get_all("Employee", filters={"object_id": object_id}, fields=["employee_name", "image as avatar", "name"])
+        employee = frappe.db.get_value("Employee",{"object_id": object_id}, ["employee_name", "image as avatar", "name"],as_dict=1)
         if employee:
             return gen_response(200, "Thành công", employee)
         else:
