@@ -132,7 +132,7 @@ def update_kpi_daily(doc, method):
         daily_summary_doc.save(ignore_permissions=True)
     else:
         daily_summary_doc = frappe.get_doc({
-            "doctype": "DMS Summary KPI Monthly",
+            "doctype": "DMS Summary KPI Daily",
             "date": today,
             "nhan_vien_ban_hang": user_name,
             "so_don_hang": 1,

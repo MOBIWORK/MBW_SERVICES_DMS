@@ -202,7 +202,7 @@ class DMSCheckin(Document):
                 daily_summary_doc.save(ignore_permissions=True)
             else:
                 daily_summary_doc = frappe.get_doc({
-                    "doctype": "DMS Summary KPI Monthly",
+                    "doctype": "DMS Summary KPI Daily",
                     "date": today,
                     "nhan_vien_ban_hang": user_name,
                     "so_kh_vt_luot": 1,
@@ -856,11 +856,10 @@ def list_inventory(kwargs):
         return exception_handle(e)
     
 
-
 def get_report(filters={}):
     try:
-        from_date = validate_filter(type_check="timestamp_to_date",type="start",value=filters.get("from_date"))
-        to_date = validate_filter(type_check="timestamp_to_date",type="end",value=filters.get("to_date"))
+        from_date = validate_filter(type_check="timestamp_to_date", type="start", value=filters.get("from_date"))
+        to_date = validate_filter(type_check="timestamp_to_date", type="end", value=filters.get("to_date"))
         employee = filters.get("employee")
         sale_group = filters.get("sale_group")
         customer_type = filters.get("customer_type")
@@ -868,7 +867,7 @@ def get_report(filters={}):
         territory = filters.get("territory")
         page_size =  cint(filters.get("page_size", 20))
         page_number = cint(filters.get("page_number", 1))
-        offset= page_size*(page_number-1)
+        offset = page_size*(page_number-1)
         where = "WHERE createdbyemail IS NOT NULL AND is_checkout = 1"
         if sale_group:
             query_sale= f"""
@@ -900,37 +899,41 @@ def get_report(filters={}):
                             SELECT * FROM Tree
                             WHERE is_group = 0;
                         """
-            sales_person = frappe.db.sql(query_sale,as_dict=1)
-            if len(sales_person)>0:
+            sales_person = frappe.db.sql(query_sale, as_dict=1)
+            if len(sales_person) > 0:
                 employee_codes = pydash.map_(sales_person,lambda x: x.employee)
-                employee_id_users = frappe.db.get_all("Employee",filters={"name": ["in",employee_codes]},fields=["user_id"])
-                employee_id_users = pydash.map_(employee_id_users,lambda x: x.user_id)
+                employee_id_users = frappe.db.get_all("Employee", filters={"name": ["in", employee_codes]}, fields=["user_id"])
+                employee_id_users = pydash.map_(employee_id_users, lambda x: x.user_id)
                 employees =  ", ".join(f"'{user_id}'" for user_id in employee_id_users)
                 where = f"{where} AND dc.createdbyemail in ({employees})"
             else :
                 where = f"{where} AND dc.createdbyemail IS NULL"
         if employee:
-            employee_info = frappe.db.get_value("Employee",employee,["user_id"],as_dict=1)
+            employee_info = frappe.db.get_value("Employee", employee, ["user_id"], as_dict=1)
             where = f"{where} AND dc.createdbyemail = '{employee_info.user_id}'"
+
         if territory:
-            employee_info = frappe.db.get_all("Customer",{"territory":territory},["customer_code"])
+            employee_info = frappe.db.get_all("Customer", {"territory":territory}, ["customer_code"])
             customer_code_list = pydash.map_(employee_info,lambda x :x.customer_code)
             customers = ", ".join(f"'{customer_code}'" for customer_code in customer_code_list)
             where = f"{where} AND dc.kh_ma IN ({customers})"
+
         if customer_group:
-            customers_list = frappe.db.get_all("Customer",{"customer_group":customer_group},["customer_code"])
+            customers_list = frappe.db.get_all("Customer", {"customer_group":customer_group}, ["customer_code"])
             customer_code_list = pydash.map_(customers_list,lambda x :x.customer_code)
             customers = ", ".join(f"'{customer_code}'" for customer_code in customer_code_list)
             where = f"{where} AND dc.kh_ma IN ({customers})"
+
         if customer_type:
-            customers_list = frappe.db.get_all("Customer",{"customer_type":customer_type},["customer_code"])
-            customer_code_list = pydash.map_(customers_list,lambda x :x.customer_code)
+            customers_list = frappe.db.get_all("Customer", {"customer_type": customer_type}, ["customer_code"])
+            customer_code_list = pydash.map_(customers_list, lambda x :x.customer_code)
             customers = ", ".join(f"'{customer_code}'" for customer_code in customer_code_list)
             where = f"{where} AND dc.kh_ma IN ({customers})"
+
         if from_date:
-            where =  f"{where} AND dc.createddate >= '{from_date}'"
+            where = f"{where} AND dc.createddate >= '{from_date}'"
         if to_date:
-            where =  f"{where} AND dc.createddate <= '{to_date}'"
+            where = f"{where} AND dc.createddate <= '{to_date}'"
         query = f"""
             WITH ImageCounts AS (
                 SELECT 
