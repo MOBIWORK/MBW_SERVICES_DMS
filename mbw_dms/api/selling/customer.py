@@ -596,9 +596,6 @@ def list_dms_cs_type():
 
 
 # danh sách loại hình khách hàng - customer_type - Company/Individual/Proprietorship/Partnership
-
-
-# danh sách kênh-sfa_sale_channel - link to: DMS Sales Channel
 #Danh sách Loại khách hàng
 @frappe.whitelist(methods="GET")
 def get_type_customer():
@@ -607,7 +604,9 @@ def get_type_customer():
         return gen_response(200, "Thành công", customer_type)
     except Exception as e:
         return exception_handle(e)
-#Danh sách Kênh khách hàng
+    
+# danh sách kênh-sfa_sale_channel - link to: DMS Sales Channel
+#Danh sách kênh khách hàng
 @frappe.whitelist(methods="GET")
 def get_channel():
     try:
