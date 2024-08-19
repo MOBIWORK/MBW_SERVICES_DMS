@@ -115,17 +115,17 @@ def update_kpi_daily(doc, method):
     total_uom = 0
 
     if existing_daily_summary:
-        daily_summary_doc = frappe.get_doc("DMS Summary KPI Monthly", existing_daily_summary)
+        daily_summary_doc = frappe.get_doc("DMS Summary KPI Daily", existing_daily_summary)
         if len(existing_cus) > 1:
             total_uom += len(uom)
             daily_summary_doc.so_don_hang += 1
-            daily_summary_doc.doanh_so_thang += grand_totals
+            daily_summary_doc.doanh_so_ngay += grand_totals
             daily_summary_doc.san_luong += sum(qty)
             daily_summary_doc.sku = round((float(total_uom) / (daily_summary_doc.so_don_hang)), 2) if daily_summary_doc.so_don_hang > 0 else 0
         else:
             total_uom += len(uom)
             daily_summary_doc.so_don_hang += 1
-            daily_summary_doc.doanh_so_thang += grand_totals
+            daily_summary_doc.doanh_so_ngay += grand_totals
             daily_summary_doc.so_kh_dat_hang += 1
             daily_summary_doc.san_luong += sum(qty)
             daily_summary_doc.sku = round((float(total_uom) / (daily_summary_doc.so_don_hang)), 2) if daily_summary_doc.so_don_hang > 0 else 0
@@ -136,7 +136,7 @@ def update_kpi_daily(doc, method):
             "date": today,
             "nhan_vien_ban_hang": user_name,
             "so_don_hang": 1,
-            "doanh_so_thang": grand_totals,
+            "doanh_so_ngay": grand_totals,
             "so_kh_dat_hang": 1,
             "sku": len(uom),
             "san_luong": len(qty)
@@ -227,13 +227,13 @@ def update_kpi_daily_on_cancel(doc, method):
         if len(existing_cus) == 0:
             total_uom -= len(uom)
             daily_summary_doc.so_don_hang -= 1
-            daily_summary_doc.doanh_so_thang -= grand_totals
+            daily_summary_doc.doanh_so_ngay -= grand_totals
             daily_summary_doc.san_luong -= sum(qty)
             daily_summary_doc.so_kh_dat_hang -= 1
             daily_summary_doc.sku = round((float(total_uom) / (daily_summary_doc.so_don_hang)), 2) if daily_summary_doc.so_don_hang > 0 else 0
         else:
             daily_summary_doc.so_don_hang -= 1
-            daily_summary_doc.doanh_so_thang -= grand_totals
+            daily_summary_doc.doanh_so_ngay -= grand_totals
             daily_summary_doc.san_luong -= sum(qty)
             daily_summary_doc.sku = round((float(total_uom) / (daily_summary_doc.so_don_hang)), 2) if daily_summary_doc.so_don_hang > 0 else 0
         daily_summary_doc.save(ignore_permissions=True)

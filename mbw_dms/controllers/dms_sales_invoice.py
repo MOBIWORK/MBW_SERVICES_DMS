@@ -61,67 +61,69 @@ def update_kpi_daily(doc, method):
 
         if existing_daily_summary:
             daily_summary_doc = frappe.get_doc("DMS Summary KPI Daily", existing_daily_summary)
-            daily_summary_doc.doanh_thu_thang += grand_totals
+            daily_summary_doc.doanh_thu_ngay += grand_totals
             daily_summary_doc.save(ignore_permissions=True)
         else:
             daily_summary_doc = frappe.get_doc({
                 "doctype": "DMS Summary KPI Daily",
                 "date": today,
                 "nhan_vien_ban_hang": user_name,
-                "doanh_thu_thang": grand_totals,
+                "doanh_thu_ngay": grand_totals,
             })
             daily_summary_doc.insert(ignore_permissions=True)
 
 
 # Cập nhật kpi tháng sau khi xóa bản ghi
 def update_kpi_monthly_on_cancel(doc, method):
-    # Lấy ngày tháng để truy xuất dữ liệu
-    month = int(nowdate().split('-')[1])
-    year = int(nowdate().split('-')[0])
-    
-    # Lấy id của nhân viên
-    sales_person = None
-    for i in doc.sales_team:
-        if i.created_by == 1:
-            sales_person = i.sales_person
-    
-    user_name = frappe.get_value("Sales Person", {"name": sales_person}, "employee")
+    if doc.is_return == 0:
+        # Lấy ngày tháng để truy xuất dữ liệu
+        month = int(nowdate().split('-')[1])
+        year = int(nowdate().split('-')[0])
+        
+        # Lấy id của nhân viên
+        sales_person = None
+        for i in doc.sales_team:
+            if i.created_by == 1:
+                sales_person = i.sales_person
+        
+        user_name = frappe.get_value("Sales Person", {"name": sales_person}, "employee")
 
-    # Kiểm tra đã tồn tại bản ghi KPI của tháng này chưa
-    existing_monthly_summary = frappe.get_value("DMS Summary KPI Monthly", {"thang": month, "nam": year, "nhan_vien_ban_hang": user_name}, "name")
-    grand_totals = doc.grand_total
-    if existing_monthly_summary:
-        monthly_summary_doc = frappe.get_doc("DMS Summary KPI Monthly", existing_monthly_summary)
-        monthly_summary_doc.doanh_thu_thang -= grand_totals
-        monthly_summary_doc.save(ignore_permissions=True)
-    else:
-        return
+        # Kiểm tra đã tồn tại bản ghi KPI của tháng này chưa
+        existing_monthly_summary = frappe.get_value("DMS Summary KPI Monthly", {"thang": month, "nam": year, "nhan_vien_ban_hang": user_name}, "name")
+        grand_totals = doc.grand_total
+        if existing_monthly_summary:
+            monthly_summary_doc = frappe.get_doc("DMS Summary KPI Monthly", existing_monthly_summary)
+            monthly_summary_doc.doanh_thu_thang -= grand_totals
+            monthly_summary_doc.save(ignore_permissions=True)
+        else:
+            return
     
 # Cập nhật kpi ngày sau khi xóa bản ghi
 def update_kpi_daily_on_cancel(doc, method):
-    # Lấy ngày tháng
-    today = datetime.today().date()
+    if doc.is_return == 0:
+        # Lấy ngày tháng
+        today = datetime.today().date()
 
-    # Lấy id của nhân viên
-    sales_person = None
-    for i in doc.sales_team:
-        if i.created_by == 1:
-            sales_person = i.sales_person
-    
-    user_name = frappe.get_value("Sales Person", {"name": sales_person}, "employee")
+        # Lấy id của nhân viên
+        sales_person = None
+        for i in doc.sales_team:
+            if i.created_by == 1:
+                sales_person = i.sales_person
+        
+        user_name = frappe.get_value("Sales Person", {"name": sales_person}, "employee")
 
-    # Kiểm tra đã tồn tại bản ghi KPI của tháng này chưa
-    existing_daily_summary = frappe.get_value(
-        "DMS Summary KPI Daily", {"date": today, "nhan_vien_ban_hang": user_name}, "name"
-    )
-    grand_totals = doc.grand_total
+        # Kiểm tra đã tồn tại bản ghi KPI của tháng này chưa
+        existing_daily_summary = frappe.get_value(
+            "DMS Summary KPI Daily", {"date": today, "nhan_vien_ban_hang": user_name}, "name"
+        )
+        grand_totals = doc.grand_total
 
-    if existing_daily_summary:
-        monthly_summary_doc = frappe.get_doc("DMS Summary KPI Daily", existing_daily_summary)
-        monthly_summary_doc.doanh_thu_thang -= grand_totals
-        monthly_summary_doc.save(ignore_permissions=True)
-    else:
-        return
+        if existing_daily_summary:
+            monthly_summary_doc = frappe.get_doc("DMS Summary KPI Daily", existing_daily_summary)
+            monthly_summary_doc.doanh_thu_ngay -= grand_totals
+            monthly_summary_doc.save(ignore_permissions=True)
+        else:
+            return
     
 # Cập nhật nhân viên bán hàng
 def update_sales_person(doc, method):
