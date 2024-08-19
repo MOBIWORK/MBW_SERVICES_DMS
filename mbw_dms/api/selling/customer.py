@@ -364,7 +364,6 @@ def update_customer(**kwargs):
                     "bypass_credit_limit_check":1
                 }])
                 customer.save()
-
             # Cập nhật hoặc thêm mới địa chỉ
             if kwargs.get("address"):
                 # customer = frappe.get_doc("Customer", name)
