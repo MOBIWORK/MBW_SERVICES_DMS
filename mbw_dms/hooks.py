@@ -278,9 +278,6 @@ doc_events = {
         "on_submit": "mbw_dms.controllers.delivery_note.auto_create_si",
         "on_update_after_submit": "mbw_dms.controllers.delivery_note.auto_create_pe"
     },
-    # "DMS Summary KPI Daily": {
-    #     "after_submit": "mbw_dms.controllers.dms_kpi_daily.update_kpi_monthly"
-    # }
 }
 
 on_session_creation = [

@@ -23,15 +23,15 @@ from frappe.utils import cint
 
 class DMSCheckin(Document):
     def after_insert(self):
-        # self.update_kpi_monthly()
         self.update_kpi_daily()
+        self.update_kpi_monthly()
         self.send_data_to_ekgis()
         self.check_router()
         self.update_data_first_checkin()
 
     def after_delete(self):
-        # self.update_kpi_monthly_after_delete()
         self.update_kpi_daily_after_delete()
+        self.update_kpi_monthly_after_delete()
 
     def existing_checkin(self, kh_ma, start_date, end_date, current_user):
         existing_checkin = None
@@ -44,6 +44,17 @@ class DMSCheckin(Document):
             fields=["name"]
         )
         return existing_checkin
+    
+    def existing_kpi_daily(self, start_date, end_date, current_user):
+        kpi_daily = None
+
+        kpi_daily = frappe.get_all(
+            "DMS Summary KPI Daily",
+            filters={"date": ("between", [start_date, end_date]),
+                     "nhan_vien_ban_hang": current_user},
+            fields=["name"]
+        )
+        return kpi_daily
 
     # Cập nhật kpi tháng
     def update_kpi_monthly(self):
@@ -57,54 +68,37 @@ class DMSCheckin(Document):
         end_date = frappe.utils.getdate(end_date_str)
 
         # Lấy id của nhân viên
-        user_id = frappe.session.user
-        user_name = frappe.get_value("Employee", {"user_id": user_id}, "name")
-        # Lấy tuyến của nhân viên
-        router_employee = frappe.get_all("DMS Router", filters = {"employee": user_name}, fields = ["travel_date"])
-        list_travel_date = [router["travel_date"] for router in router_employee]
-
-        # Lấy thứ của ngày
-        days = datetime.date.today()
-        date = days.weekday()
-        # Chuyển đổi sang tên của ngày trong tuần
-        date_in_week = ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ Nhật"]
-        name_date = date_in_week[date]
+        user_name = frappe.get_value("Employee", {"user_id": frappe.session.user}, "name")
 
         # Kiểm tra xem khách hàng đã thực hiện checkin trong tháng này hay chưa
-        kh_ma = self.kh_ma
-        exists_checkin = self.existing_checkin(kh_ma=kh_ma, start_date=start_date, end_date=end_date, current_user=user_id)
+        kpi_daily = self.existing_kpi_daily(start_date=start_date, end_date=end_date, current_user=user_name)
 
         # Kiểm tra đã tồn tại bản ghi KPI của tháng này chưa
         existing_monthly_summary = frappe.get_value("DMS Summary KPI Monthly", {"thang": month, "nam": year, "nhan_vien_ban_hang": user_name}, "name")
         sales_team = frappe.get_value("DMS KPI", {"nhan_vien_ban_hang": user_name}, "nhom_ban_hang")
 
-        checkin_giovao = self.checkin_giovao
-        checkin_giora = self.checkin_giora
-        time_in = datetime.datetime.strptime(checkin_giovao, "%Y-%m-%d %H:%M:%S")
-        time_out = datetime.datetime.strptime(checkin_giora, "%Y-%m-%d %H:%M:%S")
-        seconds_worked = time_out.timestamp() - time_in.timestamp()
-        time_work = seconds_worked / 3600
+        so_kh_vt_luot = 0
+        so_kh_vt_duynhat = 0
+        so_gio_lam_viec = 0
+        solan_vt_dungtuyen = 0
+        solan_vt_ngoaituyen = 0
 
-        if len(exists_checkin) > 1:
+        if kpi_daily:
+            for i in kpi_daily:
+                kpi = frappe.get_doc("DMS Summary KPI Daily", i.name)
+                so_kh_vt_luot += kpi.so_kh_vt_luot
+                so_kh_vt_duynhat += kpi.so_kh_vt_duynhat
+                so_gio_lam_viec += kpi.so_gio_lam_viec
+                solan_vt_dungtuyen += kpi.solan_vt_dungtuyen
+                solan_vt_ngoaituyen += kpi.solan_vt_ngoaituyen
             if existing_monthly_summary:
                 monthly_summary_doc = frappe.get_doc("DMS Summary KPI Monthly", existing_monthly_summary)
-                if len(exists_checkin) == 2:
-                    monthly_summary_doc.so_kh_vt_luot += 1
-                    monthly_summary_doc.so_kh_vt_duynhat -= 1
-                    monthly_summary_doc.so_gio_lam_viec += time_work
-                    if name_date in list_travel_date:
-                        monthly_summary_doc.solan_vt_dungtuyen += 1
-                    else:
-                        monthly_summary_doc.solan_vt_ngoaituyen += 1
-
-                if len(exists_checkin) > 2:
-                    monthly_summary_doc.so_kh_vt_luot += 1
-                    monthly_summary_doc.so_gio_lam_viec += time_work
-                    if name_date in list_travel_date:
-                        monthly_summary_doc.solan_vt_dungtuyen += 1
-                    else:
-                        monthly_summary_doc.solan_vt_ngoaituyen += 1
-                monthly_summary_doc.save(ignore_permissions=True)
+                monthly_summary_doc.so_kh_vt_luot = so_kh_vt_luot
+                monthly_summary_doc.so_kh_vt_duynhat = so_kh_vt_duynhat
+                monthly_summary_doc.so_gio_lam_viec = so_gio_lam_viec
+                monthly_summary_doc.solan_vt_dungtuyen = solan_vt_dungtuyen
+                monthly_summary_doc.solan_vt_ngoaituyen = solan_vt_ngoaituyen
+                monthly_summary_doc.save()
             else:
                 monthly_summary_doc = frappe.get_doc({
                     "doctype": "DMS Summary KPI Monthly",
@@ -112,33 +106,11 @@ class DMSCheckin(Document):
                     "thang": month,
                     "nhan_vien_ban_hang": user_name,
                     "nhom_ban_hang": sales_team,
-                    "so_kh_vt_luot": len(exists_checkin),
-                    "solan_vt_dungtuyen": len(exists_checkin) if name_date in list_travel_date else 0,
-                    "solan_vt_ngoaituyen": len(exists_checkin) if name_date not in list_travel_date else 0,
-                    "so_gio_lam_viec": time_work
-                })
-                monthly_summary_doc.insert(ignore_permissions=True)
-        if len(exists_checkin) == 1:
-            if existing_monthly_summary:
-                monthly_summary_doc = frappe.get_doc("DMS Summary KPI Monthly", existing_monthly_summary)
-                monthly_summary_doc.so_kh_vt_luot += 1
-                monthly_summary_doc.so_kh_vt_duynhat += 1
-                if name_date in list_travel_date:
-                    monthly_summary_doc.solan_vt_dungtuyen += 1
-                else:
-                    monthly_summary_doc.solan_vt_ngoaituyen += 1
-                monthly_summary_doc.save(ignore_permissions=True)
-            else:
-                monthly_summary_doc = frappe.get_doc({
-                    "doctype": "DMS Summary KPI Monthly",
-                    "nam": year,
-                    "thang": month,
-                    "nhan_vien_ban_hang": user_name,
-                    "nhom_ban_hang": sales_team,
-                    "so_kh_vt_luot": 1,
-                    "so_kh_vt_duynhat": 1,
-                    "solan_vt_dungtuyen": 1 if name_date in list_travel_date else 0,
-                    "solan_vt_ngoaituyen": 1 if name_date not in list_travel_date else 0
+                    "so_kh_vt_luot": so_kh_vt_luot,
+                    "so_kh_vt_duynhat": so_kh_vt_duynhat,
+                    "solan_vt_dungtuyen": so_kh_vt_duynhat,
+                    "solan_vt_ngoaituyen": solan_vt_ngoaituyen,
+                    "so_gio_lam_viec": so_gio_lam_viec
                 })
                 monthly_summary_doc.insert(ignore_permissions=True)
 
@@ -177,7 +149,7 @@ class DMSCheckin(Document):
         seconds_worked = time_out.timestamp() - time_in.timestamp()
         time_work = seconds_worked / 3600
 
-        if len(exists_checkin) >= 2:
+        if len(exists_checkin) > 1:
             if existing_daily_summary:
                 daily_summary_doc = frappe.get_doc("DMS Summary KPI Daily", existing_daily_summary)
                 daily_summary_doc.so_kh_vt_luot += 1
@@ -204,6 +176,7 @@ class DMSCheckin(Document):
                 daily_summary_doc = frappe.get_doc("DMS Summary KPI Daily", existing_daily_summary)
                 daily_summary_doc.so_kh_vt_luot += 1
                 daily_summary_doc.so_kh_vt_duynhat += 1
+                daily_summary_doc.so_gio_lam_viec += time_work
                 if name_date in list_travel_date:
                     daily_summary_doc.solan_vt_dungtuyen += 1
                 else:
@@ -217,7 +190,8 @@ class DMSCheckin(Document):
                     "so_kh_vt_luot": 1,
                     "so_kh_vt_duynhat": 1,
                     "solan_vt_dungtuyen": 1 if name_date in list_travel_date else 0,
-                    "solan_vt_ngoaituyen": 1 if name_date not in list_travel_date else 0
+                    "solan_vt_ngoaituyen": 1 if name_date not in list_travel_date else 0,
+                    "so_gio_lam_viec": time_work
                 })
                 daily_summary_doc.insert(ignore_permissions=True)
 
@@ -229,7 +203,7 @@ class DMSCheckin(Document):
         end_date = datetime.datetime.combine(today, datetime.datetime.max.time())
 
         # Lấy id của nhân viên
-        user_id = frappe.session.user
+        user_id = self.createdbyemail
         user_name = frappe.get_value("Employee", {"user_id": user_id}, "name")
         # Lấy tuyến của nhân viên
         router_employee = frappe.get_all("DMS Router", filters = {"employee": user_name}, fields = ["travel_date"])
@@ -282,56 +256,36 @@ class DMSCheckin(Document):
         end_date = frappe.utils.getdate(end_date_str)
 
         # Lấy id của nhân viên
-        user_id = frappe.session.user
+        user_id = self.createdbyemail
         user_name = frappe.get_value("Employee", {"user_id": user_id}, "name")
-        # Lấy tuyến của nhân viên
-        router_employee = frappe.get_all("DMS Router", filters = {"employee": user_name}, fields = ["travel_date"])
-        list_travel_date = [router["travel_date"] for router in router_employee]
 
-        # Lấy thứ của ngày
-        days = datetime.date.today()
-        date = days.weekday()
-        # Chuyển đổi sang tên của ngày trong tuần
-        date_in_week = ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ Nhật"]
-        name_date = date_in_week[date]
-
-        # Kiểm tra xem khách hàng đã thực hiện checkin trong tháng này hay chưa
-        kh_ma = self.kh_ma
-        exists_checkin = self.existing_checkin(kh_ma=kh_ma, start_date=start_date, end_date=end_date, current_user=user_id)
+        kpi_daily = self.existing_kpi_daily(start_date=start_date, end_date=end_date, current_user=user_name)
 
         # Kiểm tra đã tồn tại bản ghi KPI của tháng này chưa
         existing_monthly_summary = frappe.get_value("DMS Summary KPI Monthly", {"thang": month, "nam": year, "nhan_vien_ban_hang": user_name}, "name")
 
-        if len(exists_checkin) > 1:
+        so_kh_vt_luot = 0
+        so_kh_vt_duynhat = 0
+        so_gio_lam_viec = 0
+        solan_vt_dungtuyen = 0
+        solan_vt_ngoaituyen = 0
+        
+        if kpi_daily:
+            for i in kpi_daily:
+                kpi = frappe.get_doc("DMS Summary KPI Daily", i.name)
+                so_kh_vt_luot += kpi.so_kh_vt_luot
+                so_kh_vt_duynhat += kpi.so_kh_vt_duynhat
+                so_gio_lam_viec += kpi.so_gio_lam_viec
+                solan_vt_dungtuyen += kpi.solan_vt_dungtuyen
+                solan_vt_ngoaituyen += kpi.solan_vt_ngoaituyen
             if existing_monthly_summary:
                 monthly_summary_doc = frappe.get_doc("DMS Summary KPI Monthly", existing_monthly_summary)
-                monthly_summary_doc.so_kh_vt_luot -= 1
-                if name_date in list_travel_date:
-                    monthly_summary_doc.solan_vt_dungtuyen -= 1
-                else:
-                    monthly_summary_doc.solan_vt_ngoaituyen -= 1
-                monthly_summary_doc.save(ignore_permissions=True)
-
-        elif len(exists_checkin) == 1:
-            if existing_monthly_summary:
-                monthly_summary_doc = frappe.get_doc("DMS Summary KPI Monthly", existing_monthly_summary)
-                monthly_summary_doc.so_kh_vt_luot -= 1
-                monthly_summary_doc.so_kh_vt_duynhat += 1
-                if name_date in list_travel_date:
-                    monthly_summary_doc.solan_vt_dungtuyen -= 1
-                else:
-                    monthly_summary_doc.solan_vt_ngoaituyen -= 1
-                monthly_summary_doc.save(ignore_permissions=True)
-        else:
-            if existing_monthly_summary:
-                monthly_summary_doc = frappe.get_doc("DMS Summary KPI Monthly", existing_monthly_summary)
-                monthly_summary_doc.so_kh_vt_luot -= 1
-                monthly_summary_doc.so_kh_vt_duynhat -= 1
-                if name_date in list_travel_date:
-                    monthly_summary_doc.solan_vt_dungtuyen -= 1
-                else:
-                    monthly_summary_doc.solan_vt_ngoaituyen -= 1
-                monthly_summary_doc.save(ignore_permissions=True)
+                monthly_summary_doc.so_kh_vt_luot = so_kh_vt_luot
+                monthly_summary_doc.so_kh_vt_duynhat = so_kh_vt_duynhat
+                monthly_summary_doc.so_gio_lam_viec = so_gio_lam_viec
+                monthly_summary_doc.solan_vt_dungtuyen = solan_vt_dungtuyen
+                monthly_summary_doc.solan_vt_ngoaituyen = solan_vt_ngoaituyen
+                monthly_summary_doc.save()
 
     def send_data_to_ekgis(self):
         frappe.enqueue(
