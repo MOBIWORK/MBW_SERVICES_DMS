@@ -35,11 +35,9 @@ def update_kpi_monthly(doc, method):
     user_name = frappe.get_value("Sales Person", {"name": sales_person}, "employee")
     sales_team = frappe.get_value("DMS KPI", {"nhan_vien_ban_hang": user_name}, "nhom_ban_hang")
 
-    # Tính sản lượng (số sản phẩm/đơn) và sku(số mặt hàng/đơn) trong đơn hàng
+    # Tính sản lượng (số sản phẩm/đơn) và sku(số mặt hàng/đơn) trong đơn hàng(không km)
     items = doc.items
-    qty = {item.get("qty") for item in items}
-    uom = {item.get("uom") for item in items}
-
+    qty,uom = qty_not_pricing_rule(items)
     # Kiểm tra đã tồn tại bản ghi KPI của tháng này chưa
     existing_monthly_summary = frappe.get_value("DMS Summary KPI Monthly", {"thang": month, "nam": year, "nhan_vien_ban_hang": user_name}, "name")
     grand_totals = doc.grand_total
@@ -97,8 +95,7 @@ def update_kpi_monthly_on_cancel(doc, method):
     user_name = frappe.get_value("Sales Person", {"name": sales_person}, "employee")
 
     items = doc.items
-    qty = {item.get("qty") for item in items}
-    uom = {item.get("uom") for item in items}
+    qty,uom = qty_not_pricing_rule(items)
 
     # Kiểm tra đã tồn tại bản ghi KPI của tháng này chưa
     existing_monthly_summary = frappe.get_value("DMS Summary KPI Monthly", {"thang": month, "nam": year, "nhan_vien_ban_hang": user_name}, "name")
@@ -133,3 +130,12 @@ def minus_not_nega(num,sub=1):
         return 0
     else:
         return num - sub
+    
+import pydash
+# sp khuyến mãi 1:có apply pricing role,2: giá = 0 
+def qty_not_pricing_rule(items):
+    total_item_price = pydash.filter(items, lambda x: x.amount > 0)
+    total_qty = sum({item.get("qty") for item in total_item_price})
+    total_uom = sum({item.get("uom") for item in total_item_price})
+
+    return total_qty,total_uom
