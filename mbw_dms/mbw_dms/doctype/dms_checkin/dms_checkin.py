@@ -1072,7 +1072,7 @@ def get_report(filters={}):
 
         return gen_response(200, "", {
             "data": report,
-            "total": total[0].number_of_groups,
+            "totals": total[0].number_of_groups,
             "page_size": page_size,
             "page_number": page_number
         })
