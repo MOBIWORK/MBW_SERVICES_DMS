@@ -356,7 +356,6 @@ def handle_address_customer(address_info,link_to_customer):
         address_info = frappe._dict(address_info)
         id_address = address_info.name if address_info.name and address_info.name != "" else False
         exit_address_title = frappe.db.exists("Address",{"address_title": ["like",f"%{address_info.address_title}%"],"name": ["!=",id_address]})
-        print("exisst============",exit_address_title,frappe.db.exists("Address",id_address))
         if id_address and frappe.db.exists("Address",id_address):
             doc_address =frappe.get_doc("Address",id_address)
             #kiểm tra đã tồn tại address muốn đối sang chưa
@@ -379,6 +378,9 @@ def handle_address_customer(address_info,link_to_customer):
         else:
             if exit_address_title: 
                 curent_address = frappe.get_doc("Address",{"address_title": ["like",f"%{address_info.address_title}%"]})
+                for key,value in address_info.items():
+                    if key in key_info:
+                        curent_address.set(key,value)
                 curent_address.append("links",link_to_customer)
                 curent_address.save()
                 return curent_address

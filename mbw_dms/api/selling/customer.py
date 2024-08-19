@@ -216,23 +216,16 @@ def create_customer(**kwargs):
         })
         new_customer.insert()
         # Tạo mới địa chỉ khách hàng
-        if address and address.get("address_title"):
-            new_address_cus = frappe.new_doc("Address")
-            new_address_cus.address_title = address.get("address_title")
-            new_address_cus.address_type = "Personal"
-            new_address_cus.address_line1 = address.get("address_line1")
-            new_address_cus.city = address.get("city")
-            new_address_cus.county = address.get("county")
-            new_address_cus.state = address.get("state")
-            new_address_cus.is_shipping_address = address.get("is_shipping_address")
-            new_address_cus.is_primary_address = address.get("is_primary_address")
-            new_address_cus.address_location = json_location
-            new_address_cus.append("links", {
+        address= frappe._dict(address)
+        if address and address.address_title:
+            address.address_location = json_location
+            link_cs_address = {
                 "link_doctype": new_customer.doctype,
                 "link_name": new_customer.name,
-            })
-            new_address_cus.insert()
-            new_customer.customer_primary_address = new_address_cus.name
+            }
+            print("address,link_cs_address",address,link_cs_address)
+            current_address = handle_address_customer(address,link_cs_address)
+            new_customer.customer_primary_address = current_address.name
             new_customer.save()
 
         # Tạo mới contact khách hàng
@@ -299,7 +292,7 @@ def create_customer(**kwargs):
                     queue="default",                        # one of short, default, long
                     timeout=None,                           # pass timeout manually
                     is_async=True,                         # if this is True, method is run in worker
-                    now=False,                               # if this is True, method is run directly (not in a worker) 
+                    now=True,                               # if this is True, method is run directly (not in a worker) 
                     job_name=None,                          # specify a job name
                     enqueue_after_commit=True,              # enqueue the job after the database commit is done at the end of the request
                     at_front=False,                         # put the job at the front of the queue
