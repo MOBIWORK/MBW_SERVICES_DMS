@@ -321,7 +321,7 @@ def kpi_so_qty_detail(**kwargs):
         employee = kwargs.get("employee")
         sales_person = frappe.get_value("Sales Person", {"employee": employee}, "name")
 
-        filters["docstatus"] = ["!=", 0]
+        filters["docstatus"] = 1
         if from_date and to_date:
             filters["creation"] = ["between", [from_date, to_date]]
 
@@ -337,12 +337,10 @@ def kpi_so_qty_detail(**kwargs):
 
         totals = len(filtered_data)
 
-        total_qty = 0
         for i in filtered_data:
-            so = frappe.get_doc("Sales Order", i.name)
-            for item in so.items:
-                total_qty += item.qty
-            i["total_qty"] = total_qty
+            so = frappe.get_doc("Sales Order", i.name).as_dict()
+            qty,uom = qty_not_pricing_rule(so.items)
+            i["total_qty"] = qty
 
         # Phân trang dữ liệu
         start_idx = page_size * (page_number - 1)
@@ -428,3 +426,12 @@ def kpi_time_work_detail(**kwargs):
         })
     except Exception as e:
         return exception_handle(e)
+    
+import pydash
+# sp khuyến mãi giá = 0 
+def qty_not_pricing_rule(items):
+    total_item_price = pydash.filter(items, lambda x: x.amount > 0)
+    total_qty = sum({item.get("qty") for item in total_item_price})
+    total_uom = sum({item.get("uom") for item in total_item_price})
+
+    return total_qty,total_uom
