@@ -82,6 +82,7 @@ class DMSCheckin(Document):
         so_gio_lam_viec = 0
         solan_vt_dungtuyen = 0
         solan_vt_ngoaituyen = 0
+        tong_ngay_cong = 0
 
         if kpi_daily:
             for i in kpi_daily:
@@ -91,6 +92,7 @@ class DMSCheckin(Document):
                 so_gio_lam_viec += kpi.so_gio_lam_viec
                 solan_vt_dungtuyen += kpi.solan_vt_dungtuyen
                 solan_vt_ngoaituyen += kpi.solan_vt_ngoaituyen
+                tong_ngay_cong += kpi.ngay_cong
             if existing_monthly_summary:
                 monthly_summary_doc = frappe.get_doc("DMS Summary KPI Monthly", existing_monthly_summary)
                 monthly_summary_doc.so_kh_vt_luot = so_kh_vt_luot
@@ -98,6 +100,7 @@ class DMSCheckin(Document):
                 monthly_summary_doc.so_gio_lam_viec = so_gio_lam_viec
                 monthly_summary_doc.solan_vt_dungtuyen = solan_vt_dungtuyen
                 monthly_summary_doc.solan_vt_ngoaituyen = solan_vt_ngoaituyen
+                monthly_summary_doc.tong_ngay_cong = tong_ngay_cong
                 monthly_summary_doc.save()
             else:
                 monthly_summary_doc = frappe.get_doc({
@@ -110,7 +113,8 @@ class DMSCheckin(Document):
                     "so_kh_vt_duynhat": so_kh_vt_duynhat,
                     "solan_vt_dungtuyen": so_kh_vt_duynhat,
                     "solan_vt_ngoaituyen": solan_vt_ngoaituyen,
-                    "so_gio_lam_viec": so_gio_lam_viec
+                    "so_gio_lam_viec": so_gio_lam_viec,
+                    "tong_ngay_cong": tong_ngay_cong
                 })
                 monthly_summary_doc.insert(ignore_permissions=True)
 
@@ -152,8 +156,10 @@ class DMSCheckin(Document):
         if len(exists_checkin) > 1:
             if existing_daily_summary:
                 daily_summary_doc = frappe.get_doc("DMS Summary KPI Daily", existing_daily_summary)
+                ngay_cong = float(daily_summary_doc.so_kh_vt_duynhat / 20)
                 daily_summary_doc.so_kh_vt_luot += 1
                 daily_summary_doc.so_gio_lam_viec += time_work
+                daily_summary_doc.ngay_cong = ngay_cong if ngay_cong < 1 else 1
                 if name_date in list_travel_date:
                     daily_summary_doc.solan_vt_dungtuyen += 1
                 else:
@@ -165,18 +171,22 @@ class DMSCheckin(Document):
                     "date": today,
                     "nhan_vien_ban_hang": user_name,
                     "so_kh_vt_luot": len(exists_checkin),
+                    "so_kh_vt_duynhat": 1,
                     "solan_vt_dungtuyen": len(exists_checkin) if name_date in list_travel_date else 0,
                     "solan_vt_ngoaituyen": len(exists_checkin) if name_date not in list_travel_date else 0,
-                    "so_gio_lam_viec": time_work
+                    "so_gio_lam_viec": time_work,
+                    "ngay_cong": float(1/20)
                 })
                 daily_summary_doc.insert(ignore_permissions=True)
 
         if len(exists_checkin) == 1:
             if existing_daily_summary:
                 daily_summary_doc = frappe.get_doc("DMS Summary KPI Daily", existing_daily_summary)
+                ngay_cong = float(daily_summary_doc.so_kh_vt_duynhat / 20)
                 daily_summary_doc.so_kh_vt_luot += 1
                 daily_summary_doc.so_kh_vt_duynhat += 1
                 daily_summary_doc.so_gio_lam_viec += time_work
+                daily_summary_doc.ngay_cong = ngay_cong if ngay_cong < 1 else 1
                 if name_date in list_travel_date:
                     daily_summary_doc.solan_vt_dungtuyen += 1
                 else:
@@ -191,7 +201,8 @@ class DMSCheckin(Document):
                     "so_kh_vt_duynhat": 1,
                     "solan_vt_dungtuyen": 1 if name_date in list_travel_date else 0,
                     "solan_vt_ngoaituyen": 1 if name_date not in list_travel_date else 0,
-                    "so_gio_lam_viec": time_work
+                    "so_gio_lam_viec": time_work,
+                    "ngay_cong": float(1/20)
                 })
                 daily_summary_doc.insert(ignore_permissions=True)
 
@@ -235,8 +246,10 @@ class DMSCheckin(Document):
         else:
             if existing_daily_summary:
                 daily_summary_doc = frappe.get_doc("DMS Summary KPI Daily", existing_daily_summary)
+                ngay_cong = float(daily_summary_doc.so_kh_vt_duynhat / 20)
                 daily_summary_doc.so_kh_vt_luot -= 1
                 daily_summary_doc.so_kh_vt_duynhat -= 1
+                daily_summary_doc.ngay_cong = ngay_cong if ngay_cong < 1 else 1
                 if name_date in list_travel_date:
                     daily_summary_doc.solan_vt_dungtuyen -= 1
                 else:
@@ -269,7 +282,8 @@ class DMSCheckin(Document):
         so_gio_lam_viec = 0
         solan_vt_dungtuyen = 0
         solan_vt_ngoaituyen = 0
-        
+        tong_ngay_cong = 0
+
         if kpi_daily:
             for i in kpi_daily:
                 kpi = frappe.get_doc("DMS Summary KPI Daily", i.name)
@@ -278,6 +292,8 @@ class DMSCheckin(Document):
                 so_gio_lam_viec += kpi.so_gio_lam_viec
                 solan_vt_dungtuyen += kpi.solan_vt_dungtuyen
                 solan_vt_ngoaituyen += kpi.solan_vt_ngoaituyen
+                tong_ngay_cong += kpi.ngay_cong
+
             if existing_monthly_summary:
                 monthly_summary_doc = frappe.get_doc("DMS Summary KPI Monthly", existing_monthly_summary)
                 monthly_summary_doc.so_kh_vt_luot = so_kh_vt_luot
@@ -285,6 +301,7 @@ class DMSCheckin(Document):
                 monthly_summary_doc.so_gio_lam_viec = so_gio_lam_viec
                 monthly_summary_doc.solan_vt_dungtuyen = solan_vt_dungtuyen
                 monthly_summary_doc.solan_vt_ngoaituyen = solan_vt_ngoaituyen
+                monthly_summary_doc.tong_ngay_cong = tong_ngay_cong
                 monthly_summary_doc.save()
 
     def send_data_to_ekgis(self):

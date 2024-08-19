@@ -20,7 +20,8 @@
   "so_don_hang",
   "san_luong",
   "sku",
-  "so_gio_lam_viec"
+  "so_gio_lam_viec",
+  "ngay_cong"
  ],
  "fields": [
   {
@@ -93,66 +94,71 @@
    "fieldname": "solan_vt_ngoaituyen",
    "fieldtype": "Int",
    "label": "T\u1ed5ng s\u1ed1 l\u1ea7n vi\u1ebfng th\u0103m ngo\u1ea1i tuy\u1ebfn"
+  },
+  {
+   "fieldname": "ngay_cong",
+   "fieldtype": "Float",
+   "label": "Ng\u00e0y c\u00f4ng"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-02-19 15:13:04.140967",
+ "modified": "2024-08-19 16:56:06.150376",
  "modified_by": "Administrator",
  "module": "MBW DMS",
  "name": "DMS Summary KPI Daily",
  "owner": "Administrator",
  "permissions": [
-    {
-     "create": 1,
-     "delete": 1,
-     "email": 1,
-     "export": 1,
-     "print": 1,
-     "read": 1,
-     "report": 1,
-     "role": "System Manager",
-     "share": 1,
-     "write": 1
-    },
-    {
-     "email": 1,
-     "export": 1,
-     "print": 1,
-     "read": 1,
-     "report": 1,
-     "role": "All",
-     "select": 1,
-     "share": 1
-    },
-    {
-     "create": 1,
-     "delete": 1,
-     "email": 1,
-     "export": 1,
-     "print": 1,
-     "read": 1,
-     "report": 1,
-     "role": "Sales Manager",
-     "select": 1,
-     "share": 1,
-     "write": 1
-    },
-    {
-     "create": 1,
-     "delete": 1,
-     "email": 1,
-     "export": 1,
-     "if_owner": 1,
-     "print": 1,
-     "read": 1,
-     "report": 1,
-     "role": "Sales User",
-     "select": 1,
-     "share": 1,
-     "write": 1
-    }
-   ],
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "All",
+   "select": 1,
+   "share": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales Manager",
+   "select": 1,
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "if_owner": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales User",
+   "select": 1,
+   "share": 1,
+   "write": 1
+  }
+ ],
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": []

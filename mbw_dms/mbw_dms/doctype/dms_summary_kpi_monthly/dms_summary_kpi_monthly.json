@@ -23,7 +23,8 @@
   "so_don_hang",
   "san_luong",
   "sku",
-  "so_gio_lam_viec"
+  "so_gio_lam_viec",
+  "tong_ngay_cong"
  ],
  "fields": [
   {
@@ -111,11 +112,16 @@
    "fieldtype": "Link",
    "label": "Nh\u00f3m b\u00e1n h\u00e0ng",
    "options": "Sales Person"
+  },
+  {
+   "fieldname": "tong_ngay_cong",
+   "fieldtype": "Float",
+   "label": "T\u1ed5ng ng\u00e0y c\u00f4ng"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-06-12 13:51:44.536280",
+ "modified": "2024-08-19 17:36:26.781949",
  "modified_by": "Administrator",
  "module": "MBW DMS",
  "name": "DMS Summary KPI Monthly",
