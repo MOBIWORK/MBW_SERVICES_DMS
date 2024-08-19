@@ -64,9 +64,10 @@ export default function CustomerList({search}: {search:string}) {
     <TableCustom 
         $wrap={true}
         columns={columnsCustomer}
+        scroll={{y: 500}}
         dataSource={customerRouter.filter((cus: CustomerType) => 
             cus.customer_name?.toLocaleLowerCase()?.includes(search.toLocaleLowerCase()) || cus.customer_code?.toLocaleLowerCase()?.includes(search.toLocaleLowerCase()))}
-        pagination={false}
+        pagination={{ pageSize: 10 }}
     />
     </div>
   )
