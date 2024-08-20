@@ -226,7 +226,7 @@ def list_product_campaign(**kwargs):
             item["image"] = validate_image(item.get("image"))
             item["details"] = frappe.get_all("Item Price", filters={"item_code": item.get("item_code"), "price_list": default_price_list}, fields=["uom", "price_list", "price_list_rate", "valid_from", "currency"])
             item["unit"] = frappe.db.get_all("UOM Conversion Detail", {"parent" : item.get("name")}, ["uom", "conversion_factor"])
-            item["stock"] = frappe.db.get_all("Stock Entry Detail", {"item_code": item.get("item_code")}, ["t_warehouse", "qty"])
+            item["stock"] = frappe.db.get_all("Bin", {"item_code": item.get("item_code")}, ["warehouse as t_warehouse", "stock_uom", "projected_qty as qty"])
             data_item.append(item)
 
         return gen_response(200, "Thành công", {
