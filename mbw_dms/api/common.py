@@ -361,12 +361,14 @@ def handle_address_customer(address_info,link_to_customer):
             #kiểm tra đã tồn tại address muốn đối sang chưa
             if exit_address_title: 
                 links = doc_address.get("links")
-                rest_links = pydash.filter_(links,lambda x:x.get("link_doctype") != link_to_customer.get("link_doctype") and x.get("link_name") != link_to_customer.get("link_name"))
+                if len(link_to_customer) >0 :
+                    links = pydash.filter_(links,lambda x:x.get("link_doctype") != link_to_customer.get("link_doctype") and x.get("link_name") != link_to_customer.get("link_name"))
                 #xóa khách ở địa chỉ cũ nếu có nhiều khách , xóa luôn địa chỉ nếu chỉ có 1 khách liên kết
-                doc_address.set("links",rest_links)
+                doc_address.set("links",links)
                 doc_address.save()
                 curent_address = frappe.get_doc("Address",{"address_title": ["like",f"%{address_info.address_title}%"]})
-                curent_address.append("links",link_to_customer)
+                if len(link_to_customer) >0 :
+                    curent_address.append("links",link_to_customer)
                 curent_address.save()
                 return curent_address
             else:
@@ -381,7 +383,8 @@ def handle_address_customer(address_info,link_to_customer):
                 for key,value in address_info.items():
                     if key in key_info:
                         curent_address.set(key,value)
-                curent_address.append("links",link_to_customer)
+                if len(link_to_customer) >0 :
+                    curent_address.append("links",link_to_customer)
                 curent_address.save()
                 return curent_address
             else:
@@ -389,7 +392,8 @@ def handle_address_customer(address_info,link_to_customer):
                 for key,value in address_info.items():
                     if key in key_info:
                         new_address.set(key,value)
-                new_address.append("links",link_to_customer)
+                if len(link_to_customer) >0 :
+                    new_address.append("links",link_to_customer)
                 new_address.insert()
                 return new_address
     except Exception as e :
