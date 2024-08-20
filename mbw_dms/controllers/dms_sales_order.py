@@ -256,3 +256,12 @@ def update_sales_person(doc, method):
         doc.save()
     else:
         pass
+
+# Cập nhật giá sau khi submit
+def update_price_list_rate(doc, method):
+    price_list = doc.selling_price_list
+    for i in doc.items:
+        item_price = frappe.db.get_value("Item Price", {"price_list": price_list, "item_code": i.item_code}, "price_list_rate")
+        
+        if item_price:
+            i.price_list_rate = item_price
