@@ -252,5 +252,7 @@ def update_sales_person(doc, method):
         if bool(sales_person):
             employee = frappe.get_value("Sales Person", {"name": sales_person}, "employee")
             doc.phone_number = frappe.get_value("Employee", {"name": employee}, "cell_number")
+        
+        doc.save()
     else:
         pass
