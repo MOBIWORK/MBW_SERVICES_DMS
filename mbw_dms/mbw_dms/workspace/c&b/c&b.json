@@ -1,0 +1,58 @@
+{
+ "charts": [],
+ "content": "[{\"id\":\"PxUnFuPNm2\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Ti\u1ec7n \u00edch</b></span>\",\"col\":12}},{\"id\":\"hxGSuc-051\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Lo\u1ea1i ca\",\"col\":4}},{\"id\":\"VikVt4DUn2\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Ch\u1ea5m c\u00f4ng\",\"col\":4}},{\"id\":\"wyctLVL6uo\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Dashboard\",\"col\":4}},{\"id\":\"ktB08jml3C\",\"type\":\"custom_block\",\"data\":{\"custom_block_name\":\"SFC HR\",\"col\":12}},{\"id\":\"zLULX9hRQt\",\"type\":\"paragraph\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>BHXH</b></span>\",\"col\":12}},{\"id\":\"a86W_VioS_\",\"type\":\"paragraph\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Thu\u1ebf TNCN</b></span>\",\"col\":12}}]",
+ "creation": "2024-05-30 12:53:06.708443",
+ "custom_blocks": [
+  {
+   "custom_block_name": "SFC HR",
+   "label": "SFC HR"
+  }
+ ],
+ "docstatus": 0,
+ "doctype": "Workspace",
+ "for_user": "",
+ "hide_custom": 0,
+ "icon": "color-rank",
+ "idx": 0,
+ "indicator_color": "green",
+ "is_hidden": 1,
+ "label": "C&B",
+ "links": [],
+ "modified": "2024-08-20 14:33:10.857695",
+ "modified_by": "Administrator",
+ "module": "MBW DMS",
+ "name": "C&B",
+ "number_cards": [],
+ "owner": "tungda@mobiwork.vn",
+ "parent_page": "",
+ "public": 1,
+ "quick_lists": [],
+ "roles": [],
+ "sequence_id": 2.0,
+ "shortcuts": [
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Lo\u1ea1i ca",
+   "link_to": "Shift Type",
+   "stats_filter": "[]",
+   "type": "DocType"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Ch\u1ea5m c\u00f4ng",
+   "link_to": "Attendance",
+   "stats_filter": "[]",
+   "type": "DocType"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Dashboard",
+   "link_to": "Attendance",
+   "type": "Dashboard"
+  }
+ ],
+ "title": "C&B"
+}

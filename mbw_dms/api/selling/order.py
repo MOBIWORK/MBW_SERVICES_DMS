@@ -155,7 +155,7 @@ def so_si_detail(doctype, name):
     # Lấy ra chi tiết đơn hàng
     detail_order = {"list_items": []}
     if len(detail) > 0:
-        for key_item, value in detail[0].items() :
+        for key_item, value in detail[0].items():
             if key_item in field_detail_sales:                    
                 detail_order.setdefault(key_item, value)
         detail_order["list_items"] = get_items(master_doc=doctype, master_name=name)

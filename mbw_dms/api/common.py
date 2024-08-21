@@ -352,7 +352,7 @@ def try_c(cb):
 #xử lý thêm mới/cập nhật địa chỉ
 def handle_address_customer(address_info,link_to_customer):
     try:
-        key_info = ["address_title","address_type","address_line1","city","county","state","is_primary_address","is_shipping_address","customer_location_primary"]
+        key_info = ["address_title","address_type","address_line1","city","county","state","is_primary_address","is_shipping_address","address_location"]
         address_info = frappe._dict(address_info)
         id_address = address_info.name if address_info.name and address_info.name != "" else False
         exit_address_title = frappe.db.exists("Address",{"address_title": ["like",f"%{address_info.address_title}%"],"name": ["!=",id_address]})
