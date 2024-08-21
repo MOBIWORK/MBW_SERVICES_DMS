@@ -110,7 +110,7 @@ def kpi_cus_so_detail(**kwargs):
         elif to_date:
             filters.append(f"so.creation <= '{to_date}'")
 
-        filters.append("so.docstatus != 0")
+        filters.append("so.docstatus == 1 ")
         where_condition = " AND ".join(filters)
 
         sql_query = """
@@ -193,7 +193,7 @@ def kpi_total_so_detail(**kwargs):
         employee = kwargs.get("employee")
         sales_person = frappe.get_value("Sales Person", {"employee": employee}, "name")
 
-        filters["docstatus"] = ["!=", 0]
+        filters["docstatus"] = 1
 
         if from_date and to_date:
             filters["creation"] = ["between", [from_date, to_date]]
@@ -237,7 +237,7 @@ def kpi_so_amount_detail(**kwargs):
         employee = kwargs.get("employee")
         sales_person = frappe.get_value("Sales Person", {"employee": employee}, "name")
 
-        filters["docstatus"] = ["!=", 0]
+        filters["docstatus"] = 1
 
         if from_date and to_date:
             filters["creation"] = ["between", [from_date, to_date]]
@@ -281,7 +281,7 @@ def kpi_si_amount_detail(**kwargs):
 
         if from_date and to_date:
             filters["creation"] = ["between", [from_date, to_date]]
-        filters["docstatus"] = ["!=", 0]
+        filters["docstatus"] = 1
 
         all_sales_invoices = frappe.get_all("Sales Invoice", filters=filters, fields=["name", "customer", "UNIX_TIMESTAMP(creation) as collec_date", "grand_total"])
         filtered_data = []
@@ -371,6 +371,7 @@ def kpi_so_sku_detail(**kwargs):
         if employee:
             user_id = frappe.get_value("Employee", {"name": employee}, "user_id")
         filters["owner"] = user_id
+        filters["docstatus"] =1
 
         if from_date and to_date:
             filters["creation"] = ["between", [from_date, to_date]]
