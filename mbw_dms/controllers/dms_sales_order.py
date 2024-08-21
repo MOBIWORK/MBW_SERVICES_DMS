@@ -2,6 +2,7 @@ import frappe
 from frappe.utils import nowdate
 import calendar
 from datetime import datetime
+from frappe import _
 
 # Kiểm tra xem khách đã đặt hàng trước đó chưa
 def existing_customer(customer_name=None, start_date=None, end_date=None, sales_person=None):
@@ -260,8 +261,22 @@ def update_sales_person(doc, method):
 # Cập nhật giá sau khi submit
 def update_price_list_rate(doc, method):
     price_list = doc.selling_price_list
+    warehouse = doc.set_warehouse
+    
     for i in doc.items:
+        # Lấy giá từ Item Price dựa trên Price List và Item Code
         item_price = frappe.db.get_value("Item Price", {"price_list": price_list, "item_code": i.item_code}, "price_list_rate")
         
+        # Cập nhật price_list_rate nếu tìm thấy
         if item_price:
-            i.price_list_rate = item_price
+            frappe.db.set_value("Sales Order Item", i.name, "price_list_rate", item_price)
+
+        # Kiểm tra projected_qty trong kho
+        projected_qty = frappe.db.get_value("Bin", {"item_code": i.item_code, "warehouse": warehouse}, "projected_qty")
+        frappe.db.set_value("Sales Order Item", i.name, "projected_qty", projected_qty)
+        
+        # Nếu projected_qty <= 0, báo lỗi
+        if projected_qty is None or projected_qty <= 0 or i.qty > projected_qty:
+            frappe.throw(_("Số lượng dự kiến ​​cho mặt hàng {0} trong kho {1} là {2}. Không thể tiếp tục lệnh bán hàng.")
+                .format(i.item_code, warehouse, projected_qty)
+            )
