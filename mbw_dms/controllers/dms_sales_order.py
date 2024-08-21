@@ -36,7 +36,7 @@ def update_kpi_monthly(doc, method):
     sales_team = frappe.get_value("DMS KPI", {"nhan_vien_ban_hang": user_name}, "nhom_ban_hang")
 
     # Tính sản lượng (số sản phẩm/đơn) và sku(số mặt hàng/đơn) trong đơn hàng(không km)
-    items = doc.items
+    items = doc.get("items")
     qty,uom = qty_not_pricing_rule(items)
     # Kiểm tra đã tồn tại bản ghi KPI của tháng này chưa
     existing_monthly_summary = frappe.get_value("DMS Summary KPI Monthly", {"thang": month, "nam": year, "nhan_vien_ban_hang": user_name}, "name")
@@ -94,7 +94,7 @@ def update_kpi_monthly_on_cancel(doc, method):
     
     user_name = frappe.get_value("Sales Person", {"name": sales_person}, "employee")
 
-    items = doc.items
+    items = doc.get("items")
     qty,uom = qty_not_pricing_rule(items)
 
     # Kiểm tra đã tồn tại bản ghi KPI của tháng này chưa
