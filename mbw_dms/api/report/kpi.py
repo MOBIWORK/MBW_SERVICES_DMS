@@ -433,10 +433,7 @@ import pydash
 # sp khuyến mãi giá = 0 
 def qty_not_pricing_rule(items):
     items = list(items)
-    def view(x):
-        print("x====",x)            
-        return x.amount >0
-    total_item_price = pydash.filter_(items, view)
+    total_item_price = pydash.filter_(items, lambda x: x.amount >0)
     print("total_item_price",total_item_price)
     total_qty = {item.get("qty") for item in total_item_price}
     total_uom = {item.get("uom") for item in total_item_price}
