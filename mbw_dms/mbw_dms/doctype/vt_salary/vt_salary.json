@@ -1,0 +1,66 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2024-08-22 15:26:09.980709",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "employee",
+  "employee_name",
+  "year",
+  "month",
+  "thuong_doanh_thu"
+ ],
+ "fields": [
+  {
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "label": "Nh\u00e2n vi\u00ean b\u00e1n h\u00e0ng",
+   "options": "Employee"
+  },
+  {
+   "fieldname": "employee_name",
+   "fieldtype": "Data",
+   "label": "T\u00ean nh\u00e2n vi\u00ean"
+  },
+  {
+   "fieldname": "year",
+   "fieldtype": "Int",
+   "label": "N\u0103m"
+  },
+  {
+   "fieldname": "month",
+   "fieldtype": "Int",
+   "label": "Th\u00e1ng"
+  },
+  {
+   "fieldname": "thuong_doanh_thu",
+   "fieldtype": "Float",
+   "label": "Th\u01b0\u1edfng doanh thu"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2024-08-22 15:27:33.520799",
+ "modified_by": "Administrator",
+ "module": "MBW DMS",
+ "name": "VT Salary",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

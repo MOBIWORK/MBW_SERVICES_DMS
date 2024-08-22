@@ -11,7 +11,44 @@ from frappe.utils import nowdate
 import calendar
 
 class DMSSummaryKPIMonthly(Document):
-	pass
+    def on_update(self):
+        self.update_vt_salary()
+
+    def update_vt_salary(self):
+          month = int(self.thang)
+          year = int(self.nam)
+          start_date_str = f"{year:04d}-{month:02d}-01"
+          last_day_of_month = calendar.monthrange(year, month)[1]
+          end_date_str = f"{year:04d}-{month:02d}-{last_day_of_month:02d}"
+          start_date = frappe.utils.getdate(start_date_str)
+          end_date = frappe.utils.getdate(end_date_str)
+
+          # Lấy id của nhân viên
+          user_name = self.nhan_vien_ban_hang
+          employee_name = frappe.get_value("Employee", {"name": user_name}, "employee_name")
+          
+		  # Lấy Kpi nhân viên
+          kpi_employee = frappe.get_value("DMS KPI",
+                {"ngay_hieu_luc_tu": (">=", start_date), "ngay_hieu_luc_den": ("<=", end_date), "nhan_vien_ban_hang": user_name},
+                "doanh_thu")
+          
+          if frappe.db.exists("VT Salary", {"month": month, "year": year, "employee": user_name}):
+            vt_salary = frappe.get_doc("VT Salary", {"month": month, "year": year, "employee": user_name})
+            if kpi_employee:
+                vt_salary.thuong_doanh_thu = self.doanh_thu_thang / kpi_employee * 100
+            vt_salary.save()
+
+          else:
+            if kpi_employee:
+                vt_salary = frappe.get_doc({
+                    "doctype": "VT Salary",
+                    "employee": user_name,
+                    "employee_name": employee_name,
+                    "year": year,
+                    "month": month,
+                    "thuong_doanh_thu": self.doanh_thu_thang / kpi_employee * 100
+                })
+                vt_salary.insert()
 
 
 @frappe.whitelist(methods="GET")
@@ -27,6 +64,7 @@ def get_kpi_monthly():
         
 		# Lấy id của nhân viên
         user_name = frappe.get_value("Employee", {"user_id": frappe.session.user}, "name")
+        
         
 		# Lấy Kpi tháng
         monthly_summary = frappe.get_all(
@@ -64,4 +102,3 @@ def get_kpi_monthly():
         return gen_response(200, "Thành công", kpi)
     except Exception as e:
         return exception_handle(e)
-	
