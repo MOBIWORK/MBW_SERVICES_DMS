@@ -235,11 +235,12 @@ def create_customer(**kwargs):
             new_contact.is_primary_contact = 1
             new_contact.is_billing_contact = 1
             
-            new_contact.append("phone_nos", {
-                "phone": phone_number,
-                "is_primary_phone":1,
-                "is_primary_mobile_no":1
-            })
+            if phone_number:
+                new_contact.append("phone_nos", {
+                    "phone": phone_number,
+                    "is_primary_phone":1,
+                    "is_primary_mobile_no":1
+                })
             new_contact.insert()
             # liên kết địa chỉ với contact
             link_cs_contact = {
@@ -275,7 +276,6 @@ def create_customer(**kwargs):
 
         # xử lý các liên kết ở đây
         ## liên kết địa chỉ
-        print("current_address=================",current_address)
         if address and address.address_title and current_address:
             link_cs_address = {
                 "link_doctype": new_customer.doctype,

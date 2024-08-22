@@ -814,6 +814,7 @@ def list_inventory(kwargs):
 
 def get_report(filters={}):
     try:
+        is_excel = filters.get("is_excel",False)
         from_date = validate_filter(type_check="timestamp_to_date",type="start",value=filters.get("from_date"))
         to_date = validate_filter(type_check="timestamp_to_date",type="end",value=filters.get("to_date"))
         employee = filters.get("employee")
@@ -824,6 +825,9 @@ def get_report(filters={}):
         page_size =  cint(filters.get("page_size", 20))
         page_number = cint(filters.get("page_number", 1))
         offset= page_size*(page_number-1)
+        paging = ""
+        if not is_excel:
+            paging = f"WHERE row_num > {offset} AND row_num <= {offset} + {page_size};"
         where = "WHERE createdbyemail IS NOT NULL AND is_checkout = 1"
         if sale_group:
             query_sale= f"""
@@ -957,35 +961,44 @@ def get_report(filters={}):
             
             SELECT *
             FROM NumberedGroups
-            WHERE row_num > {offset} AND row_num <= {offset} + {page_size};
+            {paging}
         """
 
         report = frappe.db.sql(query, as_dict=1)
         for row in report:
             row['customers'] = json.loads(row['customers']) if row['customers'] else []
-        query2 = f"""
-            SELECT COUNT(*) AS number_of_groups FROM (SELECT 
-                te.name AS employee_code,
-                DATE(dc.createddate) AS creation_date,
-                COUNT(*) AS total_records
-            FROM 
-                `tabDMS Checkin` dc
-            INNER JOIN `tabCustomer` cs ON dc.kh_ma = cs.customer_code
-            LEFT JOIN `tabEmployee` te ON te.user_id = dc.createdbyemail
-            RIGHT JOIN `tabSales Person` sp ON sp.employee = te.name
-            {where}
-            GROUP BY 
-                te.name, DATE(dc.createddate))  AS grouped_counts
-            """
-        total = frappe.db.sql(query2,as_dict=1)
-        return gen_response(200,"",{
-            "data": report,
-            "total": total[0].number_of_groups,
-            "page_size": page_size,
-            "page_number": page_number
-        })
+        if not is_excel:
+            query2 = f"""
+                SELECT COUNT(*) AS number_of_groups FROM (SELECT 
+                    te.name AS employee_code,
+                    DATE(dc.createddate) AS creation_date,
+                    COUNT(*) AS total_records
+                FROM 
+                    `tabDMS Checkin` dc
+                INNER JOIN `tabCustomer` cs ON dc.kh_ma = cs.customer_code
+                LEFT JOIN `tabEmployee` te ON te.user_id = dc.createdbyemail
+                RIGHT JOIN `tabSales Person` sp ON sp.employee = te.name
+                {where}
+                GROUP BY 
+                    te.name, DATE(dc.createddate))  AS grouped_counts
+                """
+            total = frappe.db.sql(query2,as_dict=1)
+            return gen_response(200,"",{
+                "data": report,
+                "total": total[0].number_of_groups,
+                "page_size": page_size,
+                "page_number": page_number
+            })
+        else :
+            return {
+                "data": report,
+                "total": total[0].number_of_groups,
+            }
     except Exception as e:
-        return exception_handle(e)
+        if not is_excel:
+            return exception_handle(e)
+        else:
+            return []
     
 def validate_fields(data):
     field_descriptions = {
