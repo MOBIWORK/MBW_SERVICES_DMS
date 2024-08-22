@@ -270,6 +270,9 @@ def update_price_list_rate(doc, method):
         # Cập nhật price_list_rate nếu tìm thấy
         if item_price:
             frappe.db.set_value("Sales Order Item", i.name, "price_list_rate", item_price)
+        
+        discount_percentage = (1 - i.rate / item_price) * 100
+        frappe.db.set_value("Sales Order Item", i.name, "discount_percentage", discount_percentage)
 
         # Kiểm tra projected_qty trong kho
         projected_qty = frappe.db.get_value("Bin", {"item_code": i.item_code, "warehouse": warehouse}, "projected_qty")
@@ -277,6 +280,6 @@ def update_price_list_rate(doc, method):
         
         # Nếu projected_qty <= 0, báo lỗi
         if projected_qty is None or projected_qty <= 0 or i.qty > projected_qty:
-            frappe.throw(_("Số lượng dự kiến ​​cho mặt hàng {0} trong kho {1} là {2}. Không thể tiếp tục lệnh bán hàng.")
+            frappe.throw(_("Số lượng dự kiến ​​cho mặt hàng {0} trong kho {1} là {2} . Không thể tiếp tục lệnh bán hàng.")
                 .format(i.item_code, warehouse, projected_qty)
             )
