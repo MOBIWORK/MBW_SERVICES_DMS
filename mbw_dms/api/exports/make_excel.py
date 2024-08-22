@@ -3,12 +3,14 @@ from frappe import _
 from io import BytesIO
 from mbw_dms.api.common import ( get_employee_info,gen_response)
 from openpyxl import Workbook
+from datetime import datetime
 from openpyxl.styles import Font, Alignment, PatternFill, Border, Side
 wb = Workbook()
 ws = wb.active
 
 name_report = {
-    "Report KPI":"Báo cáo KPI"
+    "Report KPI":"BÁO CÁO KPI",
+    "Report Checkin": "BÁO CÁO VIẾNG THĂM KHÁCH HÀNG"
 }
 
 columnReport = {
@@ -32,6 +34,15 @@ columnReport = {
                             "AC": 10, "AD": 10, "AE": 10, "AF": 10,
                             "AG": 10, "AH": 10
                         }
+    },
+    "Report Checkin" : {
+        "column" : {
+            "main_columns": ["STT", "Mã nhân viên","Nhân viên", "Nhóm bán hàng","Ngày","Thứ","Giờ làm", "Giờ VT","Khách hàng","","","","","","Viếng Thăm","","","","","","","","","","","Số km tự động (km)","Số km tự di chuyển (km)","Vận tốc (km/h)"],
+            "sub_column": ["","","","","","","","","Mã KH","Tên KH","Liên hệ","Loại KH","Nhóm KH","SĐT","Địa chỉ","Checkin","Checkout","Số giờ VT","Địa chỉ checkin","Khoảng cách (km)","Thiết bị","Số ảnh chụp","Đúng tuyến","Đơn hàng","Ghi tồn","Ghi chú","","",""],
+        },
+        "col_span": ["A9:A11", "B9:B11", "C9:C11", "D9:D11","E9:E11","F9:F11","G9:G11","H9:H11","I9:010","P9:Z10","AA9:AA11","AB9:AB11","AC9:AC11"],
+        "show_data":[ "employee_code","employee_name", "sale_group","time","day_week","total_work", "total_time","customer_code","customer_name","customer_contact","customer_type","customer_group","customer_sdt","customer_address","checkin","checkout","time_check","checkin_address","distance","device","total_image","is_router","is_order","is_check_inventory","ghi chú","","",""],
+        "column_widths": {}
     }
 }
 class MakeExcel :
@@ -54,15 +65,12 @@ class MakeExcel :
         bottom=Side(style='thin', color='000000')
     ) 
 
-    def __init__(self,report_type,data,month,year):
-        self.month = month
-        self.year = year
+    def __init__(self,report_type,data):
         self.report_type = report_type
         self.data_content = data.get("data")
         self.data_footer = data.get("sum")
         self.description_data = []
         self.org_info(report_type)
-        print("self.description_data",self.description_data)
     # lấy thông tin tổ chức 
     def org_info(self,report_type):
         if len(self.description_data) == 0 :
@@ -75,15 +83,20 @@ class MakeExcel :
                 address = frappe.db.get_all(doctype= "Address",filters= {"link_doctype": "Company", "link_name" : employee_info.company},fields=["*"])
                 address_title = address[0].address_title if len(address) >0 else ""
                 phone = company_info.phone_no if company_info.phone_no != None else ""
+                show_time = self.line_time() if self.line_time() else []
                 self.description_data = [
                     ["", employee_info.company , "", "", "", ""],
                     ["", f"Điện thoại: {phone}", "", "", "", ""],
                     ["", f"Địa chỉ: {address_title}", "", "", "", ""],
                     ["", "", "", "", "", ""],
                     ["", name_report[report_type], "", "", "", ""],
-                    ["", f"Tháng: {self.month} - Năm: {self.year} ", "", "", "", ""]
+                    # ["", f"Tháng: {self.month} - Năm: {self.year} ", "", "", "", ""]
+                    show_time
                 ]
         return self
+    # tạo hiển thị kiểu thời gian
+    def line_time(self):
+        return []
     #tạo bảng report hoàn chỉnh
     def make(self):
         self.make_description_header()
@@ -163,7 +176,7 @@ class MakeExcel :
         # print("sort_list",sort_list)
         # Add the data to the worksheet
         start_row = 12
-        # phải xem lại
+        # ghi nội dung vào bản
         for row_idx, row_data in enumerate(self.data_content, start=start_row):
             cell = ws.cell(row=row_idx, column=1, value=row_idx-11)
             cell.alignment = self.center_alignment
@@ -192,4 +205,55 @@ class MakeExcel :
         cell.border = self.border_style
         return self
     
+
+class MakeExcelKpi(MakeExcel):
+    def __init__(self,report_type,data,from_time,to_time):
+        self.month = from_time
+        self.year = to_time
+        super().__init__(report_type,data)
+    def line_time(self):
+        return ["", f"Tháng: {self.month} - Năm: {self.year} ", "", "", "", ""]
+
+class MakeExcelCheckin(MakeExcel):
+    def __init__(self,report_type,data,from_time,to_time):
+        self.from_time =  datetime.fromtimestamp(from_time).strftime("%d/%m/%Y")
+        self.to_time =  datetime.fromtimestamp(to_time).strftime("%d/%m/%Y")  
+        super().__init__(report_type,data)
+    def line_time(self):
+        return ["", f"{self.from_time} - {self.to_time}", "", "", "", ""]
+    # tạo nội dung bảng
+    def make_table(self):
+        sort_list = columnReport[self.report_type]["show_data"]
+        # print("sort_list",sort_list)
+        # Add the data to the worksheet
+        start_row = 12
+        # chỉnh sửa , gom cột tự động- nhiều cột
+        # for row_idx, row_data in enumerate(self.data_content, start=start_row):
+        #     cell = ws.cell(row=row_idx, column=1, value=row_idx-11)
+        #     cell.alignment = self.center_alignment
+        #     cell.border = self.border_style
+        #     for col_idx, value in enumerate(sort_list, start=2):
+        #         cell = ws.cell(row=row_idx, column=col_idx, value=row_data.get(value) or 0)
+        #         cell.alignment = self.left_alignment if col_idx <= 4 else self.center_alignment
+        #         cell.border = self.border_style
+        
+        return self
+    pass
+
+class MakeExcelInventory(MakeExcel):
+    pass
+
+
+class MakeExcelSell(MakeExcel):
+    pass
+
+
+class MakeExcelOrder(MakeExcel):
+    pass
+
+class MakeExcelCustomer(MakeExcel):
+    pass
+
+class MakeExcelCustomerCheckin(MakeExcel):
+    pass
 

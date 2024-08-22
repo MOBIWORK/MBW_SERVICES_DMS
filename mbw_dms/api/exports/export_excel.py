@@ -9,11 +9,17 @@ from openpyxl import Workbook
 from io import BytesIO
 import os
 from frappe.desk.utils import provide_binary_file
-from mbw_dms.api.exports.make_excel import MakeExcel
+from mbw_dms.api.exports.make_excel import (MakeExcel,MakeExcelCheckin,MakeExcelCustomer,MakeExcelCustomerCheckin,MakeExcelInventory,MakeExcelKpi,MakeExcelOrder,MakeExcelSell)
+from mbw_dms.api.validators import validate_filter
+
 import json
 @frappe.whitelist(methods="GET")
 def export_excel(**kwarg):
-    report_type  = kwarg.get("report_type","")
+    report_type  = validate_filter(
+        value= kwarg.get("report_type",""),
+        type_check="enum",type=[ "Report KPI","Report Inventory","Report Checkin",
+                                "Report Sell","Report Order","Report Customer",
+                                "Report Customer Checkin"])  
     filter = kwarg.get("data_filter")
     if bool(report_type) == False:
         return gen_response(500,_("Link is require"))
@@ -30,9 +36,22 @@ def export_excel(**kwarg):
         # Lấy hàm từ module
         function_to_call = getattr(module, function_name)
         data = function_to_call({**filter,"is_excel": True})
-        print("data===================",data)
-        #xử lý tạo excel
-        create_xlsx = MakeExcel(report_type,data,filter.get("month"),filter.get("year"))
+        #xử lý tạo excel theo từng trường hợp
+        if report_type == "Report KPI":
+            create_xlsx = MakeExcelKpi(report_type,data,filter.get("month"),filter.get("year"))
+        elif report_type == "Report Checkin":
+            create_xlsx = MakeExcelCheckin(report_type,data,filter.get("month"),filter.get("year"))
+        elif report_type == "Report Inventory":
+            create_xlsx = MakeExcelInventory(report_type,data,filter.get("month"),filter.get("year"))
+        elif report_type == "Report Sell":
+            create_xlsx = MakeExcelSell(report_type,data,filter.get("month"),filter.get("year"))
+        elif report_type == "Report Order":
+            create_xlsx = MakeExcelOrder(report_type,data,filter.get("month"),filter.get("year"))
+        elif report_type == "Report Customer":
+            create_xlsx = MakeExcelCustomer(report_type,data,filter.get("month"),filter.get("year"))
+        elif report_type == "Report Customer Checkin":
+            create_xlsx = MakeExcelCustomerCheckin(report_type,data,filter.get("month"),filter.get("year"))
+         
         xlsx_file = create_xlsx.make()
         # # xử lý gửi excel - xóa trên server        
         # os.remove(xlsx_file)

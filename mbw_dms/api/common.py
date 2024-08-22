@@ -47,6 +47,7 @@ class CommonHandle() :
     
     @staticmethod
     def get_user_id():
+        
         headers = frappe.local.request.headers.get("Authorization")
         usrPass = headers.split(" ")[1]
         str_b64Val = base64.b64decode(usrPass).decode("utf-8")
@@ -170,12 +171,16 @@ def customers_code_router(router=False, routersName=[], thisWeek = False, view_m
 
 
 def get_user_id():
-    headers = frappe.local.request.headers.get("Authorization")
-    usrPass = headers.split(" ")[1]
-    str_b64Val = base64.b64decode(usrPass).decode("utf-8")
-    list_key = str_b64Val.split(':')
-    api_key = list_key[0]
-    user_id = frappe.db.get_value("User", {"api_key": api_key},["name", "email", "full_name"],as_dict=1)
+    id = frappe.get_user().doc.name
+    if not id:
+        headers = frappe.local.request.headers.get("Authorization")
+        usrPass = headers.split(" ")[1]
+        str_b64Val = base64.b64decode(usrPass).decode("utf-8")
+        list_key = str_b64Val.split(':')
+        api_key = list_key[0]
+        user_id = frappe.db.get_value("User", {"api_key": api_key},["name", "email", "full_name"],as_dict=1)
+    else :
+        user_id = frappe.db.get_value("User", {"name": id},["name", "email", "full_name"],as_dict=1)
     return user_id
 
 def get_employee_id():
@@ -189,7 +194,8 @@ def get_employee_info():
     try:
         user_id = get_user_id()
         return get_employee_by_user(user_id.get("email"), ["name", "user_id", "employee_name", "company"])
-    except:
+    except Exception as e:
+        print("lỗi lấy thông tin nhân viên",e)
         return ""
 
 def get_employee_by_name(name, fields=["name"]):
