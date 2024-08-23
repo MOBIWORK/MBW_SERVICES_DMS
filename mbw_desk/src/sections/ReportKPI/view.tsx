@@ -9,7 +9,7 @@ import { rsData, rsDataFrappe } from "../../types/response";
 import { employee } from "../../types/employeeFilter";
 import useDebounce from "../../hooks/useDebount";
 import dayjs from "dayjs";
-import { treeArray } from "../../util";
+import { handleDowload, treeArray } from "../../util";
 import { listSale } from "../../types/listSale";
 import { useResize } from "@/hooks";
 import { SelectCommon, TreeSelectCommon } from "@/components/select/select";
@@ -302,32 +302,17 @@ export default function ReportKPI() {
                 icon: <VerticalAlignBottomOutlined className="text-xl" />,
                 size: "18px",
                 className: "flex items-center",
-                action: async () => {
-                  try {
-                    console.log("datyaa");
-
-                    const response = await AxiosService.get(
-                      "/api/method/mbw_dms.api.exports.export_excel.export_excel",
-                      {
-                        params: {
-                          report_type: "Report KPI",
-                          data_filter: {
-                            month: fmonth,
-                            year: fyear
-                            //còn đẩy lên sale team sale person
-                          },
-                        },
-                        responseType: "arraybuffer",
-                      }
-                    );
-                    const blob = new Blob([response]);
-                    console.log(blob);
-
-                    saveAs(blob, "report.xlsx");
-                  } catch (err) {
-                    console.log("error", err);
-                  }
-                },
+                action: handleDowload.bind(null, {
+                  url: "/api/method/mbw_dms.api.exports.export_excel.export_excel",
+                  params: {
+                    report_type: "Report KPI",
+                    data_filter: {
+                      month: fmonth,
+                      year: fyear,
+                      //còn đẩy lên sale team sale person
+                    },
+                  },
+                }),
               },
             ]}
           />
@@ -502,7 +487,9 @@ export default function ReportKPI() {
                       {dataReort?.sum?.tong_kh_so_gio_lam_viec}
                     </Table.Summary.Cell>
                     <Table.Summary.Cell index={32} className="text-center">
-                      {Number(dataReort?.sum?.tong_th_so_gio_lam_viec).toFixed(2)}
+                      {Number(dataReort?.sum?.tong_th_so_gio_lam_viec).toFixed(
+                        2
+                      )}
                     </Table.Summary.Cell>
                     <Table.Summary.Cell index={33}></Table.Summary.Cell>
                   </Table.Summary.Row>

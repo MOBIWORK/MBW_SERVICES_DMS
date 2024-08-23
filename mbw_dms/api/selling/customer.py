@@ -187,8 +187,8 @@ def create_customer(**kwargs):
             
         # Tạo mới khách hàng
         new_customer = frappe.new_doc("Customer")
-        required_fields = ["customer_code", "customer_name", "customer_group", "territory","sfa_customer_type","sfa_sale_channel"]
-        normal_fields = ["customer_details", "website"]
+        required_fields = ["customer_code", "customer_name",]
+        normal_fields = ["customer_details", "website", "customer_group", "territory","sfa_customer_type","sfa_sale_channel"]
         date_fields = ["custom_birthday"]
         choice_fields = ["customer_type"]
         for key, value in kwargs.items():

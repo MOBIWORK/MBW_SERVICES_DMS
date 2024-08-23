@@ -30,7 +30,6 @@ def get_customer_inventory(**body):
         # Bộ lọc khách hàng
         customer = body.get("customer")
         # lọc nhân viên
-        employee = body.get("employee")
         message = ""
         # tao filter
         filters = []

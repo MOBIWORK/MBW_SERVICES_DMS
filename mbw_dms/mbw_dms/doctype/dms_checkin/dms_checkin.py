@@ -992,13 +992,16 @@ def get_report(filters={}):
         else :
             return {
                 "data": report,
-                "total": total[0].number_of_groups,
             }
     except Exception as e:
         if not is_excel:
             return exception_handle(e)
         else:
-            return []
+            print("Lỗi lấy dũa liệu",e)
+            return {
+                "data": [],
+                "total": 0
+            }
     
 def validate_fields(data):
     field_descriptions = {

@@ -5,14 +5,22 @@ from mbw_dms.api.common import ( get_employee_info,gen_response)
 from openpyxl import Workbook
 from datetime import datetime
 from openpyxl.styles import Font, Alignment, PatternFill, Border, Side
-wb = Workbook()
-ws = wb.active
+
 
 name_report = {
     "Report KPI":"BÁO CÁO KPI",
     "Report Checkin": "BÁO CÁO VIẾNG THĂM KHÁCH HÀNG"
 }
-
+list_name_col_x =['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'AA', 'AB', 'AC']
+week_days = {
+    "Mon": "Thứ Hai",
+    "Tue": "Thứ Ba",
+    "Wed": "Thứ Tư",
+    "Thu": "Thứ Năm",
+    "Fri": "Thứ Sáu",
+    "Sat": "Thứ Bảy",
+    "Sun": "Chủ Nhật"
+}
 columnReport = {
     "Report KPI" : {
         "column" : {
@@ -37,12 +45,23 @@ columnReport = {
     },
     "Report Checkin" : {
         "column" : {
-            "main_columns": ["STT", "Mã nhân viên","Nhân viên", "Nhóm bán hàng","Ngày","Thứ","Giờ làm", "Giờ VT","Khách hàng","","","","","","Viếng Thăm","","","","","","","","","","","Số km tự động (km)","Số km tự di chuyển (km)","Vận tốc (km/h)"],
+            "main_columns": ["STT", "Mã nhân viên","Nhân viên", "Nhóm bán hàng","Ngày","Thứ","Giờ làm", "Giờ VT","Khách hàng","","","","","","","Viếng Thăm","","","","","","","","","","","Số km tự động (km)","Số km tự di chuyển (km)","Vận tốc (km/h)"],
             "sub_column": ["","","","","","","","","Mã KH","Tên KH","Liên hệ","Loại KH","Nhóm KH","SĐT","Địa chỉ","Checkin","Checkout","Số giờ VT","Địa chỉ checkin","Khoảng cách (km)","Thiết bị","Số ảnh chụp","Đúng tuyến","Đơn hàng","Ghi tồn","Ghi chú","","",""],
         },
-        "col_span": ["A9:A11", "B9:B11", "C9:C11", "D9:D11","E9:E11","F9:F11","G9:G11","H9:H11","I9:010","P9:Z10","AA9:AA11","AB9:AB11","AC9:AC11"],
+        "col_span": ["A9:A11", "B9:B11", "C9:C11", "D9:D11","E9:E11","F9:F11","G9:G11","H9:H11","I9:O10","P9:Z10","AA9:AA11","AB9:AB11","AC9:AC11"],
+        # "col_span": [],
         "show_data":[ "employee_code","employee_name", "sale_group","time","day_week","total_work", "total_time","customer_code","customer_name","customer_contact","customer_type","customer_group","customer_sdt","customer_address","checkin","checkout","time_check","checkin_address","distance","device","total_image","is_router","is_order","is_check_inventory","ghi chú","","",""],
-        "column_widths": {}
+        "column_widths" : {
+                            "A": 5, "B": 15, "C": 25, "D": 35,
+                            "E": 10, "F": 10, "G": 10, "H": 10,
+                            "I": 10, "J": 10, "K": 10, "L": 10,
+                            "M": 10, "N": 10, "O": 10, "P": 10,
+                            "Q": 10, "R": 10, "S": 10, "T": 10,
+                            "U": 10, "V": 10, "W": 10, "X": 10,
+                            "Y": 10, "Z": 10, "AA": 10, "AB": 10,
+                            "AC": 10, "AD": 10, "AE": 10, "AF": 10,
+                            "AG": 10, "AH": 10
+                        }
     }
 }
 class MakeExcel :
@@ -66,46 +85,54 @@ class MakeExcel :
     ) 
 
     def __init__(self,report_type,data):
+        self.wb = Workbook()
+        self.ws = self.wb.active
         self.report_type = report_type
         self.data_content = data.get("data")
-        self.data_footer = data.get("sum")
+        self.data_footer = data.get("sum") or False
         self.description_data = []
         self.org_info(report_type)
+
     # lấy thông tin tổ chức 
     def org_info(self,report_type):
         if len(self.description_data) == 0 :
-            employee_info = get_employee_info()
-            if employee_info != "":
-                employee_info = frappe._dict(employee_info)
-                if not employee_info.company :
-                    return gen_response(500,_("Account not in any company!"))
-                company_info = frappe.db.get_value("Company",employee_info.company,["name","phone_no"],as_dict=1)
-                address = frappe.db.get_all(doctype= "Address",filters= {"link_doctype": "Company", "link_name" : employee_info.company},fields=["*"])
-                address_title = address[0].address_title if len(address) >0 else ""
-                phone = company_info.phone_no if company_info.phone_no != None else ""
-                show_time = self.line_time() if self.line_time() else []
-                self.description_data = [
-                    ["", employee_info.company , "", "", "", ""],
-                    ["", f"Điện thoại: {phone}", "", "", "", ""],
-                    ["", f"Địa chỉ: {address_title}", "", "", "", ""],
-                    ["", "", "", "", "", ""],
-                    ["", name_report[report_type], "", "", "", ""],
-                    # ["", f"Tháng: {self.month} - Năm: {self.year} ", "", "", "", ""]
-                    show_time
-                ]
+            try:
+                employee_info = get_employee_info()
+                if employee_info:
+                    employee_info = frappe._dict(employee_info)
+                    if not employee_info.company :
+                        return gen_response(500,_("Account not in any company!"))
+                    company_info = frappe.db.get_value("Company",employee_info.company,["name","phone_no"],as_dict=1)
+                    address = frappe.db.get_all(doctype= "Address",filters= {"link_doctype": "Company", "link_name" : employee_info.company},fields=["*"])
+                    address_title = address[0].address_title if len(address) >0 else ""
+                    phone = company_info.phone_no if company_info.phone_no != None else ""
+                    show_time = self.line_time() if self.line_time() else []
+                    self.description_data = [
+                        ["", employee_info.company , "", "", "", ""],
+                        ["", f"Điện thoại: {phone}", "", "", "", ""],
+                        ["", f"Địa chỉ: {address_title}", "", "", "", ""],
+                        ["", "", "", "", "", ""],
+                        ["", name_report[report_type], "", "", "", ""],
+                        show_time
+                    ]
+
+                    print("self.description_data",self.description_data)
+            except Exception as e :
+                print("Lỗi khi tạo ",e)
         return self
     # tạo hiển thị kiểu thời gian
     def line_time(self):
         return []
     #tạo bảng report hoàn chỉnh
     def make(self):
-        self.make_description_header()
+        if not  self.make_description_header():
+            self.make_description_header()
         self.make_header()
         if len(self.data_content) > 0:
             self.make_table()
         self.make_footer()
         xlsx_file = BytesIO()
-        wb.save(xlsx_file)
+        self.wb.save(xlsx_file)
         # # xử lý gửi excel - xóa trên server
         return xlsx_file
 
@@ -114,27 +141,26 @@ class MakeExcel :
         merge = ['B1:F1','B2:F2','B3:F3','B5:F5',"B6:F6","B7:F7"]
         # Populate the worksheet with data
         for row in self.description_data :
-            ws.append(row)
+            self.ws.append(row)
         # Merge cells for styling as in the image
         for mer in merge:
-            ws.merge_cells(mer)
-        ws['B1'].font = self.bold_font
-        ws['B1'].alignment = self.center_alignment
-        ws['B1'].fill = self.header_fill
+            self.ws.merge_cells(mer)
+        self.ws['B1'].font = self.bold_font
+        self.ws['B1'].alignment = self.center_alignment
+        self.ws['B1'].fill = self.header_fill
 
-        ws['B5'].font = self.title_font
-        ws['B5'].alignment = self.center_alignment
+        self.ws['B5'].font = self.title_font
+        self.ws['B5'].alignment = self.center_alignment
 
-        ws['B6'].font = self.subtitle_font
-        ws['B6'].alignment = self.center_alignment
+        self.ws['B6'].font = self.subtitle_font
+        self.ws['B6'].alignment = self.center_alignment
 
-        ws['B7'].font = self.subtitle_font
-        ws['B7'].alignment = self.center_alignment
+        self.ws['B7'].font = self.subtitle_font
+        self.ws['B7'].alignment = self.center_alignment
         # Định dạng chiều rộng cột
         column_widths = columnReport[self.report_type]["column_widths"] 
         for col, width in column_widths.items():
-            ws.column_dimensions[col].width = width
-        
+            self.ws.column_dimensions[col].width = width
         return self
     
     # tạo header bảng
@@ -144,22 +170,23 @@ class MakeExcel :
         col_span = columnReport[self.report_type]["col_span"]
         for mg in col_span:
             try:
-                ws.unmerge_cells(mg)
+                self.ws.unmerge_cells(mg)
             except :
-                print("not merge")
+                print("not merge ",mg)
         # điền title header
         # Điền các giá trị tiêu đề cho hàng đầu tiên bằng vòng lặp
         for col_idx, header in enumerate(headers_row1, start=1):
-            cell = ws.cell(row=9, column=col_idx, value=header)
+            cell = self.ws.cell(row=9, column=col_idx, value=header)
             #áp dụng style
             cell.font = self.bold_font
             cell.alignment = self.center_alignment
             cell.border = self.border_style
             cell.fill = self.header_tableFill
 
+        
         # Fill in the header values for the second row using a loop
         for col_idx, header in enumerate(headers_row2, start=1):
-            cell = ws.cell(row=11, column=col_idx, value=header)
+            cell = self.ws.cell(row=11, column=col_idx, value=header)
             #áp dụng style
             cell.font = self.bold_font  # Use bold font for the subheader
             cell.alignment = self.center_alignment
@@ -167,7 +194,8 @@ class MakeExcel :
             cell.fill = self.header_tableFill
         # # gom các cột cha với các cột con
         for mg in col_span:
-            ws.merge_cells(mg)
+            self.ws.merge_cells(mg)
+        print("make header xong")
         return self
 
     # tạo nội dung bảng
@@ -178,31 +206,35 @@ class MakeExcel :
         start_row = 12
         # ghi nội dung vào bản
         for row_idx, row_data in enumerate(self.data_content, start=start_row):
-            cell = ws.cell(row=row_idx, column=1, value=row_idx-11)
+            cell = self.ws.cell(row=row_idx, column=1, value=row_idx-11)
             cell.alignment = self.center_alignment
             cell.border = self.border_style
             for col_idx, value in enumerate(sort_list, start=2):
-                cell = ws.cell(row=row_idx, column=col_idx, value=row_data.get(value) or 0)
+                cell = self.ws.cell(row=row_idx, column=col_idx, value=row_data.get(value) or 0)
                 cell.alignment = self.left_alignment if col_idx <= 4 else self.center_alignment
                 cell.border = self.border_style
         
+
+        print("make table content xong")
         return self
     def make_footer(self):
-        sort_footer = columnReport[self.report_type]["footer"]
-        start_row = len(self.data_content) + 12
-        # for row_idx, row_data in enumerate(self.data_footer, start=start_row):
-        
-        for col_idx, value in enumerate(sort_footer, start=1):
-            # if col_idx == 1:
-            #     cell = ws.cell(row=row_idx, column=col_idx, value=row_idx)
-            #     cell.alignment = self.center_alignment
-            # else:
-            cell = ws.cell(row=start_row, column=col_idx, value=self.data_footer.get(value))
-            cell.alignment = self.left_alignment if col_idx <= 4 else self.center_alignment
-            cell.border = self.border_style
-        cell = ws.cell(row=start_row, column=2, value="Tổng")
-        cell.alignment = self.center_alignment
-        cell.border = self.border_style
+        if self.data_footer:
+            sort_footer = columnReport[self.report_type]["footer"]
+            if sort_footer:
+                start_row = len(self.data_content) + 12
+                # for row_idx, row_data in enumerate(self.data_footer, start=start_row):
+                
+                for col_idx, value in enumerate(sort_footer, start=1):
+                    # if col_idx == 1:
+                    #     cell = self.ws.cell(row=row_idx, column=col_idx, value=row_idx)
+                    #     cell.alignment = self.center_alignment
+                    # else:
+                    cell = self.ws.cell(row=start_row, column=col_idx, value=self.data_footer.get(value))
+                    cell.alignment = self.left_alignment if col_idx <= 4 else self.center_alignment
+                    cell.border = self.border_style
+                cell = self.ws.cell(row=start_row, column=2, value="Tổng")
+                cell.alignment = self.center_alignment
+                cell.border = self.border_style
         return self
     
 
@@ -216,32 +248,91 @@ class MakeExcelKpi(MakeExcel):
 
 class MakeExcelCheckin(MakeExcel):
     def __init__(self,report_type,data,from_time,to_time):
-        self.from_time =  datetime.fromtimestamp(from_time).strftime("%d/%m/%Y")
-        self.to_time =  datetime.fromtimestamp(to_time).strftime("%d/%m/%Y")  
+        self.from_time =  datetime.fromtimestamp(float(from_time)).strftime("%d/%m/%Y")
+        self.to_time =  datetime.fromtimestamp(float(to_time)).strftime("%d/%m/%Y") 
+        print("self.to_time",self.to_time,self.from_time) 
         super().__init__(report_type,data)
+        self.changer_data()
+    # định nghĩa thời gian
     def line_time(self):
         return ["", f"{self.from_time} - {self.to_time}", "", "", "", ""]
+    def changer_data(self):
+        data  = self.data_content
+        new_data = []
+        for idx_data,checkin in enumerate(data,1):
+            # xử lý thời gian ,ngày tháng
+            checkin["total_work"] = round(float(checkin["total_work"])/ 60,2)
+            checkin["total_time"] = round(float(checkin["total_time"])/ 60,2)
+            checkin["time"] =  datetime.fromtimestamp(float(checkin["create_time"])).strftime("%d/%m/%Y")
+            checkin["day_week"] = week_days[datetime.fromtimestamp(float(checkin["create_time"])).strftime("%a")]
+
+            customers = checkin.get("customers")
+            for index,customer in enumerate(customers):
+                customer["time_check"] = round(float(customer["time_check"])/ 60,2)
+                if index == 0 :
+                    data_appen = {**checkin,**customer}
+                   
+                    data_appen = {**data_appen,"total_group": len(customers),"stt": idx_data}
+                    
+                    del data_appen["customers"]
+                    new_data.append(data_appen)
+                else:
+                    new_data.append(customer)
+        self.data_content = new_data
     # tạo nội dung bảng
     def make_table(self):
+        fields_group = ["employee_code","employee_name", "sale_group","time","day_week","total_work", "total_time"] 
         sort_list = columnReport[self.report_type]["show_data"]
         # print("sort_list",sort_list)
         # Add the data to the worksheet
         start_row = 12
         # chỉnh sửa , gom cột tự động- nhiều cột
-        # for row_idx, row_data in enumerate(self.data_content, start=start_row):
-        #     cell = ws.cell(row=row_idx, column=1, value=row_idx-11)
-        #     cell.alignment = self.center_alignment
-        #     cell.border = self.border_style
-        #     for col_idx, value in enumerate(sort_list, start=2):
-        #         cell = ws.cell(row=row_idx, column=col_idx, value=row_data.get(value) or 0)
-        #         cell.alignment = self.left_alignment if col_idx <= 4 else self.center_alignment
-        #         cell.border = self.border_style
-        
+
+        for row_idx, row_data in enumerate(self.data_content, start=start_row):
+            # xử lý gộp cột nếu nhiều hơn 1 con
+            if row_data.get("total_group") and row_data.get("total_group") > 1:
+                total_group = row_data.get("total_group")
+                column_group = list_name_col_x[0]
+                group_string = f"{column_group}{row_idx}:{column_group}{row_idx+total_group-1}"
+                self.ws.merge_cells(group_string)
+                self.ws[f"{column_group}{row_idx+total_group-1}"].border = self.border_style
+            # ghi stt vào cột stt
+            if row_data.get("stt"):
+                cell = self.ws.cell(row=row_idx, column=1, value=row_data["stt"])
+                cell.alignment = self.center_alignment
+                cell.border = self.border_style
+            for col_idx, value in enumerate(sort_list, start=2):
+                # xử lý gộp cột nếu nhiều hơn 1 con
+                if value in fields_group and  row_data.get("total_group") and row_data.get("total_group") >1:
+                    total_group = row_data.get("total_group")
+                    column_group = list_name_col_x[col_idx-1]
+                    group_string = f"{column_group}{row_idx}:{column_group}{row_idx+total_group-1}"
+                    self.ws.merge_cells(group_string)
+                    self.ws[f"{column_group}{row_idx+total_group-1}"].border = self.border_style
+                # ghi nội dung vào cột
+                if value in fields_group and row_data.get("total_group") is not None:
+                    cell = self.ws.cell(row=row_idx, column=col_idx, value=row_data.get(value) or "")
+                    cell.alignment = self.left_alignment if col_idx <= 4 else self.center_alignment
+                    cell.border = self.border_style
+                if value not in fields_group:
+                    cell = self.ws.cell(row=row_idx, column=col_idx, value=row_data.get(value) or "")
+                    cell.alignment = self.left_alignment if col_idx <= 4 else self.center_alignment
+                    cell.border = self.border_style
         return self
     pass
 
 class MakeExcelInventory(MakeExcel):
-    pass
+    def __init__(self,report_type,data,from_time,to_time,area):
+        self.from_time =  datetime.fromtimestamp(float(from_time)).strftime("%d/%m/%Y")
+        self.to_time =  datetime.fromtimestamp(float(to_time)).strftime("%d/%m/%Y") 
+        self.area = area
+        print("self.to_time",self.to_time,self.from_time) 
+        super().__init__(report_type,data)
+        self.changer_data()
+    # định nghĩa thời gian
+    def line_time(self):
+        return ["", "", f"Khu vực: {self.area}", "", "", ""],["", f"{self.from_time} - {self.to_time}", "", "", "", ""]
+    
 
 
 class MakeExcelSell(MakeExcel):
