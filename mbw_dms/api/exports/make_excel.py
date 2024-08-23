@@ -9,7 +9,8 @@ from openpyxl.styles import Font, Alignment, PatternFill, Border, Side
 
 name_report = {
     "Report KPI":"BÁO CÁO KPI",
-    "Report Checkin": "BÁO CÁO VIẾNG THĂM KHÁCH HÀNG"
+    "Report Checkin": "BÁO CÁO VIẾNG THĂM KHÁCH HÀNG",
+    "Report Checkin": "BÁO CÁO TỒN SẢN PHẨM THEO KHÁCH HÀNG"
 }
 list_name_col_x =['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'AA', 'AB', 'AC']
 week_days = {
@@ -51,6 +52,23 @@ columnReport = {
         "col_span": ["A9:A11", "B9:B11", "C9:C11", "D9:D11","E9:E11","F9:F11","G9:G11","H9:H11","I9:O10","P9:Z10","AA9:AA11","AB9:AB11","AC9:AC11"],
         # "col_span": [],
         "show_data":[ "employee_code","employee_name", "sale_group","time","day_week","total_work", "total_time","customer_code","customer_name","customer_contact","customer_type","customer_group","customer_sdt","customer_address","checkin","checkout","time_check","checkin_address","distance","device","total_image","is_router","is_order","is_check_inventory","ghi chú","","",""],
+        "column_widths" : {
+                            "A": 5, "B": 15, "C": 25, "D": 35,
+                            "E": 10, "F": 10, "G": 10, "H": 10,
+                            "I": 10, "J": 10, "K": 10, "L": 10,
+                            "M": 10, "N": 10, "O": 10, "P": 10,
+                            "Q": 10, "R": 10, "S": 10, "T": 10,
+                            "U": 10, "V": 10, "W": 10, "X": 10,
+                            "Y": 10, "Z": 10, "AA": 10, "AB": 10,
+                            "AC": 10, "AD": 10, "AE": 10, "AF": 10,
+                            "AG": 10, "AH": 10
+                        }
+    },
+    "Report Checkin" : {
+        "column" : {
+            "main_columns": ["STT","Mã khách hàng","Tên khách hàng","Loại khách hàng","Địa chỉ","Mã sản phẩm","Tên sản phẩm","Hạn sử dụng","ĐVT","Tồn","Giá sản phẩm","Tổng giá trị","Ngày cập nhật","Mã nhân viên","Nhân viên cập nhật"],
+        },
+        "show_data":["stt","customer_code","customer_name","customer_type","customer_address","item_code","item_name","exp_time","item_unit","quantity","item_price","total_quantity","update_at","update_bycode","update_byname"],
         "column_widths" : {
                             "A": 5, "B": 15, "C": 25, "D": 35,
                             "E": 10, "F": 10, "G": 10, "H": 10,
