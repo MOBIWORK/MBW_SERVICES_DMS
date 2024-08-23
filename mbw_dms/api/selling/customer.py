@@ -280,15 +280,16 @@ def create_customer(**kwargs):
         # xử lý các liên kết ở đây
         ## liên kết địa chỉ
         if address is not None and address.address_title and current_address:
-            print("add địa chỉ")
+            print("add địa chỉ",current_address.name)
             link_cs_address = {
                 "link_doctype": new_customer.doctype,
                 "link_name": new_customer.name,
             }
             current_address.append("links",link_cs_address)
             current_address.save()
+            frappe.db.commit()
             #liên kết địa chỉ với khách hàng
-            new_customer.customer_primary_address = current_address.name
+            new_customer.customer_primary_address = current_address.address_title
             new_customer.save()
         ## liên kết contact
         if contact is not None and contact.get("first_name") and new_contact:

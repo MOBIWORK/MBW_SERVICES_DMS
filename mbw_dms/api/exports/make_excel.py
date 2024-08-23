@@ -353,12 +353,20 @@ class MakeExcelInventory(MakeExcel):
     def changer_data(self):
         data  = self.data_content
         new_data = []
-        for idx, inven in enumerate(data):
+        for idx, inven in enumerate(data,1):
             # xử lý dữ liệu 
-            
+
             items = inven["items"]
             for index_item, item in enumerate(items):
-                new_data.append()
+                if index_item == 0 :
+                    data_appen = {**inven,**item}
+                   
+                    data_appen = {**data_appen,"total_group": len(items),"stt": idx}
+                    
+                    del data_appen["customers"]
+                    new_data.append(data_appen)
+                else:
+                    new_data.append(item)
 
         self.data_content = new_data
 
