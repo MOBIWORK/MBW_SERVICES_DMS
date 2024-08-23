@@ -173,13 +173,14 @@ def delete_customer(name):
 @frappe.whitelist(methods="POST")
 def create_customer(**kwargs):
     try:
+        print("kwargs",kwargs)
+        kwargs  = frappe._dict(kwargs)
         # Check dữ liệu đầu vào
         phone_number = ""
         address = kwargs.get("address")
         contact = kwargs.get("contact")
         router_in = kwargs.get("router")
-        print("contact infor=====================",contact,contact.get("phone"))
-        if contact and contact.get("phone"):
+        if contact is not None and contact.get("phone"):
             phone_number = validate_phone_number(contact.get("phone"))
         json_location = ""
         if address.get("latitude") and address.get("longitude"):
@@ -192,6 +193,7 @@ def create_customer(**kwargs):
         date_fields = ["custom_birthday"]
         choice_fields = ["customer_type"]
         for key, value in kwargs.items():
+            print("đẩy key vào customer")
             if key in normal_fields:
                 new_customer.set(key, value)
             elif key in required_fields:
@@ -219,13 +221,14 @@ def create_customer(**kwargs):
         # Xử lý địa chỉ khách hàng
         address= frappe._dict(address)
         current_address = None
-        if address and address.address_title:
+        if address is not None and address.address_title:
             address.address_location = json_location            
             current_address = handle_address_customer(address,{})
             
 
         # xử  lý contact khách hàng
-        if contact and contact.get("first_name"):
+        if contact is not None and contact.get("first_name"):
+            print("vào tạo contact")
             new_contact = frappe.new_doc("Contact")
             contact_fields = ["first_name", "address_contact", "phone"]
             for key, value in contact.items():
@@ -276,7 +279,8 @@ def create_customer(**kwargs):
 
         # xử lý các liên kết ở đây
         ## liên kết địa chỉ
-        if address and address.address_title and current_address:
+        if address is not None and address.address_title and current_address:
+            print("add địa chỉ")
             link_cs_address = {
                 "link_doctype": new_customer.doctype,
                 "link_name": new_customer.name,
@@ -287,7 +291,8 @@ def create_customer(**kwargs):
             new_customer.customer_primary_address = current_address.name
             new_customer.save()
         ## liên kết contact
-        if contact and contact.get("first_name") and new_contact:
+        if contact is not None and contact.get("first_name") and new_contact:
+            print("thêm contacts")
             link_cs_contact = {
                 "link_doctype": new_customer.doctype,
                 "link_name": new_customer.name,
@@ -643,7 +648,7 @@ def update_customer_in_router(customer={},routers=[]):
         contact = pydash.find( customer.contact,lambda x:x.get("primary"))
     else:
         contact = customer.contact
-    contact = frappe._dict(contact)
+    contact = frappe._dict(contact) if contact else False
     customer_router = {
         "customer_code": customer.customer_code or "",
         "customer_name": customer.customer_name or "",
@@ -654,14 +659,16 @@ def update_customer_in_router(customer={},routers=[]):
         "lat":address.get("latitude") if address else 0
     }
     list_router = frappe.db.get_all("DMS Router",{"name": ["in",routers]},["*"])
-    for router in list_router:
-        router_doc = frappe.get_doc("DMS Router",router.get("name"))
-        cus_list = router_doc.get("customers") or []
-        exist = pydash.find(cus_list,lambda x: x.customer_code == customer.customer_code)
-        if exist:
-            cus_list = pydash.map_(cus_list,lambda x: x.update(customer_router))
-        else:
-            cus_list.append(customer_router)    
-        router_doc.set("customers",cus_list)   
-        router_doc.save(ignore_permissions=True)    
+    if len(list_router) > 0 :
+        for router in list_router:
+            router_doc = frappe.get_doc("DMS Router",router.get("name"))
+            cus_list = router_doc.get("customers") or []
+            exist = pydash.find(cus_list,lambda x: x.customer_code == customer.customer_code)
+            if exist:
+                cus_list = pydash.map_(cus_list,lambda x: x.update(customer_router))
+            else:
+                cus_list.append(customer_router)    
+            router_doc.set("customers",cus_list)   
+            router_doc.save(ignore_permissions=True)    
+    print("done update customer in router")
     return
