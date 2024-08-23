@@ -183,7 +183,7 @@ def create_customer(**kwargs):
         if contact is not None and contact.get("phone"):
             phone_number = validate_phone_number(contact.get("phone"))
         json_location = ""
-        if address.get("latitude") and address.get("longitude"):
+        if address is not None and address.get("latitude") and address.get("longitude"):
             json_location = json.dumps({"long": address.get("longitude"), "lat": address.get("latitude")})
             
         # Tạo mới khách hàng
@@ -219,7 +219,7 @@ def create_customer(**kwargs):
         })
         new_customer.insert()
         # Xử lý địa chỉ khách hàng
-        address= frappe._dict(address)
+        address= frappe._dict(address) if address else None
         current_address = None
         if address is not None and address.address_title:
             address.address_location = json_location            
