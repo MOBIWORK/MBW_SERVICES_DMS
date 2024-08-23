@@ -3,7 +3,8 @@ import dayjs from "dayjs";
 import timezone from 'dayjs/plugin/timezone';
 import {Modal, message} from 'antd'
 import { ReactNode } from 'react';
-
+import { saveAs } from "file-saver";
+import { AxiosService } from '@/services/server';
 export const infoToast = (text:string|ReactNode) => {  
   message.info(text)
 }
@@ -138,4 +139,28 @@ window.location.href = (import.meta.env.VITE_BASE_URL || "") + `/api/method/frap
 
 export const translationUrl = (url:string) => {
   window.location.href = url
+}
+
+
+interface downloadProps {
+  url :string,
+  params: any,
+  file_name?: string
+}
+export const handleDowload = async ({url,params,file_name = "report.xlsx"}:downloadProps) => {
+  try {
+    const response = await AxiosService.get(
+     url,
+      {
+        params,
+        responseType: "arraybuffer",
+      }
+    );
+    const blob = new Blob([response]);
+    console.log(blob);
+
+    saveAs(blob, file_name);
+  } catch (err) {
+    console.log("error", err);
+  }
 }

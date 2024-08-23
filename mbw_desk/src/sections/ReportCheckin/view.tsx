@@ -23,7 +23,7 @@ import useDebounce from "../../hooks/useDebount";
 import { rsData, rsDataFrappe } from "../../types/response";
 import { AxiosService } from "../../services/server";
 import { employee } from "../../types/employeeFilter";
-import { treeArray } from "@/util";
+import { handleDowload, treeArray } from "@/util";
 import { listSale } from "@/types/listSale";
 import dayjs from "dayjs";
 import { TreeSelectCommon } from "@/components/select/select";
@@ -537,13 +537,13 @@ export default function ReportCheckin() {
           params: {
             page_size: PAGE_SIZE,
             page_number: page,
-            from_date: from_date,
-            to_date: to_date,
-            employee: employee,
-            sale_group: sales_team,
-            territory: territory,
-            customer_group: customer_group,
-            customer_type: customer_type,
+            from_date,
+            to_date,
+            employee,
+            sales_team,
+            territory,
+            customer_group,
+            customer_type,
           },
         }
       );
@@ -585,6 +585,22 @@ export default function ReportCheckin() {
                 icon: <VerticalAlignBottomOutlined className="text-xl" />,
                 size: "18px",
                 className: "flex items-center",
+                action: handleDowload.bind(null, {
+                  url: "/api/method/mbw_dms.api.exports.export_excel.export_excel",
+                  params: {
+                    report_type: "Report Checkin",
+                    data_filter: {
+                      from_date,
+                      to_date,
+                      employee,
+                      sales_team,
+                      territory,
+                      customer_group,
+                      customer_type,
+                    },
+                  },
+                  file_name: "checkin-report.xlsx"
+                }),
               },
             ]}
           />
