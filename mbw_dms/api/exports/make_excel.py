@@ -344,13 +344,23 @@ class MakeExcelInventory(MakeExcel):
         self.from_time =  datetime.fromtimestamp(float(from_time)).strftime("%d/%m/%Y")
         self.to_time =  datetime.fromtimestamp(float(to_time)).strftime("%d/%m/%Y") 
         self.area = area
-        print("self.to_time",self.to_time,self.from_time) 
         super().__init__(report_type,data)
         self.changer_data()
     # định nghĩa thời gian
     def line_time(self):
         return ["", "", f"Khu vực: {self.area}", "", "", ""],["", f"{self.from_time} - {self.to_time}", "", "", "", ""]
-    
+    # biến đổi data
+    def changer_data(self):
+        data  = self.data_content
+        new_data = []
+        for idx, inven in enumerate(data):
+            # xử lý dữ liệu 
+            
+            items = inven["items"]
+            for index_item, item in enumerate(items):
+                new_data.append()
+
+        self.data_content = new_data
 
 
 class MakeExcelSell(MakeExcel):
