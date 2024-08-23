@@ -35,18 +35,38 @@ class DMSSummaryKPIMonthly(Document):
           if frappe.db.exists("VT Salary", {"month": month, "year": year, "employee": user_name}):
             vt_salary = frappe.get_doc("VT Salary", {"month": month, "year": year, "employee": user_name})
             if kpi_employee:
-                vt_salary.thuong_doanh_thu = self.doanh_thu_thang / kpi_employee * 100
+                vt_salary.pt_thuong_doanh_thu = self.doanh_thu_thang / kpi_employee * 100
+                if float(vt_salary.pt_thuong_doanh_thu) >= 100:
+                    vt_salary.thuong_doanh_thu = 4800000
+                elif 80 <= float(vt_salary.pt_thuong_doanh_thu) < 90:
+                    vt_salary.thuong_doanh_thu = 3000000
+                elif 90 <= float(vt_salary.pt_thuong_doanh_thu) < 100:
+                    vt_salary.thuong_doanh_thu = 4000000
+                else:
+                    vt_salary.thuong_doanh_thu = 0
             vt_salary.save()
 
           else:
             if kpi_employee:
+                pt_thuong_doanh_thu = self.doanh_thu_thang / kpi_employee * 100
+
+                if float(pt_thuong_doanh_thu) >= 100:
+                    thuong_doanh_thu = 4800000
+                elif 80 <= float(pt_thuong_doanh_thu) < 90:
+                    thuong_doanh_thu = 3000000
+                elif 90 <= float(pt_thuong_doanh_thu) < 100:
+                    thuong_doanh_thu = 4000000
+                else:
+                    thuong_doanh_thu = 0
+
                 vt_salary = frappe.get_doc({
                     "doctype": "VT Salary",
                     "employee": user_name,
                     "employee_name": employee_name,
                     "year": year,
                     "month": month,
-                    "thuong_doanh_thu": self.doanh_thu_thang / kpi_employee * 100
+                    "pt_thuong_doanh_thu": pt_thuong_doanh_thu,
+                    "thuong_doanh_thu": thuong_doanh_thu
                 })
                 vt_salary.insert()
 
