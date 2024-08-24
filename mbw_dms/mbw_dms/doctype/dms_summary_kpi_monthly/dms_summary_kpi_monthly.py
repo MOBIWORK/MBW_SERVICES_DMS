@@ -12,8 +12,7 @@ import calendar
 
 class DMSSummaryKPIMonthly(Document):
     def on_update(self):
-        pass
-        # self.update_vt_salary()
+        self.update_vt_salary()
 
     def update_vt_salary(self):
           month = int(self.thang)
