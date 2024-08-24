@@ -4,6 +4,6 @@ template_header = {
     "Report Checkin": "mbw_dms.mbw_dms.doctype.dms_checkin.dms_checkin.get_report",
     "Report Sell": "mbw_dms.api.report.so_report.handle_si_report",
     "Report Order": "mbw_dms.api.report.so_report.handle_so_report",
-    "Report Customer": "",
-    "Report Customer Checkin": ""
+    "Report Customer": "mbw_dms.api.report.customer_report.handle_customer_report",
+    "Report Customer Checkin": "mbw_dms.api.report.first_checkin_rp.handle_first_checkin_report"
 }

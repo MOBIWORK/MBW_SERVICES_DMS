@@ -126,8 +126,42 @@ columnReport = {
                             "AG": 10, "AH": 10
                         }
     },
-    "Report Customer": {},
-    "Report Customer Checkin": {}
+    "Report Customer": {
+        "column": {
+            "main_columns":["STT","Mã NV","Tên nhân viên","Nhóm bán hàng","Mã KH","Tên khách hàng","Loại khách hàng","Nhóm khách hàng","Người liên hệ","SĐT","Mã số thuế","Khu vực","Địa chỉ","Ngày thu thập","Nguồn","Số lần VT","VT đầu","VT cuối","Số đơn hàng","Đơn hàng cuối"]
+        },
+        "show_data":["sales_person_id","sales_person","sales_team","customer_code","customer_name","customer_type","customer_group","contact","phone","tax_id","territory","address","creation","f1","totals_checkin","first_checkin","last_checkin","totals_so","last_sale_order"],
+        "content_start_at": 10,
+        "column_widths" : {
+                            "A": 5, "B": 15, "C": 25, "D": 35,
+                            "E": 10, "F": 10, "G": 10, "H": 10,
+                            "I": 10, "J": 10, "K": 10, "L": 10,
+                            "M": 10, "N": 10, "O": 10, "P": 10,
+                            "Q": 10, "R": 10, "S": 10, "T": 10,
+                            "U": 10, "V": 10, "W": 10, "X": 10,
+                            "Y": 10, "Z": 10, "AA": 10, "AB": 10,
+                            "AC": 10, "AD": 10, "AE": 10, "AF": 10,
+                            "AG": 10, "AH": 10
+                        }
+    },
+    "Report Customer Checkin": {
+        "column": {
+            "main_columns":["STT","Nhóm bán hàng","Mã NV","Tên nhân viên","Mã KH","Tên khách hàng","Loại KH","Nhóm KH","Người liên hệ","SĐT","Mã số thuế","Khu vực","Địa chỉ","Ngày viếng thăm"]
+        },
+        "show_data":["sales_team","employee_id","sales_person","customer_code","customer_name","customer_type","customer_group","contact_person","phone","tax_id","territory","address","date_checkin"],
+        "content_start_at": 10,
+        "column_widths" : {
+                            "A": 5, "B": 15, "C": 25, "D": 35,
+                            "E": 10, "F": 10, "G": 10, "H": 10,
+                            "I": 10, "J": 10, "K": 10, "L": 10,
+                            "M": 10, "N": 10, "O": 10, "P": 10,
+                            "Q": 10, "R": 10, "S": 10, "T": 10,
+                            "U": 10, "V": 10, "W": 10, "X": 10,
+                            "Y": 10, "Z": 10, "AA": 10, "AB": 10,
+                            "AC": 10, "AD": 10, "AE": 10, "AF": 10,
+                            "AG": 10, "AH": 10
+                        }
+    }
 
 
 }
@@ -538,9 +572,40 @@ class MakeExcelOrder(MakeExcelSell):
         self.data_content = new_data
         self.data_footer = data_footer
 
-class MakeExcelCustomer(MakeExcel):
-    pass
+class MakeExcelCustomer(MakeExcelCheckin):
+    def __init__(self,report_type,data,from_time ="",to_time=""):
+        if bool(from_time):
+            self.from_time =  self.convert_tp_to_string(from_time)
+        if bool(to_time):
+            self.to_time =  self.convert_tp_to_string(to_time)
+        super().__init__(report_type,data,from_time,to_time)
+    def changer_data(self):
+        field_tp_to_dt= ["last_sale_order","last_checkin","first_checkin","creation"]
+        data  = self.data_content
+        new_data = []
+        for idx_data,checkin in enumerate(data,1):
+            checkin["totals_so"] = checkin["totals_so"] or 0
+            for key,value in checkin.items():
+                if key in field_tp_to_dt and bool(value):
+                    print(key,value)
+                    checkin[key] = self.convert_tp_to_string(value)
+            data_appen = {**checkin,"stt": idx_data}
+            new_data.append(data_appen)
+        self.data_content = new_data
 
-class MakeExcelCustomerCheckin(MakeExcel):
-    pass
+class MakeExcelCustomerCheckin(MakeExcelCheckin):
+    def __init__(self,report_type,data,from_time ="",to_time=""):
+        if bool(from_time):
+            self.from_time =  self.convert_tp_to_string(from_time)
+        if bool(to_time):
+            self.to_time =  self.convert_tp_to_string(to_time)
+        super().__init__(report_type,data,from_time,to_time)
+    def changer_data(self):
+        data  = self.data_content
+        new_data = []
+        for idx_data,checkin in enumerate(data,1):
+            checkin["date_checkin"] = checkin["date_checkin"].strftime("%d/%m/%Y")
+            data_appen = {**checkin,"stt": idx_data}
+            new_data.append(data_appen)
+        self.data_content = new_data
 
