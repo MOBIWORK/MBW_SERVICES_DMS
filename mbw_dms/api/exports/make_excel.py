@@ -421,6 +421,7 @@ class MakeExcelInventory(MakeExcelCheckin):
             return ["", "", f"Khu vực: {self.area}", "", "", ""],["", f"Tính đến {self.to_time}", "", "", "", ""]
         else:
             return ["", "", f"Khu vực: {self.area}", "", "", ""]
+
     # biến đổi data
     def changer_data(self):
         data  = self.data_content
