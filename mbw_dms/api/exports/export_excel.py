@@ -36,7 +36,7 @@ def export_excel(**kwarg):
         # Lấy hàm từ module
         function_to_call = getattr(module, function_name)
         data = function_to_call({**filter,"is_excel": True})
-        # print({**filter,"is_excel": True},data)
+        print({**filter,"is_excel": True},data)
         #xử lý tạo excel theo từng trường hợp
         if report_type == "Report KPI":
             create_xlsx = MakeExcelKpi(report_type,data,filter.get("month"),filter.get("year"))
@@ -45,7 +45,7 @@ def export_excel(**kwarg):
         elif report_type == "Report Inventory":
             create_xlsx = MakeExcelInventory(report_type,data,filter.get("update_at_from") or "",filter.get("update_at_to") or "",filter.get("team_sale") if filter.get("team_sale") else "Tất cả" )
         elif report_type == "Report Sell":
-            create_xlsx = MakeExcelSell(report_type,data,filter.get("month"),filter.get("year"))
+            create_xlsx = MakeExcelSell(report_type,data,filter.get("from_date"),filter.get("to_date"))
         elif report_type == "Report Order":
             create_xlsx = MakeExcelOrder(report_type,data,filter.get("month"),filter.get("year"))
         elif report_type == "Report Customer":

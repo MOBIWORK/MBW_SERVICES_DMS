@@ -10,7 +10,11 @@ from openpyxl.styles import Font, Alignment, PatternFill, Border, Side
 name_report = {
     "Report KPI":"BÁO CÁO KPI",
     "Report Checkin": "BÁO CÁO VIẾNG THĂM KHÁCH HÀNG",
-    "Report Inventory": "BÁO CÁO TỒN SẢN PHẨM THEO KHÁCH HÀNG"
+    "Report Inventory": "BÁO CÁO TỒN SẢN PHẨM THEO KHÁCH HÀNG",
+    "Report Sell": "BÁO CÁO TỔNG HỢP BÁN HÀNG",
+    "Report Order": "BÁO CÁO TỔNG HỢP ĐẶT HÀNG",
+    "Report Customer": "BÁO CÁO KHÁCH HÀNG MỚI",
+    "Report Customer Checkin": "BÁO CÁO THỐNG KÊ KHÁCH HÀNG VIẾNG THĂM LẦN ĐẦU"
 }
 list_name_col_x =['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'AA', 'AB', 'AC']
 week_days = {
@@ -83,7 +87,48 @@ columnReport = {
                             "AC": 10, "AD": 10, "AE": 10, "AF": 10,
                             "AG": 10, "AH": 10
                         }
-    }
+    },
+    "Report Sell":{
+        "column": {
+            "main_columns": ['STT', 'Đơn bán', 'Khách hàng', 'Khu vực', 'Ngày tạo', 'Nhân Viên', 'Mã sản phẩm', 'Tên sản phẩm', 'Mã kho', 'Tên kho', 'Nhóm sản phẩm', 'Nhãn hàng', 'Số lượng', 'ĐVT', 'Đơn giá', 'Chiết khấu(%)', 'Tiền chiết khấu(VNĐ)', 'Tổng tiền(VNĐ)', 'Thành tiền(VNĐ)', 'Tiền VAT(VNĐ)', 'Chiết khấu(VNĐ)', 'Tổng tiền(VNĐ)']
+        },
+        "show_data": ['name', 'customer', 'territory', 'posting_date', 'sales_person', 'item_code', 'item_name', 'set_warehouse', 'name_warehouse', 'item_group', 'brand', 'qty', 'item_unit', 'rate', 'discount_percentage', 'discount_amount', 'amount', 'total', 'tax_amount', 'discount_amount', 'grand_total'],
+        "content_start_at": 10,
+        "footer" : ["","","","","","","","","","","","","sum_qty","","","","sum_discount_items","sum_grand_items","sum_total","sum_vat","sum_discount_amount","sum_grand_total"],
+        "column_widths" : {
+                            "A": 5, "B": 15, "C": 25, "D": 35,
+                            "E": 10, "F": 10, "G": 10, "H": 10,
+                            "I": 10, "J": 10, "K": 10, "L": 10,
+                            "M": 10, "N": 10, "O": 10, "P": 10,
+                            "Q": 10, "R": 10, "S": 10, "T": 10,
+                            "U": 10, "V": 10, "W": 10, "X": 10,
+                            "Y": 10, "Z": 10, "AA": 10, "AB": 10,
+                            "AC": 10, "AD": 10, "AE": 10, "AF": 10,
+                            "AG": 10, "AH": 10
+                        }
+    },
+    "Report Order":{
+        "column": {
+            "main_columns": ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v']
+        },
+        "show_data": [],
+        "content_start_at": 10,
+        "column_widths" : {
+                            "A": 5, "B": 15, "C": 25, "D": 35,
+                            "E": 10, "F": 10, "G": 10, "H": 10,
+                            "I": 10, "J": 10, "K": 10, "L": 10,
+                            "M": 10, "N": 10, "O": 10, "P": 10,
+                            "Q": 10, "R": 10, "S": 10, "T": 10,
+                            "U": 10, "V": 10, "W": 10, "X": 10,
+                            "Y": 10, "Z": 10, "AA": 10, "AB": 10,
+                            "AC": 10, "AD": 10, "AE": 10, "AF": 10,
+                            "AG": 10, "AH": 10
+                        }
+    },
+    "Report Customer": {},
+    "Report Customer Checkin": {}
+
+
 }
 class MakeExcel :
     # Định dạng chung
@@ -244,7 +289,7 @@ class MakeExcel :
         if self.data_footer:
             sort_footer = columnReport[self.report_type]["footer"]
             if sort_footer:
-                start_row = len(self.data_content) + 12
+                start_row = len(self.data_content) +  (columnReport[self.report_type]["content_start_at"])
                 # for row_idx, row_data in enumerate(self.data_footer, start=start_row):
                 
                 for col_idx, value in enumerate(sort_footer, start=1):
@@ -259,6 +304,8 @@ class MakeExcel :
                 cell.alignment = self.center_alignment
                 cell.border = self.border_style
         return self
+    def convert_tp_to_string(self,tp):
+        return  datetime.fromtimestamp(float(tp)).strftime("%d/%m/%Y")
     
 
 class MakeExcelKpi(MakeExcel):
@@ -272,15 +319,22 @@ class MakeExcelKpi(MakeExcel):
 class MakeExcelCheckin(MakeExcel):
     def __init__(self,report_type,data,from_time,to_time):
         if bool(from_time):
-            self.from_time =  datetime.fromtimestamp(float(from_time)).strftime("%d/%m/%Y")
+            self.from_time = self.convert_tp_to_string(from_time)
         if bool(to_time):
-            self.to_time =  datetime.fromtimestamp(float(to_time)).strftime("%d/%m/%Y") 
+            self.to_time =  self.convert_tp_to_string(to_time)
         self.fields_group = ["employee_code","employee_name", "sale_group","time","day_week","total_work", "total_time"] 
         super().__init__(report_type,data)
         self.changer_data()
     # định nghĩa thời gian
     def line_time(self):
-        return ["", f"{self.from_time} - {self.to_time}", "", "", "", ""]
+        if hasattr(self, 'from_time') and hasattr(self, 'to_time'):
+            return ["", f"{self.from_time} - {self.to_time}", "", "", "", ""]
+        elif hasattr(self, 'from_time'):
+            return ["", f"Từ {self.from_time}", "", "", "", ""]
+        elif hasattr(self, 'to_time'):
+            return ["", f"Tính đến {self.to_time}", "", "", "", ""]
+        else:
+            return ["", "", "", "", "", ""]
     def changer_data(self):
         data  = self.data_content
         new_data = []
@@ -288,7 +342,7 @@ class MakeExcelCheckin(MakeExcel):
             # xử lý thời gian ,ngày tháng
             checkin["total_work"] = round(float(checkin["total_work"])/ 60,2)
             checkin["total_time"] = round(float(checkin["total_time"])/ 60,2)
-            checkin["time"] =  datetime.fromtimestamp(float(checkin["create_time"])).strftime("%d/%m/%Y")
+            checkin["time"] =  self.convert_tp_to_string(checkin["create_time"])
             checkin["day_week"] = week_days[datetime.fromtimestamp(float(checkin["create_time"])).strftime("%a")]
 
             customers = checkin.get("customers")
@@ -350,13 +404,13 @@ class MakeExcelCheckin(MakeExcel):
 class MakeExcelInventory(MakeExcelCheckin):
     def __init__(self,report_type,data,from_time ="",to_time="",area="Tất cả"):
         if bool(from_time):
-            self.from_time =  datetime.fromtimestamp(float(from_time)).strftime("%d/%m/%Y")
+            self.from_time =  self.convert_tp_to_string(from_time)
         if bool(to_time):
-            self.to_time =  datetime.fromtimestamp(float(to_time)).strftime("%d/%m/%Y") 
+            self.to_time =  self.convert_tp_to_string(to_time)
         self.area = area
         super().__init__(report_type,data,from_time,to_time)
         self.fields_group = ["customer_code","customer_name","customer_type","customer_address"]
-        self.changer_data()
+        # self.changer_data()
     # định nghĩa thời gian
     def line_time(self):
         if hasattr(self, 'from_time') and hasattr(self, 'to_time'):
@@ -378,7 +432,9 @@ class MakeExcelInventory(MakeExcelCheckin):
                 for index_item, item in enumerate(items):
                     #xử lý dữ liệu 
                     if item.get("update_at"):
-                        item["update_at"] = datetime.fromtimestamp(float(item.get("update_at"))).strftime("%d/%m/%Y")
+                        item["update_at"] = self.convert_tp_to_string(item.get("update_at"))
+                    if item.get("exp_time"):
+                        item["exp_time"] = self.convert_tp_to_string(item.get("exp_time"))
                     if item.get("item_price"):
                         item["item_price"] = round(float(item.get("item_price")),2)
                         pass
@@ -397,9 +453,48 @@ class MakeExcelInventory(MakeExcelCheckin):
         self.data_content = new_data
 
 
-class MakeExcelSell(MakeExcel):
-    pass
-
+class MakeExcelSell(MakeExcelCheckin):
+    def __init__(self,report_type,data,from_time ="",to_time=""):
+        super().__init__(report_type,data,from_time,to_time)
+        self.fields_group = ['name', 'customer', 'territory', 'posting_date', 'sales_person','total', 'tax_amount', 'discount_amount', 'grand_total']
+        # self.changer_data()
+    def changer_data(self):
+        data  = self.data_content
+        # thêm "sum_qty","","","","sum_discount_items","sum_grand_items"
+        data_footer = self.data_footer
+        data_footer = {**data_footer,"sum_qty":0,"sum_discount_items":0,"sum_grand_items":0}
+        new_data = []
+        qty=0
+        discount_amount=0
+        amount=0
+        for idx, sale in enumerate(data,1):
+            # if "/" not in sale["posting_date"]:
+            sale["posting_date"] = self.convert_tp_to_string(sale.get("posting_date"))
+            # xử lý dữ liệu 
+            items = sale.get("items")
+            if items:
+                for index_item, item in enumerate(items):
+                    #xử lý dữ liệu 
+                    qty += item["qty"]
+                    discount_amount += item["discount_amount"]
+                    amount += item["amount"]
+                    # xử lý làm phẳng mảng, index=0 thì có thông tin chung
+                    if index_item == 0 :
+                        data_appen = {**sale,**item}
+                    
+                        data_appen = {**data_appen,"total_group": len(items),"stt": idx}
+                        
+                        del data_appen["items"]
+                        new_data.append(data_appen)
+                    else:
+                        new_data.append(item)
+            else:
+                new_data.append(sale)
+        data_footer["sum_qty"] = qty
+        data_footer["sum_discount_items"] = discount_amount
+        data_footer["sum_grand_items"] = amount
+        self.data_content = new_data
+        self.data_footer = data_footer
 
 class MakeExcelOrder(MakeExcel):
     pass

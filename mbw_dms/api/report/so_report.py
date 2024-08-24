@@ -102,13 +102,16 @@ def so_report(**kwargs):
 # Báo cáo tổng hợp bán hàng
 @frappe.whitelist(methods="GET")
 def si_report(**kwargs):
+    return handle_si_report(kwargs=kwargs)
+
+def handle_si_report(kwargs):
     try:
+        is_excel = kwargs.get("is_excel")
         filters = []
         from_date = validate_filter_timestamp(type="start")(kwargs.get("from_date")) if kwargs.get("from_date") else None
         to_date = validate_filter_timestamp(type="end")(kwargs.get("to_date")) if kwargs.get("to_date") else None
         page_size =  int(kwargs.get("page_size", 20))
         page_number = int(kwargs.get("page_number")) if kwargs.get("page_number") and int(kwargs.get("page_number")) >=1 else 1
-
         sales_person = kwargs.get("sales_person")
         customer = kwargs.get("customer")
         territory = kwargs.get("territory")
@@ -151,8 +154,10 @@ def si_report(**kwargs):
         
         if where_conditions:
             sql_query += " WHERE {}".format(where_conditions)
+        
         sql_query += " ORDER BY si.posting_date desc"
-        sql_query += " LIMIT %s OFFSET %s"
+        if not is_excel:
+            sql_query += " LIMIT %s OFFSET %s"
 
         sql_query_count = """
             SELECT COUNT(*)
@@ -167,8 +172,10 @@ def si_report(**kwargs):
 
         limit = page_size
         offset = (page_number - 1) * limit
-        sale_invoices = frappe.db.sql(sql_query, (limit, offset), as_dict=True)
-
+        if is_excel:
+            sale_invoices = frappe.db.sql(sql_query, as_dict=True)
+        else: 
+             sale_invoices = frappe.db.sql(sql_query, (limit, offset), as_dict=True)
         for i in sale_invoices:
             i["discount_amount"] = 0
             st = get_value_child_doctype("Sales Invoice", i["name"], "sales_team")
@@ -187,7 +194,11 @@ def si_report(**kwargs):
             totals["sum_discount_amount"] += i["discount_amount"]
             totals["sum_grand_total"] += i["grand_total"]
 
-
+        if is_excel:
+            return {
+                "data": sale_invoices,
+                "sum": totals,
+            }
         return gen_response(200, "Thành công", {
             "data": sale_invoices,
             "sum": totals,
@@ -196,8 +207,14 @@ def si_report(**kwargs):
             "totals": si_count
         })
     except Exception as e:
+        if is_excel:
+            print("Lỗi khi lấy dứ liệu xuất excel===  ",e)
+            return {
+                "data": [],
+                "sum": {}
+            }
         return exception_handle(e)
-    
+
 @frappe.whitelist(methods="GET")
 def list_company(**kwargs):
     try:
