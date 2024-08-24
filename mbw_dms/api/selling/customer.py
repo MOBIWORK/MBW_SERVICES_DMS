@@ -280,15 +280,16 @@ def create_customer(**kwargs):
         # xử lý các liên kết ở đây
         ## liên kết địa chỉ
         if address is not None and address.address_title and current_address:
-            print("add địa chỉ")
+            print("add địa chỉ",current_address.name)
             link_cs_address = {
                 "link_doctype": new_customer.doctype,
                 "link_name": new_customer.name,
             }
             current_address.append("links",link_cs_address)
             current_address.save()
+            frappe.db.commit()
             #liên kết địa chỉ với khách hàng
-            new_customer.customer_primary_address = current_address.name
+            new_customer.customer_primary_address = current_address.address_title
             new_customer.save()
         ## liên kết contact
         if contact is not None and contact.get("first_name") and new_contact:
@@ -322,7 +323,7 @@ def create_customer(**kwargs):
         if "current_address" in locals() and current_address is not None :
             print("xóa current_address")
             try:
-                frappe.delete_doc("Address", current_address.name,ignore_permissions=True)
+                frappe.delete_doc("Address", {"address_title":["like",f"%{current_address.address_title}%"]},ignore_permissions=True)
                 print("xóa current_address: done")
             except Exception as ex:
                  print("xóa current_address: thất bại - chi tiết",ex)
@@ -342,7 +343,7 @@ def create_customer(**kwargs):
                     frappe.delete_doc("Contact",new_contact.name)
                     frappe.db.commit()
                     if len(links) ==0:
-                        frappe.delete_doc("Address",current_address_contact.name)
+                        frappe.delete_doc("Address",{"address_title":["like",f"%{current_address_contact.address_title}%"]})
                         frappe.db.commit()                
                 print("xóa new_contact- address contact: done")
             except Exception as ex:

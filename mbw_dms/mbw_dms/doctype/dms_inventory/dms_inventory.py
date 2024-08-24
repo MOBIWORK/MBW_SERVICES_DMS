@@ -96,7 +96,7 @@ def find(filters = {},filters_or={}, options = ["*"],page_length = 20, page =1,o
 		"page_size": page_length
 		}
 
-def handle_filter_find_v2(**body):
+def handle_filter_find_v2(body):
 	# phan trang
 	is_excel = body.get("is_excel")
 

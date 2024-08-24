@@ -312,6 +312,7 @@ export default function ReportKPI() {
                       //còn đẩy lên sale team sale person
                     },
                   },
+                  file_name: "Report KPI.xlsx"
                 }),
               },
             ]}

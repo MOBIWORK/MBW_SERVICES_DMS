@@ -376,12 +376,14 @@ def handle_address_customer(address_info,link_to_customer):
                 if len(link_to_customer) >0 :
                     curent_address.append("links",link_to_customer)
                 curent_address.save()
+                frappe.db.commit()
                 return curent_address
             else:
                 for key,value in address_info.items():
                     if key in key_info:
                         doc_address.set(key,value)
                 doc_address.save()
+                frappe.db.commit()
                 return doc_address
         else:
             if exit_address_title: 
@@ -392,6 +394,7 @@ def handle_address_customer(address_info,link_to_customer):
                 if len(link_to_customer) >0 :
                     curent_address.append("links",link_to_customer)
                 curent_address.save()
+                frappe.db.commit()
                 return curent_address
             else:
                 new_address = frappe.new_doc("Address")
@@ -401,9 +404,9 @@ def handle_address_customer(address_info,link_to_customer):
                 if len(link_to_customer) >0 :
                     new_address.append("links",link_to_customer)
                 new_address.insert()
+                frappe.db.commit()
                 return new_address
     except Exception as e :
-        print("erorr============",e)
         return None        
 
 def handle_address(address_title) : 
