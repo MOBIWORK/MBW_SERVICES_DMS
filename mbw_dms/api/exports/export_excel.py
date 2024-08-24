@@ -49,9 +49,9 @@ def export_excel(**kwarg):
         elif report_type == "Report Order":
             create_xlsx = MakeExcelOrder(report_type,data,filter.get("from_date"),filter.get("to_date"))
         elif report_type == "Report Customer":
-            create_xlsx = MakeExcelCustomer(report_type,data,filter.get("month"),filter.get("year"))
+            create_xlsx = MakeExcelCustomer(report_type,data,filter.get("from_date"),filter.get("to_date"))
         elif report_type == "Report Customer Checkin":
-            create_xlsx = MakeExcelCustomerCheckin(report_type,data,filter.get("month"),filter.get("year"))
+            create_xlsx = MakeExcelCustomerCheckin(report_type,data,filter.get("from_date"),filter.get("to_date"))
         else:
             return gen_response(500,_("Kiểu báo cáo không hợp lệ!!!!"))
         xlsx_file = create_xlsx.make()
