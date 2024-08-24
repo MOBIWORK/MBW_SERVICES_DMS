@@ -6,7 +6,11 @@ from mbw_dms.api.validators import validate_filter_timestamp
 # Báo cáo tổng hợp đặt hàng
 @frappe.whitelist(methods="GET")
 def so_report(**kwargs):
+    return handle_so_report(kwargs=kwargs)
+
+def handle_so_report(kwargs):  
     try:
+        is_excel = kwargs.get("is_excel")
         filters = []
         from_date = validate_filter_timestamp(type="start")(kwargs.get("from_date")) if kwargs.get("from_date") else None
         to_date = validate_filter_timestamp(type="end")(kwargs.get("to_date")) if kwargs.get("to_date") else None
@@ -56,7 +60,8 @@ def so_report(**kwargs):
         if where_conditions:
             sql_query += " WHERE {}".format(where_conditions)
         sql_query += " ORDER BY so.transaction_date desc"
-        sql_query += " LIMIT %s OFFSET %s"
+        if not is_excel: 
+            sql_query += " LIMIT %s OFFSET %s"
 
         sql_query_count = """
             SELECT COUNT(*)
@@ -71,8 +76,10 @@ def so_report(**kwargs):
 
         limit = page_size
         offset = (page_number - 1) * limit
-        sale_orders = frappe.db.sql(sql_query, (limit, offset), as_dict=True)
-
+        if is_excel:
+            sale_orders = frappe.db.sql(sql_query, as_dict=True)
+        else: 
+            sale_orders = frappe.db.sql(sql_query, (limit, offset), as_dict=True)
         for i in sale_orders:
             st = get_value_child_doctype("Sales Order", i["name"], "sales_team")
             i["sales_person"] = ""
@@ -88,7 +95,11 @@ def so_report(**kwargs):
             totals["sum_discount_amount"] += i["discount_amount"]
             totals["sum_grand_total"] += i["grand_total"]
 
-
+        if is_excel:
+            return {
+                "data": sale_orders,
+                "sum": totals,
+            }
         return gen_response(200, "Thành công", {
             "data": sale_orders,
             "sum": totals,
@@ -97,8 +108,13 @@ def so_report(**kwargs):
             "totals": so_count
         })
     except Exception as e:
+        if is_excel:
+            print("lỗi báo cáo sale order ==== ",e)
+            return {
+                "data": [],
+                "sum" : {}
+            }
         return exception_handle(e)
-    
 # Báo cáo tổng hợp bán hàng
 @frappe.whitelist(methods="GET")
 def si_report(**kwargs):

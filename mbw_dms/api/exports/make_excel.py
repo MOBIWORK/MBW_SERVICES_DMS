@@ -108,11 +108,12 @@ columnReport = {
                         }
     },
     "Report Order":{
-        "column": {
-            "main_columns": ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v']
+       "column": {
+            "main_columns": ['STT', 'Đơn bán', 'Khách hàng', 'Khu vực', 'Ngày tạo', 'Nhân Viên', 'Mã sản phẩm', 'Tên sản phẩm', 'Mã kho', 'Tên kho', 'Nhóm sản phẩm', 'Nhãn hàng', 'Số lượng', 'ĐVT', 'Đơn giá', 'Chiết khấu(%)', 'Tiền chiết khấu(VNĐ)', 'Tổng tiền(VNĐ)', 'Thành tiền(VNĐ)', 'Tiền VAT(VNĐ)', 'Chiết khấu(VNĐ)', 'Tổng tiền(VNĐ)']
         },
-        "show_data": [],
+        "show_data": ['name', 'customer', 'territory', 'transaction_date', 'sales_person', 'item_code', 'item_name', 'set_warehouse', 'name_warehouse', 'item_group', 'brand', 'qty', 'item_unit', 'rate', 'discount_percentage', 'discount_amount', 'amount', 'total', 'tax_amount', 'discount_amount', 'grand_total'],
         "content_start_at": 10,
+        "footer" : ["","","","","","","","","","","","","sum_qty","","","","sum_discount_items","sum_grand_items","sum_total","sum_vat","sum_discount_amount","sum_grand_total"],
         "column_widths" : {
                             "A": 5, "B": 15, "C": 25, "D": 35,
                             "E": 10, "F": 10, "G": 10, "H": 10,
@@ -283,7 +284,6 @@ class MakeExcel :
                 cell.border = self.border_style
         
 
-        print("make table content xong")
         return self
     def make_footer(self):
         if self.data_footer:
@@ -496,8 +496,47 @@ class MakeExcelSell(MakeExcelCheckin):
         self.data_content = new_data
         self.data_footer = data_footer
 
-class MakeExcelOrder(MakeExcel):
-    pass
+class MakeExcelOrder(MakeExcelSell):
+    def __init__(self,report_type,data,from_time ="",to_time=""):
+        super().__init__(report_type,data,from_time,to_time)
+        self.fields_group = ['name', 'customer', 'territory', 'transaction_date', 'sales_person','total', 'tax_amount', 'discount_amount', 'grand_total']
+    def changer_data(self):
+        data  = self.data_content
+        # thêm "sum_qty","","","","sum_discount_items","sum_grand_items"
+        data_footer = self.data_footer
+        data_footer = {**data_footer,"sum_qty":0,"sum_discount_items":0,"sum_grand_items":0}
+        new_data = []
+        qty=0
+        discount_amount=0
+        amount=0
+        for idx, sale in enumerate(data,1):
+            # if "/" not in sale["posting_date"]:
+            sale["transaction_date"] = self.convert_tp_to_string(sale.get("transaction_date"))
+            # xử lý dữ liệu 
+            items = sale.get("items")
+            if items:
+                for index_item, item in enumerate(items):
+                    #xử lý dữ liệu 
+                    qty += item["qty"]
+                    discount_amount += item["discount_amount"]
+                    amount += item["amount"]
+                    # xử lý làm phẳng mảng, index=0 thì có thông tin chung
+                    if index_item == 0 :
+                        data_appen = {**sale,**item}
+                    
+                        data_appen = {**data_appen,"total_group": len(items),"stt": idx}
+                        
+                        del data_appen["items"]
+                        new_data.append(data_appen)
+                    else:
+                        new_data.append(item)
+            else:
+                new_data.append(sale)
+        data_footer["sum_qty"] = qty
+        data_footer["sum_discount_items"] = discount_amount
+        data_footer["sum_grand_items"] = amount
+        self.data_content = new_data
+        self.data_footer = data_footer
 
 class MakeExcelCustomer(MakeExcel):
     pass

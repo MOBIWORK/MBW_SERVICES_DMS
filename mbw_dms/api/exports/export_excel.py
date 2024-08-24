@@ -47,7 +47,7 @@ def export_excel(**kwarg):
         elif report_type == "Report Sell":
             create_xlsx = MakeExcelSell(report_type,data,filter.get("from_date"),filter.get("to_date"))
         elif report_type == "Report Order":
-            create_xlsx = MakeExcelOrder(report_type,data,filter.get("month"),filter.get("year"))
+            create_xlsx = MakeExcelOrder(report_type,data,filter.get("from_date"),filter.get("to_date"))
         elif report_type == "Report Customer":
             create_xlsx = MakeExcelCustomer(report_type,data,filter.get("month"),filter.get("year"))
         elif report_type == "Report Customer Checkin":
