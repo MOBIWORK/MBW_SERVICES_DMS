@@ -6,7 +6,10 @@ from mbw_dms.api.validators import validate_filter_timestamp
 
 @frappe.whitelist(methods="GET")
 def customer_report(**kwargs):
+    return handle_customer_report(kwargs=kwargs)
+def handle_customer_report(kwargs):
     try:
+        is_excel = kwargs.get("is_excel")
         filters = []
         page_size = int(kwargs.get("page_size", 20))
         page_number = int(kwargs.get("page_number")) if kwargs.get("page_number") and int(kwargs.get("page_number")) >= 1 else 1
@@ -46,7 +49,8 @@ def customer_report(**kwargs):
         """
         if where_conditions:
             sql_query += " WHERE {}".format(where_conditions)
-        sql_query += " LIMIT %s OFFSET %s"
+        if not is_excel:
+            sql_query += " LIMIT %s OFFSET %s"
 
         sql_query_count = """
             SELECT COUNT(*)
@@ -60,7 +64,10 @@ def customer_report(**kwargs):
         
         limit = page_size
         offset = (page_number - 1) * limit
-        list_customers = frappe.db.sql(sql_query, (limit, offset), as_dict=True)
+        if is_excel:
+            list_customers = frappe.db.sql(sql_query, as_dict=True)
+        else:    
+            list_customers = frappe.db.sql(sql_query, (limit, offset), as_dict=True)
         totals = {
             "sum_checkin": 0,
             "sum_so": 0,
@@ -99,14 +106,22 @@ def customer_report(**kwargs):
         
             # Tổng số khách hàng
             customer_count = count_customers[0]["COUNT(*)"]
-
+        if is_excel:
+            return {
+                "data": list_customers,
+            }
         return gen_response(200, "Thành công", {
             "data": list_customers,
-            "totals_cus": customer_count,
             "sum": totals,
+            "totals_cus": customer_count,
             "page_number": page_number,
             "page_size": page_size,
         })
     
     except Exception as e:
+        if is_excel:
+            print("lỗi báo cáo sale order ==== ",e)
+            return {
+                "data": [],
+            }
         return exception_handle(e)

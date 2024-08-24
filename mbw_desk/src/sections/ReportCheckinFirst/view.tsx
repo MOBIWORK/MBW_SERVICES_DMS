@@ -22,7 +22,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { AxiosService } from "@/services/server";
 import useDebounce from "@/hooks/useDebount";
 import { DatePickerProps } from "antd/lib";
-import { translationUrl, treeArray } from "@/util";
+import { handleDowload, translationUrl, treeArray } from "@/util";
 import dayjs from "dayjs";
 import { LuFilter, LuFilterX } from "react-icons/lu";
 import { listSale } from "@/types/listSale";
@@ -284,7 +284,10 @@ export default function ReportCheckinFirst() {
       setListEmployees(
         results.map((employee_filter: employee) => ({
           value: employee_filter.sale_name,
-          label: employee_filter.sale_name || employee_filter.employee_name || employee_filter.employee_code,
+          label:
+            employee_filter.sale_name ||
+            employee_filter.employee_name ||
+            employee_filter.employee_code,
         }))
       );
     })();
@@ -414,9 +417,21 @@ export default function ReportCheckinFirst() {
                 icon: <VerticalAlignBottomOutlined className="text-xl" />,
                 size: "18px",
                 className: "flex items-center",
-                action: () => {
-                  translationUrl("/app/data-export/Data%20Export");
-                },
+                action: handleDowload.bind(null, {
+                  url: "/api/method/mbw_dms.api.exports.export_excel.export_excel",
+                  params: {
+                    report_type: "Report Customer Checkin",
+                    data_filter: {
+                      sales_person: employee,
+                      customer_group: customer_group,
+                      customer_type: customer_type,
+                      territory: territory,
+                      from_date: from_date,
+                      to_date: to_date,
+                    },
+                  },
+                  file_name: "Report Customer Checkin.xlsx",
+                }),
               },
             ]}
           />
