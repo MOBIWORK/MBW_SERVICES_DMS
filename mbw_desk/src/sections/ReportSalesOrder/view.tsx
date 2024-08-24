@@ -24,7 +24,7 @@ import { AxiosService } from "../../services/server";
 import dayjs from "dayjs";
 import useDebounce from "../../hooks/useDebount";
 import { DatePickerProps } from "antd/lib";
-import { translationUrl, treeArray } from "@/util";
+import { handleDowload, translationUrl, treeArray } from "@/util";
 import { employee } from "@/types/employeeFilter";
 import { rsData, rsDataFrappe } from "@/types/response";
 import { listSale } from "@/types/listSale";
@@ -435,7 +435,10 @@ export default function ReportSalesOrder() {
       setListEmployees(
         results.map((employee_filter: employee) => ({
           value: employee_filter.sale_name,
-          label: employee_filter.sale_name || employee_filter.employee_name || employee_filter.employee_code,
+          label:
+            employee_filter.sale_name ||
+            employee_filter.employee_name ||
+            employee_filter.employee_code,
         }))
       );
     })();
@@ -555,9 +558,22 @@ export default function ReportSalesOrder() {
                 icon: <VerticalAlignBottomOutlined className="text-xl" />,
                 size: "20px",
                 className: "flex items-center",
-                action: () => {
-                  translationUrl("/app/data-export/Data%20Export");
-                },
+                action: handleDowload.bind(null, {
+                  url: "/api/method/mbw_dms.api.exports.export_excel.export_excel",
+                  params: {
+                    report_type: "Report Order",
+                    data_filter: {
+                      company: company,
+                      territory: territory,
+                      customer: customer,
+                      from_date: from_date,
+                      to_date: to_date,
+                      warehouse: warehouse,
+                      sales_person: employee,
+                    },
+                  },
+                  file_name: "Report Order.xlsx",
+                }),
               },
             ]}
           />

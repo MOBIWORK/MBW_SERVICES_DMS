@@ -323,7 +323,7 @@ def create_customer(**kwargs):
         if "current_address" in locals() and current_address is not None :
             print("xóa current_address")
             try:
-                frappe.delete_doc("Address", current_address.name,ignore_permissions=True)
+                frappe.delete_doc("Address", {"address_title":["like",f"%{current_address.address_title}%"]},ignore_permissions=True)
                 print("xóa current_address: done")
             except Exception as ex:
                  print("xóa current_address: thất bại - chi tiết",ex)
@@ -343,7 +343,7 @@ def create_customer(**kwargs):
                     frappe.delete_doc("Contact",new_contact.name)
                     frappe.db.commit()
                     if len(links) ==0:
-                        frappe.delete_doc("Address",current_address_contact.name)
+                        frappe.delete_doc("Address",{"address_title":["like",f"%{current_address_contact.address_title}%"]})
                         frappe.db.commit()                
                 print("xóa new_contact- address contact: done")
             except Exception as ex:

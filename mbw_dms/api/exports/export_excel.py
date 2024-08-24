@@ -43,18 +43,17 @@ def export_excel(**kwarg):
         elif report_type == "Report Checkin":
             create_xlsx = MakeExcelCheckin(report_type,data,filter.get("from_date"),filter.get("to_date"))
         elif report_type == "Report Inventory":
-            create_xlsx = MakeExcelInventory(report_type,data,filter.get("month"),filter.get("year"),filter.get("team_sale") if filter.get("team_sale") else "" )
+            create_xlsx = MakeExcelInventory(report_type,data,filter.get("update_at_from") or "",filter.get("update_at_to") or "",filter.get("team_sale") if filter.get("team_sale") else "Tất cả" )
         elif report_type == "Report Sell":
-            create_xlsx = MakeExcelSell(report_type,data,filter.get("month"),filter.get("year"))
+            create_xlsx = MakeExcelSell(report_type,data,filter.get("from_date"),filter.get("to_date"))
         elif report_type == "Report Order":
-            create_xlsx = MakeExcelOrder(report_type,data,filter.get("month"),filter.get("year"))
+            create_xlsx = MakeExcelOrder(report_type,data,filter.get("from_date"),filter.get("to_date"))
         elif report_type == "Report Customer":
             create_xlsx = MakeExcelCustomer(report_type,data,filter.get("month"),filter.get("year"))
         elif report_type == "Report Customer Checkin":
             create_xlsx = MakeExcelCustomerCheckin(report_type,data,filter.get("month"),filter.get("year"))
         else:
             return gen_response(500,_("Kiểu báo cáo không hợp lệ!!!!"))
-        print(" tạo xong excel Xong")
         xlsx_file = create_xlsx.make()
         # # xử lý gửi excel - xóa trên server        
         # os.remove(xlsx_file)
