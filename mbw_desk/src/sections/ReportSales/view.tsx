@@ -74,6 +74,7 @@ const columns: TableColumnsType<DataSaleOrder> = [
     ),
     dataIndex: "stt",
     key: "stt",
+    width: 60,
     render: (_, record: any, index: number) => index + 1,
   },
   {
@@ -106,13 +107,6 @@ const columns: TableColumnsType<DataSaleOrder> = [
     key: "territory",
     width: 120,
     render: (_, record: any) => <div>{record.territory}</div>,
-  },
-  {
-    title: "Kho",
-    dataIndex: "set_warehouse",
-    key: "set_warehouse",
-    width: 80,
-    render: (_, record: any) => <div>{record.set_warehouse}</div>,
   },
   {
     title: "Ngày tạo",
@@ -243,6 +237,7 @@ export default function ReportSales() {
       { title: "Tên sản phẩm", dataIndex: "item_name", key: "item_name" },
       { title: "Nhóm sản phẩm", dataIndex: "item_group", key: "item_group" },
       { title: "Nhãn hàng", dataIndex: "brand", key: "brand" },
+      { title: "Kho", dataIndex: "warehouse", key: "warehouse" },
       {
         title: <div className="text-right">Đơn giá</div>,
         dataIndex: "rate",
@@ -253,6 +248,7 @@ export default function ReportSales() {
           </div>
         ),
       },
+      { title: "Đơn vị tính", dataIndex: "uom", key: "uom" },
       {
         title: <div className="text-right">Số lượng</div>,
         dataIndex: "qty",
@@ -278,6 +274,16 @@ export default function ReportSales() {
         render: (_, record: any) => (
           <div className="!text-right">
             {Intl.NumberFormat().format(record.discount_amount)}
+          </div>
+        ),
+      },
+      {
+        title: <div className="text-right">Tiền VAT (VNĐ)</div>,
+        dataIndex: "money_vat",
+        key: "money_vat",
+        render: (_, record: any) => (
+          <div className="!text-right">
+            {Intl.NumberFormat().format(record.money_vat)}
           </div>
         ),
       },
@@ -824,7 +830,6 @@ export default function ReportSales() {
                     <Table.Summary.Cell index={1}></Table.Summary.Cell>
                     <Table.Summary.Cell index={2}>Tổng</Table.Summary.Cell>
                     <Table.Summary.Cell index={3}></Table.Summary.Cell>
-                    <Table.Summary.Cell index={4}></Table.Summary.Cell>
                     <Table.Summary.Cell index={5}></Table.Summary.Cell>
                     <Table.Summary.Cell index={6}></Table.Summary.Cell>
                     <Table.Summary.Cell index={7}></Table.Summary.Cell>
