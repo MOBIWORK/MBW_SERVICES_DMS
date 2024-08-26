@@ -252,7 +252,10 @@ def create_customer(**kwargs):
             }
             # new_address_contact.insert()
             current_address_contact = handle_address_customer(contact,link_cs_contact)
-            new_contact.address = current_address_contact.name
+            if frappe.db.exists("Address",current_address_contact.name) :
+                new_contact.address = current_address_contact.name
+            else:
+                new_contact.address = current_address_contact.address_title
             new_contact.save()
             
 
@@ -289,7 +292,10 @@ def create_customer(**kwargs):
             current_address.save()
             frappe.db.commit()
             #liên kết địa chỉ với khách hàng
-            new_customer.customer_primary_address = current_address.address_title
+            if frappe.db.exists("Address",current_address.name):
+                new_customer.customer_primary_address = current_address.name
+            else:
+                new_customer.customer_primary_address = current_address.address_title
             new_customer.save()
         ## liên kết contact
         if contact is not None and contact.get("first_name") and new_contact:
