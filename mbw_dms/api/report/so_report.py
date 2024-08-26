@@ -1,5 +1,5 @@
 import frappe
-
+import re
 from mbw_dms.api.common import gen_response ,exception_handle, get_child_values_doc, get_value_child_doctype
 from mbw_dms.api.validators import validate_filter_timestamp
 
@@ -42,7 +42,7 @@ def handle_so_report(kwargs):
         filters.append("so.docstatus = 1")
         where_conditions = " AND ".join(filters)
 
-        field_items = ["name", "item_name", "item_code", "item_group", "brand", "rate", "qty", "amount", "discount_amount", "discount_percentage"]
+        field_items = ["name", "item_name", "item_code", "item_group", "brand", "rate", "qty", "amount", "discount_amount", "discount_percentage", "warehouse", "item_tax_rate", "uom"]
         totals = {
             "sum_total": 0,
             "sum_vat": 0,
@@ -88,7 +88,39 @@ def handle_so_report(kwargs):
                     i["sales_person"] = j.sales_person 
             i["tax_amount"] = frappe.get_value("Sales Taxes and Charges", {"parent": i["name"]}, "tax_amount")
             i["items"] = get_child_values_doc(doctype="Sales Order", master_name=i["name"], fields_to_get=field_items, chil_name="items")
+            for itemvat in i["items"]:
 
+                item_tax_rate = itemvat.get("item_tax_rate")
+
+                unit_price = float(itemvat.get("rate", 0.0))
+
+                if item_tax_rate:
+
+                    match = re.search(r':\s*([0-9.]+)', item_tax_rate)
+
+                    if match:
+
+                        itemvat["item_tax_rate"] = float(match.group(1))
+
+                        try:
+
+                            itemvat["item_tax_rate"] = float(match.group(1))
+
+                        except ValueError:
+
+                            itemvat["item_tax_rate"] = 0.0
+
+                    else:
+
+                        itemvat["item_tax_rate"] = 0.0
+
+                else:
+
+                    itemvat["item_tax_rate"] = 0.0
+
+                money_vat = float(unit_price * float(itemvat["item_tax_rate"] / 100))
+
+                itemvat["money_vat"] = money_vat
             totals["sum_total"] += i["total"]
             if i["tax_amount"]:
                 totals["sum_vat"] += i["tax_amount"]
@@ -153,7 +185,7 @@ def handle_si_report(kwargs):
         filters.append("si.docstatus = 1")
         where_conditions = " AND ".join(filters)
 
-        field_items = ["name", "item_name", "item_code", "item_group", "brand", "rate", "qty", "amount", "discount_amount", "discount_percentage"]
+        field_items = ["name", "item_name", "item_code", "item_group", "brand", "rate", "qty", "amount", "discount_amount", "discount_percentage", "warehouse", "item_tax_rate", "uom"]
         totals = {
             "sum_total": 0,
             "sum_vat": 0,
@@ -201,7 +233,39 @@ def handle_si_report(kwargs):
                     i["sales_person"] = j.sales_person
             i["tax_amount"] = frappe.get_value("Sales Taxes and Charges", {"parent": i["name"]}, "tax_amount")
             i["items"] = get_child_values_doc(doctype="Sales Invoice", master_name=i["name"], fields_to_get=field_items, chil_name="items")
+            for itemvat in i["items"]:
 
+                item_tax_rate = itemvat.get("item_tax_rate")
+
+                unit_price = float(itemvat.get("rate", 0.0))
+
+                if item_tax_rate:
+
+                    match = re.search(r':\s*([0-9.]+)', item_tax_rate)
+
+                    if match:
+
+                        itemvat["item_tax_rate"] = float(match.group(1))
+
+                        try:
+
+                            itemvat["item_tax_rate"] = float(match.group(1))
+
+                        except ValueError:
+
+                            itemvat["item_tax_rate"] = 0.0
+
+                    else:
+
+                        itemvat["item_tax_rate"] = 0.0
+
+                else:
+
+                    itemvat["item_tax_rate"] = 0.0
+
+                money_vat = float(unit_price * float(itemvat["item_tax_rate"] / 100))
+
+                itemvat["money_vat"] = money_vat
             totals["sum_total"] += i["total"]
             if i["tax_amount"]:
                 totals["sum_vat"] += i["tax_amount"]
