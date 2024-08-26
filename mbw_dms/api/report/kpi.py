@@ -110,7 +110,7 @@ def kpi_cus_so_detail(**kwargs):
         elif to_date:
             filters.append(f"so.creation <= '{to_date}'")
 
-        filters.append("so.docstatus == 1 ")
+        filters.append("so.docstatus = 1 ")
         where_condition = " AND ".join(filters)
 
         sql_query = """
