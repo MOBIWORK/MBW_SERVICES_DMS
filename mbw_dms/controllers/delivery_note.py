@@ -29,8 +29,8 @@ def auto_create_si(doc, method):
             "mode_of_payment": "Bank Draft",
             "paid_from": "131 - Phải thu của khách hàng - VT",
             "paid_to": "1121 - Tiền Việt Nam - VT",
-            "paid_amount": frappe.db.get_value("Sales Invoice", sales_invoice, "grand_total"),
-            "received_amount": frappe.db.get_value("Sales Invoice", sales_invoice, "grand_total"),
+            "paid_amount": frappe.db.get_value("Sales Invoice", sales_invoice, "rounded_total"),
+            "received_amount": frappe.db.get_value("Sales Invoice", sales_invoice, "rounded_total"),
             "reference_no": sales_invoice,
             "reference_date": frappe.utils.nowdate(),
             "references": [
@@ -38,9 +38,9 @@ def auto_create_si(doc, method):
                     "reference_doctype": "Sales Invoice",
                     "reference_name": sales_invoice,
                     "due_date": frappe.utils.nowdate(),
-                    "total_amount": frappe.db.get_value("Sales Invoice", sales_invoice, "grand_total"),
-                    "outstanding_amount": frappe.db.get_value("Sales Invoice", sales_invoice, "grand_total"),
-                    "allocated_amount": frappe.db.get_value("Sales Invoice", sales_invoice, "grand_total")
+                    "total_amount": frappe.db.get_value("Sales Invoice", sales_invoice, "rounded_total"),
+                    "outstanding_amount": frappe.db.get_value("Sales Invoice", sales_invoice, "rounded_total"),
+                    "allocated_amount": frappe.db.get_value("Sales Invoice", sales_invoice, "rounded_total")
                 }
             ]
         })
@@ -71,8 +71,8 @@ def auto_create_pe(doc, method):
             "mode_of_payment": "Bank Draft",
             "paid_from": "131 - Phải thu của khách hàng - VT",
             "paid_to": "1121 - Tiền Việt Nam - VT",
-            "paid_amount": frappe.db.get_value("Sales Invoice", sales_invoice, "grand_total"),
-            "received_amount": frappe.db.get_value("Sales Invoice", sales_invoice, "grand_total"),
+            "paid_amount": frappe.db.get_value("Sales Invoice", sales_invoice, "rounded_total"),
+            "received_amount": frappe.db.get_value("Sales Invoice", sales_invoice, "rounded_total"),
             "reference_no": sales_invoice,
             "reference_date": frappe.utils.nowdate(),
             "references": [
@@ -80,9 +80,9 @@ def auto_create_pe(doc, method):
                     "reference_doctype": "Sales Invoice",
                     "reference_name": sales_invoice,
                     "due_date": frappe.utils.nowdate(),
-                    "total_amount": frappe.db.get_value("Sales Invoice", sales_invoice, "grand_total"),
-                    "outstanding_amount": frappe.db.get_value("Sales Invoice", sales_invoice, "grand_total"),
-                    "allocated_amount": frappe.db.get_value("Sales Invoice", sales_invoice, "grand_total")
+                    "total_amount": frappe.db.get_value("Sales Invoice", sales_invoice, "rounded_total"),
+                    "outstanding_amount": frappe.db.get_value("Sales Invoice", sales_invoice, "rounded_total"),
+                    "allocated_amount": frappe.db.get_value("Sales Invoice", sales_invoice, "rounded_total")
                 }
             ]
         })

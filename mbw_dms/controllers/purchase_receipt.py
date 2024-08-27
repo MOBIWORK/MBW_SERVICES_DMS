@@ -24,7 +24,7 @@ def auto_create_purchase_invoice(doc, method):
             frappe.throw("Không tìm thấy Purchase Invoice được liên kết cho Purchase Receipt này.")
         supplier = doc.supplier
         # Lấy thông tin từ Purchase Invoice
-        total_amount = frappe.db.get_value("Purchase Invoice", purchase_invoice, "grand_total")
+        total_amount = frappe.db.get_value("Purchase Invoice", purchase_invoice, "rounded_total")
 
         # Tạo Payment Entry
         payment_entry = frappe.get_doc({
@@ -71,7 +71,7 @@ def auto_create_pe(doc, method):
             frappe.throw("Không tìm thấy Purchase Invoice được liên kết cho Purchase Receipt này.")
         supplier = doc.supplier
         # Lấy thông tin từ Purchase Invoice
-        total_amount = frappe.db.get_value("Purchase Invoice", purchase_invoice, "grand_total")
+        total_amount = frappe.db.get_value("Purchase Invoice", purchase_invoice, "rounded_total")
 
         # Tạo Payment Entry
         payment_entry = frappe.get_doc({
