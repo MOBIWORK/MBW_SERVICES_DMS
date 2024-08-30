@@ -1,6 +1,7 @@
 import frappe
 from frappe.utils import nowdate
 import calendar
+from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
 
 
 # Kiểm tra xem khách đã đặt hàng trước đó chưa
@@ -125,3 +126,10 @@ def update_kpi_monthly_on_cancel(doc, method):
         monthly_summary_doc.save(ignore_permissions=True)
     else:
         return
+    
+def auto_create_si(doc, method):
+    sales_invoice = make_sales_invoice(source_name=doc.name)
+    sales_invoice.due_date = nowdate()
+    sales_invoice.insert()
+
+    frappe.msgprint(f"Sales Invoice {sales_invoice.name} đã được tạo thành công.")
