@@ -57,27 +57,31 @@
   {
    "fieldname": "address_line2",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "Address Line 2",
    "length": 240
   },
   {
    "fieldname": "city",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "in_global_search": 1,
    "in_list_view": 1,
    "label": "City/Town",
+   "options": "DMS Province",
    "reqd": 1,
    "search_index": 1
   },
   {
    "fieldname": "county",
-   "fieldtype": "Data",
-   "label": "County"
+   "fieldtype": "Link",
+   "label": "County",
+   "options": "DMS District"
   },
   {
    "fieldname": "state",
-   "fieldtype": "Data",
-   "label": "State/Province"
+   "fieldtype": "Link",
+   "label": "State/Province",
+   "options": "DMS Ward"
   },
   {
    "fieldname": "country",
@@ -150,7 +154,7 @@
  "icon": "fa fa-map-marker",
  "idx": 5,
  "links": [],
- "modified": "2024-08-23 16:33:07.507435",
+ "modified": "2024-09-06 15:47:03.839721",
  "modified_by": "Administrator",
  "module": "MBW DMS",
  "name": "Address",
