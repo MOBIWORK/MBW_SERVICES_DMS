@@ -357,6 +357,7 @@ export default function SupervisoryStaffRealTime() {
             justifyContent: "center",
             alignItems: "center",
           }}
+         
         >
           <Spin
             indicator={
@@ -365,12 +366,11 @@ export default function SupervisoryStaffRealTime() {
           />
         </div>
       )}
-      <Row className="flex flex-wrap justify-between items-center px-[30px] pt-5">
-        <div className="flex justify-center items-center">
+      <Row className="flex flex-wrap justify-between items-center px-[30px] h-[48px] bg-white">
           <span className="text-2xl font-semibold leading-[21px]">
             Giám sát thời gian thực
           </span>
-        </div>
+       
         <div className="flex">
           <Dropdown
             trigger={["click"]}
@@ -388,10 +388,12 @@ export default function SupervisoryStaffRealTime() {
         </div>
         {/* <Button onClick={handlerShowHistoryForAnyOne}>Xem dữ liệu lịch sử</Button> */}
       </Row>
-      <Row style={{ marginTop: "20px" }} gutter={5} className="px-[30px]">
-        <Col span={12} className="card-container">
+      <Row style={{ marginTop: "20px" }} gutter={[20,20]} className="px-[30px] h-full overflow-y-scroll pb-20" >
+        {/*  Thông tin chi tiết */}
+        <Col className="card-container  w-full 1kr:w-1/2 order-1 1k:order-2 1kr:order-1 " >
           <div style={{ display: "block", width: "100%" }}>
-            <Row gutter={10} style={{ width: "100%" }}>
+            <Row gutter={[20,20]} style={{ width: "100%" }}>
+              {/* nhân viên on/off */}
               <Col span={12} className="card-container">
                 <WrapperCard>
                   <div className="wrap-card-container">
@@ -458,9 +460,8 @@ export default function SupervisoryStaffRealTime() {
                   </div>
                 </WrapperCard>
               </Col>
-            </Row>
-            <Row gutter={10} style={{ width: "100%", marginTop: "13px" }}>
-              <Col span={8} className="card-container">
+              {/* chi tiết viếng thăm 1280-1440 là 100 , còn lại là 1/3*/}
+              <Col  className="card-container w-1/3 1kr:w-full 1_5k:w-1/3">
                 <WrapperCard>
                   <div className="wrap-card-container">
                     <div className="flex items-center">
@@ -493,7 +494,7 @@ export default function SupervisoryStaffRealTime() {
                   </div>
                 </WrapperCard>
               </Col>
-              <Col span={8} className="card-container">
+              <Col className="card-container w-1/3 1kr:w-full 1_5k:w-1/3">
                 <WrapperCard>
                   <div className="wrap-card-container">
                     <div className="flex items-center">
@@ -526,7 +527,7 @@ export default function SupervisoryStaffRealTime() {
                   </div>
                 </WrapperCard>
               </Col>
-              <Col span={8} className="card-container">
+              <Col  className="card-container w-1/3 1kr:w-full 1_5k:w-1/3">
                 <WrapperCard>
                   <div className="wrap-card-container">
                     <div className="flex items-center">
@@ -559,8 +560,7 @@ export default function SupervisoryStaffRealTime() {
                   </div>
                 </WrapperCard>
               </Col>
-            </Row>
-            <Row gutter={10} style={{ width: "100%", marginTop: "13px" }}>
+              {/* Quãng đường di chuyển */}
               <Col span={12} className="card-container">
                 <WrapperCard>
                   <div className="wrap-card-container">
@@ -844,35 +844,35 @@ export default function SupervisoryStaffRealTime() {
                 </WrapperCard>
               </Col>
             </Row>
-            <Row gutter={10} style={{ width: "100%", marginTop: "13px" }}>
-              <Col span={24} className="card-container">
-                <WrapperCardTable>
-                  <div
-                    style={{
-                      fontWeight: 500,
-                      fontSize: "14px",
-                      lineHeight: "28px",
-                      paddingLeft: "10px",
-                      paddingBottom: "10px",
-                      paddingTop: "10px",
-                    }}
-                  >
-                    Thống kê thời gian di chuyển, thời gian dừng, thời gian
-                    viếng thăm của nhân viên
-                  </div>
-                  <TableCustom
-                    style={{ height: "100%" }}
-                    pagination={false}
-                    scroll={{ y: 350 }}
-                    columns={columnsCheckingEmployee}
-                    dataSource={dataCheckingEmployee}
-                  />
-                </WrapperCardTable>
-              </Col>
-            </Row>
           </div>
         </Col>
-        <Col span={12} className="card-container">
+        {/* thống kê thời gian di chuyển  */} 
+        <Col  className="card-container w-full order-2 1k:order-3 1kr:order-3" >
+          <WrapperCardTable>
+            <div
+              style={{
+                fontWeight: 500,
+                fontSize: "14px",
+                lineHeight: "28px",
+                paddingLeft: "10px",
+                paddingBottom: "10px",
+                paddingTop: "10px",
+              }}
+            >
+              Thống kê thời gian di chuyển, thời gian dừng, thời gian
+              viếng thăm của nhân viên
+            </div>
+            <TableCustom
+              style={{ height: "100%" }}
+              pagination={false}
+              scroll={{ y: 350 }}
+              columns={columnsCheckingEmployee}
+              dataSource={dataCheckingEmployee}
+            />
+          </WrapperCardTable>
+        </Col>
+        {/* Giao diện map */}
+        <Col  className="card-container min-h-[400px] w-full 1kr:w-1/2 order-3 1k:order-1 1kr:order-2 ">
           <WrapperCardMap>
             <div style={{ height: "100%" }}>
               {options.projectId && (
@@ -885,7 +885,7 @@ export default function SupervisoryStaffRealTime() {
             </div>
           </WrapperCardMap>
         </Col>
-      </Row>
+      </Row> 
     </>
   );
 }
