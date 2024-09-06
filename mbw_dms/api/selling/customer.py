@@ -251,12 +251,15 @@ def create_customer(**kwargs):
                 "link_doctype": new_customer.doctype,
                 "link_name": new_customer.name,
             })
-            new_contact.append("phone_nos", {
-                "phone": phone_number,
-                "is_primary_phone":1,
-                "is_primary_mobile_no":1
-            })
+
+            if bool(phone_number):
+                new_contact.append("phone_nos", {
+                    "phone": phone_number,
+                    "is_primary_phone":1,
+                    "is_primary_mobile_no":1
+                })
             new_contact.insert()
+
             # Tạo mới địa chỉ contact
             new_address_contact = frappe.new_doc("Address")
             new_address_contact.address_title = contact.get("address_title")
@@ -296,14 +299,14 @@ def create_customer(**kwargs):
         frappe.db.commit()
         return gen_response(201, "Thành công", {"name": new_customer.name})
     except Exception as e:
-        if "new_customer" in locals() and new_customer is not None :
-            frappe.delete_doc("Customer", new_customer.name,ignore_permissions=True)
+        if "new_customer" in locals() and new_customer is not None:
+            frappe.delete_doc("Customer", new_customer.name, ignore_permissions=True)
         if "new_address_cus" in locals() and new_address_cus is not None:
-            frappe.delete_doc("Address", new_address_cus.name,ignore_permissions=True)
-        if "new_contact" in locals() and new_contact is not None :
-            frappe.delete_doc("Contact", new_contact.name,ignore_permissions=True)
-        if "new_address_contact" in locals() and new_address_contact is not None  :
-            frappe.delete_doc("Contact", new_address_contact.name,ignore_permissions=True)
+            frappe.delete_doc("Address", new_address_cus.name, ignore_permissions=True)
+        if "new_contact" in locals() and new_contact is not None:
+            frappe.delete_doc("Contact", new_contact.name, ignore_permissions=True)
+        if "new_address_contact" in locals() and new_address_contact is not None:
+            frappe.delete_doc("Contact", new_address_contact.name, ignore_permissions=True)
         return exception_handle(e)
     
 # Danh sách lãnh thổ 
