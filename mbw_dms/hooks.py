@@ -269,7 +269,8 @@ doc_events = {
         "before_insert": "mbw_dms.controllers.dms_router.check_duplicate_import"
     },
     "Pick List": {
-        "on_submit": "mbw_dms.controllers.pick_list.update_pick_pist_to_si"
+        "on_submit": "mbw_dms.controllers.pick_list.update_pick_list_to_si",
+        "before_insert": "mbw_dms.controllers.pick_list.request_for_dn"
     }
 }
 
