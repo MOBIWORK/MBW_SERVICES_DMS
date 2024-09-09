@@ -1,7 +1,7 @@
 import frappe
 from mbw_dms.api.validators import validate_filter
 from mbw_dms.mbw_dms.doctype.dms_checkin.dms_checkin  import DMSCheckin
-from mbw_dms.api.common import CommonHandle
+from mbw_dms.api.common import CommonHandle,exception_handle
 # Tạo mới checkin
 @frappe.whitelist()
 def create_checkin(**kwargs):
@@ -43,3 +43,10 @@ def list_inventory(**kwargs):
     from mbw_dms.mbw_dms.doctype.dms_checkin.dms_checkin import list_inventory
     return list_inventory(kwargs=kwargs)
 
+# danh sách ghi chú chi tiết viếng thăm
+@frappe.whitelist(methods="GET")
+def checkin_notes(**rest):
+    try:
+        pass
+    except Exception as e:
+        return exception_handle(e) 

@@ -140,7 +140,7 @@ def real_time_monitoring_report(**kwargs):
             data["don_hang"] = len(sales_orders_today)
 
         # Lấy dữ liệu viếng thăm
-        data_checkin = frappe.get_all("DMS Checkin", filters=filter_today, fields=["name", "owner"])
+        data_checkin = frappe.get_all("DMS Checkin", filters=filter_today, fields=["name", "owner","createbyname"])
         if data_checkin:
             data["luot_vt"] = len(data_checkin)
 
@@ -152,7 +152,7 @@ def real_time_monitoring_report(**kwargs):
         employee = []
         for i in data_checkin:
             if i["owner"] not in employee:
-                employee.append(i["owner"])
+                employee.append(i["createbyname"])
         data["so_nv_online"] = len(employee)
         data["so_nv_offline"] = total_employee - data["so_nv_online"]
 
