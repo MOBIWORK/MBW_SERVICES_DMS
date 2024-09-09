@@ -2,7 +2,6 @@ import React, { useRef, useEffect, useState } from 'react';
 import maplibregl from 'maplibre-gl';
 import extend from 'xtend';
 import bbox from '@turf/bbox';
-
 import './map_realtime.css';
 import MapLegend from './maplegend_realtime';
 
@@ -41,7 +40,7 @@ function RealtimeMap({ options, onClickPopup, status }) {
                 maxBounds: _options.bounds
             });
 
-            var _map = map.current;
+            var _map:any = map.current;
             // console.log(_map);
             _map.setPadding({ top: 100, bottom: 100, left: 100, right: 100 });
 
@@ -109,7 +108,7 @@ function RealtimeMap({ options, onClickPopup, status }) {
                 ],
             });
             _map.addControl(basemap, 'bottom-left');
-            basemap.on('changeBaseLayer', async function (response) {
+            basemap.on('changeBaseLayer', async function (response:any) {
                 await new ekmapplf.VectorBaseMap(response.layer, _options.apiKey).addTo(_map);
                 setTimeout(() => {
                     setMap();
@@ -133,7 +132,7 @@ function RealtimeMap({ options, onClickPopup, status }) {
                 icon: 'none',
                 tooltip: tl
             });
-            btn3D.on('click', (btn) => {
+            btn3D.on('click', (btn:any) => {
                 is3DMap = !is3DMap;
                 if (is3DMap) {
                     btn._div.className = btn._div.className.replaceAll(
@@ -172,7 +171,7 @@ function RealtimeMap({ options, onClickPopup, status }) {
                     if (intervalIdRef.current) clearInterval(intervalIdRef.current);
                     intervalIdRef.current = setInterval(() => {
                         loadMap(_options.objectId);
-                    }, 60000);
+                    }, 10000);
                 } catch (error) {
                     console.error('Error:', error);
                 }
@@ -184,7 +183,8 @@ function RealtimeMap({ options, onClickPopup, status }) {
                 return await loadMap(_options.objectId);
             }
 
-            const loadMap = async (objectIds) => {
+            const loadMap = async (objectIds:any) => {
+                // load map => gọi dịch vụ nhân viên onl/off
                 var DataObjs = await getLastPos(objectIds)
                 // DataObjs = DataObjs.filter(item => item !== null);
                 // console.log(DataObjs);
@@ -358,9 +358,11 @@ function RealtimeMap({ options, onClickPopup, status }) {
                 }
                 return FeatureCollection;
             }
-
-            async function getLastPos(objectIds) {
+            // xử lý request nhân viên onl/off
+            async function getLastPos(objectIds:any) {
                 try {
+                    console.log(typeof objectIds,objectIds);
+                    
                     var str_ids = objectIds === null ? 'null' : objectIds.toString().replaceAll(',', ';');
                     const urlTracking = `https://api.ekgis.vn/v2/tracking/locationHistory/position/${_options.projectId}/latest/${str_ids}?api_key=${_options.apiKey}`;
                     const urlCheckin = `https://api.ekgis.vn/v1/checkin/${_options.projectId}/latest/${str_ids}?api_key=${_options.apiKey}`;
@@ -370,15 +372,17 @@ function RealtimeMap({ options, onClickPopup, status }) {
                         fetch(urlCheckin)
                     ]);
 
+                    
                     const DataTracking = await responseTracking.json();
                     const DataCheckin = await responseCheckin.json();
-
-                    let obj2Map = {};
-                    DataTracking.forEach(item => {
+                    
+                    console.log("responseTracking, responseCheckin",DataTracking, DataCheckin)
+                    let obj2Map:any = {};
+                    DataTracking.forEach((item:any) => {
                         obj2Map[item.object._id] = item;
                     });
 
-                    let mergedArray = DataCheckin.map(item1 => ({
+                    let mergedArray = DataCheckin.map((item1:any) => ({
                         object: item1.object,
                         position: obj2Map[item1.object._id] ? obj2Map[item1.object._id].position : null,
                         checkin: item1.checkin

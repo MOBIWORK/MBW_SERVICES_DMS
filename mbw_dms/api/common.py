@@ -366,6 +366,9 @@ def handle_address_customer(address_info,link_to_customer):
             doc_address =frappe.get_doc("Address",id_address)
             #kiểm tra đã tồn tại address muốn đối sang chưa
             if exit_address_title: 
+                for key,value in address_info.items():
+                    if key in key_info:
+                        doc_address.set(key,value)
                 links = doc_address.get("links")
                 if len(link_to_customer) >0 :
                     links = pydash.filter_(links,lambda x:x.get("link_doctype") != link_to_customer.get("link_doctype") and x.get("link_name") != link_to_customer.get("link_name"))
