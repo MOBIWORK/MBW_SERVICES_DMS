@@ -4,9 +4,15 @@ import frappe.utils
 
 def update_pick_list_to_si(doc, method):
     # Tự động tạo delivery note
+    delivery_notes = []
     delivery_note = create_delivery_note(source_name=doc.name)
+    delivery_notes.append({'name': delivery_note.name})
 
-    delivery_note.submit()
+    # Submit dn
+    for dn in delivery_notes:
+        dn_doc = frappe.get_doc("Delivery Note", dn["name"])
+        if dn_doc.docstatus == 0:
+            dn_doc.submit()
 
     # Tự động tạo si và payment entry
     item_locations = doc.locations
@@ -62,8 +68,74 @@ def update_pick_list_to_si(doc, method):
 
             frappe.msgprint(f"Sales Invoice {sales_invoice.name} và Payment Entry {payment_entry.name} đã được tạo và duyệt thành công.")
 
+# Convert số thành chữ 
+def number_to_vietnamese_words(number):
+    vietnamese_words = {
+        0: "không", 1: "một", 2: "hai", 3: "ba", 4: "bốn", 5: "năm", 6: "sáu", 7: "bảy", 8: "tám", 9: "chín"
+    }
 
+    suffixes = ["", "nghìn", "triệu", "tỷ"]
+    result = ""
+
+    # Chỉ xử lý phần nguyên, bỏ qua phần thập phân
+    integer_part = int(number)
+
+    # Chuyển đổi phần nguyên
+    index = 0
+    while integer_part > 0:
+        part = integer_part % 1000
+        part_string = ""
+
+        hundreds = part // 100
+        tens = (part % 100) // 10
+        ones = part % 10
+
+        if hundreds > 0:
+            part_string += vietnamese_words[hundreds] + " trăm "
+
+        if tens == 1:
+            part_string += "mười "
+            if ones == 5:
+                part_string += "lăm"
+            elif ones > 0:
+                part_string += vietnamese_words[ones]
+        elif tens > 1:
+            part_string += vietnamese_words[tens] + " mươi "
+            if ones == 1:
+                part_string += "mốt"
+            elif ones == 5:
+                part_string += "lăm"
+            elif ones > 0:
+                part_string += vietnamese_words[ones]
+        elif ones > 0:
+            part_string += vietnamese_words[ones]
+
+        if part_string:
+            result = part_string.strip() + " " + suffixes[index] + " " + result.strip()
+
+        integer_part = integer_part // 1000
+        index += 1
+
+    return result.strip() if result else "không"
+
+# Tính toán các trường custom field trong pick list
 def request_for_dn(doc, method):
+    # Tính các trường round_total, discount_amount
+    total_discount = 0
+    round_total = 0
+    for so in doc.custom_so_list:
+        total_discount += so.discount_amount
+        round_total += so.rounded_total
+
+    doc.custom_total_discount_on_order = total_discount
+    doc.custom_round_total = round_total
+
+    amount_in_words = number_to_vietnamese_words(round_total)
+    if amount_in_words:
+        # Thêm chữ "Việt Nam đồng"
+        doc.custom_in_word_vietnamese = amount_in_words.capitalize() + " Việt Nam đồng"
+
+    # Tính Request for Delivery Note
     item_locations = doc.locations
     list_items = []
 
@@ -106,6 +178,7 @@ def request_for_dn(doc, method):
             "item_code": item_code,
             "item_name": item_name,
             "qty": total_qty,
+            "stock_qty": total_qty * uom_cf,
             "uom": item_uom,
             "stock_uom": item_stock_uom,
             "uom_conversion_factor": uom_cf,
@@ -115,3 +188,12 @@ def request_for_dn(doc, method):
         
         # Thêm dòng vào bảng con custom_request_for_delivery_note
         doc.append("custom_request_for_delivery_note", item_data)
+
+    total_discount_on_total_amount_so = 0
+    total_amount_before_discount_so = 0
+    for i in doc.custom_request_for_delivery_note:
+        total_discount_on_total_amount_so += i.custom_discount_on_total
+        total_amount_before_discount_so += i.custom_amount_before_discount
+
+    doc.custom_amount_before_discount = total_amount_before_discount_so
+    doc.custom_discount_on_product = total_discount_on_total_amount_so

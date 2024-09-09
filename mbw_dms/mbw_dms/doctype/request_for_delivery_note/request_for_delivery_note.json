@@ -11,6 +11,7 @@
   "item_name",
   "section_break_pcve",
   "qty",
+  "stock_qty",
   "uom",
   "column_break_dvyk",
   "stock_uom",
@@ -93,12 +94,17 @@
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Amount before discount"
+  },
+  {
+   "fieldname": "stock_qty",
+   "fieldtype": "Float",
+   "label": "Stock quantity"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-09-06 14:24:07.860464",
+ "modified": "2024-09-09 09:38:02.035682",
  "modified_by": "Administrator",
  "module": "MBW DMS",
  "name": "Request for Delivery Note",
