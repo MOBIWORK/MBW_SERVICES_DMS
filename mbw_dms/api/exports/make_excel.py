@@ -29,7 +29,7 @@ week_days = {
 columnReport = {
     "Report KPI" : {
         "column" : {
-            "main_columns": ["STT", "Mã nhân viên","Nhân viên", "Nhóm bán hàng","Số khách hàng viếng thăm","","", "Số khách hàng viếng thăm duy nhất","","", "Số khách đặt hàng","","","Số khách hàng thêm mới","","","Số đơn hàng","","", "Doanh số (VNĐ)","","","Doang thu (VNĐ)","","", "Sản Lượng","","","SKU","","", "Số giờ làm việc""","",],
+            "main_columns": ["STT", "Mã nhân viên","Nhân viên", "Nhóm bán hàng","Số khách hàng viếng thăm","","", "Số khách hàng viếng thăm duy nhất","","", "Số khách đặt hàng","","","Số khách hàng thêm mới","","","Số đơn hàng","","", "Doanh số (VNĐ)","","","Doanh thu (VNĐ)","","", "Sản Lượng","","","SKU","","", "Số giờ làm việc""","",],
             "sub_column": ["","","","","KH","TH","TL(%)","KH","TH","TL(%)","KH","TH","TL(%)","KH","TH","TL(%)","KH","TH","TL(%)","KH","TH","TL(%)","KH","TH","TL(%)","KH","TH","TL(%)","KH","TH","TL(%)","KH","TH","TL(%)",],
         },
         "col_span": ["A9:A11", "B9:B11", "C9:C11", "D9:D11","E9:G10","H9:J10","K9:M10","N9:P10","Q9:S10","T9:V10","W9:Y10","Z9:AB10","AC9:AE10","AF9:AH10"],
