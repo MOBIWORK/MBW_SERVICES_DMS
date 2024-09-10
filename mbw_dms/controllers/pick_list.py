@@ -4,15 +4,7 @@ import frappe.utils
 
 def update_pick_list_to_si(doc, method):
     # Tự động tạo delivery note
-    delivery_notes = []
-    delivery_note = create_delivery_note(source_name=doc.name)
-    delivery_notes.append({'name': delivery_note.name})
-
-    # Submit dn
-    for dn in delivery_notes:
-        dn_doc = frappe.get_doc("Delivery Note", dn["name"])
-        if dn_doc.docstatus == 0:
-            dn_doc.submit()
+    create_delivery_note(source_name=doc.name)
 
     # Tự động tạo si và payment entry
     item_locations = doc.locations
@@ -26,6 +18,12 @@ def update_pick_list_to_si(doc, method):
         shipper_phone = frappe.get_value("Employee", {"name": doc.custom_shipper}, "cell_number")
 
     for so in sales_order_list:
+        dn_name = frappe.get_value("Delivery Note Item", {"against_sales_order": so}, "parent")
+        if bool(dn_name):
+            delivery_note = frappe.get_doc("Delivery Note", {"name": dn_name})
+            if delivery_note.docstatus == 0:
+                delivery_note.submit()
+
         si = frappe.db.get_value("Sales Invoice Item", {"sales_order": so}, "parent")
 
         if si:
