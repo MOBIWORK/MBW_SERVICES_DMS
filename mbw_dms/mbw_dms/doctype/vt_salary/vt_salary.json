@@ -9,6 +9,7 @@
   "employee_name",
   "year",
   "month",
+  "doanh_thu",
   "pt_thuong_doanh_thu",
   "thuong_doanh_thu"
  ],
@@ -43,11 +44,16 @@
    "fieldname": "thuong_doanh_thu",
    "fieldtype": "Float",
    "label": "Th\u01b0\u1edfng doanh thu"
+  },
+  {
+   "fieldname": "doanh_thu",
+   "fieldtype": "Float",
+   "label": "Doanh thu"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-08-28 09:10:12.965399",
+ "modified": "2024-09-10 16:40:34.147894",
  "modified_by": "Administrator",
  "module": "MBW DMS",
  "name": "VT Salary",
