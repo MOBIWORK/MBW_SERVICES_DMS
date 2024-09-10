@@ -33,7 +33,7 @@ def update_kpi_monthly(doc, method):
             sales_person = i.sales_person
     
     user_name = frappe.get_value("Sales Person", {"name": sales_person}, "employee")
-    sales_team = frappe.get_value("DMS KPI", {"nhan_vien_ban_hang": user_name}, "nhom_ban_hang")
+    sales_team = frappe.get_value("Sales Person", {"employee": user_name}, "parent_sales_person")
 
     # Tính sản lượng (số sản phẩm/đơn) và sku(số mặt hàng/đơn) trong đơn hàng(không km)
     items = doc.get("items")
@@ -124,6 +124,13 @@ def update_kpi_monthly_on_cancel(doc, method):
         return
 
 
+
+def update_kpi_monthly_after_delete(doc,method):
+    # chỉ thay đổi kpi nếu xóa bản ghi đã submit
+    if doc.docstatus == 1:
+        update_kpi_monthly_on_cancel(doc,method)
+
+        
 def minus_not_nega(num,sub=1):
     num = int(num)
     if num <= 0 :

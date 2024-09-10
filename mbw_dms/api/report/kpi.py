@@ -46,7 +46,7 @@ def kpi_visit_detail(**kwargs):
 @frappe.whitelist(methods="GET")
 def kpi_only_visit_detail(**kwargs):
     try:
-        filters = {"docstatus": 1}
+        filters = {}
         from_date = validate_filter_timestamp(type="start")(kwargs.get("from_date")) if kwargs.get("from_date") else None
         to_date = validate_filter_timestamp(type="end")(kwargs.get("to_date")) if kwargs.get("to_date") else None
         page_size = int(kwargs.get("page_size", 20))
@@ -61,27 +61,18 @@ def kpi_only_visit_detail(**kwargs):
         if employee:
             filters["createdbyemail"] = user_id
 
-        all_data = frappe.get_all("DMS Checkin", filters=filters, fields=["name", "kh_ma", "kh_ten", "kh_diachi", "checkin_giovao", "checkin_khoangcach"])
+        all_data = frappe.db.get_all("DMS Checkin", filters=filters, fields=["name", "kh_ma", "kh_ten", "kh_diachi", "checkin_giovao", "checkin_khoangcach"],start=  (page_number -1 )* page_size,page_length = page_size)
+        unique_data_count =  frappe.db.count("DMS Checkin", filters=filters)
+        return_data = {}
+        for checkin in all_data: 
+            return_data.setdefault(checkin.get("kh_ma"),[])
+            return_data[checkin.get("kh_ma")].append(checkin)
 
-        # Đếm số lượng mã khách hàng không trùng lặp
-        kh_ma_count = {}
-        for i in all_data:
-            kh_ma = i["kh_ma"]
-            if kh_ma in kh_ma_count:
-                kh_ma_count[kh_ma] += 1
-            else:
-                kh_ma_count[kh_ma] = 1
-
-        unique_data = [i for i in all_data if kh_ma_count[i["kh_ma"]] == 1]
-        unique_data_count = len(unique_data)
-
-        # Phân trang dữ liệu không trùng lặp
-        start_idx = page_size * (page_number - 1)
-        end_idx = start_idx + page_size
-        paginated_data = unique_data[start_idx:end_idx]
-
+        return_data2 = []
+        for checkin_ma,value in return_data.items():
+            return_data2 += value
         return gen_response(200, "Thành công", {
-            "data": paginated_data,
+            "data": return_data2,
             "totals": unique_data_count,
             "page_number": page_number,
             "page_size": page_size,

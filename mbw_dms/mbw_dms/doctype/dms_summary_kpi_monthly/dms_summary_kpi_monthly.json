@@ -13,7 +13,7 @@
   "nhom_ban_hang",
   "doanh_thu_thang",
   "doanh_so_thang",
-  "so_kh_vt_duynhat",
+  "kh_vt",
   "so_kh_vt_luot",
   "solan_vt_dungtuyen",
   "column_break_dlma",
@@ -53,14 +53,9 @@
    "label": "T\u1ed5ng doanh s\u1ed1 vi\u1ebfng th\u0103m trong th\u00e1ng"
   },
   {
-   "fieldname": "so_kh_vt_duynhat",
-   "fieldtype": "Int",
-   "label": "S\u1ed1 KH vi\u1ebfng th\u0103m (duy nh\u1ea5t/th\u00e1ng)"
-  },
-  {
    "fieldname": "so_kh_vt_luot",
    "fieldtype": "Int",
-   "label": "S\u1ed1 KH vi\u1ebfng th\u0103m (l\u01b0\u1ee3t/th\u00e1ng)"
+   "label": "S\u1ed1 l\u01b0\u1ee3t vi\u1ebfng th\u0103m (l\u01b0\u1ee3t/th\u00e1ng)"
   },
   {
    "fieldname": "solan_vt_dungtuyen",
@@ -111,11 +106,16 @@
    "fieldtype": "Link",
    "label": "Nh\u00f3m b\u00e1n h\u00e0ng",
    "options": "Sales Person"
+  },
+  {
+   "fieldname": "kh_vt",
+   "fieldtype": "Data",
+   "label": "KH vi\u1ebfng th\u0103m"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-06-12 13:51:44.536280",
+ "modified": "2024-09-10 08:42:08.652035",
  "modified_by": "Administrator",
  "module": "MBW DMS",
  "name": "DMS Summary KPI Monthly",
