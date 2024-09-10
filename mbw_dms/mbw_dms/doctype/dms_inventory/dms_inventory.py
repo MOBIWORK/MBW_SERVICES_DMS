@@ -6,6 +6,8 @@ from frappe.model.document import Document
 from pypika import CustomFunction
 from datetime import datetime
 import pydash
+from frappe import _
+from mbw_dms.api.common  import CommonHandle
 UNIX_TIMESTAMP = CustomFunction('UNIX_TIMESTAMP', ['day'])
 class DMSInventory(Document):
 	pass
@@ -133,6 +135,183 @@ def find_v2(where,page_length = 20, page =1,order_by = "modified desc",**data):
 		SELECT *
 		FROM NumberedGroups
 		WHERE row_num > {offset} AND row_num <= {offset} + {page_length};
+	"""
+
+	results = frappe.db.sql(query,as_dict=1)
+	query2 = f"""
+			WITH NumberedGroups AS (
+        SELECT 
+            di.*,
+            CONCAT(
+                '[',
+                GROUP_CONCAT(
+                    CONCAT(
+                       '{{"item_code":"', IFNULL(dii.item_code, ''), '",',
+                            '"item_name":"', IFNULL(dii.item_name, ''), '",',
+                            '"item_price":"', IFNULL(dii.item_price, ''), '",',
+								'"item_unit":"', IFNULL(dii.item_unit, ''), '",',
+								'"update_at":"', IFNULL(UNIX_TIMESTAMP(dii.update_at), ''), '",',
+								'"update_byname":"', IFNULL(dii.update_byname, ''), '",',
+								'"update_bycode":"', IFNULL(dii.update_bycode, ''), '",',
+								'"quantity":"', IFNULL(dii.quantity, ''), '",',
+								'"exp_time":"', IFNULL(UNIX_TIMESTAMP(dii.exp_time), '') , '"}}'
+							) SEPARATOR ','
+					),
+					']'
+				) AS items,
+				ROW_NUMBER() OVER (ORDER BY di.modified) AS row_num
+			FROM 
+				`tabDMS Inventory` di
+			LEFT JOIN 
+				`tabDMS Inventory Items` dii
+			ON 
+				di.name = dii.parent
+			{where}
+			GROUP BY 
+				di.customer_code
+			ORDER BY 
+				{order_by}
+		)
+		SELECT COUNT(name) 
+		FROM NumberedGroups
+		"""
+	lenRs = frappe.db.sql(query2,as_dict=1)[0]["COUNT(name)"]
+	for row in results:
+		import json
+		row['items'] = json.loads(row['items']) if row['items'] else []
+	return {
+		"data": results,
+		"total": lenRs,
+		"page_number": page,
+		"page_size": page_length
+		}
+
+def handle_filter_find_v2(body):
+	# phan trang
+	is_excel = body.get("is_excel")
+
+	page_size = int(body.get("page_size")) if body.get("page_size") and int(body.get("page_size")) >= 20 else 20
+	page_number = int(body.get("page_number")) if body.get("page_number") and int(body.get("page_number")) >=1 else 1
+	# san pham
+	expire_from = body.get("expire_from")
+	expire_to = body.get("expire_to")
+	update_at_from = body.get("update_at_from")
+	update_at_to = body.get("update_at_to")
+	item_code = body.get("item_code")
+	# lay theo don vi tinh sp
+	unit_product = body.get("unit_product")
+	# nhan vien
+	employee_sale = body.get("employee_sale")
+	# nang cao: so luong sp khach hang dang ton, tong gia tri cac sp dang ton
+	qty_inven_from = body.get("qty_inven_from")
+	qty_inven_to = body.get("qty_inven_to")
+	total_from = body.get("total_from")
+	total_to = body.get("total_to")
+
+	# Bộ lọc khách hàng
+	customer = body.get("customer")
+	# lọc nhân viên
+	message = ""
+	# tao filter
+	filters = []
+	# filter v2
+	query = ""
+	if employee_sale:
+		filters.append(["create_by","=",employee_sale])
+		query = CommonHandle.buildQuery(query,f"di.create_by = '{employee_sale}'")
+	if item_code:
+		filters.append(["item_code","=" ,item_code])
+		query = CommonHandle.buildQuery(query,f"dii.item_code = '{item_code}'")
+	if expire_from:
+		expire_from = datetime.fromtimestamp(float(expire_from)).date()
+		filters.append(["exp_time",">=",expire_from])
+		query = CommonHandle.buildQuery(query,f"dii.exp_time >= '{expire_from}'")
+	if expire_to:
+		expire_to = datetime.fromtimestamp(float(expire_to)).date()
+		filters.append(["exp_time","<=",expire_to])
+		query = CommonHandle.buildQuery(query,f"dii.exp_time <= '{expire_to}'")
+	# if expire_from and expire_to:
+	#     filters.append(["exp_time","between",[expire_from,expire_to]])
+	if update_at_from:
+		update_at_from = datetime.fromtimestamp(float(update_at_from)).date()
+		filters.append(["update_at",">=",update_at_from])
+		query = CommonHandle.buildQuery(query,f"dii.update_at >= '{update_at_from}'")
+	if update_at_to:
+		update_at_to = datetime.fromtimestamp(float(update_at_to)).date()
+		filters.append(["update_at","<=",update_at_to])
+		query = CommonHandle.buildQuery(query,f"dii.update_at <= '{update_at_to}'")
+	# if update_at_from and update_at_to: 
+	#     filters.append(["update_at","between",[update_at_from,update_at_to]])
+	if unit_product:
+		filters.append(["item_unit","=" ,unit_product])
+		query = CommonHandle.buildQuery(query,f"dii.item_unit = '{unit_product}'")
+	if qty_inven_from:
+		filters.append(["total_qty",">=", float(qty_inven_from)])
+		query = CommonHandle.buildQuery(query,f"dii.total_qty >= '{qty_inven_from}'")
+	if qty_inven_to:
+		filters.append(["total_qty","<=", float(qty_inven_to)])
+		query = CommonHandle.buildQuery(query,f"dii.total_qty <= '{qty_inven_to}'")
+	# if qty_inven_from and qty_inven_to: 
+	#     filters.append(["total_qty": ["between",[qty_inven_from,qty_inven_to]]])
+	if total_from:
+		filters.append(["total_cost",">=", float(total_from)])
+		query = CommonHandle.buildQuery(query,f"dii.total_cost >= '{total_from}'")
+	if total_to:
+		filters.append(["total_cost","<=", float(total_to)])
+		query = CommonHandle.buildQuery(query,f"dii.total_cost <= '{total_to}'")
+	# if total_from and total_to: 
+	#     filters.append(["total_cost": ["between",[float(total_from),float(total_to)]]])
+	if customer:
+		customer_code = frappe.db.get_value("Customer",customer,["customer_code"],as_dict=1)
+		if customer_code:                
+			filters.append(["customer_code","=", customer_code.get("customer_code")])
+			customer = customer_code.get("customer_code")
+			query = CommonHandle.buildQuery(query,f"di.customer_code = '{customer}'")
+		else :
+			message= _("Customer not have Code")
+	options= ["*"]
+	return find_v2(where=query,page=page_number,page_length=page_size,is_excel=is_excel)
+
+def find_v2(where,page_length = 20, page =1,order_by = "modified desc",is_excel  = False):
+	offset = (page -1) * page_length
+	paging = "" if is_excel else f"WHERE row_num > {offset} AND row_num <= {offset} + {page_length};"
+	query = f"""
+    WITH NumberedGroups AS (
+        SELECT 
+            di.*,
+            CONCAT(
+                '[',
+                GROUP_CONCAT(
+                    CONCAT(
+                       '{{"item_code":"', IFNULL(dii.item_code, ''), '",',
+                            '"item_name":"', IFNULL(dii.item_name, ''), '",',
+                            '"item_price":"', IFNULL(dii.item_price, ''), '",',
+								'"item_unit":"', IFNULL(dii.item_unit, ''), '",',
+								'"update_at":"', IFNULL(UNIX_TIMESTAMP(dii.update_at), ''), '",',
+								'"update_byname":"', IFNULL(dii.update_byname, ''), '",',
+								'"update_bycode":"', IFNULL(dii.update_bycode, ''), '",',
+								'"quantity":"', IFNULL(dii.quantity, ''), '",',
+								'"exp_time":"', IFNULL(UNIX_TIMESTAMP(dii.exp_time), '') , '"}}'
+							) SEPARATOR ','
+					),
+					']'
+				) AS items,
+				ROW_NUMBER() OVER (ORDER BY di.modified) AS row_num
+			FROM 
+				`tabDMS Inventory` di
+			LEFT JOIN 
+				`tabDMS Inventory Items` dii
+			ON 
+				di.name = dii.parent
+			{where}
+			GROUP BY 
+				di.customer_code
+			ORDER BY 
+				{order_by}
+		)
+		SELECT *
+		FROM NumberedGroups
+		{paging}
 	"""
 
 	results = frappe.db.sql(query,as_dict=1)

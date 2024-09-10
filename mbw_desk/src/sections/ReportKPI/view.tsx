@@ -14,7 +14,7 @@ import { rsData, rsDataFrappe } from "../../types/response";
 import { employee } from "../../types/employeeFilter";
 import useDebounce from "../../hooks/useDebount";
 import dayjs from "dayjs";
-import { translationUrl, treeArray } from "../../util";
+import { handleDowload, translationUrl, treeArray } from "../../util";
 import { listSale } from "../../types/listSale";
 import { useResize } from "@/hooks";
 import { SelectCommon, TreeSelectCommon } from "@/components/select/select";
@@ -189,9 +189,18 @@ export default function ReportKPI() {
                 icon: <VerticalAlignBottomOutlined className="text-xl" />,
                 size: "18px",
                 className: "flex items-center",
-                action: () => {
-                  translationUrl("/app/data-export/Data%20Export");
-                },
+                action: handleDowload.bind(null, {
+                  url: "/api/method/mbw_dms.api.exports.export_excel.export_excel",
+                  params: {
+                    report_type: "Report KPI",
+                    data_filter: {
+                      month: fmonth,
+                      year: fyear,
+                      //còn đẩy lên sale team sale person
+                    },
+                  },
+                  file_name: "Report KPI.xlsx"
+                }),
               },
             ]}
           />

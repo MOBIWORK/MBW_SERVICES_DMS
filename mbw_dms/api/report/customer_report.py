@@ -3,10 +3,12 @@ import frappe
 from mbw_dms.api.common import gen_response ,exception_handle
 from mbw_dms.api.validators import validate_filter_timestamp
 
-
 @frappe.whitelist(methods="GET")
 def customer_report(**kwargs):
+    return handle_customer_report(kwargs=kwargs)
+def handle_customer_report(kwargs):
     try:
+        is_excel = kwargs.get("is_excel")
         filters = []
         page_size = int(kwargs.get("page_size", 20))
         page_number = int(kwargs.get("page_number")) if kwargs.get("page_number") and int(kwargs.get("page_number")) >= 1 else 1
@@ -32,20 +34,22 @@ def customer_report(**kwargs):
         if territory:
             filters.append(f"cus.territory='{territory}'")
         if sales_team:
-            filters.append(f"sp.parent_sales_person='{sales_team}'")
+            filters.append(f"cus.custom_sales_manager='{sales_team}'")
         if sales_person:
-            filters.append(f"st.sales_person='{sales_person}'")
+            filters.append(f"sp.name='{sales_person}'")
 
         where_conditions = " AND ".join(filters)
         sql_query = """
             SELECT cus.name as cus_id, cus.owner, UNIX_TIMESTAMP(cus.creation) as creation, cus.customer_name, cus.customer_code, cus.customer_type, cus.tax_id, cus.customer_group, cus.territory, cus.customer_primary_contact as contact, cus.customer_primary_address as address,
-            cus.mobile_no as phone, cus.custom_sales_manager as sales_team, emp.name, emp.employee_name
+            cus.mobile_no as phone, cus.custom_sales_manager as sales_team, emp.name as sales_person_id, sp.name as sales_person
             FROM `tabCustomer` cus
             LEFT JOIN `tabEmployee` emp ON cus.owner = emp.user_id
+            LEFT JOIN `tabSales Person` sp ON emp.name = sp.employee
         """
         if where_conditions:
             sql_query += " WHERE {}".format(where_conditions)
-        sql_query += " LIMIT %s OFFSET %s"
+        if not is_excel:
+            sql_query += " LIMIT %s OFFSET %s"
 
         sql_query_count = """
             SELECT COUNT(*)
@@ -53,11 +57,16 @@ def customer_report(**kwargs):
             LEFT JOIN `tabSales Team` st ON cus.name = st.parent
             LEFT JOIN `tabSales Person` sp ON st.sales_person = sp.name
         """
+        if where_conditions:
+            sql_query_count += " WHERE {}".format(where_conditions)
         count_customers = frappe.db.sql(sql_query_count, as_dict=1)
         
         limit = page_size
         offset = (page_number - 1) * limit
-        list_customers = frappe.db.sql(sql_query, (limit, offset), as_dict=True)
+        if is_excel:
+            list_customers = frappe.db.sql(sql_query, as_dict=True)
+        else:    
+            list_customers = frappe.db.sql(sql_query, (limit, offset), as_dict=True)
         totals = {
             "sum_checkin": 0,
             "sum_so": 0,
@@ -96,14 +105,22 @@ def customer_report(**kwargs):
         
             # Tổng số khách hàng
             customer_count = count_customers[0]["COUNT(*)"]
-
+        if is_excel:
+            return {
+                "data": list_customers,
+            }
         return gen_response(200, "Thành công", {
             "data": list_customers,
-            "totals_cus": customer_count,
             "sum": totals,
+            "totals_cus": customer_count,
             "page_number": page_number,
             "page_size": page_size,
         })
     
     except Exception as e:
+        if is_excel:
+            print("lỗi báo cáo sale order ==== ",e)
+            return {
+                "data": [],
+            }
         return exception_handle(e)

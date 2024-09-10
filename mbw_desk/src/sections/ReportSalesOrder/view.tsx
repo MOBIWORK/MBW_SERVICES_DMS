@@ -1,4 +1,4 @@
-import { VerticalAlignBottomOutlined } from "@ant-design/icons";
+import { SyncOutlined, VerticalAlignBottomOutlined } from "@ant-design/icons";
 import {
   ContentFrame,
   DropDownCustom,
@@ -24,7 +24,7 @@ import { AxiosService } from "../../services/server";
 import dayjs from "dayjs";
 import useDebounce from "../../hooks/useDebount";
 import { DatePickerProps } from "antd/lib";
-import { translationUrl, treeArray } from "@/util";
+import { handleDowload, translationUrl, treeArray } from "@/util";
 import { employee } from "@/types/employeeFilter";
 import { rsData, rsDataFrappe } from "@/types/response";
 import { listSale } from "@/types/listSale";
@@ -204,6 +204,7 @@ export default function ReportSalesOrder() {
   const containerRef1 = useRef(null);
   const size = useResize();
   const [containerHeight, setContainerHeight] = useState<any>(0);
+  const [refresh, setRefresh] = useState<boolean>(false);
   const [scrollYTable1, setScrollYTable1] = useState<number>(size?.h * 0.52);
 
   useEffect(() => {
@@ -474,6 +475,7 @@ export default function ReportSalesOrder() {
     to_date,
     warehouse,
     employee,
+    refresh
   ]);
 
   const onChange: DatePickerProps["onChange"] = (dateString: any) => {
@@ -550,14 +552,35 @@ export default function ReportSalesOrder() {
             title="Báo cáo tổng hợp đặt hàng"
             buttons={[
               {
+                icon: <SyncOutlined className="text-xl" />,
+                size: "18px",
+                className: "flex mr-2 ",
+                action: () => {
+                  setRefresh((prev) => !prev);
+                },
+              },
+              {
                 label: "Xuất dữ liệu",
                 type: "primary",
                 icon: <VerticalAlignBottomOutlined className="text-xl" />,
                 size: "20px",
                 className: "flex items-center",
-                action: () => {
-                  translationUrl("/app/data-export/Data%20Export");
-                },
+                action: handleDowload.bind(null, {
+                  url: "/api/method/mbw_dms.api.exports.export_excel.export_excel",
+                  params: {
+                    report_type: "Report Order",
+                    data_filter: {
+                      company: company,
+                      territory: territory,
+                      customer: customer,
+                      from_date: from_date,
+                      to_date: to_date,
+                      warehouse: warehouse,
+                      sales_person: employee,
+                    },
+                  },
+                  file_name: "Report Order.xlsx",
+                }),
               },
             ]}
           />

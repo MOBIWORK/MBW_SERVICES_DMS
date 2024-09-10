@@ -28,7 +28,7 @@ import { AxiosService } from "../../services/server";
 import dayjs from "dayjs";
 import { useForm } from "antd/es/form/Form";
 import useDebounce from "../../hooks/useDebount";
-import { translationUrl, treeArray } from "@/util";
+import { handleDowload, translationUrl, treeArray } from "@/util";
 import { rsData, rsDataFrappe } from "@/types/response";
 import { listSale } from "@/types/listSale";
 import { employee } from "@/types/employeeFilter";
@@ -522,9 +522,28 @@ export default function ReportCustomer() {
                 icon: <VerticalAlignBottomOutlined className="text-xl" />,
                 size: "18px",
                 className: "flex items-center",
-                action: () => {
-                  translationUrl("/app/data-export/Data%20Export");
-                },
+                action: handleDowload.bind(null, {
+                  url: "/api/method/mbw_dms.api.exports.export_excel.export_excel",
+                  params: {
+                    report_type: "Report Inventory",
+                    data_filter: {
+                      expire_from,
+                      expire_to,
+                      update_at_from,
+                      update_at_to,
+                      qty_inven_from,
+                      qty_inven_to,
+                      total_from,
+                      total_to,
+                      item_code,
+                      unit_product: unit,
+                      employee: employee,
+                      customer: customer,
+                      //còn đẩy lên sale team sale person
+                    },
+                  },
+                  file_name: "Report Inventory.xlsx",
+                }),
               },
             ]}
           />

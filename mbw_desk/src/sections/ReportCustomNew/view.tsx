@@ -26,7 +26,7 @@ import React, { useEffect, useRef, useState } from "react";
 import dayjs from "dayjs";
 import { AxiosService } from "../../services/server";
 import useDebounce from "../../hooks/useDebount";
-import { translationUrl, treeArray } from "@/util";
+import { handleDowload, translationUrl, treeArray } from "@/util";
 import { DatePickerProps } from "antd/lib";
 import { employee } from "@/types/employeeFilter";
 import { rsData, rsDataFrappe } from "@/types/response";
@@ -501,9 +501,24 @@ console.log(dataCustomNew?.data);
                 icon: <VerticalAlignBottomOutlined className="text-xl" />,
                 size: "18px",
                 className: "flex items-center",
-                action: () => {
-                  translationUrl("/app/data-export/Data%20Export");
-                },
+                action: handleDowload.bind(null, {
+                  url: "/api/method/mbw_dms.api.exports.export_excel.export_excel",
+                  params: {
+                    report_type: "Report Customer",
+                    data_filter: {
+                      customer_type,
+                      customer_group,
+                      territory,
+                      sales_person: employee,
+                      sales_team,
+                      has_sales_order,
+                      department,
+                      from_date,
+                      to_date,
+                    },
+                  },
+                  file_name: "Report Customer.xlsx",
+                }),
               },
             ]}
           />
