@@ -89,33 +89,25 @@ def handle_so_report(kwargs):
             i["tax_amount"] = frappe.get_value("Sales Taxes and Charges", {"parent": i["name"]}, "tax_amount")
             i["items"] = get_child_values_doc(doctype="Sales Order", master_name=i["name"], fields_to_get=field_items, chil_name="items")
             for itemvat in i["items"]:
-
                 item_tax_rate = itemvat.get("item_tax_rate")
-
                 unit_price = float(itemvat.get("rate", 0.0))
 
                 if item_tax_rate:
-
                     match = re.search(r':\s*([0-9.]+)', item_tax_rate)
 
                     if match:
-
                         itemvat["item_tax_rate"] = float(match.group(1))
 
                         try:
-
                             itemvat["item_tax_rate"] = float(match.group(1))
-
                         except ValueError:
 
                             itemvat["item_tax_rate"] = 0.0
 
                     else:
-
                         itemvat["item_tax_rate"] = 0.0
 
                 else:
-
                     itemvat["item_tax_rate"] = 0.0
 
                 money_vat = float(unit_price * float(itemvat["item_tax_rate"] / 100))
@@ -141,7 +133,6 @@ def handle_so_report(kwargs):
         })
     except Exception as e:
         if is_excel:
-            print("lỗi báo cáo sale order ==== ",e)
             return {
                 "data": [],
                 "sum" : {}

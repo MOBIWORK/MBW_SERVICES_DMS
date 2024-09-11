@@ -8,6 +8,7 @@ import calendar
 @frappe.whitelist(methods='GET')
 def kpi_report(**kwargs):
     try:
+        is_excel = kwargs.get("is_excel", False)
         page_size =  int(kwargs.get("page_size", 20))
         page_number = int(kwargs.get("page_number")) if kwargs.get("page_number") and int(kwargs.get("page_number")) >= 1 else 1
         employee = kwargs.get("employee")
@@ -39,12 +40,17 @@ def kpi_report(**kwargs):
             SELECT nhan_vien_ban_hang, nhom_ban_hang, so_kh_vt_luot as kh_vt, doanh_so as kh_doanh_so, doanh_thu as kh_doanh_thu
             FROM `tabDMS KPI`
         """
+
         if where_condition:
             sql_query += " WHERE {}".format(where_condition)
-        sql_query += " LIMIT %s OFFSET %s"
-        limit = page_size
-        offset = (page_number - 1) * limit
-        data = frappe.db.sql(sql_query, (limit, offset), as_dict=True)
+
+        if is_excel:
+            data = frappe.db.sql(sql_query, as_dict=True)
+        else:
+            sql_query += " LIMIT %s OFFSET %s"
+            limit = page_size
+            offset = (page_number - 1) * limit
+            data = frappe.db.sql(sql_query, (limit, offset), as_dict=True)
         for i in data:
             emp = i.nhan_vien_ban_hang
             kpi_month = frappe.db.sql(f"""
@@ -57,8 +63,8 @@ def kpi_report(**kwargs):
             """, as_dict=True)
 
             i["kpi_month"] = []
-            if bool(kpi_month):
-                i["kpi_month"] = kpi_month
+            if bool(kpi_month) and len(kpi_month) > 0:
+                i["kpi_month"] = kpi_month[0]
 
         sql_query_count = """
             SELECT COUNT(*)
@@ -85,30 +91,40 @@ def kpi_report(**kwargs):
 
             if bool(i["kpi_month"]):
                 if i["kh_vt"] != 0:
-                    i["tl_vt"] = round(i["kpi_month"][0]["th_vt"] / i["kh_vt"]*100, 2)
+                    i["tl_vt"] = round(i["kpi_month"]["th_vt"] / i["kh_vt"]*100, 2)
 
                 if i["kh_doanh_so"] != 0:
-                    i["tl_doanh_so"] = round(i["kpi_month"][0]["th_doanh_so"] / i["kh_doanh_so"]*100, 2)
+                    i["tl_doanh_so"] = round(i["kpi_month"]["th_doanh_so"] / i["kh_doanh_so"]*100, 2)
 
                 if i["kh_doanh_thu"] != 0:
-                    i["tl_doanh_thu"] = round(i["kpi_month"][0]["th_doanh_thu"] / i["kh_doanh_thu"]*100, 2)
+                    i["tl_doanh_thu"] = round(i["kpi_month"]["th_doanh_thu"] / i["kh_doanh_thu"]*100, 2)
 
-                totals["tong_th_vt"] += i["kpi_month"][0]["th_vt"]
-                totals["tong_th_doanh_so"] += i["kpi_month"][0]["th_doanh_so"]
-                totals["tong_th_doanh_thu"] += i["kpi_month"][0]["th_doanh_thu"]
+                totals["tong_th_vt"] += i["kpi_month"]["th_vt"]
+                totals["tong_th_doanh_so"] += i["kpi_month"]["th_doanh_so"]
+                totals["tong_th_doanh_thu"] += i["kpi_month"]["th_doanh_thu"]
                 
             # Sum
             totals["tong_kh_vt"] += i["kh_vt"]
             totals["tong_kh_doanh_so"] += i["kh_doanh_so"]
             totals["tong_kh_doanh_thu"] += i["kh_doanh_thu"]
 
-        return gen_response(200, "Thành công", {
-            "data": data,
-            "sum": totals,
-            "page_number": page_number,
-            "page_size": page_size,
-            "totals": count_data[0]['COUNT(*)']
-        })
+        if is_excel: 
+            for x in data :
+                if len(x.get("kpi_month")) > 0 :
+                    for key,value in x.get("kpi_month")[0].items():
+                        x.update({key:value})
+            return {
+                "data": data,
+                "sum": totals,
+            }
+        else:
+            return gen_response(200, "Thành công", {
+                "data": data,
+                "sum": totals,
+                "page_number": page_number,
+                "page_size": page_size,
+                "totals": count_data[0]['COUNT(*)']
+            })
     except Exception as e:
         return exception_handle(e)
     
