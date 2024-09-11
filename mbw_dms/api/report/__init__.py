@@ -140,22 +140,9 @@ def real_time_monitoring_report(**kwargs):
             data["don_hang"] = len(sales_orders_today)
 
         # Lấy dữ liệu viếng thăm
-        data_checkin = frappe.get_all("DMS Checkin", filters=filter_today, fields=["name", "owner"])
+        data_checkin = frappe.get_all("DMS Checkin", filters=filter_today, fields=["name", "owner","createbyname"])
         if data_checkin:
             data["luot_vt"] = len(data_checkin)
-
-        # Lấy số nhân viên
-        total_employee = frappe.db.count("Employee")
-
-        # Lấy số nhân viên online, offline
-        data["so_nv_online"] = 0
-        employee = []
-        for i in data_checkin:
-            if i["owner"] not in employee:
-                employee.append(i["owner"])
-        data["so_nv_online"] = len(employee)
-        data["so_nv_offline"] = total_employee - data["so_nv_online"]
-
         return gen_response(200, "Thành công", data)
     except Exception as e:
         return exception_handle(e)

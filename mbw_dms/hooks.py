@@ -37,7 +37,7 @@ website_route_rules = [
 # page_js = {"page" : "public/js/file.js"}
 
 # include js in doctype views
-# doctype_js = {"doctype" : "public/js/doctype.js"}
+doctype_js = {"Payroll Entry" : "controllers/payroll_entry.js"}
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
@@ -260,13 +260,14 @@ doc_events = {
     "Sales Invoice": {
         "on_submit": "mbw_dms.controllers.dms_sales_invoice.update_kpi_monthly",
         #hủy đơn bán/trả
-        "on_cancel": "mbw_dms.controllers.dms_sales_invoice.update_kpi_monthly_on_cancel"
+        "on_cancel": "mbw_dms.controllers.dms_sales_invoice.update_kpi_monthly_on_cancel",
+        "on_cancel": "mbw_dms.controllers.dms_sales_invoice.update_kpi_monthly_on_delete"
     },
     "Sales Order": {
         "on_submit": "mbw_dms.controllers.dms_sales_order.update_kpi_monthly",
         #hủy/xóa đơn hàng
         "on_cancel": "mbw_dms.controllers.dms_sales_order.update_kpi_monthly_on_cancel",
-        "after_delete": "mbw_dms.controllers.dms_sales_order.update_kpi_monthly_on_cancel"
+        "after_delete": "mbw_dms.controllers.dms_sales_order.update_kpi_monthly_after_delete"
     },
     "DMS Router": {
         "before_insert": "mbw_dms.controllers.dms_router.check_duplicate_import"

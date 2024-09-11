@@ -488,7 +488,7 @@ export default function ReportKPI() {
                       {dataReort?.sum?.tong_kh_so_gio_lam_viec}
                     </Table.Summary.Cell>
                     <Table.Summary.Cell index={32} className="text-center">
-                      {Number(dataReort?.sum?.tong_th_so_gio_lam_viec).toFixed(
+                      {(Number(dataReort?.sum?.tong_th_so_gio_lam_viec) || 0).toFixed(
                         2
                       )}
                     </Table.Summary.Cell>
@@ -538,7 +538,7 @@ export default function ReportKPI() {
               />
               <ColumnGroup
                 className="!whitespace-normal !min-w-[210px] !text-center"
-                title="Số khách hàng viếng thăm"
+                title="Số lượt viếng thăm"
               >
                 <Column
                   className="!text-center"
@@ -565,7 +565,7 @@ export default function ReportKPI() {
                         });
                       }}
                     >
-                      {record?.kpi_month[0] ? record?.kpi_month[0]?.th_vt : 0}
+                      {record?.kpi_month ? record?.kpi_month?.th_vt : 0}
                     </div>
                   )}
                 />
@@ -580,7 +580,7 @@ export default function ReportKPI() {
               </ColumnGroup>
               <ColumnGroup
                 className="!whitespace-normal !min-w-[210px] !text-center"
-                title="Số khách hàng viếng thăm duy nhất"
+                title="Số khách hàng viếng thăm"
               >
                 <Column
                   className="!text-center"
@@ -607,8 +607,8 @@ export default function ReportKPI() {
                         });
                       }}
                     >
-                      {record?.kpi_month[0]
-                        ? record?.kpi_month[0]?.th_vt_dn
+                      {record?.kpi_month
+                        ? record?.kpi_month?.th_vt_dn
                         : 0}
                     </div>
                   )}
@@ -651,8 +651,8 @@ export default function ReportKPI() {
                         });
                       }}
                     >
-                      {record?.kpi_month[0]
-                        ? record?.kpi_month[0]?.th_dat_hang
+                      {record?.kpi_month
+                        ? record?.kpi_month?.th_dat_hang
                         : 0}
                     </div>
                   )}
@@ -695,8 +695,8 @@ export default function ReportKPI() {
                         });
                       }}
                     >
-                      {record?.kpi_month[0]
-                        ? record?.kpi_month[0]?.th_kh_moi
+                      {record?.kpi_month
+                        ? record?.kpi_month?.th_kh_moi
                         : 0}
                     </div>
                   )}
@@ -740,8 +740,8 @@ export default function ReportKPI() {
                         });
                       }}
                     >
-                      {record?.kpi_month[0]
-                        ? record?.kpi_month[0]?.th_don_hang
+                      {record?.kpi_month
+                        ? record?.kpi_month?.th_don_hang
                         : 0}
                     </div>
                   )}
@@ -787,9 +787,9 @@ export default function ReportKPI() {
                         });
                       }}
                     >
-                      {record?.kpi_month[0]
+                      {record?.kpi_month
                         ? Intl.NumberFormat().format(
-                            record?.kpi_month[0]?.th_doanh_so
+                            record?.kpi_month?.th_doanh_so
                           )
                         : 0}
                     </div>
@@ -837,9 +837,9 @@ export default function ReportKPI() {
                         });
                       }}
                     >
-                      {record?.kpi_month[0]
+                      {record?.kpi_month
                         ? Intl.NumberFormat().format(
-                            record?.kpi_month[0]?.th_doanh_thu
+                            record?.kpi_month?.th_doanh_thu
                           )
                         : 0}
                     </div>
@@ -884,8 +884,8 @@ export default function ReportKPI() {
                         });
                       }}
                     >
-                      {record?.kpi_month[0]
-                        ? record?.kpi_month[0]?.th_san_lg
+                      {record?.kpi_month
+                        ? record?.kpi_month?.th_san_lg
                         : 0}
                     </div>
                   )}
@@ -929,7 +929,7 @@ export default function ReportKPI() {
                         });
                       }}
                     >
-                      {record?.kpi_month[0] ? record?.kpi_month[0]?.th_sku : 0}
+                      {record?.kpi_month ? record?.kpi_month?.th_sku : 0}
                     </div>
                   )}
                 />
@@ -972,8 +972,8 @@ export default function ReportKPI() {
                         });
                       }}
                     >
-                      {record?.kpi_month[0]
-                        ? (record?.kpi_month[0]?.th_so_gio_lam_viec).toFixed(2)
+                      {record?.kpi_month?.th_so_gio_lam_viec
+                        ? (record?.kpi_month?.th_so_gio_lam_viec).toFixed(2)
                         : 0}
                     </div>
                   )}

@@ -60,3 +60,8 @@ def update_kpi_monthly_on_cancel(doc, method):
         monthly_summary_doc.save(ignore_permissions=True)
     else:
         return
+
+def update_kpi_monthly_after_delete(doc,method):
+    # chỉ thay đổi kpi nếu xóa bản ghi đã submit
+    if doc.docstatus == 1:
+        update_kpi_monthly_on_cancel(doc,method)
