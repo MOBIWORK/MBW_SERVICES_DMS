@@ -488,7 +488,7 @@ export default function ReportKPI() {
                       {dataReort?.sum?.tong_kh_so_gio_lam_viec}
                     </Table.Summary.Cell>
                     <Table.Summary.Cell index={32} className="text-center">
-                      {Number(dataReort?.sum?.tong_th_so_gio_lam_viec).toFixed(
+                      {(Number(dataReort?.sum?.tong_th_so_gio_lam_viec) || 0).toFixed(
                         2
                       )}
                     </Table.Summary.Cell>
@@ -972,7 +972,7 @@ export default function ReportKPI() {
                         });
                       }}
                     >
-                      {record?.kpi_month
+                      {record?.kpi_month?.th_so_gio_lam_viec
                         ? (record?.kpi_month?.th_so_gio_lam_viec).toFixed(2)
                         : 0}
                     </div>
