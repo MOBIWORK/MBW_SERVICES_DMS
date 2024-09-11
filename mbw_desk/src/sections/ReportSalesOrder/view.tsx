@@ -206,6 +206,7 @@ export default function ReportSalesOrder() {
   const [containerHeight, setContainerHeight] = useState<any>(0);
   const [refresh, setRefresh] = useState<boolean>(false);
   const [scrollYTable1, setScrollYTable1] = useState<number>(size?.h * 0.52);
+  const [isExcel, setIsExcel] = useState<boolean>(false);
 
   useEffect(() => {
     setScrollYTable1(size.h * 0.52);
@@ -560,6 +561,7 @@ export default function ReportSalesOrder() {
                 },
               },
               {
+                disabled: isExcel,
                 label: "Xuất dữ liệu",
                 type: "primary",
                 icon: <VerticalAlignBottomOutlined className="text-xl" />,
@@ -580,7 +582,7 @@ export default function ReportSalesOrder() {
                     },
                   },
                   file_name: "Report Order.xlsx",
-                }),
+                }, setIsExcel),
               },
             ]}
           />

@@ -87,6 +87,7 @@ export default function ReportKPI() {
   const [containerHeight, setContainerHeight] = useState<any>(0);
   const [scrollYTable1, setScrollYTable1] = useState<number>(size?.h * 0.52);
   const [refresh, setRefresh] = useState<boolean>(false);
+  const [isExcel, setIsExcel] = useState<boolean>(false);
 
   const [modal, setModal] = useState<{
     open: boolean;
@@ -234,6 +235,7 @@ export default function ReportKPI() {
                 },
               },
               {
+                disabled: isExcel,
                 label: "Xuất dữ liệu",
                 type: "primary",
                 icon: <VerticalAlignBottomOutlined className="text-xl" />,
@@ -250,7 +252,7 @@ export default function ReportKPI() {
                     },
                   },
                   file_name: "Report KPI.xlsx",
-                }),
+                }, setIsExcel),
               },
             ]}
           />

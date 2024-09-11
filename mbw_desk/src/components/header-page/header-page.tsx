@@ -8,6 +8,7 @@ type button = {
   action?: any;
   type?: string;
   className?: string;
+  disabled?: boolean;
 };
 
 type Props = {
@@ -28,6 +29,7 @@ export const HeaderPage = forwardRef(({ title, buttons, customButton, customSlec
         {buttons &&
           buttons.map((button, index) => (
             <Button
+              disabled={button?.disabled}
               key={index}
               className={button.className}
               size={button.size || "middle"}

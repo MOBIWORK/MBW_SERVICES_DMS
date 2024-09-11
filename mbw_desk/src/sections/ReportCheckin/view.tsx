@@ -160,8 +160,7 @@ export default function ReportCheckin() {
   const size = useResize();
   const [containerHeight, setContainerHeight] = useState<any>(0);
   const [scrollYTable1, setScrollYTable1] = useState<number>(size?.h * 0.52);
-  const [startDate, setStartDate] = useState<any>(null);
-  const [endDate, setEndDate] = useState<any>(null);
+  const [isExcel, setIsExcel] = useState<boolean>(false);
 
   const [modal, setModal] = useState<{
     open: boolean;
@@ -582,6 +581,7 @@ export default function ReportCheckin() {
                 },
               },
               {
+                disabled: isExcel,
                 label: "Xuất dữ liệu",
                 type: "primary",
                 icon: <VerticalAlignBottomOutlined className="text-xl" />,
@@ -602,7 +602,7 @@ export default function ReportCheckin() {
                     },
                   },
                   file_name: "checkin-report.xlsx"
-                }),
+                }, setIsExcel),
               },
             ]}
           />

@@ -244,6 +244,7 @@ export default function ReportCustomNew() {
   const [containerHeight, setContainerHeight] = useState<any>(0);
   const [scrollYTable1, setScrollYTable1] = useState<number>(size?.h * 0.52);
   const [refresh, setRefresh] = useState<boolean>(false);
+  const [isExcel, setIsExcel] = useState<boolean>(false);
 
   useEffect(() => {
     setScrollYTable1(size.h * 0.52);
@@ -496,6 +497,7 @@ console.log(dataCustomNew?.data);
                 },
               },
               {
+                disabled: isExcel,
                 label: "Xuất dữ liệu",
                 type: "primary",
                 icon: <VerticalAlignBottomOutlined className="text-xl" />,
@@ -518,7 +520,7 @@ console.log(dataCustomNew?.data);
                     },
                   },
                   file_name: "Report Customer.xlsx",
-                }),
+                }, setIsExcel),
               },
             ]}
           />

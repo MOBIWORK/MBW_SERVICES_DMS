@@ -133,6 +133,7 @@ export default function ReportCustomer() {
   const [startDate, setStartDate] = useState<any>(null);
   const [endDate, setEndDate] = useState<any>(null);
   const [refresh, setRefresh] = useState<boolean>(false);
+  const [isExcel, setIsExcel] = useState<boolean>(false);
 
   useEffect(() => {
     setScrollYTable1(size.h * 0.52);
@@ -517,6 +518,7 @@ export default function ReportCustomer() {
                 },
               },
               {
+                disabled: isExcel,
                 label: "Xuất dữ liệu",
                 type: "primary",
                 icon: <VerticalAlignBottomOutlined className="text-xl" />,
@@ -543,7 +545,8 @@ export default function ReportCustomer() {
                     },
                   },
                   file_name: "Report Inventory.xlsx",
-                }),
+                  
+                },setIsExcel),
               },
             ]}
           />
