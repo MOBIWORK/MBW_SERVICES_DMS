@@ -35,7 +35,7 @@ function WidgetHistory({ employee }: { employee?: string }) {
   })
   
   const [options, setOptions] = useState<optionsType>({
-    apiKey: import.meta.env.VITE_API_KEY,
+    apiKey: import.meta.env.VITE_KEY_MAP,
     projectId: "",
     objectId: "",
     ...time
