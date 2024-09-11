@@ -6,14 +6,14 @@ export default {
   ],
   theme: {
     extend: {
-      fontFamily: "Inter"
+      fontFamily: "Inter",
+      screens: {
+        "1k": "1000px",
+        "1kr": "1280px",
+        "1_5k" :"1400px ",
+        "2_5k" :"1920px",
+      }
     },
-    screens: {
-      "1k": "1000px",
-      "1kr": "1280px",
-      "1_5k" :"1400px ",
-      "2_5k" :"1920px",
-    }
   },
   plugins: [],
   corePlugins: {
