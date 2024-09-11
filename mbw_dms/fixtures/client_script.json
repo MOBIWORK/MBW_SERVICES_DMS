@@ -158,10 +158,10 @@
   "doctype": "Client Script",
   "dt": "Payment Entry",
   "enabled": 1,
-  "modified": "2024-08-30 15:34:35.894875",
+  "modified": "2024-09-10 14:26:09.526641",
   "module": "MBW DMS",
   "name": "Filter debt note not paid",
-  "script": "frappe.ui.form.on('Payment Entry', {\n    refresh: function(frm) {\n        if (frm.doc.party_type === 'Employee') {\n            frm.fields_dict['custom_debt_note_information'].grid.get_field('debt_note').get_query = function(doc, cdt, cdn) {\n                console.log(\"Running query filter for Debt Note\");\n                return {\n                    filters: {\n                        'status': 0,\n                        'customer': frm.doc.party\n                    }\n                };\n            };\n        }\n    }\n});\n",
+  "script": "frappe.ui.form.on('Payment Entry', {\n    refresh: function(frm) {\n        if (frm.doc.party_type === 'Employee') {\n            frm.fields_dict['custom_debt_note_information'].grid.get_field('debt_note').get_query = function(doc, cdt, cdn) {\n                console.log(\"Running query filter for Debt Note\");\n                return {\n                    filters: {\n                        'status': 0,\n                    }\n                };\n            };\n        }\n    }\n});\n",
   "view": "Form"
  },
  {
@@ -217,6 +217,17 @@
   "module": "MBW DMS",
   "name": "tạo Date cho Pick List",
   "script": "frappe.ui.form.on('Pick List', {\r\n    onload: function(frm) {\r\n        if (!frm.doc.custom_pick_date) {\r\n            let today = frappe.datetime.nowdate();\r\n            frm.set_value('custom_pick_date', today);\r\n            // Định dạng ngày theo kiểu Việt Nam\r\n            let vietnamese_date = format_date_to_vietnamese(today);\r\n            frm.set_value('custom_date_by_vietnamese', vietnamese_date);\r\n        }\r\n    },\r\n    custom_pick_date: function(frm) {\r\n        if (frm.doc.custom_pick_date) {\r\n            let vietnamese_date = format_date_to_vietnamese(frm.doc.custom_pick_date);\r\n            frm.set_value('custom_date_by_vietnamese', vietnamese_date);\r\n        }\r\n    }\r\n});\r\n\r\n// Hàm để định dạng ngày tháng theo kiểu Việt Nam\r\nfunction format_date_to_vietnamese(date) {\r\n    let parts = date.split('-'); // yyyy-mm-dd\r\n    let day = parts[2];\r\n    let month = parts[1];\r\n    let year = parts[0];\r\n    return `Ngày ${day} tháng ${month} năm ${year}`;\r\n}\r\n",
+  "view": "Form"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Client Script",
+  "dt": "Sales Order",
+  "enabled": 1,
+  "modified": "2024-09-11 10:57:49.236913",
+  "module": "MBW DMS",
+  "name": "Tạo clone nhân viên bán hàng",
+  "script": "frappe.ui.form.on('Sales Order', {\r\n    refresh: function(frm) {\r\n        // Kiểm tra nếu bảng con 'sales_team' chứa 1 dòng dữ liệu\r\n        if (frm.doc.sales_team && frm.doc.sales_team.length === 1) {\r\n            // Lấy giá trị của trường 'sales_person' từ dòng duy nhất\r\n            let sales_person_value = frm.doc.sales_team[0].sales_person;\r\n            // Gán giá trị này cho trường 'custom_sales_person'\r\n            frm.set_value('custom_sales_person', sales_person_value);\r\n        }\r\n    }\r\n});\r\n",
   "view": "Form"
  }
 ]
