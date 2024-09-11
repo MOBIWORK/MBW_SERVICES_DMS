@@ -1,0 +1,46 @@
+{
+ "cards": [
+  {
+   "card": "Doanh thu"
+  },
+  {
+   "card": "Doanh s\u1ed1"
+  },
+  {
+   "card": "\u0110\u01a1n h\u00e0ng"
+  },
+  {
+   "card": "Vi\u1ebfng th\u0103m"
+  },
+  {
+   "card": "Kh\u00e1ch h\u00e0ng m\u1edbi"
+  },
+  {
+   "card": "T\u1ed5ng gi\u00e1 tr\u1ecb t\u1ed3n kho"
+  },
+  {
+   "card": "T\u1ed5ng h\u1ee3p xu\u1ea5t kho"
+  },
+  {
+   "card": "T\u1ed5ng h\u1ee3p c\u00f4ng n\u1ee3"
+  }
+ ],
+ "charts": [
+  {
+   "chart": "Kh\u00e1ch h\u00e0ng doanh s\u1ed1 cao nh\u1ea5t",
+   "width": "Full"
+  }
+ ],
+ "creation": "2024-09-10 16:57:15.420575",
+ "dashboard_name": "B\u00e1o c\u00e1o t\u1ed5ng h\u1ee3p",
+ "docstatus": 0,
+ "doctype": "Dashboard",
+ "idx": 0,
+ "is_default": 0,
+ "is_standard": 1,
+ "modified": "2024-09-11 10:47:00.355587",
+ "modified_by": "Administrator",
+ "module": "MBW DMS",
+ "name": "B\u00e1o c\u00e1o t\u1ed5ng h\u1ee3p",
+ "owner": "Administrator"
+}
