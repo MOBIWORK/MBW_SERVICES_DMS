@@ -194,7 +194,7 @@ def find_v2(where,page_length = 20, page =1,order_by = "modified desc",is_excel 
                 GROUP_CONCAT(
                     CONCAT(
                        '{{"item_code":"', IFNULL(dii.item_code, ''), '",',
-                            '"item_name":"', IFNULL(dii.item_name, ''), '",',
+                            '"item_name":"', IFNULL(REPLACE(dii.item_name, '"', "'"), ''), '",',
                             '"item_price":"', IFNULL(dii.item_price, ''), '",',
 								'"item_unit":"', IFNULL(dii.item_unit, ''), '",',
 								'"update_at":"', IFNULL(UNIX_TIMESTAMP(dii.update_at), ''), '",',
@@ -234,14 +234,14 @@ def find_v2(where,page_length = 20, page =1,order_by = "modified desc",is_excel 
                 GROUP_CONCAT(
                     CONCAT(
                        '{{"item_code":"', IFNULL(dii.item_code, ''), '",',
-                            '"item_name":"', IFNULL(dii.item_name, ''), '",',
+                            '"item_name":"', IFNULL(REPLACE(dii.item_name, '"', "'"), ''), '",',
                             '"item_price":"', IFNULL(dii.item_price, ''), '",',
-								'"item_unit":"', IFNULL(dii.item_unit, ''), '",',
-								'"update_at":"', IFNULL(UNIX_TIMESTAMP(dii.update_at), ''), '",',
-								'"update_byname":"', IFNULL(dii.update_byname, ''), '",',
-								'"update_bycode":"', IFNULL(dii.update_bycode, ''), '",',
-								'"quantity":"', IFNULL(dii.quantity, ''), '",',
-								'"exp_time":"', IFNULL(UNIX_TIMESTAMP(dii.exp_time), '') , '"}}'
+							'"item_unit":"', IFNULL(dii.item_unit, ''), '",',
+							'"update_at":"', IFNULL(UNIX_TIMESTAMP(dii.update_at), ''), '",',
+							'"update_byname":"', IFNULL(dii.update_byname, ''), '",',
+							'"update_bycode":"', IFNULL(dii.update_bycode, ''), '",',
+							'"quantity":"', IFNULL(dii.quantity, ''), '",',
+							'"exp_time":"', IFNULL(UNIX_TIMESTAMP(dii.exp_time), '') , '"}}'
 							) SEPARATOR ','
 					),
 					']'
@@ -263,8 +263,9 @@ def find_v2(where,page_length = 20, page =1,order_by = "modified desc",is_excel 
 		FROM NumberedGroups
 		"""
 	lenRs = frappe.db.sql(query2,as_dict=1)[0]["COUNT(name)"]
+	import re
+	import json
 	for row in results:
-		import json
 		row['items'] = json.loads(row['items']) if row['items'] else []
 	return {
 		"data": results,
