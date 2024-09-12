@@ -861,7 +861,6 @@ def receivable_summary_report(**kwargs):
 		return exception_handle(e)
 
 # report
-
 def report(kwargs):
     try:
         is_excel = kwargs.get("is_excel", False)
@@ -893,26 +892,24 @@ def report(kwargs):
         where_condition = " AND ".join(filters)
         
         sql_query = """
-            SELECT nhan_vien_ban_hang, nhom_ban_hang, so_kh_vt_luot as kh_vt, so_kh_vt_duynhat as kh_vt_dn, so_kh_dathang as kh_dat_hang, so_don_hang as kh_don_hang,
-            so_kh_moi as kh_kh_moi, doanh_so as kh_doanh_so, doanh_thu as kh_doanh_thu, san_luong as kh_san_lg, sku as kh_sku, so_gio_lam_viec as kh_so_gio_lam_viec
+            SELECT nhan_vien_ban_hang, nhom_ban_hang, so_kh_vt_luot as kh_vt, doanh_so as kh_doanh_so, doanh_thu as kh_doanh_thu
             FROM `tabDMS KPI`
         """
+
         if where_condition:
             sql_query += " WHERE {}".format(where_condition)
+
         if is_excel:
             data = frappe.db.sql(sql_query, as_dict=True)
-        else: 
+        else:
             sql_query += " LIMIT %s OFFSET %s"
             limit = page_size
             offset = (page_number - 1) * limit
             data = frappe.db.sql(sql_query, (limit, offset), as_dict=True)
-        
         for i in data:
             emp = i.nhan_vien_ban_hang
-            # kpi nhan vien ban hang
             kpi_month = frappe.db.sql(f"""
-                SELECT so_kh_vt_luot as th_vt, so_kh_vt_duynhat as th_vt_dn, so_kh_dat_hang as th_dat_hang, so_don_hang as th_don_hang, so_kh_moi as th_kh_moi,
-                doanh_so_thang as th_doanh_so, doanh_thu_thang as th_doanh_thu, san_luong as th_san_lg, sku as th_sku, so_gio_lam_viec as th_so_gio_lam_viec
+                SELECT so_kh_vt_luot as th_vt, doanh_so_thang as th_doanh_so, doanh_thu_thang as th_doanh_thu, tong_ngay_cong
                 FROM `tabDMS Summary KPI Monthly`
                 WHERE 
                     nhan_vien_ban_hang = '{emp}'
@@ -921,8 +918,8 @@ def report(kwargs):
             """, as_dict=True)
 
             i["kpi_month"] = []
-            if bool(kpi_month):
-                i["kpi_month"] = kpi_month
+            if bool(kpi_month) and len(kpi_month) > 0:
+                i["kpi_month"] = kpi_month[0]
 
         sql_query_count = """
             SELECT COUNT(*)
@@ -935,98 +932,42 @@ def report(kwargs):
         totals = {
             "tong_kh_vt": 0,
             "tong_th_vt": 0,
-            "tong_th_vt_dn": 0,
-            "tong_kh_vt_dn": 0,
-            "tong_th_dat_hang": 0,
-            "tong_kh_dat_hang": 0,
-            "tong_th_don_hang": 0,
-            "tong_kh_don_hang": 0,
-            "tong_th_kh_moi": 0,
-            "tong_kh_kh_moi": 0,
             "tong_th_doanh_so": 0,
             "tong_kh_doanh_so": 0,
             "tong_th_doanh_thu": 0,
             "tong_kh_doanh_thu": 0,
-            "tong_th_san_lg": 0,
-            "tong_kh_san_lg": 0,
-            "tong_th_sku": 0,
-            "tong_kh_sku": 0,
-            "tong_th_so_gio_lam_viec": 0,
-            "tong_kh_so_gio_lam_viec": 0
         }
         for i in data:
             i["ten_nv"] =  frappe.get_value("Employee", {"name": i["nhan_vien_ban_hang"]}, "employee_name")
             
             i["tl_vt"] = 0
-            i["tl_vt_dn"] = 0
-            i["tl_dat_hang"] = 0
-            i["tl_don_hang"] = 0
-            i["tl_kh_moi"] = 0
             i["tl_doanh_so"] = 0
             i["tl_doanh_thu"] = 0
-            i["tl_san_luong"] = 0
-            i["tl_so_gio_lam_viec"] = 0
-            i["tl_sku"] = 0
-            
+
             if bool(i["kpi_month"]):
                 if i["kh_vt"] != 0:
-                    i["tl_vt"] = round(i["kpi_month"][0]["th_vt"] / i["kh_vt"]*100, 2)
-
-                if i["kh_vt_dn"] != 0:
-                    i["tl_vt_dn"] = round(i["kpi_month"][0]["th_vt_dn"] / i["kh_vt_dn"]*100, 2)
-
-                if i["kh_dat_hang"] != 0:
-                    i["tl_dat_hang"] = round(i["kpi_month"][0]["th_dat_hang"] / i["kh_dat_hang"]*100, 2)
-
-                if i["kh_don_hang"] != 0:
-                    i["tl_don_hang"] = round(i["kpi_month"][0]["th_don_hang"] / i["kh_don_hang"]*100, 2)
-
-                if i["kh_kh_moi"] != 0:
-                    i["tl_kh_moi"] = round(i["kpi_month"][0]["th_kh_moi"] / i["kh_kh_moi"]*100, 2)
+                    i["tl_vt"] = round(i["kpi_month"]["th_vt"] / i["kh_vt"]*100, 2)
 
                 if i["kh_doanh_so"] != 0:
-                    i["tl_doanh_so"] = round(i["kpi_month"][0]["th_doanh_so"] / i["kh_doanh_so"]*100, 2)
+                    i["tl_doanh_so"] = round(i["kpi_month"]["th_doanh_so"] / i["kh_doanh_so"]*100, 2)
 
                 if i["kh_doanh_thu"] != 0:
-                    i["tl_doanh_thu"] = round(i["kpi_month"][0]["th_doanh_thu"] / i["kh_doanh_thu"]*100, 2)
+                    i["tl_doanh_thu"] = round(i["kpi_month"]["th_doanh_thu"] / i["kh_doanh_thu"]*100, 2)
 
-                if i["kh_san_lg"] != 0:
-                    i["tl_san_luong"] = round(i["kpi_month"][0]["th_san_lg"] / i["kh_san_lg"]*100, 2)
-
-                if i["kh_sku"] != 0:
-                    i["tl_sku"] = round(i["kpi_month"][0]["th_sku"] / i["kh_sku"]*100, 2)
-
-                if i["kh_so_gio_lam_viec"] != 0:
-                    i["tl_so_gio_lam_viec"] = round(i["kpi_month"][0]["th_so_gio_lam_viec"] / i["kh_so_gio_lam_viec"]*100, 2)
-
-                totals["tong_th_vt"] += i["kpi_month"][0]["th_vt"]
-                totals["tong_th_vt_dn"] += i["kpi_month"][0]["th_vt_dn"]
-                totals["tong_th_dat_hang"] += i["kpi_month"][0]["th_dat_hang"]
-                totals["tong_th_don_hang"] += i["kpi_month"][0]["th_don_hang"]
-                totals["tong_th_kh_moi"] += i["kpi_month"][0]["th_kh_moi"]
-                totals["tong_th_doanh_so"] += i["kpi_month"][0]["th_doanh_so"]
-                totals["tong_th_doanh_thu"] += i["kpi_month"][0]["th_doanh_thu"]
-                totals["tong_th_san_lg"] += i["kpi_month"][0]["th_san_lg"]
-                totals["tong_th_sku"] += i["kpi_month"][0]["th_sku"]
-                totals["tong_th_so_gio_lam_viec"] += i["kpi_month"][0]["th_so_gio_lam_viec"]
-                
+                totals["tong_th_vt"] += i["kpi_month"]["th_vt"]
+                totals["tong_th_doanh_so"] += i["kpi_month"]["th_doanh_so"]
+                totals["tong_th_doanh_thu"] += i["kpi_month"]["th_doanh_thu"]
                 
             # Sum
             totals["tong_kh_vt"] += i["kh_vt"]
-            totals["tong_kh_vt_dn"] += i["kh_vt_dn"]
-            totals["tong_kh_dat_hang"] += i["kh_dat_hang"]
-            totals["tong_kh_don_hang"] += i["kh_don_hang"]
-            totals["tong_kh_kh_moi"] += i["kh_kh_moi"]
             totals["tong_kh_doanh_so"] += i["kh_doanh_so"]
             totals["tong_kh_doanh_thu"] += i["kh_doanh_thu"]
-            totals["tong_kh_san_lg"] += i["kh_san_lg"]
-            totals["tong_kh_sku"] += i["kh_sku"]
-            totals["tong_kh_so_gio_lam_viec"] += i["kh_so_gio_lam_viec"]
+
         if is_excel: 
             print(data)
             for x in data :
                 if len(x.get("kpi_month")) > 0 :
-                    for key,value in x.get("kpi_month")[0].items():
+                    for key,value in x.get("kpi_month").items():
                         x.update({key:value})
             return {
                 "data":data,
@@ -1042,3 +983,4 @@ def report(kwargs):
             })
     except Exception as e:
         return exception_handle(e)
+    

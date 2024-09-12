@@ -29,17 +29,16 @@ week_days = {
 columnReport = {
     "Report KPI" : {
         "column" : {
-            "main_columns": ["STT", "Mã nhân viên","Nhân viên", "Nhóm bán hàng","Số khách hàng viếng thăm","","", "Số khách hàng viếng thăm duy nhất","","", "Số khách đặt hàng","","","Số khách hàng thêm mới","","","Số đơn hàng","","", "Doanh số (VNĐ)","","","Doanh thu (VNĐ)","","", "Sản Lượng","","","SKU","","", "Số giờ làm việc""","",],
-            "sub_column": ["","","","","KH","TH","TL(%)","KH","TH","TL(%)","KH","TH","TL(%)","KH","TH","TL(%)","KH","TH","TL(%)","KH","TH","TL(%)","KH","TH","TL(%)","KH","TH","TL(%)","KH","TH","TL(%)","KH","TH","TL(%)",],
+            "main_columns": ["STT", "Mã nhân viên","Nhân viên", "Nhóm bán hàng","Số lượt viếng thăm","","", "Tổng công","Doanh số","","","Doanh thu","",""],
+            "sub_column": ["","","","","KH","TH","TL(%)","","KH","TH","TL(%)","KH","TH","TL(%)"],
         },
-        "col_span": ["A9:A11", "B9:B11", "C9:C11", "D9:D11","E9:G10","H9:J10","K9:M10","N9:P10","Q9:S10","T9:V10","W9:Y10","Z9:AB10","AC9:AE10","AF9:AH10"],
-        # "col_span": ["A9:A10", "B9:B10", "C9:C10", "D9:D10","E9:G9","H9:J9","K9:M9","N9:P9","Q9:S9","T9:V9","W9:Y9","Z9:AB9","AC9:AE9","AF9:AH9"],
-        "show_data": ["nhan_vien_ban_hang","ten_nv","nhom_ban_hang","kh_vt","th_vt","tl_vt","kh_vt_dn","th_vt_dn","tl_vt_dn","kh_dat_hang","th_dat_hang","tl_dat_hang","kh_kh_moi","th_kh_moi","tl_kh_moi","kh_don_hang","th_don_hang","tl_don_hang","kh_doanh_so","th_doanh_so","tl_don_hang","kh_doanh_thu","th_doanh_thu","tl_doanh_thu","kh_san_lg","th_san_lg","tl_san_luong","kh_sku","th_sku","tl_sku","kh_so_gio_lam_viec","th_so_gio_lam_viec","tl_so_gio_lam_viec"],
+        "col_span": ["A9:A11", "B9:B11", "C9:C11", "D9:D11","E9:G10","H9:H11","I9:K11","L9:N11"],
+        "show_data": ["nhan_vien_ban_hang","ten_nv","nhom_ban_hang","kh_vt","th_vt","tl_vt","tong_ngay_cong","kh_doanh_so","th_doanh_so","tl_doanh_so","kh_doanh_thu","th_doanh_thu","tl_doanh_thu"],
         "content_start_at": 12,
-        "footer" : ["","","","","tong_kh_vt","tong_th_vt","","tong_kh_vt_dn","tong_th_vt_dn","","tong_kh_dat_hang","tong_th_dat_hang","","tong_kh_kh_moi","tong_th_kh_moi","","tong_kh_don_hang","tong_th_don_hang","","tong_kh_doanh_so","tong_th_doanh_so","","tong_kh_doanh_thu","tong_th_doanh_thu","","tong_kh_san_lg","tong_th_san_lg","","tong_kh_sku","tong_th_sku","","tong_kh_so_gio_lam_viec","tong_th_so_gio_lam_viec",""],
+        "footer" : ["","","","","tong_kh_vt","tong_th_vt","","","tong_kh_doanh_so","tong_th_doanh_so","","tong_kh_doanh_thu","tong_th_doanh_thu",""],
         "column_widths" : {
                             "A": 5, "B": 15, "C": 25, "D": 35,
-                            "E": 10, "F": 10, "G": 10, "H": 10,
+                            "E": 10, "F": 10, "G": 10, "H": 15,
                             "I": 10, "J": 10, "K": 10, "L": 10,
                             "M": 10, "N": 10, "O": 10, "P": 10,
                             "Q": 10, "R": 10, "S": 10, "T": 10,
