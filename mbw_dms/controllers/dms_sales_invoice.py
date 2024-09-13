@@ -60,3 +60,14 @@ def update_kpi_monthly_on_cancel(doc, method):
         monthly_summary_doc.save(ignore_permissions=True)
     else:
         return
+    
+
+# Lấy các Payment Entry liên kết với Sales Invoice
+@frappe.whitelist()
+def check_payment_entry_si_status(sales_invoice_name):
+    payment_entries = frappe.get_all("Payment Entry Reference", 
+        filters={"reference_name": sales_invoice_name, "docstatus": 1}, 
+        fields=["name"])
+
+    # Trả về danh sách các Payment Entry
+    return payment_entries if payment_entries else []

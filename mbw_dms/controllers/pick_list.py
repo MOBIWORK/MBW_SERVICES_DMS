@@ -2,6 +2,15 @@ import frappe
 from erpnext.stock.doctype.pick_list.pick_list import create_delivery_note
 import frappe.utils
 
+
+# Định dạng ngày theo kiểu Việt Nam
+def format_date_to_vietnamese(date):
+    date_obj = frappe.utils.getdate(date)
+    day = date_obj.day
+    month = date_obj.month
+    year = date_obj.year
+    return f"Ngày {day} tháng {month} năm {year}"
+
 def update_pick_list_to_si(doc, method):
     # Tự động tạo delivery note
     create_delivery_note(source_name=doc.name)
@@ -118,6 +127,10 @@ def number_to_vietnamese_words(number):
 
 # Tính toán các trường custom field trong pick list
 def request_for_dn(doc, method):
+    if not doc.custom_pick_date:
+        doc.custom_pick_date = frappe.utils.today()
+        doc.custom_date_by_vietnamese = format_date_to_vietnamese(doc.custom_pick_date)
+
     # Tính các trường round_total, discount_amount
     total_discount = 0
     round_total = 0
@@ -142,17 +155,18 @@ def request_for_dn(doc, method):
         if item.item_code not in list_items:
             list_items.append(item.item_code)
 
-    # Xử lý từng item_code
+    # Xử lý từng item_code (ko phải item khuyến mãi)
     for item_code in list_items:
         item_name = None
         total_discount_on_total_amount = 0
         total_amount_before_discount = 0
         item_uom = None
         item_stock_uom = None
-        total_qty = 0
+        total_qty_not_km = 0
+        total_qty_km = 0
         uom_cf = 0
 
-        # Duyệt qua tất cả các mục trong bảng locations có cùng item_code
+        # Duyệt qua tất cả các mục trong bảng locations có cùng item_code (Trường hợp ko phải item khuyến mãi)
         for i in item_locations:
             if i.item_code == item_code:
                 item_name = i.item_name
@@ -166,17 +180,28 @@ def request_for_dn(doc, method):
                 # Cộng dồn giá trị của các trường cần thiết
                 total_amount_before_discount += i.custom_amount_before_discount
                 total_discount_on_total_amount += i.custom_discount_on_total_amount
-                if uom_cf != 0:
-                    total_qty += float(i.stock_qty / uom_cf)
+                if uom_cf != 0 and i.custom_amount_before_discount > 0:
+                    total_qty_not_km += float(i.stock_qty / uom_cf)
+                if uom_cf != 0 and i.custom_amount_before_discount == 0:
+                    total_qty_km += float(i.stock_qty / uom_cf)
                 
                 item_stock_uom = i.stock_uom
+
+        total_qty_integer = int(total_qty_not_km)
+        total_odd_qty = (total_qty_not_km - total_qty_integer) * uom_cf
+
+        total_qty_km_integer = int(total_qty_km)
+        total_odd_qty_km = (total_qty_km - total_qty_km_integer) * uom_cf
 
         # Tạo dữ liệu để thêm vào bảng con
         item_data = {
             "item_code": item_code,
             "item_name": item_name,
-            "qty": total_qty,
-            "stock_qty": total_qty * uom_cf,
+            "quantity_1_for_print": total_qty_integer,
+            "quantity_2_for_print": total_odd_qty,
+            "discount_quantity_1_for_print": total_qty_km_integer,
+            "discount_quantity_2_for_print": total_odd_qty_km,
+            "stock_qty": (total_qty_not_km + total_qty_km) * uom_cf,
             "uom": item_uom,
             "stock_uom": item_stock_uom,
             "uom_conversion_factor": uom_cf,
@@ -195,3 +220,23 @@ def request_for_dn(doc, method):
 
     doc.custom_amount_before_discount = total_amount_before_discount_so
     doc.custom_discount_on_product = total_discount_on_total_amount_so
+
+
+# Lấy các Payment Entry liên kết với Pick List
+@frappe.whitelist()
+def check_payment_entry_status(pick_list_name):
+    payment_entries = frappe.get_all("Payment Entry", 
+        filters={"reference_no": pick_list_name, "docstatus": 1}, 
+        fields=["name"])
+
+    return payment_entries if payment_entries else []
+
+
+# Kế thừa trường data Customer Paid của Payment Entry
+def cal_customer_paid_pe(doc, method):
+    pick_list_name = doc.reference_no
+    
+    if bool(pick_list_name):
+        if frappe.db.exists("Pick List", {"name": pick_list_name}):
+            pick_list = frappe.get_doc("Pick List", pick_list_name)
+            doc.customer_paid = pick_list.custom_round_total

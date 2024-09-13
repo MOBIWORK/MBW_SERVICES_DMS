@@ -13,6 +13,10 @@
   "qty",
   "stock_qty",
   "uom",
+  "quantity_1_for_print",
+  "quantity_2_for_print",
+  "discount_quantity_1_for_print",
+  "discount_quantity_2_for_print",
   "column_break_dvyk",
   "stock_uom",
   "uom_conversion_factor",
@@ -99,12 +103,36 @@
    "fieldname": "stock_qty",
    "fieldtype": "Float",
    "label": "Stock quantity"
+  },
+  {
+   "fieldname": "quantity_1_for_print",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Quantity 1 for print"
+  },
+  {
+   "fieldname": "quantity_2_for_print",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Quantity 2 for print"
+  },
+  {
+   "fieldname": "discount_quantity_1_for_print",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Discount Quantity 1 for print"
+  },
+  {
+   "fieldname": "discount_quantity_2_for_print",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Discount Quantity 2 for print"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-09-09 09:38:02.035682",
+ "modified": "2024-09-12 14:00:04.606876",
  "modified_by": "Administrator",
  "module": "MBW DMS",
  "name": "Request for Delivery Note",

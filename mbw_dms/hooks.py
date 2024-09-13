@@ -271,6 +271,9 @@ doc_events = {
     "Pick List": {
         "on_submit": "mbw_dms.controllers.pick_list.update_pick_list_to_si",
         "before_insert": "mbw_dms.controllers.pick_list.request_for_dn"
+    },
+    "Payment Entry": {
+        "before_insert": "mbw_dms.controllers.pick_list.cal_customer_paid_pe"
     }
 }
 
