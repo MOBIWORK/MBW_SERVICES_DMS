@@ -147,10 +147,10 @@
   "doctype": "Client Script",
   "dt": "Payment Entry",
   "enabled": 1,
-  "modified": "2024-08-30 15:04:57.938477",
+  "modified": "2024-09-13 16:51:33.569459",
   "module": "MBW DMS",
   "name": "Calculate paid amount PE",
-  "script": "frappe.ui.form.on('Payment Entry', {\n    refresh: function(frm) {\n        if (frm.doc.party_type === 'Employee') {\n            frm.trigger('calculate_paid_amount');\n        }\n    },\n\n    validate: function(frm) {\n        if (frm.doc.party_type === 'Employee') {\n            frm.trigger('calculate_paid_amount');\n        }\n    },\n\n    customer_paid: function(frm) {\n        if (frm.doc.party_type === 'Employee') {\n            frm.trigger('calculate_paid_amount');\n        }\n    },\n\n    custom_debt_note_information: function(frm) {\n        if (frm.doc.party_type === 'Employee') {\n            frm.trigger('calculate_paid_amount');\n        }\n    },\n\n    calculate_paid_amount: function(frm) {\n        let total_debt_amount = 0;\n        let customer_paid = frm.doc.customer_paid || 0;\n\n        if (frm.doc.custom_debt_note_information) {\n            frm.doc.custom_debt_note_information.forEach(function(debt_note) {\n                total_debt_amount += debt_note.debt_amount || 0;\n            });\n        }\n\n        frm.set_value('paid_amount', total_debt_amount + customer_paid);\n    }\n});\n",
+  "script": "frappe.ui.form.on('Payment Entry', {\n    // refresh: function(frm) {\n    //     if (frm.doc.party_type === 'Employee') {\n    //         frm.trigger('calculate_paid_amount');\n    //     }\n    // },\n\n    validate: function(frm) {\n        if (frm.doc.party_type === 'Employee') {\n            frm.trigger('calculate_paid_amount');\n        }\n    },\n\n    customer_paid: function(frm) {\n        if (frm.doc.party_type === 'Employee') {\n            frm.trigger('calculate_paid_amount');\n        }\n    },\n\n    custom_debt_note_information: function(frm) {\n        if (frm.doc.party_type === 'Employee') {\n            frm.trigger('calculate_paid_amount');\n        }\n    },\n\n    calculate_paid_amount: function(frm) {\n        let total_debt_amount = 0;\n        let customer_paid = frm.doc.customer_paid || 0;\n\n        if (frm.doc.custom_debt_note_information) {\n            frm.doc.custom_debt_note_information.forEach(function(debt_note) {\n                total_debt_amount += debt_note.debt_amount || 0;\n            });\n        }\n\n        frm.set_value('paid_amount', total_debt_amount + customer_paid);\n    }\n});\n",
   "view": "Form"
  },
  {
@@ -212,11 +212,11 @@
   "docstatus": 0,
   "doctype": "Client Script",
   "dt": "Pick List",
-  "enabled": 1,
-  "modified": "2024-09-10 09:05:53.821012",
+  "enabled": 0,
+  "modified": "2024-09-13 16:53:06.421134",
   "module": "MBW DMS",
   "name": "tạo Date cho Pick List",
-  "script": "frappe.ui.form.on('Pick List', {\r\n    onload: function(frm) {\r\n        if (!frm.doc.custom_pick_date) {\r\n            let today = frappe.datetime.nowdate();\r\n            frm.set_value('custom_pick_date', today);\r\n            // Định dạng ngày theo kiểu Việt Nam\r\n            let vietnamese_date = format_date_to_vietnamese(today);\r\n            frm.set_value('custom_date_by_vietnamese', vietnamese_date);\r\n        }\r\n    },\r\n    custom_pick_date: function(frm) {\r\n        if (frm.doc.custom_pick_date) {\r\n            let vietnamese_date = format_date_to_vietnamese(frm.doc.custom_pick_date);\r\n            frm.set_value('custom_date_by_vietnamese', vietnamese_date);\r\n        }\r\n    }\r\n});\r\n\r\n// Hàm để định dạng ngày tháng theo kiểu Việt Nam\r\nfunction format_date_to_vietnamese(date) {\r\n    let parts = date.split('-'); // yyyy-mm-dd\r\n    let day = parts[2];\r\n    let month = parts[1];\r\n    let year = parts[0];\r\n    return `Ngày ${day} tháng ${month} năm ${year}`;\r\n}\r\n",
+  "script": "frappe.ui.form.on('Pick List', {\r\n    validate: function(frm) {\r\n        if (!frm.doc.custom_pick_date) {\r\n            let today = frappe.datetime.nowdate();\r\n            frm.set_value('custom_pick_date', today);\r\n            // Định dạng ngày theo kiểu Việt Nam\r\n            let vietnamese_date = format_date_to_vietnamese(today);\r\n            frm.set_value('custom_date_by_vietnamese', vietnamese_date);\r\n        }\r\n    },\r\n    custom_pick_date: function(frm) {\r\n        if (frm.doc.custom_pick_date) {\r\n            let vietnamese_date = format_date_to_vietnamese(frm.doc.custom_pick_date);\r\n            frm.set_value('custom_date_by_vietnamese', vietnamese_date);\r\n        }\r\n    }\r\n});\r\n\r\n// Hàm để định dạng ngày tháng theo kiểu Việt Nam\r\nfunction format_date_to_vietnamese(date) {\r\n    let parts = date.split('-'); // yyyy-mm-dd\r\n    let day = parts[2];\r\n    let month = parts[1];\r\n    let year = parts[0];\r\n    return `Ngày ${day} tháng ${month} năm ${year}`;\r\n}\r\n",
   "view": "Form"
  },
  {
@@ -224,10 +224,43 @@
   "doctype": "Client Script",
   "dt": "Sales Order",
   "enabled": 1,
-  "modified": "2024-09-11 10:57:49.236913",
+  "modified": "2024-09-11 13:51:50.541450",
   "module": "MBW DMS",
   "name": "Tạo clone nhân viên bán hàng",
-  "script": "frappe.ui.form.on('Sales Order', {\r\n    refresh: function(frm) {\r\n        // Kiểm tra nếu bảng con 'sales_team' chứa 1 dòng dữ liệu\r\n        if (frm.doc.sales_team && frm.doc.sales_team.length === 1) {\r\n            // Lấy giá trị của trường 'sales_person' từ dòng duy nhất\r\n            let sales_person_value = frm.doc.sales_team[0].sales_person;\r\n            // Gán giá trị này cho trường 'custom_sales_person'\r\n            frm.set_value('custom_sales_person', sales_person_value);\r\n        }\r\n    }\r\n});\r\n",
+  "script": "frappe.ui.form.on('Sales Order', {\r\n    onload: function(frm) {\r\n        // Kiểm tra nếu bảng con 'sales_team' chứa 1 dòng dữ liệu\r\n        if (frm.doc.sales_team && frm.doc.sales_team.length === 1) {\r\n            // Lấy giá trị của trường 'sales_person' từ dòng duy nhất\r\n            let sales_person_value = frm.doc.sales_team[0].sales_person;\r\n            // Gán giá trị này cho trường 'custom_sales_person'\r\n            frm.set_value('custom_sales_person', sales_person_value);\r\n        }\r\n    }\r\n});\r\n",
+  "view": "Form"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Client Script",
+  "dt": "Sales Order",
+  "enabled": 1,
+  "modified": "2024-09-12 08:35:33.179627",
+  "module": "MBW DMS",
+  "name": "Tạo delivery Date tự động trong SO",
+  "script": "frappe.ui.form.on('Sales Order', {\n    refresh: function(frm) {\n        if (frm.is_new()) {  // Kiểm tra nếu là bản ghi mới\n            let tomorrow = frappe.datetime.add_days(frappe.datetime.nowdate(), 1);\n            frm.set_value('delivery_date', tomorrow);\n        }\n    }\n});",
+  "view": "Form"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Client Script",
+  "dt": "Pick List",
+  "enabled": 1,
+  "modified": "2024-09-13 16:36:47.616165",
+  "module": "MBW DMS",
+  "name": "Ẩn/hiện nút in trong Pick List",
+  "script": "frappe.ui.form.on('Pick List', {\n    refresh: function(frm) {\n\n        frappe.call({\n            method: \"mbw_dms.controllers.pick_list.check_payment_entry_status\",\n            args: {\n                pick_list_name: frm.doc.name\n            },\n            callback: function(r) {\n                if (r.message && r.message.length > 0) {\n                    $('button:has(svg use[href=\"#icon-printer\"])').show();\n                } else { \n                    $('button:has(svg use[href=\"#icon-printer\"])').hide();\n                }\n            }\n        });\n    }\n});\n",
+  "view": "Form"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Client Script",
+  "dt": "Sales Invoice",
+  "enabled": 1,
+  "modified": "2024-09-13 17:27:16.700827",
+  "module": "MBW DMS",
+  "name": "Ẩn/hiện nút in trong Sales Invoice",
+  "script": "frappe.ui.form.on('Sales Invoice', {\n    refresh: function(frm) {\n        frappe.call({\n            method: \"mbw_dms.controllers.dms_sales_invoice.check_payment_entry_si_status\",\n            args: {\n                sales_invoice_name: frm.doc.name\n            },\n            callback: function(r) {\n                // Kiểm tra nếu có Payment Entry đã submit\n                if (r.message && r.message.length > 0) {\n                    $('button:has(svg use[href=\"#icon-printer\"])').show();\n                } else { \n                    $('button:has(svg use[href=\"#icon-printer\"])').hide();\n                }\n            }\n        });\n    }\n});\n",
   "view": "Form"
  }
 ]
