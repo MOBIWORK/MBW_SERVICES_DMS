@@ -99,6 +99,10 @@ def list_note(kwargs):
         page_size =  int(kwargs.get('page_size', 20))
         page_number = int(kwargs.get('page_number')) if kwargs.get('page_number') and int(kwargs.get('page_number')) >= 1 else 1
         custom_checkin_id = kwargs.get('custom_checkin_id')
+        customer = kwargs.get('customer')
+        if customer:
+            list_checkin = frappe.db.get_all("DMS Checkin",{"kh_ma": customer},pluck='name')
+            my_filter["custom_checkin_id"] = ['in', list_checkin]
         if name:
             my_filter["name"] = ['like', f'%{name}%']
         if custom_checkin_id:
@@ -123,3 +127,5 @@ def list_note_type():
         return gen_response(200, "Thành công", list_note_type)
     except Exception as e:
         return exception_handle(e)
+    
+
