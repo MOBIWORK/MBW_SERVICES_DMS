@@ -512,6 +512,7 @@ def get_customer(filters):
         customer_type = filters.get('customer_type')
         customer_name = filters.get('customer_name')
         search_key = filters.get("search_key")
+        territory = filters.get("territory")
         teamSale = filters.get('teamSale')
         queryFilters = {}
         queryFilters2 = {}
@@ -541,7 +542,8 @@ def get_customer(filters):
         if search_key :
             queryFilters2['customer_name'] = ['like',f"%{search_key}%"]
             queryFilters2['customer_code'] = ['like',f"%{search_key}%"]
-        
+        if territory:
+            queryFilters['territory'] = territory
 
         if city or district or ward:
             Address = frappe.qb.DocType("Address")
@@ -570,7 +572,7 @@ def get_customer(filters):
             or_filters = queryFilters2,
             fields = ["name",'customer_code',"customer_name",'UNIX_TIMESTAMP(custom_birthday) as custom_birthday',
              "customer_location_primary", "customer_type", "customer_name",
-             "customer_primary_address as display_address", "mobile_no as phone_number"],
+             "customer_primary_address as display_address", "mobile_no as phone_number","territory"],
             start=page_size*(page_number-1), 
             page_length=page_size)
         

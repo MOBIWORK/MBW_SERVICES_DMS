@@ -4,6 +4,7 @@ import { FormItemCustom } from "../../../components";
 import { FormInstance, useForm } from "antd/es/form/Form";
 import { rsDataFrappe, rsData } from '../../../types/response';
 import { AxiosService } from "../../../services/server";
+import { handleListGroup, handleListTerritory } from "../service";
 
 type Props = {
   filter: any;
@@ -12,6 +13,7 @@ type Props = {
 };
 export default function FilterCustomer({ form, filter, setFilter }: Props) {
   const [listCustomerGroup, setCustomerGroup] = useState<any[]>([]);
+  const [listTeritory, setTerritory] = useState<any[]>([]);
   const [listCities, SetCities] = useState<any[]>([]);
   const [listDistrict, SetDistrict] = useState<any[]>([]);
   const [listward, Setward] = useState<any[]>([]);
@@ -23,28 +25,32 @@ export default function FilterCustomer({ form, filter, setFilter }: Props) {
   }, [filter]);
   useEffect(() => {
     (async () => {
-      let rsEmployee: rsDataFrappe<any[]> = await AxiosService.get(
-        "/api/method/frappe.desk.search.search_link",
-        {
-          params: {
-            txt: "",
-            doctype: "Customer Group",
-            ignore_user_permissions: 0,
-            reference_doctype: "Customer",
-          },
-        }
-      );
+      /* mới */
+      let promiseGroupCustomer = handleListGroup()
 
-      let rsCities:rsData<any[]>  = await  AxiosService.get("/api/method/mbw_dms.api.location.list_province")
-      SetCities(rsCities.result)
+        let promiseTerritoty = handleListTerritory()
 
-      let { results } = rsEmployee;
-      setCustomerGroup(
-        results.map((customer_group) => ({
+        let promiseCities = AxiosService.get("/api/method/mbw_dms.api.location.list_province")
+      
+        const [rsGroup,rsTerritory,rsCities] = await Promise.all([promiseGroupCustomer,promiseTerritoty,promiseCities])
+        console.log([rsGroup,rsTerritory,rsCities]);
+        
+        
+          setCustomerGroup(
+            rsGroup.message.map((customer_group:any) => ({
+              label: customer_group.value,
+              value: customer_group.value,
+            }))
+          );
+        SetCities(rsCities.result)
+        setTerritory(rsTerritory.message.map((customer_group:any) => ({
           label: customer_group.value,
           value: customer_group.value,
-        }))
-      );
+        })))
+        
+
+
+
     })();
   }, []);
 
@@ -77,6 +83,23 @@ export default function FilterCustomer({ form, filter, setFilter }: Props) {
 
 
   }
+
+  const handleSearchGroup = (key: string) => {
+    handleListGroup(key).then((rsGroup:any) => setCustomerGroup(
+      rsGroup.message.map((customer_group:any) => ({
+        label: customer_group.value,
+        value: customer_group.value,
+      }))
+    )).catch()
+  }
+  
+  const handleSearchTerritory = (key: string) => {
+    handleListTerritory(key).then((rsTerritory:any) =>  setTerritory(rsTerritory.message.map((customer_group:any) => ({
+      label: customer_group.value,
+      value: customer_group.value,
+    })))).catch()
+
+  }
   return (
     <Form form={form} layout="vertical" onFinish={setFilter}>
       <FormItemCustom label={"Loại khách hàng"} name="customer_type">
@@ -98,9 +121,12 @@ export default function FilterCustomer({ form, filter, setFilter }: Props) {
         />
       </FormItemCustom>
       <FormItemCustom label={"Nhóm khách hàng"} name="customer_group">
-        <Select options={listCustomerGroup} />
+        <Select showSearch onSearch={handleSearchGroup} options={listCustomerGroup}  />
       </FormItemCustom>
-      <p className="font-medium text-sm">Địa chỉ</p>
+      <FormItemCustom label={"Khu vực"} name="territory">
+        <Select showSearch onSearch={handleSearchTerritory} options={listTeritory} />
+      </FormItemCustom>
+      <p className="font-medium text-sm py-4">Địa chỉ</p>
       <FormItemCustom label={"Tỉnh/Thành phố"} name="city">
         <Select options={listCities.map(city => ({
         label: city.ten_tinh,
