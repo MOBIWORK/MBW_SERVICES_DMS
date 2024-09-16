@@ -179,12 +179,29 @@ def create_customer(**kwargs):
         if contact and contact.get("phone"):
             phone_number = validate_phone_number(contact.get("phone"))
         json_location = ""
-        if address.get("latitude") and address.get("longitude"):
+        if bool(address) and address.get("latitude") and address.get("longitude"):
             json_location = json.dumps({"long": address.get("longitude"), "lat": address.get("latitude")})
+
+        # Tìm số thứ tự cao nhất hiện tại của customer_code và tăng lên 1
+        latest_customer_code = frappe.db.sql("""
+            SELECT customer_code 
+            FROM `tabCustomer`
+            WHERE customer_code LIKE 'SL1%'
+            ORDER BY customer_code DESC
+            LIMIT 1
+        """, as_dict=True)
+
+        if latest_customer_code:
+            latest_number = int(latest_customer_code[0]['customer_code'].replace('SL1', ''))
+        else:
+            latest_number = 0
+
+        new_number = latest_number + 1
+        customer_code = f"SL1{new_number:06d}"
             
         # Tạo mới khách hàng
         new_customer = frappe.new_doc("Customer")
-        required_fields = ["customer_code", "customer_name", "customer_group", "territory"]
+        required_fields = ["customer_name", "customer_group", "territory"]
         normal_fields = ["customer_details", "website"]
         date_fields = ["custom_birthday"]
         choice_fields = ["customer_type"]
@@ -207,6 +224,7 @@ def create_customer(**kwargs):
         sale_person = frappe.get_value("Sales Person", {"employee": employee_name.name}, "parent_sales_person")
         new_customer.custom_sales_manager = sale_person
 
+        new_customer.customer_code = customer_code
         new_customer.customer_location_primary = json_location
 
         new_customer.append("credit_limits", {
