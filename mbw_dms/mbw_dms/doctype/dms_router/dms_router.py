@@ -513,6 +513,7 @@ def get_customer(filters):
         customer_name = filters.get('customer_name')
         search_key = filters.get("search_key")
         teamSale = filters.get('teamSale')
+        territory = filters.get("territory")
         queryFilters = {}
         queryFilters2 = {}
         queryFilters["disabled"] = 0
@@ -537,7 +538,8 @@ def get_customer(filters):
         if search_key :
             queryFilters2['customer_name'] = ['like',f"%{search_key}%"]
             queryFilters2['customer_code'] = ['like',f"%{search_key}%"]
-        
+        if territory:
+            queryFilters['territory'] = territory
 
         if city or district or ward:
             Address = frappe.qb.DocType("Address")
