@@ -70,3 +70,23 @@ def update_location(doc,method=None):
         doc.save(ignore_permissions=True)
     frappe.db.commit()
     pass
+
+def create_customer_code(doc, method):
+    # Tìm số thứ tự cao nhất hiện tại của customer_code và tăng lên 1
+    latest_customer_code = frappe.db.sql("""
+        SELECT customer_code 
+        FROM `tabCustomer`
+        WHERE customer_code LIKE 'SL1%'
+        ORDER BY customer_code DESC
+        LIMIT 1
+    """, as_dict=True)
+
+    if latest_customer_code:
+        latest_number = int(latest_customer_code[0]["customer_code"].replace("SL1", ""))
+    else:
+        latest_number = 0
+
+    new_number = latest_number + 1
+    customer_code = f"SL1{new_number:06d}"
+
+    doc.customer_code = customer_code
