@@ -233,7 +233,7 @@ def create_sale_order(**kwargs):
                 "discount_percentage": discount_percentage,
                 "item_tax_template": item_tax_template,
                 "item_tax_rate": tax_rate,
-                "description": description
+                "additional_notes": description
             })
             
             item_amount = (rate - rate * discount_percentage / 100) * float(item_data.get("qty"))
@@ -578,7 +578,7 @@ def get_items(master_doc, master_name):
     master_doc = frappe.get_doc(master_doc, master_name).as_dict()
     items = master_doc["items"]
 
-    fields_to_get = ["name", "item_name", "item_code", "rate", "qty", "uom", "amount", "discount_amount", "discount_percentage", "is_free_item", "item_tax_rate", "price_list_rate", "description"]
+    fields_to_get = ["name", "item_name", "item_code", "rate", "qty", "uom", "amount", "discount_amount", "discount_percentage", "is_free_item", "item_tax_rate", "price_list_rate", "additional_notes"]
     result = []
 
     for item in items:

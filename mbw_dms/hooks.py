@@ -236,6 +236,10 @@ fixtures = [
         "doctype": "Server Script",
         "filters": [["module", "in", ("MBW DMS")]]
     },
+    {
+       "doctype": "Print Format",
+       "filters": [["module", "in", ("MBW DMS")]]
+    }
 
 ]
 
