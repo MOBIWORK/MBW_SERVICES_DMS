@@ -261,20 +261,21 @@ def create_customer(**kwargs):
             new_contact.insert()
 
             # Tạo mới địa chỉ contact
-            new_address_contact = frappe.new_doc("Address")
-            new_address_contact.address_title = contact.get("address_title")
-            new_address_contact.address_type = contact.get("address_type")
-            new_address_contact.address_line1 = contact.get("address_line1")
-            new_address_contact.city = contact.get("city")
-            new_address_contact.county = contact.get("county")
-            new_address_contact.state = contact.get("state")
-            new_address_contact.append("links", {
-                "link_doctype": new_contact.doctype,
-                "link_name": new_contact.name,
-            })
-            new_address_contact.insert()
-
-            new_contact.address = new_address_contact.name
+            if contact.get("address_title"):
+                new_address_contact = frappe.new_doc("Address")
+                new_address_contact.address_title = contact.get("address_title")
+                new_address_contact.address_type = contact.get("address_type")
+                new_address_contact.address_line1 = contact.get("address_line1")
+                new_address_contact.city = contact.get("city")
+                new_address_contact.county = contact.get("county")
+                new_address_contact.state = contact.get("state")
+                new_address_contact.append("links", {
+                    "link_doctype": new_contact.doctype,
+                    "link_name": new_contact.name,
+                })
+                new_address_contact.insert()
+                new_contact.address = new_address_contact.name
+                
             new_contact.save()
             new_customer.customer_primary_contact = new_contact.name
             new_customer.save()
