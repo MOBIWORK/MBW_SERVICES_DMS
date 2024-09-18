@@ -155,6 +155,24 @@ def list_customer_type():
     except Exception as e:
         return exception_handle(e)
     
+# Danh sách Loại khách hàng
+@frappe.whitelist(methods="GET")
+def get_type_customer():
+    try:
+        customer_type = frappe.db.get_list('DMS Customer Type', fields=["name", "customer_type_id", "customer_type_name"])
+        return gen_response(200, "Thành công", customer_type)
+    except Exception as e:
+        return exception_handle(e)
+    
+# Danh sách kênh-sfa_sale_channel - link to: DMS Sales Channel
+@frappe.whitelist(methods="GET")
+def get_channel():
+    try:
+        channel = frappe.db.get_list('DMS Sales Channel', fields=["name", "sales_channel_id", "sales_channel_name"])
+        return gen_response(200, "Thành công", channel)
+    except Exception as e:
+        return exception_handle(e)
+    
 # Xóa khách hàng
 @frappe.whitelist(methods="DELETE")
 def delete_customer(name):
