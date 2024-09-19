@@ -28,11 +28,16 @@ frappe.query_reports["Báo cáo công nợ theo đơn hàng"] = {
 			options: "Customer"
 		},
 		{
-			fieldname: "customer",
+			fieldname: "deliverynote",
 			label: __("Mã đơn DN"),
 			fieldtype: "Link",
 			width: "80",
 			options: "Delivery Note"
+		},
+		{
+			fieldname: "thanhtoan",
+			label: __("Thanh toán"),
+			fieldtype: "Check"
 		}
 	]
 };

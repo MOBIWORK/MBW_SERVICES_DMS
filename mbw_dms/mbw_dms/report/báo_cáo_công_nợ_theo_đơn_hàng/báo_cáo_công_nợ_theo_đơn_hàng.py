@@ -47,9 +47,13 @@ def execute(filters=None):
 
     # Xây dựng điều kiện tìm kiếm
     conditions = ""
-    if filters.get("customer_name"):
-        conditions += " AND q.customer_name LIKE %s"
-    
+    if filters.get("customer"):
+        conditions += " AND dn.customer_name LIKE %s"
+    if filters.get("deliverynote"):
+        conditions += " AND dn.name LIKE %s"
+    if filters.get("thanhtoan") is not None:  # Check if the filter is set
+        conditions += " AND dn.da_thanh_toan = %s"
+
     # Lấy dữ liệu từ bảng Sales Order và Delivery Note
     query = """
 	SELECT 
@@ -78,9 +82,13 @@ def execute(filters=None):
 
     # Xây dựng danh sách tham số
     params = [filters.get("from_date"), filters.get("to_date")]
-    if filters.get("customer_name"):
-        params.append("%" + filters.get("customer_name") + "%")
-    
+    if filters.get("customer"):
+        params.append("%" + filters.get("customer") + "%")
+    if filters.get("deliverynote"):
+        params.append("%" + filters.get("deliverynote") + "%")
+    if filters.get("thanhtoan") is not None:
+        params.append(int(filters.get("thanhtoan")))  # Add the boolean value (0 or 1)
+
     data = frappe.db.sql(query, params, as_dict=True)
     
     return columns, data
