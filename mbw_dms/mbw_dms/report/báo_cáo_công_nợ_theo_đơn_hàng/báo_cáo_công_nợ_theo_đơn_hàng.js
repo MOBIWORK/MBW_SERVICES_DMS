@@ -36,7 +36,7 @@ frappe.query_reports["Báo cáo công nợ theo đơn hàng"] = {
 		},
 		{
 			fieldname: "thanhtoan",
-			label: __("Thanh toán"),
+			label: __("Chưa Thanh toán"),
 			fieldtype: "Check"
 		}
 	]

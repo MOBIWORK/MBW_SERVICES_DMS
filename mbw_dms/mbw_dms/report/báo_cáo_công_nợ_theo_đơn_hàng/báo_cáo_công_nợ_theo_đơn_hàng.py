@@ -44,7 +44,8 @@ def execute(filters=None):
             "width": 150
         }
     ]
-
+    if filters.get("thanhtoan") == 1:
+        filters["thanhtoan"] = 0
     # Xây dựng điều kiện tìm kiếm
     conditions = ""
     if filters.get("customer"):
@@ -53,7 +54,7 @@ def execute(filters=None):
         conditions += " AND dn.name LIKE %s"
     if filters.get("thanhtoan") is not None:  # Check if the filter is set
         conditions += " AND dn.da_thanh_toan = %s"
-
+    
     # Lấy dữ liệu từ bảng Sales Order và Delivery Note
     query = """
 	SELECT 
