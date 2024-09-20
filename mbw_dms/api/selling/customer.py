@@ -420,7 +420,7 @@ def update_customer(**kwargs):
                         #cũ
                         # current_address = update_address(address_data, link_cs_address, name, json_location)
                         #mới
-                        current_address = handle_address_customer(address_data,link_cs_address)
+                        handle_address_customer(address_data,link_cs_address)
                     address_data_primary = pydash.find(address_data_list,lambda x: x.get("primary") == 1)
                     if address_data_primary:
                         address_data_primary = frappe._dict(address_data_primary)
@@ -489,8 +489,8 @@ def update_customer(**kwargs):
 
                     if bool(new_address):
                         link_cs_address= {
-                            "link_doctype": "Customer",
-                            "link_name": name 
+                            "link_doctype": "Contact",
+                            "link_name": new_contact.name 
                         }
                         address_current = update_address(new_address, link_cs_address, name_cus=name, json_location=None)
                         new_contact.address = address_current.name
@@ -520,6 +520,7 @@ def update_customer(**kwargs):
         else:
             return gen_response(406, f"Không tồn tại khách hàng {name}")
     except Exception as e:
+        print("error::::: ",e)
         return exception_handle(e)
 
 
