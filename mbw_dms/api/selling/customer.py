@@ -34,6 +34,7 @@ from frappe.query_builder.functions import Count
 @frappe.whitelist(methods="GET")
 def list_customer(**kwargs):
     try:
+        print('========================= value: ', flush=True)
         kwargs = frappe._dict(kwargs)
         name = kwargs.get("name")
         search_key = kwargs.get("search_key")
