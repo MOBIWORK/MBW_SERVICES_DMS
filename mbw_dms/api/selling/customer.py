@@ -12,7 +12,6 @@ from mbw_dms.api.common import (
     customers_code_router,
     null_location,
     CommonHandle,
-    create_address,
     update_address,
     handle_address_customer
 )
@@ -240,11 +239,11 @@ def create_customer(**kwargs):
         new_customer.insert()
 
         # Tạo mới địa chỉ khách hàng
-        address= frappe._dict(address) if address else None
+        address = frappe._dict(address) if address else None
         current_address = None
         if address is not None and address.address_title:
             address.address_location = json_location            
-            current_address = handle_address_customer(address,{})
+            current_address = handle_address_customer(address, {})
 
         # Tạo mới contact khách hàng
         if contact is not None and contact.get("first_name"):
@@ -284,16 +283,18 @@ def create_customer(**kwargs):
             new_customer.save()
 
         # Thêm khách hàng vào tuyến 
-        if router_in and router_in.get("router_name"):
-            router = frappe.get_doc("DMS Router", router_in.get("router_name"))
-            router.append("customers", {
-                "customer": new_customer.name,
-                "customer_code": new_customer.customer_code,
-                "customer_name": new_customer.customer_name,
-                "display_address": new_customer.customer_primary_address,
-                "frequency": router_in.get("frequency")
-            })
-            router.save()
+        if router_in and len(router_in)>0:
+            frappe.enqueue(
+                    update_customer_in_router,
+                    queue="short",                        # one of short, default, long
+                    timeout=None,                           # pass timeout manually
+                    is_async=True,                         # if this is True, method is run in worker
+                    now=True,                               # if this is True, method is run directly (not in a worker) 
+                    job_name=None,                          # specify a job name
+                    enqueue_after_commit=True,              # enqueue the job after the database commit is done at the end of the request
+                    at_front=False,                         # put the job at the front of the queue
+                    customer=kwargs,routers= router_in                             # kwargs are passed to the method as arguments
+                )
 
         # Liên kết địa chỉ
         if address is not None and address.address_title and current_address:
