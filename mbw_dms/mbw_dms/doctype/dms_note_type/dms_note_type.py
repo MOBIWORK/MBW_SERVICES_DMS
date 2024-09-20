@@ -109,6 +109,9 @@ def list_note(kwargs):
             my_filter["custom_checkin_id"] = ['like', f'%{custom_checkin_id}%']
         list_note = frappe.get_all('Note',filters=my_filter ,fields=["name", "title", "content", "creation","custom_checkin_id"], start=page_size*(page_number-1), page_length=page_size)
         totals = frappe.db.count("Note", filters=my_filter)
+        from bs4 import BeautifulSoup
+        import pydash
+        list_note =  pydash.map_(list_note,lambda x: {**x,"content": BeautifulSoup(x.get("content"), 'html.parser')})      
         return gen_response(200, "Thành công", {
             "data": list_note,
             "totals": totals,

@@ -352,8 +352,7 @@ def create_checkin(kwargs):
         for note in notes:
             current_note = frappe.get_doc("Note",note.name)
             memory_send = current_note.as_dict().seen_by
-            for mail in memory_send:
-                
+            for mail in memory_send:                
                 try:
                     STANDARD_USERS = ("Guest", "Administrator")
                     from frappe.utils import get_formatted_email
@@ -376,6 +375,7 @@ def create_checkin(kwargs):
         return gen_response(201, "Thành công", {"name": new_checkin.name})
     
     except Exception as e:
+        print("Sonething wrong:::",e)
         return exception_handle(e)
 
 
