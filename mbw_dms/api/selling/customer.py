@@ -293,7 +293,7 @@ def create_customer(**kwargs):
                     job_name=None,                          # specify a job name
                     enqueue_after_commit=True,              # enqueue the job after the database commit is done at the end of the request
                     at_front=False,                         # put the job at the front of the queue
-                    customer=kwargs,routers= router_in                             # kwargs are passed to the method as arguments
+                    customer=kwargs, routers=router_in                             # kwargs are passed to the method as arguments
                 )
 
         # Liên kết địa chỉ
@@ -384,7 +384,7 @@ def update_customer(**kwargs):
         if frappe.db.exists("Customer", name, cache=True):
             customer = frappe.get_doc("Customer", name)            
             # Cập nhật các trường cơ bản của khách hàng
-            fields = ["customer_code", "customer_name", "customer_group", "territory", "customer_details", "website", "customer_type"]
+            fields = ["customer_name", "customer_group", "territory", "customer_details", "website", "customer_type"]
             date_fields = ["custom_birthday"]
             for key, value in kwargs.items():
                 if key in fields:
@@ -509,7 +509,7 @@ def update_customer(**kwargs):
             # Chỉnh sửa tuyến
             if kwargs.get("router"):
                 router_in = kwargs.get("router")
-                update_customer_in_router(customer=kwargs, routers= router_in)
+                update_customer_in_router(customer=kwargs, routers=router_in)
 
             customer.save()
             frappe.db.commit()
@@ -626,8 +626,10 @@ def update_customer_in_router(customer={}, routers=[]):
         contact = customer.contact
     contact = frappe._dict(contact) if contact else False
 
+    customer_code = frappe.get_value("Customer", {"name": customer.customer_name}, "customer_code")
+
     customer_router = {
-        "customer_code": customer.customer_code or "",
+        "customer_code": customer_code if bool(customer_code) else "",
         "customer_name": customer.customer_name or "",
         "display_address": customer.display_address or "",
         "phone_number": contact.phone if contact else "",
