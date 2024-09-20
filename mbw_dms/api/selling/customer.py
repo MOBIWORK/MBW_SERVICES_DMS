@@ -34,7 +34,6 @@ from frappe.query_builder.functions import Count
 @frappe.whitelist(methods="GET")
 def list_customer(**kwargs):
     try:
-        print('========================= value: ', flush=True)
         kwargs = frappe._dict(kwargs)
         name = kwargs.get("name")
         search_key = kwargs.get("search_key")
@@ -42,14 +41,17 @@ def list_customer(**kwargs):
         customer_group = kwargs.get("customer_group")
         from_date = validate_filter_timestamp("start")(kwargs.get("from_date")) if kwargs.get("from_date") else None
         to_date = validate_filter_timestamp("end")(kwargs.get("to_date")) if kwargs.get("to_date") else None
+
         routers = routers_name_of_customer()
         if not routers or len(routers) == 0 :
             return gen_response(200, "", [])
+        
         customers_name = customers_code_router(routersName=routers)
 
-        CustomerDoc = DocType("Customer")
         page_size = int(kwargs.get("page_size", 20))
         page_number = 1 if not kwargs.get("page_number") or int(kwargs.get("page_number")) <= 0 else int(kwargs.get("page_number"))
+
+        CustomerDoc = DocType("Customer")
         def CustomerField(name):
             return CustomerDoc[name]
 
@@ -66,9 +68,9 @@ def list_customer(**kwargs):
             my_filter = (my_filter & CustomerField("custom_birthday").between(from_date,to_date))
 
         select_field = ["name", "customer_name", "customer_code","customer_type", 
-                                        "customer_group", "territory", "industry", "image", "website", 
-                                        "mobile_no", "customer_primary_address", "custom_birthday",
-                                        "customer_location_primary", "customer_details"]
+                        "customer_group", "territory", "industry", "image", "website", 
+                        "mobile_no", "customer_primary_address", "custom_birthday",
+                        "customer_location_primary", "customer_details"]
         
         customers = (frappe.qb.from_(CustomerDoc)
                     .distinct()
@@ -77,7 +79,6 @@ def list_customer(**kwargs):
                     .limit(page_size)
                     .offset(page_size*(page_number-1))
                     ).run(as_dict=True)
-        
         record = frappe.qb.from_(CustomerDoc).where(my_filter).select(Count('*')).distinct().run(as_dict=True)
 
         for customer in customers:
@@ -283,18 +284,16 @@ def create_customer(**kwargs):
             new_customer.save()
 
         # Thêm khách hàng vào tuyến 
-        if router_in and len(router_in)>0:
-            frappe.enqueue(
-                    update_customer_in_router,
-                    queue="short",                        # one of short, default, long
-                    timeout=None,                           # pass timeout manually
-                    is_async=True,                         # if this is True, method is run in worker
-                    now=True,                               # if this is True, method is run directly (not in a worker) 
-                    job_name=None,                          # specify a job name
-                    enqueue_after_commit=True,              # enqueue the job after the database commit is done at the end of the request
-                    at_front=False,                         # put the job at the front of the queue
-                    customer=kwargs,routers= router_in                             # kwargs are passed to the method as arguments
-                )
+        if router_in and router_in.get("router_name"):
+            router = frappe.get_doc("DMS Router", router_in.get("router_name"))
+            router.append("customers", {
+                "customer": new_customer.name,
+                "customer_code": new_customer.customer_code,
+                "customer_name": new_customer.customer_name,
+                "display_address": new_customer.customer_primary_address,
+                "frequency": router_in.get("frequency")
+            })
+            router.save()
 
         # Liên kết địa chỉ
         if address is not None and address.address_title and current_address:
@@ -507,20 +506,10 @@ def update_customer(**kwargs):
                         customer.save()
 
             # Chỉnh sửa tuyến
-            router_in = kwargs.get("router")
-            if router_in and len(router_in)>0:
-                frappe.enqueue(
-                    update_customer_in_router,
-                    queue="default",                        # one of short, default, long
-                    timeout=None,                           # pass timeout manually
-                    is_async=True,                         # if this is True, method is run in worker
-                    now=False,                               # if this is True, method is run directly (not in a worker) 
-                    job_name=None,                          # specify a job name
-                    enqueue_after_commit=True,              # enqueue the job after the database commit is done at the end of the request
-                    at_front=False,                         # put the job at the front of the queue
-                    customer=kwargs,routers= router_in                             # kwargs are passed to the method as arguments
-                )
-            
+            if kwargs.get("router"):
+                router_in = kwargs.get("router")
+                update_customer_in_router(customer=kwargs, routers= router_in)
+
             customer.save()
             frappe.db.commit()
             return gen_response(200, "Cập nhật thông tin khách hàng thành công")
@@ -657,6 +646,6 @@ def update_customer_in_router(customer={}, routers=[]):
             else:
                 cus_list.append(customer_router)  
 
-            router_doc.set("customers",cus_list)   
+            router_doc.set("customers", cus_list)   
             router_doc.save(ignore_permissions=True)    
     return

@@ -137,6 +137,7 @@ def routers_name_of_customer(router=False, thisWeek = False, view_mode="list", m
 
     if more_filters:
         queryFilters.update(more_filters)
+
     list_router = frappe.db.get_all("DMS Router", filters=queryFilters, pluck="name", distinct=True)
     return list_router
 
@@ -149,7 +150,7 @@ def customers_code_router(router=False, routersName=[], thisWeek = False, view_m
             from mbw_dms.api.common import weekday
             today= datetime.now()
             thu_trong_tuan, tuan_trong_thang = weekday(today)
-            customer = pydash.filter_(detail_router.get("customers"),lambda value: (value.frequency.find(str(int(tuan_trong_thang))) != -1))
+            customer = pydash.filter_(detail_router.get("customers"), lambda value: (value.frequency.find(str(int(tuan_trong_thang))) != -1))
         list_customer += customer
 
     list_customer_name = []
