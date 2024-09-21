@@ -496,7 +496,7 @@ def update_customer(**kwargs):
                         new_contact.address = address_current.name
                         new_contact.save()
 
-                    if contact_data_update.get("is_primary_contact") == 1 :
+                    if contact_data_update.get("primary") == 1 :
                         # customer = frappe.get_doc("Customer", name)
                         customer.set("customer_primary_contact", new_contact.name)
                         customer.save()
