@@ -293,7 +293,7 @@ def create_customer(**kwargs):
                     job_name=None,                          # specify a job name
                     enqueue_after_commit=True,              # enqueue the job after the database commit is done at the end of the request
                     at_front=False,                         # put the job at the front of the queue
-                    customer=kwargs, routers=router_in                             # kwargs are passed to the method as arguments
+                    customer=kwargs, customer_code=new_customer.customer_code, routers=router_in                             # kwargs are passed to the method as arguments
                 )
 
         # Liên kết địa chỉ
@@ -506,13 +506,13 @@ def update_customer(**kwargs):
                         customer.set("customer_primary_contact", new_contact.name)
                         customer.save()
 
-            customer.save()
             
             # Chỉnh sửa tuyến
             if kwargs.get("router"):
                 router_in = kwargs.get("router")
-                update_customer_in_router(customer=kwargs, routers=router_in)
+                update_customer_in_router(customer=kwargs, customer_code=customer.customer_code,  routers=router_in)
 
+            customer.save()
             frappe.db.commit()
             return gen_response(200, "Cập nhật thông tin khách hàng thành công")
         else:
@@ -615,7 +615,7 @@ def remove_contact_address(**kwarg):
         return exception_handle(e)
     
 # Cập nhật khách hàng vào danh sách tuyến
-def update_customer_in_router(customer={}, routers=[]):
+def update_customer_in_router(customer={}, customer_code=None, routers=[]):
     customer = frappe._dict(customer)
     if isinstance(customer.address, list):
         address = pydash.find(customer.address, lambda x:x.get("primary"))
@@ -626,9 +626,6 @@ def update_customer_in_router(customer={}, routers=[]):
     else:
         contact = customer.contact
     contact = frappe._dict(contact) if contact else False
-
-    customer_code = frappe.get_value("Customer", {"name": customer.customer_name}, "customer_code")
-    print('========================= customer_code: ', customer_code, flush=True)
 
     customer_router = {
         "customer_code": customer_code if bool(customer_code) else "",
