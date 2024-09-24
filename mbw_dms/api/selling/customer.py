@@ -506,12 +506,13 @@ def update_customer(**kwargs):
                         customer.set("customer_primary_contact", new_contact.name)
                         customer.save()
 
+            customer.save()
+            
             # Chỉnh sửa tuyến
             if kwargs.get("router"):
                 router_in = kwargs.get("router")
                 update_customer_in_router(customer=kwargs, routers=router_in)
 
-            customer.save()
             frappe.db.commit()
             return gen_response(200, "Cập nhật thông tin khách hàng thành công")
         else:
@@ -627,6 +628,7 @@ def update_customer_in_router(customer={}, routers=[]):
     contact = frappe._dict(contact) if contact else False
 
     customer_code = frappe.get_value("Customer", {"name": customer.customer_name}, "customer_code")
+    print('========================= customer_code: ', customer_code, flush=True)
 
     customer_router = {
         "customer_code": customer_code if bool(customer_code) else "",
