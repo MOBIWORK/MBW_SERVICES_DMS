@@ -264,7 +264,8 @@ doc_events = {
     },
     "Sales Order": {
         "on_submit": ["mbw_dms.controllers.dms_sales_order.update_kpi_monthly", "mbw_dms.controllers.dms_sales_order.auto_create_si"],
-        "on_cancel": "mbw_dms.controllers.dms_sales_order.update_kpi_monthly_on_cancel"
+        "on_cancel": "mbw_dms.controllers.dms_sales_order.update_kpi_monthly_on_cancel",
+        "on_submit": "mbw_dms.controllers.dms_sales_order.validate_projected_qty"
     },
     "DMS Router": {
         "before_insert": "mbw_dms.controllers.dms_router.check_duplicate_import"

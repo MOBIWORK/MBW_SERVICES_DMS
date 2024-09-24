@@ -1,4 +1,5 @@
 import frappe
+from frappe import _
 from frappe.utils import nowdate
 import calendar
 from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
@@ -133,3 +134,16 @@ def auto_create_si(doc, method):
     sales_invoice.insert()
 
     frappe.msgprint(f"Sales Invoice {sales_invoice.name} đã được tạo thành công.")
+
+
+def validate_projected_qty(doc, method):
+    for i in doc.items:
+        warehouse = i.warehouse
+        # Kiểm tra projected_qty trong kho
+        projected_qty = frappe.db.get_value("Bin", {"item_code": i.item_code, "warehouse": warehouse}, "projected_qty")
+        
+        # Nếu projected_qty <= 0, báo lỗi
+        if projected_qty is None or projected_qty <= 0 or i.qty > projected_qty:
+            frappe.throw(_("Số lượng dự kiến ​​cho mặt hàng '{0}' trong '{1}' là {2} .Vui lòng nhập thêm hàng.")
+                .format(i.item_name, warehouse, projected_qty)
+            )
