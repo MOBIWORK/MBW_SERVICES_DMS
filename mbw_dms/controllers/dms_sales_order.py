@@ -136,10 +136,10 @@ def auto_create_si(doc, method):
     frappe.msgprint(f"Sales Invoice {sales_invoice.name} đã được tạo thành công.")
 
 
+# Kiểm tra projected_qty trong kho
 def validate_projected_qty(doc, method):
     for i in doc.items:
         warehouse = i.warehouse
-        # Kiểm tra projected_qty trong kho
         projected_qty = frappe.db.get_value("Bin", {"item_code": i.item_code, "warehouse": warehouse}, "projected_qty")
         
         # Nếu projected_qty <= 0, báo lỗi
@@ -147,3 +147,21 @@ def validate_projected_qty(doc, method):
             frappe.throw(_("Số lượng dự kiến ​​cho mặt hàng '{0}' trong '{1}' là {2} .Vui lòng nhập thêm hàng.")
                 .format(i.item_name, warehouse, projected_qty)
             )
+
+
+# Áp dụng chiết khấu đồng thời
+def apply_discounts_simultaneously(doc, method):
+    pricing_rules = doc.pricing_rules
+    
+    if bool(pricing_rules):
+        totals_discount = 0
+        for rule in pricing_rules:
+            pricing_rule = frappe.get_doc("Pricing Rule", rule.pricing_rule)
+            is_simultaneously = pricing_rule.custom_la_khuyen_mai_dong_thoi
+            if is_simultaneously == True:
+                for item in doc.items:
+                    if item.item_code == rule.item_code and item.uom == pricing_rule.custom_don_vi_tinh:
+                        totals_discount += float(pricing_rule.custom_chiet_khau_bo_sung * item.qty)
+        
+        doc.discount_amount = totals_discount
+        doc.save()
