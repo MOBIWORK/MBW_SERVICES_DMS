@@ -350,27 +350,29 @@ def create_checkin(kwargs):
         #send mail
         notes = frappe.db.get_all("Note", {"custom_checkin_id": kwargs.get("checkin_id")},["*"])
         for note in notes:
-            current_note = frappe.get_doc("Note",note.name)
-            memory_send = current_note.as_dict().seen_by
-            for mail in memory_send:                
-                try:
-                    STANDARD_USERS = ("Guest", "Administrator")
-                    from frappe.utils import get_formatted_email
-                    sender = (
-                        frappe.session.user not in STANDARD_USERS and get_formatted_email(frappe.session.user) or None
-                    )
-                
-                    frappe.sendmail(
-                        recipients=mail.get("user"),
-                        sender=None,
-                        subject=note.get("title"),
-                        message=note.get("content") + f"-from: {sender}" if sender else "",
-                        delayed=False,
-                        retry=3
-                    )
-                except Exception as e:
-                    print("something error send mail", e)
-            
+            try :
+                current_note = frappe.get_doc("Note",note.name)
+                memory_send = current_note.as_dict().seen_by
+                for mail in memory_send:                
+                    try:
+                        STANDARD_USERS = ("Guest", "Administrator")
+                        from frappe.utils import get_formatted_email
+                        sender = (
+                            frappe.session.user not in STANDARD_USERS and get_formatted_email(frappe.session.user) or None
+                        )
+                    
+                        frappe.sendmail(
+                            recipients=mail.get("user"),
+                            sender=None,
+                            subject=note.get("title"),
+                            message=note.get("content") + f"-from: {sender}" if sender else "",
+                            delayed=False,
+                            retry=3
+                        )
+                    except Exception as e:
+                        print("something error send mail", e)
+            except Exception as e:
+                print(f"something error send mail {note.name} :::", e)
         frappe.db.commit()
         return gen_response(201, "Thành công", {"name": new_checkin.name})
     
