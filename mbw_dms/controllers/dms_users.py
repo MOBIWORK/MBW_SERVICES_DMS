@@ -51,7 +51,7 @@ def update_objid_employee(doc, method):
                 frappe.throw("Chưa có Project ID")
                 return
             api_key = frappe.get_doc('DMS Settings').api_key
-            api_url = f"{API_URL_TRACKING}/object/{sale_person.custom_object_id}"
+            api_url = f"{API_URL_TRACKING}/object/{sale_person.object_id}"
             params = {"api_key": api_key}
             data_post = {
                 "name": f"{employee.name}-{employee.employee_name}",

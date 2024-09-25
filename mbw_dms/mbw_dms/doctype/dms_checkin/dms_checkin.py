@@ -711,7 +711,7 @@ def send_checkin_to_ekgis(doc):
             
         # Tích hợp dữ liệu checkin vào ekgis
         if sale_person:
-            objectId = sale_person.custom_object_id
+            objectId = sale_person.object_id
             api_url_checkin=f"{API_URL}/{projectId}/{objectId}"
             ext = {"customer_name": doc.kh_ten, "address": doc.kh_diachi}
             json_object = json.dumps(ext)

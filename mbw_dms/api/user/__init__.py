@@ -60,7 +60,7 @@ def get_projectID(**kwargs):
             # filters = {"name": ["in",  pydash.filter_(employee_codes, lambda x: bool(x))]}
             if bool(company):
                 sales_person = pydash.filter_(sales_person,lambda x: x.get("company")== company)
-            objectIds = pydash.map_(sales_person,lambda x: x.get("custom_object_id"))
+            objectIds = pydash.map_(sales_person,lambda x: x.get("object_id"))
             objectIds = pydash.filter_(objectIds, lambda x: bool(x))
             if len(objectIds) == 0:
                 return gen_response(406, _("Chưa có nhân viên bán hàng nào được đăng ký tracking!"))
