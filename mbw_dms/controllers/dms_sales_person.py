@@ -29,7 +29,7 @@ def update(doc, method=None):
             frappe.msgprint(f"Lỗi khi gọi API tạo mới object ID: {response.status_code}")
             return
     # cập nhật object id   
-    if doc.employee and doc.employee != previous_doc.employee and not previous_doc.employee:
+    if doc.employee and doc.employee != previous_doc.employee and previous_doc.employee:
         employee = frappe.get_doc("Employee",doc.employee).as_dict()
         projectId = frappe.get_doc("DMS Settings").ma_du_an
         if projectId is None:

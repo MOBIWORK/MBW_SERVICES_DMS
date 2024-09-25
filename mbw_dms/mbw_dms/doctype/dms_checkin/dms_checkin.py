@@ -208,7 +208,7 @@ class DMSCheckin(Document):
             queue="default",                        # one of short, default, long
             timeout=None,                           # pass timeout manually
             is_async=True,                         # if this is True, method is run in worker
-            now=False,                               # if this is True, method is run directly (not in a worker) 
+            now=True,                               # if this is True, method is run directly (not in a worker) 
             job_name=None,                          # specify a job name
             enqueue_after_commit=True,              # enqueue the job after the database commit is done at the end of the request
             at_front=False,                         # put the job at the front of the queue
@@ -684,38 +684,18 @@ def send_checkin_to_ekgis(doc):
         owner_id = doc.owner
         employee = frappe.db.get_value("Employee",{"user_id":owner_id},["*"],as_dict=1)
         sale_person = frappe.db.get_value("Sales Person",{"employee":employee.name},["*"],as_dict=1)
-        # # Tạo mới ObjectID
-        # if projectId is None:
-        #     frappe.throw("Chưa có Project ID")
-        #     return
-        # api_url = f"{API_URL_TRACKING}/{projectId}/object"
-        # data_post = {
-        #     "name": frappe.session.user,
-        #     "type": "driver"
-        # }
-        # objectId = ""
-        # user_name = frappe.db.get_list("Employee", filters={"user_id": frappe.session.user}, fields=["name", "object_id"])
-        # if user_name and user_name[0]["object_id"] is not None:
-        #     objectId = user_name[0]["object_id"]
-        # else:
-        #     response = requests.post(api_url, params=params, json=data_post)
-        #     employee = frappe.get_doc("Employee", user_name[0]["name"])
-        #     if response.status_code == 200:
-        #         new_info = response.json()
-        #         employee.object_id = new_info["results"].get("_id")
-        #         employee.save()
-        #         objectId = new_info["results"].get("_id")
-        #     else:
-        #         frappe.msgprint(f"Lỗi khi gọi API tạo mới object ID: {response.status_code}")
-        #         return
-            
+        print("sales person employee",sale_person,employee.name)
         # Tích hợp dữ liệu checkin vào ekgis
         if sale_person:
+
             objectId = sale_person.object_id
-            api_url_checkin=f"{API_URL}/{projectId}/{objectId}"
+            api_url_checkin=f"{API_URL}/{projectId}/{objectId}?api_key={api_key}"
             ext = {"customer_name": doc.kh_ten, "address": doc.kh_diachi}
             json_object = json.dumps(ext)
             import pytz
+            time_checkin = pytz.timezone("Asia/Ho_Chi_Minh").localize(datetime.datetime.strptime(doc.checkin_giovao,"%Y-%m-%d %H:%M:%S")).astimezone(pytz.utc).strftime("%Y-%m-%d %H:%M:%S")
+            time_checkout = pytz.timezone("Asia/Ho_Chi_Minh").localize(datetime.datetime.strptime(doc.checkin_giora,"%Y-%m-%d %H:%M:%S")).astimezone(pytz.utc).strftime("%Y-%m-%d %H:%M:%S")
+            create_time  = pytz.timezone("Asia/Ho_Chi_Minh").localize(doc.createddate).astimezone(pytz.utc).strftime("%Y-%m-%d %H:%M:%S")
             data_checkin = {
                 "projectid":projectId,
                 "objectid": objectId,
@@ -727,14 +707,14 @@ def send_checkin_to_ekgis(doc):
                 "battery_checkin": doc.checkin_pinvao,
                 "battery_checkout": doc.checkin_pinra,
                 "accuracy": doc.checkin_dochinhxac,
-                "time_checkin": pytz.timezone("Asia/Ho_Chi_Minh").localize(doc.checkin_giovao).astimezone(pytz.utc),
-                "time_checkout": "",
+                "time_checkin": time_checkin,
+                "time_checkout": time_checkout,
                 "ext": json_object,
-                "createddate":pytz.timezone("Asia/Ho_Chi_Minh").localize(doc.createddate).astimezone(pytz.utc),
+                "createddate":create_time,
                 "timestamp": ""
             }
-            response_checkin = requests.post(api_url_checkin, params=params, json=data_checkin)
-
+            print("data send",data_checkin)
+            response_checkin = requests.post(api_url_checkin, json=data_checkin)
             if response_checkin.status_code == 200:
                     create_dms_log(status="Success")
             else:
