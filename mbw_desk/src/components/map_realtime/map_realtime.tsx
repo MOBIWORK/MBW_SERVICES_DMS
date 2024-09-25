@@ -1,15 +1,20 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, LegacyRef } from 'react';
 import maplibregl from 'maplibre-gl';
 import extend from 'xtend';
 import bbox from '@turf/bbox';
 import './map_realtime.css';
 import MapLegend from './maplegend_realtime';
+import { functionType } from '@/types/dashboard';
 
+
+interface RealtimeProp {
+    options: any, onClickPopup: functionType, status:functionType 
+}
 const ekmapplf = window.ekmapplf;
 
-function RealtimeMap({ options, onClickPopup, status }) {
-    const mapContainer = useRef(null);
-    const map = useRef(null);
+function RealtimeMap({ options, onClickPopup, status }:RealtimeProp) {
+    const mapContainer = useRef<any>(null);
+    const map = useRef<any>(null);
     const intervalIdRef = useRef(null);
 
     const markers = useRef({});
@@ -28,7 +33,7 @@ function RealtimeMap({ options, onClickPopup, status }) {
     };
     const _options = extend({}, defaultOptions, options);
     if (_options.apiKey === "" || !_options.apiKey) throw new Error("apiKey is required");
-
+    
     const initializeMap = async () => {
         try {
             map.current = new maplibregl.Map({

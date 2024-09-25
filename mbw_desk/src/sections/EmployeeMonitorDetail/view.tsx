@@ -7,9 +7,9 @@ export default function EmployeeMonitorDetail() {
   const [viewMode,setViewMode] = useState<"list"|"history">("list")
   const {employee_id} = useParams()
   return (
-    <>
+    <div className='overflow-y-auto h-full'>
       {/* <TravelHistory employee={employee_id}/> */}
       <WidgetHistory employee={employee_id}/>
-    </>
+    </div>
   )
 }

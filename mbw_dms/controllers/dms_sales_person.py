@@ -1,8 +1,59 @@
 import frappe
 from mbw_dms.api.common import get_all_parent_sales_persons
+from mbw_dms.api.ekgis.constant import API_URL_TRACKING
+import requests
 
-def create_user_permission(doc, method=None):
+def update(doc, method=None):
+    previous_doc = doc.get_doc_before_save()
     data = doc.as_dict()
+    #tạo object id
+    if doc.employee and not doc.custom_object_id:
+        employee = frappe.get_doc("Employee",doc.employee).as_dict()
+        projectId = frappe.get_doc("DMS Settings").ma_du_an
+        if projectId is None:
+            frappe.throw("Chưa có Project ID")
+            return
+        api_key = frappe.get_doc('DMS Settings').api_key
+        api_url = f"{API_URL_TRACKING}/{projectId}/object"
+        params = {"api_key": api_key}
+        data_post = {
+            "name": f"{employee.name}-{employee.employee_name}",
+            "type": "driver"
+        }
+        response = requests.post(api_url, params=params, json=data_post)
+        if response.status_code == 200:
+            new_info = response.json()
+            doc.custom_object_id = new_info["results"].get("_id")
+            doc.save()
+        else:
+            frappe.msgprint(f"Lỗi khi gọi API tạo mới object ID: {response.status_code}")
+            return
+    # cập nhật object id   
+    if doc.employee and doc.employee != previous_doc.employee and not previous_doc.employee:
+        employee = frappe.get_doc("Employee",doc.employee).as_dict()
+        projectId = frappe.get_doc("DMS Settings").ma_du_an
+        if projectId is None:
+            frappe.throw("Chưa có Project ID")
+            return
+        api_key = frappe.get_doc('DMS Settings').api_key
+        api_url = f"{API_URL_TRACKING}/object/{doc.custom_object_id}"
+        params = {"api_key": api_key}
+        data_post = {
+            "name": f"{employee.name}-{employee.employee_name}",
+            "type": "driver"
+        }
+        response = requests.put(api_url, params=params, json=data_post)
+        if response.status_code == 200:
+            pass
+        else:
+            frappe.msgprint(f"Lỗi khi gọi API tạo mới object ID: {response.status_code}")
+            return
+        
+    #xóa objectid khi sales person không được gán
+    if not doc.employee:
+        delete_employee(doc,method)
+
+
     if doc.sales_manager:
         user_permission = frappe.new_doc("User Permission")
         allow = "Sales Person"
@@ -31,3 +82,21 @@ def create_user_permission(doc, method=None):
             pass
     else:
         return
+    
+def delete_employee(doc,method=None):
+    if not doc.employee and not doc.custom_object_id:
+        projectId = frappe.get_doc("DMS Settings").ma_du_an
+        if projectId is None:
+            frappe.throw("Chưa có Project ID")
+            return
+        api_key = frappe.get_doc('DMS Settings').api_key
+        api_url = f"{API_URL_TRACKING}/object/{doc.custom_object_id}"
+        params = {"api_key": api_key}
+        response = requests.delete(api_url, params=params)
+        if response.status_code == 200:
+            doc.custom_object_id=None
+            doc.save()
+            pass
+        else:
+            frappe.msgprint(f"Lỗi khi gọi API tạo mới object ID: {response.status_code}")
+            return

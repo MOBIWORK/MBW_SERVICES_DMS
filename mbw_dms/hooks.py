@@ -252,10 +252,12 @@ doc_events = {
         "after_delete": "mbw_dms.controllers.dms_customer.update_kpi_monthly_after_delete"
     },
     "Sales Person": {
-        "on_update": "mbw_dms.controllers.dms_sales_person.create_user_permission"
+        "on_update": "mbw_dms.controllers.dms_sales_person.update",
+        # "after_insert": "mbw_dms.controllers.dms_users.create_objid_employee",
+        "after_delete": "mbw_dms.controllers.dms_sales_person.delete_employee"
     },
     "Employee": {
-        "after_insert": "mbw_dms.controllers.dms_users.create_objid_employee"
+        "on_update": "mbw_dms.controllers.dms_users.update_objid_employee"
     },
     "Sales Invoice": {
         "on_submit": "mbw_dms.controllers.dms_sales_invoice.update_kpi_monthly",
