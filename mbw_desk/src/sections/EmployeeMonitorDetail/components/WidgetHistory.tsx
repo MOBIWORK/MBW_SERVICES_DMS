@@ -109,7 +109,7 @@ function WidgetHistory({ employee }: { employee?: string }) {
   }, [options]);
   return (
     <>
-      <Row className="flex flex-wrap justify-between items-center px-[30px] bg-[#fff]">
+      <Row className="flex flex-wrap justify-between items-center px-[30px] bg-[#fff] sticky top-0 z-10">
         <div className="flex justify-center items-center">
           <Link to="/employee-monitor">
             {" "}

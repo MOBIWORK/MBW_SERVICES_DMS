@@ -202,6 +202,7 @@ class DMSCheckin(Document):
 
 
     def send_data_to_ekgis(self):
+        print("send data to ekgis")
         frappe.enqueue(
             "mbw_dms.mbw_dms.doctype.dms_checkin.dms_checkin.send_checkin_to_ekgis",
             queue="default",                        # one of short, default, long
@@ -677,63 +678,68 @@ def cancel_checkout(data):
 
 def send_checkin_to_ekgis(doc):
     try:
-        # Tạo mới ObjectID
         projectId = frappe.get_doc("DMS Settings").ma_du_an
-        if projectId is None:
-            frappe.throw("Chưa có Project ID")
-            return
         api_key = frappe.get_doc("DMS Settings").api_key
-        api_url = f"{API_URL_TRACKING}/{projectId}/object"
         params = {"api_key": api_key}
-        data_post = {
-            "name": frappe.session.user,
-            "type": "driver"
-        }
-        objectId = ""
-        user_name = frappe.db.get_list("Employee", filters={"user_id": frappe.session.user}, fields=["name", "object_id"])
-        if user_name and user_name[0]["object_id"] is not None:
-            objectId = user_name[0]["object_id"]
-        else:
-            response = requests.post(api_url, params=params, json=data_post)
-            employee = frappe.get_doc("Employee", user_name[0]["name"])
-            if response.status_code == 200:
-                new_info = response.json()
-                employee.object_id = new_info["results"].get("_id")
-                employee.save()
-                objectId = new_info["results"].get("_id")
-            else:
-                frappe.msgprint(f"Lỗi khi gọi API tạo mới object ID: {response.status_code}")
-                return
+        owner_id = doc.owner
+        employee = frappe.db.get_value("Employee",{"user_id":owner_id},["*"],as_dict=1)
+        sale_person = frappe.db.get_value("Sales Person",{"employee":employee.name},["*"],as_dict=1)
+        # # Tạo mới ObjectID
+        # if projectId is None:
+        #     frappe.throw("Chưa có Project ID")
+        #     return
+        # api_url = f"{API_URL_TRACKING}/{projectId}/object"
+        # data_post = {
+        #     "name": frappe.session.user,
+        #     "type": "driver"
+        # }
+        # objectId = ""
+        # user_name = frappe.db.get_list("Employee", filters={"user_id": frappe.session.user}, fields=["name", "object_id"])
+        # if user_name and user_name[0]["object_id"] is not None:
+        #     objectId = user_name[0]["object_id"]
+        # else:
+        #     response = requests.post(api_url, params=params, json=data_post)
+        #     employee = frappe.get_doc("Employee", user_name[0]["name"])
+        #     if response.status_code == 200:
+        #         new_info = response.json()
+        #         employee.object_id = new_info["results"].get("_id")
+        #         employee.save()
+        #         objectId = new_info["results"].get("_id")
+        #     else:
+        #         frappe.msgprint(f"Lỗi khi gọi API tạo mới object ID: {response.status_code}")
+        #         return
             
         # Tích hợp dữ liệu checkin vào ekgis
-        api_url_checkin=f"{API_URL}/{projectId}/{objectId}"
-        ext = {"customer_name": doc.kh_ten, "address": doc.kh_diachi}
-        json_object = json.dumps(ext)
-        import pytz
-        data_checkin = {
-            "projectid":projectId,
-            "objectid": objectId,
-            "uuid": "",
-            "lng": doc.kh_long,
-            "lat": doc.kh_lat,
-            "coordinates": "",
-            "activity": "checkin",
-            "battery_checkin": doc.checkin_pinvao,
-            "battery_checkout": doc.checkin_pinra,
-            "accuracy": doc.checkin_dochinhxac,
-            "time_checkin": pytz.timezone("Asia/Ho_Chi_Minh").localize(doc.checkin_giovao).astimezone(pytz.utc),
-            "time_checkout": "",
-            "ext": json_object,
-            "createddate":pytz.timezone("Asia/Ho_Chi_Minh").localize(doc.createddate).astimezone(pytz.utc),
-            "timestamp": ""
-        }
-        response_checkin = requests.post(api_url_checkin, params=params, json=data_checkin)
+        if sale_person:
+            objectId = sale_person.custom_object_id
+            api_url_checkin=f"{API_URL}/{projectId}/{objectId}"
+            ext = {"customer_name": doc.kh_ten, "address": doc.kh_diachi}
+            json_object = json.dumps(ext)
+            import pytz
+            data_checkin = {
+                "projectid":projectId,
+                "objectid": objectId,
+                "uuid": "",
+                "lng": doc.kh_long,
+                "lat": doc.kh_lat,
+                "coordinates": "",
+                "activity": "checkin",
+                "battery_checkin": doc.checkin_pinvao,
+                "battery_checkout": doc.checkin_pinra,
+                "accuracy": doc.checkin_dochinhxac,
+                "time_checkin": pytz.timezone("Asia/Ho_Chi_Minh").localize(doc.checkin_giovao).astimezone(pytz.utc),
+                "time_checkout": "",
+                "ext": json_object,
+                "createddate":pytz.timezone("Asia/Ho_Chi_Minh").localize(doc.createddate).astimezone(pytz.utc),
+                "timestamp": ""
+            }
+            response_checkin = requests.post(api_url_checkin, params=params, json=data_checkin)
 
-        if response_checkin.status_code == 200:
-                create_dms_log(status="Success")
-        else:
-            create_dms_log(status="Error", message=f"Lỗi khi gọi API checkin: {response_checkin.status_code}")
-    
+            if response_checkin.status_code == 200:
+                    create_dms_log(status="Success")
+            else:
+                create_dms_log(status="Error", message=f"Lỗi khi gọi API checkin: {response_checkin.status_code}")
+        
     except Exception as e:
         create_dms_log(status="Error", exception=e, rollback=True)
 import requests

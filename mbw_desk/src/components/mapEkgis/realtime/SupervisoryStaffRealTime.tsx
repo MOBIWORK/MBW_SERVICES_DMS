@@ -1,4 +1,4 @@
-import { Row, Col, List, Button, Spin, Dropdown } from "antd";
+import { Row, Col, List, Spin } from "antd";
 import "./SupervisoryStaffRealTime.css";
 import {
   TableCustom,
@@ -6,18 +6,21 @@ import {
   WrapperCard,
   WrapperCardTable,
   WrapperCardMap,
-  DropDownCustom,
 } from "@/components";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { AxiosService } from "@/services/server";
 import axios from "axios";
+import type { AxiosResponse } from "axios";
 import { useNavigate } from "react-router-dom";
 import { LoadingOutlined } from "@ant-design/icons";
-import { FilterIcon } from "@/icons";
-import Filter from "../components/filter";
-
+import { employeeMoveType, RootObject, summaryMoveType } from "./types";
+import { renderColumnsCheckingEmployee } from "./data";
+import { GlobalContext } from "@/App";
+import DepartmentSelect from './Department'
 export default function SupervisoryStaffRealTime() {
   const navigate = useNavigate();
+  const { errorMsg } = useContext(GlobalContext);
+  const [teamSale,setTeamSale] = useState<string>("")
   const [summaryOver, setSummaryOver] = useState<{
     luot_vt: number | 0;
     don_hang: number | 0;
@@ -41,6 +44,7 @@ export default function SupervisoryStaffRealTime() {
   const [dataCheckingEmployee, setDataCheckingEmployee] = useState<any[]>([]);
   const [loadingPage, setLoadingPape] = useState<boolean>(true);
 
+  /**lấy dữ liệu tổng quan lượt viếng thăm, doanh số, đơn hàng */
   const initDataSummaryOver = async () => {
     const rs = await AxiosService.get(
       `/api/method/mbw_dms.api.report.real_time_monitoring_report`
@@ -49,82 +53,12 @@ export default function SupervisoryStaffRealTime() {
       setSummaryOver(rs.result);
     }
   };
-  //bảng: cột nhân viên
-  const columnsCheckingEmployee = [
-    {
-      dataIndex: "stt",
-      width: "50px",
-    },
-    {
-      title: "Nhân viên",
-      dataIndex: "emp_name",
-      render: (text: any, record: any) => (
-        <div className="flex items-center">
-          <div
-            className="flex items-center justify-center"
-            style={{ height: "48px", width: "48px", borderRadius: "12px" }}
-          >
-            {record.pic_profile != null ? (
-              <div
-                style={{
-                  width: "48px",
-                  height: "48px",
-                  backgroundImage: `url("${record.pic_profile}")`,
-                  backgroundSize: "Cover",
-                }}
-              ></div>
-            ) : (
-              <div
-                style={{
-                  width: "48px",
-                  height: "48px",
-                  backgroundSize: "Cover",
-                }}
-                className="icon_user_default"
-              ></div>
-            )}
-          </div>
-          <div
-            className="mx-3"
-            style={{ cursor: "pointer" }}
-            onClick={() => handleShowHistoryEmployee(record)}
-          >
-            <div
-              style={{ fontWeight: 500, fontSize: "14px", lineHeight: "21px" }}
-            >
-              {text}
-            </div>
-            {record.emp_id != null && (
-              <div
-                style={{
-                  marginTop: "5px",
-                  fontWeight: 400,
-                  fontSize: "12px",
-                  lineHeight: "21px",
-                }}
-              >
-                ID: {record.emp_id}
-              </div>
-            )}
-          </div>
-        </div>
-      ),
-    },
-    {
-      title: "Thời gian di chuyển",
-      dataIndex: "moving",
-    },
-    {
-      title: "Thời gian dừng",
-      dataIndex: "stopping",
-    },
-    {
-      title: "Thời gian viếng thăm",
-      dataIndex: "visiting",
-    },
-  ];
 
-  const handleSummaryOnlienAndOffline = (res) => {
+  /** Số nhân viên onl/off */
+  const handleSummaryOnlienAndOffline = (res: {
+    online: number;
+    offline: number;
+  }) => {
     setSummaryOnlineAndOffline({
       so_nv_online: res.online,
       so_nv_offline: res.offline,
@@ -135,11 +69,13 @@ export default function SupervisoryStaffRealTime() {
   const [options, setOptions] = useState<{
     apiKey: string | null;
     projectId: string | null;
+    objectId?: string
   }>({
     apiKey: import.meta.env.VITE_API_KEY,
     projectId: "",
   });
 
+  /**format */
   const formatUnitNumber = (num: number) => {
     return num.toLocaleString("en-US").replace(/,/g, ".");
   };
@@ -153,60 +89,21 @@ export default function SupervisoryStaffRealTime() {
     else if (time >= 60 && time < 3600) return `${Math.round(time / 60)} phút`;
     return `${Math.round(time / 3600)} giờ`;
   };
-
-  const handlerShowHistory = (evt) => {
+  /**end format */
+  const handlerShowHistory = (evt: any) => {
     navigate(`/employee-monitor-detail/${evt["_id"]}`);
   };
-  const handlerShowHistoryForAnyOne = () => {
-    navigate("/employee-monitor-detail"); //654c8a12d65d3e52f2d286de
-  };
-  const handleShowHistoryEmployee = (employee) => {
+  // const handlerShowHistoryForAnyOne = () => {
+  //   navigate("/employee-monitor-detail"); //654c8a12d65d3e52f2d286de
+  // };
+
+  const handleShowHistoryEmployee = (employee: employeeMoveType) => {
     if (employee.objectId != null)
       navigate(`/employee-monitor-detail/${employee.objectId}`);
     else navigate(`/employee-monitor-detail`);
   };
-  const renderDataMoveTopEmployee = (arrSummary, arrEmployee) => {
-    for (let i = 0; i < arrEmployee.length; i++) {
-      for (let j = 0; j < arrSummary.length; j++) {
-        if (
-          arrEmployee[i].object_id != null &&
-          arrEmployee[i].object_id == arrSummary[j].object["_id"]
-        ) {
-          arrEmployee[i].summary = arrSummary[j].summary;
-          break;
-        } else {
-          arrEmployee[i].summary = {};
-        }
-      }
-    }
-    let arrDataSort = arrEmployee.sort((a, b) => {
-      if (
-        a.summary != null &&
-        a.summary.move != null &&
-        b.summary != null &&
-        b.summary.move != null
-      )
-        return b.summary.move.distance - a.summary.move.distance;
-    });
-    let dataMoveTopEmployee = [];
-    for (let i = 0; i < arrDataSort.length; i++) {
-      if (i == 5) break;
-      dataMoveTopEmployee.push({
-        stt: i + 1,
-        pic_profile:
-          arrDataSort[i].avatar != null ? arrDataSort[i].avatar : null,
-        emp_name: arrDataSort[i].employee_name,
-        emp_id: arrDataSort[i].name,
-        distance:
-          arrDataSort[i].summary != null && arrDataSort[i].summary.move != null
-            ? formatDistance(arrDataSort[i].summary.move.distance)
-            : formatDistance(0),
-        objectId: arrDataSort[i].object_id,
-      });
-    }
-    setDataTopDistanceEmployee(dataMoveTopEmployee);
-  };
-  const renderDataEmployee = async (arrEmployeeInput) => {
+  // render top 5 nhân viên có nhiều SO
+  const renderDataEmployee = async (arrEmployeeInput: any[]) => {
     let dateNow = new Date();
     let timeStamp = dateNow.getTime() / 1000;
     let res = await AxiosService(
@@ -216,135 +113,219 @@ export default function SupervisoryStaffRealTime() {
     if (res.message == "Thành công") {
       arrEmployee = res.result;
     }
-    for (let i = 0; i < arrEmployeeInput.length; i++) {
-      if (arrEmployee.length > 0) {
-        for (let j = 0; j < arrEmployee.length; j++) {
-          if (arrEmployeeInput[i].name == arrEmployee[j].employee) {
-            arrEmployeeInput[i].today_visit = arrEmployee[j].today_visit;
-            arrEmployeeInput[i].must_visit = arrEmployee[j].must_visit;
-            arrEmployeeInput[i].sales_order = arrEmployee[j].sales_order;
-            break;
-          } else {
-            arrEmployeeInput[i].today_visit = 0;
-            arrEmployeeInput[i].must_visit = 0;
-            arrEmployeeInput[i].sales_order = 0;
+    //tích hợp thông tin lượt vt, phải vt, đơn hàng vào ds nhân viên
+    arrEmployeeInput = arrEmployeeInput
+      .map((employeeInput: any) => {
+        employeeInput = {
+          ...employeeInput,
+          today_visit: 0,
+          must_visit: 0,
+          sales_order: 0,
+        };
+        arrEmployee.forEach(
+          (employee: {
+            name: string;
+            total_visit: number;
+            must_visit: number;
+            sales_order: number;
+            employee: string;
+          }) => {
+            if (employeeInput.name == employee.employee) {
+              employeeInput = {
+                ...employeeInput,
+                today_visit: employee.total_visit || 0,
+                must_visit: employee.must_visit || 0,
+                sales_order: employee.sales_order || 0,
+              };
+            }
           }
-        }
-      } else {
-        arrEmployeeInput[i].today_visit = 0;
-        arrEmployeeInput[i].must_visit = 0;
-        arrEmployeeInput[i].sales_order = 0;
-      }
-    }
-    let arrDataSort = arrEmployeeInput.sort((a, b) => {
-      return b.sales_order - a.sales_order;
-    });
-    let arrEmployeeOut = [];
-    for (let i = 0; i < arrDataSort.length; i++) {
-      if (i == 5) break;
-      let item = arrDataSort[i];
-      arrEmployeeOut.push({
-        s1tt: i + 1,
+        );
+        return employeeInput;
+      })
+      .sort((a, b) => {
+        return b.sales_order - a.sales_order;
+      })
+      .slice(0, 5);
+    let arrEmployeeOut = arrEmployeeInput.map(
+      (employeeInput: any, index: number) => ({
+        ...employeeInput,
+        s1tt: index + 1,
         pic_profile:
-          item.avatar != null && item.avatar != "" ? item.avatar : null,
-        emp_name: item.employee_name,
-        emp_id: item.name,
-        visiting: `${item.today_visit}/${item.must_visit}`,
-        boxing: item.sales_order,
-        objectId: item.object_id,
-      });
-    }
+          employeeInput.avatar != null && employeeInput.avatar != ""
+            ? employeeInput.avatar
+            : null,
+        emp_name: employeeInput.employee_name,
+        emp_id: employeeInput.name,
+        visiting: `${employeeInput.today_visit}/${employeeInput.must_visit}`,
+        boxing: employeeInput.sales_order,
+        objectId: employeeInput.object_id,
+      })
+    );
     setDataEmployee(arrEmployeeOut);
   };
-  const renderDataCheckingEmployee = (arrSummary, arrEmployee) => {
-    for (let i = 0; i < arrEmployee.length; i++) {
-      for (let j = 0; j < arrSummary.length; j++) {
-        if (
-          arrEmployee[i].object_id != null &&
-          arrEmployee[i].object_id == arrSummary[j].object["_id"]
-        ) {
-          arrEmployee[i].summary = arrEmployee[i].summary;
-          break;
-        } else {
-          arrEmployee[i].summary = {};
-        }
-      }
-    }
-    let dataCheckingEmployee = [];
-    for (let i = 0; i < arrEmployee.length; i++) {
-      dataCheckingEmployee.push({
+
+  // tổng hợp thời gian/quãng đường di chuyển theo nhân viên
+  const renderDataEmployeeSummary = (
+    arrSummary: summaryMoveType,
+    arrEmployee: employeeMoveType[]
+  ) => {
+    // thời gian di chuyển
+    arrEmployee = arrEmployee.map((employee: employeeMoveType) => {
+      employee.summary = {};
+      let summary = arrSummary.find(
+        (summary: RootObject) =>
+          employee.object_id != null &&
+          employee.object_id == summary.object["_id"]
+      );
+      if (summary) employee.summary = summary.summary;
+
+      return employee;
+    });
+    let dataCheckingEmployee = arrEmployee.map(
+      (employee: employeeMoveType, i: number) => ({
         stt: i + 1,
-        pic_profile:
-          arrEmployee[i].avatar != null ? arrEmployee[i].avatar : null,
-        emp_name: arrEmployee[i].employee_name,
-        emp_id: arrEmployee[i].name,
+        pic_profile: employee.avatar != null ? employee.avatar : null,
+        emp_name: employee.employee_name,
+        emp_id: employee.name,
         moving:
-          arrEmployee[i].summary != null && arrEmployee[i].summary.move != null
-            ? formatTime(arrEmployee[i].summary.move.totalTime)
+          employee.summary != null && employee.summary.move != null
+            ? formatTime(employee.summary.move.totalTime)
             : formatTime(0),
         stopping:
-          arrEmployee[i].summary != null && arrEmployee[i].summary.stop != null
-            ? formatTime(arrEmployee[i].summary.stop.totalTime)
+          employee.summary != null && employee.summary.stop != null
+            ? formatTime(employee.summary.stop.totalTime)
             : formatTime(0),
         visiting:
-          arrEmployee[i].summary != null &&
-          arrEmployee[i].summary.checkin != null
-            ? formatTime(arrEmployee[i].summary.checkin.totalTime)
+          employee.summary != null && employee.summary.checkin != null
+            ? formatTime(employee.summary.checkin.totalTime)
             : formatTime(0),
-        objectId: arrEmployee[i].object_id,
-      });
-    }
+        objectId: employee.object_id,
+      })
+    );
     setDataCheckingEmployee(dataCheckingEmployee);
-  };
 
+    //khoảng cách di chuyển
+    arrEmployee
+      .sort((a, b) =>
+        a.summary != null &&
+        a.summary.move != null &&
+        b.summary != null &&
+        b.summary.move != null
+          ? b.summary.move.distance - a.summary.move.distance
+          : 1
+      )
+      .slice(0, 5);
+
+    let dataMoveTopEmployee = arrEmployee.map(
+      (employee: employeeMoveType, i: number) => ({
+        stt: i + 1,
+        pic_profile: employee.avatar != null ? employee.avatar : null,
+        emp_name: employee.employee_name,
+        emp_id: employee.name,
+        distance:
+          employee.summary != null && employee.summary.move != null
+            ? formatDistance(employee.summary.move.distance)
+            : formatDistance(0),
+        objectId: employee.object_id,
+      })
+    );
+    setDataTopDistanceEmployee(dataMoveTopEmployee);
+  };
+  // query thông tin projectId,key bản đồ , danh sách nhân viên
   useEffect(() => {
     (async () => {
-      setLoadingPape(true);
-      initDataSummaryOver();
-      const rs = await AxiosService.get(
-        "/api/method/mbw_dms.api.user.get_projectID"
-      );
-      setOptions((prev) => ({
-        ...prev,
-        projectId: rs.result["Project ID"],
-      }));
-      const res_apikey = await AxiosService.get(
-        "/api/method/mbw_dms.api.vgm.map_customer.get_config_api"
-      );
-      setOptions((prev) => ({
-        ...prev,
-        apiKey: res_apikey.result,
-      }));
-      let responseAllEmployee = await AxiosService(
-        "/api/method/mbw_dms.api.user.get_list_employees"
-      );
-      let arrEmployee = [];
-      if (responseAllEmployee.message == "Thành công") {
-        arrEmployee = responseAllEmployee.result;
-      }
-      let urlSummary = `https://api.ekgis.vn/v2/tracking/locationHistory/summary/lastest/${rs.result["Project ID"]}/null?api_key=${options.apiKey}`;
-      let res = await axios.get(urlSummary);
-      if (import.meta.env.VITE_BASE_URL) {
-        res = res.data;
-      }
-      if (res?.results.length > 0) {
-        let arrSummary = res?.results;
-        renderDataMoveTopEmployee(
-          arrSummary,
-          JSON.parse(JSON.stringify(arrEmployee))
+      try {
+        setLoadingPape(true);
+        initDataSummaryOver();
+        /** Lấy project id và các object id thuộc công ty quản lý => chưa làm */
+        const rs = AxiosService.get(
+          "/api/method/mbw_dms.api.user.get_projectID",
+          {
+            params: {
+              teamSale
+            }
+          }
         );
-        renderDataCheckingEmployee(
-          arrSummary,
-          JSON.parse(JSON.stringify(arrEmployee))
+        
+        const resApikey = AxiosService.get(
+          "/api/method/mbw_dms.api.vgm.map_customer.get_config_api"
         );
+         /**lấy  danh sách nhân viên của công ty => chưa làm, có thể tích hợp phía trên*/
+         let responseEmployees = AxiosService.get(
+          "/api/method/mbw_dms.api.user.get_list_employees",
+          {
+            params: {
+              team_sale:teamSale
+            }
+          }
+        );
+        
+        const [rsPj,res_apikey,responseAllEmployee]  = await Promise.all([rs,resApikey,responseEmployees])
+        
+        setOptions((prev) => ({
+          ...prev,
+          apiKey: res_apikey.result,
+          projectId: rsPj.result["Project ID"],
+          objectId:  rsPj.result["objectIds"]
+        }));
+        const objectIds = rsPj.result["objectIds"]
+       
+        let arrEmployee = [];
+        if (responseAllEmployee.message == "Thành công") {
+          arrEmployee = responseAllEmployee.result;
+        }
+
+        
+        /* chỉnh lại dịch vụ đi tuyến của thằng này */
+        let urlSummary = `https://api.ekgis.vn/v2/tracking/locationHistory/summary/lastest/${rsPj.result["Project ID"]}/${objectIds}?api_key=${options.apiKey}`;
+        /** trả về mảng [
+                {
+                  object: {id: "objectId",name: ""},
+                  summary: {
+                    "move": {
+                      "count": 4,
+                      "totalTime": 2226,
+                      "distance": 6633.500000000001
+                    },
+                    "stop": {
+                      "count": 3,
+                      "totalTime": 53620
+                    },
+                    "checkin": {
+                      "count": 0,
+                      "totalTime": 0
+                    }
+                  } 
+                }
+                ] */
+        let res: AxiosResponse<{ results: summaryMoveType }> = await axios.get(
+          urlSummary
+        );
+        // if (import.meta.env.VITE_BASE_URL) {
+        //   res = res.data;
+        // }
+
+        if (res.data?.results.length > 0) {
+          let arrSummary = res.data?.results;
+          renderDataEmployeeSummary(
+            arrSummary,
+            JSON.parse(JSON.stringify(arrEmployee))
+          );
+        }
+        renderDataEmployee(JSON.parse(JSON.stringify(arrEmployee)));
+      } catch (error: any) {
+        errorMsg(
+          error?.message || error || "Something was wrong when query !!"
+        );
+      } finally {
+        setLoadingPape(false);
       }
-      renderDataEmployee(JSON.parse(JSON.stringify(arrEmployee)));
-      setLoadingPape(false);
     })();
-  }, []);
+  }, [teamSale]);
 
   return (
     <>
+      {/* loading screen  */}
       {loadingPage && (
         <div
           style={{
@@ -357,7 +338,6 @@ export default function SupervisoryStaffRealTime() {
             justifyContent: "center",
             alignItems: "center",
           }}
-         
         >
           <Spin
             indicator={
@@ -366,33 +346,27 @@ export default function SupervisoryStaffRealTime() {
           />
         </div>
       )}
+      {/* header */}
       <Row className="flex flex-wrap justify-between items-center px-[30px] h-[48px] bg-white">
-          <span className="text-2xl font-semibold leading-[21px]">
-            Giám sát thời gian thực
-          </span>
-       
+        <span className="text-2xl font-semibold leading-[21px]">
+          Giám sát thời gian thực
+        </span>
+
         <div className="flex">
-          <Dropdown
-            trigger={["click"]}
-            dropdownRender={() => {
-              return <DropDownCustom title="Bộ lọc"><Filter/></DropDownCustom>;
-            }}
-          >
-            <div
-              className="flex items-center justify-between border border-solid rounded-lg border-[#ccc] px-2 py-1 cursor-pointer"
-              onClick={() => {}}
-            >
-              <FilterIcon /> Bộ lọc
-            </div>
-          </Dropdown>
+          <DepartmentSelect team_sale={teamSale} setTeamSale={setTeamSale}/>
         </div>
+        {/* Lịch sử di chuyển tất cả nhân viên  */}
         {/* <Button onClick={handlerShowHistoryForAnyOne}>Xem dữ liệu lịch sử</Button> */}
       </Row>
-      <Row style={{ marginTop: "20px" }} gutter={[20,20]} className="px-[30px] h-full overflow-y-scroll pb-20" >
+      <Row
+        style={{ marginTop: "20px" }}
+        gutter={[20, 20]}
+        className="px-[30px] h-full overflow-y-scroll pb-20"
+      >
         {/*  Thông tin chi tiết */}
-        <Col className="card-container  w-full 1kr:w-1/2 order-1 1k:order-2 1kr:order-1 " >
+        <Col className="card-container  w-full 1kr:w-1/2 order-1 1k:order-2 1kr:order-1 ">
           <div style={{ display: "block", width: "100%" }}>
-            <Row gutter={[20,20]} style={{ width: "100%" }}>
+            <Row gutter={[20, 20]} style={{ width: "100%" }}>
               {/* nhân viên on/off */}
               <Col span={12} className="card-container">
                 <WrapperCard>
@@ -461,7 +435,7 @@ export default function SupervisoryStaffRealTime() {
                 </WrapperCard>
               </Col>
               {/* chi tiết viếng thăm 1280-1440 là 100 , còn lại là 1/3*/}
-              <Col  className="card-container w-1/3 1kr:w-full 1_5k:w-1/3">
+              <Col className="card-container w-1/3 1kr:w-full 1_5k:w-1/3">
                 <WrapperCard>
                   <div className="wrap-card-container">
                     <div className="flex items-center">
@@ -527,7 +501,7 @@ export default function SupervisoryStaffRealTime() {
                   </div>
                 </WrapperCard>
               </Col>
-              <Col  className="card-container w-1/3 1kr:w-full 1_5k:w-1/3">
+              <Col className="card-container w-1/3 1kr:w-full 1_5k:w-1/3">
                 <WrapperCard>
                   <div className="wrap-card-container">
                     <div className="flex items-center">
@@ -846,8 +820,8 @@ export default function SupervisoryStaffRealTime() {
             </Row>
           </div>
         </Col>
-        {/* thống kê thời gian di chuyển  */} 
-        <Col  className="card-container w-full order-2 1k:order-3 1kr:order-3" >
+        {/* thống kê thời gian di chuyển  */}
+        <Col className="card-container w-full order-2 1k:order-3 1kr:order-3">
           <WrapperCardTable>
             <div
               style={{
@@ -859,20 +833,20 @@ export default function SupervisoryStaffRealTime() {
                 paddingTop: "10px",
               }}
             >
-              Thống kê thời gian di chuyển, thời gian dừng, thời gian
-              viếng thăm của nhân viên
+              Thống kê thời gian di chuyển, thời gian dừng, thời gian viếng thăm
+              của nhân viên
             </div>
             <TableCustom
               style={{ height: "100%" }}
               pagination={false}
               scroll={{ y: 350 }}
-              columns={columnsCheckingEmployee}
+              columns={renderColumnsCheckingEmployee(handleShowHistoryEmployee)}
               dataSource={dataCheckingEmployee}
             />
           </WrapperCardTable>
         </Col>
         {/* Giao diện map */}
-        <Col  className="card-container min-h-[400px] w-full 1kr:w-1/2 order-3 1k:order-1 1kr:order-2 ">
+        <Col className="card-container min-h-[400px] w-full 1kr:w-1/2 order-3 1k:order-1 1kr:order-2 ">
           <WrapperCardMap>
             <div style={{ height: "100%" }}>
               {options.projectId && (
@@ -885,7 +859,7 @@ export default function SupervisoryStaffRealTime() {
             </div>
           </WrapperCardMap>
         </Col>
-      </Row> 
+      </Row>
     </>
   );
 }
