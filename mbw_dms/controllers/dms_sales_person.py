@@ -46,7 +46,7 @@ def update(doc, method=None):
         if response.status_code == 200:
             pass
         else:
-            frappe.msgprint(f"Lỗi khi gọi API tạo mới object ID: {response.status_code}")
+            frappe.msgprint(f"Lỗi khi gọi API cập nhật object ID: {response.status_code}")
             return
         
     #xóa objectid khi sales person không được gán
@@ -84,7 +84,7 @@ def update(doc, method=None):
         return
     
 def delete_employee(doc,method=None):
-    if not doc.employee and not doc.object_id:
+    if not doc.employee and doc.object_id:
         projectId = frappe.get_doc("DMS Settings").ma_du_an
         if projectId is None:
             frappe.throw("Chưa có Project ID")
@@ -98,5 +98,5 @@ def delete_employee(doc,method=None):
             doc.save()
             pass
         else:
-            frappe.msgprint(f"Lỗi khi gọi API tạo mới object ID: {response.status_code}")
+            frappe.msgprint(f"Lỗi khi gọi API xóa object ID: {response.status_code}")
             return
