@@ -8,51 +8,14 @@ def update(doc, method=None):
     data = doc.as_dict()
     #tạo object id
     if doc.employee and not doc.object_id:
-        employee = frappe.get_doc("Employee",doc.employee).as_dict()
-        projectId = frappe.get_doc("DMS Settings").ma_du_an
-        if projectId is None:
-            frappe.throw("Chưa có Project ID")
-            return
-        api_key = frappe.get_doc('DMS Settings').api_key
-        api_url = f"{API_URL_TRACKING}/{projectId}/object"
-        params = {"api_key": api_key}
-        data_post = {
-            "name": f"{employee.name}-{employee.employee_name}",
-            "type": "driver"
-        }
-        response = requests.post(api_url, params=params, json=data_post)
-        if response.status_code == 200:
-            new_info = response.json()
-            doc.object_id = new_info["results"].get("_id")
-            doc.save()
-        else:
-            frappe.msgprint(f"Lỗi khi gọi API tạo mới object ID: {response.status_code}")
-            return
+        create_employee_objectid(doc,method)
     # cập nhật object id   
     if doc.employee and doc.employee != previous_doc.employee and previous_doc.employee:
-        employee = frappe.get_doc("Employee",doc.employee).as_dict()
-        projectId = frappe.get_doc("DMS Settings").ma_du_an
-        if projectId is None:
-            frappe.throw("Chưa có Project ID")
-            return
-        api_key = frappe.get_doc('DMS Settings').api_key
-        api_url = f"{API_URL_TRACKING}/object/{doc.object_id}"
-        params = {"api_key": api_key}
-        data_post = {
-            "name": f"{employee.name}-{employee.employee_name}",
-            "type": "driver"
-        }
-        response = requests.put(api_url, params=params, json=data_post)
-        if response.status_code == 200:
-            pass
-        else:
-            frappe.msgprint(f"Lỗi khi gọi API cập nhật object ID: {response.status_code}")
-            return
+        update_employee_objectid(doc,method)
         
     #xóa objectid khi sales person không được gán
     if not doc.employee:
-        delete_employee(doc,method)
-
+        delete_employee_objectId(doc,method)
 
     if doc.sales_manager:
         user_permission = frappe.new_doc("User Permission")
@@ -83,7 +46,7 @@ def update(doc, method=None):
     else:
         return
     
-def delete_employee(doc,method=None):
+def delete_employee_objectId(doc,method=None):
     if not doc.employee and doc.object_id:
         projectId = frappe.get_doc("DMS Settings").ma_du_an
         if projectId is None:
@@ -100,3 +63,46 @@ def delete_employee(doc,method=None):
         else:
             frappe.msgprint(f"Lỗi khi gọi API xóa object ID: {response.status_code}")
             return
+
+
+def create_employee_objectid(doc,method=None):
+    employee = frappe.get_doc("Employee",doc.employee).as_dict()
+    projectId = frappe.get_doc("DMS Settings").ma_du_an
+    if projectId is None:
+        frappe.throw("Chưa có Project ID")
+        return
+    api_key = frappe.get_doc('DMS Settings').api_key
+    api_url = f"{API_URL_TRACKING}/{projectId}/object"
+    params = {"api_key": api_key}
+    data_post = {
+        "name": f"{employee.name}-{employee.employee_name}",
+        "type": "driver"
+    }
+    response = requests.post(api_url, params=params, json=data_post)
+    if response.status_code == 200:
+        new_info = response.json()
+        doc.object_id = new_info["results"].get("_id")
+        doc.save()
+    else:
+        frappe.msgprint(f"Lỗi khi gọi API tạo mới object ID: {response.status_code}")
+        return
+
+def update_employee_objectid(doc,method=None):
+    employee = frappe.get_doc("Employee",doc.employee).as_dict()
+    projectId = frappe.get_doc("DMS Settings").ma_du_an
+    if projectId is None:
+        frappe.throw("Chưa có Project ID")
+        return
+    api_key = frappe.get_doc('DMS Settings').api_key
+    api_url = f"{API_URL_TRACKING}/object/{doc.object_id}"
+    params = {"api_key": api_key}
+    data_post = {
+        "name": f"{employee.name}-{employee.employee_name}",
+        "type": "driver"
+    }
+    response = requests.put(api_url, params=params, json=data_post)
+    if response.status_code == 200:
+        pass
+    else:
+        frappe.msgprint(f"Lỗi khi gọi API cập nhật object ID: {response.status_code}")
+        return

@@ -689,14 +689,17 @@ def send_checkin_to_ekgis(doc):
     try:
         projectId = frappe.get_doc("DMS Settings").ma_du_an
         api_key = frappe.get_doc("DMS Settings").api_key
-        params = {"api_key": api_key}
         owner_id = doc.owner
         employee = frappe.db.get_value("Employee",{"user_id":owner_id},["*"],as_dict=1)
         sale_person = frappe.db.get_value("Sales Person",{"employee":employee.name},["*"],as_dict=1)
         # Tích hợp dữ liệu checkin vào ekgis
         if sale_person:
-
+            from mbw_dms.controllers.dms_sales_person import create_employee_objectid
             objectId = sale_person.object_id
+            if not objectId:
+                create_employee_objectid(sale_person)
+                sale_person = frappe.db.get_value("Sales Person",{"employee":employee.name},["*"],as_dict=1)
+                objectId = sale_person.object_id
             api_url_checkin=f"{API_URL}/{projectId}/{objectId}?api_key={api_key}"
             ext = {"customer_name": doc.kh_ten, "address": doc.kh_diachi}
             json_object = json.dumps(ext)
