@@ -56,6 +56,7 @@ def get_projectID(**kwargs):
         # thay logic sửa đoạn này
         if bool(teamSale):
             sales_person = get_sales_group_child(sale_person=teamSale,is_group=0)
+            print("alse",sales_person)
             # print("employee_codes=============",employee_codes)
             # filters = {"name": ["in",  pydash.filter_(employee_codes, lambda x: bool(x))]}
             if bool(company):

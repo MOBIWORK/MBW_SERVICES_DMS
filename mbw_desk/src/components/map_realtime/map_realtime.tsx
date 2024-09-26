@@ -176,7 +176,7 @@ function RealtimeMap({ options, onClickPopup, status }:RealtimeProp) {
                     if (intervalIdRef.current) clearInterval(intervalIdRef.current);
                     intervalIdRef.current = setInterval(() => {
                         loadMap(_options.objectId);
-                    }, 10000);
+                    }, 60000);
                 } catch (error) {
                     console.error('Error:', error);
                 }
