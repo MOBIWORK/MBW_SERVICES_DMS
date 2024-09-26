@@ -26,3 +26,18 @@ export interface RootObject {
 export type employeeMoveType = {
     [key:string]: any
 }
+
+export type employeeType = {
+  object_id?: string
+  employee_name: string
+  avatar?: string
+  name: string
+  user_id?: string
+}
+
+export type optionsType = {
+  apiKey: string | null;
+  projectId: string | null;
+  objectId?: string,
+  employees?: employeeType[]
+}

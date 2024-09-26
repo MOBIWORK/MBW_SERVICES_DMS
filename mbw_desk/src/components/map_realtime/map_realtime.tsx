@@ -5,6 +5,7 @@ import bbox from '@turf/bbox';
 import './map_realtime.css';
 import MapLegend from './maplegend_realtime';
 import { functionType } from '@/types/dashboard';
+import { employeeType } from '../mapEkgis/realtime/types';
 
 
 interface RealtimeProp {
@@ -31,7 +32,7 @@ function RealtimeMap({ options, onClickPopup, status }:RealtimeProp) {
         reloadTime: 60000,
         stopTime: 600,
     };
-    const _options = extend({}, defaultOptions, options);
+    const _options = {... defaultOptions, ...options};
     if (_options.apiKey === "" || !_options.apiKey) throw new Error("apiKey is required");
     
     const initializeMap = async () => {
@@ -62,16 +63,16 @@ function RealtimeMap({ options, onClickPopup, status }:RealtimeProp) {
                         height: "50px"
                     },
                     {
-                        id: "OSM:Night",
-                        title: 'Bản đồ nền Đêm',
-                        thumbnail: "https://docs.ekgis.vn/assets/dem-map.png",
+                        id: "OSM:Standard",
+                        title: 'Bản đồ nền Tiêu chuẩn',
+                        thumbnail: "https://docs.ekgis.vn/assets/map-chuan.png",
                         width: "50px",
                         height: "50px"
                     },
                     {
-                        id: "OSM:Standard",
-                        title: 'Bản đồ nền Tiêu chuẩn',
-                        thumbnail: "https://docs.ekgis.vn/assets/map-chuan.png",
+                        id: "OSM:Night",
+                        title: 'Bản đồ nền Đêm',
+                        thumbnail: "https://docs.ekgis.vn/assets/dem-map.png",
                         width: "50px",
                         height: "50px"
                     },
@@ -86,27 +87,6 @@ function RealtimeMap({ options, onClickPopup, status }:RealtimeProp) {
                         id: "OSM:Dark",
                         title: 'Bản đồ nền Đêm xanh coban',
                         thumbnail: "https://docs.ekgis.vn/assets/xanhcoban-map.png",
-                        width: "50px",
-                        height: "50px"
-                    },
-                    {
-                        id: "OSM:Pencil",
-                        title: 'Bản đồ nền Bút chì',
-                        thumbnail: "https://docs.ekgis.vn/assets/chi-map.png",
-                        width: "50px",
-                        height: "50px"
-                    },
-                    {
-                        id: "OSM:Pirates",
-                        title: 'Bản đồ nền Cổ điển',
-                        thumbnail: "https://docs.ekgis.vn/assets/dien-map.png",
-                        width: "50px",
-                        height: "50px"
-                    },
-                    {
-                        id: "OSM:Wood",
-                        title: 'Bản đồ nền Gỗ',
-                        thumbnail: "https://docs.ekgis.vn/assets/go-map.png",
                         width: "50px",
                         height: "50px"
                     },
@@ -360,10 +340,12 @@ function RealtimeMap({ options, onClickPopup, status }:RealtimeProp) {
                     var results = []
                     // name Nhân viên => xử lý tên nhân viên từ đây
                     for (const item of mergedArray) {
+                        const employee = _options.employees.find((employee:employeeType) => employee.object_id == item.object._id )
+                        const employee_name = employee ? employee.employee_name : "Không xác định"
                         if (!item.position && !item.checkin) {
                             results.push({
                                 '_id': item.object._id,
-                                'name': item.object.name, // name Nhân viên
+                                'name': employee_name, // name Nhân viên
                                 'status': 'offline',
                             });
                         } else {
@@ -372,7 +354,7 @@ function RealtimeMap({ options, onClickPopup, status }:RealtimeProp) {
                             const isTracking = TrackTimestamp > CheckinTimestamp;
                             const timestamp = isTracking ? TrackTimestamp : CheckinTimestamp;
                             const today = await isToday(timestamp);
-
+                            
                             if (today) {
                                 var status = 'offline';
                                 const coords = isTracking ? [item.position.coords.longitude, item.position.coords.latitude] : item.checkin.coordinates.split(',').map(coord => parseFloat(coord));
@@ -384,9 +366,10 @@ function RealtimeMap({ options, onClickPopup, status }:RealtimeProp) {
                                     if (item.checkin.time_checkout == '') status = 'online';
                                     else if (Date.parse(new Date()) - Date.parse(item.checkin.time_checkout) <= (_options.stopTime * 1000)) status = 'online';
                                 }
+                                
                                 results.push({
                                     '_id': item.object._id,
-                                    'name': item.object.name, // name Nhân viên
+                                    'name': employee_name, // name Nhân viên
                                     'type': isTracking ? 'tracking' : 'checkin',
                                     'position': isTracking ? item.position : item.checkin,
                                     'coordinates': coords,
@@ -397,7 +380,7 @@ function RealtimeMap({ options, onClickPopup, status }:RealtimeProp) {
                             } else {
                                 results.push({
                                     '_id': item.object._id,
-                                    'name': item.object.name, // name Nhân viên
+                                    'name': employee_name, // name Nhân viên
                                     'status': 'offline',
                                 });
                             }

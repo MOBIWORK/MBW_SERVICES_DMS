@@ -127,13 +127,26 @@ def get_list_employees(**kwargs):
             company= employee_info.get("company")
             if not bool(company):
                 return gen_response(406, _("Tài khoản quản lý chưa thuộc công ty nào!"))
-        filters ={}
+        filters = []
+        EmplDoc = frappe.qb.DocType("Employee")
+        SPDoc = frappe.qb.DocType("Sales Person")
         if bool(teamSale):
             employee_codes,employee_id_users = get_sales_group_child(sale_person=teamSale if teamSale != "" else None)
-            filters = {"name": ["in",  pydash.filter_(employee_codes, lambda x: bool(x))]}
+            filters.append(EmplDoc.name.in_(pydash.filter_(employee_codes, lambda x: bool(x))))
+            # filters = {"name": ["in",  pydash.filter_(employee_codes, lambda x: bool(x))]}
             if bool(company):
-                filters["comany"] = company
-        employees = frappe.db.get_all("Employee",filters,["employee_name", "image as avatar", "object_id", "name", "user_id"])
+                filters.append(EmplDoc.company == company)
+                # filters["comany"] = company
+        # employees = frappe.db.get_all("Employee",filters,["employee_name", "image as avatar", "name", "user_id"])
+        
+        query = (frappe.qb.from_(EmplDoc)
+                     .left_join(SPDoc)
+                     .on(EmplDoc.name == SPDoc.employee)
+                     .select(SPDoc.object_id,EmplDoc.employee_name,EmplDoc.image.as_("avatar"),EmplDoc.name,EmplDoc.user_id ))
+                     
+        if  len(filters)>0 : 
+            query = query.where(*filter)
+        employees = query.run(as_dict=1)
         gen_response(200, "Thành công", employees)
     except Exception as e:
         print("Lỗi danh sách nhân viên",e)

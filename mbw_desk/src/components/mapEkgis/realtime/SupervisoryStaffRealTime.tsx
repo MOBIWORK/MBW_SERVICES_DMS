@@ -13,7 +13,7 @@ import axios from "axios";
 import type { AxiosResponse } from "axios";
 import { useNavigate } from "react-router-dom";
 import { LoadingOutlined } from "@ant-design/icons";
-import { employeeMoveType, RootObject, summaryMoveType } from "./types";
+import { employeeMoveType, employeeType, optionsType, RootObject, summaryMoveType } from "./types";
 import { renderColumnsCheckingEmployee } from "./data";
 import { GlobalContext } from "@/App";
 import DepartmentSelect from './Department'
@@ -66,11 +66,7 @@ export default function SupervisoryStaffRealTime() {
   };
 
   // option hiển thị map
-  const [options, setOptions] = useState<{
-    apiKey: string | null;
-    projectId: string | null;
-    objectId?: string
-  }>({
+  const [options, setOptions] = useState<optionsType>({
     apiKey: import.meta.env.VITE_API_KEY,
     projectId: "",
   });
@@ -262,20 +258,23 @@ export default function SupervisoryStaffRealTime() {
         
         const [rsPj,res_apikey,responseAllEmployee]  = await Promise.all([rs,resApikey,responseEmployees])
         
-        setOptions((prev) => ({
-          ...prev,
+        const options:optionsType = {
           apiKey: res_apikey.result,
           projectId: rsPj.result["Project ID"],
           objectId:  rsPj.result["objectIds"]
-        }));
+        }
         const objectIds = rsPj.result["objectIds"]
        
         let arrEmployee = [];
         if (responseAllEmployee.message == "Thành công") {
           arrEmployee = responseAllEmployee.result;
+          options["employees"] =  arrEmployee
         }
 
-        
+        setOptions((prev) => ({
+          ...prev,
+          ...options
+        }));
         /* chỉnh lại dịch vụ đi tuyến của thằng này */
         let urlSummary = `https://api.ekgis.vn/v2/tracking/locationHistory/summary/lastest/${rsPj.result["Project ID"]}/${objectIds}?api_key=${options.apiKey}`;
         /** trả về mảng [
