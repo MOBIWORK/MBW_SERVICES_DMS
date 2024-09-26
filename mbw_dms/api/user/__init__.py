@@ -50,7 +50,7 @@ def get_projectID(**kwargs):
         company= ""
         if account_user.get("name") != "Administrator":
             company= get_employee_info().get("company")
-            if bool(company):
+            if not bool(company):
                 return gen_response(406, _("Tài khoản quản lý chưa thuộc công ty nào!"))
         objectIds = None
         # thay logic sửa đoạn này
@@ -118,7 +118,7 @@ def get_list_employees(**kwargs):
         company= ""
         if account_user.get("name") != "Administrator":
             company= get_employee_info().get("company")
-            if bool(company):
+            if not bool(company):
                 return gen_response(406, _("Tài khoản quản lý chưa thuộc công ty nào!"))
         filters ={}
         if bool(teamSale):
