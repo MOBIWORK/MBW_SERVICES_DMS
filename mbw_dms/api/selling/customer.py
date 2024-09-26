@@ -275,7 +275,7 @@ def create_customer(**kwargs):
                     job_name=None,                          # specify a job name
                     enqueue_after_commit=True,              # enqueue the job after the database commit is done at the end of the request
                     at_front=False,                         # put the job at the front of the queue
-                    customer=kwargs,routers= router_in                             # kwargs are passed to the method as arguments
+                    customer=kwargs,routers= router_in,customer_code = new_customer.customer_code                             # kwargs are passed to the method as arguments
                 )
 
 
@@ -644,7 +644,7 @@ def get_channel():
         return exception_handle(e)
 
 #cập nhật khách hàng vào danh sách tuyến
-def update_customer_in_router(customer={},routers=[]):
+def update_customer_in_router(customer={},routers=[],customer_code=None):
     print("===========================run queue router customer======================")
     customer = frappe._dict(customer)
     if isinstance(customer.address, list):
@@ -657,7 +657,7 @@ def update_customer_in_router(customer={},routers=[]):
         contact = customer.contact
     contact = frappe._dict(contact) if contact else False
     customer_router = {
-        "customer_code": customer.customer_code or "",
+        "customer_code": customer_code if bool(customer_code) else "",
         "customer_name": customer.customer_name or "",
         "display_address": customer.display_address or "",
         "phone_number":  contact.phone if contact else "",
