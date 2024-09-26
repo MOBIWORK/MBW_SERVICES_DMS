@@ -412,11 +412,10 @@ def update_customer(**kwargs):
                 }
                 address_data_list = kwargs.get("address")
                 if len(address_data_list) > 0:
-                    json_location = ""
                     for address_data in address_data_list:
                         if address_data.get("latitude") and address_data.get("longitude"):
                             json_location = json.dumps({"long": address_data.get("longitude"), "lat": address_data.get("latitude")})
-                        address_data["address_location"] =    json_location
+                            address_data["address_location"] = json_location
                         #cũ
                         # current_address = update_address(address_data, link_cs_address, name, json_location)
                         #mới
