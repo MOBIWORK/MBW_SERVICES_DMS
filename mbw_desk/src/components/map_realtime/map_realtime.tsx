@@ -49,7 +49,7 @@ function RealtimeMap({ options, onClickPopup, status }:RealtimeProp) {
             // console.log(_map);
             _map.setPadding({ top: 100, bottom: 100, left: 100, right: 100 });
 
-            new ekmapplf.VectorBaseMap('OSM:Night', _options.apiKey).addTo(_map);
+            new ekmapplf.VectorBaseMap('OSM:Bright', _options.apiKey).addTo(_map);
 
             var basemap = new ekmapplf.control.BaseMap({
                 id: 'ekmapplf_tracking_ctrl_basemap',
