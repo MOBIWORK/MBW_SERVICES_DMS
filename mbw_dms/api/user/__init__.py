@@ -59,8 +59,7 @@ def get_projectID(**kwargs):
         # thay logic sửa đoạn này
         if bool(teamSale):
             sales_person = get_sales_group_child(sale_person=teamSale,is_group=0)
-            print("alse",sales_person)
-            # print("employee_codes=============",employee_codes)
+            print("employee_codes=============",sales_person)
             # filters = {"name": ["in",  pydash.filter_(employee_codes, lambda x: bool(x))]}
             if bool(company):
                 sales_person = pydash.filter_(sales_person,lambda x: x.get("company")== company)
@@ -75,6 +74,7 @@ def get_projectID(**kwargs):
             "objectIds":objectIds
         })
     except Exception as e:
+        print("loi pjid ",e)
         return exception_handle(e)
 
 # Lấy project ID và Object ID

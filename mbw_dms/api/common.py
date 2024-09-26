@@ -685,7 +685,7 @@ def get_sales_group_child(sale_person = "Sales Team",is_group=1,query=""):
             sp.name,
             sp.employee,
             sp.is_group,
-            sp.*,
+            sp.object_id,
             em.employee_name,
             em.company
         FROM 
@@ -702,7 +702,7 @@ def get_sales_group_child(sale_person = "Sales Team",is_group=1,query=""):
             child.name,
             child.employee,
             child.is_group,
-            child.*,
+            child.object_id,
             em.employee_name,
             em.company
         FROM 
