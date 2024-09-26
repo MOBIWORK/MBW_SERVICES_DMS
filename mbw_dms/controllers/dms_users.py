@@ -45,7 +45,7 @@ def update_objid_employee(doc, method):
     employee = doc
     try:
         sale_person = frappe.get_doc("Sales Person",{"employee": employee.name}).as_dict()
-        if sale_person:
+        if sale_person and sale_person.object_id:
             projectId = frappe.get_doc("DMS Settings").ma_du_an
             if projectId is None:
                 frappe.throw("Chưa có Project ID")
@@ -61,7 +61,7 @@ def update_objid_employee(doc, method):
             if response.status_code == 200:
                 pass
             else:
-                frappe.msgprint(f"Lỗi khi gọi API tạo mới object ID: {response.status_code}")
+                frappe.msgprint(f"Lỗi khi gọi API cập nhật object ID: {response.status_code}")
                 return
     except: 
         pass

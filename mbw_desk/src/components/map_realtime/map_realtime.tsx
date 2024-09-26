@@ -122,46 +122,6 @@ function RealtimeMap({ options, onClickPopup, status }:RealtimeProp) {
 
             _map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'bottom-right');
 
-            // bản đồ 3D
-            var is3DMap = false;
-            if (_map.getPitch() > 0) is3DMap = true;
-            else is3DMap = false;
-            var cl = 'maplibregl-terrain2d-control';
-            var tl = 'Hiển thị 2D'
-            if (!is3DMap) {
-                cl = 'maplibregl-terrain3d-control';
-                tl = 'Bản đồ 3D'
-            }
-            let btn3D = new ekmapplf.control.Button({
-                className: 'btn-ctl-group ' + cl,
-                icon: 'none',
-                tooltip: tl
-            });
-            btn3D.on('click', (btn:any) => {
-                is3DMap = !is3DMap;
-                if (is3DMap) {
-                    btn._div.className = btn._div.className.replaceAll(
-                        'maplibregl-terrain3d-control',
-                        'maplibregl-terrain2d-control'
-                    );
-                    btn._div.title = "Hiển thị 2D";
-                }
-                else {
-                    btn._div.className = btn._div.className.replaceAll(
-                        'maplibregl-terrain2d-control',
-                        'maplibregl-terrain3d-control'
-                    );
-                    btn._div.title = "Hiển thị 3D";
-                }
-                if (is3DMap) {
-                    _map.easeTo({ pitch: 60 });
-                    _map.setLayoutProperty('building-3d', 'visibility', 'visible');
-                } else {
-                    _map.easeTo({ pitch: 0 });
-                    _map.setLayoutProperty('building-3d', 'visibility', 'none');
-                }
-            });
-            _map.addControl(btn3D, 'bottom-right');
 
             _map.addControl(new maplibregl.FullscreenControl(), 'top-right');
 
@@ -223,6 +183,10 @@ function RealtimeMap({ options, onClickPopup, status }:RealtimeProp) {
                 if (_map.getSource(`ek-tracking-live-source`)) {
                     _map.getSource(`ek-tracking-live-source`).setData(FeatureCollection);
                 } else {
+                    let Glyphs = _map.getGlyphs()
+                    if (!Glyphs)
+                        _map.setGlyphs(`https://api.ekgis.vn/v2/maps/fonts/{fontstack}/{range}.pbf?api_key=${_options.apiKey}`)
+  
                     _map.addSource(`ek-tracking-live-source`, {
                         'type': 'geojson',
                         'data': FeatureCollection,
@@ -394,11 +358,12 @@ function RealtimeMap({ options, onClickPopup, status }:RealtimeProp) {
                     }));
 
                     var results = []
+                    // name Nhân viên => xử lý tên nhân viên từ đây
                     for (const item of mergedArray) {
                         if (!item.position && !item.checkin) {
                             results.push({
                                 '_id': item.object._id,
-                                'name': item.object.name,
+                                'name': item.object.name, // name Nhân viên
                                 'status': 'offline',
                             });
                         } else {
@@ -421,7 +386,7 @@ function RealtimeMap({ options, onClickPopup, status }:RealtimeProp) {
                                 }
                                 results.push({
                                     '_id': item.object._id,
-                                    'name': item.object.name,
+                                    'name': item.object.name, // name Nhân viên
                                     'type': isTracking ? 'tracking' : 'checkin',
                                     'position': isTracking ? item.position : item.checkin,
                                     'coordinates': coords,
@@ -432,7 +397,7 @@ function RealtimeMap({ options, onClickPopup, status }:RealtimeProp) {
                             } else {
                                 results.push({
                                     '_id': item.object._id,
-                                    'name': item.object.name,
+                                    'name': item.object.name, // name Nhân viên
                                     'status': 'offline',
                                 });
                             }

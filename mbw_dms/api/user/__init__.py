@@ -49,7 +49,10 @@ def get_projectID(**kwargs):
         account_user = get_user_id()
         company= ""
         if account_user.get("name") != "Administrator":
-            company= get_employee_info().get("company")
+            employee_info = get_employee_info()
+            if not employee_info:
+                return gen_response(406, _("Tài khoản chưa phải nhân viên!"))
+            company= employee_info.get("company")
             if not bool(company):
                 return gen_response(406, _("Tài khoản quản lý chưa thuộc công ty nào!"))
         objectIds = None
@@ -118,7 +121,10 @@ def get_list_employees(**kwargs):
         account_user = get_user_id()
         company= ""
         if account_user.get("name") != "Administrator":
-            company= get_employee_info().get("company")
+            employee_info = get_employee_info()
+            if not employee_info:
+                return gen_response(406, _("Tài khoản chưa phải nhân viên!"))
+            company= employee_info.get("company")
             if not bool(company):
                 return gen_response(406, _("Tài khoản quản lý chưa thuộc công ty nào!"))
         filters ={}
