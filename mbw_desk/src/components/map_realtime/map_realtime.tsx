@@ -49,22 +49,22 @@ function RealtimeMap({ options, onClickPopup, status }:RealtimeProp) {
             // console.log(_map);
             _map.setPadding({ top: 100, bottom: 100, left: 100, right: 100 });
 
-            new ekmapplf.VectorBaseMap('OSM:Bright', _options.apiKey).addTo(_map);
+            new ekmapplf.RasterBaseMap('OSM:Bright', _options.apiKey).addTo(_map);
 
             var basemap = new ekmapplf.control.BaseMap({
                 id: 'ekmapplf_tracking_ctrl_basemap',
                 baseLayers: [
                     {
-                        id: "OSM:Night",
-                        title: 'Bản đồ nền Đêm',
-                        thumbnail: "https://docs.ekgis.vn/assets/dem-map.png",
+                        id: "OSM:Bright",
+                        title: 'Bản đồ nền Sáng',
+                        thumbnail: "https://docs.ekgis.vn/assets/map-sang.png",
                         width: "50px",
                         height: "50px"
                     },
                     {
-                        id: "OSM:Bright",
-                        title: 'Bản đồ nền Sáng',
-                        thumbnail: "https://docs.ekgis.vn/assets/map-sang.png",
+                        id: "OSM:Night",
+                        title: 'Bản đồ nền Đêm',
+                        thumbnail: "https://docs.ekgis.vn/assets/dem-map.png",
                         width: "50px",
                         height: "50px"
                     },
@@ -114,7 +114,7 @@ function RealtimeMap({ options, onClickPopup, status }:RealtimeProp) {
             });
             _map.addControl(basemap, 'bottom-left');
             basemap.on('changeBaseLayer', async function (response:any) {
-                await new ekmapplf.VectorBaseMap(response.layer, _options.apiKey).addTo(_map);
+                await new ekmapplf.RasterBaseMap(response.layer, _options.apiKey).addTo(_map);
                 setTimeout(() => {
                     setMap();
                 }, 500)
