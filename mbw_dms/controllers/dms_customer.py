@@ -88,6 +88,6 @@ def create_customer_code(doc, method):
             latest_number = 0
 
         new_number = latest_number + 1
-        customer_code = f"SL1{new_number:06d}"
+        customer_code = f"KH{new_number:06d}"
 
         doc.customer_code = customer_code
