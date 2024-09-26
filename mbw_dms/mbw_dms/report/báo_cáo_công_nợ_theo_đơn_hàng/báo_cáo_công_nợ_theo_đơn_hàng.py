@@ -4,6 +4,12 @@ from frappe import _
 def execute(filters=None):
     # Khởi tạo tiêu đề các cột trong báo cáo
     columns = [
+        {
+            "label": _("Chọn"),
+            "fieldname": "select_item",
+            "fieldtype": "Check",
+            "width": 50
+        },
     	{
             "label": _("Tên khách hàng"),
             "fieldname": "customer_name",
@@ -44,18 +50,20 @@ def execute(filters=None):
             "width": 150
         }
     ]
+
     if filters.get("thanhtoan") == 1:
         filters["thanhtoan"] = 0
+    
     # Xây dựng điều kiện tìm kiếm
     conditions = ""
     if filters.get("customer"):
         conditions += " AND dn.customer_name LIKE %s"
     if filters.get("deliverynote"):
         conditions += " AND dn.name LIKE %s"
-    if filters.get("thanhtoan") is not None:  # Check if the filter is set
+    if filters.get("thanhtoan") is not None:
         conditions += " AND dn.da_thanh_toan = %s"
-    
-    # Lấy dữ liệu từ bảng Sales Order và Delivery Note
+
+    # Truy vấn dữ liệu từ bảng Sales Order và Delivery Note
     query = """
 	SELECT 
 	    dn.customer_name,
@@ -88,8 +96,12 @@ def execute(filters=None):
     if filters.get("deliverynote"):
         params.append("%" + filters.get("deliverynote") + "%")
     if filters.get("thanhtoan") is not None:
-        params.append(int(filters.get("thanhtoan")))  # Add the boolean value (0 or 1)
+        params.append(int(filters.get("thanhtoan")))
 
     data = frappe.db.sql(query, params, as_dict=True)
     
+    # Bổ sung cột checkbox cho từng dòng trong dữ liệu
+    for row in data:
+        row['select_item'] = 0  # Checkbox không bị chọn mặc định và có thể chọn được
+
     return columns, data
