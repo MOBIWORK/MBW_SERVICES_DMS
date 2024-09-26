@@ -248,6 +248,7 @@ doc_events = {
     },
     "Customer": {
         "on_update": "mbw_dms.controllers.dms_customer.update_location",
+        "before_insert": "mbw_dms.controllers.dms_customer.create_customer_code",
         "after_insert": "mbw_dms.controllers.dms_customer.update_kpi_monthly",
         "after_delete": "mbw_dms.controllers.dms_customer.update_kpi_monthly_after_delete"
     },
