@@ -104,7 +104,8 @@ def get_project_object_id(name):
 @frappe.whitelist(methods="GET")
 def get_employee_info_by_objid(object_id):
     try:
-        employee = frappe.db.get_value("Employee",{"object_id": object_id}, ["employee_name", "image as avatar", "name"],as_dict=1)
+        sale_person  = frappe.db.get_value("Sales Person",{"object_id": object_id},"employee")
+        employee = frappe.db.get_value("Employee",sale_person, ["employee_name", "image as avatar", "name"],as_dict=1)
         if employee:
             return gen_response(200, "Thành công", employee)
         else:
@@ -115,7 +116,7 @@ def get_employee_info_by_objid(object_id):
 @frappe.whitelist(methods="GET")
 def get_list_employees(**kwargs):
     try:
-        teamSale = kwargs.get("teamSale")
+        teamSale = kwargs.get("teamSale") if bool(kwargs.get("teamSale")) else "Sales Team"
         # kiểm tả tài khoản quản lý
         account_user = get_user_id()
         company= ""
@@ -126,26 +127,23 @@ def get_list_employees(**kwargs):
             company= employee_info.get("company")
             if not bool(company):
                 return gen_response(406, _("Tài khoản quản lý chưa thuộc công ty nào!"))
-        filters = []
         EmplDoc = frappe.qb.DocType("Employee")
+        filters = EmplDoc.name.isnotnull()
         SPDoc = frappe.qb.DocType("Sales Person")
-        if bool(teamSale):
-            employee_codes,employee_id_users = get_sales_group_child(sale_person=teamSale if teamSale != "" else None)
-            filters.append(EmplDoc.name.in_(pydash.filter_(employee_codes, lambda x: bool(x))))
-            # filters = {"name": ["in",  pydash.filter_(employee_codes, lambda x: bool(x))]}
-            if bool(company):
-                filters.append(EmplDoc.company == company)
-                # filters["comany"] = company
-        # employees = frappe.db.get_all("Employee",filters,["employee_name", "image as avatar", "name", "user_id"])
+        # if bool(teamSale):
+        employee_codes,employee_id_users = get_sales_group_child(sale_person=teamSale)
+        print("employee_codes",employee_codes)
+        employee_code_not_empt = pydash.filter_(employee_codes, lambda x: bool(x))
+        filters = (filters) & EmplDoc.name.isin(employee_code_not_empt)
+        if bool(company):
+            filters = (filters) & EmplDoc.company == company
         
         query = (frappe.qb.from_(EmplDoc)
                      .left_join(SPDoc)
-                     .on(EmplDoc.name == SPDoc.employee)
-                     .select(SPDoc.object_id,EmplDoc.employee_name,EmplDoc.image.as_("avatar"),EmplDoc.name,EmplDoc.user_id ))
-                     
-        if  len(filters)>0 : 
-            query = query.where(*filter)
-        employees = query.run(as_dict=1)
+                     .on(EmplDoc.name == SPDoc.employee))
+        if filters: 
+            query = query.where(filters)
+        employees = query.select(SPDoc.object_id,EmplDoc.employee_name,EmplDoc.image.as_("avatar"),EmplDoc.name,EmplDoc.user_id ).run(as_dict=1)
         gen_response(200, "Thành công", employees)
     except Exception as e:
         print("Lỗi danh sách nhân viên",e)

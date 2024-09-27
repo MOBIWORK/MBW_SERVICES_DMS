@@ -96,7 +96,7 @@ export default function SupervisoryStaffRealTime() {
   const handleShowHistoryEmployee = (employee: employeeMoveType) => {
     if (employee.objectId != null)
       navigate(`/employee-monitor-detail/${employee.objectId}`);
-    else navigate(`/employee-monitor-detail`);
+    else errorMsg(`Kiểm tra dữ liệu nhân viên bán hàng: ${employee.emp_name} `)
   };
   // render top 5 nhân viên có nhiều SO
   const renderDataEmployee = async (arrEmployeeInput: any[]) => {
@@ -251,7 +251,7 @@ export default function SupervisoryStaffRealTime() {
           "/api/method/mbw_dms.api.user.get_list_employees",
           {
             params: {
-              team_sale:teamSale
+              teamSale
             }
           }
         );
@@ -261,16 +261,18 @@ export default function SupervisoryStaffRealTime() {
         const options:optionsType = {
           apiKey: res_apikey.result,
           projectId: rsPj.result["Project ID"],
-          objectId:  rsPj.result["objectIds"]
+          objectId:  rsPj.result["objectIds"],
+          employees: []
         }
         const objectIds = rsPj.result["objectIds"]
-       
+        
         let arrEmployee = [];
         if (responseAllEmployee.message == "Thành công") {
           arrEmployee = responseAllEmployee.result;
           options["employees"] =  arrEmployee
-        }
-
+        }       
+        console.log("options",options);
+        
         setOptions((prev) => ({
           ...prev,
           ...options

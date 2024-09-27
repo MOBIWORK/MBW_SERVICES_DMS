@@ -39,5 +39,5 @@ export type optionsType = {
   apiKey: string | null;
   projectId: string | null;
   objectId?: string,
-  employees?: employeeType[]
+  employees?: employeeType[] |[]
 }
