@@ -7,6 +7,7 @@ from mbw_dms.api.common import (
     get_employee_by_name,
     validate_image,
     BASE_URL,
+    get_base_url,
     get_value_child_doctype,
     get_all_parent_sales_persons
 )
@@ -131,7 +132,7 @@ def get_info_notification(**kwargs):
             info["employee_watched"] = employee_watched
             # handle returns the attached file
             info['files'] = (frappe.qb.from_(FileDoc)
-                             .select(Concat(BASE_URL, FileDoc.file_url).as_("file_url"), FileDoc.name)
+                             .select(Concat(get_base_url(), FileDoc.file_url).as_("file_url"), FileDoc.name)
                              .where(FileDoc.attached_to_name == name_doc)
                              ).run(as_dict=True)
 
