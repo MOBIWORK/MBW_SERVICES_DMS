@@ -77,7 +77,7 @@ def create_customer_code(doc, method):
         latest_customer_code = frappe.db.sql("""
             SELECT customer_code 
             FROM `tabCustomer`
-            WHERE customer_code LIKE 'SL1%'
+            WHERE customer_code LIKE 'KH%'
             ORDER BY customer_code DESC
             LIMIT 1
         """, as_dict=True)
