@@ -101,12 +101,13 @@ def list_note(kwargs):
         custom_checkin_id = kwargs.get('custom_checkin_id')
         customer = kwargs.get('customer')
         if customer:
-            list_checkin = frappe.db.get_all("DMS Checkin",{"kh_ma": customer},pluck='name')
+            list_checkin = frappe.db.get_all("DMS Checkin",{"kh_ma": customer},pluck='checkin_id')
             my_filter["custom_checkin_id"] = ['in', list_checkin]
         if name:
             my_filter["name"] = ['like', f'%{name}%']
         if custom_checkin_id:
             my_filter["custom_checkin_id"] = ['like', f'%{custom_checkin_id}%']
+        print("filter====",my_filter)
         list_note = frappe.get_all('Note',filters=my_filter ,fields=["name", "title", "content", "creation","custom_checkin_id"], start=page_size*(page_number-1), page_length=page_size)
         totals = frappe.db.count("Note", filters=my_filter)
         from bs4 import BeautifulSoup
