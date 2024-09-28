@@ -20,6 +20,17 @@ const columnsDetail: any = [
     title: "Khách hàng",
     dataIndex: "kh_ten",
     key: "kh_ten",
+    render: (_, record: any) => (
+      <div>
+        <a
+          className="text-[#212B36]"
+          href={`/app/sales-invoice/${record.kh_ten}`}
+          target="_blank"
+        >
+          {record.kh_ten}
+        </a>
+      </div>
+    ),
   },
   {
     title: "Địa chỉ",

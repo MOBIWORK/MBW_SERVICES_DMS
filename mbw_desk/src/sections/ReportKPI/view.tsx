@@ -1012,7 +1012,7 @@ export default function ReportKPI() {
           <ModalDetail
             title={
               <div className="font-semibold text-2xl leading-[22px] text-[#222222] px-4 pt-4">
-                Số khách hàng viếng thăm duy nhất -{" "}
+                Số khách hàng viếng thăm -{" "}
                 {modalCheckF.id?.name_employee}
               </div>
             }
