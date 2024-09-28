@@ -383,8 +383,7 @@ function RealtimeMap({ options, onClickPopup, status }:RealtimeProp) {
                                 }
                                 
                                 inforEmployee = {
-                                    '_id': employee.object_id,
-                                    'name': employee_name, // name Nhân viên
+                                    ...inforEmployee,// name Nhân viên
                                     'type': isTracking ? 'tracking' : 'checkin',
                                     'position': isTracking ? item_tracking.position : item_checkin.checkin,
                                     'coordinates': coords,
