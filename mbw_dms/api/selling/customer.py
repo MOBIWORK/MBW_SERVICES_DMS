@@ -275,7 +275,7 @@ def create_customer(**kwargs):
                     job_name=None,                          # specify a job name
                     enqueue_after_commit=True,              # enqueue the job after the database commit is done at the end of the request
                     at_front=False,                         # put the job at the front of the queue
-                    customer=kwargs,routers= router_in                             # kwargs are passed to the method as arguments
+                    customer=kwargs,routers= router_in,customer_code = new_customer.customer_code                             # kwargs are passed to the method as arguments
                 )
 
 
@@ -412,15 +412,14 @@ def update_customer(**kwargs):
                 }
                 address_data_list = kwargs.get("address")
                 if len(address_data_list) > 0:
-                    json_location = ""
                     for address_data in address_data_list:
                         if address_data.get("latitude") and address_data.get("longitude"):
                             json_location = json.dumps({"long": address_data.get("longitude"), "lat": address_data.get("latitude")})
-                        address_data["address_location"] =    json_location
+                            address_data["address_location"] = json_location
                         #cũ
                         # current_address = update_address(address_data, link_cs_address, name, json_location)
                         #mới
-                        current_address = handle_address_customer(address_data,link_cs_address)
+                        handle_address_customer(address_data,link_cs_address)
                     address_data_primary = pydash.find(address_data_list,lambda x: x.get("primary") == 1)
                     if address_data_primary:
                         address_data_primary = frappe._dict(address_data_primary)
@@ -443,62 +442,61 @@ def update_customer(**kwargs):
                 new_address = {}
                 contact_data_update = {}
                 if contacts_data_list:
-                    contact_data = contacts_data_list[0]
-                    contact_name = contact_data.get("name")
-                    if frappe.db.exists("Contact", contact_name):
-                        frappe.db.sql("""
-                            UPDATE `tabCustomer` 
-                            SET customer_primary_contact=NULL, mobile_no=NULL, email_id=NULL
-                            WHERE name=%s AND customer_primary_contact=%s
-                        """, (name, contact_name))
+                    for contact_data in contacts_data_list:
+                        if contact_data.get("city") and contact_data.get("address_line1"):
+                            new_address = {
+                                "address_title":contact_data.get("address_title"),
+                                "address_line1": contact_data.get("address_line1"),
+                                "city": contact_data.get("city"),
+                                "county": contact_data.get("county"),
+                                "state": contact_data.get("state"),
+                                "address": contact_data.get("address")
+                            }
 
-                        contact = frappe.get_doc("Contact", contact_name)
-                        if contact.address:
-                            frappe.db.delete("Address", contact.address)
-                        frappe.db.delete("Contact", contact_name)
-                    
-                    if contact_data.get("city") and contact_data.get("address_line1"):
-                        new_address = {
-                            "address_title":contact_data.get("address_title"),
-                            "address_line1": contact_data.get("address_line1"),
-                            "city": contact_data.get("city"),
-                            "county": contact_data.get("county"),
-                            "state": contact_data.get("state"),
-                            "address": contact_data.get("address")
+                        contact_data_update = {
+                            "first_name": contact_data.get("first_name"),
+                            "is_billing_contact": contact_data.get("is_billing_contact"),
+                            "is_primary_contact": contact_data.get("is_primary_contact"),
+                            "last_name": contact_data.get("last_name"),
+                            "phone": contact_data.get("phone")
                         }
-                    
-                    contact_data_update = {
-                        "first_name": contact_data.get("first_name"),
-                        "is_billing_contact": contact_data.get("is_billing_contact"),
-                        "is_primary_contact": contact_data.get("is_primary_contact"),
-                        "last_name": contact_data.get("last_name"),
-                        "phone": contact_data.get("phone")
-                    }
+                        contact_name = contact_data.get("name")
+                        if frappe.db.exists("Contact", contact_name):
+                            frappe.db.sql("""
+                                UPDATE `tabCustomer` 
+                                SET customer_primary_contact=NULL, mobile_no=NULL, email_id=NULL
+                                WHERE name=%s AND customer_primary_contact=%s
+                            """, (name, contact_name))
 
-                    new_contact = frappe.new_doc("Contact")
+                            contact = frappe.get_doc("Contact", contact_name)
+                            if contact.address:
+                                frappe.db.delete("Address", contact.address)
+                            frappe.db.delete("Contact", contact_name)                  
+                                                                       
+                        new_contact = frappe.new_doc("Contact")
 
-                    if contact_data_update.get("phone"):
-                        new_contact.append("phone_nos", {"phone": contact_data_update.get("phone") ,"is_primary_mobile_no": 1})
+                        if contact_data_update.get("phone"):
+                            new_contact.append("phone_nos", {"phone": contact_data_update.get("phone") ,"is_primary_mobile_no": 1})
 
-                    new_contact.update(contact_data_update)
-                    new_contact.append("links", {
-                        "link_doctype": "Customer",
-                        "link_name": name
-                    })
-                    new_contact.insert()
-
-                    if bool(new_address):
-                        link_cs_address= {
+                        new_contact.update(contact_data_update)
+                        new_contact.append("links", {
                             "link_doctype": "Customer",
-                            "link_name": name 
-                        }
-                        address_current = update_address(new_address, link_cs_address, name_cus=name, json_location=None)
-                        new_contact.address = address_current.name
-                        new_contact.save()
-
-                    if contact_data_update.get("is_primary_contact") == 1 :
+                            "link_name": name
+                        })
+                        new_contact.insert()
+                        if bool(new_address):
+                            link_cs_address= {
+                                "link_doctype": "Contact",
+                                "link_name": new_contact.name 
+                            }
+                            address_current = update_address(new_address, link_cs_address, name_cus=name, json_location=None)
+                            new_contact.address = address_current.name
+                            new_contact.save()
+                        contact_data.update({"name": new_contact.name})
+                    primary_contact = pydash.find(contacts_data_list,lambda x: x.get("primary") == 1)
+                    if primary_contact:
                         # customer = frappe.get_doc("Customer", name)
-                        customer.set("customer_primary_contact", new_contact.name)
+                        customer.set("customer_primary_contact", primary_contact.get("name"))
                         customer.save()
             router_in = kwargs.get("router")
             if router_in and len(router_in)>0:
@@ -520,6 +518,7 @@ def update_customer(**kwargs):
         else:
             return gen_response(406, f"Không tồn tại khách hàng {name}")
     except Exception as e:
+        print("error::::: ",e)
         return exception_handle(e)
 
 
@@ -644,7 +643,7 @@ def get_channel():
         return exception_handle(e)
 
 #cập nhật khách hàng vào danh sách tuyến
-def update_customer_in_router(customer={},routers=[]):
+def update_customer_in_router(customer={},routers=[],customer_code=None):
     print("===========================run queue router customer======================")
     customer = frappe._dict(customer)
     if isinstance(customer.address, list):
@@ -657,7 +656,7 @@ def update_customer_in_router(customer={},routers=[]):
         contact = customer.contact
     contact = frappe._dict(contact) if contact else False
     customer_router = {
-        "customer_code": customer.customer_code or "",
+        "customer_code": customer_code if bool(customer_code) else "",
         "customer_name": customer.customer_name or "",
         "display_address": customer.display_address or "",
         "phone_number":  contact.phone if contact else "",

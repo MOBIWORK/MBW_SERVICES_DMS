@@ -35,7 +35,7 @@ function WidgetHistory({ employee }: { employee?: string }) {
   })
   
   const [options, setOptions] = useState<optionsType>({
-    apiKey: import.meta.env.VITE_API_KEY,
+    apiKey: import.meta.env.VITE_KEY_MAP,
     projectId: "",
     objectId: "",
     ...time
@@ -109,7 +109,7 @@ function WidgetHistory({ employee }: { employee?: string }) {
   }, [options]);
   return (
     <>
-      <Row className="flex flex-wrap justify-between items-center px-[30px] bg-[#fff]">
+      <Row className="flex flex-wrap justify-between items-center px-[30px] bg-[#fff] sticky top-0 z-10">
         <div className="flex justify-center items-center">
           <Link to="/employee-monitor">
             {" "}

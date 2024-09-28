@@ -685,7 +685,9 @@ def get_sales_group_child(sale_person = "Sales Team",is_group=1,query=""):
             sp.name,
             sp.employee,
             sp.is_group,
-            em.employee_name
+            sp.object_id,
+            em.employee_name,
+            em.company
         FROM 
             `tabSales Person` sp
         LEFT JOIN `tabEmployee` em
@@ -700,7 +702,9 @@ def get_sales_group_child(sale_person = "Sales Team",is_group=1,query=""):
             child.name,
             child.employee,
             child.is_group,
-            em.employee_name
+            child.object_id,
+            em.employee_name,
+            em.company
         FROM 
             `tabSales Person` child
         LEFT JOIN `tabEmployee` em

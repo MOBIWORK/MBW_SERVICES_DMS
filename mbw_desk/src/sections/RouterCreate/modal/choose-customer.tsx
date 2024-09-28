@@ -249,7 +249,7 @@ export function ChooseCustomer({ closeModal }: Props) {
           rowSelection={{
             type: "checkbox",
             ...rowSelection,
-          }}
+          } as any}
           columns={columnSelectCustomer}
           dataSource={customerList.map((value: CustomerType) => ({
             key: value.customer_code,

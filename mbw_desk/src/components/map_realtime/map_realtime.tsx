@@ -1,15 +1,21 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, LegacyRef } from 'react';
 import maplibregl from 'maplibre-gl';
 import extend from 'xtend';
 import bbox from '@turf/bbox';
 import './map_realtime.css';
 import MapLegend from './maplegend_realtime';
+import { functionType } from '@/types/dashboard';
+import { employeeType } from '../mapEkgis/realtime/types';
 
+
+interface RealtimeProp {
+    options: any, onClickPopup: functionType, status:functionType 
+}
 const ekmapplf = window.ekmapplf;
 
-function RealtimeMap({ options, onClickPopup, status }) {
-    const mapContainer = useRef(null);
-    const map = useRef(null);
+function RealtimeMap({ options, onClickPopup, status }:RealtimeProp) {
+    const mapContainer = useRef<any>(null);
+    const map = useRef<any>(null);
     const intervalIdRef = useRef(null);
 
     const markers = useRef({});
@@ -26,9 +32,9 @@ function RealtimeMap({ options, onClickPopup, status }) {
         reloadTime: 60000,
         stopTime: 600,
     };
-    const _options = extend({}, defaultOptions, options);
+    const _options = {... defaultOptions, ...options};
     if (_options.apiKey === "" || !_options.apiKey) throw new Error("apiKey is required");
-
+    
     const initializeMap = async () => {
         try {
             map.current = new maplibregl.Map({
@@ -44,18 +50,11 @@ function RealtimeMap({ options, onClickPopup, status }) {
             // console.log(_map);
             _map.setPadding({ top: 100, bottom: 100, left: 100, right: 100 });
 
-            new ekmapplf.VectorBaseMap('OSM:Night', _options.apiKey).addTo(_map);
+            new ekmapplf.RasterBaseMap('OSM:Bright', _options.apiKey).addTo(_map);
 
             var basemap = new ekmapplf.control.BaseMap({
                 id: 'ekmapplf_tracking_ctrl_basemap',
                 baseLayers: [
-                    {
-                        id: "OSM:Night",
-                        title: 'Bản đồ nền Đêm',
-                        thumbnail: "https://docs.ekgis.vn/assets/dem-map.png",
-                        width: "50px",
-                        height: "50px"
-                    },
                     {
                         id: "OSM:Bright",
                         title: 'Bản đồ nền Sáng',
@@ -67,6 +66,13 @@ function RealtimeMap({ options, onClickPopup, status }) {
                         id: "OSM:Standard",
                         title: 'Bản đồ nền Tiêu chuẩn',
                         thumbnail: "https://docs.ekgis.vn/assets/map-chuan.png",
+                        width: "50px",
+                        height: "50px"
+                    },
+                    {
+                        id: "OSM:Night",
+                        title: 'Bản đồ nền Đêm',
+                        thumbnail: "https://docs.ekgis.vn/assets/dem-map.png",
                         width: "50px",
                         height: "50px"
                     },
@@ -84,32 +90,11 @@ function RealtimeMap({ options, onClickPopup, status }) {
                         width: "50px",
                         height: "50px"
                     },
-                    {
-                        id: "OSM:Pencil",
-                        title: 'Bản đồ nền Bút chì',
-                        thumbnail: "https://docs.ekgis.vn/assets/chi-map.png",
-                        width: "50px",
-                        height: "50px"
-                    },
-                    {
-                        id: "OSM:Pirates",
-                        title: 'Bản đồ nền Cổ điển',
-                        thumbnail: "https://docs.ekgis.vn/assets/dien-map.png",
-                        width: "50px",
-                        height: "50px"
-                    },
-                    {
-                        id: "OSM:Wood",
-                        title: 'Bản đồ nền Gỗ',
-                        thumbnail: "https://docs.ekgis.vn/assets/go-map.png",
-                        width: "50px",
-                        height: "50px"
-                    },
                 ],
             });
             _map.addControl(basemap, 'bottom-left');
             basemap.on('changeBaseLayer', async function (response:any) {
-                await new ekmapplf.VectorBaseMap(response.layer, _options.apiKey).addTo(_map);
+                await new ekmapplf.RasterBaseMap(response.layer, _options.apiKey).addTo(_map);
                 setTimeout(() => {
                     setMap();
                 }, 500)
@@ -117,46 +102,6 @@ function RealtimeMap({ options, onClickPopup, status }) {
 
             _map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'bottom-right');
 
-            // bản đồ 3D
-            var is3DMap = false;
-            if (_map.getPitch() > 0) is3DMap = true;
-            else is3DMap = false;
-            var cl = 'maplibregl-terrain2d-control';
-            var tl = 'Hiển thị 2D'
-            if (!is3DMap) {
-                cl = 'maplibregl-terrain3d-control';
-                tl = 'Bản đồ 3D'
-            }
-            let btn3D = new ekmapplf.control.Button({
-                className: 'btn-ctl-group ' + cl,
-                icon: 'none',
-                tooltip: tl
-            });
-            btn3D.on('click', (btn:any) => {
-                is3DMap = !is3DMap;
-                if (is3DMap) {
-                    btn._div.className = btn._div.className.replaceAll(
-                        'maplibregl-terrain3d-control',
-                        'maplibregl-terrain2d-control'
-                    );
-                    btn._div.title = "Hiển thị 2D";
-                }
-                else {
-                    btn._div.className = btn._div.className.replaceAll(
-                        'maplibregl-terrain2d-control',
-                        'maplibregl-terrain3d-control'
-                    );
-                    btn._div.title = "Hiển thị 3D";
-                }
-                if (is3DMap) {
-                    _map.easeTo({ pitch: 60 });
-                    _map.setLayoutProperty('building-3d', 'visibility', 'visible');
-                } else {
-                    _map.easeTo({ pitch: 0 });
-                    _map.setLayoutProperty('building-3d', 'visibility', 'none');
-                }
-            });
-            _map.addControl(btn3D, 'bottom-right');
 
             _map.addControl(new maplibregl.FullscreenControl(), 'top-right');
 
@@ -171,7 +116,7 @@ function RealtimeMap({ options, onClickPopup, status }) {
                     if (intervalIdRef.current) clearInterval(intervalIdRef.current);
                     intervalIdRef.current = setInterval(() => {
                         loadMap(_options.objectId);
-                    }, 10000);
+                    }, 60000);
                 } catch (error) {
                     console.error('Error:', error);
                 }
@@ -196,8 +141,9 @@ function RealtimeMap({ options, onClickPopup, status }) {
                     }
                     return acc;
                 }, { online: 0, offline: 0 });
+                // set nhân viên onl/off
                 if (status) status(statusCount);
-
+                // add nv vào bản đồ
                 const FeatureCollection = {
                     'type': 'FeatureCollection',
                     'features': await Promise.all(DataObjs.map((data) => {
@@ -218,6 +164,10 @@ function RealtimeMap({ options, onClickPopup, status }) {
                 if (_map.getSource(`ek-tracking-live-source`)) {
                     _map.getSource(`ek-tracking-live-source`).setData(FeatureCollection);
                 } else {
+                    let Glyphs = _map.getGlyphs()
+                    if (!Glyphs)
+                        _map.setGlyphs(`https://api.ekgis.vn/v2/maps/fonts/{fontstack}/{range}.pbf?api_key=${_options.apiKey}`)
+  
                     _map.addSource(`ek-tracking-live-source`, {
                         'type': 'geojson',
                         'data': FeatureCollection,
@@ -360,9 +310,7 @@ function RealtimeMap({ options, onClickPopup, status }) {
             }
             // xử lý request nhân viên onl/off
             async function getLastPos(objectIds:any) {
-                try {
-                    console.log(typeof objectIds,objectIds);
-                    
+                try {                   
                     var str_ids = objectIds === null ? 'null' : objectIds.toString().replaceAll(',', ';');
                     const urlTracking = `https://api.ekgis.vn/v2/tracking/locationHistory/position/${_options.projectId}/latest/${str_ids}?api_key=${_options.apiKey}`;
                     const urlCheckin = `https://api.ekgis.vn/v1/checkin/${_options.projectId}/latest/${str_ids}?api_key=${_options.apiKey}`;
@@ -372,8 +320,9 @@ function RealtimeMap({ options, onClickPopup, status }) {
                         fetch(urlCheckin)
                     ]);
 
-                    
+                    // dữ liệu tracking cuối
                     const DataTracking = await responseTracking.json();
+                    //dữ liệu checkin cuối
                     const DataCheckin = await responseCheckin.json();
                     
                     console.log("responseTracking, responseCheckin",DataTracking, DataCheckin)
@@ -387,52 +336,120 @@ function RealtimeMap({ options, onClickPopup, status }) {
                         position: obj2Map[item1.object._id] ? obj2Map[item1.object._id].position : null,
                         checkin: item1.checkin
                     }));
+                    let obj2Chckin:any = {}
+                    mergedArray.forEach((item_checkin:any) => {
+                        obj2Chckin[item_checkin.object._id] = item_checkin
+                    })
 
-                    var results = []
-                    for (const item of mergedArray) {
-                        if (!item.position && !item.checkin) {
-                            results.push({
-                                '_id': item.object._id,
-                                'name': item.object.name,
+                    var results:any[] = []
+                    if(_options && _options?.employees && _options?.employees.length > 0) {
+                        let employeeHasObjId =  _options?.employees.filter((employee: employeeType) => employee.object_id)
+                        employeeHasObjId.forEach(async(employee: employeeType) => {
+                            const employee_name = employee ? employee.employee_name : "Không xác định"
+
+                            let inforEmployee:any = {
+                                '_id': employee.object_id,
+                                'name': employee_name, // name Nhân viên
                                 'status': 'offline',
-                            });
-                        } else {
-                            const TrackTimestamp = item.position ? Date.parse(item.position.timestamp) : 0;
-                            const CheckinTimestamp = item.checkin ? Date.parse(item.checkin.timestamp) : 0;
-                            const isTracking = TrackTimestamp > CheckinTimestamp;
-                            const timestamp = isTracking ? TrackTimestamp : CheckinTimestamp;
-                            const today = await isToday(timestamp);
+                            }
+                            let item_checkin = obj2Chckin[employee.object_id as string]
+                            let item_tracking = obj2Map[employee.object_id as string]
+                            let endTimeTracking = 0
+                            let endTimeCheckin = 0
+                            if(item_checkin) {
+                                endTimeCheckin = Date.parse(item_checkin.checkin.timestamp);                                
+                            }
+                            if(item_tracking) {
+                                endTimeTracking = Date.parse(item_tracking.position.timestamp) 
+                            }
 
-                            if (today) {
-                                var status = 'offline';
-                                const coords = isTracking ? [item.position.coords.longitude, item.position.coords.latitude] : item.checkin.coordinates.split(',').map(coord => parseFloat(coord));
+                            let isTracking = endTimeTracking > endTimeCheckin
+                            const timestamp = isTracking ? endTimeTracking : endTimeCheckin;
+                            let today = isToday(timestamp);
+
+
+
+                            if(today) {
+                                const coords = isTracking ? [item_tracking.position.coords.longitude, item_tracking.position.coords.latitude] : item_checkin.checkin.coordinates.split(',').map((coord:any) => parseFloat(coord));
                                 const address = await reverseGeocode(coords);
-
+                                //>10p -> offl 
                                 if (isTracking) {
-                                    if (Date.parse(new Date()) - timestamp <= (_options.stopTime * 1000)) status = 'online';
+                                    // là tracking so sánh timestamp
+                                    if (Date.parse(new Date()) - timestamp <= (_options.stopTime * 1000)) inforEmployee.status = 'online';
                                 } else {
-                                    if (item.checkin.time_checkout == '') status = 'online';
-                                    else if (Date.parse(new Date()) - Date.parse(item.checkin.time_checkout) <= (_options.stopTime * 1000)) status = 'online';
+                                    //là checkin 
+                                    if (item_checkin.checkin.time_checkout == '') inforEmployee.status = 'online';
+                                    else if (Date.parse(new Date()) - Date.parse(item_checkin.checkin.time_checkout) <= (_options.stopTime * 1000)) inforEmployee.status = 'online';
                                 }
-                                results.push({
-                                    '_id': item.object._id,
-                                    'name': item.object.name,
+                                
+                                inforEmployee = {
+                                    ...inforEmployee,// name Nhân viên
                                     'type': isTracking ? 'tracking' : 'checkin',
-                                    'position': isTracking ? item.position : item.checkin,
+                                    'position': isTracking ? item_tracking.position : item_checkin.checkin,
                                     'coordinates': coords,
                                     'address': address,
-                                    'status': status,
                                     'timestamp': timestamp
-                                });
-                            } else {
-                                results.push({
-                                    '_id': item.object._id,
-                                    'name': item.object.name,
-                                    'status': 'offline',
-                                });
+                                }
                             }
-                        }
+                            
+
+
+                            results.push(inforEmployee)
+                        })
                     }
+
+                    // name Nhân viên => xử lý tên nhân viên từ đây
+                    // for (const item of mergedArray) {
+                    //     const employee = _options.employees.find((employee:employeeType) => employee.object_id == item.object._id )
+                    //     const employee_name = employee ? employee.employee_name : "Không xác định"
+                    //     if (!item.position && !item.checkin) {
+                    //         results.push({
+                    //             '_id': item.object._id,
+                    //             'name': employee_name, // name Nhân viên
+                    //             'status': 'offline',
+                    //         });
+                    //     } else {
+                    //         const TrackTimestamp = item.position ? Date.parse(item.position.timestamp) : 0;
+                    //         const CheckinTimestamp = item.checkin ? Date.parse(item.checkin.timestamp) : 0;
+                    //         const isTracking = TrackTimestamp > CheckinTimestamp;
+                    //         const timestamp = isTracking ? TrackTimestamp : CheckinTimestamp;
+                    //         const today = await isToday(timestamp);
+                            
+                    //         if (today) {
+                    //             let status = 'offline';
+                    //             const coords = isTracking ? [item.position.coords.longitude, item.position.coords.latitude] : item.checkin.coordinates.split(',').map(coord => parseFloat(coord));
+                    //             const address = await reverseGeocode(coords);
+                    //             //>10p -> offl 
+                    //             if (isTracking) {
+                    //                 // là tracking so sánh timestamp
+                    //                 if (Date.parse(new Date()) - timestamp <= (_options.stopTime * 1000)) status = 'online';
+                    //             } else {
+                    //                 //là checkin 
+                    //                 if (item.checkin.time_checkout == '') status = 'online';
+                    //                 else if (Date.parse(new Date()) - Date.parse(item.checkin.time_checkout) <= (_options.stopTime * 1000)) status = 'online';
+                    //             }
+                                
+                    //             results.push({
+                    //                 '_id': item.object._id,
+                    //                 'name': employee_name, // name Nhân viên
+                    //                 'type': isTracking ? 'tracking' : 'checkin',
+                    //                 'position': isTracking ? item.position : item.checkin,
+                    //                 'coordinates': coords,
+                    //                 'address': address,
+                    //                 'status': status,
+                    //                 'timestamp': timestamp
+                    //             });
+                    //         } else {
+                    //             results.push({
+                    //                 '_id': item.object._id,
+                    //                 'name': employee_name, // name Nhân viên
+                    //                 'status': 'offline',
+                    //             });
+                    //         }
+                    //     }
+                    // }
+                    console.log("results",results);
+                    
                     return results;
                 } catch (error) {
                     console.error('Error getting last position:', error);
