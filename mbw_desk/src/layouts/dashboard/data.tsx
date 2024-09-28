@@ -44,7 +44,7 @@ export const listMenu: MenuItem[] = [
       {
         label: (
           <Link className={""} to="/monitor-album">
-              Giám sát chụp ảnh khách hàng
+              Chụp ảnh khách hàng
           </Link>
         ),
         key: "giamsat-image",
@@ -52,7 +52,7 @@ export const listMenu: MenuItem[] = [
       {
         label: (
           <Link className={""} to="employee-monitor">
-              Giám sát viếng thăm khách hàng
+              Viếng thăm khách hàng
           </Link>
         ),
         key: "employee-monitor",
