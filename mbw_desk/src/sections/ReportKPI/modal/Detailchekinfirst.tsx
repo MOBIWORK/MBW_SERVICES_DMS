@@ -20,6 +20,17 @@ const columnsDetail: any = [
     title: "Khách hàng",
     dataIndex: "kh_ten",
     key: "kh_ten",
+    render: (_, record: any) => (
+      <div>
+        <a
+          className="text-[#212B36]"
+          href={`/app/sales-invoice/${record.kh_ten}`}
+          target="_blank"
+        >
+          {record.kh_ten}
+        </a>
+      </div>
+    ),
   },
   {
     title: "Địa chỉ",
@@ -121,6 +132,10 @@ export default function Detailchekinfirst({ employee, month, year }: any) {
           y: 300,
         }}
         columns={columnsDetail}
+        onRow={() => ({
+          onMouseEnter: () => null, // Vô hiệu hóa hover
+          onMouseLeave: () => null, // Vô hiệu hóa hover
+        })}
       />
     </>
   );

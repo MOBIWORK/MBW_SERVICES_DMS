@@ -61,7 +61,7 @@ def kpi_only_visit_detail(**kwargs):
         if employee:
             filters["createdbyemail"] = user_id
 
-        all_data = frappe.db.get_all("DMS Checkin", filters=filters, fields=["name", "kh_ma", "kh_ten", "kh_diachi", "checkin_giovao", "checkin_khoangcach"],start=  (page_number -1 )* page_size,page_length = page_size)
+        all_data = frappe.db.get_all("DMS Checkin", filters=filters, fields=["name", "kh_ma", "kh_ten", "kh_diachi", "checkin_giovao", "checkin_khoangcach"],order_by="kh_ma asc",start=  (page_number -1 )* page_size,page_length = page_size)
         unique_data_count =  frappe.db.count("DMS Checkin", filters=filters)
         return_data = {}
         for checkin in all_data: 
