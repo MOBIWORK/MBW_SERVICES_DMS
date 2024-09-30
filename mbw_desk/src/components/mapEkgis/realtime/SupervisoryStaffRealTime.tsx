@@ -145,6 +145,7 @@ export default function SupervisoryStaffRealTime() {
 
      handleSummaryOnlienAndOffline(realtimeEmployee)
      initDataSummaryOver();
+
   },[options])
 
 
