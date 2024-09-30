@@ -129,6 +129,8 @@ function RealtimeMap({ options, onClickPopup, status }:RealtimeProp) {
             }
 
             const loadMap = async (objectIds:any) => {
+                console.log("load map");
+                
                 // load map => gọi dịch vụ nhân viên onl/off
                 var DataObjs = await getLastPos(objectIds)
                 // DataObjs = DataObjs.filter(item => item !== null);
@@ -142,7 +144,7 @@ function RealtimeMap({ options, onClickPopup, status }:RealtimeProp) {
                     return acc;
                 }, { online: 0, offline: 0 });
                 // set nhân viên onl/off
-                if (status) status(statusCount);
+                if (status) await status(statusCount);
                 // add nv vào bản đồ
                 const FeatureCollection = {
                     'type': 'FeatureCollection',
@@ -397,58 +399,6 @@ function RealtimeMap({ options, onClickPopup, status }:RealtimeProp) {
                             results.push(inforEmployee)
                         })
                     }
-
-                    // name Nhân viên => xử lý tên nhân viên từ đây
-                    // for (const item of mergedArray) {
-                    //     const employee = _options.employees.find((employee:employeeType) => employee.object_id == item.object._id )
-                    //     const employee_name = employee ? employee.employee_name : "Không xác định"
-                    //     if (!item.position && !item.checkin) {
-                    //         results.push({
-                    //             '_id': item.object._id,
-                    //             'name': employee_name, // name Nhân viên
-                    //             'status': 'offline',
-                    //         });
-                    //     } else {
-                    //         const TrackTimestamp = item.position ? Date.parse(item.position.timestamp) : 0;
-                    //         const CheckinTimestamp = item.checkin ? Date.parse(item.checkin.timestamp) : 0;
-                    //         const isTracking = TrackTimestamp > CheckinTimestamp;
-                    //         const timestamp = isTracking ? TrackTimestamp : CheckinTimestamp;
-                    //         const today = await isToday(timestamp);
-                            
-                    //         if (today) {
-                    //             let status = 'offline';
-                    //             const coords = isTracking ? [item.position.coords.longitude, item.position.coords.latitude] : item.checkin.coordinates.split(',').map(coord => parseFloat(coord));
-                    //             const address = await reverseGeocode(coords);
-                    //             //>10p -> offl 
-                    //             if (isTracking) {
-                    //                 // là tracking so sánh timestamp
-                    //                 if (Date.parse(new Date()) - timestamp <= (_options.stopTime * 1000)) status = 'online';
-                    //             } else {
-                    //                 //là checkin 
-                    //                 if (item.checkin.time_checkout == '') status = 'online';
-                    //                 else if (Date.parse(new Date()) - Date.parse(item.checkin.time_checkout) <= (_options.stopTime * 1000)) status = 'online';
-                    //             }
-                                
-                    //             results.push({
-                    //                 '_id': item.object._id,
-                    //                 'name': employee_name, // name Nhân viên
-                    //                 'type': isTracking ? 'tracking' : 'checkin',
-                    //                 'position': isTracking ? item.position : item.checkin,
-                    //                 'coordinates': coords,
-                    //                 'address': address,
-                    //                 'status': status,
-                    //                 'timestamp': timestamp
-                    //             });
-                    //         } else {
-                    //             results.push({
-                    //                 '_id': item.object._id,
-                    //                 'name': employee_name, // name Nhân viên
-                    //                 'status': 'offline',
-                    //             });
-                    //         }
-                    //     }
-                    // }
-                    console.log("results",results);
                     
                     return results;
                 } catch (error) {

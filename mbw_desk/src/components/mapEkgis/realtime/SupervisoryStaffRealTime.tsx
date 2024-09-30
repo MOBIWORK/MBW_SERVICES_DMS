@@ -7,7 +7,7 @@ import {
   WrapperCardTable,
   WrapperCardMap,
 } from "@/components";
-import { useContext, useEffect, useState } from "react";
+import React, { useCallback, useContext, useEffect, useState } from "react";
 import { AxiosService } from "@/services/server";
 import axios from "axios";
 import type { AxiosResponse } from "axios";
@@ -89,15 +89,66 @@ export default function SupervisoryStaffRealTime() {
   const handlerShowHistory = (evt: any) => {
     navigate(`/employee-monitor-detail/${evt["_id"]}`);
   };
-  // const handlerShowHistoryForAnyOne = () => {
-  //   navigate("/employee-monitor-detail"); //654c8a12d65d3e52f2d286de
-  // };
 
-  const handleShowHistoryEmployee = (employee: employeeMoveType) => {
+  // điều hướng qua lịch sử di chuyển
+  const handleShowHistoryEmployee = React.useCallback((employee: any) => {
     if (employee.objectId != null)
       navigate(`/employee-monitor-detail/${employee.objectId}`);
     else errorMsg(`Kiểm tra dữ liệu nhân viên bán hàng: ${employee.emp_name} `)
-  };
+  },[]) ;
+
+  //handle hiển thị realtime sumary nhân viên{đang xử lý}
+  const handleUpdateData = useCallback(async(realtimeEmployee:{ online: number, offline: number }) => {
+    console.log("10s chạy",options);
+    
+    
+
+    /** bắt đầu xử lý hiển thị nhân viên  */
+    const objectIds = options.objectId
+    const arrEmployee = options.employees
+     /* chỉnh lại dịch vụ đi tuyến của thằng này */
+     let urlSummary = `https://api.ekgis.vn/v2/tracking/locationHistory/summary/lastest/${options.projectId}/${objectIds}?api_key=${options.apiKey}`;
+     /** trả về mảng [
+             {
+               object: {id: "objectId",name: ""},
+               summary: {
+                 "move": {
+                   "count": 4,
+                   "totalTime": 2226,
+                   "distance": 6633.500000000001
+                 },
+                 "stop": {
+                   "count": 3,
+                   "totalTime": 53620
+                 },
+                 "checkin": {
+                   "count": 0,
+                   "totalTime": 0
+                 }
+               } 
+             }
+             ] */
+     let res: AxiosResponse<{ results: summaryMoveType }> = await axios.get(
+       urlSummary
+     );
+     // if (import.meta.env.VITE_BASE_URL) {
+     //   res = res.data;
+     // }
+     if (res.data?.results.length > 0) {
+       let arrSummary = res.data?.results;
+       renderDataEmployeeSummary(
+         arrSummary,
+         JSON.parse(JSON.stringify(arrEmployee))
+       );
+     }
+     renderDataEmployee(JSON.parse(JSON.stringify(arrEmployee)));
+
+     handleSummaryOnlienAndOffline(realtimeEmployee)
+     initDataSummaryOver();
+  },[options])
+
+
+
   // render top 5 nhân viên có nhiều SO
   const renderDataEmployee = async (arrEmployeeInput: any[]) => {
     let dateNow = new Date();
@@ -157,6 +208,7 @@ export default function SupervisoryStaffRealTime() {
         objectId: employeeInput.object_id,
       })
     );
+    // danh sách nhân viên
     setDataEmployee(arrEmployeeOut);
   };
 
@@ -165,9 +217,11 @@ export default function SupervisoryStaffRealTime() {
     arrSummary: summaryMoveType,
     arrEmployee: employeeMoveType[]
   ) => {
-    // thời gian di chuyển
+    console.log({arrSummary,arrEmployee});
+    
+    // thêm summary vào nhân viên
     arrEmployee = arrEmployee.map((employee: employeeMoveType) => {
-      employee.summary = {};
+      employee.summary = undefined;
       let summary = arrSummary.find(
         (summary: RootObject) =>
           employee.object_id != null &&
@@ -177,6 +231,9 @@ export default function SupervisoryStaffRealTime() {
 
       return employee;
     });
+
+
+
     let dataCheckingEmployee = arrEmployee.map(
       (employee: employeeMoveType, i: number) => ({
         stt: i + 1,
@@ -198,33 +255,39 @@ export default function SupervisoryStaffRealTime() {
         objectId: employee.object_id,
       })
     );
+    // thống kê thời gian di chuyển, thời gian dừng, vt của nhân viên
     setDataCheckingEmployee(dataCheckingEmployee);
+    
+   const dataDistance = arrEmployee.filter((emp:employeeMoveType) => {
+    // console.log("length summary",Object.keys(emp.summary).length);
+    if(!emp.summary) return 0
+    else {
+      return Object.keys(emp.summary).length
+    }
+   }).sort((emp1:employeeMoveType,emp2:employeeMoveType) => {
 
-    //khoảng cách di chuyển
-    arrEmployee
-      .sort((a, b) =>
-        a.summary != null &&
-        a.summary.move != null &&
-        b.summary != null &&
-        b.summary.move != null
-          ? b.summary.move.distance - a.summary.move.distance
-          : 1
-      )
-      .slice(0, 5);
 
-    let dataMoveTopEmployee = arrEmployee.map(
+    if (emp1.summary?.moves && emp2.summary?.moves) {
+      return emp1.summary?.moves.distance - emp2.summary?.moves.distance
+    }
+    return 1
+   } ).slice(0,5)
+      
+
+    let dataMoveTopEmployee = dataDistance.map(
       (employee: employeeMoveType, i: number) => ({
         stt: i + 1,
         pic_profile: employee.avatar != null ? employee.avatar : null,
         emp_name: employee.employee_name,
         emp_id: employee.name,
         distance:
-          employee.summary != null && employee.summary.move != null
-            ? formatDistance(employee.summary.move.distance)
+          employee.summary != null && employee.summary.moves != null
+            ? formatDistance(employee.summary.moves.distance)
             : formatDistance(0),
         objectId: employee.object_id,
       })
-    );
+    )
+    // quãng đường di chuyển của nhân viên
     setDataTopDistanceEmployee(dataMoveTopEmployee);
   };
   // query thông tin projectId,key bản đồ , danh sách nhân viên
@@ -232,7 +295,6 @@ export default function SupervisoryStaffRealTime() {
     (async () => {
       try {
         setLoadingPape(true);
-        initDataSummaryOver();
         /** Lấy project id và các object id thuộc công ty quản lý => chưa làm */
         const rs = AxiosService.get(
           "/api/method/mbw_dms.api.user.get_projectID",
@@ -246,7 +308,7 @@ export default function SupervisoryStaffRealTime() {
         const resApikey = AxiosService.get(
           "/api/method/mbw_dms.api.vgm.map_customer.get_config_api"
         );
-         /**lấy  danh sách nhân viên của công ty => chưa làm, có thể tích hợp phía trên*/
+         // lấy ds nhân viên bán hàng-sales person
          let responseEmployees = AxiosService.get(
           "/api/method/mbw_dms.api.user.get_list_employees",
           {
@@ -264,56 +326,19 @@ export default function SupervisoryStaffRealTime() {
           objectId:  rsPj.result["objectIds"],
           employees: []
         }
-        const objectIds = rsPj.result["objectIds"]
+        // const objectIds = rsPj.result["objectIds"]
         
         let arrEmployee = [];
         if (responseAllEmployee.message == "Thành công") {
           arrEmployee = responseAllEmployee.result;
           options["employees"] =  arrEmployee
         }       
-        console.log("options",options);
         
         setOptions((prev) => ({
           ...prev,
           ...options
-        }));
-        /* chỉnh lại dịch vụ đi tuyến của thằng này */
-        let urlSummary = `https://api.ekgis.vn/v2/tracking/locationHistory/summary/lastest/${rsPj.result["Project ID"]}/${objectIds}?api_key=${options.apiKey}`;
-        /** trả về mảng [
-                {
-                  object: {id: "objectId",name: ""},
-                  summary: {
-                    "move": {
-                      "count": 4,
-                      "totalTime": 2226,
-                      "distance": 6633.500000000001
-                    },
-                    "stop": {
-                      "count": 3,
-                      "totalTime": 53620
-                    },
-                    "checkin": {
-                      "count": 0,
-                      "totalTime": 0
-                    }
-                  } 
-                }
-                ] */
-        let res: AxiosResponse<{ results: summaryMoveType }> = await axios.get(
-          urlSummary
-        );
-        // if (import.meta.env.VITE_BASE_URL) {
-        //   res = res.data;
-        // }
-
-        if (res.data?.results.length > 0) {
-          let arrSummary = res.data?.results;
-          renderDataEmployeeSummary(
-            arrSummary,
-            JSON.parse(JSON.stringify(arrEmployee))
-          );
-        }
-        renderDataEmployee(JSON.parse(JSON.stringify(arrEmployee)));
+        }));      
+        
       } catch (error: any) {
         errorMsg(
           error?.message || error || "Something was wrong when query !!"
@@ -854,7 +879,7 @@ export default function SupervisoryStaffRealTime() {
                 <RealtimeMap
                   options={options}
                   onClickPopup={handlerShowHistory}
-                  status={handleSummaryOnlienAndOffline}
+                  status={handleUpdateData}
                 />
               )}
             </div>
