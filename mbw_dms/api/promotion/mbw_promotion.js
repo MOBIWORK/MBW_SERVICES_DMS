@@ -12,40 +12,42 @@ frappe.ui.form.on('Sales Order', {
         }
     }
 });
-function processAfterApplyPromotion(ptype_value,result,frm)
+function processAfterApplyPromotion(ptype_value, result, frm)
 {
-    if(ptype_value=="SP_SL_CKSP")
+    if(ptype_value == "SP_SL_CKSP")
     {
-        for(var i=0;i<result.length;i++)
+        for(var i=0; i<result.length; i++)
         {
             let filtered_items = frm.doc.items.find(function(item) {
                 return item.item_code === result[i].item_code;
             });
             if (filtered_items) {
                 
-                // Recalculate the amount based on the new quantity
+                // Tính toán lại discount_amount dựa trên discount_amount km
                 filtered_items.discount_amount = result[i].discount_amount;
-                // Trigger the onchange event for the discount_amount field
+                // Kích hoạt sự kiện onchange cho trường discount_amount
                 frm.script_manager.trigger("discount_amount", filtered_items.doctype, filtered_items.name);
 
-                // Refresh the items table to reflect the changes
+                // Refresh bảng items
                 frm.refresh_field('items');
             }
         }
         
     }
 }
-function onClearPromotion(frm) {
-    // Set ignore pricing rule to 1
-    frm.set_value('ignore_pricing_rule', 1);
 
-    // Remove free items (for example, items with rate == 0 or custom is_free_item == 1)
+function onClearPromotion(frm) {
+    // Tắt khuyến mại của frappe
+    frm.set_value("ignore_pricing_rule", 1);
+
+    // Xóa hết các sản phẩm khuyến mại
     frm.doc.items = frm.doc.items.filter(function(item) {
-        return item.rate > 0 || !item.is_free_item; // Assuming is_free_item is a custom field for free items
+        return item.rate > 0 || !item.is_free_item;
     });
-    // Refresh the items field after removing free items
-    frm.refresh_field('items');
-    // Cap nhat lai gia sau khi chay km
+
+    // Làm mới danh sách items sau khi xóa các sp khuyến mại
+    frm.refresh_field("items");
+    // Cập nhật lại giá sáu khi chạy khuyến mại
     update_item_prices_by_price_list(frm)
 }
 
