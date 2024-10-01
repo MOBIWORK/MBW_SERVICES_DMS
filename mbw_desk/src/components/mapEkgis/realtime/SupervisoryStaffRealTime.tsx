@@ -128,14 +128,14 @@ export default function SupervisoryStaffRealTime() {
                } 
              }
              ] */
-     let res: AxiosResponse<{ results: summaryMoveType }> = await axios.get(
+     let res:any= await axios.get(
        urlSummary
      );
-     // if (import.meta.env.VITE_BASE_URL) {
-     //   res = res.data;
-     // }
-     if (res.data?.results.length > 0) {
-       let arrSummary = res.data?.results;
+     if (import.meta.env.VITE_BASE_URL) {
+       res = res.data;
+     }
+     if (res?.results.length > 0 ) {
+       let arrSummary = res.results;
        renderDataEmployeeSummary(
          arrSummary,
          JSON.parse(JSON.stringify(arrEmployee))
