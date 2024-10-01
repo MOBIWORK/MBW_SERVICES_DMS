@@ -114,8 +114,8 @@ function RealtimeMap({ options, onClickPopup, status }:RealtimeProp) {
                     }
 
                     if (intervalIdRef.current) clearInterval(intervalIdRef.current);
-                    intervalIdRef.current = setInterval(() => {
-                        loadMap(_options.objectId);
+                    intervalIdRef.current = setInterval(async () => {
+                        await loadMap(_options.objectId);
                     }, 60000);
                 } catch (error) {
                     console.error('Error:', error);
@@ -134,15 +134,18 @@ function RealtimeMap({ options, onClickPopup, status }:RealtimeProp) {
                 // load map => gọi dịch vụ nhân viên onl/off
                 var DataObjs = await getLastPos(objectIds)
                 // DataObjs = DataObjs.filter(item => item !== null);
-                // console.log(DataObjs);
+                console.log({DataObjs},DataObjs.length,DataObjs);
                 const statusCount = DataObjs.reduce((acc, cur) => {
+                    console.log({acc, cur});                    
                     if (cur.status === "offline") {
                         acc.offline++;
-                    } else if (cur.status === "online") {
+                    } else {
                         acc.online++;
                     }
                     return acc;
                 }, { online: 0, offline: 0 });
+                console.log(statusCount);
+                
                 // set nhân viên onl/off
                 if (status) await status(statusCount);
                 // add nv vào bản đồ
@@ -325,9 +328,7 @@ function RealtimeMap({ options, onClickPopup, status }:RealtimeProp) {
                     // dữ liệu tracking cuối
                     const DataTracking = await responseTracking.json();
                     //dữ liệu checkin cuối
-                    const DataCheckin = await responseCheckin.json();
-                    
-                    console.log("responseTracking, responseCheckin",DataTracking, DataCheckin)
+                    const DataCheckin = await responseCheckin.json();                    
                     let obj2Map:any = {};
                     DataTracking.forEach((item:any) => {
                         obj2Map[item.object._id] = item;
@@ -345,8 +346,11 @@ function RealtimeMap({ options, onClickPopup, status }:RealtimeProp) {
 
                     var results:any[] = []
                     if(_options && _options?.employees && _options?.employees.length > 0) {
+                        console.log("employee",_options?.employees);
+                        
                         let employeeHasObjId =  _options?.employees.filter((employee: employeeType) => employee.object_id)
-                        employeeHasObjId.forEach(async(employee: employeeType) => {
+                        console.log("employee2",employeeHasObjId);
+                        for(let employee of employeeHasObjId) {
                             const employee_name = employee ? employee.employee_name : "Không xác định"
 
                             let inforEmployee:any = {
@@ -372,6 +376,8 @@ function RealtimeMap({ options, onClickPopup, status }:RealtimeProp) {
 
 
                             if(today) {
+                                console.log("employee today",employee);
+                                
                                 const coords = isTracking ? [item_tracking.position.coords.longitude, item_tracking.position.coords.latitude] : item_checkin.checkin.coordinates.split(',').map((coord:any) => parseFloat(coord));
                                 const address = await reverseGeocode(coords);
                                 //>10p -> offl 
@@ -392,12 +398,11 @@ function RealtimeMap({ options, onClickPopup, status }:RealtimeProp) {
                                     'address': address,
                                     'timestamp': timestamp
                                 }
-                            }
-                            
-
-
-                            results.push(inforEmployee)
-                        })
+                            }       
+                            console.log("inforEmployee",inforEmployee);
+                                               
+                            results = [...results,inforEmployee ]
+                        }
                     }
                     
                     return results;
