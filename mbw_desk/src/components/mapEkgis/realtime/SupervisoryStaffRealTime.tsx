@@ -242,16 +242,16 @@ export default function SupervisoryStaffRealTime() {
         emp_name: employee.employee_name,
         emp_id: employee.name,
         moving:
-          employee.summary != null && employee.summary.move != null
-            ? formatTime(employee.summary.move.totalTime)
+          employee.summary != null && employee.summary.moves != null
+            ? formatTime(employee.summary.moves.totalTime)
             : formatTime(0),
         stopping:
-          employee.summary != null && employee.summary.stop != null
-            ? formatTime(employee.summary.stop.totalTime)
+          employee.summary != null && employee.summary.stops != null
+            ? formatTime(employee.summary.stops.totalTime)
             : formatTime(0),
         visiting:
-          employee.summary != null && employee.summary.checkin != null
-            ? formatTime(employee.summary.checkin.totalTime)
+          employee.summary != null && employee.summary.checkins != null
+            ? formatTime(employee.summary.checkins.totalTime)
             : formatTime(0),
         objectId: employee.object_id,
       })
