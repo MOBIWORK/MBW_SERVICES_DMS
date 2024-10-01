@@ -10,6 +10,7 @@ def get_list_promotion(**kwargs):
     customer = kwargs.get("customer")
     territory = kwargs.get("territory")
     list_item = kwargs.get("listItem")
+    total_amount = float(kwargs.get("totalAmount"))
     date = nowdate()
 
     if isinstance(list_item, str):
@@ -49,19 +50,21 @@ def get_list_promotion(**kwargs):
                 promo["products"] = []
 
     # Áp dụng CTKM
-    return apply_Promotion(list_item, list_promotions)
+    return apply_Promotion(list_item, list_promotions, total_amount)
     
 # Áp dụng CTKM
-def apply_Promotion(list_item=[], list_promotions=[]):
+def apply_Promotion(list_item=[], list_promotions=[], total_amount=0):
     promtion_list = []
+
     for promtion in list_promotions:
-        promo_result = caculate_promotion(list_item, promtion)
+        promo_result = caculate_promotion(list_item, promtion, total_amount)
+  
         if bool(promo_result):
             promtion_list.append(promo_result)
     return promtion_list
     
 # Caculate Promotion
-def caculate_promotion(list_item=[], promtion={}):
+def caculate_promotion(list_item=[], promtion={}, total_amount=0):
     if promtion.get("ptype_value") == "SP_SL_CKSP":
         ref = SP_SL_CKSP(list_item, promtion)
         if bool(ref):
@@ -69,21 +72,51 @@ def caculate_promotion(list_item=[], promtion={}):
         else:
             return None
         
-    if promtion.get("ptype_value") == "TIEN_SP":
+    elif promtion.get("ptype_value") == "TIEN_SP":
         ref = TIEN_SP(list_item, promtion)
         if bool(ref):
             return {"ptype_value": "TIEN_SP", "result": ref}
         else:
             return None
 
+    elif promtion.get("ptype_value") == "TIEN_TIEN":
+        ref = TIEN_TIEN(promtion, total_amount)
+        if bool(ref):
+            return {"ptype_value": "TIEN_TIEN", "result": ref}
+        else:
+            return None
+        
+    elif promtion.get("ptype_value") == "TIEN_CKDH":
+        ref = TIEN_CKDH(promtion, total_amount)
+        if bool(ref):
+            return {"ptype_value": "TIEN_CKDH", "result": ref}
+        else:
+            return None
+# "Trinh Tổng tiền hàng - chiết khấu đơn hàng (%)"
+def TIEN_CKDH(data_Promotion={}, tongTienhang = 0):
+    product = sorted(data_Promotion["products"], key=lambda x: x["yeu_cau"], reverse=True)
+    tien_km = 0
+    for prd in product:
+        if tongTienhang >= float(prd["yeu_cau"]):
+            chietKhau_promotion = tongTienhang * float(prd["khuyen_mai"]) / 100
+            break
+    return chietKhau_promotion
 
-# "TuanBD Tổng tiền hàng - chiết khấu đơn hàng (%)"
-def TIEN_CKDH():
-    pass
+# "Trinh Tổng tiền hàng - tặng tiền"
+def TIEN_TIEN(data_Promotion={}, tongTienhang = 0):
+    product = sorted(data_Promotion["products"], key=lambda x: x["yeu_cau"], reverse=True)
+    boi_so = data_Promotion["multiple"]
+    boi_so_cap = 1
+    tien_km = 0
+    for prd in product:
+        if tongTienhang >= float(prd["yeu_cau"]):
+            boi_so_cap = float(tongTienhang / float(prd["yeu_cau"]))
+            tien_km = float(prd["khuyen_mai"])
+            if boi_so:
+                tien_km = tien_km * boi_so_cap
+            break
+    return tien_km
 
-# "TuanBD Tổng tiền hàng - tặng tiền"
-def TIEN_TIEN():
-    pass
 
 # "TuanBD Tổng tiền hàng - tặng SP"
 def TIEN_SP(list_item=[], data_promotion={}):
@@ -108,6 +141,7 @@ def TIEN_SP(list_item=[], data_promotion={}):
                     "is_free_item": True
                 }
                 list_item.append(product_promo)
+            break
     return list_item
         
 
@@ -118,8 +152,7 @@ def SP_SL_CKSP(list_item=[], data_promotion={}):
     for item in list_item:
         product = pydash.filter_(data_promotion["products"], {"_id": item["item_code"]})
         # Sắp xếp lại danh sách sản phẩm theo yêu cầu
-        product = pydash.sort_by(product, "yeu_cau").reverse()
-
+        product = sorted(product, key=lambda x: x["yeu_cau"], reverse=True)
         # Kết quả khuyến mại đạt được
         for prd in product:
             if bool(prd["yeu_cau_min"]) and prd["yeu_cau_min"] != 0:

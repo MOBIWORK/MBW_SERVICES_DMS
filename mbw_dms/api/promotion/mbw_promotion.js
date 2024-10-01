@@ -36,11 +36,9 @@ function processAfterApplyPromotion(ptype_value, result, frm)
             }
             
         }
-
     // Tổng tiền hàng - tặng SP
     else if (ptype_value == "TIEN_SP") {
         frm.clear_table("items");
-    
         result.forEach(function(item) {
             let new_row = frm.add_child("items");
             new_row.item_code = item.item_code;
@@ -52,10 +50,12 @@ function processAfterApplyPromotion(ptype_value, result, frm)
             new_row.amount = item.amount || 0;
             new_row.is_free_item = item.is_free_item || 0;
         });
-
         frm.refresh_field('items');
     }
-    
+    // Tổng tiền hàng - Tien 
+    else if (ptype_value == "TIEN_TIEN") {
+        frm.doc.discount_amount=result;
+    }
 }
 
 function onClearPromotion(frm) {
@@ -123,7 +123,8 @@ function update_item_prices_by_price_list(frm) {
                     frappe.call({
                         method: 'mbw_dms.api.promotion.mbw_promotion.get_list_promotion',
                         args: {
-                            listItem: frm.doc.items
+                            listItem: frm.doc.items,
+                            totalAmount: frm.doc.total
                         },
                         callback: function(r) {
                             if (Array.isArray(r.message)) {
