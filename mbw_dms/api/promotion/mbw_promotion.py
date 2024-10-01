@@ -16,9 +16,9 @@ def get_list_promotion(**kwargs):
         list_item = json.loads(list_item)
           
     if customer:
-        filters.append(f"cus.customer_code={frappe.db.escape(customer)}")
+        filters.append(f"cus.customer_code = {frappe.db.escape(customer)}")
     if territory:
-        filters.append(f"pro.territory={frappe.db.escape(territory)}")
+        filters.append(f"pro.territory = {frappe.db.escape(territory)}")
     filters.append(f"pro.start_date <= {frappe.db.escape(date)} AND pro.end_date >= {frappe.db.escape(date)}")
     
     where_conditions = " AND ".join(filters)
@@ -49,22 +49,33 @@ def get_list_promotion(**kwargs):
                 promo["products"] = []
 
     # Áp dụng CTKM
-    return apply_Promotion(list_item,list_promotions)
+    return apply_Promotion(list_item, list_promotions)
     
-# Reset data trước khi gọi khuyến mại
-
 # Áp dụng CTKM
 def apply_Promotion(list_item=[], list_promotions=[]):
+    promtion_list = []
     for promtion in list_promotions:
-        return caculate_promotion(list_item, promtion)
+        promo_result = caculate_promotion(list_item, promtion)
+        if bool(promo_result):
+            promtion_list.append(promo_result)
+    return promtion_list
     
 # Caculate Promotion
 def caculate_promotion(list_item=[], promtion={}):
     if promtion.get("ptype_value") == "SP_SL_CKSP":
         ref = SP_SL_CKSP(list_item, promtion)
-        return {"ptype_value": "SP_SL_CKSP", "result": ref}
+        if bool(ref):
+            return {"ptype_value": "SP_SL_CKSP", "result": ref}
+        else:
+            return None
+        
+    if promtion.get("ptype_value") == "TIEN_SP":
+        ref = TIEN_SP(list_item, promtion)
+        if bool(ref):
+            return {"ptype_value": "TIEN_SP", "result": ref}
+        else:
+            return None
 
-    
 
 # "TuanBD Tổng tiền hàng - chiết khấu đơn hàng (%)"
 def TIEN_CKDH():
@@ -75,19 +86,39 @@ def TIEN_TIEN():
     pass
 
 # "TuanBD Tổng tiền hàng - tặng SP"
-def TIEN_SP():
-    pass
+def TIEN_SP(list_item=[], data_promotion={}):
+    total_amount = sum(item["amount"] for item in list_item)
+
+    product = sorted(data_promotion["products"], key=lambda x: x["yeu_cau"], reverse=True)
+    boi_so = data_promotion["multiple"]
+    boi_so_cap = 1
+    for prd in product:
+        if total_amount >= prd["yeu_cau"]:
+            if bool(boi_so):
+                boi_so_cap = int(total_amount / prd["yeu_cau"])
+            
+            for item_km in prd["khuyen_mai"]:
+                product_promo = {
+                    "item_code": item_km["ma_san_pham"],
+                    "item_name": item_km["ten_san_pham"],
+                    "uom": item_km["don_vi_tinh"].get("choice_values"),
+                    "qty": item_km["so_luong"] * boi_so_cap,
+                    "rate": 0,
+                    "amount": 0,
+                    "is_free_item": True
+                }
+                list_item.append(product_promo)
+    return list_item
+        
 
 # "TungDA Mua sản phẩm - đạt số lượng - chiết khấu SP (%)"
-def SP_SL_CKSP(list_Item=[], data_Promotion={}):
-    list_Item_Return=[]
-    getProductPromotion={}
+def SP_SL_CKSP(list_item=[], data_promotion={}):
+    getProductPromotion = {}
 
-    for item in list_Item:
-        product = pydash.filter_(data_Promotion["products"], {"_id": item["item_code"]})
+    for item in list_item:
+        product = pydash.filter_(data_promotion["products"], {"_id": item["item_code"]})
         # Sắp xếp lại danh sách sản phẩm theo yêu cầu
-        product = pydash.sort_by(product, "yeu_cau")
-        product.reverse()
+        product = pydash.sort_by(product, "yeu_cau").reverse()
 
         # Kết quả khuyến mại đạt được
         for prd in product:
@@ -103,7 +134,7 @@ def SP_SL_CKSP(list_Item=[], data_Promotion={}):
             if item["qty"] >= getProductPromotion["yeu_cau"] and item["uom"] == getProductPromotion["don_vi_tinh"].get("choice_values"):
                 chietKhau_promotion = item["amount"] * getProductPromotion["khuyen_mai"] / 100
                 item["discount_amount"] = chietKhau_promotion
-    return list_Item
+    return list_item
 
 #"TungDA Mua sản phẩm - đạt số tien - chiết khấu SP (%)"
 def SP_ST_CKSP():
