@@ -37,10 +37,10 @@ def get_list_promotion(**kwargs):
                 del promo[field]
 
         # Làm sạch JSON trong trường hợp chuỗi trả về không chính xác
-        if 'products' in promo and isinstance(promo['products'], str):
+        if "products" in promo and isinstance(promo["products"], str):
             try:
-                promo['products'] = json.loads(promo['products'])
+                promo["products"] = json.loads(promo["products"])
             except json.JSONDecodeError:
-                promo['products'] = []
+                promo["products"] = []
 
     return list_promotions

@@ -114,8 +114,8 @@ function RealtimeMap({ options, onClickPopup, status }:RealtimeProp) {
                     }
 
                     if (intervalIdRef.current) clearInterval(intervalIdRef.current);
-                    intervalIdRef.current = setInterval(() => {
-                        loadMap(_options.objectId);
+                    intervalIdRef.current = setInterval(async () => {
+                        await loadMap(_options.objectId);
                     }, 60000);
                 } catch (error) {
                     console.error('Error:', error);
@@ -129,20 +129,25 @@ function RealtimeMap({ options, onClickPopup, status }:RealtimeProp) {
             }
 
             const loadMap = async (objectIds:any) => {
+                console.log("load map");
+                
                 // load map => gọi dịch vụ nhân viên onl/off
                 var DataObjs = await getLastPos(objectIds)
                 // DataObjs = DataObjs.filter(item => item !== null);
-                // console.log(DataObjs);
+                console.log({DataObjs},DataObjs.length,DataObjs);
                 const statusCount = DataObjs.reduce((acc, cur) => {
+                    console.log({acc, cur});                    
                     if (cur.status === "offline") {
                         acc.offline++;
-                    } else if (cur.status === "online") {
+                    } else {
                         acc.online++;
                     }
                     return acc;
                 }, { online: 0, offline: 0 });
+                console.log(statusCount);
+                
                 // set nhân viên onl/off
-                if (status) status(statusCount);
+                if (status) await status(statusCount);
                 // add nv vào bản đồ
                 const FeatureCollection = {
                     'type': 'FeatureCollection',
@@ -323,9 +328,7 @@ function RealtimeMap({ options, onClickPopup, status }:RealtimeProp) {
                     // dữ liệu tracking cuối
                     const DataTracking = await responseTracking.json();
                     //dữ liệu checkin cuối
-                    const DataCheckin = await responseCheckin.json();
-                    
-                    console.log("responseTracking, responseCheckin",DataTracking, DataCheckin)
+                    const DataCheckin = await responseCheckin.json();                    
                     let obj2Map:any = {};
                     DataTracking.forEach((item:any) => {
                         obj2Map[item.object._id] = item;
@@ -343,8 +346,11 @@ function RealtimeMap({ options, onClickPopup, status }:RealtimeProp) {
 
                     var results:any[] = []
                     if(_options && _options?.employees && _options?.employees.length > 0) {
+                        console.log("employee",_options?.employees);
+                        
                         let employeeHasObjId =  _options?.employees.filter((employee: employeeType) => employee.object_id)
-                        employeeHasObjId.forEach(async(employee: employeeType) => {
+                        console.log("employee2",employeeHasObjId);
+                        for(let employee of employeeHasObjId) {
                             const employee_name = employee ? employee.employee_name : "Không xác định"
 
                             let inforEmployee:any = {
@@ -370,6 +376,8 @@ function RealtimeMap({ options, onClickPopup, status }:RealtimeProp) {
 
 
                             if(today) {
+                                console.log("employee today",employee);
+                                
                                 const coords = isTracking ? [item_tracking.position.coords.longitude, item_tracking.position.coords.latitude] : item_checkin.checkin.coordinates.split(',').map((coord:any) => parseFloat(coord));
                                 const address = await reverseGeocode(coords);
                                 //>10p -> offl 
@@ -390,65 +398,12 @@ function RealtimeMap({ options, onClickPopup, status }:RealtimeProp) {
                                     'address': address,
                                     'timestamp': timestamp
                                 }
-                            }
-                            
-
-
-                            results.push(inforEmployee)
-                        })
+                            }       
+                            console.log("inforEmployee",inforEmployee);
+                                               
+                            results = [...results,inforEmployee ]
+                        }
                     }
-
-                    // name Nhân viên => xử lý tên nhân viên từ đây
-                    // for (const item of mergedArray) {
-                    //     const employee = _options.employees.find((employee:employeeType) => employee.object_id == item.object._id )
-                    //     const employee_name = employee ? employee.employee_name : "Không xác định"
-                    //     if (!item.position && !item.checkin) {
-                    //         results.push({
-                    //             '_id': item.object._id,
-                    //             'name': employee_name, // name Nhân viên
-                    //             'status': 'offline',
-                    //         });
-                    //     } else {
-                    //         const TrackTimestamp = item.position ? Date.parse(item.position.timestamp) : 0;
-                    //         const CheckinTimestamp = item.checkin ? Date.parse(item.checkin.timestamp) : 0;
-                    //         const isTracking = TrackTimestamp > CheckinTimestamp;
-                    //         const timestamp = isTracking ? TrackTimestamp : CheckinTimestamp;
-                    //         const today = await isToday(timestamp);
-                            
-                    //         if (today) {
-                    //             let status = 'offline';
-                    //             const coords = isTracking ? [item.position.coords.longitude, item.position.coords.latitude] : item.checkin.coordinates.split(',').map(coord => parseFloat(coord));
-                    //             const address = await reverseGeocode(coords);
-                    //             //>10p -> offl 
-                    //             if (isTracking) {
-                    //                 // là tracking so sánh timestamp
-                    //                 if (Date.parse(new Date()) - timestamp <= (_options.stopTime * 1000)) status = 'online';
-                    //             } else {
-                    //                 //là checkin 
-                    //                 if (item.checkin.time_checkout == '') status = 'online';
-                    //                 else if (Date.parse(new Date()) - Date.parse(item.checkin.time_checkout) <= (_options.stopTime * 1000)) status = 'online';
-                    //             }
-                                
-                    //             results.push({
-                    //                 '_id': item.object._id,
-                    //                 'name': employee_name, // name Nhân viên
-                    //                 'type': isTracking ? 'tracking' : 'checkin',
-                    //                 'position': isTracking ? item.position : item.checkin,
-                    //                 'coordinates': coords,
-                    //                 'address': address,
-                    //                 'status': status,
-                    //                 'timestamp': timestamp
-                    //             });
-                    //         } else {
-                    //             results.push({
-                    //                 '_id': item.object._id,
-                    //                 'name': employee_name, // name Nhân viên
-                    //                 'status': 'offline',
-                    //             });
-                    //         }
-                    //     }
-                    // }
-                    console.log("results",results);
                     
                     return results;
                 } catch (error) {
