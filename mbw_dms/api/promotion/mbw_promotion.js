@@ -13,48 +13,57 @@ frappe.ui.form.on('Sales Order', {
     }
 });
 
+// Tính toán khuyến mãi
 function processAfterApplyPromotion(ptype_value, result, frm)
 {
-    // Sản phẩm - số lượng - chiết khấu sản phẩm
-    if (ptype_value == "SP_SL_CKSP")
-        {
-            for(var i = 0; i < result.length; i++)
-            {
-                let filtered_items = frm.doc.items.find(function(item) {
-                    return item.item_code === result[i].item_code;
-                });
-                if (filtered_items) {
-                    // Tính toán lại discount_amount dựa trên discount_amount km
-                    filtered_items.discount_amount = result[i].discount_amount;
-
-                    // Kích hoạt sự kiện onchange cho trường discount_amount
-                    frm.script_manager.trigger("discount_amount", filtered_items.doctype, filtered_items.name);
-
-                    // Refresh bảng items
-                    frm.refresh_field('items');
-                }
-            }
-            
-        }
-    // Tổng tiền hàng - tặng SP
-    else if (ptype_value == "TIEN_SP") {
-       result.forEach(function(item) {
-            let new_row = frm.add_child("items");
-            new_row.item_code = item.item_code;
-            new_row.item_name = item.item_name;
-            new_row.delivery_date = frm.doc.delivery_date;
-            new_row.qty = item.qty;
-            new_row.uom = item.uom;
-            new_row.rate = item.rate || 0;
-            new_row.amount = item.amount || 0;
-            new_row.is_free_item = item.is_free_item || 0;
-        });
-        frm.refresh_field('items');
+    // KM chiết khấu SP (%)
+    if (ptype_value == "SP_SL_CKSP" || ptype_value == "SP_ST_CKSP"){
+        apply_discount_to_items(result, frm);
     }
-    // Tổng tiền hàng - Tien 
+    
+    // KM tặng sản phẩm
+    else if (ptype_value == "TIEN_SP" || ptype_value == "SP_SL_SP" || ptype_value == "SP_ST_SP") {
+        add_items_to_form(result, frm);
+    }
+
+    // Tổng tiền hàng - Tiền 
     else if (ptype_value == "TIEN_TIEN") {
-        frm.doc.discount_amount=result;
+        frm.doc.discount_amount = result;
     }
+}
+
+// Thêm sản phẩm khuyến mãi
+function add_items_to_form(items, frm) {
+    items.forEach(function(item) {
+        let new_row = frm.add_child("items");
+        new_row.item_code = item.item_code;
+        new_row.item_name = item.item_name;
+        new_row.delivery_date = frm.doc.delivery_date;
+        new_row.qty = item.qty;
+        new_row.uom = item.uom;
+        new_row.rate = item.rate || 0;
+        new_row.amount = item.amount || 0;
+        new_row.is_free_item = item.is_free_item || 0;
+    });
+    frm.refresh_field('items');
+}
+
+// khuyến mãi chiết khấu SP
+function apply_discount_to_items(result, frm) {
+    result.forEach((promo_item) => {
+        let filtered_item = frm.doc.items.find((item) => item.item_code === promo_item.item_code);
+        
+        if (filtered_item) {
+            // Cập nhật discount_percentage từ promo_item
+            filtered_item.discount_percentage = promo_item.discount_percentage;
+
+            // Kích hoạt sự kiện onchange cho trường discount_percentage
+            frm.script_manager.trigger("discount_percentage", filtered_item.doctype, filtered_item.name);
+
+            frm.refresh_field("items");
+        }
+    });
+
 }
 
 function onClearPromotion(frm) {
@@ -72,6 +81,8 @@ function onClearPromotion(frm) {
     update_item_prices_by_price_list(frm)
 }
 
+
+// Lấy khuyến mãi sản phẩm
 function update_item_prices_by_price_list(frm) {
     let total_amount = 0;
     frm.doc.items.forEach(function(item) {
