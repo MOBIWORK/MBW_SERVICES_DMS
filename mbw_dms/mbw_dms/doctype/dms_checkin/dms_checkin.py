@@ -845,7 +845,6 @@ def get_report(filters={}):
                 UNIX_TIMESTAMP(dc.createddate) as create_time,
                 te.name AS employee_code,
                 sp.parent_sales_person AS sale_group,
-                SUM(TIMESTAMPDIFF(MINUTE, dc.checkin_giovao, dc.checkin_giora)) as total_time,
                 TIMESTAMPDIFF(MINUTE, MIN(dc.checkin_giovao), MAX(dc.checkin_giora)) as total_work,
                 CONCAT(
                     '[', 
@@ -902,6 +901,10 @@ def get_report(filters={}):
         report = frappe.db.sql(query, as_dict=1)
         for row in report:
             row['customers'] = json.loads(row['customers']) if row['customers'] else []
+            total_time =0 
+            for customer in  row['customers']:
+                total_time +=float( customer.get("time_check"))
+            row["total_time"] = total_time
         if not is_excel:
             query2 = f"""
                 SELECT COUNT(*) AS number_of_groups FROM (SELECT 
