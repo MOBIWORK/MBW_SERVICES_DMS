@@ -77,7 +77,7 @@ def create_customer_code(doc, method):
         latest_customer_code = frappe.db.sql("""
             SELECT customer_code 
             FROM `tabCustomer`
-            WHERE customer_code LIKE 'KH%'
+            WHERE customer_code REGEXP '^KH[0-9]{6}$'
             ORDER BY customer_code DESC
             LIMIT 1
         """, as_dict=True)
@@ -89,5 +89,4 @@ def create_customer_code(doc, method):
 
         new_number = latest_number + 1
         customer_code = f"KH{new_number:06d}"
-
         doc.customer_code = customer_code
