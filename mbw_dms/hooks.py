@@ -255,7 +255,7 @@ doc_events = {
     "Sales Person": {
         "on_update": "mbw_dms.controllers.dms_sales_person.update",
         # "after_insert": "mbw_dms.controllers.dms_users.create_objid_employee",
-        "after_delete": "mbw_dms.controllers.dms_sales_person.delete_employee"
+        "after_delete": "mbw_dms.controllers.dms_sales_person.delete_employee_objectId"
     },
     "Employee": {
         "on_update": "mbw_dms.controllers.dms_users.update_objid_employee"

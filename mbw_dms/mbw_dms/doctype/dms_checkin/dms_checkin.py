@@ -106,14 +106,14 @@ class DMSCheckin(Document):
                     monthly_summary_doc.so_kh_vt_luot += 1
                 
                 
-                def render_string(default_str,value) :
-                    if default_str !=None and value not in default_str:
-                        return f"{monthly_summary_doc.kh_vt};{kh_ma}"
-                    elif default_str ==None and value :
-                        return value
-                    else :
-                        return default_str
-                    
+                # def render_string(default_str,value) :
+                #     if default_str !=None and value not in default_str:
+                #         return f"{monthly_summary_doc.kh_vt};{kh_ma}"
+                #     elif default_str ==None and value :
+                #         return value
+                #     else :
+                #         return default_str
+                from mbw_dms.mbw_dms.doctype.common import   render_string  
                 # kiểm tra mã kh đã có trong chuỗi chưa, chưa thì thêm mới
                 monthly_summary_doc.kh_vt = render_string(monthly_summary_doc.kh_vt,kh_ma) # f"{monthly_summary_doc.kh_vt};{kh_ma}" if kh_ma not in monthly_summary_doc.kh_vt else monthly_summary_doc.kh_vt
                 monthly_summary_doc.so_gio_lam_viec += time_work
