@@ -14,7 +14,7 @@ def update(doc, method=None):
         update_employee_objectid(doc,method)
         
     #xóa objectid khi sales person không được gán
-    if not doc.employee:
+    if not doc.employee and doc.object_id:
         delete_employee_objectId(doc,method)
 
     if doc.sales_manager:
