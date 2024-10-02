@@ -29,7 +29,7 @@ class DMSCheckin(Document):
         self.send_data_to_ekgis()
         #kiểm tra đúng/ngoại tuyến
         self.check_router()
-        # cập nhật data viếng thăm lần đầu
+        # cập nhật report viếng thăm lần đầu
         self.update_data_first_checkin()
 
     def after_delete(self):
@@ -81,6 +81,7 @@ class DMSCheckin(Document):
         start_day= datetime.datetime.combine(days,time.min)
         end_day= datetime.datetime.combine(days,time.max)
         kh_ma = self.kh_ma
+        # kiểm tra bản ghi trong ngày
         exists_checkin_day = self.existing_checkin(kh_ma=kh_ma, start_date=start_day, end_date=end_day, current_user=user_id)
         # Kiểm tra đã tồn tại bản ghi KPI của tháng này chưa
         existing_monthly_summary = frappe.get_value(
@@ -104,7 +105,7 @@ class DMSCheckin(Document):
                 if len(exists_checkin_day) <= 1:
                     monthly_summary_doc.so_kh_vt_luot += 1
                 
-                #nếu trong tháng có trên 1 checkin của khách => loại bỏ khách khỏi kpi duy nhất
+                
                 def render_string(default_str,value) :
                     if default_str !=None and value not in default_str:
                         return f"{monthly_summary_doc.kh_vt};{kh_ma}"
@@ -113,7 +114,7 @@ class DMSCheckin(Document):
                     else :
                         return default_str
                     
-
+                # kiểm tra mã kh đã có trong chuỗi chưa, chưa thì thêm mới
                 monthly_summary_doc.kh_vt = render_string(monthly_summary_doc.kh_vt,kh_ma) # f"{monthly_summary_doc.kh_vt};{kh_ma}" if kh_ma not in monthly_summary_doc.kh_vt else monthly_summary_doc.kh_vt
                 monthly_summary_doc.so_gio_lam_viec += time_work
                 if name_date in list_travel_date:
