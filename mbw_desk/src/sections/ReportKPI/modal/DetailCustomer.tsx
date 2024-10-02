@@ -3,60 +3,61 @@ import { AxiosService } from "@/services/server";
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 
-const columnsDetail: any = [
-  {
-    title: "STT",
-    dataIndex: "stt",
-    key: "stt",
-    width:60,
-    render: (_, record: any, index: number) => index + 1,
-  },
-  {
-    title: "Mã khách hàng",
-    dataIndex: "customer_code",
-    key: "customer_code",
-  },
-  {
-    title: "Khách hàng",
-    dataIndex: "customer_name",
-    key: "customer_name",
-  },
-  {
-    title: "Địa chỉ",
-    dataIndex: "customer_primary_address",
-    key: "customer_primary_address",
-    render: (value: any) => {
-      return <div className="truncate hover:whitespace-normal">{value}</div>;
-    },
-  },
-  {
-    title: "Số điện thoại",
-    dataIndex: "mobile_no",
-    key: "mobile_no",
-  },
-  {
-    title: "Ngày thu thập",
-    dataIndex: "collection_date",
-    key: "collection_date",
-    render: (value: any) => {
-      return (
-        <>
-          <div>{dayjs.unix(value).format('DD/MM/YYYY')}</div>
-        </>
-      );
-    },
-  },
-  {
-    title: "Nguồn",
-    dataIndex: "nguon",
-    key: "nguon",
-    render: (value: any) => (
-      <div>{value ? value : "-"}</div>
-    ),
-  },
-];
-
 export default function DetailCustomer({ employee, month, year }: any) {
+  const columnsDetail: any = [
+    {
+      title: "STT",
+      dataIndex: "stt",
+      key: "stt",
+      width: 60,
+      render: (_: any, __: any, index: number) => (
+        <span>{calculateIndex(page, PAGE_SIZE, index)}</span> // Tính toán index cho từng dòng
+      ),
+    },
+    {
+      title: "Mã khách hàng",
+      dataIndex: "customer_code",
+      key: "customer_code",
+    },
+    {
+      title: "Khách hàng",
+      dataIndex: "customer_name",
+      key: "customer_name",
+    },
+    {
+      title: "Địa chỉ",
+      dataIndex: "customer_primary_address",
+      key: "customer_primary_address",
+      render: (value: any) => {
+        return <div className="truncate hover:whitespace-normal">{value}</div>;
+      },
+    },
+    {
+      title: "Số điện thoại",
+      dataIndex: "mobile_no",
+      key: "mobile_no",
+    },
+    {
+      title: "Ngày thu thập",
+      dataIndex: "collection_date",
+      key: "collection_date",
+      render: (value: any) => {
+        return (
+          <>
+            <div>{dayjs.unix(value).format('DD/MM/YYYY')}</div>
+          </>
+        );
+      },
+    },
+    {
+      title: "Nguồn",
+      dataIndex: "nguon",
+      key: "nguon",
+      render: (value: any) => (
+        <div>{value ? value : "-"}</div>
+      ),
+    },
+  ];
   const [page, setPage] = useState<number>(1);
   const PAGE_SIZE = 20;
   const [total, setTotal] = useState<number>(0);
@@ -69,6 +70,13 @@ export default function DetailCustomer({ employee, month, year }: any) {
 
   const startOfMonthTimestamp = startOfMonth.unix();
   const endOfMonthTimestamp = endOfMonth.unix();
+  const calculateIndex = (
+    pageNumber: number,
+    pageSize: number,
+    index: number
+  ) => {
+    return (pageNumber - 1) * pageSize + index + 1;
+  };
 
   useEffect(() => {
     (async () => {
@@ -113,7 +121,7 @@ export default function DetailCustomer({ employee, month, year }: any) {
             : false
         }
         scroll={{
-          y: 300,
+          y: 500,
         }}
         columns={columnsDetail}
       />

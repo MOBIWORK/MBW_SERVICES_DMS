@@ -19,7 +19,6 @@ import Detailchekinfirst from "./modal/Detailchekinfirst";
 import DetailOrder from "./modal/DetailOrder";
 import DetailCustomer from "./modal/DetailCustomer";
 import DetailTotalOrder from "./modal/DetailTotalOrder";
-import { saveAs } from "file-saver";
 import DetailWork from "./modal/DetailWork";
 import DetailSku from "./modal/DetailSku";
 import DetailQty from "./modal/DetailQty";
@@ -49,6 +48,13 @@ export default function ReportKPI() {
   const [containerHeight, setContainerHeight] = useState<any>(0);
   const [scrollYTable1, setScrollYTable1] = useState<number>(size?.h * 0.52);
   const [refresh, setRefresh] = useState<boolean>(false);
+  const calculateIndex = (
+    pageNumber: number,
+    pageSize: number,
+    index: number
+  ) => {
+    return (pageNumber - 1) * pageSize + index + 1;
+  };
 
   const [modal, setModal] = useState<{
     open: boolean;
@@ -504,7 +510,7 @@ export default function ReportKPI() {
                 fixed="left"
                 className="!text-center"
                 width={60}
-                render={(_: any, record: any, index: number) => index + 1}
+                render={(_: any, __: any, index: number) => <span>{calculateIndex(page, PAGE_SIZE, index)}</span>}
               />
               <Column
                 title="Mã Nhân viên"
