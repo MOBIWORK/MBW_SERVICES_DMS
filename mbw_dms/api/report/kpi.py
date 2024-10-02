@@ -30,7 +30,7 @@ def kpi_visit_detail(**kwargs):
         if employee:
             filters["createdbyemail"] = user_id
         
-        data = frappe.get_all("DMS Checkin", filters=filters, fields=["name", "kh_ma", "kh_ten", "kh_diachi", "checkin_giovao", "checkin_khoangcach"], start=page_size*(page_number-1), page_length=page_size)
+        data = frappe.get_all("DMS Checkin", filters=filters, fields=["name", "kh_ma", "kh_ten", "kh_diachi", "checkin_giovao", "checkin_khoangcach"],order_by="kh_ma asc", start=page_size*(page_number-1), page_length=page_size)
         totals = frappe.db.count("DMS Checkin", filters=filters)
         return gen_response(200, "Thành công", {
             "data": data,

@@ -3,78 +3,77 @@ import { AxiosService } from "@/services/server";
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 
-const columnsDetail: any = [
-  {
-    title: "STT",
-    dataIndex: "stt",
-    key: "stt",
-    width:60,
-    render: (_, record: any, index: number) => index + 1,
-  },
-  {
-    title: "Mã khách hàng",
-    dataIndex: "kh_ma",
-    key: "kh_ma",
-  },
-  {
-    title: "Khách hàng",
-    dataIndex: "kh_ten",
-    key: "kh_ten",
-    render: (_, record: any) => (
-      <div>
-        <a
-          className="text-[#212B36]"
-          href={`/app/sales-invoice/${record.kh_ten}`}
-          target="_blank"
-        >
-          {record.kh_ten}
-        </a>
-      </div>
-    ),
-  },
-  {
-    title: "Địa chỉ",
-    dataIndex: "kh_diachi",
-    key: "kh_diachi",
-    render: (value: any) => {
-      return <div className="truncate hover:whitespace-normal">{value}</div>;
-    },
-  },
-  {
-    title: "Ngày viếng thăm",
-    dataIndex: "checkin_giovao",
-    key: "checkin_giovao",
-    render: (value: any) => {
-      return (
-        <>
-          <div>{dayjs(value).format("DD/MM/YYYY")}</div>
-        </>
-      );
-    },
-  },
-  {
-    title: "Thời gian checkin",
-    dataIndex: "checkin_giovao",
-    key: "checkin_giovao",
-    render: (value: any) => {
-      return (
-        <>
-          <div>{dayjs(value).format("HH:mm")}</div>
-        </>
-      );
-    },
-  },
-  {
-    title: "Khoảng cách",
-    dataIndex: "checkin_khoangcach",
-    key: "checkin_khoangcach",
-    render: (value: any) => (
-      <div>{parseFloat((value / 60).toFixed(2))}</div>
-    ),
-  },
-];
-
 export default function Detailcheckin({ employee, month, year }: any) {
+  const columnsDetail: any = [
+    {
+      title: "STT",
+      dataIndex: "stt",
+      key: "stt",
+      width: 60,
+      render: (_: any, __: any, index: number) => (
+        <span>{calculateIndex(page, PAGE_SIZE, index)}</span> // Tính toán index cho từng dòng
+      ),
+    },
+    {
+      title: "Mã khách hàng",
+      dataIndex: "kh_ma",
+      key: "kh_ma",
+    },
+    {
+      title: "Khách hàng",
+      dataIndex: "kh_ten",
+      key: "kh_ten",
+      render: (_:any, record: any) => (
+        <div>
+          <a
+            className="text-[#212B36]"
+            href={`/app/sales-invoice/${record.kh_ten}`}
+            target="_blank"
+          >
+            {record.kh_ten}
+          </a>
+        </div>
+      ),
+    },
+    {
+      title: "Địa chỉ",
+      dataIndex: "kh_diachi",
+      key: "kh_diachi",
+      render: (value: any) => {
+        return <div className="truncate hover:whitespace-normal">{value}</div>;
+      },
+    },
+    {
+      title: "Ngày viếng thăm",
+      dataIndex: "checkin_giovao",
+      key: "checkin_giovao",
+      render: (value: any) => {
+        return (
+          <>
+            <div>{dayjs(value).format("DD/MM/YYYY")}</div>
+          </>
+        );
+      },
+    },
+    {
+      title: "Thời gian checkin",
+      dataIndex: "checkin_giovao",
+      key: "checkin_giovao",
+      render: (value: any) => {
+        return (
+          <>
+            <div>{dayjs(value).format("HH:mm")}</div>
+          </>
+        );
+      },
+    },
+    {
+      title: "Khoảng cách",
+      dataIndex: "checkin_khoangcach",
+      key: "checkin_khoangcach",
+      render: (value: any) => <div>{parseFloat((value / 60).toFixed(2))}</div>,
+    },
+  ];
   const [page, setPage] = useState<number>(1);
   const PAGE_SIZE = 20;
   const [total, setTotal] = useState<number>(0);
@@ -87,6 +86,13 @@ export default function Detailcheckin({ employee, month, year }: any) {
 
   const startOfMonthTimestamp = startOfMonth.unix();
   const endOfMonthTimestamp = endOfMonth.unix();
+  const calculateIndex = (
+    pageNumber: number,
+    pageSize: number,
+    index: number
+  ) => {
+    return (pageNumber - 1) * pageSize + index + 1;
+  };
 
   useEffect(() => {
     (async () => {
@@ -131,7 +137,7 @@ export default function Detailcheckin({ employee, month, year }: any) {
             : false
         }
         scroll={{
-          y: 300,
+          y: 500,
         }}
         columns={columnsDetail}
       />
