@@ -12,7 +12,6 @@ def get_list_promotion(**kwargs):
     list_item = kwargs.get("listItem")
     total_amount = float(kwargs.get("totalAmount"))
     date = nowdate()
-
     if isinstance(list_item, str):
         list_item = json.loads(list_item)
           
@@ -50,7 +49,7 @@ def get_list_promotion(**kwargs):
                 promo["products"] = []
 
     # Áp dụng CTKM
-    return apply_Promotion(list_item, list_promotions, total_amount)
+    return r(list_item, list_promotions, total_amount)
     
 # Áp dụng CTKM
 def apply_Promotion(list_item=[], list_promotions=[], total_amount=0):
@@ -73,7 +72,7 @@ def caculate_promotion(list_item=[], promtion={}, total_amount=0):
             return None
         
     elif promtion.get("ptype_value") == "TIEN_SP":
-        ref = TIEN_SP(list_item, promtion)
+        ref = TIEN_SP(promtion,total_amount)
         if bool(ref):
             return {"ptype_value": "TIEN_SP", "result": ref}
         else:
@@ -119,16 +118,16 @@ def TIEN_TIEN(data_Promotion={}, tongTienhang = 0):
 
 
 # "TuanBD Tổng tiền hàng - tặng SP"
-def TIEN_SP(list_item=[], data_promotion={}):
-    total_amount = sum(item["amount"] for item in list_item)
-
+def TIEN_SP(data_promotion={}, tongTienhang = 0):
+    list_free_item=[]
     product = sorted(data_promotion["products"], key=lambda x: x["yeu_cau"], reverse=True)
+    
     boi_so = data_promotion["multiple"]
     boi_so_cap = 1
     for prd in product:
-        if total_amount >= prd["yeu_cau"]:
+        if tongTienhang >= prd["yeu_cau"]:
             if bool(boi_so):
-                boi_so_cap = int(total_amount / prd["yeu_cau"])
+                boi_so_cap = int(tongTienhang / prd["yeu_cau"])
             
             for item_km in prd["khuyen_mai"]:
                 product_promo = {
@@ -140,9 +139,9 @@ def TIEN_SP(list_item=[], data_promotion={}):
                     "amount": 0,
                     "is_free_item": True
                 }
-                list_item.append(product_promo)
+                list_free_item.append(product_promo)
             break
-    return list_item
+    return list_free_item
         
 
 # "TungDA Mua sản phẩm - đạt số lượng - chiết khấu SP (%)"

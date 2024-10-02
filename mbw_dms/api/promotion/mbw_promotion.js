@@ -38,8 +38,7 @@ function processAfterApplyPromotion(ptype_value, result, frm)
         }
     // Tổng tiền hàng - tặng SP
     else if (ptype_value == "TIEN_SP") {
-        frm.clear_table("items");
-        result.forEach(function(item) {
+       result.forEach(function(item) {
             let new_row = frm.add_child("items");
             new_row.item_code = item.item_code;
             new_row.item_name = item.item_name;
