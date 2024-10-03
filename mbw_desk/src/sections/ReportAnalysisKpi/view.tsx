@@ -36,7 +36,7 @@ const ReportAnalysis_KPI = () => {
   useEffect(() => {
     (async () => {
       const rsData = await AxiosService.get(
-        "/api/method/mbw_sfa.api.report.kpi.analisis_kpi",
+        "/api/method/mbw_dms.api.report.kpi.analisis_kpi",
         {
           params: {
             page_size: PAGE_SIZE,

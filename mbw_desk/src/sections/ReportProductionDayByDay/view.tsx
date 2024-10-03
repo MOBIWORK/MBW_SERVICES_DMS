@@ -51,7 +51,7 @@ const ReportProductionDayByDay = () => {
   useEffect(() => {
     (async () => {
       const rsData = await AxiosService.get(
-        "/api/method/mbw_sfa.api.report.prod_dbd.report_prod_dbd",
+        "/api/method/mbw_dms.api.report.prod_dbd.report_prod_dbd",
         {
           params: {
             page_size: PAGE_SIZE,

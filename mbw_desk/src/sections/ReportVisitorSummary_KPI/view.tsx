@@ -53,7 +53,7 @@ export default function ReportVisitorSummary_KPI() {
       title: <div className="">STT</div>,
       dataIndex: "stt",
       key: "stt",
-      render: (_, record: any, index: number) => index + 1,
+      render: (_: any, record: any, index: number) => index + 1,
     },
     {
       title: <div className="text-center">Nhóm bán hàng</div>,
@@ -260,7 +260,7 @@ export default function ReportVisitorSummary_KPI() {
   useEffect(() => {
     (async () => {
       const rsData = await AxiosService.get(
-        "/api/method/mbw_sfa.api.report.visitor_kpi.report_visitor_kpi",
+        "/api/method/mbw_dms.api.report.visitor_kpi.report_visitor_kpi",
         {
           params: {
             page_size: PAGE_SIZE,
