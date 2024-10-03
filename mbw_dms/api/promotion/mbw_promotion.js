@@ -16,17 +16,14 @@ frappe.ui.form.on('Sales Order', {
 // Tính toán khuyến mãi
 function processAfterApplyPromotion(ptype_value, result, frm)
 {
-    // KM chiết khấu SP (%)
-    if (ptype_value == "SP_SL_CKSP" || ptype_value == "SP_ST_CKSP"){
-        apply_discount_percentage_to_items(result, frm);
-    }
+    
     
     // KM tặng sản phẩm
-    else if (ptype_value == "TIEN_SP" || ptype_value == "SP_SL_SP" || ptype_value == "SP_ST_SP") {
+    if (ptype_value == "TIEN_SP" || ptype_value == "SP_SL_SP" || ptype_value == "SP_ST_SP") {
         add_items_to_form(result, frm);
     }
 
-    else if (ptype_value == "SP_SL_TIEN" || ptype_value == "SP_ST_TIEN"){
+    else if (ptype_value == "SP_SL_TIEN" || ptype_value == "SP_ST_TIEN" || ptype_value == "SP_SL_CKSP" || ptype_value == "SP_ST_CKSP"){
         apply_discount_amount_to_items(result, frm);
     }
 
@@ -52,23 +49,7 @@ function add_items_to_form(items, frm) {
     frm.refresh_field('items');
 }
 
-// khuyến mãi chiết khấu SP
-function apply_discount_percentage_to_items(result, frm) {
-    result.forEach((promo_item) => {
-        let filtered_item = frm.doc.items.find((item) => item.item_code === promo_item.item_code);
-        
-        if (filtered_item) {
-            // Cập nhật discount_percentage từ promo_item
-            filtered_item.discount_percentage = promo_item.discount_percentage;
 
-            // Kích hoạt sự kiện onchange cho trường discount_percentage
-            frm.script_manager.trigger("discount_percentage", filtered_item.doctype, filtered_item.name);
-
-            frm.refresh_field("items");
-        }
-    });
-
-}
 
 function apply_discount_amount_to_items(result, frm) {
     result.forEach((promo_item) => {
@@ -146,6 +127,7 @@ function update_item_prices_by_price_list(frm) {
                 if (!r.exc) {
                     item.rate = r.message.price_list_rate;
                     item.amount = item.rate * item.qty;
+                    item.discount_amount=0;
                     total_amount += item.amount;
                     frm.set_value("total", total_amount);
                     refresh_field("items");
