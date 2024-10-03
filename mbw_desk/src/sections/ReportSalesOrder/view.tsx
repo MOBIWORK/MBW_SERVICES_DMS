@@ -65,113 +65,114 @@ const endOfMonth: any = dayjs().endOf("month");
 let start = Date.parse(startOfMonth["$d"]) / 1000;
 let end = Date.parse(endOfMonth["$d"]) / 1000;
 
-const columns: TableColumnsType<DataSaleOrder> = [
-  {
-    title: (
-      <div className="relative">
-        <span className="absolute -top-[11px] -left-8">STT</span>
-      </div>
-    ),
-    dataIndex: "stt",
-    key: "stt",
-    render: (_, record: any, index) => index + 1,
-  },
-  {
-    title: "Đơn đặt",
-    dataIndex: "name",
-    key: "name",
-    render: (_, record: any) => (
-      <div>
-        <a
-          className="text-[#212B36]"
-          href={`/app/sales-order/${record.name}`}
-          target="_blank"
-        >
-          {record.name}
-        </a>
-      </div>
-    ),
-  },
-  {
-    title: "Khách hàng",
-    dataIndex: "customer",
-    key: "customer",
-    render: (_, record: any) => <div>{record.customer}</div>,
-  },
-  {
-    title: "Khu vực",
-    dataIndex: "territory",
-    key: "territory",
-    render: (_, record: any) => <div>{record.territory}</div>,
-  },
-  {
-    title: "Kho",
-    dataIndex: "set_warehouse",
-    key: "set_warehouse",
-  },
-  {
-    title: "Ngày tạo",
-    dataIndex: "transaction_date",
-    key: "transaction_date",
-    render: (value) => {
-      return value ? <p>{dayjs(value * 1000).format("DD/MM/YYYY")}</p> : <></>;
-    },
-  },
-  {
-    title: "Nhân viên",
-    dataIndex: "sales_person",
-    key: "sales_person",
-    render: (_, record: any) => (
-      <div className="!w-[150px]">{record.sales_person}</div>
-    ),
-  },
-  {
-    title: <div className="text-right">Thành tiền (VNĐ)</div>,
-    dataIndex: "total",
-    key: "total",
-    width: 160,
-    render: (_, record: any) => (
-      <div className="!text-right">
-        {Intl.NumberFormat().format(record.total)}
-      </div>
-    ),
-  },
-  {
-    title: <div className="text-right">Tiền VAT (VNĐ)</div>,
-    dataIndex: "tax_amount",
-    key: "tax_amount",
-    width: 160,
-    render: (_, record: any) => (
-      <div className="!text-right">
-        {Intl.NumberFormat().format(record.tax_amount)}
-      </div>
-    ),
-  },
-  {
-    title: <div className="text-right">Chiết khấu (VNĐ)</div>,
-    dataIndex: "discount_amount",
-    key: "discount_amount",
-    width: 160,
-    render: (_, record: any) => (
-      <div className="!text-right">
-        {Intl.NumberFormat().format(record.discount_amount)}
-      </div>
-    ),
-  },
-  {
-    title: <div className="text-right">Tổng tiền (VNĐ)</div>,
-    dataIndex: "grand_total",
-    key: "grand_total",
-    width: 160,
-    render: (_, record: any) => (
-      <div className="!text-right">
-        {Intl.NumberFormat().format(record.grand_total)}
-      </div>
-    ),
-  },
-];
-
 export default function ReportSalesOrder() {
+  const columns: TableColumnsType<DataSaleOrder> = [
+    {
+      title: (
+        <div className="relative">
+          <span className="absolute -top-[11px] -left-8">STT</span>
+        </div>
+      ),
+      dataIndex: "stt",
+      key: "stt",
+      render: (_: any, __: any, index: number) => (
+        <span>{calculateIndex(page, PAGE_SIZE, index)}</span> // Tính toán index cho từng dòng
+      ),
+    },
+    {
+      title: "Đơn đặt",
+      dataIndex: "name",
+      key: "name",
+      render: (_, record: any) => (
+        <div>
+          <a
+            className="text-[#212B36]"
+            href={`/app/sales-order/${record.name}`}
+            target="_blank"
+          >
+            {record.name}
+          </a>
+        </div>
+      ),
+    },
+    {
+      title: "Khách hàng",
+      dataIndex: "customer",
+      key: "customer",
+      render: (_, record: any) => <div>{record.customer}</div>,
+    },
+    {
+      title: "Khu vực",
+      dataIndex: "territory",
+      key: "territory",
+      render: (_, record: any) => <div>{record.territory}</div>,
+    },
+    {
+      title: "Kho",
+      dataIndex: "set_warehouse",
+      key: "set_warehouse",
+    },
+    {
+      title: "Ngày tạo",
+      dataIndex: "transaction_date",
+      key: "transaction_date",
+      render: (value) => {
+        return value ? <p>{dayjs(value * 1000).format("DD/MM/YYYY")}</p> : <></>;
+      },
+    },
+    {
+      title: "Nhân viên",
+      dataIndex: "sales_person",
+      key: "sales_person",
+      render: (_, record: any) => (
+        <div className="!w-[150px]">{record.sales_person}</div>
+      ),
+    },
+    {
+      title: <div className="text-right">Thành tiền (VNĐ)</div>,
+      dataIndex: "total",
+      key: "total",
+      width: 160,
+      render: (_, record: any) => (
+        <div className="!text-right">
+          {Intl.NumberFormat().format(record.total)}
+        </div>
+      ),
+    },
+    {
+      title: <div className="text-right">Tiền VAT (VNĐ)</div>,
+      dataIndex: "tax_amount",
+      key: "tax_amount",
+      width: 160,
+      render: (_, record: any) => (
+        <div className="!text-right">
+          {Intl.NumberFormat().format(record.tax_amount)}
+        </div>
+      ),
+    },
+    {
+      title: <div className="text-right">Chiết khấu (VNĐ)</div>,
+      dataIndex: "discount_amount",
+      key: "discount_amount",
+      width: 160,
+      render: (_, record: any) => (
+        <div className="!text-right">
+          {Intl.NumberFormat().format(record.discount_amount)}
+        </div>
+      ),
+    },
+    {
+      title: <div className="text-right">Tổng tiền (VNĐ)</div>,
+      dataIndex: "grand_total",
+      key: "grand_total",
+      width: 160,
+      render: (_, record: any) => (
+        <div className="!text-right">
+          {Intl.NumberFormat().format(record.grand_total)}
+        </div>
+      ),
+    },
+  ];
   const [dataSaleOrder, setDataSaleOrder] = useState<DataSaleOrder[]>([]);
   const [total, setTotal] = useState<number>(0);
   const PAGE_SIZE = 20;
@@ -205,6 +206,13 @@ export default function ReportSalesOrder() {
   const size = useResize();
   const [containerHeight, setContainerHeight] = useState<any>(0);
   const [scrollYTable1, setScrollYTable1] = useState<number>(size?.h * 0.52);
+  const calculateIndex = (
+    pageNumber: number,
+    pageSize: number,
+    index: number
+  ) => {
+    return (pageNumber - 1) * pageSize + index + 1;
+  };
 
   useEffect(() => {
     setScrollYTable1(size.h * 0.52);

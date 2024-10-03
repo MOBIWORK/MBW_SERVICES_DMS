@@ -99,6 +99,12 @@ export default function DetailOrder({ employee, month, year }: any) {
     })();
   }, [startOfMonthTimestamp, endOfMonthTimestamp, employee, page]);
 
+  useEffect(() => {
+    return () => {
+      setPage(1);
+    };
+  }, [employee]);
+
   return (
     <>
       <TableCustom

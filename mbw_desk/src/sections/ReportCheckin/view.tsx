@@ -41,98 +41,101 @@ const endOfMonth: any = dayjs().endOf("month");
 let start = Date.parse(startOfMonth["$d"]) / 1000;
 let end = Date.parse(endOfMonth["$d"]) / 1000;
 
-const columnsCheckin: any = [
-  {
-    title: (
-      <div className="relative">
-        <span className="absolute -top-[11px] -left-8">STT</span>
-      </div>
-    ),
-    dataIndex: "stt",
-    key: "stt",
-    render: (_, record: any, index: number) => index + 1,
-  },
-  {
-    title: "Mã nhân viên",
-    dataIndex: "employee_code",
-    key: "employee_code",
-  },
-  {
-    title: "Tên nhân viên",
-    dataIndex: "employee_name",
-    key: "employee_name",
-  },
-  {
-    title: "Nhóm bán hàng",
-    dataIndex: "sale_group",
-    key: "sale_group",
-  },
-  {
-    title: "Ngày",
-    dataIndex: "create_time",
-    key: "create_time",
-    render: (value: any) => <div>{dayjs.unix(value).format("DD/MM/YYYY")}</div>,
-  },
-  {
-    title: "Thứ",
-    dataIndex: "create_time",
-    key: "create_time",
-    render: (value: any) => <div>{dayjs.unix(value).format("dddd")}</div>,
-  },
-  {
-    title: "Giờ làm",
-    className: "!text-center",
-    dataIndex: "total_work",
-    key: "total_work",
-    render: (value: any) => (
-      <div className="!text-center">{parseFloat((value / 60).toFixed(2))}</div>
-    ),
-  },
-  {
-    title: "Giờ viếng thăm",
-    dataIndex: "total_time",
-    className: "!text-center",
-    key: "total_time",
-    render: (value: any) => (
-      <div className="!text-center">{parseFloat((value / 60).toFixed(2))}</div>
-    ),
-  },
-  {
-    title: "Số km tự động (km)",
-    dataIndex: "kmauto",
-    className: "!text-center",
-    key: "kmauto",
-    render: (value: any) => (
-      <div className="!text-center">
-        {value ? value : <div className="min-w-[30px]">-</div>}
-      </div>
-    ),
-  },
-  {
-    title: "Số km di chuyển (km)",
-    className: "!text-center",
-    dataIndex: "kmmove",
-    key: "kmmove",
-    render: (value: any) => (
-      <div className="!text-center">
-        {value ? value : <div className="min-w-[40px]">-</div>}
-      </div>
-    ),
-  },
-  {
-    title: "Vận tốc (km/h)",
-    dataIndex: "speed",
-    className: "!text-center",
-    key: "kmmove",
-    render: (value: any) => (
-      <div className="!text-center">
-        {value ? value : <div className="min-w-[20px]">-</div>}
-      </div>
-    ),
-  },
-];
-
 export default function ReportCheckin() {
+  const columnsCheckin: any = [
+    {
+      title: (
+        <div className="relative">
+          <span className="absolute -top-[11px] -left-8">STT</span>
+        </div>
+      ),
+      dataIndex: "stt",
+      key: "stt",
+      width: 60,
+      render: (_: any, __: any, index: number) => (
+        <span>{calculateIndex(page, PAGE_SIZE, index)}</span> // Tính toán index cho từng dòng
+      ),
+    },
+    {
+      title: "Mã nhân viên",
+      dataIndex: "employee_code",
+      key: "employee_code",
+    },
+    {
+      title: "Tên nhân viên",
+      dataIndex: "employee_name",
+      key: "employee_name",
+    },
+    {
+      title: "Nhóm bán hàng",
+      dataIndex: "sale_group",
+      key: "sale_group",
+      width: 200,
+    },
+    {
+      title: "Ngày",
+      dataIndex: "create_time",
+      key: "create_time",
+      render: (value: any) => <div>{dayjs.unix(value).format("DD/MM/YYYY")}</div>,
+    },
+    {
+      title: "Thứ",
+      dataIndex: "create_time",
+      key: "create_time",
+      render: (value: any) => <div>{dayjs.unix(value).format("dddd")}</div>,
+    },
+    {
+      title: "Giờ làm",
+      className: "!text-center",
+      dataIndex: "total_work",
+      key: "total_work",
+      render: (value: any) => (
+        <div className="!text-center">{parseFloat((value / 60).toFixed(2))}</div>
+      ),
+    },
+    {
+      title: "Giờ viếng thăm",
+      dataIndex: "total_time",
+      className: "!text-center",
+      key: "total_time",
+      render: (value: any) => (
+        <div className="!text-center">{parseFloat((value / 60).toFixed(2))}</div>
+      ),
+    },
+    {
+      title: "Số km tự động (km)",
+      dataIndex: "kmauto",
+      className: "!text-center",
+      key: "kmauto",
+      render: (value: any) => (
+        <div className="!text-center">
+          {value ? value : <div className="min-w-[50px]">-</div>}
+        </div>
+      ),
+    },
+    {
+      title: "Số km di chuyển (km)",
+      className: "!text-center",
+      dataIndex: "kmmove",
+      key: "kmmove",
+      render: (value: any) => (
+        <div className="!text-center">
+          {value ? value : <div className="min-w-[50px]">-</div>}
+        </div>
+      ),
+    },
+    {
+      title: "Vận tốc (km/h)",
+      dataIndex: "speed",
+      className: "!text-center",
+      key: "kmmove",
+      render: (value: any) => (
+        <div className="!text-center">
+          {value ? value : <div className="min-w-[50px]">-</div>}
+        </div>
+      ),
+    },
+  ];
   const [dataCheckin, setDataCheckin] = useState<any>([]);
   const [total, setTotal] = useState<number>(0);
   const PAGE_SIZE = 20;
@@ -160,6 +163,13 @@ export default function ReportCheckin() {
   const size = useResize();
   const [containerHeight, setContainerHeight] = useState<any>(0);
   const [scrollYTable1, setScrollYTable1] = useState<number>(size?.h * 0.52);
+  const calculateIndex = (
+    pageNumber: number,
+    pageSize: number,
+    index: number
+  ) => {
+    return (pageNumber - 1) * pageSize + index + 1;
+  };
 
   const [modal, setModal] = useState<{
     open: boolean;
@@ -367,9 +377,10 @@ export default function ReportCheckin() {
         ),
       },
       {
-        title: "Loại khách",
+        title: "Loại hình khách hàng",
         dataIndex: "customer_type",
         key: "customer_type",
+        width: 200,
         render: (_, record) => <div>{record.customer_type}</div>,
       },
       {
@@ -685,7 +696,7 @@ export default function ReportCheckin() {
                           >
                             <Form.Item
                               name="customertype"
-                              label={"Loại khách hàng"}
+                              label={"Loại hình khách hàng"}
                               className="w-[468px] border-none"
                             >
                               <SelectCommon
@@ -693,7 +704,7 @@ export default function ReportCheckin() {
                                 options={typecustomer}
                                 allowClear
                                 showSearch
-                                placeholder="Tất cả loại khách hàng"
+                                placeholder="Tất cả loại hình khách hàng"
                               />
                             </Form.Item>
 
