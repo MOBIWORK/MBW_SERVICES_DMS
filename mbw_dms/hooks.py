@@ -263,9 +263,8 @@ doc_events = {
         "on_cancel": "mbw_dms.controllers.dms_sales_invoice.update_kpi_monthly_on_cancel"
     },
     "Sales Order": {
-        "on_submit": ["mbw_dms.controllers.dms_sales_order.update_kpi_monthly", "mbw_dms.controllers.dms_sales_order.auto_create_si"],
+        "on_submit": ["mbw_dms.controllers.dms_sales_order.update_kpi_monthly", "mbw_dms.controllers.dms_sales_order.auto_create_si", "mbw_dms.controllers.dms_sales_order.validate_projected_qty"],
         "on_cancel": "mbw_dms.controllers.dms_sales_order.update_kpi_monthly_on_cancel",
-        "on_submit": "mbw_dms.controllers.dms_sales_order.validate_projected_qty",
         "after_insert": "mbw_dms.controllers.dms_sales_order.apply_discounts_simultaneously"
     },
     "DMS Router": {
