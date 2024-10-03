@@ -7,8 +7,8 @@ export default function Detailchekinfirst({ employee, month, year }: any) {
   const columnsDetail: any = [
     {
       title: "STT",
-      dataIndex: "stt",
-      key: "stt",
+      dataIndex: "groupIndex",
+      key: "index",
       width: 60,
       render: (_: any, __: any, index: number) => (
         <span>{calculateIndex(page, PAGE_SIZE, index)}</span> // Tính toán index cho từng dòng
@@ -23,6 +23,7 @@ export default function Detailchekinfirst({ employee, month, year }: any) {
       title: "Khách hàng",
       dataIndex: "kh_ten",
       key: "kh_ten",
+      width: 200,
       render: (_: any, record: any) => (
         <div>
           <a
@@ -114,6 +115,33 @@ export default function Detailchekinfirst({ employee, month, year }: any) {
     })();
   }, [startOfMonthTimestamp, endOfMonthTimestamp, employee, page]);
 
+  useEffect(() => {
+    return () => {
+      setPage(1);
+    };
+  }, [employee]);
+
+  const startIndex: number = (page - 1) * PAGE_SIZE + 1;
+
+  // Tạo groupIndex cho các hàng
+  let lastKhMa: string | null = null;
+  // let groupIndex = startIndex - 1;
+  let currentIndex = 0;
+
+  // Map the data to add groupIndex
+  const groupedData: any = dataDetail?.data?.map((item: any) => {
+    // Nếu kh_ma thay đổi thì tăng groupIndex
+    if (item.kh_ma !== lastKhMa) {
+      lastKhMa = item.kh_ma;
+      currentIndex++; // Tăng index khi gặp kh_ma mới
+      const updatedItem = { ...item, groupIndex: currentIndex };
+      return updatedItem;
+    } else {
+      // Nếu kh_ma trùng lặp, không tăng index
+      return { ...item, groupIndex: null };
+    }
+  });
+
   return (
     <>
       <TableCustom
@@ -123,6 +151,7 @@ export default function Detailchekinfirst({ employee, month, year }: any) {
           key: report.name,
           ...report,
         }))}
+        // dataSource={groupedData}
         pagination={
           total && total > PAGE_SIZE
             ? {
@@ -140,10 +169,7 @@ export default function Detailchekinfirst({ employee, month, year }: any) {
           y: 500,
         }}
         columns={columnsDetail}
-        onRow={() => ({
-          onMouseEnter: () => null, // Vô hiệu hóa hover
-          onMouseLeave: () => null, // Vô hiệu hóa hover
-        })}
+        rowKey="name"
       />
     </>
   );
