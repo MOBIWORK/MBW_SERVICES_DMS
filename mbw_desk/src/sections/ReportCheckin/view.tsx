@@ -373,7 +373,7 @@ export default function ReportCheckin() {
         key: "customer_address",
         width: 200,
         render: (_, record) => (
-          <div className="truncate">{record.customer_address}</div>
+          <div className="truncate hover:whitespace-normal">{record.customer_address}</div>
         ),
       },
       {
@@ -433,7 +433,7 @@ export default function ReportCheckin() {
         title: "Địa chỉ checkin",
         dataIndex: "checkin_address",
         key: "checkin_address",
-        render: (_, record) => <div>{record.checkin_address}</div>,
+        render: (_, record) => <div className="truncate hover:whitespace-normal">{record.checkin_address}</div>,
       },
       {
         title: "Khoảng cách",

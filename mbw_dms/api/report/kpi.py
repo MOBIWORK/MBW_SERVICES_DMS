@@ -108,6 +108,7 @@ def kpi_cus_so_detail(**kwargs):
             SELECT cus.customer_code, so.customer, so.customer_address, so.name as so_name, UNIX_TIMESTAMP(so.transaction_date) as trans_date, so.grand_total
             FROM `tabSales Order` so
             LEFT JOIN `tabCustomer` cus ON so.customer = cus.name
+            ORDER BY so.customer_code ASC
         """
 
         if where_condition:
