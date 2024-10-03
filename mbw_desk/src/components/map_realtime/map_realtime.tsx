@@ -379,7 +379,17 @@ function RealtimeMap({ options, onClickPopup, status }:RealtimeProp) {
                                 console.log("employee today",employee);
                                 
                                 const coords = isTracking ? [item_tracking.position.coords.longitude, item_tracking.position.coords.latitude] : item_checkin.checkin.coordinates.split(',').map((coord:any) => parseFloat(coord));
-                                const address = await reverseGeocode(coords);
+                                let address =  ""
+                                try {                                    
+                                    address = await reverseGeocode(coords);
+                                } catch (error) {
+                                    console.log("loi lay dia chi",error);                                    
+                                }
+                                finally {
+
+                                }
+                                console.log("address",address);
+                                
                                 //>10p -> offl 
                                 if (isTracking) {
                                     // là tracking so sánh timestamp
@@ -411,7 +421,7 @@ function RealtimeMap({ options, onClickPopup, status }:RealtimeProp) {
                     throw error;
                 }
             };
-
+            
             async function reverseGeocode(position) {
                 return new Promise((resolve, reject) => {
                     const param = {
