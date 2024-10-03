@@ -18,12 +18,16 @@ function processAfterApplyPromotion(ptype_value, result, frm)
 {
     // KM chiết khấu SP (%)
     if (ptype_value == "SP_SL_CKSP" || ptype_value == "SP_ST_CKSP"){
-        apply_discount_to_items(result, frm);
+        apply_discount_percentage_to_items(result, frm);
     }
     
     // KM tặng sản phẩm
     else if (ptype_value == "TIEN_SP" || ptype_value == "SP_SL_SP" || ptype_value == "SP_ST_SP") {
         add_items_to_form(result, frm);
+    }
+
+    else if (ptype_value == "SP_SL_TIEN" || ptype_value == "SP_ST_TIEN"){
+        apply_discount_amount_to_items(result, frm);
     }
 
     // Tổng tiền hàng - Tiền 
@@ -49,7 +53,7 @@ function add_items_to_form(items, frm) {
 }
 
 // khuyến mãi chiết khấu SP
-function apply_discount_to_items(result, frm) {
+function apply_discount_percentage_to_items(result, frm) {
     result.forEach((promo_item) => {
         let filtered_item = frm.doc.items.find((item) => item.item_code === promo_item.item_code);
         
@@ -59,6 +63,23 @@ function apply_discount_to_items(result, frm) {
 
             // Kích hoạt sự kiện onchange cho trường discount_percentage
             frm.script_manager.trigger("discount_percentage", filtered_item.doctype, filtered_item.name);
+
+            frm.refresh_field("items");
+        }
+    });
+
+}
+
+function apply_discount_amount_to_items(result, frm) {
+    result.forEach((promo_item) => {
+        let filtered_item = frm.doc.items.find((item) => item.item_code === promo_item.item_code);
+        
+        if (filtered_item) {
+            // Cập nhật discount_amount từ promo_item
+            filtered_item.discount_amount = promo_item.discount_amount;
+
+            // Kích hoạt sự kiện onchange cho trường discount_amount
+            frm.script_manager.trigger("discount_amount", filtered_item.doctype, filtered_item.name);
 
             frm.refresh_field("items");
         }
