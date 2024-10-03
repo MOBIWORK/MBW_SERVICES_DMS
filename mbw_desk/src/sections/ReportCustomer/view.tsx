@@ -57,7 +57,7 @@ export default function ReportCustomer() {
       key: "customer_name",
     },
     {
-      title: "Loại khách hàng",
+      title: "Loại hình khách hàng",
       dataIndex: "customer_type",
       key: "customer_type",
       width: 175,

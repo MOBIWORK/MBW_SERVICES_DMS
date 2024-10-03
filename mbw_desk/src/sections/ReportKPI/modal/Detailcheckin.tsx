@@ -95,6 +95,12 @@ export default function Detailcheckin({ employee, month, year }: any) {
   };
 
   useEffect(() => {
+    return () => {
+      setPage(1);
+    };
+  }, [employee]);
+
+  useEffect(() => {
     (async () => {
       const rsData = await AxiosService.get(
         "/api/method/mbw_dms.api.report.kpi.kpi_visit_detail",
