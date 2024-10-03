@@ -22,7 +22,6 @@ dist-ssr
 *.sln
 *.sw?
 .env.development
-
 node_modules
 
 src/auth
