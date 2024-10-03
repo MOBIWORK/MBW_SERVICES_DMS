@@ -47,7 +47,9 @@
     "slick-carousel": "^1.8.1",
     "styled-components": "^6.1.12",
     "xlsx": "^0.18.5",
-    "xtend": "^4.0.2"
+    "xtend": "^4.0.2",
+    "redux": "^5.0.1",
+    "@reduxjs/toolkit": "^2.2.7"
   },
   "devDependencies": {
     "@faker-js/faker": "^8.4.1",
