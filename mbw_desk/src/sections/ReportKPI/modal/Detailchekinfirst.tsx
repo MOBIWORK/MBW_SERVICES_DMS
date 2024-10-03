@@ -1,7 +1,7 @@
 import { TableCustom } from "@/components";
 import { AxiosService } from "@/services/server";
 import dayjs from "dayjs";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 
 export default function Detailchekinfirst({ employee, month, year }: any) {
   const columnsDetail: any = [
@@ -10,9 +10,9 @@ export default function Detailchekinfirst({ employee, month, year }: any) {
       dataIndex: "groupIndex",
       key: "index",
       width: 60,
-      render: (_: any, __: any, index: number) => (
-        <span>{calculateIndex(page, PAGE_SIZE, index)}</span> // Tính toán index cho từng dòng
-      ),
+      render: (_: any, __: any) => {
+        return _;
+      },
     },
     {
       title: "Mã khách hàng",
@@ -87,13 +87,12 @@ export default function Detailchekinfirst({ employee, month, year }: any) {
 
   const startOfMonthTimestamp = startOfMonth.unix();
   const endOfMonthTimestamp = endOfMonth.unix();
-  const calculateIndex = (
-    pageNumber: number,
-    pageSize: number,
-    index: number
-  ) => {
-    return (pageNumber - 1) * pageSize + index + 1;
-  };
+
+  useEffect(() => {
+    return () => {
+      setPage(1);
+    };
+  }, [employee]);
 
   useEffect(() => {
     (async () => {
@@ -103,55 +102,44 @@ export default function Detailchekinfirst({ employee, month, year }: any) {
           params: {
             from_date: startOfMonthTimestamp,
             to_date: endOfMonthTimestamp,
-            employee: employee,
+            employee,
             page_size: PAGE_SIZE,
             page_number: page,
           },
         }
       );
-      let { result } = rsData;
-      setDataDetail(result);
+
+      const { result } = rsData;
       setTotal(result?.totals);
+
+      // Cập nhật allData chỉ khi tải trang mới
+      setDataDetail((prevData: any) => 
+        page === 1 ? result.data : [...prevData, ...result.data]
+      );
     })();
   }, [startOfMonthTimestamp, endOfMonthTimestamp, employee, page]);
 
-  useEffect(() => {
-    return () => {
-      setPage(1);
-    };
-  }, [employee]);
+  const groupedData = React.useMemo(() => {
+    let lastKhMa: string | null = null;
+    let currentIndex = 0;
 
-  const startIndex: number = (page - 1) * PAGE_SIZE + 1;
-
-  // Tạo groupIndex cho các hàng
-  let lastKhMa: string | null = null;
-  // let groupIndex = startIndex - 1;
-  let currentIndex = 0;
-
-  // Map the data to add groupIndex
-  const groupedData: any = dataDetail?.data?.map((item: any) => {
-    // Nếu kh_ma thay đổi thì tăng groupIndex
-    if (item.kh_ma !== lastKhMa) {
-      lastKhMa = item.kh_ma;
-      currentIndex++; // Tăng index khi gặp kh_ma mới
-      const updatedItem = { ...item, groupIndex: currentIndex };
-      return updatedItem;
-    } else {
-      // Nếu kh_ma trùng lặp, không tăng index
-      return { ...item, groupIndex: null };
-    }
-  });
+    return dataDetail.map((item: any) => {
+      if (item.kh_ma !== lastKhMa) {
+        lastKhMa = item.kh_ma;
+        currentIndex++;
+        return { ...item, groupIndex: currentIndex };
+      } else {
+        return { ...item, groupIndex: null };
+      }
+    });
+  }, [dataDetail]);
 
   return (
     <>
       <TableCustom
         bordered
         $border
-        dataSource={dataDetail?.data?.map((report: any) => ({
-          key: report.name,
-          ...report,
-        }))}
-        // dataSource={groupedData}
+        dataSource={groupedData}
         pagination={
           total && total > PAGE_SIZE
             ? {
@@ -169,7 +157,6 @@ export default function Detailchekinfirst({ employee, month, year }: any) {
           y: 500,
         }}
         columns={columnsDetail}
-        rowKey="name"
       />
     </>
   );
