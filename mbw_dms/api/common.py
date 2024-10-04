@@ -32,7 +32,7 @@ def qty_not_pricing_rule(items):
     total_item_price = pydash.filter_(items, lambda x: x.amount > 0)
     total_qty = {item.get("qty") for item in total_item_price}
     total_uom = {item.get("uom") for item in total_item_price}
-
+    print("total=============================",total_qty,total_uom)
     return total_qty,total_uom
 
 
