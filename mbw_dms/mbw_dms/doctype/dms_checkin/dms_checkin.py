@@ -695,7 +695,6 @@ def send_checkin_to_ekgis(doc):
         sale_person = frappe.db.get_value("Sales Person",{"employee":employee.name},["*"],as_dict=1)
         # Tích hợp dữ liệu checkin vào ekgis
         if sale_person:
-            print("sale_person",sale_person)
             from mbw_dms.controllers.dms_sales_person import create_employee_objectid
             objectId = sale_person.object_id
             if objectId == None:
