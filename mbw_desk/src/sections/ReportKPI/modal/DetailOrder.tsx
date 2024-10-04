@@ -1,18 +1,18 @@
 import { TableCustom } from "@/components";
 import { AxiosService } from "@/services/server";
 import dayjs from "dayjs";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 
 export default function DetailOrder({ employee, month, year }: any) {
   const columnsDetail: any = [
     {
       title: "STT",
-      dataIndex: "stt",
-      key: "stt",
+      dataIndex: "groupIndex",
+      key: "index",
       width: 60,
-      render: (_: any, __: any, index: number) => (
-        <span>{calculateIndex(page, PAGE_SIZE, index)}</span> // Tính toán index cho từng dòng
-      ),
+      render: (_: any, __: any) => {
+        return _;
+      },
     },
     {
       title: "Mã khách hàng",
@@ -71,13 +71,6 @@ export default function DetailOrder({ employee, month, year }: any) {
 
   const startOfMonthTimestamp = startOfMonth.unix();
   const endOfMonthTimestamp = endOfMonth.unix();
-  const calculateIndex = (
-    pageNumber: number,
-    pageSize: number,
-    index: number
-  ) => {
-    return (pageNumber - 1) * pageSize + index + 1;
-  };
 
   useEffect(() => {
     (async () => {
@@ -94,10 +87,27 @@ export default function DetailOrder({ employee, month, year }: any) {
         }
       );
       let { result } = rsData;
-      setDataDetail(result);
       setTotal(result?.totals);
+      setDataDetail((prevData: any) => 
+        page === 1 ? result.data : [...prevData, ...result.data]
+      );
     })();
   }, [startOfMonthTimestamp, endOfMonthTimestamp, employee, page]);
+
+  const groupedData = React.useMemo(() => {
+    let lastKhMa: string | null = null;
+    let currentIndex = 0;
+
+    return dataDetail.map((item: any) => {
+      if (item.kh_ma !== lastKhMa) {
+        lastKhMa = item.kh_ma;
+        currentIndex++;
+        return { ...item, groupIndex: currentIndex };
+      } else {
+        return { ...item, groupIndex: null };
+      }
+    });
+  }, [dataDetail]);
 
   useEffect(() => {
     return () => {
@@ -110,10 +120,7 @@ export default function DetailOrder({ employee, month, year }: any) {
       <TableCustom
         bordered
         $border
-        dataSource={dataDetail?.data?.map((report: any) => ({
-          key: report.so_name,
-          ...report,
-        }))}
+        dataSource={groupedData}
         pagination={
           total && total > PAGE_SIZE
             ? {
