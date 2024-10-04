@@ -326,7 +326,7 @@ def kpi_so_qty_detail(**kwargs):
                     filtered_data.append(i)
 
         totals = len(filtered_data)
-
+        from mbw_dms.api.common import qty_not_pricing_rule
         for i in filtered_data:
             so = frappe.get_doc("Sales Order", i.name).as_dict()
             items = so.get("items")
@@ -418,17 +418,7 @@ def kpi_time_work_detail(**kwargs):
         })
     except Exception as e:
         return exception_handle(e)
-    
-import pydash
-# sp khuyến mãi giá = 0 
-def qty_not_pricing_rule(items):
-    items = list(items)
-    total_item_price = pydash.filter_(items, lambda x: x.amount >0)
-    print("total_item_price",total_item_price)
-    total_qty = {item.get("qty") for item in total_item_price}
-    total_uom = {item.get("uom") for item in total_item_price}
 
-    return total_qty,total_uom
 
 
 

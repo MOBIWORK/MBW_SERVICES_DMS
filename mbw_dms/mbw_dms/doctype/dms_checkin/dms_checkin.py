@@ -102,7 +102,7 @@ class DMSCheckin(Document):
         if existing_monthly_summary:
                 monthly_summary_doc = frappe.get_doc("DMS Summary KPI Monthly", existing_monthly_summary)
                 #chỉ + 1 với lần checkin đầu tiên của ngày
-                if len(exists_checkin_day) <= 1:
+                if len(exists_checkin_day) == 0:
                     monthly_summary_doc.so_kh_vt_luot += 1
                 
                 
@@ -138,7 +138,10 @@ class DMSCheckin(Document):
             })
             monthly_summary_doc.insert(ignore_permissions=True)
     def update_kpi_monthly_after_delete(self):
-        # Lấy ngày tháng để truy xuất dữ liệu
+        try:
+            pass
+        except Exception as e:
+            print("loi xoas=====================",e)
         month = int(nowdate().split('-')[1])
         year = int(nowdate().split('-')[0])
         start_date_str = f"{year:04d}-{month:02d}-01"
@@ -177,18 +180,19 @@ class DMSCheckin(Document):
         )
         #mới:chuyện- nếu số lần checkin trong ngày bị xóa =0 thì vt -1
         if existing_monthly_summary:
+            print("ddax chay vao day")
             #tính thời gian viếng thăm
             checkin_giovao = self.checkin_giovao
             checkin_giora = self.checkin_giora
-            time_in = datetime.datetime.strptime(checkin_giovao, "%Y-%m-%d %H:%M:%S")
-            time_out = datetime.datetime.strptime(checkin_giora, "%Y-%m-%d %H:%M:%S")
+            time_in = datetime.datetime.strptime(checkin_giovao, "%Y-%m-%d %H:%M:%S") if isinstance(checkin_giovao,str) else checkin_giovao
+            time_out = datetime.datetime.strptime(checkin_giora, "%Y-%m-%d %H:%M:%S") if isinstance(checkin_giora,str) else checkin_giora
             seconds_worked = time_out.timestamp() - time_in.timestamp()
             time_work = seconds_worked / 3600
 
             monthly_summary_doc = frappe.get_doc("DMS Summary KPI Monthly", existing_monthly_summary)
             monthly_summary_doc.so_gio_lam_viec = minus_not_nega(monthly_summary_doc.so_gio_lam_viec,time_work)
             #không còn bản ghi trong ngày => giảm kpi viếng thăm
-            if exists_checkin_the_day == None:
+            if len(exists_checkin_the_day) == 0:
                 monthly_summary_doc.so_kh_vt_luot = minus_not_nega(monthly_summary_doc.so_kh_vt_luot)
                 if name_date in list_travel_date:
                     monthly_summary_doc.solan_vt_dungtuyen = minus_not_nega(monthly_summary_doc.solan_vt_dungtuyen)
@@ -196,10 +200,12 @@ class DMSCheckin(Document):
                     monthly_summary_doc.solan_vt_ngoaituyen = minus_not_nega(monthly_summary_doc.solan_vt_ngoaituyen)
             else :
                 last_checkin_date = exists_checkin_the_day[0]
-                checkin_giovao_new = last_checkin_date.checkin_giovao
+                checkin_giovao_new = last_checkin_date.checkin_giovao 
                 checkin_giora_new = last_checkin_date.checkin_giora
-                time_in_new = datetime.datetime.strptime(checkin_giovao_new, "%Y-%m-%d %H:%M:%S")
-                time_out_new = datetime.datetime.strptime(checkin_giora_new, "%Y-%m-%d %H:%M:%S")
+                
+                time_in_new = datetime.datetime.strptime(checkin_giovao_new, "%Y-%m-%d %H:%M:%S") if isinstance(checkin_giovao_new,str) else  checkin_giovao_new
+                time_out_new = datetime.datetime.strptime(checkin_giora_new, "%Y-%m-%d %H:%M:%S") if isinstance(checkin_giora_new,str) else  checkin_giora_new
+
                 seconds_worked_new = time_out_new.timestamp() - time_in_new.timestamp()
                 time_work_new = seconds_worked_new / 3600
                 monthly_summary_doc.so_gio_lam_viec += time_work_new
@@ -210,6 +216,8 @@ class DMSCheckin(Document):
 
             
             monthly_summary_doc.save(ignore_permissions=True)
+            print("cap nhat thanhcong vao")
+        # Lấy ngày tháng để truy xuất dữ liệu
 
 
     def send_data_to_ekgis(self):
@@ -219,7 +227,7 @@ class DMSCheckin(Document):
             queue="default",                        # one of short, default, long
             timeout=None,                           # pass timeout manually
             is_async=True,                         # if this is True, method is run in worker
-            now=False,                               # if this is True, method is run directly (not in a worker) 
+            now=True,                               # if this is True, method is run directly (not in a worker) 
             job_name=None,                          # specify a job name
             enqueue_after_commit=True,              # enqueue the job after the database commit is done at the end of the request
             at_front=False,                         # put the job at the front of the queue
@@ -697,10 +705,13 @@ def send_checkin_to_ekgis(doc):
         if sale_person:
             from mbw_dms.controllers.dms_sales_person import create_employee_objectid
             objectId = sale_person.object_id
-            if not objectId:
-                create_employee_objectid(sale_person)
-                sale_person = frappe.db.get_value("Sales Person",{"employee":employee.name},["*"],as_dict=1)
-                objectId = sale_person.object_id
+            if objectId == None:
+                try:
+                    create_employee_objectid(frappe.get_doc("Sales Person",{"employee":employee.name}))
+                    sale_person = frappe.get_doc("Sales Person",{"employee":employee.name})
+                    objectId = sale_person.object_id
+                except Exception as e:
+                    print("loi khi tao moi object",e)
             api_url_checkin=f"{API_URL}/{projectId}/{objectId}?api_key={api_key}"
             ext = {"customer_name": doc.kh_ten, "address": doc.kh_diachi}
             json_object = json.dumps(ext)
