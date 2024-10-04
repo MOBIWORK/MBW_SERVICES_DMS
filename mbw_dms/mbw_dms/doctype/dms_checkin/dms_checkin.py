@@ -247,9 +247,9 @@ class DMSCheckin(Document):
         else:
             if existing_daily_summary:
                 daily_summary_doc = frappe.get_doc("DMS Summary KPI Daily", existing_daily_summary)
-                ngay_cong = float(daily_summary_doc.so_kh_vt_duynhat / 20)
                 daily_summary_doc.so_kh_vt_luot -= 1
                 daily_summary_doc.so_kh_vt_duynhat -= 1
+                ngay_cong = float(daily_summary_doc.so_kh_vt_duynhat / 20)
                 daily_summary_doc.ngay_cong = ngay_cong if ngay_cong < 1 else 1
                 if name_date in list_travel_date:
                     daily_summary_doc.solan_vt_dungtuyen -= 1
