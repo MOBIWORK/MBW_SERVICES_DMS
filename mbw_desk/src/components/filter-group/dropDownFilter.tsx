@@ -9,8 +9,6 @@ import { rsDataFrappe } from "../../types/response";
 import { employee } from "../../types/employeeFilter";
 import { Row, Dropdown, Form, Button } from "antd";
 import { DropDownCustom } from "..";
-import { useMediaQuery } from "../../hooks/useMediaQuery";
-import { mediaQuery } from "../../constant";
 import { useForm } from "antd/es/form/Form";
 import { SelectCommon, TreeSelectCommon } from "../select/select";
 import { LuFilter } from "react-icons/lu";
@@ -131,132 +129,137 @@ const DropDownFilter = ({
   const { sales_team } = useSelector((state: any) => state.group);
 
   // nganh hang
-  useEffect(() => {
-    (async () => {
-      let industry: any = await AxiosService.get(
-        "/api/method/frappe.desk.search.search_link",
-        {
-          params: {
-            txt: keySearchIndustry,
-            doctype: "SFA Industry",
-            ignore_user_permissions: 0,
-            query: "",
-          },
-        }
-      );
+  inputIndustry &&
+    useEffect(() => {
+      (async () => {
+        let industry: any = await AxiosService.get(
+          "/api/method/frappe.desk.search.search_link",
+          {
+            params: {
+              txt: keySearchIndustry,
+              doctype: "DMS Industry",
+              ignore_user_permissions: 0,
+              query: "",
+            },
+          }
+        );
 
-      let { message: results } = industry;
-      setListIndustry(
-        results.map((industry: industry) => ({
-          value: industry?.value,
-          description: industry?.description,
-        }))
-      );
-    })();
-  }, [keySearchIndustry]);
+        let { message: results } = industry;
+        setListIndustry(
+          results.map((industry: industry) => ({
+            value: industry?.value,
+            description: industry?.description,
+          }))
+        );
+      })();
+    }, [keySearchIndustry]);
 
   // Nhan hieu
-  useEffect(() => {
-    (async () => {
-      let brand: any = await AxiosService.get(
-        "/api/method/frappe.desk.search.search_link",
-        {
-          params: {
-            txt: keySearchBrand,
-            doctype: "Brand",
-            ignore_user_permissions: 0,
-            query: "",
-          },
-        }
-      );
+  inputBrand &&
+    useEffect(() => {
+      (async () => {
+        let brand: any = await AxiosService.get(
+          "/api/method/frappe.desk.search.search_link",
+          {
+            params: {
+              txt: keySearchBrand,
+              doctype: "Brand",
+              ignore_user_permissions: 0,
+              query: "",
+            },
+          }
+        );
 
-      let { message: results } = brand;
-      setListBrand(
-        results.map((brand: brand) => ({
-          value: brand?.value,
-          description: brand?.description,
-        }))
-      );
-    })();
-  }, [keySearchBrand]);
+        let { message: results } = brand;
+        setListBrand(
+          results.map((brand: brand) => ({
+            value: brand?.value,
+            description: brand?.description,
+          }))
+        );
+      })();
+    }, [keySearchBrand]);
 
   // kahch hang
-  useEffect(() => {
-    (async () => {
-      let rsCustomer: any = await AxiosService.get(
-        "/api/method/frappe.desk.search.search_link",
-        {
-          params: {
-            txt: keySearchCustomer,
-            doctype: "Customer",
-            ignore_user_permissions: 0,
-            query: "",
-          },
-        }
-      );
+  inputCustomer &&
+    useEffect(() => {
+      (async () => {
+        let rsCustomer: any = await AxiosService.get(
+          "/api/method/frappe.desk.search.search_link",
+          {
+            params: {
+              txt: keySearchCustomer,
+              doctype: "Customer",
+              ignore_user_permissions: 0,
+              query: "",
+            },
+          }
+        );
 
-      let { message: results } = rsCustomer;
+        let { message: results } = rsCustomer;
 
-      setListCustomer(
-        results.map((dtCustomer: any) => ({
-          value: dtCustomer.value,
-          label: dtCustomer.value,
-        }))
-      );
-    })();
-  }, [keySearchCustomer]);
+        setListCustomer(
+          results.map((dtCustomer: any) => ({
+            value: dtCustomer.value,
+            label: dtCustomer.value,
+          }))
+        );
+      })();
+    }, [keySearchCustomer]);
 
   //khu vuc
-  useEffect(() => {
-    (async () => {
-      let rsTerritory: any = await AxiosService.get(
-        "/api/method/frappe.desk.search.search_link",
-        {
-          params: {
-            txt: keySearchTerritory,
-            doctype: "Territory",
-            ignore_user_permissions: 0,
-            query: "",
-          },
-        }
-      );
+  inputTerritory &&
+    useEffect(() => {
+      (async () => {
+        let rsTerritory: any = await AxiosService.get(
+          "/api/method/frappe.desk.search.search_link",
+          {
+            params: {
+              txt: keySearchTerritory,
+              doctype: "Territory",
+              ignore_user_permissions: 0,
+              query: "",
+            },
+          }
+        );
 
-      let { message: results } = rsTerritory;
+        let { message: results } = rsTerritory;
 
-      setListTerritory(
-        results.map((dtTerritory: any) => ({
-          value: dtTerritory.value,
-          label: dtTerritory.value,
-        }))
-      );
-    })();
-  }, [keySearchTerritory]);
+        setListTerritory(
+          results.map((dtTerritory: any) => ({
+            value: dtTerritory.value,
+            label: dtTerritory.value,
+          }))
+        );
+      })();
+    }, [keySearchTerritory]);
 
   //nhom khach hang
-  useEffect(() => {
-    (async () => {
-      let rsCustomerGroup: any = await AxiosService.get(
-        "/api/method/frappe.desk.search.search_link",
-        {
-          params: {
-            txt: keySearchCustomerGroup,
-            doctype: "Customer Group",
-            ignore_user_permissions: 0,
-            query: "",
-          },
-        }
-      );
+  inputCustomerGroup &&
+    useEffect(() => {
+      (async () => {
+        let rsCustomerGroup: any = await AxiosService.get(
+          "/api/method/frappe.desk.search.search_link",
+          {
+            params: {
+              txt: keySearchCustomerGroup,
+              doctype: "Customer Group",
+              ignore_user_permissions: 0,
+              query: "",
+            },
+          }
+        );
 
-      let { message: results } = rsCustomerGroup;
+        let { message: results } = rsCustomerGroup;
 
-      setListCustomerGroup(
-        results.map((dtCustomerGroup: any) => ({
-          value: dtCustomerGroup.value.trim(),
-          label: dtCustomerGroup.value.trim(),
-        }))
-      );
-    })();
-  }, [keySearchCustomerGroup]);
+        setListCustomerGroup(
+          results.map((dtCustomerGroup: any) => ({
+            value: dtCustomerGroup.value.trim(),
+            label: dtCustomerGroup.value.trim(),
+          }))
+        );
+      })();
+    }, [keySearchCustomerGroup]);
 
   // nhom ban hang
   useEffect(() => {
@@ -280,103 +283,108 @@ const DropDownFilter = ({
   }, []);
 
   // nhan vien
-  useEffect(() => {
-    (async () => {
-      let rsEmployee: rsDataFrappe<employee[]> = await AxiosService.get(
-        "/api/method/mbw_dms.api.router.get_sale_person",
-        {
-          params: {
-            team_sale: sales_team,
-            key_search: keySeartEmployee,
-          },
-        }
-      );
-      let { message: results } = rsEmployee;
-      setListEmployees(
-        results.map((employee_filter: employee) => ({
-          value: employee_filter.employee_code,
-          label: employee_filter.employee_name || employee_filter.employee_code,
-        }))
-      );
-    })();
-  }, [sales_team, keySeartEmployee]);
+  inputEmployee &&
+    useEffect(() => {
+      (async () => {
+        let rsEmployee: rsDataFrappe<employee[]> = await AxiosService.get(
+          "/api/method/mbw_dms.api.router.get_sale_person",
+          {
+            params: {
+              team_sale: sales_team,
+              key_search: keySeartEmployee,
+            },
+          }
+        );
+        let { message: results } = rsEmployee;
+        setListEmployees(
+          results.map((employee_filter: employee) => ({
+            value: employee_filter.employee_code,
+            label:
+              employee_filter.employee_name || employee_filter.employee_code,
+          }))
+        );
+      })();
+    }, [sales_team, keySeartEmployee]);
 
   //cong ty
-  useEffect(() => {
-    (async () => {
-      let rsCompany: any = await AxiosService.get(
-        "/api/method/frappe.desk.search.search_link",
-        {
-          params: {
-            txt: keySearchCompany,
-            doctype: "Company",
-            ignore_user_permissions: 0,
-            query: "",
-          },
-        }
-      );
+  inputCompany &&
+    useEffect(() => {
+      (async () => {
+        let rsCompany: any = await AxiosService.get(
+          "/api/method/frappe.desk.search.search_link",
+          {
+            params: {
+              txt: keySearchCompany,
+              doctype: "Company",
+              ignore_user_permissions: 0,
+              query: "",
+            },
+          }
+        );
 
-      let { message: results } = rsCompany;
+        let { message: results } = rsCompany;
 
-      setListCompany(
-        results.map((dtCompany: any) => ({
-          value: dtCompany.value,
-          label: dtCompany.value,
-        }))
-      );
-    })();
-  }, [keySearchCompany]);
+        setListCompany(
+          results.map((dtCompany: any) => ({
+            value: dtCompany.value,
+            label: dtCompany.value,
+          }))
+        );
+      })();
+    }, [keySearchCompany]);
 
   // kho
-  useEffect(() => {
-    (async () => {
-      let rsWarehouse: any = await AxiosService.get(
-        "/api/method/frappe.desk.search.search_link",
-        {
-          params: {
-            txt: keySearchWarehouse,
-            doctype: "Warehouse",
-            ignore_user_permissions: 0,
-            query: "",
-          },
-        }
-      );
+  inputWarehouse &&
+    useEffect(() => {
+      (async () => {
+        let rsWarehouse: any = await AxiosService.get(
+          "/api/method/frappe.desk.search.search_link",
+          {
+            params: {
+              txt: keySearchWarehouse,
+              doctype: "Warehouse",
+              ignore_user_permissions: 0,
+              query: "",
+            },
+          }
+        );
 
-      let { message: results } = rsWarehouse;
+        let { message: results } = rsWarehouse;
 
-      setListWarehouse(
-        results.map((dtCustomer: any) => ({
-          value: dtCustomer.value,
-          label: dtCustomer.value,
-        }))
-      );
-    })();
-  }, [keySearchWarehouse]);
+        setListWarehouse(
+          results.map((dtCustomer: any) => ({
+            value: dtCustomer.value,
+            label: dtCustomer.value,
+          }))
+        );
+      })();
+    }, [keySearchWarehouse]);
 
   //nha cung cap
-  useEffect(() => {
-    (async () => {
-      let supplier: any = await AxiosService.get(
-        "/api/method/frappe.desk.search.search_link",
-        {
-          params: {
-            txt: keySearchSpiller,
-            doctype: "Supplier",
-            ignore_user_permissions: 0,
-            query: "",
-          },
-        }
-      );
+  inputSupplier &&
+    useEffect(() => {
+      (async () => {
+        let supplier: any = await AxiosService.get(
+          "/api/method/frappe.desk.search.search_link",
+          {
+            params: {
+              txt: keySearchSpiller,
+              doctype: "Supplier",
+              ignore_user_permissions: 0,
+              query: "",
+            },
+          }
+        );
 
-      let { message: results } = supplier;
-      setListsupplier(
-        results.map((supplier: supplier) => ({
-          value: supplier?.value,
-          label: supplier.description.split(",")[0].trim(),
-        }))
-      );
-    })();
-  }, [keySearchSpiller]);
+        let { message: results } = supplier;
+        setListsupplier(
+          results.map((supplier: supplier) => ({
+            value: supplier?.value,
+            label: supplier.description.split(",")[0].trim(),
+          }))
+        );
+      })();
+    }, [keySearchSpiller]);
   const handleSearchFilter = (val: any) => {
     if (val.customergroup) {
       dispatch(setCustomerGroup(val.customergroup));

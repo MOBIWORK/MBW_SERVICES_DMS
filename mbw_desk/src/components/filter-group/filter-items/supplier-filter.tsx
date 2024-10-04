@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { Col } from "antd";
 import { SelectCommon } from "../../select/select";
 import { AxiosService } from "../../../services/server";
-import { supplier } from "@/types/supplier";
 
 import { useDispatch } from "react-redux";
 import { setSupplier } from "@/redux/slices/groups-slice";
@@ -13,6 +12,11 @@ interface SupplierFilterProps {
   setPage: (value: number) => void;
   setSupplier?: (value: string) => void;
   matchMedia?: boolean;
+}
+
+interface supplier {
+  value: string;
+  description: string;
 }
 
 export const SupplierFilter = ({ setPage }: SupplierFilterProps) => {
@@ -51,7 +55,6 @@ export const SupplierFilter = ({ setPage }: SupplierFilterProps) => {
       </label>
       <SelectCommon
         filterOption={false}
-        notFoundContent={null}
         allowClear
         showSearch
         placeholder="Tất cả nhà cung cấp"

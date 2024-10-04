@@ -47,3 +47,10 @@ interface DataItem {
   rowSpan?: number; // Optional vì chỉ thêm trong quá trình xử lý
   groupIndex?: number; // Optional vì chỉ thêm trong quá trình xử lý
 }
+
+
+  
+interface ShowModalProps { 
+  open: boolean;
+  id: any;
+}

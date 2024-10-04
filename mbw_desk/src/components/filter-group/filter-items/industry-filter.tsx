@@ -28,7 +28,7 @@ export const IndustryFilter = ({ setPage }: IndustryFilterProps) => {
         {
           params: {
             txt: keySearchIndustry,
-            doctype: "SFA Industry",
+            doctype: "DMS Industry",
             ignore_user_permissions: 0,
             query: "",
           },
