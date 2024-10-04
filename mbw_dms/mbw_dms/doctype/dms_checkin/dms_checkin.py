@@ -219,7 +219,7 @@ class DMSCheckin(Document):
             queue="default",                        # one of short, default, long
             timeout=None,                           # pass timeout manually
             is_async=True,                         # if this is True, method is run in worker
-            now=False,                               # if this is True, method is run directly (not in a worker) 
+            now=True,                               # if this is True, method is run directly (not in a worker) 
             job_name=None,                          # specify a job name
             enqueue_after_commit=True,              # enqueue the job after the database commit is done at the end of the request
             at_front=False,                         # put the job at the front of the queue
@@ -695,12 +695,16 @@ def send_checkin_to_ekgis(doc):
         sale_person = frappe.db.get_value("Sales Person",{"employee":employee.name},["*"],as_dict=1)
         # Tích hợp dữ liệu checkin vào ekgis
         if sale_person:
+            print("sale_person",sale_person)
             from mbw_dms.controllers.dms_sales_person import create_employee_objectid
             objectId = sale_person.object_id
-            if not objectId:
-                create_employee_objectid(sale_person)
-                sale_person = frappe.db.get_value("Sales Person",{"employee":employee.name},["*"],as_dict=1)
-                objectId = sale_person.object_id
+            if objectId == None:
+                try:
+                    create_employee_objectid(frappe.get_doc("Sales Person",{"employee":employee.name}))
+                    sale_person = frappe.get_doc("Sales Person",{"employee":employee.name})
+                    objectId = sale_person.object_id
+                except Exception as e:
+                    print("loi khi tao moi object",e)
             api_url_checkin=f"{API_URL}/{projectId}/{objectId}?api_key={api_key}"
             ext = {"customer_name": doc.kh_ten, "address": doc.kh_diachi}
             json_object = json.dumps(ext)

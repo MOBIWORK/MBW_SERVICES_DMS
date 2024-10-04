@@ -83,7 +83,7 @@ def create_employee_objectid(doc,method=None):
     if response.status_code == 200:
         new_info = response.json()
         doc.object_id = new_info["results"].get("_id")
-        doc.save()
+        doc.save(ignore_permissions=True)
     else:
         frappe.msgprint(f"Lỗi khi gọi API tạo mới object ID: {response.status_code}")
         return
