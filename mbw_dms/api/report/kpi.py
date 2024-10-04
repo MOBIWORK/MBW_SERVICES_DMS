@@ -3,7 +3,7 @@ import frappe
 from mbw_dms.api.common import gen_response, exception_handle, get_child_values_doc,get_value_child_doctype
 from mbw_dms.api.validators import validate_filter_timestamp
 import calendar
-
+import math
 # Báo cáo KPI web- lưới tổng quan
 @frappe.whitelist(methods='GET')
 def kpi_report(**kwargs):
@@ -466,7 +466,7 @@ def analisis_kpi(**res):
         
         # Lấy dữ liệu số khách hàng của nv từ bảng tuyến
         sql_query_router = """
-            SELECT name as id, employee FROM `tabSFA Router`
+            SELECT name as id, employee FROM `tabDMS Router`
         """
         data_router = frappe.db.sql(sql_query_router, as_dict=True)
         obj_nv = {}
@@ -503,7 +503,7 @@ def analisis_kpi(**res):
                 ),
                 ']'
             ) AS children
-            FROM `tabSFA KPI`
+            FROM `tabDMS KPI`
         """
         if where_condition:
             sql_query += " WHERE {}".format(where_condition)
@@ -625,7 +625,7 @@ def analisis_kpi(**res):
                         doanh_thu_thang as th_doanh_thu,
                         san_luong as th_san_lg, 
                         sku as th_sku
-                    FROM `tabSFA Summary KPI Monthly`
+                    FROM `tabDMS Summary KPI Monthly`
                     WHERE 
                         nhan_vien_ban_hang = '{emp}'
                         AND thang = '{month}'
@@ -735,7 +735,7 @@ def analisis_kpi(**res):
 
         # sql_query_count = """
         #     SELECT COUNT(*)
-        #     FROM `tabSFA KPI`
+        #     FROM `tabDMS KPI`
         # """
         # if where_condition:
         #     sql_query_count += " WHERE {}".format(where_condition)

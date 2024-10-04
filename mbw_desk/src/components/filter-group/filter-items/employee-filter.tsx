@@ -27,7 +27,7 @@ export const EmployeeFilter = ({
   useEffect(() => {
     (async () => {
       let rsEmployee: rsDataFrappe<employee[]> = await AxiosService.get(
-        "/api/method/mbw_sfa.api.router.get_sale_person",
+        "/api/method/mbw_dms.api.router.get_sale_person",
         {
           params: {
             team_sale: sales_team,
