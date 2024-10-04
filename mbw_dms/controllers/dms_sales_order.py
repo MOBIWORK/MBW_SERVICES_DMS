@@ -1,7 +1,7 @@
 import frappe
 from frappe.utils import nowdate
 import calendar
-
+from mbw_dms.api.common import qty_not_pricing_rule
 
 # Kiểm tra xem khách đã đặt hàng trước đó chưa
 def existing_customer(customer_name, start_date, end_date, current_user):
@@ -47,19 +47,20 @@ def update_kpi_monthly(doc, method):
     total_uom = 0
     if existing_monthly_summary:
         monthly_summary_doc = frappe.get_doc("DMS Summary KPI Monthly", existing_monthly_summary)
+        total_uom += monthly_summary_doc.sku*monthly_summary_doc.so_don_hang + len(uom)
         if len(existing_cus) > 1:
-            total_uom += len(uom)
+            # total_uom += len(uom)
             monthly_summary_doc.so_don_hang += 1
             monthly_summary_doc.doanh_so_thang += grand_totals
             monthly_summary_doc.san_luong += sum(qty)
-            monthly_summary_doc.sku = round((float(total_uom) / (monthly_summary_doc.so_don_hang)), 2) if monthly_summary_doc.so_don_hang > 0 else 0
+            monthly_summary_doc.sku = (float(total_uom) / (monthly_summary_doc.so_don_hang))if monthly_summary_doc.so_don_hang > 0 else 0
         else:
-            total_uom += len(uom)
+            # total_uom += len(uom)
             monthly_summary_doc.so_don_hang += 1
             monthly_summary_doc.doanh_so_thang += grand_totals
             monthly_summary_doc.so_kh_dat_hang += 1
             monthly_summary_doc.san_luong += sum(qty)
-            monthly_summary_doc.sku = round((float(total_uom) / (monthly_summary_doc.so_don_hang)), 2) if monthly_summary_doc.so_don_hang > 0 else 0
+            monthly_summary_doc.sku = (float(total_uom) / (monthly_summary_doc.so_don_hang)) if monthly_summary_doc.so_don_hang > 0 else 0
         monthly_summary_doc.save(ignore_permissions=True)
     else:
         monthly_summary_doc = frappe.get_doc({
@@ -95,6 +96,7 @@ def update_kpi_monthly_on_cancel(doc, method):
     user_name = frappe.get_value("Sales Person", {"name": sales_person}, "employee")
 
     items = doc.get("items")
+    
     qty,uom = qty_not_pricing_rule(items)
 
     # Kiểm tra đã tồn tại bản ghi KPI của tháng này chưa
@@ -108,17 +110,17 @@ def update_kpi_monthly_on_cancel(doc, method):
         existing_cus = existing_customer(customer_name=cus_name, start_date=start_date, end_date=end_date, current_user=doc.owner)
 
         if len(existing_cus) == 0:
-            total_uom -= len(uom)
+            total_uom =  monthly_summary_doc.sku*monthly_summary_doc.so_don_hang -  len(uom)
             monthly_summary_doc.so_don_hang = minus_not_nega(monthly_summary_doc.so_don_hang)
             monthly_summary_doc.doanh_so_thang = minus_not_nega(monthly_summary_doc.doanh_so_thang, grand_totals)
             monthly_summary_doc.san_luong = minus_not_nega(monthly_summary_doc.san_luong, sum(qty))
             monthly_summary_doc.so_kh_dat_hang = minus_not_nega(monthly_summary_doc.so_kh_dat_hang)
-            monthly_summary_doc.sku = round((float(total_uom) / (monthly_summary_doc.so_don_hang)), 2) if monthly_summary_doc.so_don_hang > 0 else 0
+            monthly_summary_doc.sku = (float(total_uom) / (monthly_summary_doc.so_don_hang)) if monthly_summary_doc.so_don_hang > 0 else 0
         else:
             monthly_summary_doc.so_don_hang = minus_not_nega(monthly_summary_doc.so_don_hang)
             monthly_summary_doc.doanh_so_thang = minus_not_nega(monthly_summary_doc.doanh_so_thang,grand_totals)
             monthly_summary_doc.san_luong = minus_not_nega(monthly_summary_doc.san_luong, sum(qty))
-            monthly_summary_doc.sku = round((float(total_uom) / (monthly_summary_doc.so_don_hang)), 2) if monthly_summary_doc.so_don_hang > 0 else 0
+            monthly_summary_doc.sku = (float(total_uom) / (monthly_summary_doc.so_don_hang)) if monthly_summary_doc.so_don_hang > 0 else 0
         monthly_summary_doc.save(ignore_permissions=True)
     else:
         return
@@ -138,11 +140,3 @@ def minus_not_nega(num,sub=1):
     else:
         return num - sub
     
-import pydash
-# sp khuyến mãi 1:có apply pricing role,2: giá = 0 
-def qty_not_pricing_rule(items):
-    total_item_price = pydash.filter_(items, lambda x: x.amount > 0)
-    total_qty = {item.get("qty") for item in total_item_price}
-    total_uom = {item.get("uom") for item in total_item_price}
-
-    return total_qty,total_uom
