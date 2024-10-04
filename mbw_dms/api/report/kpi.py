@@ -474,13 +474,13 @@ def analisis_kpi(**res):
             if obj_nv.get(n["employee"]) is None:
                 obj_nv[n["employee"]] = []
 
-            list_customers =frappe.get_doc('SFA Router',{"is_deleted": 0,"name": n["id"]}).get("customers")
+            list_customers =frappe.get_doc('DMS Router',{"is_deleted": 0,"name": n["id"]}).get("customers")
 
             for c in list_customers:
                 if c.get("customer_code") not in obj_nv[n["employee"]]:
                     obj_nv[n["employee"]].append(c.get("customer_code"))
 
-        # Lấy dữ liệu từ bảng SFA KPI
+        # Lấy dữ liệu từ bảng DMS KPI
         sql_query = """
             SELECT nhom_ban_hang,
             CONCAT(
