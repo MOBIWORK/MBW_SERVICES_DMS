@@ -236,7 +236,7 @@ export default function ReportKPI() {
               />
               <ColumnGroup
                 className="!whitespace-normal !min-w-[210px] !text-center"
-                title="Số khách hàng viếng thăm">
+                title="Số lượt viếng thăm">
                 <Column
                   className="!text-center"
                   title="KH"
@@ -278,7 +278,7 @@ export default function ReportKPI() {
               </ColumnGroup>
               <ColumnGroup
                 className="!whitespace-normal !min-w-[210px] !text-center"
-                title="Số khách hàng viếng thăm duy nhất">
+                title="Số khách hàng viếng thăm">
                 <Column
                   className="!text-center"
                   title="KH"
