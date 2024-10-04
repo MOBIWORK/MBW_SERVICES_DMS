@@ -40,7 +40,7 @@ const ReportHeader = ({
           action: handleDowload.bind(
             null,
             {
-              url: "/api/method/mbw_sfa.api.exports.export_excel.export_excel",
+              url: "/api/method/mbw_dms.api.exports.export_excel.export_excel",
               params: params,
               file_name,
             },
