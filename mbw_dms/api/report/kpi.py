@@ -86,7 +86,6 @@ def kpi_only_visit_detail(**kwargs):
 @frappe.whitelist(methods='GET')
 def kpi_cus_so_detail(**kwargs):
     try:
-        filters = []
         from_date = validate_filter_timestamp(type="start")(kwargs.get("from_date")) if kwargs.get("from_date") else None
         to_date = validate_filter_timestamp(type="end")(kwargs.get("to_date")) if kwargs.get("to_date") else None
         page_size =  int(kwargs.get("page_size", 20))
@@ -94,26 +93,25 @@ def kpi_cus_so_detail(**kwargs):
         employee = kwargs.get("employee")
         sales_person = frappe.get_value("Sales Person", {"employee": employee}, "name")
 
+        filters = "WHERE so.docstatus = 1"
         if from_date and to_date:
-            filters.append(f"so.creation BETWEEN '{from_date}' AND '{to_date}'")
+            filters = f"{filters} AND so.creation BETWEEN '{from_date}' AND '{to_date}'"
         elif from_date:
-            filters.append(f"so.creation >= '{from_date}'")
+            filters = f"{filters} AND so.creation >= '{from_date}'"
         elif to_date:
-            filters.append(f"so.creation <= '{to_date}'")
+            filters = f"{filters} AND so.creation <= '{to_date}'"
 
-        filters.append("so.docstatus = 1 ")
-        where_condition = " AND ".join(filters)
 
-        sql_query = """
+        sql_query = f"""
             SELECT cus.customer_code, so.customer, so.customer_address, so.name as so_name, UNIX_TIMESTAMP(so.transaction_date) as trans_date, so.grand_total
             FROM `tabSales Order` so
             LEFT JOIN `tabCustomer` cus ON so.customer = cus.name
-            ORDER BY so.customer_code ASC
+            {filters}
+            ORDER BY cus.customer_code ASC
         """
 
-        if where_condition:
-            sql_query += " WHERE {}".format(where_condition)
-
+        # if where_condition:
+        #     sql_query += " WHERE {}".format(where_condition)
         all_sales_orders = frappe.db.sql(sql_query, as_dict=True)
 
         filtered_data = []
