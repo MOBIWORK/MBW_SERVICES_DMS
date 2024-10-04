@@ -5,6 +5,7 @@ import pydash
 
 # Biến lữu trữ các trương trình khuyến mại và kết quả đáp ứng
 objPromotionOder=[]
+
 # Lấy ra danh sách các chương trình khuyến mại
 @frappe.whitelist()
 def get_list_promotion(**kwargs):
@@ -138,7 +139,7 @@ def TIEN_CKDH(data_Promotion={}, tongTienhang=0):
     for prd in product:
         if tongTienhang >= float(prd["yeu_cau"]):
             chietKhau_promotion = tongTienhang * float(prd["khuyen_mai"]) / 100
-             #Luu ket qua nhan duoc
+            # Lưu kết quả nhận được
             save_promotionResult(data_Promotion,tien_km)
             break
     return chietKhau_promotion
@@ -157,9 +158,8 @@ def TIEN_TIEN(data_Promotion={}, tongTienhang=0):
             if boi_so:
                 tien_km = tien_km * boi_so_cap
 
-             #Luu ket qua nhan duoc
+            # Lưu kết quả nhận được
             save_promotionResult(data_Promotion,tien_km,boi_so)
-
             break
     return tien_km
 
@@ -200,8 +200,9 @@ def SP_SL_CKSP(list_item=[], data_promotion={}):
         # Sắp xếp lại danh sách sản phẩm theo yêu cầu
         product = sorted(product, key=lambda x: x["yeu_cau"], reverse=True)
 
-        #Chiet khau hien tai cua san pham
-        current_discount=item["discount_amount"];
+        # Chiết khấu hiện tại của sản phẩm
+        current_discount = item["discount_amount"]
+
         # Kết quả khuyến mại đạt được
         for prd in product:
             if bool(prd["yeu_cau_min"]) and prd["yeu_cau_min"] != 0:
@@ -219,13 +220,13 @@ def SP_SL_CKSP(list_item=[], data_promotion={}):
 
         if bool(getProductPromotion):
             if item["qty"] >= getProductPromotion["yeu_cau"] and item["uom"] == getProductPromotion["don_vi_tinh"].get("choice_values"):
-                chietKhau_promotion=item["amount"]*getProductPromotion["khuyen_mai"]/100
+                chietKhau_promotion = item["amount"] * getProductPromotion["khuyen_mai"] / 100
                 getProductPromotion["chietKhau_promotion"]=chietKhau_promotion
 
-                #Cong giam gia hien tai voi giam gia khuyen mai
-                item["discount_amount"] = chietKhau_promotion+current_discount
+                # Cong giam gia hien tai voi giam gia khuyen mai
+                item["discount_amount"] = chietKhau_promotion + current_discount
 
-                #luu tru ket qua khuyen mai
+                # Lưu kết quả nhận được
                 save_promotionResult(data_promotion,getProductPromotion,1)
 
     return list_item
@@ -394,7 +395,28 @@ def SP_SL_SP(list_item=[], data_promotion={}):
     return list_free_item
 
 
-            
+def save_promotionResult(objDataKM, so_luong, boi_so):
+    if objDataKM.ptype_value in ["TIEN_TIEN", "TIEN_CKDH"]:
+        objRef={"_id": "CKDH", "ma_san_pham": "", "ten_san_pham": "", "don_vi_tinh": "", "so_luong": so_luong}
+        objKM = { "id": objDataKM.name, "ten_khuyen_mai": objDataKM.name_promotion, "ptype": objDataKM.ptype_value, "product": objRef }
+        
+        item_promotion = pydash.arrays.index_of(pydash.collections.map_(objPromotionOder, "id"), objDataKM.name)
 
+         # If the item exists, update it
+        if item_promotion >= 0:
+            objPromotionOder[item_promotion] = objKM
+        # If the item does not exist, append it
+        else:
+            objPromotionOder.append(objKM)
 
-
+    elif objDataKM.ptype_value in ["SP_SL_CKSP", "SP_SL_TIEN", "SP_ST_TIEN", "SP_ST_CKSP"]:
+        objRef = [{ "_id": "CKSP", "id_sp": so_luong["_id"], "ma_san_pham": so_luong["ma_san_pham"], "ten_san_pham": so_luong["ten_san_pham"], "don_vi_tinh": so_luong["don_vi_tinh"], "so_luong": so_luong["chietKhau_promotion"]}];
+        objKM = { "id": objDataKM.name, "ten_khuyen_mai": objDataKM.name_promotion, "ptype": objDataKM.ptype_value, "product": objRef }
+        
+        item_promotion = pydash.arrays.index_of(pydash.collections.map_(objPromotionOder, "id"), objDataKM.name)
+        # If the item exists, update it
+        if item_promotion >= 0:
+            objPromotionOder[item_promotion] = objKM
+        # If the item does not exist, append it
+        else:
+            objPromotionOder.append(objKM)
