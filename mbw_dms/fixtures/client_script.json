@@ -2,17 +2,6 @@
  {
   "docstatus": 0,
   "doctype": "Client Script",
-  "dt": "Sales Order",
-  "enabled": 1,
-  "modified": "2024-09-25 16:18:05.178847",
-  "module": "MBW DMS",
-  "name": "Tính tổng giá trị trước chiết khấu SO",
-  "script": "frappe.ui.form.on('Sales Order', {\r\n    validate: function(frm) {\r\n        if (frm.doc.docstatus == 1) {\r\n            // Cho phép thay đổi sau khi đã nộp\r\n            frm.allow_edit_after_submit = true;\r\n        }\r\n        calculate_total_amount_before_discount(frm);\r\n    },\r\n    onload_post_render: function(frm) {\r\n        calculate_total_amount_before_discount(frm);\r\n    }\r\n});\r\n\r\nfrappe.ui.form.on('Sales Order Item', {\r\n    custom_amount_before_discount: function(frm, cdt, cdn) {\r\n        calculate_total_amount_before_discount(frm);\r\n    },\r\n    items_add: function(frm, cdt, cdn) {\r\n        calculate_total_amount_before_discount(frm);\r\n    },\r\n    items_remove: function(frm, cdt, cdn) {\r\n        calculate_total_amount_before_discount(frm);\r\n    }\r\n});\r\n\r\nfunction calculate_total_amount_before_discount(frm) {\r\n    let total_amount_before_discount = 0;\r\n\r\n    // Duyệt qua tất cả các hàng trong child table Sales Order Item\r\n    $.each(frm.doc.items || [], function(i, item) {\r\n        total_amount_before_discount += item.custom_amount_before_discount || 0;\r\n    });\r\n\r\n    // Cho phép thay đổi giá trị sau khi tài liệu đã được nộp\r\n    frm.set_value('custom_total_amount_before_discount__', total_amount_before_discount);\r\n    frm.refresh_field('custom_total_amount_before_discount__');\r\n}\r\n",
-  "view": "Form"
- },
- {
-  "docstatus": 0,
-  "doctype": "Client Script",
   "dt": "Purchase Invoice",
   "enabled": 1,
   "modified": "2024-09-25 16:18:18.123261",
@@ -57,17 +46,6 @@
  {
   "docstatus": 0,
   "doctype": "Client Script",
-  "dt": "Sales Order",
-  "enabled": 1,
-  "modified": "2024-08-30 15:07:18.016991",
-  "module": "MBW DMS",
-  "name": "Tính tổng chiết khấu cho 1 sản phẩm trên SO",
-  "script": "frappe.ui.form.on('Sales Order Item', {\r\n    discount_amount: function(frm, cdt, cdn) {\r\n        calculate_discount_amount(frm, cdt, cdn);\r\n    },\r\n    qty: function(frm, cdt, cdn) {\r\n        calculate_discount_amount(frm, cdt, cdn);\r\n    },\r\n    discount_percentage: function(frm, cdt, cdn) {\r\n        calculate_discount_amount(frm, cdt, cdn);\r\n    },\r\n    custom_discount_on_total_amount: function(frm, cdt, cdn) {\r\n        calculate_discount_amount(frm, cdt, cdn);\r\n    }\r\n});\r\n\r\nfunction calculate_discount_amount(frm, cdt, cdn) {\r\n    let row = locals[cdt][cdn];\r\n    \r\n    if (row.discount_amount && row.qty && row.price_list_rate) {\r\n        row.custom_discount_on_total_amount = row.discount_amount * row.qty;\r\n        frm.refresh_field('items');\r\n    }\r\n}\r\n",
-  "view": "Form"
- },
- {
-  "docstatus": 0,
-  "doctype": "Client Script",
   "dt": "Sales Invoice",
   "enabled": 1,
   "modified": "2024-08-30 15:07:23.783507",
@@ -90,45 +68,12 @@
  {
   "docstatus": 0,
   "doctype": "Client Script",
-  "dt": "Sales Order",
-  "enabled": 1,
-  "modified": "2024-08-30 15:05:48.635173",
-  "module": "MBW DMS",
-  "name": "Tính tổng giá trị sản phẩm trước chiết khấu",
-  "script": "frappe.ui.form.on('Sales Order Item', {\n    qty: function(frm, cdt, cdn) {\n        calculate_custom_amount_before_discount(frm, cdt, cdn);\n    },\n    price_list_rate: function(frm, cdt, cdn) {\n        calculate_custom_amount_before_discount(frm, cdt, cdn);\n    }\n});\n\nfunction calculate_custom_amount_before_discount(frm, cdt, cdn) {\n    var row = locals[cdt][cdn];\n    if (row.price_list_rate && row.qty) {\n        row.custom_amount_before_discount = row.price_list_rate * row.qty;\n        frm.refresh_field('items'); // Thay 'items' bằng tên chính xác của child table nếu cần\n    }\n}",
-  "view": "Form"
- },
- {
-  "docstatus": 0,
-  "doctype": "Client Script",
   "dt": "Sales Invoice",
   "enabled": 1,
   "modified": "2024-08-30 15:07:02.835106",
   "module": "MBW DMS",
   "name": "Tính tổng trước chiết khấu cho sản phẩm",
   "script": "frappe.ui.form.on('Sales Invoice Item', {\n    qty: function(frm, cdt, cdn) {\n        calculate_custom_amount_before_discount(frm, cdt, cdn);\n    },\n    price_list_rate: function(frm, cdt, cdn) {\n        calculate_custom_amount_before_discount(frm, cdt, cdn);\n    }\n});\n\nfunction calculate_custom_amount_before_discount(frm, cdt, cdn) {\n    var row = locals[cdt][cdn];\n    if (row.price_list_rate && row.qty) {\n        row.custom_amount_before_discount = row.price_list_rate * row.qty;\n        frm.refresh_field('items'); // Thay 'items' bằng tên chính xác của child table nếu cần\n    }\n}",
-  "view": "Form"
- },
- {
-  "docstatus": 0,
-  "doctype": "Client Script",
-  "dt": "Sales Order",
-  "enabled": 1,
-  "modified": "2024-09-06 10:14:09.705474",
-  "module": "MBW DMS",
-  "name": "Tính tổng tiền trước khuyến mãi cho SO và tổng khuyến mãi",
-  "script": "frappe.ui.form.on('Sales Order', {\r\n    validate: function(frm) {\r\n        calculate_total_discount(frm);\r\n    },\r\n    onload_post_render: function(frm) {\r\n        calculate_total_discount(frm);\r\n    }\r\n});\r\n\r\nfrappe.ui.form.on('Sales Order Item', {\r\n    custom_discount_on_total_amount: function(frm, cdt, cdn) {\r\n        calculate_total_discount(frm);\r\n    }\r\n});\r\n\r\nfunction calculate_total_discount(frm) {\r\n    let total_discount = 0;\r\n\r\n    // Duyệt qua tất cả các hàng trong child table Sales Order Item\r\n    $.each(frm.doc.items || [], function(i, item) {\r\n        total_discount += item.custom_discount_on_total_amount || 0;\r\n    });\r\n\r\n    // Đặt giá trị cho trường custom_product_discount_amount_\r\n    frm.set_value('custom_product_discount_amount_', total_discount);\r\n}\r\n",
-  "view": "Form"
- },
- {
-  "docstatus": 0,
-  "doctype": "Client Script",
-  "dt": "Sales Order",
-  "enabled": 1,
-  "modified": "2024-08-30 15:06:31.746659",
-  "module": "MBW DMS",
-  "name": "Tính tổng giá trị trước chiết khấu",
-  "script": "frappe.ui.form.on('Sales Order', {\r\n    validate: function(frm) {\r\n        calculate_total_amount_before_discount(frm);\r\n    },\r\n    onload_post_render: function(frm) {\r\n        calculate_total_amount_before_discount(frm);\r\n    }\r\n});\r\n\r\nfrappe.ui.form.on('Sales Order Item', {\r\n    custom_amount_before_discount: function(frm, cdt, cdn) {\r\n        calculate_total_amount_before_discount(frm);\r\n    },\r\n    items_add: function(frm, cdt, cdn) {\r\n        calculate_total_amount_before_discount(frm);\r\n    },\r\n    items_remove: function(frm, cdt, cdn) {\r\n        calculate_total_amount_before_discount(frm);\r\n    }\r\n});\r\n\r\nfunction calculate_total_amount_before_discount(frm) {\r\n    let total_amount_before_discount = 0;\r\n\r\n    // Duyệt qua tất cả các hàng trong child table Sales Order Item\r\n    $.each(frm.doc.items || [], function(i, item) {\r\n        total_amount_before_discount += item.custom_amount_before_discount || 0;\r\n    });\r\n\r\n    // Đặt giá trị cho trường custom_total_amount_before_discount__\r\n    frm.set_value('custom_total_amount_before_discount__', total_amount_before_discount);\r\n    frm.refresh_field('custom_total_amount_before_discount__');\r\n}\r\n",
   "view": "Form"
  },
  {

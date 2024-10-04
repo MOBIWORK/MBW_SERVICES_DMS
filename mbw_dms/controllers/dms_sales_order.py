@@ -3,6 +3,7 @@ from frappe import _
 from frappe.utils import nowdate
 import calendar
 from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
+from mbw_dms.controllers.pick_list import number_to_vietnamese_words
 
 
 # Kiểm tra xem khách đã đặt hàng trước đó chưa
@@ -148,7 +149,27 @@ def validate_projected_qty(doc, method):
                 .format(i.item_name, warehouse, projected_qty)
             )
 
+def calculate_so(doc, method):
+    items = doc.items
+    amount_before_discount = 0
+    discount_total_amount = 0
 
+    for item in items:
+        item.custom_amount_before_discount = item.price_list_rate * item.qty
+        item.custom_discount_on_total_amount = item.discount_amount * item.qty
+        amount_before_discount += item.custom_amount_before_discount
+        discount_total_amount += item.custom_discount_on_total_amount
+    
+    doc.custom_total_amount_before_discount = amount_before_discount
+    doc.custom_product_discount_amount = discount_total_amount
+
+    amount_in_words = number_to_vietnamese_words(doc.grand_total)
+    if amount_in_words:
+        doc.custom_grand_total_by_vietnamese = amount_in_words.capitalize() + " Việt Nam đồng"
+    
+    doc.save()
+    
+    
 # Áp dụng chiết khấu đồng thời
 def apply_discounts_simultaneously(doc, method):
     pricing_rules = doc.pricing_rules
