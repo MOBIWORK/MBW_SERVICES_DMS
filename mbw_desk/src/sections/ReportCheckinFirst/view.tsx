@@ -564,7 +564,7 @@ export default function ReportCheckinFirst() {
                                   setKeySTerritory(value);
                                 }}
                                 showSearch
-                                placeholder="Tất cẩ khu vực"
+                                placeholder="Tất cả khu vực"
                               />
                             </Form.Item>
                           </Form>
