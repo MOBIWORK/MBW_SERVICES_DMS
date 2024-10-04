@@ -1,7 +1,7 @@
 import frappe
 from frappe.utils import nowdate
 import calendar
-
+from mbw_dms.api.common import qty_not_pricing_rule
 
 # Kiểm tra xem khách đã đặt hàng trước đó chưa
 def existing_customer(customer_name, start_date, end_date, current_user):
@@ -95,6 +95,7 @@ def update_kpi_monthly_on_cancel(doc, method):
     user_name = frappe.get_value("Sales Person", {"name": sales_person}, "employee")
 
     items = doc.get("items")
+    
     qty,uom = qty_not_pricing_rule(items)
 
     # Kiểm tra đã tồn tại bản ghi KPI của tháng này chưa
@@ -138,11 +139,3 @@ def minus_not_nega(num,sub=1):
     else:
         return num - sub
     
-import pydash
-# sp khuyến mãi 1:có apply pricing role,2: giá = 0 
-def qty_not_pricing_rule(items):
-    total_item_price = pydash.filter_(items, lambda x: x.amount > 0)
-    total_qty = {item.get("qty") for item in total_item_price}
-    total_uom = {item.get("uom") for item in total_item_price}
-
-    return total_qty,total_uom
