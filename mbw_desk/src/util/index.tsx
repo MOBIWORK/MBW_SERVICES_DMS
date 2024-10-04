@@ -171,12 +171,13 @@ interface downloadProps {
   params: any;
   file_name?: string;
 }
-export const handleDowload = async ({
-  url,
-  params,
-  file_name = "report.xlsx",
-}: downloadProps) => {
+export const handleDowload = async (
+  { url, params, file_name = "report.xlsx" }: downloadProps,
+  setIsExcel: (value: boolean) => void
+) => {
   try {
+    // console.log(params);
+    setIsExcel(true);
     const response = await AxiosService.get(url, {
       params,
       responseType: "arraybuffer",
@@ -187,6 +188,8 @@ export const handleDowload = async ({
     saveAs(blob, file_name);
   } catch (err) {
     console.log("error", err);
+  } finally {
+    setIsExcel(false);
   }
 };
 
