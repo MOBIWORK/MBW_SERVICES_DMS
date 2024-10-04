@@ -42,8 +42,11 @@ import {
 
 import { setEndDate, setStartDate } from "@/redux/slices/date-slice";
 import { setMonth, setYear } from "@/redux/slices/month-slice";
-import { supplier } from "@/types/supplier";
 
+type supplier = {
+  value: string;
+  description: string;
+};
 type brand = {
   value: string;
   description: string;

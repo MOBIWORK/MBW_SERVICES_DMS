@@ -38,7 +38,7 @@ def report_prod_dbd(**res):
             FROM `tabSales Order` so
             LEFT JOIN `tabSales Team` st ON so.name = st.parent 
             LEFT JOIN `tabSales Person` sp ON st.sales_person = sp.sales_person_name
-            LEFT JOIN `tabSFA KPI` kpi ON sp.employee = kpi.nhan_vien_ban_hang
+            LEFT JOIN `tabDMS KPI` kpi ON sp.employee = kpi.nhan_vien_ban_hang
         """
 
         if where_conditions:

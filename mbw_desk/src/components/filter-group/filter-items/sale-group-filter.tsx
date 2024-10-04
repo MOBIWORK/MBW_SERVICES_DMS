@@ -17,7 +17,7 @@ export const SaleGroupFilter = () => {
   useEffect(() => {
     (async () => {
       let rsSales: rsData<listSale[]> = await AxiosService.get(
-        "/api/method/mbw_sfa.api.router.get_team_sale"
+        "/api/method/mbw_dms.api.router.get_team_sale"
       );
 
       setListSales(

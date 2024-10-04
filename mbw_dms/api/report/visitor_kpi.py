@@ -22,9 +22,9 @@ def report_visitor_kpi(**res):
                     sc.name AS checkin_name, 
                     COALESCE(COUNT(dci.url_image), 0) AS total_image
                 FROM 
-                    `tabSFA Checkin` sc
+                    `tabDMS Checkin` sc
                 LEFT JOIN 
-                    `tabSFA Checkin Image` dci ON sc.name = dci.parent
+                    `tabDMS Checkin Image` dci ON sc.name = dci.parent
                 GROUP BY
                     sc.name
             )
@@ -58,9 +58,9 @@ def report_visitor_kpi(**res):
                 ) AS customers
             FROM `tabEmployee` em
             LEFT JOIN 
-                `tabSFA Checkin` sc ON em.user_id = sc.createdbyemail
+                `tabDMS Checkin` sc ON em.user_id = sc.createdbyemail
             LEFT JOIN 
-                `tabSFA KPI` sk ON em.name = sk.nhan_vien_ban_hang
+                `tabDMS KPI` sk ON em.name = sk.nhan_vien_ban_hang
             LEFT JOIN 
                 ImageCounts ic ON sc.name = ic.checkin_name
             WHERE {query}
@@ -78,9 +78,9 @@ def report_visitor_kpi(**res):
                     DATE(sc.createddate)
                 FROM `tabEmployee` em
                 LEFT JOIN 
-                    `tabSFA Checkin` sc ON em.user_id = sc.createdbyemail
+                    `tabDMS Checkin` sc ON em.user_id = sc.createdbyemail
                 LEFT JOIN 
-                    `tabSFA KPI` sk ON em.name = sk.nhan_vien_ban_hang
+                    `tabDMS KPI` sk ON em.name = sk.nhan_vien_ban_hang
                 
                 WHERE {query}
                 GROUP BY 
