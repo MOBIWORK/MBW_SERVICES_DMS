@@ -103,7 +103,7 @@ export default function Detailcheckin({
   useEffect(() => {
     (async () => {
       const rsData = await AxiosService.get(
-        "/api/method/mbw_sfa.api.report.kpi.kpi_visit_detail",
+        "/api/method/mbw_dms.api.report.kpi.kpi_visit_detail",
         {
           params: {
             time_checkin: timeCheckin,
