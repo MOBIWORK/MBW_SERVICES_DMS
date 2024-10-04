@@ -1,18 +1,18 @@
 import { TableCustom } from "@/components";
 import { AxiosService } from "@/services/server";
 import dayjs from "dayjs";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 
 export default function Detailcheckin({ employee, month, year }: any) {
   const columnsDetail: any = [
     {
       title: "STT",
-      dataIndex: "stt",
-      key: "stt",
+      dataIndex: "groupIndex",
+      key: "index",
       width: 60,
-      render: (_: any, __: any, index: number) => (
-        <span>{calculateIndex(page, PAGE_SIZE, index)}</span> // Tính toán index cho từng dòng
-      ),
+      render: (_: any, __: any) => {
+        return _;
+      },
     },
     {
       title: "Mã khách hàng",
@@ -23,6 +23,7 @@ export default function Detailcheckin({ employee, month, year }: any) {
       title: "Khách hàng",
       dataIndex: "kh_ten",
       key: "kh_ten",
+      width: 200,
       render: (_:any, record: any) => (
         <div>
           <a
@@ -86,13 +87,6 @@ export default function Detailcheckin({ employee, month, year }: any) {
 
   const startOfMonthTimestamp = startOfMonth.unix();
   const endOfMonthTimestamp = endOfMonth.unix();
-  const calculateIndex = (
-    pageNumber: number,
-    pageSize: number,
-    index: number
-  ) => {
-    return (pageNumber - 1) * pageSize + index + 1;
-  };
 
   useEffect(() => {
     return () => {
@@ -115,20 +109,43 @@ export default function Detailcheckin({ employee, month, year }: any) {
         }
       );
       let { result } = rsData;
-      setDataDetail(result);
       setTotal(result?.totals);
+      setDataDetail((prevData: any) => 
+        page === 1 ? result.data : [...prevData, ...result.data]
+      );
     })();
   }, [startOfMonthTimestamp, endOfMonthTimestamp, employee, page]);
+
+  const groupedData = React.useMemo(() => {
+    let lastKhMa: string | null = null;
+    let lastCheckinDate: string | null = null;
+    let currentIndex = 0;
+
+    return dataDetail.map((item: any) => {
+      const currentCheckinDate = new Date(item.checkin_giovao).toLocaleDateString('vi-VN');
+      if (item.kh_ma !== lastKhMa || currentCheckinDate !== lastCheckinDate) {
+        lastKhMa = item.kh_ma;
+        lastCheckinDate = currentCheckinDate;
+        currentIndex++;
+        return { ...item, groupIndex: currentIndex };
+      } else {
+        return { ...item, groupIndex: null };
+      }
+    });
+  }, [dataDetail]);
+
+  console.log(groupedData);
 
   return (
     <>
       <TableCustom
         bordered
         $border
-        dataSource={dataDetail?.data?.map((report: any) => ({
-          key: report.name,
-          ...report,
-        }))}
+        // dataSource={dataDetail?.data?.map((report: any) => ({
+        //   key: report.name,
+        //   ...report,
+        // }))}
+        dataSource={groupedData}
         pagination={
           total && total > PAGE_SIZE
             ? {
