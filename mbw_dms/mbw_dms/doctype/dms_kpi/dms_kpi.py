@@ -964,7 +964,7 @@ def report(kwargs):
                     AND thang = '{month}'
                     AND nam = '{year}'
             """, as_dict=True)
-
+            print("kpi_month",kpi_month,emp)
             i["kpi_month"] = []
             if bool(kpi_month) and len(kpi_month) > 0:
                 i["kpi_month"] = kpi_month[0]

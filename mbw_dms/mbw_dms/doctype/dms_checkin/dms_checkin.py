@@ -102,7 +102,7 @@ class DMSCheckin(Document):
         if existing_monthly_summary:
                 monthly_summary_doc = frappe.get_doc("DMS Summary KPI Monthly", existing_monthly_summary)
                 #chỉ + 1 với lần checkin đầu tiên của ngày
-                if len(exists_checkin_day) <= 1:
+                if len(exists_checkin_day) == 0:
                     monthly_summary_doc.so_kh_vt_luot += 1
                 
                 
