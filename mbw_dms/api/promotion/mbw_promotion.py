@@ -393,36 +393,8 @@ def SP_SL_SP(list_item=[], data_promotion={}):
 
     return list_free_item
 
-def save_promotionResult(objDataKM,so_luong,boi_so):
-    if objDataKM.ptype_value in ["TIEN_TIEN","TIEN_CKDH"]:
-        objRef={"_id": "CKDH", "ma_san_pham": "", "ten_san_pham": "", "don_vi_tinh": "", "so_luong": so_luong}
-        objKM = { "id": objDataKM.name, "ten_khuyen_mai": objDataKM.name_promotion, "ptype": objDataKM.ptype_value, "product": objRef }
-        
-        item_promotion = pydash.arrays.index_of(pydash.collections.map_(objPromotionOder, 'id'), objDataKM.name)
 
-        # If the item exists, update it
-        if item_promotion >= 0:
-            objPromotionOder[item_promotion] = objKM
-        # If the item does not exist, append it
-        else:
-            objPromotionOder.append(objKM)
-    elif objDataKM.ptype_value in ["SP_SL_CKSP","SP_SL_TIEN","SP_ST_TIEN","SP_ST_CKSP"]:
-        print('========================= value: ', so_luong["_id"], flush=True)
-        objRef = [{ "_id": "CKSP", "id_sp": so_luong["_id"], "ma_san_pham": so_luong["ma_san_pham"], "ten_san_pham": so_luong["ten_san_pham"], "don_vi_tinh": so_luong["don_vi_tinh"], "so_luong": so_luong["chietKhau_promotion"]}];
-        
-        objKM = { "id": objDataKM.name, "ten_khuyen_mai": objDataKM.name_promotion, "ptype": objDataKM.ptype_value, "product": objRef };
-        print('========================= value: ', objKM, flush=True)
-        
-        item_promotion = pydash.arrays.index_of(pydash.collections.map_(objPromotionOder, 'id'), objDataKM.name)
-        # If the item exists, update it
-        if item_promotion >= 0:
-            objPromotionOder[item_promotion] = objKM
-        # If the item does not exist, append it
-        else:
-            objPromotionOder.append(objKM)
-    
-
-                
+            
 
 
 
