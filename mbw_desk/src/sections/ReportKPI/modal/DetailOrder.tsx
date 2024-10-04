@@ -99,8 +99,8 @@ export default function DetailOrder({ employee, month, year }: any) {
     let currentIndex = 0;
 
     return dataDetail.map((item: any) => {
-      if (item.kh_ma !== lastKhMa) {
-        lastKhMa = item.kh_ma;
+      if (item.customer_code !== lastKhMa) {
+        lastKhMa = item.customer_code;
         currentIndex++;
         return { ...item, groupIndex: currentIndex };
       } else {
