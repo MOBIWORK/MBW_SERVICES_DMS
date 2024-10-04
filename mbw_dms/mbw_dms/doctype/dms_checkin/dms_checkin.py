@@ -38,6 +38,7 @@ class DMSCheckin(Document):
         self.update_kpi_monthly_after_delete()
 
     def existing_checkin(self, kh_ma, start_date, end_date, current_user):
+        print("du lieu kiem tra",kh_ma, start_date, end_date, current_user)
         existing_checkin = frappe.get_all(
             "DMS Checkin",
             filters={"creation": (">=", start_date), 
@@ -102,7 +103,8 @@ class DMSCheckin(Document):
         if existing_monthly_summary:
                 monthly_summary_doc = frappe.get_doc("DMS Summary KPI Monthly", existing_monthly_summary)
                 #chỉ + 1 với lần checkin đầu tiên của ngày
-                if len(exists_checkin_day) == 0:
+                print("data hom nay",exists_checkin_day,kh_ma)
+                if len(exists_checkin_day) <=1:
                     monthly_summary_doc.so_kh_vt_luot += 1
                 
                 
