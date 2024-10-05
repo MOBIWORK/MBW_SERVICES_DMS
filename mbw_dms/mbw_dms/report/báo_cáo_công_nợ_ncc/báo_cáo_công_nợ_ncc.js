@@ -94,47 +94,14 @@ frappe.query_reports["Báo cáo công nợ NCC"] = {
 			label: __("Consider Accounting Dimensions"),
 			fieldtype: "Check",
 			default: 1,
-		},
-		{
-			fieldname: "show_opening_entries",
-			label: __("Show Opening Entries"),
-			fieldtype: "Check",
+			hidden: 1,
 		},
 		{
 			fieldname: "include_default_book_entries",
 			label: __("Include Default FB Entries"),
 			fieldtype: "Check",
 			default: 1,
-		},
-		{
-			fieldname: "show_cancelled_entries",
-			label: __("Show Cancelled Entries"),
-			fieldtype: "Check",
-		},
-		{
-			fieldname: "show_net_values_in_party_account",
-			label: __("Show Net Values in Party Account"),
-			fieldtype: "Check",
-		},
-		{
-			fieldname: "add_values_in_transaction_currency",
-			label: __("Add Columns in Transaction Currency"),
-			fieldtype: "Check",
-		},
-		{
-			fieldname: "show_remarks",
-			label: __("Show Remarks"),
-			fieldtype: "Check",
-		},
-		{
-			fieldname: "ignore_err",
-			label: __("Ignore Exchange Rate Revaluation Journals"),
-			fieldtype: "Check",
-		},
-		{
-			fieldname: "ignore_cr_dr_notes",
-			label: __("Ignore System Generated Credit / Debit Notes"),
-			fieldtype: "Check",
+			hidden: 1,
 		},
 	],
 };
