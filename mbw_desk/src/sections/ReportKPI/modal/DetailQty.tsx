@@ -18,6 +18,17 @@ export default function DetailQty({ employee, month, year }: any) {
       title: "Mã đơn đặt",
       dataIndex: "name",
       key: "name",
+      render: (_:any, record: any) => (
+        <div>
+          <a
+            className="text-[#212B36]"
+            href={`/app/sales-order/${record.name}`}
+            target="_blank"
+          >
+            {record.name}
+          </a>
+        </div>
+      ),
     },
     {
       title: "Khách hàng",
