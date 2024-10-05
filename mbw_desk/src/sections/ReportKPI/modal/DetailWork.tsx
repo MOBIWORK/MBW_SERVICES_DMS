@@ -23,6 +23,18 @@ export default function DetailWork({ employee, month, year }: any) {
       title: "Khách hàng",
       dataIndex: "kh_ten",
       key: "kh_ten",
+      width: 200,
+      render: (_:any, record: any) => (
+        <div>
+          <a
+            className="text-[#212B36]"
+            href={`/app/customer/${record.kh_ten}`}
+            target="_blank"
+          >
+            {record.kh_ten}
+          </a>
+        </div>
+      ),
     },
     {
       title: "Địa chỉ",

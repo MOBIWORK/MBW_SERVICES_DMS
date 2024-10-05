@@ -23,6 +23,18 @@ export default function DetailSku({ employee, month, year }: any) {
       title: "Khách hàng",
       dataIndex: "customer",
       key: "customer",
+      width: 200,
+      render: (_:any, record: any) => (
+        <div>
+          <a
+            className="text-[#212B36]"
+            href={`/app/customer/${record.customer}`}
+            target="_blank"
+          >
+            {record.customer}
+          </a>
+        </div>
+      ),
     },
     {
       title: "Ngày đặt",

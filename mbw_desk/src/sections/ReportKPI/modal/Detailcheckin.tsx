@@ -28,7 +28,7 @@ export default function Detailcheckin({ employee, month, year }: any) {
         <div>
           <a
             className="text-[#212B36]"
-            href={`/app/sales-invoice/${record.kh_ten}`}
+            href={`/app/customer/${record.kh_ten}`}
             target="_blank"
           >
             {record.kh_ten}
