@@ -23,6 +23,18 @@ export default function DetailCustomer({ employee, month, year }: any) {
       title: "Khách hàng",
       dataIndex: "customer_name",
       key: "customer_name",
+      width: 200,
+      render: (_:any, record: any) => (
+        <div>
+          <a
+            className="text-[#212B36]"
+            href={`/app/customer/${record.customer_name}`}
+            target="_blank"
+          >
+            {record.customer_name}
+          </a>
+        </div>
+      ),
     },
     {
       title: "Địa chỉ",
