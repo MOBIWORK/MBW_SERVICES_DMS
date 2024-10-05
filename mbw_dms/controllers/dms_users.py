@@ -44,8 +44,9 @@ def create_objid_employee(doc, method):
 def update_objid_employee(doc, method):
     employee = doc
     try:
-        sale_person = frappe.get_doc("Sales Person",{"employee": employee.name}).as_dict()
-        if sale_person and sale_person.object_id:
+        sale_person = frappe.get_value("Sales Person",{"employee": employee.name})
+        if sale_person and sale_person.get("object_id"):
+            # sale_person = sale_person.as_dict()
             projectId = frappe.get_doc("DMS Settings").ma_du_an
             if projectId is None:
                 frappe.throw("Chưa có Project ID")
