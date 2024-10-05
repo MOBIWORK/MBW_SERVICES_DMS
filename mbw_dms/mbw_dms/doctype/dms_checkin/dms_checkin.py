@@ -38,18 +38,20 @@ class DMSCheckin(Document):
         self.update_kpi_monthly_after_delete()
 
     def existing_checkin(self, kh_ma, start_date, end_date, current_user):
+        print("du lieu kiem tra",kh_ma, start_date, end_date, current_user)
         existing_checkin = frappe.get_all(
             "DMS Checkin",
-            filters={"creation": (">=", start_date), 
-                     "creation": ("<=", end_date), 
+            filters={"creation": ["between", [start_date,end_date]], 
                      "kh_ma": kh_ma, 
                      "owner": current_user},
             fields=["name"],
             order_by= "creation desc"
         )
+        existing_checkin = pydash.filter_(existing_checkin,lambda x:x.name!= self.name)
         return existing_checkin
 
     def update_kpi_monthly(self):
+        print("update monthly")
         # Lấy ngày tháng để truy xuất dữ liệu
         month = int(nowdate().split('-')[1])
         year = int(nowdate().split('-')[0])
@@ -99,10 +101,11 @@ class DMSCheckin(Document):
         time_work = seconds_worked / 3600
         # Quang: nếu viếng thăm 2 lần đổ lên thì ko bị giảm viếng thăm duy nhất, số người viếng thăm chỉ bắt trùng theo ngày, qua ngày sau lại khách đó vẫn +1
         #mới====================================================================================================================
+        print("dataa update monthly",existing_monthly_summary,exists_checkin_day,user_name,self.name)
         if existing_monthly_summary:
                 monthly_summary_doc = frappe.get_doc("DMS Summary KPI Monthly", existing_monthly_summary)
                 #chỉ + 1 với lần checkin đầu tiên của ngày
-                if len(exists_checkin_day) == 0:
+                if len(exists_checkin_day) == 0 :
                     monthly_summary_doc.so_kh_vt_luot += 1
                 
                 
