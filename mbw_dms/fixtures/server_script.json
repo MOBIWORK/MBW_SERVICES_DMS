@@ -1,1 +1,21 @@
-[]
+[
+ {
+  "allow_guest": 0,
+  "api_method": null,
+  "cron_format": null,
+  "disabled": 1,
+  "docstatus": 0,
+  "doctype": "Server Script",
+  "doctype_event": "Before Insert",
+  "enable_rate_limit": 0,
+  "event_frequency": "All",
+  "modified": "2024-10-04 17:06:36.202279",
+  "module": "MBW DMS",
+  "name": "Calculate SO",
+  "rate_limit_count": 5,
+  "rate_limit_seconds": 86400,
+  "reference_doctype": "Sales Order",
+  "script": "def number_to_vietnamese_words(number):\n    vietnamese_words = {\n        0: \"không\", 1: \"một\", 2: \"hai\", 3: \"ba\", 4: \"bốn\", 5: \"năm\", 6: \"sáu\", 7: \"bảy\", 8: \"tám\", 9: \"chín\"\n    }\n\n    suffixes = [\"\", \"nghìn\", \"triệu\", \"tỷ\"]\n    result_parts = []  # Sử dụng một danh sách để lưu các phần của kết quả\n\n    # Chỉ xử lý phần nguyên, bỏ qua phần thập phân\n    integer_part = int(number)\n\n    # Chuyển đổi phần nguyên\n    index = 0\n    while integer_part > 0:\n        part = integer_part % 1000\n        part_parts = []  # Lưu các phần của từng nhóm ba chữ số\n\n        hundreds = part // 100\n        tens = (part % 100) // 10\n        ones = part % 10\n\n        if hundreds > 0:\n            part_parts.append(vietnamese_words[hundreds] + \" trăm\")\n\n        if tens == 1:\n            part_parts.append(\"mười\")\n            if ones == 5:\n                part_parts.append(\"lăm\")\n            elif ones > 0:\n                part_parts.append(vietnamese_words[ones])\n        elif tens > 1:\n            part_parts.append(vietnamese_words[tens] + \" mươi\")\n            if ones == 1:\n                part_parts.append(\"mốt\")\n            elif ones == 5:\n                part_parts.append(\"lăm\")\n            elif ones > 0:\n                part_parts.append(vietnamese_words[ones])\n        elif ones > 0:\n            part_parts.append(vietnamese_words[ones])\n\n        if part_parts:\n            result_parts.append(\" \".join(part_parts).strip() + \" \" + suffixes[index])\n\n        integer_part = integer_part // 1000\n        index = index + 1\n\n    result_parts.reverse()\n\n    # Ghép các phần của kết quả lại\n    return \" \".join(result_parts).strip() if result_parts else \"không\"\n\nif doc.items:\n    items = doc.items\n    amount_before_discount = 0\n    discount_total_amount = 0\n\n    for item in items:\n        item.custom_amount_before_discount = item.price_list_rate * item.qty\n        item.custom_discount_on_total_amount = item.discount_amount * item.qty\n        amount_before_discount = amount_before_discount + item.custom_amount_before_discount\n        discount_total_amount = discount_total_amount + item.custom_discount_on_total_amount\n\n    doc.custom_total_amount_before_discount = amount_before_discount\n    doc.custom_product_discount_amount = discount_total_amount\n\n    amount_in_words = number_to_vietnamese_words(doc.grand_total)\n    if amount_in_words:\n        doc.custom_grand_total_by_vietnamese = amount_in_words.capitalize() + \" Việt Nam đồng\"\n",
+  "script_type": "DocType Event"
+ }
+]

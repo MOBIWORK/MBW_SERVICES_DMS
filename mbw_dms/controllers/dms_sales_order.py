@@ -139,4 +139,70 @@ def minus_not_nega(num,sub=1):
         return 0
     else:
         return num - sub
+
+def calculate_so(doc, method):
+    items = doc.items
+    amount_before_discount = 0
+    discount_total_amount = 0
+
+    for item in items:
+        item.custom_amount_before_discount = item.price_list_rate * item.qty
+        item.custom_discount_on_total_amount = item.discount_amount * item.qty
+        amount_before_discount += item.custom_amount_before_discount
+        discount_total_amount += item.custom_discount_on_total_amount
     
+    doc.custom_total_amount_before_discount = amount_before_discount
+    doc.custom_product_discount_amount = discount_total_amount
+
+    amount_in_words = number_to_vietnamese_words(doc.grand_total)
+    if amount_in_words:
+        doc.custom_grand_total_by_vietnamese = amount_in_words.capitalize() + " Việt Nam đồng"
+    
+def number_to_vietnamese_words(number):
+    vietnamese_words = {
+        0: "không", 1: "một", 2: "hai", 3: "ba", 4: "bốn", 5: "năm", 6: "sáu", 7: "bảy", 8: "tám", 9: "chín"
+    }
+
+    suffixes = ["", "nghìn", "triệu", "tỷ"]
+    result = ""
+
+    # Chỉ xử lý phần nguyên, bỏ qua phần thập phân
+    integer_part = int(number)
+
+    # Chuyển đổi phần nguyên
+    index = 0
+    while integer_part > 0:
+        part = integer_part % 1000
+        part_string = ""
+
+        hundreds = part // 100
+        tens = (part % 100) // 10
+        ones = part % 10
+
+        if hundreds > 0:
+            part_string += vietnamese_words[hundreds] + " trăm "
+
+        if tens == 1:
+            part_string += "mười "
+            if ones == 5:
+                part_string += "lăm"
+            elif ones > 0:
+                part_string += vietnamese_words[ones]
+        elif tens > 1:
+            part_string += vietnamese_words[tens] + " mươi "
+            if ones == 1:
+                part_string += "mốt"
+            elif ones == 5:
+                part_string += "lăm"
+            elif ones > 0:
+                part_string += vietnamese_words[ones]
+        elif ones > 0:
+            part_string += vietnamese_words[ones]
+
+        if part_string:
+            result = part_string.strip() + " " + suffixes[index] + " " + result.strip()
+
+        integer_part = integer_part // 1000
+        index += 1
+
+    return result.strip() if result else "không"
