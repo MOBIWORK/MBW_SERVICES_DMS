@@ -167,8 +167,6 @@ def calculate_so(doc, method):
     if amount_in_words:
         doc.custom_grand_total_by_vietnamese = amount_in_words.capitalize() + " Việt Nam đồng"
     
-    doc.save()
-    
     
 # Áp dụng chiết khấu đồng thời
 def apply_discounts_simultaneously(doc, method):
