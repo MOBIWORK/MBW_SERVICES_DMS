@@ -35,7 +35,7 @@ def kpi_visit_detail(**kwargs):
         data = frappe.get_all("DMS Checkin", filters=filters, fields=fields,order_by="kh_ma asc", start=page_size*(page_number-1), page_length=page_size)
         if dms_setting.kb_vitringoaisaiso and dms_setting.checkout_ngoaisaiso:
             for checkin in data :
-                checkin["kh_diachi"] = checkin["checkin_address"] if bool(checkin["kh_diachi"]) else checkin["kh_diachi"]
+                checkin["kh_diachi"] = checkin["checkin_address"] if not bool(checkin["kh_diachi"]) else checkin["kh_diachi"]
         else:
             for checkin in data :
                 checkin["kh_diachi"] = checkin["checkin_address"]
@@ -73,7 +73,7 @@ def kpi_only_visit_detail(**kwargs):
         all_data = frappe.db.get_all("DMS Checkin", filters=filters, fields=fields,order_by="kh_ma asc",start=  (page_number -1 )* page_size,page_length = page_size)
         if dms_setting.kb_vitringoaisaiso and dms_setting.checkout_ngoaisaiso:
             for checkin in all_data :
-                checkin["kh_diachi"] = checkin["checkin_address"] if bool(checkin["kh_diachi"]) else checkin["kh_diachi"]
+                checkin["kh_diachi"] = checkin["checkin_address"] if not bool(checkin["kh_diachi"]) else checkin["kh_diachi"]
         else:
             for checkin in all_data :
                 checkin["kh_diachi"] = checkin["checkin_address"]
