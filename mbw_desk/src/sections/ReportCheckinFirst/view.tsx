@@ -12,113 +12,112 @@ import DropDownFilter from "@/components/filter-group/dropDownFilter";
 import ReportHeader from "../ReportHeader/ReportHeader";
 import { useSelector } from "react-redux";
 
-const columns: TableColumnsType<DataCheckinFirst> = [
-  {
-    title: "STT",
-    dataIndex: "stt",
-    key: "stt",
-    width: 60,
-    render: (_, record: any, index: number) => (
-      <div className="text-center">{index + 1}</div>
-    ),
-  },
-  {
-    title: "Nhóm bán hàng",
-    dataIndex: "sales_team",
-    key: "sales_team",
-    render: (_, record: any) => <div>{record.sales_team}</div>,
-  },
-  {
-    title: "Mã nhân viên",
-    dataIndex: "employee_id",
-    key: "employee_id",
-    render: (_, record: any) => <div>{record.employee_id}</div>,
-  },
-  {
-    title: "Tên nhân viên",
-    dataIndex: "sales_person",
-    key: "sales_person",
-    render: (_, record: any) => <div>{record.sales_person}</div>,
-  },
-  {
-    title: "Mã khách hàng",
-    dataIndex: "customer_code",
-    key: "customer_code",
-    render: (_, record: any) => <div>{record.customer_code}</div>,
-  },
-  {
-    title: "Tên khách hàng",
-    dataIndex: "customer_name",
-    key: "customer_name",
-    render: (_, record: any) => <div>{record.customer_name}</div>,
-  },
-  {
-    title: "Loại khách hàng",
-    dataIndex: "customer_type",
-    key: "customer_type",
-    render: (_, record: any) => <div>{record.customer_type}</div>,
-  },
-  {
-    title: "Nhóm khách hàng",
-    dataIndex: "customer_group",
-    key: "customer_group",
-    render: (_, record: any) => <div>{record.customer_group}</div>,
-  },
-  {
-    title: "Người liên hệ",
-    dataIndex: "contact_person",
-    key: "contact_person",
-    render: (_, record: any) => (
-      <div className="!w-[175px] truncate hover:whitespace-normal">
-        {record.contact_person}
-      </div>
-    ),
-  },
-  {
-    title: "SDT",
-    dataIndex: "phone",
-    key: "phone",
-    render: (_, record: any) => <div>{record.phone}</div>,
-  },
-  {
-    title: "Mã số thuế",
-    dataIndex: "tax_id",
-    key: "tax_id",
-    render: (_, record: any) => <div>{record.tax_id}</div>,
-  },
-  {
-    title: "Khu vực",
-    dataIndex: "territory",
-    key: "territory",
-    render: (_, record: any) => <div>{record.territory}</div>,
-  },
-  {
-    title: "Địa chỉ",
-    dataIndex: "address",
-    key: "address",
-    render: (_, record: any) => (
-      <div className="!w-[175px] truncate hover:whitespace-normal">
-        {record.address}
-      </div>
-    ),
-  },
-  {
-    title: "Ngày viếng thăm",
-    dataIndex: "date_checkin",
-    key: "date_checkin",
-    render: (_, record: any) => (
-      <div>
-        {record.date_checkin
-          ?.split("-")
-          ?.reverse()
-          ?.toString()
-          ?.replaceAll(",", "-")}
-      </div>
-    ),
-  },
-];
-
 export default function ReportCheckinFirst() {
+  const columns: TableColumnsType<DataCheckinFirst> = [
+    {
+      title: "STT",
+      dataIndex: "stt",
+      key: "stt",
+      width: 60,
+      render: (_: any, __: any, index: number) => (
+        <span>{calculateIndex(page, PAGE_SIZE, index)}</span> // Tính toán index cho từng dòng
+      ),
+    },
+    {
+      title: "Nhóm bán hàng",
+      dataIndex: "sales_team",
+      key: "sales_team",
+      render: (_, record: any) => <div>{record.sales_team}</div>,
+    },
+    {
+      title: "Mã nhân viên",
+      dataIndex: "employee_id",
+      key: "employee_id",
+      render: (_, record: any) => <div>{record.employee_id}</div>,
+    },
+    {
+      title: "Tên nhân viên",
+      dataIndex: "sales_person",
+      key: "sales_person",
+      render: (_, record: any) => <div>{record.sales_person}</div>,
+    },
+    {
+      title: "Mã khách hàng",
+      dataIndex: "customer_code",
+      key: "customer_code",
+      render: (_, record: any) => <div>{record.customer_code}</div>,
+    },
+    {
+      title: "Tên khách hàng",
+      dataIndex: "customer_name",
+      key: "customer_name",
+      render: (_, record: any) => <div>{record.customer_name}</div>,
+    },
+    {
+      title: "Loại khách hàng",
+      dataIndex: "customer_type",
+      key: "customer_type",
+      render: (_, record: any) => <div>{record.customer_type}</div>,
+    },
+    {
+      title: "Nhóm khách hàng",
+      dataIndex: "customer_group",
+      key: "customer_group",
+      render: (_, record: any) => <div>{record.customer_group}</div>,
+    },
+    {
+      title: "Người liên hệ",
+      dataIndex: "contact_person",
+      key: "contact_person",
+      render: (_, record: any) => (
+        <div className="!w-[175px] truncate hover:whitespace-normal">
+          {record.contact_person}
+        </div>
+      ),
+    },
+    {
+      title: "SDT",
+      dataIndex: "phone",
+      key: "phone",
+      render: (_, record: any) => <div>{record.phone}</div>,
+    },
+    {
+      title: "Mã số thuế",
+      dataIndex: "tax_id",
+      key: "tax_id",
+      render: (_, record: any) => <div>{record.tax_id}</div>,
+    },
+    {
+      title: "Khu vực",
+      dataIndex: "territory",
+      key: "territory",
+      render: (_, record: any) => <div>{record.territory}</div>,
+    },
+    {
+      title: "Địa chỉ",
+      dataIndex: "address",
+      key: "address",
+      render: (_, record: any) => (
+        <div className="!w-[175px] truncate hover:whitespace-normal">
+          {record.address}
+        </div>
+      ),
+    },
+    {
+      title: "Ngày viếng thăm",
+      dataIndex: "date_checkin",
+      key: "date_checkin",
+      render: (_, record: any) => (
+        <div>
+          {record.date_checkin
+            ?.split("-")
+            ?.reverse()
+            ?.toString()
+            ?.replaceAll(",", "-")}
+        </div>
+      ),
+    },
+  ];
   const [dataReport, setDataReport] = useState<DataCheckinFirst[]>([]);
   const [total, setTotal] = useState<number>(0);
   const [page, setPage] = useState<number>(1);
@@ -128,6 +127,13 @@ export default function ReportCheckinFirst() {
   const [refresh, setRefresh] = useState<boolean>(false);
 
   const { startDate, endDate } = useSelector((state: any) => state.date);
+  const calculateIndex = (
+    pageNumber: number,
+    pageSize: number,
+    index: number
+  ) => {
+    return (pageNumber - 1) * pageSize + index + 1;
+  };
   const { sales_team, employee, customer_type, customer_group, territory } =
     useSelector((state: any) => state.group);
 

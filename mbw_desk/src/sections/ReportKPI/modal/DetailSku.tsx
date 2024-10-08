@@ -60,7 +60,8 @@ export default function DetailSku({ employee, month, year }: any) {
       },
     },
     {
-      title: "Số lượng",
+      title: "SKU",
+      className: "!text-right",
       dataIndex: "totak_sku",
       key: "totak_sku",
       render: (value: any) => <div className="!text-right">{value}</div>,

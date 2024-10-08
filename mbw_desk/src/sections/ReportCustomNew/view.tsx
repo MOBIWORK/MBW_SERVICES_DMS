@@ -15,158 +15,157 @@ import SummaryDataReportNewCustomer from "./SummaryDataReportNewCustomer";
 import ReportHeader from "../ReportHeader/ReportHeader";
 import { useSelector } from "react-redux";
 
-const columns: TableColumnsType<DataTypeCustomNew> = [
-  {
-    title: "STT",
-    dataIndex: "stt",
-    key: "stt",
-    className: "!text-center",
-    width: 60,
-    render: (_, record: any, index: number) => (
-      <div className="text-center">{index + 1}</div>
-    ),
-  },
-  {
-    title: "Mã nhân viên",
-    dataIndex: "sales_person_id",
-    key: "sales_person_id",
-  },
-  {
-    title: "Tên nhân viên",
-    dataIndex: "sales_person",
-    key: "sales_person",
-    width: 200,
-  },
-  {
-    title: "Nhóm bán hàng",
-    dataIndex: "sales_team",
-    key: "sales_team",
-    width: 200,
-    render: (_, record: any) => (
-      <div className="whitespace-normal">{record.sales_team}</div>
-    ),
-  },
-  {
-    title: "Mã khách hàng",
-    dataIndex: "customer_code",
-    key: "customer_code",
-    render: (_, record: any) => <div>{record.customer_code}</div>,
-  },
-  {
-    title: "Tên khách hàng",
-    dataIndex: "customer_name",
-    key: "customer_name",
-    render: (_, record: any) => <div>{record.customer_name}</div>,
-  },
-  {
-    title: "Loại khách hàng",
-    dataIndex: "customer_type",
-    key: "customer_type",
-    render: (_, record: any) => <div>{record.customer_type}</div>,
-  },
-  {
-    title: "Nhóm khách hàng",
-    dataIndex: "customer_group",
-    key: "customer_group",
-    width: 170,
-    render: (_, record: any) => (
-      <div className="truncate hover:whitespace-normal">
-        {record.customer_group}
-      </div>
-    ),
-  },
-  {
-    title: "Người liên hệ",
-    dataIndex: "contact",
-    key: "contact",
-    render: (_, record: any) => <div>{record.contact}</div>,
-  },
-  {
-    title: "SDT",
-    dataIndex: "phone",
-    key: "phone",
-    render: (_, record: any) => <div>{record.phone}</div>,
-  },
-  {
-    title: "Mã số thuế",
-    dataIndex: "tax_id",
-    key: "tax_id",
-    render: (_, record: any) => <div>{record.tax_id}</div>,
-  },
-  {
-    title: "Khu vưc",
-    dataIndex: "territory",
-    key: "territory",
-    render: (_, record: any) => <div>{record.territory}</div>,
-  },
-  {
-    title: "Địa chỉ",
-    dataIndex: "address",
-    key: "address",
-    render: (_, record: any) => (
-      <div className="truncate hover:whitespace-normal">{record.address}</div>
-    ),
-  },
-  {
-    title: "Ngày thu thập",
-    dataIndex: "creation",
-    key: "creation",
-    render: (_, record: any) => (
-      <div>{dayjs(record.creation * 1000).format("DD/MM/YYYY")}</div>
-    ),
-  },
-  {
-    title: "Nguồn",
-    dataIndex: "f1",
-    key: "f1",
-    className: "!text-center",
-    render: (value: any) => (
-      <div className="!text-center">{value ? value : "-"}</div>
-    ),
-  },
-  {
-    title: <div className="!text-right">Số lần VT</div>,
-    dataIndex: "totals_checkin",
-    key: "totals_checkin",
-    render: (_, record: any) => (
-      <div className="!text-right">{record.totals_checkin}</div>
-    ),
-  },
-  {
-    title: "VT đầu",
-    dataIndex: "first_checkin",
-    key: "first_checkin",
-    render: (value) => {
-      return value ? <p>{dayjs(value * 1000).format("DD/MM/YYYY")}</p> : <></>;
-    },
-  },
-  {
-    title: "VT cuối",
-    dataIndex: "last_checkin",
-    key: "last_checkin",
-    render: (value) => {
-      return value ? <p>{dayjs(value * 1000).format("DD/MM/YYYY")}</p> : <></>;
-    },
-  },
-  {
-    title: <div className="!text-right">Số đơn hàng</div>,
-    dataIndex: "totals_so",
-    key: "totals_so",
-    render: (_, record: any) => (
-      <div className="!text-right">{record.totals_so}</div>
-    ),
-  },
-  {
-    title: "Đơn hàng cuối",
-    dataIndex: "last_sale_order",
-    key: "last_sale_order",
-    render: (value) => {
-      return value ? <p>{dayjs(value * 1000).format("DD/MM/YYYY")}</p> : <></>;
-    },
-  },
-];
-
 export default function ReportCustomNew() {
+  const columns: TableColumnsType<DataTypeCustomNew> = [
+    {
+      title: "STT",
+      dataIndex: "stt",
+      key: "stt",
+      className: "!text-center",
+      width: 60,
+      render: (_: any, __: any, index: number) => (
+        <span>{calculateIndex(page, PAGE_SIZE, index)}</span> // Tính toán index cho từng dòng
+      ),
+    },
+    {
+      title: "Mã nhân viên",
+      dataIndex: "sales_person_id",
+      key: "sales_person_id",
+    },
+    {
+      title: "Tên nhân viên",
+      dataIndex: "sales_person",
+      key: "sales_person",
+      width: 200,
+    },
+    {
+      title: "Nhóm bán hàng",
+      dataIndex: "sales_team",
+      key: "sales_team",
+      width: 200,
+      render: (_, record: any) => (
+        <div className="whitespace-normal">{record.sales_team}</div>
+      ),
+    },
+    {
+      title: "Mã khách hàng",
+      dataIndex: "customer_code",
+      key: "customer_code",
+      render: (_, record: any) => <div>{record.customer_code}</div>,
+    },
+    {
+      title: "Tên khách hàng",
+      dataIndex: "customer_name",
+      key: "customer_name",
+      render: (_, record: any) => <div>{record.customer_name}</div>,
+    },
+    {
+      title: "Loại khách hàng",
+      dataIndex: "customer_type",
+      key: "customer_type",
+      render: (_, record: any) => <div>{record.customer_type}</div>,
+    },
+    {
+      title: "Nhóm khách hàng",
+      dataIndex: "customer_group",
+      key: "customer_group",
+      width: 170,
+      render: (_, record: any) => (
+        <div className="truncate hover:whitespace-normal">
+          {record.customer_group}
+        </div>
+      ),
+    },
+    {
+      title: "Người liên hệ",
+      dataIndex: "contact",
+      key: "contact",
+      render: (_, record: any) => <div>{record.contact}</div>,
+    },
+    {
+      title: "SDT",
+      dataIndex: "phone",
+      key: "phone",
+      render: (_, record: any) => <div>{record.phone}</div>,
+    },
+    {
+      title: "Mã số thuế",
+      dataIndex: "tax_id",
+      key: "tax_id",
+      render: (_, record: any) => <div>{record.tax_id}</div>,
+    },
+    {
+      title: "Khu vưc",
+      dataIndex: "territory",
+      key: "territory",
+      render: (_, record: any) => <div>{record.territory}</div>,
+    },
+    {
+      title: "Địa chỉ",
+      dataIndex: "address",
+      key: "address",
+      render: (_, record: any) => (
+        <div className="truncate hover:whitespace-normal">{record.address}</div>
+      ),
+    },
+    {
+      title: "Ngày thu thập",
+      dataIndex: "creation",
+      key: "creation",
+      render: (_, record: any) => (
+        <div>{dayjs(record.creation * 1000).format("DD/MM/YYYY")}</div>
+      ),
+    },
+    {
+      title: "Nguồn",
+      dataIndex: "f1",
+      key: "f1",
+      className: "!text-center",
+      render: (value: any) => (
+        <div className="!text-center">{value ? value : "-"}</div>
+      ),
+    },
+    {
+      title: <div className="!text-right">Số lần VT</div>,
+      dataIndex: "totals_checkin",
+      key: "totals_checkin",
+      render: (_, record: any) => (
+        <div className="!text-right">{record.totals_checkin}</div>
+      ),
+    },
+    {
+      title: "VT đầu",
+      dataIndex: "first_checkin",
+      key: "first_checkin",
+      render: (value) => {
+        return value ? <p>{dayjs(value * 1000).format("DD/MM/YYYY")}</p> : <></>;
+      },
+    },
+    {
+      title: "VT cuối",
+      dataIndex: "last_checkin",
+      key: "last_checkin",
+      render: (value) => {
+        return value ? <p>{dayjs(value * 1000).format("DD/MM/YYYY")}</p> : <></>;
+      },
+    },
+    {
+      title: <div className="!text-right">Số đơn hàng</div>,
+      dataIndex: "totals_so",
+      key: "totals_so",
+      render: (_, record: any) => (
+        <div className="!text-right">{record.totals_so}</div>
+      ),
+    },
+    {
+      title: "Đơn hàng cuối",
+      dataIndex: "last_sale_order",
+      key: "last_sale_order",
+      render: (value) => {
+        return value ? <p>{dayjs(value * 1000).format("DD/MM/YYYY")}</p> : <></>;
+      },
+    },
+  ];
   const [dataCustomNew, setDataCustomNew] = useState<DataTypeCustomNew[]>([]);
   const [total, setTotal] = useState<number>(0);
 
@@ -176,7 +175,13 @@ export default function ReportCustomNew() {
   const [refresh, setRefresh] = useState<boolean>(false);
 
   const matchMedia = useMediaQuery(`${mediaQuery}`);
-
+  const calculateIndex = (
+    pageNumber: number,
+    pageSize: number,
+    index: number
+  ) => {
+    return (pageNumber - 1) * pageSize + index + 1;
+  };
   const { startDate, endDate } = useSelector((state: any) => state.date);
   const {
     sales_team,

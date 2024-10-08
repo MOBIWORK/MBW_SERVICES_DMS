@@ -594,14 +594,14 @@ const DropDownFilter = ({
             {inputCustomerType && (
               <Form.Item
                 name="customertype"
-                label={"Loại khách hàng"}
+                label={"Loại hình khách hàng"}
                 className="w-[468px] border-none">
                 <SelectCommon
                   className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
                   options={typecustomer}
                   allowClear
                   showSearch
-                  placeholder="Tất cả loại khách hàng"
+                  placeholder="Tất cả loại hình khách hàng"
                 />
               </Form.Item>
             )}
