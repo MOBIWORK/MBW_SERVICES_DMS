@@ -523,12 +523,12 @@ def analisis_kpi(**res):
 
         sale_orders = frappe.db.sql(sql_query_donhang,(start_date_str, end_date_str) ,as_dict=1)
 
-       
         field_items = ["name", "item_name", "item_code"]
         obj_emp = {}
 
         for i in sale_orders:
             st = get_value_child_doctype("Sales Order", i["name_order"], "sales_team")
+
             items = get_child_values_doc(doctype="Sales Order", master_name=i["name_order"], fields_to_get=field_items, chil_name="items")
             if len(st) != 0:
                 for j in st:
@@ -548,6 +548,8 @@ def analisis_kpi(**res):
                             
                             if obj_emp[emp[0]["employee"]]["customer"].get(i["customer_code"]) is None:
                                 obj_emp[emp[0]["employee"]]["customer"][i["customer_code"]] = 1
+
+        print("=================data", data)
        
         for i in data:
             i["children"] = frappe.parse_json(i["children"])

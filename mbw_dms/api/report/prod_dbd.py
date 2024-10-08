@@ -78,13 +78,16 @@ def report_prod_dbd(**res):
                 total_qty_by_month = 0
                 # Cộng dồn total_qty theo từng ngày cho group_name (cha)
                 kpi_san_luong = next(children['kpi_san_luong'] for children in sale_orders if children['sales_person'] == sales_person and children['parent_sales_person'] == parent_sales_person)
+                # Lấy kpi_san_luong từ dữ liệu gốc cho sales_person
+                if kpi_san_luong is not None:
+                    total_kpi_month += kpi_san_luong
+                else:
+                    kpi_san_luong = 0
+                the_rest = kpi_san_luong - total_qty_by_month
 
                 for day, qty in day_totals.items():
                     total_qty_by_day[day] += qty
                     total_qty_by_month += total_qty_by_day[day]
-                # Lấy kpi_san_luong từ dữ liệu gốc cho sales_person
-                total_kpi_month += kpi_san_luong
-                the_rest = kpi_san_luong - total_qty_by_month
                 if the_rest < 0:
                     the_rest = 0
                 total_rest_all += the_rest
