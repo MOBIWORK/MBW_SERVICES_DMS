@@ -79,7 +79,8 @@ const startOfMonth: any = dayjs().startOf("month");
 const endOfMonth: any = dayjs().endOf("month");
 let start = Date.parse(startOfMonth["$d"]) / 1000;
 let end = Date.parse(endOfMonth["$d"]) / 1000;
-
+const month = (dayjs().month() + 1).toString();
+const year = dayjs().startOf("year")["$y"].toString();
 const DropDownFilter = ({
   setPage,
   matchMedia,
@@ -401,6 +402,17 @@ const DropDownFilter = ({
     } else {
       dispatch(setTerritory(""));
     }
+    if (val.filter_fromDate) {
+      dispatch(setStartDate(val.filter_fromDate));
+    } else {
+      dispatch(setStartDate(start));
+    }
+
+    if (val.filter_toDate) {
+      dispatch(setStartDate(val.filter_toDate));
+    } else {
+      dispatch(setStartDate(end));
+    }
 
     if (val.has_sales_order) {
       dispatch(setHasSaleOrder(val.has_sales_order));
@@ -409,14 +421,14 @@ const DropDownFilter = ({
     }
 
     if (val.filter_month) {
-      dispatch(setStartDate(Date.parse(val.filter_month["$d"]) / 1000));
+      dispatch(setMonth(Date.parse(val.filter_month["$d"]) / 1000));
     } else {
-      dispatch(setStartDate(start));
+      dispatch(setMonth(month));
     }
     if (val.filter_year) {
-      dispatch(setEndDate(Date.parse(val.filter_year["$d"]) / 1000));
+      dispatch(setYear(Date.parse(val.filter_year["$d"]) / 1000));
     } else {
-      dispatch(setEndDate(end));
+      dispatch(setYear(year));
     }
     if (val.company) {
       dispatch(setCompany(val.company));
@@ -461,7 +473,7 @@ const DropDownFilter = ({
                 {inputFromDate && (
                   <Form.Item
                     className="w-[468px] border-none"
-                    name="filter_month">
+                    name="filter_fromDate">
                     <FromDateFilter />
                   </Form.Item>
                 )}
@@ -475,7 +487,7 @@ const DropDownFilter = ({
                 {inputToDate && (
                   <Form.Item
                     className="w-[468px] border-none"
-                    name="filter_year">
+                    name=" filter_toDate">
                     <ToDateFilter />
                   </Form.Item>
                 )}
@@ -737,10 +749,12 @@ const DropDownFilter = ({
                 className="mr-3"
                 onClick={(ev: any) => {
                   ev.preventDefault();
-                  dispatch(setMonth(""));
-                  dispatch(setYear(""));
+                  dispatch(setMonth(month));
+                  dispatch(setYear(year));
                   dispatch(setSaleTeam(""));
                   dispatch(setEmployee(""));
+                  dispatch(setStartDate(start));
+                  dispatch(setEndDate(end));
                   formFilter.resetFields();
                 }}>
                 Đặt lại
