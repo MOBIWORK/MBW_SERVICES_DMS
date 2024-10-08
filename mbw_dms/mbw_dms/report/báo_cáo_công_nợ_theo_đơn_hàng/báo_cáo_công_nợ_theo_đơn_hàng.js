@@ -1,5 +1,6 @@
 let now = new Date();
 let checkedCheckboxes = {};
+let Total = 0
 let arraydDeliveryNote = [];
 // Custom remove function to remove elements from the array
 Array.prototype.remove = function(value) {
@@ -60,6 +61,7 @@ frappe.query_reports["Báo cáo công nợ theo đơn hàng"] = {
     },
 
     "after_datatable_render": function(report) {
+        $('.dt-row-filter').remove();
         // Function to enable checkboxes
         function enableCheckboxes() {
             $(".datatable").find('input[type="checkbox"]').each(function() {
@@ -77,7 +79,9 @@ frappe.query_reports["Báo cáo công nợ theo đơn hàng"] = {
                     // Handle the click event
                     if ($(this).is(':checked')) {
                         checkedCheckboxes[$(this).val()] = true;
+                        let ma_dh = $(this).closest('.dt-row').find("a[data-doctype='Delivery Note']").html()
                         arraydDeliveryNote.push($(this).closest('.dt-row').find("a[data-doctype='Delivery Note']").html());
+                        Total += report.datamanager.data[$(this).val()].total
 
                     } else {
                         delete checkedCheckboxes[$(this).val()];
@@ -86,6 +90,7 @@ frappe.query_reports["Báo cáo công nợ theo đơn hàng"] = {
                     }
                 });
             });
+
         }
 
         // Enable checkboxes initially after rendering the datatable
@@ -104,6 +109,15 @@ function print_report(report, print_settings) {
     let filtered_data = report.data.filter(row => {
         return arraydDeliveryNote.includes(row.name);
     });
+    filtered_data.push({
+        against_sales_order: null,
+        customer_name: "Tổng tiền",
+        name: null,
+        "posting_date": null,
+        "select_item": null,
+        "total": Total,
+        "trangthaithanhtoan": null
+    })
     frappe.render_grid({
         title: "Báo cáo công nợ theo đơn hàng",
         subtitle: "Báo cáo công nợ theo đơn hàng",

@@ -103,5 +103,6 @@ def execute(filters=None):
     # Bổ sung cột checkbox cho từng dòng trong dữ liệu
     for row in data:
         row['select_item'] = 0  # Checkbox không bị chọn mặc định và có thể chọn được
-
+    total_amount = sum([row['total'] for row in data])
+    data.append({'select_item': 0, 'customer_name': 'Total', 'total': total_amount})
     return columns, data
