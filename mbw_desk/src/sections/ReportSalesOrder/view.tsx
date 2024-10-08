@@ -272,7 +272,7 @@ export default function ReportSales() {
         header={
           <ReportHeader
             setRefresh={setRefresh}
-            title="Báo cáo tổng hợp bán hàng"
+            title="Báo cáo tổng hợp đặt hàng"
             params={{
               report_type: "Report Sell",
               data_filter: {
