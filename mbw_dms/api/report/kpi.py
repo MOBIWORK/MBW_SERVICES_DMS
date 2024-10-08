@@ -11,7 +11,7 @@ def kpi_report(**kwargs):
     from mbw_dms.mbw_dms.doctype.dms_kpi.dms_kpi import report
     return report(kwargs=kwargs)
 
-# Chi tiết viếng thăm
+# Chi tiết lượt viếng thăm
 @frappe.whitelist(methods="GET")
 def kpi_visit_detail(**kwargs):
     try:
@@ -29,8 +29,16 @@ def kpi_visit_detail(**kwargs):
             filters["creation"] = ["between", [from_date, to_date]]
         if employee:
             filters["createdbyemail"] = user_id
-        
-        data = frappe.get_all("DMS Checkin", filters=filters, fields=["name", "kh_ma", "kh_ten", "kh_diachi", "checkin_giovao", "checkin_khoangcach"],order_by="kh_ma asc", start=page_size*(page_number-1), page_length=page_size)
+        fields = ["name", "kh_ma", "kh_ten", "kh_diachi","checkin_address", "checkin_giovao", "checkin_khoangcach"]
+        dms_setting = frappe.get_single("DMS Settings").as_dict()
+    
+        data = frappe.get_all("DMS Checkin", filters=filters, fields=fields,order_by="kh_ma asc", start=page_size*(page_number-1), page_length=page_size)
+        if dms_setting.kb_vitringoaisaiso and dms_setting.checkout_ngoaisaiso:
+            for checkin in data :
+                checkin["kh_diachi"] = checkin["checkin_address"] if not bool(checkin["kh_diachi"]) else checkin["kh_diachi"]
+        else:
+            for checkin in data :
+                checkin["kh_diachi"] = checkin["checkin_address"]
         totals = frappe.db.count("DMS Checkin", filters=filters)
         return gen_response(200, "Thành công", {
             "data": data,
@@ -42,7 +50,7 @@ def kpi_visit_detail(**kwargs):
     except Exception as e:
         return exception_handle(e)
     
-# Chi tiết số kh viếng thăm duy nhất
+# Chi tiết số kh viếng thăm
 @frappe.whitelist(methods="GET")
 def kpi_only_visit_detail(**kwargs):
     try:
@@ -60,8 +68,15 @@ def kpi_only_visit_detail(**kwargs):
             filters["creation"] = ["between", [from_date, to_date]]
         if employee:
             filters["createdbyemail"] = user_id
-
-        all_data = frappe.db.get_all("DMS Checkin", filters=filters, fields=["name", "kh_ma", "kh_ten", "kh_diachi", "checkin_giovao", "checkin_khoangcach"],order_by="kh_ma asc",start=  (page_number -1 )* page_size,page_length = page_size)
+        fields = ["name", "kh_ma", "kh_ten", "kh_diachi","checkin_address", "checkin_giovao", "checkin_khoangcach"]
+        dms_setting = frappe.get_single("DMS Settings").as_dict()
+        all_data = frappe.db.get_all("DMS Checkin", filters=filters, fields=fields,order_by="kh_ma asc",start=  (page_number -1 )* page_size,page_length = page_size)
+        if dms_setting.kb_vitringoaisaiso and dms_setting.checkout_ngoaisaiso:
+            for checkin in all_data :
+                checkin["kh_diachi"] = checkin["checkin_address"] if not bool(checkin["kh_diachi"]) else checkin["kh_diachi"]
+        else:
+            for checkin in all_data :
+                checkin["kh_diachi"] = checkin["checkin_address"]
         unique_data_count =  frappe.db.count("DMS Checkin", filters=filters)
         return_data = {}
         for checkin in all_data: 
