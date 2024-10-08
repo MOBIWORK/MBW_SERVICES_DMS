@@ -86,7 +86,7 @@ frappe.query_reports["Báo cáo công nợ theo đơn hàng"] = {
                     } else {
                         delete checkedCheckboxes[$(this).val()];
                         arraydDeliveryNote.remove($(this).closest('.dt-row').find("a[data-doctype='Delivery Note']").html());
-
+                        Total -= report.datamanager.data[$(this).val()].total
                     }
                 });
             });
