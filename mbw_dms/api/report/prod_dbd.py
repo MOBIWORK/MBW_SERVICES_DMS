@@ -13,13 +13,14 @@ def report_prod_dbd(**res):
         page_size =  int(res.get("page_size", 20))
         page_number = int(res.get("page_number")) if res.get("page_number") and int(res.get("page_number")) >=1 else 1
         sales_team = res.get("sales_team")
+
         industry= res.get("industry")
         brand= res.get("brand")
         supplier= res.get("supplier")
 
       
 
-        filters = []
+        filters = "WHERE so.docstatus = 1"
 
         # if industry:
         #     filters.append(f"nhan_vien_ban_hang = '{industry}'")
@@ -28,21 +29,19 @@ def report_prod_dbd(**res):
         # if supplier:
         #     filters.append(f"nhan_vien_ban_hang = '{supplier}'")
         if sales_team:
-            filters.append(f"nhom_ban_hang = '{sales_team}'")
+            filters=f"{filters} AND nhom_ban_hang = '{sales_team}'"
         
-        filters.append(f"so.transaction_date BETWEEN '{from_date}' AND '{to_date}'")
-        where_conditions = " AND ".join(filters)
-
-        sql_query = """ 
+        filters = f"{filters} AND so.transaction_date BETWEEN '{from_date}' AND '{to_date}'"
+        
+        sql_query = f""" 
             SELECT so.total_qty, so.transaction_date, st.sales_person , kpi.san_luong as kpi_san_luong , sp.parent_sales_person
             FROM `tabSales Order` so
             LEFT JOIN `tabSales Team` st ON so.name = st.parent 
             LEFT JOIN `tabSales Person` sp ON st.sales_person = sp.sales_person_name
             LEFT JOIN `tabDMS KPI` kpi ON sp.employee = kpi.nhan_vien_ban_hang
+            {filters}
         """
 
-        if where_conditions:
-            sql_query += " WHERE {}".format(where_conditions)
         sql_query += " ORDER BY so.transaction_date desc"
         sql_query += " LIMIT %s OFFSET %s"
         limit = page_size

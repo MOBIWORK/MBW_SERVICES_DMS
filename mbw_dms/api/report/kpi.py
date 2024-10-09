@@ -767,7 +767,10 @@ def analisis_kpi(**res):
                 i["total_kh_dat_hang"] += r["kh_dat_hang"]
                 i["total_kh_kh_moi"] += r["kh_kh_moi"]
                 if bool(r["kpi_month"]):
-                    number_vt_dn = len(r["kpi_month"]["th_vt_dn"].split(";"))
+                    if r["kpi_month"]["th_vt_dn"] is not None:
+                        number_vt_dn = len(r["kpi_month"]["th_vt_dn"].split(";"))
+                    else :
+                        number_vt_dn = 0
                     r["kpi_month"]["th_vt_dn"] = number_vt_dn
                     if r["kh_vt"] != 0:
                         r["tl_vt"] = round(r["kpi_month"]["th_vt"] / r["kh_vt"]*100, 2)

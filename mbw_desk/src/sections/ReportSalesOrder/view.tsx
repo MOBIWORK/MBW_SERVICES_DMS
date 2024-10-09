@@ -233,7 +233,7 @@ export default function ReportSales() {
   useEffect(() => {
     (async () => {
       const rsData = await AxiosService.get(
-        "/api/method/mbw_dms.api.report.so_report.si_report",
+        "/api/method/mbw_dms.api.report.so_report.so_report",
         {
           params: {
             page_size: PAGE_SIZE,
@@ -272,7 +272,7 @@ export default function ReportSales() {
         header={
           <ReportHeader
             setRefresh={setRefresh}
-            title="Báo cáo tổng hợp bán hàng"
+            title="Báo cáo tổng hợp đặt hàng"
             params={{
               report_type: "Report Sell",
               data_filter: {

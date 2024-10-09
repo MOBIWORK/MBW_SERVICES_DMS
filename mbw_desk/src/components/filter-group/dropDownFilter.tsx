@@ -7,7 +7,7 @@ import { listSale } from "../../types/listSale";
 import { treeArray } from "../../util";
 import { rsDataFrappe } from "../../types/response";
 import { employee } from "../../types/employeeFilter";
-import { Row, Dropdown, Form, Button } from "antd";
+import { Row, Dropdown, Form, Button, DatePicker, message } from "antd";
 import { DropDownCustom } from "..";
 import { useForm } from "antd/es/form/Form";
 import { SelectCommon, TreeSelectCommon } from "../select/select";
@@ -40,6 +40,8 @@ import {
 
 import { setEndDate, setStartDate } from "@/redux/slices/date-slice";
 import { setMonth, setYear } from "@/redux/slices/month-slice";
+import { DatePickerProps } from "antd/lib";
+import { monthAll } from "@/constant";
 
 type supplier = {
   value: string;
@@ -386,6 +388,47 @@ const DropDownFilter = ({
         );
       })();
     }, [keySearchSpiller]);
+
+  const dispath = useDispatch();
+  const { startDate, endDate } = useSelector((state: any) => state.date);
+  const valueFromDate = dayjs(startDate * 1000);
+  const valueToDate = dayjs(endDate * 1000);
+  const onChangeFromDate: DatePickerProps["onChange"] = (dateString: any) => {
+    if (dateString === null || dateString === undefined) {
+      dispath(setStartDate(dateString));
+    } else if (
+      endDate &&
+      dateString &&
+      dateString.isAfter(dayjs.unix(endDate), "day")
+    ) {
+      message.error("Từ ngày phải nhỏ hơn hoặc bằng Đến ngày");
+    } else {
+      let fDate = Date.parse(dateString["$d"]) / 1000;
+      dispath(setStartDate(fDate));
+    }
+  };
+
+  const onChangeToDate: DatePickerProps["onChange"] = (dateString: any) => {
+    if (dateString === null || dateString === undefined) {
+      dispath(setEndDate(dateString));
+    } else if (
+      startDate &&
+      dateString &&
+      dateString.isBefore(dayjs.unix(startDate), "day")
+    ) {
+      message.error("Đến ngày phải lớn hơn hoặc bằng Từ ngày");
+    } else {
+      let tDate = Date.parse(dateString["$d"]) / 1000;
+      dispath(setEndDate(tDate));
+    }
+  };
+
+  const disabledEndDate = (current: any) => {
+    if (startDate) {
+      const startMonth = dayjs.unix(startDate).month();
+      return current && current.month() !== startMonth;
+    }
+  };
   const handleSearchFilter = (val: any) => {
     if (val.customergroup) {
       dispatch(setCustomerGroup(val.customergroup));
@@ -402,16 +445,17 @@ const DropDownFilter = ({
     } else {
       dispatch(setTerritory(""));
     }
+
     if (val.filter_fromDate) {
-      dispatch(setStartDate(val.filter_fromDate));
+      dispatch(setStartDate(val.filter_fromDate["$d"] / 1000));
     } else {
       dispatch(setStartDate(start));
     }
 
     if (val.filter_toDate) {
-      dispatch(setStartDate(val.filter_toDate));
+      dispatch(setEndDate((val.filter_toDate["$d"] - 999) / 1000));
     } else {
-      dispatch(setStartDate(end));
+      dispatch(setEndDate(end));
     }
 
     if (val.has_sales_order) {
@@ -421,12 +465,13 @@ const DropDownFilter = ({
     }
 
     if (val.filter_month) {
-      dispatch(setMonth(Date.parse(val.filter_month["$d"]) / 1000));
+      dispatch(setMonth(val.filter_month));
     } else {
       dispatch(setMonth(month));
     }
+
     if (val.filter_year) {
-      dispatch(setYear(Date.parse(val.filter_year["$d"]) / 1000));
+      dispatch(setYear(Date.parse(val.filter_year["$y"]).toString()));
     } else {
       dispatch(setYear(year));
     }
@@ -474,28 +519,56 @@ const DropDownFilter = ({
                   <Form.Item
                     className="w-[468px] border-none"
                     name="filter_fromDate">
-                    <FromDateFilter />
+                    <DatePicker
+                      format={"DD-MM-YYYY"}
+                      className="!bg-[#F4F6F8] w-full rounded-lg h-7"
+                      placeholder="Từ ngày"
+                      onChange={onChangeFromDate}
+                      value={valueFromDate}
+                      defaultValue={startOfMonth}
+                      // disabledDate={disabledStartDate}
+                      allowClear={false}
+                    />
                   </Form.Item>
                 )}
                 {inputMonth && (
                   <Form.Item
                     className="w-[468px] border-none"
                     name="filter_month">
-                    <MonthFilter setPage={setPage} />
+                    <SelectCommon
+                      className="!bg-[#F4F6F8] "
+                      defaultValue={month}
+                      options={monthAll}
+                    />
                   </Form.Item>
                 )}
                 {inputToDate && (
                   <Form.Item
                     className="w-[468px] border-none"
-                    name=" filter_toDate">
-                    <ToDateFilter />
+                    name="filter_toDate">
+                    <DatePicker
+                      format={"DD-MM-YYYY"}
+                      className="!bg-[#F4F6F8] w-full rounded-lg h-7"
+                      onChange={onChangeToDate}
+                      placeholder="Đến ngày"
+                      defaultValue={endOfMonth}
+                      disabledDate={disabledEndDate}
+                      value={valueToDate}
+                      allowClear={false}
+                    />
                   </Form.Item>
                 )}
                 {inputYear && (
                   <Form.Item
                     className="w-[468px] border-none"
                     name="filter_year">
-                    <YearFilter />
+                    <DatePicker
+                      className="!bg-[#F4F6F8] w-full rounded-lg h-7"
+                      placeholder="Chọn năm"
+                      picker="year"
+                      allowClear={false}
+                      defaultValue={dayjs().startOf("year")}
+                    />
                   </Form.Item>
                 )}
 
@@ -751,8 +824,8 @@ const DropDownFilter = ({
                   ev.preventDefault();
                   dispatch(setMonth(month));
                   dispatch(setYear(year));
-                  dispatch(setSaleTeam(""));
-                  dispatch(setEmployee(""));
+                  !matchMedia && dispatch(setSaleTeam(""));
+                  !matchMedia && dispatch(setEmployee(""));
                   dispatch(setStartDate(start));
                   dispatch(setEndDate(end));
                   formFilter.resetFields();
