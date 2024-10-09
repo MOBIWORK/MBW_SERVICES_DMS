@@ -417,48 +417,7 @@ def kpi_so_qty_detail(**kwargs):
             "page_number": page_number,
             "page_size": page_size,
         })
-        #cũ
-        filters = {}
-        from_date = validate_filter_timestamp(type="start")(kwargs.get("from_date")) if kwargs.get("from_date") else None
-        to_date = validate_filter_timestamp(type="end")(kwargs.get("to_date")) if kwargs.get("to_date") else None
-        page_size =  int(kwargs.get("page_size", 20))
-        page_number = int(kwargs.get("page_number")) if kwargs.get("page_number") and int(kwargs.get("page_number")) >=1 else 1
-        employee = kwargs.get("employee")
-        sales_person = frappe.get_value("Sales Person", {"employee": employee}, "name")
-
-        filters["docstatus"] = 1
-        if from_date and to_date:
-            filters["creation"] = ["between", [from_date, to_date]]
-
-        all_sales_orders = frappe.get_all("Sales Order", filters=filters, fields=["name", "customer", "UNIX_TIMESTAMP(creation) as create_date"])
-
-        filtered_data = []
-
-        for i in all_sales_orders:
-            so = frappe.get_doc("Sales Order", i.name)
-            for st in so.sales_team:
-                if st.created_by == 1 and st.sales_person == sales_person:
-                    filtered_data.append(i)
-
-        totals = len(filtered_data)
-        from mbw_dms.api.common import qty_not_pricing_rule
-        for i in filtered_data:
-            so = frappe.get_doc("Sales Order", i.name).as_dict()
-            items = so.get("items")
-            qty,uom = qty_not_pricing_rule(items)
-            i["total_qty"] = sum(qty)
-
-        # Phân trang dữ liệu
-        start_idx = page_size * (page_number - 1)
-        end_idx = start_idx + page_size
-        paginated_data = filtered_data[start_idx:end_idx]
-
-        return gen_response(200, "Thành công", {
-            "data": paginated_data,
-            "totals": totals,
-            "page_size": page_size,
-            "page_number": page_number
-        }) 
+       
 
     except Exception as e:
         return exception_handle(e)

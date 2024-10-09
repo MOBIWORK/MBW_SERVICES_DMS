@@ -4,7 +4,7 @@ import calendar
 from mbw_dms.api.common import qty_not_pricing_rule
 
 # Kiểm tra xem khách đã đặt hàng trước đó chưa
-def existing_customer(customer_name, start_date, end_date, current_user):
+def existing_customer(customer_name, start_date, end_date, current_user,doc):
     existing_cus = frappe.get_all(
         "Sales Order",
         filters={
@@ -14,6 +14,8 @@ def existing_customer(customer_name, start_date, end_date, current_user):
                 "owner": current_user},
         fields=["name"]
     )
+    import pydash
+    existing_cus = pydash.filter_(existing_cus,lambda x: x.name != doc.name)
     return existing_cus
 
 def update_kpi_monthly(doc, method):
@@ -84,25 +86,18 @@ def handle_update_kpi_each_salePerson(sales_info,doc,month,year,start_date,end_d
     existing_monthly_summary = frappe.get_value("DMS Summary KPI Monthly", {"thang": month, "nam": year, "nhan_vien_ban_hang": user_name}, "name")
     grand_totals = doc.grand_total
     cus_name = doc.customer
-    existing_cus = existing_customer(customer_name=cus_name, start_date=start_date, end_date=end_date, current_user=doc.owner)
+    existing_cus_so = existing_customer(customer_name=cus_name, start_date=start_date, end_date=end_date, current_user=doc.owner,doc=doc)
     doanh_so_thang =grand_totals*sales_info.allocated_percentage/100
     total_uom = 0
     if existing_monthly_summary:
         monthly_summary_doc = frappe.get_doc("DMS Summary KPI Monthly", existing_monthly_summary)
-        total_uom += monthly_summary_doc.sku*monthly_summary_doc.so_don_hang + len(uom)
-        if len(existing_cus) > 1:
-            # total_uom += len(uom)
-            monthly_summary_doc.so_don_hang += 1
-            monthly_summary_doc.doanh_so_thang +=doanh_so_thang
-            monthly_summary_doc.san_luong += sum(qty)
-            monthly_summary_doc.sku = (float(total_uom) / (monthly_summary_doc.so_don_hang))if monthly_summary_doc.so_don_hang > 0 else 0
-        else:
-            # total_uom += len(uom)
-            monthly_summary_doc.so_don_hang += 1
-            monthly_summary_doc.doanh_so_thang += doanh_so_thang
+        if len(existing_cus_so) <1:
             monthly_summary_doc.so_kh_dat_hang += 1
-            monthly_summary_doc.san_luong += sum(qty)
-            monthly_summary_doc.sku = (float(total_uom) / (monthly_summary_doc.so_don_hang)) if monthly_summary_doc.so_don_hang > 0 else 0
+        total_uom += monthly_summary_doc.sku*monthly_summary_doc.so_don_hang + len(uom)
+        monthly_summary_doc.so_don_hang += 1
+        monthly_summary_doc.doanh_so_thang += doanh_so_thang
+        monthly_summary_doc.san_luong += sum(qty)
+        monthly_summary_doc.sku = (float(total_uom) / float(monthly_summary_doc.so_don_hang)) if monthly_summary_doc.so_don_hang > 0 else 0
         monthly_summary_doc.save(ignore_permissions=True)
     else:
         monthly_summary_doc = frappe.get_doc({
@@ -134,20 +129,15 @@ def handle_delete_kpi_each_salePerson(sales_info,doc,month,year,start_date,end_d
         monthly_summary_doc = frappe.get_doc("DMS Summary KPI Monthly", existing_monthly_summary)
         grand_totals = doc.grand_total*sales_info.allocated_percentage/100
         cus_name = doc.customer
-        existing_cus = existing_customer(customer_name=cus_name, start_date=start_date, end_date=end_date, current_user=doc.owner)
+        existing_cus = existing_customer(customer_name=cus_name, start_date=start_date, end_date=end_date, current_user=doc.owner,doc=doc)
 
+        monthly_summary_doc.so_don_hang = minus_not_nega(monthly_summary_doc.so_don_hang)
+        monthly_summary_doc.doanh_so_thang = minus_not_nega(monthly_summary_doc.doanh_so_thang, grand_totals)
+        monthly_summary_doc.san_luong = minus_not_nega(monthly_summary_doc.san_luong, sum(qty))
+        monthly_summary_doc.sku = (float(total_uom) / (monthly_summary_doc.so_don_hang)) if monthly_summary_doc.so_don_hang > 0 else 0
         if len(existing_cus) == 0:
             total_uom =  monthly_summary_doc.sku*monthly_summary_doc.so_don_hang -  len(uom)
-            monthly_summary_doc.so_don_hang = minus_not_nega(monthly_summary_doc.so_don_hang)
-            monthly_summary_doc.doanh_so_thang = minus_not_nega(monthly_summary_doc.doanh_so_thang, grand_totals)
-            monthly_summary_doc.san_luong = minus_not_nega(monthly_summary_doc.san_luong, sum(qty))
             monthly_summary_doc.so_kh_dat_hang = minus_not_nega(monthly_summary_doc.so_kh_dat_hang)
-            monthly_summary_doc.sku = (float(total_uom) / (monthly_summary_doc.so_don_hang)) if monthly_summary_doc.so_don_hang > 0 else 0
-        else:
-            monthly_summary_doc.so_don_hang = minus_not_nega(monthly_summary_doc.so_don_hang)
-            monthly_summary_doc.doanh_so_thang = minus_not_nega(monthly_summary_doc.doanh_so_thang,grand_totals)
-            monthly_summary_doc.san_luong = minus_not_nega(monthly_summary_doc.san_luong, sum(qty))
-            monthly_summary_doc.sku = (float(total_uom) / (monthly_summary_doc.so_don_hang)) if monthly_summary_doc.so_don_hang > 0 else 0
         monthly_summary_doc.save(ignore_permissions=True)
     else:
         return
