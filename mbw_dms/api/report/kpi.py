@@ -448,7 +448,8 @@ def kpi_so_sku_detail(**kwargs):
         for i in sales_orders:
             so = frappe.get_doc("Sales Order", i.name)
             items = so.items
-            uom = {item.get("uom") for item in items}
+            from mbw_dms.api.common import qty_not_pricing_rule
+            qty,uom = qty_not_pricing_rule(items)
             total_sku = len(uom)
             i["totak_sku"] = total_sku
 
