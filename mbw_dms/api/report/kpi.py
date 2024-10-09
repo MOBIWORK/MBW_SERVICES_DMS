@@ -390,7 +390,8 @@ def kpi_so_qty_detail(**kwargs):
         """
 
         sql_query = f"""
-            SELECT so.name, so.customer, UNIX_TIMESTAMP(so.creation) as collec_date
+            SELECT 
+                so.name, so.customer, UNIX_TIMESTAMP(so.creation) as collec_date
             FROM `tabSales Order` so
             LEFT JOIN `tabCustomer` cus ON so.customer = cus.name
             LEFT JOIN `tabSales Team` st ON so.name = st.parent
@@ -403,7 +404,12 @@ def kpi_so_qty_detail(**kwargs):
 
         totals = frappe.db.sql(sql_total, as_dict=True)
         
-        
+        from mbw_dms.api.common import qty_not_pricing_rule
+        for i in all_sales_orders:
+            so = frappe.get_doc("Sales Order", i.name).as_dict()
+            items = so.get("items")
+            qty,uom = qty_not_pricing_rule(items)
+            i["total_qty"] = sum(qty)
 
         return gen_response(200, "Thành công", {
             "data": all_sales_orders,
