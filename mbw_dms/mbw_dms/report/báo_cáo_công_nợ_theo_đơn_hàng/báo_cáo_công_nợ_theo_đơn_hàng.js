@@ -106,18 +106,29 @@ frappe.query_reports["Báo cáo công nợ theo đơn hàng"] = {
 // Print report function
 function print_report(report, print_settings) {
     let columns = report.get_visible_columns ? report.get_visible_columns() : [];
+    columns = columns.filter(column => column.fieldname !== 'name' && column.fieldname !== 'posting_date');
+    console.log(columns)
     let filtered_data = report.data.filter(row => {
         return arraydDeliveryNote.includes(row.name);
+    }).map(({ name, posting_date, trangthaithanhtoan, ...rest })  => {
+        if (trangthaithanhtoan === "Chưa thanh toán") {
+            trangthaithanhtoan = "CTT";
+        }
+        if (trangthaithanhtoan === "Đã thanh toán") {
+            trangthaithanhtoan = "ĐTT";
+        }
+        return { trangthaithanhtoan, ...rest };
     });
+
     filtered_data.push({
         against_sales_order: null,
         customer_name: "Tổng tiền",
         name: null,
-        "posting_date": null,
         "select_item": null,
         "total": Total,
         "trangthaithanhtoan": null
     })
+
     frappe.render_grid({
         title: "Báo cáo công nợ theo đơn hàng",
         subtitle: "Báo cáo công nợ theo đơn hàng",
