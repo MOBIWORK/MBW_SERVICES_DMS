@@ -233,7 +233,7 @@ export default function ReportSales() {
   useEffect(() => {
     (async () => {
       const rsData = await AxiosService.get(
-        "/api/method/mbw_dms.api.report.so_report.si_report",
+        "/api/method/mbw_dms.api.report.so_report.so_report",
         {
           params: {
             page_size: PAGE_SIZE,
