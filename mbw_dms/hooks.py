@@ -262,22 +262,24 @@ doc_events = {
     },
     "Sales Invoice": {
         "on_submit": "mbw_dms.controllers.dms_sales_invoice.update_kpi_monthly",
-        #hủy đơn bán/trả
+        # Hủy đơn bán/trả
         "on_cancel": "mbw_dms.controllers.dms_sales_invoice.update_kpi_monthly_on_cancel",
-        # "on_cancel": "mbw_dms.controllers.dms_sales_invoice.update_kpi_monthly_on_delete"
+        "after_delete": "mbw_dms.controllers.dms_sales_invoice.update_kpi_monthly_after_delete"
     },
     "Sales Order": {
         "on_submit": "mbw_dms.controllers.dms_sales_order.update_kpi_monthly",
-        #hủy/xóa đơn hàng
+        # Hủy/xóa đơn hàng
         "on_cancel": "mbw_dms.controllers.dms_sales_order.update_kpi_monthly_on_cancel",
-        "after_delete": "mbw_dms.controllers.dms_sales_order.update_kpi_monthly_after_delete"
+        "after_delete": "mbw_dms.controllers.dms_sales_order.update_kpi_monthly_after_delete",
+        "before_save": "mbw_dms.controllers.dms_sales_order.cal_qdtt"
     },
     "DMS Router": {
         "before_insert": "mbw_dms.controllers.dms_router.check_duplicate_import"
     },
-    "DMS Checkin" : {
-        #hủy, xóa checkin => cập nhật lại kpi: trực tiếp trong doctype
+    "Stock Entry": {
+        "before_save": "mbw_dms.controllers.stock_entry.cal_qdtt"
     }
+    
 
 }
 

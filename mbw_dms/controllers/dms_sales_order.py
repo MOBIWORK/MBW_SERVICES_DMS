@@ -126,17 +126,36 @@ def update_kpi_monthly_on_cancel(doc, method):
         return
 
 
-
-def update_kpi_monthly_after_delete(doc,method):
+def update_kpi_monthly_after_delete(doc, method):
     # chỉ thay đổi kpi nếu xóa bản ghi đã submit
     if doc.docstatus == 1:
-        update_kpi_monthly_on_cancel(doc,method)
+        update_kpi_monthly_on_cancel(doc, method)
 
-        
-def minus_not_nega(num,sub=1):
+
+def minus_not_nega(num, sub=1):
     num = int(num)
     if num <= 0 :
         return 0
     else:
         return num - sub
-    
+
+
+# Thêm quy đổi theo thùng
+def cal_qdtt(doc, method):
+    items = doc.items
+    for item in items:
+        item_detail = frappe.get_doc("Item", item.item_code)
+        quy_cach_thung = 0
+        item_uom = None
+        for uom in item_detail.uoms:
+            if uom.custom_don_vi_dong_goi == 1:
+                quy_cach_thung = uom.conversion_factor
+                item_uom = uom.uom
+        
+        if item_uom: 
+            if item.uom == item_uom:
+                item.custom_quy_doi_theo_thung = item.qty
+            else:
+                item.custom_quy_doi_theo_thung = float(item.qty / quy_cach_thung)
+        else:
+            continue
