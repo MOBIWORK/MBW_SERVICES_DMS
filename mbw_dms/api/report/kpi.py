@@ -276,7 +276,7 @@ def kpi_so_amount_detail(**kwargs):
         """
 
         sql_query = f"""
-            SELECT so.name, so.customer, UNIX_TIMESTAMP(so.creation) as collec_date, so.grand_total
+            SELECT DISTINCT so.name, so.customer, UNIX_TIMESTAMP(so.creation) as collec_date, so.grand_total,st.allocated_percentage
             FROM `tabSales Order` so
             LEFT JOIN `tabCustomer` cus ON so.customer = cus.name
             LEFT JOIN `tabSales Team` st ON so.name = st.parent
@@ -286,7 +286,8 @@ def kpi_so_amount_detail(**kwargs):
             OFFSET {start_idx}
         """
         all_sales_orders = frappe.db.sql(sql_query, as_dict=True)
-
+        for sale_order in all_sales_orders:
+            sale_order["grand_total"] = float(sale_order["grand_total"])*float(sale_order["allocated_percentage"])/100
         totals = frappe.db.sql(sql_total, as_dict=True)
         
         
