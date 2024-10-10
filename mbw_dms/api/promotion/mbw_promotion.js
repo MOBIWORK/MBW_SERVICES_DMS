@@ -16,6 +16,8 @@ frappe.ui.form.on('Sales Order', {
 // Tính toán khuyến mãi
 function processAfterApplyPromotion(ptype_value, result, frm)
 {
+    
+    
     // KM tặng sản phẩm
     if (ptype_value == "TIEN_SP" || ptype_value == "SP_SL_SP" || ptype_value == "SP_ST_SP") {
         add_items_to_form(result, frm);
@@ -46,6 +48,7 @@ function add_items_to_form(items, frm) {
     });
     frm.refresh_field('items');
 }
+
 
 
 function apply_discount_amount_to_items(result, frm) {

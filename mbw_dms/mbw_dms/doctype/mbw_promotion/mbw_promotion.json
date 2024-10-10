@@ -22,8 +22,7 @@
   "column_break_sazj",
   "gtype_name",
   "gtype_value",
-  "gpromotion_name",
-  "gpromotion_value",
+  "gpromotion",
   "gpromotion_prioritize",
   "section_break_tt20",
   "customers",
@@ -100,16 +99,6 @@
    "fieldname": "gtype_value",
    "fieldtype": "Data",
    "label": "Group type value"
-  },
-  {
-   "fieldname": "gpromotion_name",
-   "fieldtype": "Data",
-   "label": "Group promotion name"
-  },
-  {
-   "fieldname": "gpromotion_value",
-   "fieldtype": "Data",
-   "label": "Group promotion value"
   },
   {
    "fieldname": "gpromotion_prioritize",
@@ -195,11 +184,17 @@
   {
    "fieldname": "section_break_3nkk",
    "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "gpromotion",
+   "fieldtype": "Link",
+   "label": "Group promotion",
+   "options": "Group promotion"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-09-27 09:57:18.895445",
+ "modified": "2024-10-04 14:40:46.254736",
  "modified_by": "Administrator",
  "module": "MBW DMS",
  "name": "MBW Promotion",
