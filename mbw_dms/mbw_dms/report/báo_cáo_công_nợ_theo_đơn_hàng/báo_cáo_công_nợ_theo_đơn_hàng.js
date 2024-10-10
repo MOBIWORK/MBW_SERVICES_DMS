@@ -62,6 +62,9 @@ frappe.query_reports["Báo cáo công nợ theo đơn hàng"] = {
 
     "after_datatable_render": function(report) {
         $('.dt-row-filter').remove();
+        checkedCheckboxes={};
+        Total = 0
+        arraydDeliveryNote = [];
         // Function to enable checkboxes
         function enableCheckboxes() {
             $(".datatable").find('input[type="checkbox"]').each(function() {
@@ -79,7 +82,6 @@ frappe.query_reports["Báo cáo công nợ theo đơn hàng"] = {
                     // Handle the click event
                     if ($(this).is(':checked')) {
                         checkedCheckboxes[$(this).val()] = true;
-                        let ma_dh = $(this).closest('.dt-row').find("a[data-doctype='Delivery Note']").html()
                         arraydDeliveryNote.push($(this).closest('.dt-row').find("a[data-doctype='Delivery Note']").html());
                         Total += report.datamanager.data[$(this).val()].total
 
@@ -107,7 +109,16 @@ frappe.query_reports["Báo cáo công nợ theo đơn hàng"] = {
 function print_report(report, print_settings) {
     let columns = report.get_visible_columns ? report.get_visible_columns() : [];
     columns = columns.filter(column => column.fieldname !== 'name' && column.fieldname !== 'posting_date');
-    console.log(columns)
+    let columns_date = {
+        "label": "Ngày đặt hàng",
+        "fieldname": "transaction_date",
+        "fieldtype": "Date",
+        "width": 200,
+        "id": "transaction_date",
+        "name": "Ngày đặt hàng",
+        "editable": false,
+        }
+    columns.splice(3, 0, columns_date);
     let filtered_data = report.data.filter(row => {
         return arraydDeliveryNote.includes(row.name);
     }).map(({ name, posting_date, trangthaithanhtoan, ...rest })  => {
