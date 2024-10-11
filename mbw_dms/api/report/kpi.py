@@ -433,17 +433,36 @@ def kpi_so_sku_detail(**kwargs):
         page_size =  int(kwargs.get("page_size", 20))
         page_number = int(kwargs.get("page_number")) if kwargs.get("page_number") and int(kwargs.get("page_number")) >=1 else 1
         employee = kwargs.get("employee")
-        user_id = None
+        sale_p = None
         if employee:
-            user_id = frappe.get_value("Employee", {"name": employee}, "user_id")
-        filters["sales_person"] = user_id
-        filters["docstatus"] =1
-
+            sale_p = frappe.get_value("Sales Person", {"employee": employee}, "name")
+        
+        #mới
+        where = "WHERE so.docstatus = 1 "
+        if not sale_p == None:
+            print("sale_p",sale_p)
+            where = f"{where} AND st.sales_person = '{sale_p}'"
         if from_date and to_date:
-            filters["creation"] = ["between", [from_date, to_date]]
+            where = f"{where} AND so.creation BETWEEN '{from_date}' AND '{to_date}'"
+        query = f"""
+            SELECT so.name, so.customer, UNIX_TIMESTAMP(so.creation) as create_date
+            FROM `tabSales Order` so
+            LEFT JOIN `tabSales Team` st
+            ON so.name = st.parent
+            {where}
+            LIMIT {page_size}
+            OFFSET {page_size*(page_number-1)}
+        """
 
-        sales_orders = frappe.get_all("Sales Order", filters=filters, fields=["name", "customer", "UNIX_TIMESTAMP(creation) as create_date"], start=page_size*(page_number-1), page_length=page_size)
-        totals = frappe.db.count("Sales Order", filters=filters)
+        count_qr = f"""
+            SELECT COUNT(so.name) as total
+            FROM `tabSales Order` so
+            LEFT JOIN `tabSales Team` st
+            ON so.name = st.parent
+            {where}
+        """
+        sales_orders = frappe.db.sql(query,as_dict=1)
+        sales_orders_total = frappe.db.sql(count_qr,as_dict=1)
 
         for i in sales_orders:
             so = frappe.get_doc("Sales Order", i.name)
@@ -455,7 +474,7 @@ def kpi_so_sku_detail(**kwargs):
 
         return gen_response(200, "Thành công", {
             "data": sales_orders,
-            "totals": totals,
+            "totals": sales_orders_total[0]["total"],
             "page_size": page_size,
             "page_number": page_number
         })
