@@ -392,7 +392,7 @@ def kpi_so_qty_detail(**kwargs):
 
         sql_query = f"""
             SELECT 
-                so.name, so.customer, UNIX_TIMESTAMP(so.creation) as collec_date
+                so.name, so.customer, UNIX_TIMESTAMP(so.creation) as create_date
             FROM `tabSales Order` so
             LEFT JOIN `tabCustomer` cus ON so.customer = cus.name
             LEFT JOIN `tabSales Team` st ON so.name = st.parent
