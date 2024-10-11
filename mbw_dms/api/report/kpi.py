@@ -436,7 +436,7 @@ def kpi_so_sku_detail(**kwargs):
         user_id = None
         if employee:
             user_id = frappe.get_value("Employee", {"name": employee}, "user_id")
-        filters["owner"] = user_id
+        filters["sales_person"] = user_id
         filters["docstatus"] =1
 
         if from_date and to_date:
