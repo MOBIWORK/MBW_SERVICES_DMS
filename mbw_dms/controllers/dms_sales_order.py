@@ -70,10 +70,10 @@ def update_kpi_monthly_after_delete(doc,method):
         
 def minus_not_nega(num,sub=1):
     num = int(num)
-    if num <= 0 :
+    if num <= 1 :
         return 0
     else:
-        return num - sub
+        return num - sub if num >= sub else 0
     
 def handle_update_kpi_each_salePerson(sales_info,doc,month,year,start_date,end_date):
     user_name = frappe.get_value("Sales Person", {"name": sales_info.sales_person}, "employee")
