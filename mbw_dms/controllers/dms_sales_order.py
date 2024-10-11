@@ -93,7 +93,7 @@ def handle_update_kpi_each_salePerson(sales_info,doc,month,year,start_date,end_d
         monthly_summary_doc = frappe.get_doc("DMS Summary KPI Monthly", existing_monthly_summary)
         if len(existing_cus_so) <1:
             monthly_summary_doc.so_kh_dat_hang += 1
-        total_uom += monthly_summary_doc.sku*monthly_summary_doc.so_don_hang + len(uom)
+        total_uom += float(monthly_summary_doc.sku)*float(monthly_summary_doc.so_don_hang) + float(len(uom))
         monthly_summary_doc.so_don_hang += 1
         monthly_summary_doc.doanh_so_thang += doanh_so_thang
         monthly_summary_doc.san_luong += sum(qty)
