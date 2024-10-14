@@ -1,7 +1,7 @@
 // Copyright (c) 2024, MBW and contributors
 // For license information, please see license.txt
 
-frappe.query_reports["Báo cáo sổ kho theo nhóm sản phẩm"] = {
+frappe.query_reports["Báo cáo xuất nhập tồn theo sản phẩm"] = {
 	filters: [
 		{
 			fieldname: "company",
