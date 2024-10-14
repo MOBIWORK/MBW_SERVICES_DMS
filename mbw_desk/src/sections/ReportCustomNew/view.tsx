@@ -57,7 +57,7 @@ export default function ReportCustomNew() {
       title: "Tên khách hàng",
       dataIndex: "customer_name",
       key: "customer_name",
-      render: (_, record: any) => <div>{record.customer_name}</div>,
+      render: (_, record: any) => <div className="truncate hover:whitespace-normal">{record.customer_name}</div>,
     },
     {
       title: "Loại khách hàng",
