@@ -159,3 +159,11 @@ def cal_qdtt(doc, method):
                 item.custom_quy_doi_theo_thung = float(item.qty / quy_cach_thung)
         else:
             continue
+
+def create_mbw_itemscore_sales_order(doc, method):
+
+    if doc.status == "Completed":
+        from mbw_dms.mbw_dms.doctype.mbw_itemscore_saleorder.mbw_itemscore_saleorder import \
+            create_ItemScore_SaleOrder
+
+        create_ItemScore_SaleOrder(doc)

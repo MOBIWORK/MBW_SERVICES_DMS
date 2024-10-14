@@ -271,7 +271,8 @@ doc_events = {
         # Hủy/xóa đơn hàng
         "on_cancel": "mbw_dms.controllers.dms_sales_order.update_kpi_monthly_on_cancel",
         "after_delete": "mbw_dms.controllers.dms_sales_order.update_kpi_monthly_after_delete",
-        "before_save": "mbw_dms.controllers.dms_sales_order.cal_qdtt"
+        "before_save": "mbw_dms.controllers.dms_sales_order.cal_qdtt",
+        "on_change": "mbw_dms.controllers.dms_sales_order.create_mbw_itemscore_sales_order",
     },
     "DMS Router": {
         "before_insert": "mbw_dms.controllers.dms_router.check_duplicate_import"
