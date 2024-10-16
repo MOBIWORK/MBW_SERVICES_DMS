@@ -1,9 +1,7 @@
 frappe.ui.form.on('Address', {
 	refresh: function(frm) {
-		console.log(frm.doc)
 		if (frm.doc.address_location.length !== 0) {
 			let location = JSON.parse(frm.doc.address_location);
-			console.log(location)
 			let lng = location.long
 			let lat = location.lat
 			try {
