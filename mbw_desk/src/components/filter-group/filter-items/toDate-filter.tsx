@@ -9,6 +9,7 @@ import { useDispatch } from "react-redux";
 import { setEndDate } from "@/redux/slices/date-slice";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { mediaQuery } from "@/constant";
+import { useEffect } from "react";
 
 const endOfMonth: any = dayjs().endOf("month");
 
@@ -39,6 +40,10 @@ export const ToDateFilter = () => {
   const matchMedia = useMediaQuery(`${mediaQuery}`);
 
   const value = dayjs(endDate * 1000);
+
+  useEffect(() => {
+    dispath(setEndDate(Date.parse(endOfMonth["$d"]) / 1000));
+  }, []);
 
   return (
     <Col className={`min-w-[130px] ${matchMedia ? "w-full" : " w-[20%]"}`}>
