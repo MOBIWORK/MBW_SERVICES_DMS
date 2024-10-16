@@ -915,11 +915,14 @@ def get_report(filters={}):
 
         report = frappe.db.sql(query, as_dict=1)
         for row in report:
-            row['customers'] = json.loads(row['customers']) if row['customers'] else []
-            total_time =0 
-            for customer in  row['customers']:
-                total_time +=float( customer.get("time_check"))
+            try:
+                row["customers"] = json.loads(row["customers"]) if row.get("customers") else []
+            except (json.JSONDecodeError, TypeError) as e:
+                row["customers"] = []
+
+            total_time = sum(float(customer.get("time_check", 0)) for customer in row['customers'])
             row["total_time"] = total_time
+            
         if not is_excel:
             query2 = f"""
                 SELECT COUNT(*) AS number_of_groups FROM (SELECT 
