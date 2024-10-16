@@ -265,8 +265,8 @@ export default function ReportVisitorSummary_KPI() {
           params: {
             page_size: PAGE_SIZE,
             page_number: page,
-            startDate,
-            endDate,
+            from_date:startDate,
+            to_date:endDate,
             employee,
             sales_team,
             territory,
