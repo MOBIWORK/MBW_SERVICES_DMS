@@ -132,7 +132,7 @@ def handle_delete_kpi_each_salePerson(sales_info,doc,month,year,start_date,end_d
         monthly_summary_doc = frappe.get_doc("DMS Summary KPI Monthly", existing_monthly_summary)
         grand_totals = doc.grand_total*sales_info.allocated_percentage/100
         cus_name = doc.customer
-        existing_cus = existing_customer(customer_name=cus_name, start_date=start_date, end_date=end_date, current_user=doc.owner,doc=doc)
+        existing_cus = existing_customer(customer_name=cus_name, start_date=start_date, end_date=end_date, sale_person=sales_info.sales_person,doc=doc)
 
         monthly_summary_doc.so_don_hang = minus_not_nega(monthly_summary_doc.so_don_hang)
         monthly_summary_doc.doanh_so_thang = minus_not_nega(monthly_summary_doc.doanh_so_thang, grand_totals)
