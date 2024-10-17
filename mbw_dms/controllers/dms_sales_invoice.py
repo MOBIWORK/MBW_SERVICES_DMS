@@ -48,7 +48,8 @@ def handle_update_kpi_monthly(sales_info,doc,month,year):
         "DMS Summary KPI Monthly", {"thang": month, "nam": year, "nhan_vien_ban_hang": user_name}, "name"
     )
     grand_totals = doc.grand_total*sales_info.allocated_percentage/100
-
+    if doc.is_return:
+        grand_totals = -grand_totals
     if existing_monthly_summary:
         monthly_summary_doc = frappe.get_doc("DMS Summary KPI Monthly", existing_monthly_summary)
         monthly_summary_doc.doanh_thu_thang += grand_totals
@@ -71,6 +72,8 @@ def handle_update_kpi_monthly_on_cancel(sales_info,doc,month,year):
     # Kiểm tra đã tồn tại bản ghi KPI của tháng này chưa
     existing_monthly_summary = frappe.get_value("DMS Summary KPI Monthly", {"thang": month, "nam": year, "nhan_vien_ban_hang": user_name}, "name")
     grand_totals = doc.grand_total*sales_info.allocated_percentage/100
+    if doc.is_return:
+        grand_totals = -grand_totals
     if existing_monthly_summary:
         monthly_summary_doc = frappe.get_doc("DMS Summary KPI Monthly", existing_monthly_summary)
         monthly_summary_doc.doanh_thu_thang -= grand_totals
