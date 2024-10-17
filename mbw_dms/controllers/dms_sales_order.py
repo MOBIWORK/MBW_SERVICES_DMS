@@ -2,16 +2,19 @@ import frappe
 from frappe.utils import nowdate
 import calendar
 from mbw_dms.api.common import qty_not_pricing_rule
-
+import pydash
 # Kiểm tra xem khách đã đặt hàng trước đó chưa
-def existing_customer(customer_name, start_date, end_date, current_user,doc):
+def existing_customer(customer_name, start_date, end_date, sale_person,doc):
+    
     existing_cus = frappe.get_all(
         "Sales Order",
         filters={
                 "docstatus": 1,
                 "creation": ["between", [start_date, end_date]], 
-                "customer_name": customer_name, 
-                "owner": current_user},
+                "customer_name": customer_name,
+                "sales_person": sale_person,
+                "created_by" :1
+                },
         fields=["name"]
     )
     import pydash
@@ -86,7 +89,7 @@ def handle_update_kpi_each_salePerson(sales_info,doc,month,year,start_date,end_d
     existing_monthly_summary = frappe.get_value("DMS Summary KPI Monthly", {"thang": month, "nam": year, "nhan_vien_ban_hang": user_name}, "name")
     grand_totals = doc.grand_total
     cus_name = doc.customer
-    existing_cus_so = existing_customer(customer_name=cus_name, start_date=start_date, end_date=end_date, current_user=doc.owner,doc=doc)
+    existing_cus_so = existing_customer(customer_name=cus_name, start_date=start_date, end_date=end_date, sale_person=sales_info.sales_person,doc=doc)
     doanh_so_thang =grand_totals*sales_info.allocated_percentage/100
     total_uom = 0
     if existing_monthly_summary:
