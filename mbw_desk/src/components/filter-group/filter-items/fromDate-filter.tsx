@@ -9,8 +9,10 @@ import { useDispatch } from "react-redux";
 import { setStartDate } from "@/redux/slices/date-slice";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { mediaQuery } from "@/constant";
+import { useEffect } from "react";
 
 const startOfMonth: any = dayjs().startOf("month");
+
 
 export const FromDateFilter = () => {
   const dispath = useDispatch();
@@ -38,6 +40,10 @@ export const FromDateFilter = () => {
       ? current && current.isAfter(dayjs.unix(endDate), "day")
       : false;
   };
+
+  useEffect(() => {
+    dispath(setStartDate(Date.parse(startOfMonth["$d"]) / 1000));
+  }, []);
 
   return (
     <Col className={`min-w-[130px]  ${matchMedia ? "w-full" : " w-[20%]"}`}>
