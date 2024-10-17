@@ -29,7 +29,7 @@ def update_kpi_monthly_on_cancel(doc, method):
             sales_person.append(i)
     
     for sale in sales_person:
-        update_kpi_monthly_after_delete(sale,doc,month,year)
+        handle_update_kpi_monthly_on_cancel(sale,doc,month,year)
     
     
 
