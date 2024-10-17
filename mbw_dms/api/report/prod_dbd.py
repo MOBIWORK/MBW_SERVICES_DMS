@@ -1,8 +1,7 @@
 import frappe
-from mbw_dms.api.common import gen_response, exception_handle
+from mbw_dms.api.common import gen_response, exception_handle, get_value_child_doctype
 from collections import defaultdict
 from mbw_dms.api.validators import validate_filter_timestamp
-
 
 
 @frappe.whitelist(methods="GET")
@@ -28,13 +27,14 @@ def report_prod_dbd(**res):
         #     filters.append(f"nhan_vien_ban_hang = '{brand}'")
         # if supplier:
         #     filters.append(f"nhan_vien_ban_hang = '{supplier}'")
+        
         if sales_team:
             filters=f"{filters} AND nhom_ban_hang = '{sales_team}'"
         
         filters = f"{filters} AND so.transaction_date BETWEEN '{from_date}' AND '{to_date}'"
         
         sql_query = f""" 
-            SELECT so.total_qty, so.transaction_date, st.sales_person , kpi.san_luong as kpi_san_luong , sp.parent_sales_person
+            SELECT so.total_qty, so.transaction_date, st.sales_person , kpi.san_luong as kpi_san_luong , sp.parent_sales_person, so.name
             FROM `tabSales Order` so
             LEFT JOIN `tabSales Team` st ON so.name = st.parent 
             LEFT JOIN `tabSales Person` sp ON st.sales_person = sp.sales_person_name
@@ -51,12 +51,23 @@ def report_prod_dbd(**res):
         # Tạo một dictionary để lưu trữ các nhóm theo parent_sales_person và sales_person
         grouped_data = defaultdict(lambda: defaultdict(lambda: defaultdict(float)))
 
+        # print("=====sale_orders", sale_orders)
         # Lặp qua từng phần tử và kiểm tra sales_person khác None
+        arr_filed = ['qty', 'stock_uom', 'uom', 'conversion_factor', "amount"]
         for item in sale_orders:
             if item['sales_person'] is not None:
                 # Lấy ngày từ transaction_date
                 date_value = item['transaction_date'].day
-                
+                products = get_value_child_doctype("Sales Order", item["name"], "items" ,arr_filed )
+
+                for prod in products:
+                    # neu la spkm thi tru di sl spkm
+                    if(prod["amount"] == 0):
+                        item["total_qty"] -= prod["qty"]
+                        continue
+                    #chuyen doi so luong ve so luong cua dvt quy chuan
+                    if(prod["stock_uom"] != prod["uom"]):
+                        item["total_qty"] =  item["total_qty"] - prod["qty"] + (prod["qty"] / prod["conversion_factor"])
                 # Gộp vào danh sách dựa trên parent_sales_person và sales_person
                 parent = item['parent_sales_person']
                 sales_person = item['sales_person']

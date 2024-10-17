@@ -559,7 +559,7 @@ def analisis_kpi(**res):
             if obj_nv.get(n["employee"]) is None:
                 obj_nv[n["employee"]] = []
 
-            list_customers =frappe.get_doc('DMS Router',{"is_deleted": 0,"name": n["id"]}).get("customers")
+            list_customers =frappe.get_doc('DMS Router',{"name": n["id"]}).get("customers")
 
             for c in list_customers:
                 if c.get("customer_code") not in obj_nv[n["employee"]]:
@@ -644,7 +644,7 @@ def analisis_kpi(**res):
                             if obj_emp[emp[0]["employee"]]["customer"].get(i["customer_code"]) is None:
                                 obj_emp[emp[0]["employee"]]["customer"][i["customer_code"]] = 1
 
-        print("=================data", data)
+       
        
         for i in data:
             i["children"] = frappe.parse_json(i["children"])
