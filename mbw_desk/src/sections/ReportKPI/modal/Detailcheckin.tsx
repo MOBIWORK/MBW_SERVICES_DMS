@@ -72,7 +72,7 @@ export default function Detailcheckin({ employee, month, year }: any) {
       title: "Khoảng cách",
       dataIndex: "checkin_khoangcach",
       key: "checkin_khoangcach",
-      render: (value: any) => <div>{parseFloat((value / 60).toFixed(2))}</div>,
+      render: (value: any) => <div>{value}</div>,
     },
   ];
   const [page, setPage] = useState<number>(1);
