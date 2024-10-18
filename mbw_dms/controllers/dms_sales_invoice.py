@@ -48,13 +48,6 @@ def handle_update_kpi_monthly(sales_info,doc,month,year):
     total_uomSI =len(uom)
     # check connect SO
     SOs  = getConnection(doc,"Sales Order")
-    # itemsSO = []
-    # 1 SI connect 1 SO
-    # total_uom = 0
-    # for SO in SOs:
-    #     docSO = frappe.get_doc("Sales Order",SO)
-    #     items = docSO.get("items")        
-    #     itemsSO.append(items)
     # Kiểm tra đã tồn tại bản ghi KPI của tháng này chưa
     existing_monthly_summary = frappe.get_value(
         "DMS Summary KPI Monthly", {"thang": month, "nam": year, "nhan_vien_ban_hang": user_name}, "name"
