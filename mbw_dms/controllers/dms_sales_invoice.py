@@ -1,5 +1,6 @@
 import frappe
 from frappe.utils import nowdate
+from mbw_dms.api.common import getConnection,qty_not_pricing_rule,minus_not_nega
 
 def update_kpi_monthly(doc, method):
     if doc.is_return == 0:
@@ -42,17 +43,34 @@ def update_kpi_monthly_after_delete(doc,method):
 def handle_update_kpi_monthly(sales_info,doc,month,year):
     user_name = frappe.get_value("Sales Person", {"name": sales_info.sales_person}, "employee")
     sales_team = frappe.get_value("DMS KPI", {'nhan_vien_ban_hang': user_name}, "nhom_ban_hang")
-
+    itemsSI = doc.get("items")
+    qty,uom = qty_not_pricing_rule(itemsSI)
+    total_uomSI =len(uom)
+    # check connect SO
+    SOs  = getConnection(doc,"Sales Order")
+    # itemsSO = []
+    # 1 SI connect 1 SO
+    # total_uom = 0
+    # for SO in SOs:
+    #     docSO = frappe.get_doc("Sales Order",SO)
+    #     items = docSO.get("items")        
+    #     itemsSO.append(items)
     # Kiểm tra đã tồn tại bản ghi KPI của tháng này chưa
     existing_monthly_summary = frappe.get_value(
         "DMS Summary KPI Monthly", {"thang": month, "nam": year, "nhan_vien_ban_hang": user_name}, "name"
     )
+
     grand_totals = doc.grand_total*sales_info.allocated_percentage/100
-    if doc.is_return:
+    if doc.is_return and grand_totals > 0:
         grand_totals = -grand_totals
     if existing_monthly_summary:
         monthly_summary_doc = frappe.get_doc("DMS Summary KPI Monthly", existing_monthly_summary)
         monthly_summary_doc.doanh_thu_thang += grand_totals
+        # xu ly don lienket So
+        if len(SOs) >0 and doc.is_return:
+            total_uom = float(monthly_summary_doc.sku)*float(monthly_summary_doc.so_don_hang) - total_uomSI
+            monthly_summary_doc.san_luong = minus_not_nega(monthly_summary_doc.san_luong, sum(qty))
+            monthly_summary_doc.sku = (float(total_uom) / float(monthly_summary_doc.so_don_hang)) if monthly_summary_doc.so_don_hang > 0 else 0
         monthly_summary_doc.save(ignore_permissions=True)
     else:
         monthly_summary_doc = frappe.get_doc({
@@ -68,15 +86,23 @@ def handle_update_kpi_monthly(sales_info,doc,month,year):
 
 def handle_update_kpi_monthly_on_cancel(sales_info,doc,month,year):
     user_name = frappe.get_value("Sales Person", {"name": sales_info.sales_person}, "employee")
-
+    itemsSI = doc.get("items")
+    qty,uom = qty_not_pricing_rule(itemsSI)
+    total_uomSI =len(uom)
+    # check connect SO
+    SOs  = getConnection(doc,"Sales Order")
     # Kiểm tra đã tồn tại bản ghi KPI của tháng này chưa
     existing_monthly_summary = frappe.get_value("DMS Summary KPI Monthly", {"thang": month, "nam": year, "nhan_vien_ban_hang": user_name}, "name")
     grand_totals = doc.grand_total*sales_info.allocated_percentage/100
-    if doc.is_return:
+    if doc.is_return and grand_totals > 0:
         grand_totals = -grand_totals
     if existing_monthly_summary:
         monthly_summary_doc = frappe.get_doc("DMS Summary KPI Monthly", existing_monthly_summary)
         monthly_summary_doc.doanh_thu_thang -= grand_totals
+        if len(SOs) >0 and doc.is_return:
+            total_uom = float(monthly_summary_doc.sku)*float(monthly_summary_doc.so_don_hang) + total_uomSI
+            monthly_summary_doc.san_luong += sum(qty)
+            monthly_summary_doc.sku = (float(total_uom) / float(monthly_summary_doc.so_don_hang)) if monthly_summary_doc.so_don_hang > 0 else 0
         monthly_summary_doc.save(ignore_permissions=True)
     else:
         return

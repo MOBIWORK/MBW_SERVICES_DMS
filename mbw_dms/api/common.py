@@ -961,3 +961,26 @@ def get_list_search(
     except Exception as e: 
         print("error search====",e)
         return []
+    
+
+def getConnection(doc,link_doctype):
+    """
+        doc: doctype //example doc= frappe.get_doc("Sales Invoice",name)
+        link: [table_fieldname, link_fieldname],//example: link =["items","sales_order"], table_fieldname thuong la items//update: da de mac dinh
+        link_doctype: name doctype check connect from doc //example="Sales Order"
+    """
+    names = []
+    # table_fieldname, link_fieldname = link
+    link_fieldname = link_doctype.casefold().replace(" ","_")
+    for row in doc.get("items") or []:
+        value = row.get(link_fieldname)
+        if value and value not in names:
+            names.append(value)
+    return names
+
+def minus_not_nega(num,sub=1):
+    num = int(num)
+    if num <= 1 :
+        return 0
+    else:
+        return num - sub if num >= sub else 0
