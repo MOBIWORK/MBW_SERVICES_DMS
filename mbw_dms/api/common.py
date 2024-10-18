@@ -30,9 +30,8 @@ def get_base_url() :
 # sp khuyến mãi 1:có apply pricing role,2: giá = 0 
 def qty_not_pricing_rule(items):
     total_item_price = pydash.filter_(items, lambda x: x.amount > 0)
-    total_qty = {item.get("qty") for item in total_item_price}
+    total_qty = [item.get("qty") for item in total_item_price]
     total_uom = {item.get("uom") for item in total_item_price}
-    print("total=============================",total_qty,total_uom)
     return total_qty,total_uom
 
 
