@@ -20,8 +20,8 @@ def update_kpi_monthly(doc, method):
 
 def update_kpi_monthly_on_cancel(doc, method):
     # Lấy ngày tháng để truy xuất dữ liệu
-    month = int(nowdate().split('-')[1])
-    year = int(nowdate().split('-')[0])
+    month = int(doc.get("nam"))
+    year = int(doc.get("thang"))
     
     # Lấy id của nhân viên
     sales_person = []

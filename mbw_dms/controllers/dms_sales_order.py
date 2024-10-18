@@ -47,8 +47,8 @@ def update_kpi_monthly(doc, method):
 
 def update_kpi_monthly_on_cancel(doc, method):
     # Lấy ngày tháng để truy xuất dữ liệu
-    month = int(nowdate().split('-')[1])
-    year = int(nowdate().split('-')[0])
+    month = int(doc.get("nam"))
+    year = int(doc.get("thang"))
     start_date_str = f"{year:04d}-{month:02d}-01"
     last_day_of_month = calendar.monthrange(year, month)[1]
     end_date_str = f"{year:04d}-{month:02d}-{last_day_of_month:02d}"
