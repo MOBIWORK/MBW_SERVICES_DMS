@@ -144,7 +144,7 @@ export default function SupervisoryStaffRealTime() {
      renderDataEmployee(JSON.parse(JSON.stringify(arrEmployee)));
 
      handleSummaryOnlienAndOffline(realtimeEmployee)
-     initDataSummaryOver();
+     
 
   },[options])
 
@@ -879,6 +879,7 @@ export default function SupervisoryStaffRealTime() {
                   options={options}
                   onClickPopup={handlerShowHistory}
                   status={handleUpdateData}
+                  info={initDataSummaryOver}
                 />
               )}
             </div>
