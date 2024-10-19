@@ -249,8 +249,7 @@ doc_events = {
     },
     "Customer": {
         "on_update": "mbw_dms.controllers.dms_customer.update_location",
-        "before_insert": "mbw_dms.controllers.dms_customer.create_customer_code",
-        "after_insert": "mbw_dms.controllers.dms_customer.update_kpi_monthly",
+        "after_insert": ["mbw_dms.controllers.dms_customer.update_kpi_monthly", "mbw_dms.controllers.dms_customer.create_customer_code"],
         "after_delete": "mbw_dms.controllers.dms_customer.update_kpi_monthly_after_delete"
     },
     "Sales Person": {
@@ -263,13 +262,13 @@ doc_events = {
     },
     "Sales Invoice": {
         "on_submit": "mbw_dms.controllers.dms_sales_invoice.update_kpi_monthly",
-        #hủy đơn bán/trả
+        # Hủy đơn bán/trả
         "on_cancel": "mbw_dms.controllers.dms_sales_invoice.update_kpi_monthly_on_cancel",
-        # "on_cancel": "mbw_dms.controllers.dms_sales_invoice.update_kpi_monthly_on_delete"
+        "on_delete": "mbw_dms.controllers.dms_sales_invoice.update_kpi_monthly_on_delete"
     },
     "Sales Order": {
         "on_submit": "mbw_dms.controllers.dms_sales_order.update_kpi_monthly",
-        #hủy/xóa đơn hàng
+        # Hủy/xóa đơn hàng
         "on_cancel": "mbw_dms.controllers.dms_sales_order.update_kpi_monthly_on_cancel",
         "after_delete": "mbw_dms.controllers.dms_sales_order.update_kpi_monthly_after_delete",
         "before_save": "mbw_dms.controllers.dms_sales_order.calculate_so"
@@ -277,10 +276,6 @@ doc_events = {
     "DMS Router": {
         "before_insert": "mbw_dms.controllers.dms_router.check_duplicate_import"
     },
-    "DMS Checkin" : {
-        #hủy, xóa checkin => cập nhật lại kpi: trực tiếp trong doctype
-    }
-
 }
 
 on_session_creation = [
