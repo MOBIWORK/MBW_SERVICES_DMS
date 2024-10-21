@@ -23,8 +23,8 @@ def existing_customer(customer_name, start_date, end_date, sale_person,doc):
 
 def update_kpi_monthly(doc, method):
     # Lấy ngày tháng để truy xuất dữ liệu
-    month = int(nowdate().split('-')[1])
-    year = int(nowdate().split('-')[0])
+    month = doc.transaction_date.month
+    year = doc.transaction_date.year
     start_date_str = f"{year:04d}-{month:02d}-01"
     last_day_of_month = calendar.monthrange(year, month)[1]
     end_date_str = f"{year:04d}-{month:02d}-{last_day_of_month:02d}"
@@ -47,8 +47,8 @@ def update_kpi_monthly(doc, method):
 
 def update_kpi_monthly_on_cancel(doc, method):
     # Lấy ngày tháng để truy xuất dữ liệu
-    month = int(doc.get("nam"))
-    year = int(doc.get("thang"))
+    month = doc.transaction_date.month
+    year = doc.transaction_date.year
     start_date_str = f"{year:04d}-{month:02d}-01"
     last_day_of_month = calendar.monthrange(year, month)[1]
     end_date_str = f"{year:04d}-{month:02d}-{last_day_of_month:02d}"

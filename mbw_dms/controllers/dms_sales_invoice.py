@@ -5,8 +5,7 @@ from mbw_dms.api.common import getConnection,qty_not_pricing_rule,minus_not_nega
 def update_kpi_monthly(doc, method):
     if doc.is_return == 0:
         # Lấy ngày tháng để truy xuất dữ liệu
-        month = int(nowdate().split('-')[1])
-        year = int(nowdate().split('-')[0])
+        month,year = renderMonthYear(doc)
 
         # Lấy id của nhân viên
         sales_person = []
@@ -18,11 +17,23 @@ def update_kpi_monthly(doc, method):
             handle_update_kpi_monthly(sale,doc,month,year)
 
 
+def renderMonthYear(doc):
+    SO_connect = getConnection(doc=doc,link_doctype="Sales Order")
+    if len(SO_connect) > 0 :
+        SO_doc = frappe.get_doc('Sales Order',SO_connect[0]).as_dict()
+
+        creation_time = SO_doc.creation
+    else:
+        creation_time = doc.creation
+    thang = creation_time.month
+    nam = creation_time.year
+    return thang,nam
+
 def update_kpi_monthly_on_cancel(doc, method):
     # Lấy ngày tháng để truy xuất dữ liệu
-    month = int(doc.get("nam"))
-    year = int(doc.get("thang"))
-    
+    # month = int(doc.get("nam"))
+    # year = int(doc.get("thang"))
+    month,year = renderMonthYear(doc)
     # Lấy id của nhân viên
     sales_person = []
     for i in doc.sales_team:
