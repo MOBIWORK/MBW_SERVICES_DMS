@@ -2,6 +2,23 @@ import frappe
 from frappe.utils import nowdate
 from mbw_dms.api.common import getConnection,qty_not_pricing_rule,minus_not_nega
 
+from datetime import datetime
+
+def renderMonthYear(doc):
+    SO_connect = getConnection(doc=doc,link_doctype="Sales Order")
+    if len(SO_connect) > 0 :
+        SO_doc = frappe.get_doc('Sales Order',SO_connect[0]).as_dict()
+
+        creation_time = SO_doc.creation
+    else:
+        creation_time = doc.creation
+    if isinstance(creation_time,str):
+        creation_time = datetime.strptime(creation_time,"%Y-%m-%d %H:%M:%-S")
+    thang = creation_time.month
+    nam = creation_time.year
+    return thang,nam
+
+
 def update_kpi_monthly(doc, method):
     if doc.is_return == 0:
         # Lấy ngày tháng để truy xuất dữ liệu
@@ -17,17 +34,6 @@ def update_kpi_monthly(doc, method):
             handle_update_kpi_monthly(sale,doc,month,year)
 
 
-def renderMonthYear(doc):
-    SO_connect = getConnection(doc=doc,link_doctype="Sales Order")
-    if len(SO_connect) > 0 :
-        SO_doc = frappe.get_doc('Sales Order',SO_connect[0]).as_dict()
-
-        creation_time = SO_doc.creation
-    else:
-        creation_time = doc.creation
-    thang = creation_time.month
-    nam = creation_time.year
-    return thang,nam
 
 def update_kpi_monthly_on_cancel(doc, method):
     # Lấy ngày tháng để truy xuất dữ liệu
