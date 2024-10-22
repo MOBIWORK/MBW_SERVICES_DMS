@@ -1287,11 +1287,12 @@ function CustomerMapView() {
           borderTopLeftRadius: "20px",
         }}
       >
-        <div className="ekmapplf_map-ananyltic">
+        {/* tạm ẩn đợi phát triển */}
+        {/* <div className="ekmapplf_map-ananyltic">
           <Button onClick={handleOnClick} type="primary">
             Đánh giá độ phủ
           </Button>
-        </div>
+        </div> */}
         <div
           id="ekmapplf_tracking_legend"
           className="ekmapplf_tracking-map-legend"
