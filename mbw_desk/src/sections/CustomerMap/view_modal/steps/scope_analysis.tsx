@@ -1,14 +1,16 @@
 import React, { useState, useEffect, useRef } from "react";
-import { AxiosService } from "../../../services/server";
+import { AxiosService } from "../../../../services/server";
 import { Col, Row } from "antd";
 import { RadiusUpleftOutlined } from "@ant-design/icons";
-import { ARR_REGIONSTR } from "./AppConst";
+import { ARR_REGIONSTR } from "../data/AppConst";
 import { Flex, Segmented, Form, Select } from "antd";
-import maplibregl from "maplibre-gl";
+import maplibregl, { MapOptions } from "maplibre-gl";
 import classNames from 'classnames';
 import "./style.css";
+import { arr_region } from "../data";
 declare var ekmapplf: any;
 export function ScopeAnalysis({ form, onResult, scopeResult,api }) {
+  const map = useRef<any>(null);
   const [selectedOption, setSelectedOption] = useState("hanhchinh");
   const handleOptionChange = (value) => {
     setSelectedOption(value); // Cập nhật giá trị hiện tại của Segmented khi thay đổi lựa chọn
@@ -21,17 +23,8 @@ export function ScopeAnalysis({ form, onResult, scopeResult,api }) {
   const [arrHuyen, setArrHuyen] = useState([]);
   const [selectHuyen, setSelectHuyen] = useState([]);
   const [bbox, setBbox] = useState("");
-  const arr_region = JSON.parse(ARR_REGIONSTR).map((item) => {
-    return {
-      ...item,
-      value: item.code,
-      label: item.name,
-    };
-  });
-  arr_region.unshift({
-    value: 'all',
-    label: 'Cả nước',
-  });
+
+
   const filterOption = (
     input: string,
     option?: { label: string; value: string }
@@ -97,6 +90,8 @@ export function ScopeAnalysis({ form, onResult, scopeResult,api }) {
     form.setFieldValue('tinh', "")
     setBbox('')
   }, [selectRegion])
+
+
   const onChangeKhuvuc = (value) => {
     setArrTinh([]);
     setSelectTinh([])
@@ -181,28 +176,7 @@ export function ScopeAnalysis({ form, onResult, scopeResult,api }) {
     form.setFieldValue('tinh', value)
     onResultChange(JSON.stringify(bbox1))
   };
-  // const onChangeHuyen = (value) => {
-  //   if(selectHuyen.length > value.length){
 
-  //   }else{
-  //     for(let i = 0; i < arrHuyen.length; i ++){
-  //       const filteredHuyen = arrHuyen[i].options.filter((item) => item.value === value[value.length - 1]);
-  //       if (filteredHuyen.length > 0) {
-  //         if (filteredHuyen[0].bbox != null) {
-  //           let bboxSplit = filteredHuyen[0].bbox.split(",");
-  //           let bbox = [
-  //             [Number(bboxSplit[0]), Number(bboxSplit[1])],
-  //             [Number(bboxSplit[2]), Number(bboxSplit[3])],
-  //           ];
-  //           map.current.fitBounds(bbox);
-  //         }
-  //       }
-  //     }
-   
-  //   }
-  //   setSelectHuyen(value);
-  //   onResultChange()
-  // };
   const onResultChange = (bbox1) => {
       let obj = {
         region: selectRegion,
@@ -212,12 +186,8 @@ export function ScopeAnalysis({ form, onResult, scopeResult,api }) {
       }
       onResult(obj)
   }
-  // const getConfigApi = async () => {
-  //   let res = await AxiosService.get(
-  //     "/api/method/mbw_dms.api.vgm.map_customer.get_config_api"
-  //   );
-  //   setApiKey(res.result);
-  // };
+
+
   const getarrTinh= async (result,arrTinh) => {
     setSelectTinh(result)
     let filteredItems = [];
@@ -256,13 +226,14 @@ export function ScopeAnalysis({ form, onResult, scopeResult,api }) {
     setArrHuyen(modifiedHuyen)
     
   };
-  const map = useRef(null);
+
+
   const renderMap = () => {
     map.current = new maplibregl.Map({
       container: "map_cf",
       center: [108.485, 16.449],
       zoom: 5.43,
-    });
+    } as MapOptions);
     let mapOSMBright = new ekmapplf.VectorBaseMap("OSM:Bright", api).addTo(
       map.current
     );
@@ -345,14 +316,15 @@ export function ScopeAnalysis({ form, onResult, scopeResult,api }) {
     //   await getConfigMap();
     // });
   };
-  // useEffect(() => {
-  //   getConfigApi();
-  // }, []);
+
+
   useEffect(() => {
     if (api != null && api != "") {
       renderMap();
     }
   }, [api]);
+
+
   useEffect(() => {
     //if (mapConfig != null && mapConfig.length > 0) addLayerIndustry();
   }, [mapConfig]);
@@ -367,102 +339,7 @@ export function ScopeAnalysis({ form, onResult, scopeResult,api }) {
     <>
       <Row>
         <Col span={12} style={{ paddingRight: "10px" }}>
-          {/* <div
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              paddingTop: "10px",
-            }}
-          >
-            <div
-              className={classNames('flex', 'flex-col', 'justify-between', 'h-full', 'me-3','ele_control_area', {
-                // Chỉ thêm class ele_control_area khi controlAdministrative khác 'hanhchinh'
-                'ele_control_area_active': controlAdministrative === 'vungbao', // Thêm class ele_control_area_active khi controlAdministrative là 'hanhchinh'
-              })}
-              onClick={() => onChangeControlArea("vungbao")}
-            >
-              <div className="flex-grow flex flex-col items-center justify-center ele_control_area_icon">
-                <RadiusUpleftOutlined style={{ fontSize: "2rem" }} />
-              </div>
-              <div className="text-gray-700 text-center ele_control_area_text">
-                a. Theo vùng bao nhỏ nhất
-              </div>
-            </div>
-            <div
-      className={classNames('flex', 'flex-col', 'justify-between', 'h-full', 'me-3','ele_control_area', {
-        // Chỉ thêm class ele_control_area khi controlAdministrative khác 'hanhchinh'
-        'ele_control_area_active': controlAdministrative === 'hanhchinh', // Thêm class ele_control_area_active khi controlAdministrative là 'hanhchinh'
-      })}
-      onClick={() => onChangeControlArea('hanhchinh')} // Khi click vào, set controlAdministrative thành 'hanhchinh'
-    >
-              <div className="flex-grow flex flex-col items-center justify-center ele_control_area_icon">
-                <svg
-                  className="custom-svg"
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 576 512"
-                >
-                  <path d="M302.8 312C334.9 271.9 408 174.6 408 120C408 53.7 354.3 0 288 0S168 53.7 168 120c0 54.6 73.1 151.9 105.2 192c7.7 9.6 22 9.6 29.6 0zM416 503l144.9-58c9.1-3.6 15.1-12.5 15.1-22.3V152c0-17-17.1-28.6-32.9-22.3l-116 46.4c-.5 1.2-1 2.5-1.5 3.7c-2.9 6.8-6.1 13.7-9.6 20.6V503zM15.1 187.3C6 191 0 199.8 0 209.6V480.4c0 17 17.1 28.6 32.9 22.3L160 451.8V200.4c-3.5-6.9-6.7-13.8-9.6-20.6c-5.6-13.2-10.4-27.4-12.8-41.5l-122.6 49zM384 255c-20.5 31.3-42.3 59.6-56.2 77c-20.5 25.6-59.1 25.6-79.6 0c-13.9-17.4-35.7-45.7-56.2-77V449.4l192 54.9V255z" />
-                </svg>
-              </div>
-              <div className="text-gray-700 text-center ele_control_area_text">
-                b. Theo đơn vị hành chính
-              </div>
-            </div>
-          </div> */}
-
-          {/* <Flex
-            gap="small"
-            align="flex-start"
-            vertical
-            style={{ width: "100%" }}
-          >
-            <Segmented
-              style={{ width: "100%", justifyContent: "space-between" }}
-              onChange={handleOptionChange}
-              options={[
-                {
-                  label: (
-                    <div style={{ padding: 4 }}>
-                      <RadiusUpleftOutlined style={{ fontSize: "2rem" }} />
-                      <div>Theo vùng bao nhỏ nhất </div>
-                    </div>
-                  ),
-                  value: "user1",
-                },
-                {
-                  label: (
-                    <div style={{ padding: 4 }}>
-                      <svg
-                        className="custom-svg"
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 576 512"
-                      >
-                        <path d="M302.8 312C334.9 271.9 408 174.6 408 120C408 53.7 354.3 0 288 0S168 53.7 168 120c0 54.6 73.1 151.9 105.2 192c7.7 9.6 22 9.6 29.6 0zM416 503l144.9-58c9.1-3.6 15.1-12.5 15.1-22.3V152c0-17-17.1-28.6-32.9-22.3l-116 46.4c-.5 1.2-1 2.5-1.5 3.7c-2.9 6.8-6.1 13.7-9.6 20.6V503zM15.1 187.3C6 191 0 199.8 0 209.6V480.4c0 17 17.1 28.6 32.9 22.3L160 451.8V200.4c-3.5-6.9-6.7-13.8-9.6-20.6c-5.6-13.2-10.4-27.4-12.8-41.5l-122.6 49zM384 255c-20.5 31.3-42.3 59.6-56.2 77c-20.5 25.6-59.1 25.6-79.6 0c-13.9-17.4-35.7-45.7-56.2-77V449.4l192 54.9V255z" />
-                      </svg>
-                      <div>Theo đơn vị hành chính</div>
-                    </div>
-                  ),
-                  value: "user2",
-                },
-              ]}
-            />
-          </Flex> */}
-          {controlAdministrative === "vungbao" && (
-            <div style={{ lineHeight: "20px", textAlign: "left", height:'320px' }}>
-              <p
-                style={{
-                  padding: "10px",
-                  fontWeight: "bold",
-                  color: "#0a743e",
-                }}
-              >
-                Xác định khu vực đánh giá theo vùng bao đóng đại lý phân phối
-              </p>
-            </div>
-          )}
-
-          {controlAdministrative === "hanhchinh" && (
-            <div style={{ lineHeight: "20px", textAlign: "left" ,paddingLeft:'10px',height:'320px'}}>
+         <div style={{ lineHeight: "20px", textAlign: "left" ,paddingLeft:'10px',height:'320px'}}>
               <p
                 style={{
                   padding: "10px 0px 10px 0px",
@@ -510,7 +387,6 @@ export function ScopeAnalysis({ form, onResult, scopeResult,api }) {
                 </Form.Item> */}
              
             </div>
-          )}
         </Col>
         <Col span={12}>
           <div id="map_cf" style={{ width: "100%", height: "100%" }}></div>

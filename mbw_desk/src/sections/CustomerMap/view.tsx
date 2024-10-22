@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { HeaderPage } from "../../components";
 import { ModalView } from "./view_modal/view_modal";
-import maplibregl from "maplibre-gl";
+import maplibregl, { MapOptions } from "maplibre-gl";
 import { AxiosService } from "../../services/server";
 import "./map_customer.css";
 import MapConfigTree from "./mapConfig_tree";
@@ -18,8 +18,33 @@ import { TableCustom } from "../../components";
 import * as ExcelJS from "exceljs";
 import * as XLSX from "xlsx";
 import * as FileSaver from "file-saver";
-import { ARR_REGIONSTR } from "./view_modal/AppConst";
+import {svgPerson } from "@/components/icon";
 declare var ekmapplf: any;
+
+const columns = [
+  {
+    title: "Tên đơn vị hành chính",
+    dataIndex: "name",
+    key: "name",
+  },
+  {
+    title: "Tỷ lệ độ phủ",
+    dataIndex: "ratio_coverage",
+    key: "ratio_coverage",
+    render: (ratio:any) => `${ratio}%`, // Format hiển thị phần trăm
+  },
+  {
+    title: "Số lượng khách hàng",
+    dataIndex: "sum_user",
+    key: "sum_user",
+  },
+  {
+    title: "Số lượng ước tính",
+    dataIndex: "sum_vgm",
+    key: "sum_vgm",
+  },
+ 
+];
 
 interface TypeCustomer {
   name: string;
@@ -34,136 +59,20 @@ interface TypeCustomer {
 }
 
 function CustomerMapView() {
-  const items: MenuProps["items"] = [
-    {
-      label: "Đánh giá độ phủ đại lý",
-      key: "1",
-      onClick: () => {
-        setOpen(true);
-      },
-    },
-  ];
   const [open, setOpen] = useState(false);
   const [isHeatMap, setIsHeatMap] = useState(false);
   const [arrLayer, setArrLayer] = useState([]);
   const [isStatusMapCustomer, setIsStatusMapCustomer] = useState(false);
 
-  const columns = [
-    {
-      title: "Tên đơn vị hành chính",
-      dataIndex: "name",
-      key: "name",
-    },
-    {
-      title: "Tỷ lệ độ phủ",
-      dataIndex: "ratio_coverage",
-      key: "ratio_coverage",
-      render: (ratio) => `${ratio}%`, // Format hiển thị phần trăm
-    },
-    {
-      title: "Số lượng khách hàng",
-      dataIndex: "sum_user",
-      key: "sum_user",
-    },
-    {
-      title: "Số lượng ước tính",
-      dataIndex: "sum_vgm",
-      key: "sum_vgm",
-    },
-    // số lượng khách hàng
-    // số lượng ước tính
-  ];
 
-  const handleCloseModal = () => {
-    setOpen(false);
-  };
-  const handleClose = () => {
-    setMapHeight("80vh");
-    setVisibleTable(false);
-  };
-  const exportExcel = async () => {
-    const workbook = new ExcelJS.Workbook();
-    const sheet = workbook.addWorksheet("Sheet1");
 
-    sheet.properties.defaultColWidth = 20;
-    sheet.getColumn("A").width = 30;
-    sheet.mergeCells("A2:J2");
-    sheet.getCell("A2").value = "Bảng đánh giá độ phủ";
-    sheet.getCell("A2").style = {
-      font: { bold: true, name: "Times New Roman", size: 12 },
-    };
-    sheet.getCell("A2").alignment = { vertical: "middle", horizontal: "left" };
-    let rowHeader = sheet.getRow(4);
-    let rowHeader_Next = sheet.getRow(5);
-    // Thêm dữ liệu cột
-    let fieldsMerge = [
-      { title: "Tên đơn vị hành chính", field: "name" },
-      { title: "Tỷ lệ độ phủ", field: "ratio_coverage" },
-      { title: "Số lượng khách hàng", field: "sum_user" },
-      { title: "Số lượng ước tính", field: "sum_vgm" },
-    ];
-    for (let i = 0; i < fieldsMerge.length; i++) {
-      let cellStart = rowHeader.getCell(i + 1);
-      let cellEnd = rowHeader_Next.getCell(i + 1);
-      sheet.mergeCells(`${cellStart._address}:${cellEnd._address}`);
-      rowHeader.getCell(i + 1).style = {
-        font: { bold: true, name: "Times New Roman", size: 12, italic: true },
-      };
-      rowHeader.getCell(i + 1).alignment = {
-        vertical: "middle",
-        horizontal: "center",
-      };
-      rowHeader.getCell(i + 1).value = fieldsMerge[i].title;
-    }
-    for (let i = 0; i < dataSource.length; i++) {
-      let rowStart = 6;
-      let row = sheet.getRow(i + rowStart);
-      let cellStart = 1;
-      for (let j = 0; j < fieldsMerge.length; j++) {
-        row.getCell(cellStart).style = {
-          font: { name: "Times New Roman", size: 12, italic: true },
-        };
-        let valCell = "";
-        valCell = dataSource[i][fieldsMerge[j].field];
-        if (fieldsMerge[j].field == "ratio_coverage") {
-          valCell = valCell + "%";
-        }
-        row.getCell(cellStart).value = valCell;
-        cellStart += 1;
-      }
-    }
-    // sheet.columns = columns;
 
-    // // Thêm dữ liệu từ bảng vào file Excel
-    // resultProductCheck.forEach((row, index) => {
-    //   sheet.addRow({
-    //     product_code: row.product_code,
-    //     product_name: row.product_name,
-    //     product_count: row.product_count,
-    //   });
-    // });
-    // Lưu file Excel
-    const buffer = await workbook.xlsx.writeBuffer();
-    saveAsExcelFile(buffer, "report_");
-  };
-  const saveAsExcelFile = (buffer: any, fileName: string) => {
-    let EXCEL_TYPE =
-      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
-    let EXCEL_EXTENSION = ".xlsx";
-    const data: Blob = new Blob([buffer], {
-      type: EXCEL_TYPE,
-    });
-    FileSaver.saveAs(
-      data,
-      fileName + "_export_" + new Date().getTime() + EXCEL_EXTENSION
-    );
-  };
   const [objItemCoverage, setObjItemCoverage] = useState<any>(null);
   const [dataSource, setDataSource] = useState([]);
   const [mapHeight, setMapHeight] = useState("74.5vh");
   const [visibleTable, setVisibleTable] = useState(false);
 
-  const handleOk = async (data, configConverage, bbox) => {
+  const handleOk = async (data:any, configConverage:any, bbox:any) => {
     let bboxMap = JSON.parse(bbox);
     if (bboxMap && bboxMap.length > 0) {
       map.current.fitBounds(bboxMap);
@@ -216,62 +125,103 @@ function CustomerMapView() {
   const [apiKey, setApiKey] = useState("");
   const [mapConfig, setMapConfig] = useState<any[]>([]);
   const [lstCustomer, setLstCustomer] = useState<TypeCustomer[]>([]);
-  const map = useRef(null);
+  const map = useRef<any>(null);
   const [isOpen, setIsOpen] = useState(true);
-  useEffect(() => {
-    if (objItemCoverage != null) {
-      setMapConfig((prevConfig) => {
-        const updatedConfig = prevConfig.map((item) => {
-          if (item.id === "map_analytic_converage") {
-            const existingItemIndex = item.children.findIndex(
-              (child) => child.id === objItemCoverage.id
-            );
-            if (existingItemIndex !== -1) {
-              item.children[existingItemIndex] = {
-                ...objItemCoverage,
-                key: objItemCoverage.id,
-                title: objItemCoverage.label,
-              };
-            } else {
-              item.children.push({
-                ...objItemCoverage,
-                key: objItemCoverage.id,
-                title: objItemCoverage.label,
-              });
-            }
-          }
-          return item;
-        });
-        addLayerIndustry(updatedConfig);
-        return updatedConfig;
-      });
-    }
-  }, [objItemCoverage]);
 
   const toggleLegend = () => {
     setIsOpen(!isOpen);
   };
-
-  useEffect(() => {
-    localStorage.setItem("isStatusMapCustomer", JSON.stringify(true));
-    getConfigApi();
-  }, []);
-  useEffect(() => {
-    if (apiKey != null && apiKey != "") {
-      renderMap();
-    }
-  }, [apiKey]);
-
-  useEffect(() => {
-    renderMapForCustomer();
-  }, [lstCustomer]);
-
-  const getConfigApi = async () => {
-    let res = await AxiosService.get(
-      "/api/method/mbw_dms.api.vgm.map_customer.get_config_api"
-    );
-    setApiKey(res.result);
+  const handleCloseModal = () => {
+    setOpen(false);
   };
+  const handleClose = () => {
+    setMapHeight("80vh");
+    setVisibleTable(false);
+  };
+
+  // ===============handle Excel===============
+  const exportExcel = async () => {
+    const workbook = new ExcelJS.Workbook();
+    const sheet = workbook.addWorksheet("Sheet1");
+
+    sheet.properties.defaultColWidth = 20;
+    sheet.getColumn("A").width = 30;
+    sheet.mergeCells("A2:J2");
+    sheet.getCell("A2").value = "Bảng đánh giá độ phủ";
+    sheet.getCell("A2").style = {
+      font: { bold: true, name: "Times New Roman", size: 12 },
+    };
+    sheet.getCell("A2").alignment = { vertical: "middle", horizontal: "left" };
+    let rowHeader = sheet.getRow(4);
+    let rowHeader_Next = sheet.getRow(5);
+    // Thêm dữ liệu cột
+    let fieldsMerge = [
+      { title: "Tên đơn vị hành chính", field: "name" },
+      { title: "Tỷ lệ độ phủ", field: "ratio_coverage" },
+      { title: "Số lượng khách hàng", field: "sum_user" },
+      { title: "Số lượng ước tính", field: "sum_vgm" },
+    ];
+    for (let i = 0; i < fieldsMerge.length; i++) {
+      let cellStart:any = rowHeader.getCell(i + 1);
+      let cellEnd:any = rowHeader_Next.getCell(i + 1);
+      sheet.mergeCells(`${cellStart._address}:${cellEnd._address}`);
+      rowHeader.getCell(i + 1).style = {
+        font: { bold: true, name: "Times New Roman", size: 12, italic: true },
+      };
+      rowHeader.getCell(i + 1).alignment = {
+        vertical: "middle",
+        horizontal: "center",
+      };
+      rowHeader.getCell(i + 1).value = fieldsMerge[i].title;
+    }
+    for (let i = 0; i < dataSource.length; i++) {
+      let rowStart = 6;
+      let row = sheet.getRow(i + rowStart);
+      let cellStart = 1;
+      for (let j = 0; j < fieldsMerge.length; j++) {
+        row.getCell(cellStart).style = {
+          font: { name: "Times New Roman", size: 12, italic: true },
+        };
+        let valCell = "";
+        valCell = dataSource[i][fieldsMerge[j].field];
+        if (fieldsMerge[j].field == "ratio_coverage") {
+          valCell = valCell + "%";
+        }
+        row.getCell(cellStart).value = valCell;
+        cellStart += 1;
+      }
+    }
+    // sheet.columns = columns;
+
+    // // Thêm dữ liệu từ bảng vào file Excel
+    // resultProductCheck.forEach((row, index) => {
+    //   sheet.addRow({
+    //     product_code: row.product_code,
+    //     product_name: row.product_name,
+    //     product_count: row.product_count,
+    //   });
+    // });
+    // Lưu file Excel
+    const buffer = await workbook.xlsx.writeBuffer();
+    saveAsExcelFile(buffer, "report_");
+  };
+
+
+  const saveAsExcelFile = (buffer: any, fileName: string) => {
+    let EXCEL_TYPE =
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
+    let EXCEL_EXTENSION = ".xlsx";
+    const data: Blob = new Blob([buffer], {
+      type: EXCEL_TYPE,
+    });
+    FileSaver.saveAs(
+      data,
+      fileName + "_export_" + new Date().getTime() + EXCEL_EXTENSION
+    );
+  };
+
+  // end handle Excel
+
   const getConfigMap = async () => {
     let res = await AxiosService.get(
       "/api/method/mbw_dms.api.vgm.map_customer.get_config_map"
@@ -301,12 +251,14 @@ function CustomerMapView() {
     // );
     // setLstCustomer(objRes.result);
   };
+
+//================ handle render map ==============================
   const renderMap = () => {
     map.current = new maplibregl.Map({
       container: "map",
       center: [108.485, 16.449],
       zoom: 5.43,
-    });
+    } as MapOptions);
     let mapOSMNight = new ekmapplf.VectorBaseMap("OSM:Night", apiKey).addTo(
       map.current
     );
@@ -338,17 +290,19 @@ function CustomerMapView() {
     });
     map.current.addControl(basemap, "bottom-left");
     var lstCustomerCache = JSON.parse(JSON.stringify(lstCustomer));
-    basemap.on("changeBaseLayer", async function (response) {
+    console.log("lstCustomerCache",lstCustomerCache);
+    
+    basemap.on("changeBaseLayer", async function (response:any) {
       // setMapConfig(mapConfigCache);
       setLstCustomer(lstCustomerCache);
       await new ekmapplf.VectorBaseMap(response.layer, apiKey).addTo(
         map.current
       );
-      let mapConfigCache = JSON.parse(localStorage.getItem("mapConfig"));
+      let mapConfigCache = JSON.parse(localStorage.getItem("mapConfig") as string);
       setTimeout(async () => {
         await addLayerIndustry(mapConfigCache);
         let arrSaveVisibleLayer = JSON.parse(
-          localStorage.getItem("arrSaveVisible")
+          localStorage.getItem("arrSaveVisible") as string
         );
         for (let i = 0; i < arrSaveVisibleLayer.length; i++) {
           if (map.current.getLayer(arrSaveVisibleLayer[i].id)) {
@@ -514,164 +468,174 @@ function CustomerMapView() {
     });
   };
 
+  // render bản đồ khách hàng
   const renderClusterForCustomer = async (dataGeo) => {
-    if (map.current.getSource("customer_clus")) {
-      map.current.getSource("customer_clus").setData(dataGeo);
-    } else {
-      if (!map.current.getImage("marker-customer")) {
-        const iconCustomer = await map.current.loadImage(
-          "https://files.ekgis.vn/sdks/tracking/assets/check-icon.png"
-        ); //https://sfademo.mbwcloud.com/files/check-icon.png
-        map.current.addImage("marker-customer", iconCustomer.data);
+
+    try {
+      if (map.current.getSource("customer_clus")) {
+        map.current.getSource("customer_clus").setData(dataGeo);
+      } else {
+        if (!map.current.getImage("marker-customer")) {
+          var marker= new Image();
+          marker.onload = function () {
+              if (!map.hasImage('marker'))
+                  map.addImage('marker', marker);
+          };
+          marker.src = 'data:image/svg+xml;charset=utf-8;base64,' + btoa(svgPerson);
+        }
+        map.current.addSource("customer_clus", {
+          type: "geojson",
+          data: dataGeo,
+          cluster: true,
+          clusterRadius: 12,
+        });
+        map.current.addLayer({
+          id: "customer_clus-cluster",
+          type: "circle",
+          source: "customer_clus",
+          maxzoom: 16,
+          filter: ["has", "point_count"],
+          paint: {
+            "circle-color": [
+              "step",
+              ["get", "point_count"],
+              "#90D667",
+              10,
+              "#EFCD41",
+              50,
+              "#FF0012",
+            ],
+            "circle-radius": 12,
+            "circle-stroke-color": [
+              "step",
+              ["get", "point_count"],
+              "#90D667",
+              10,
+              "#EFCD41",
+              50,
+              "#FF0012",
+            ],
+            "circle-stroke-opacity": 0.7,
+            "circle-stroke-width": 5,
+          },
+          layout: {
+            visibility: "visible",
+          },
+        });
+        map.current.addLayer({
+          id: "customer_clus-cluster-count",
+          type: "symbol",
+          source: "customer_clus",
+          filter: ["has", "point_count"],
+          layout: {
+            "text-field": "{point_count}",
+            "text-size": 12,
+          },
+        });
+        map.current.on("mouseenter", `customer_clus-uncluster`, () => {
+          map.current.getCanvas().style.cursor = "pointer";
+        });
+        map.current.on("mouseleave", `customer_clus-uncluster`, () => {
+          map.current.getCanvas().style.cursor = "";
+        });
+        map.current.on("click", `customer_clus-cluster`, async (e) => {
+          const features = map.current.queryRenderedFeatures(e.point, {
+            layers: [`customer_clus-cluster`],
+          });
+          const clusterId = features[0].properties.cluster_id;
+          const zoom = await map.current
+            .getSource(`customer_clus-cluster`)
+            .getClusterExpansionZoom(clusterId);
+          map.current.easeTo({
+            center: features[0].geometry.coordinates,
+            zoom: zoom + 0.01,
+          });
+        });
+        map.current.addLayer({
+          id: "customer_clus-uncluster",
+          type: "symbol",
+          source: "customer_clus",
+          filter: ["!", ["has", "point_count"]],
+          layout: {
+            "icon-image": "marker-customer",
+            "icon-allow-overlap": true,
+            "icon-size": {
+              stops: [
+                [15, 0.7],
+                [18, 1],
+              ],
+            },
+          },
+        });
+        map.current.addLayer({
+          id: "customer_clus-title",
+          type: "symbol",
+          source: "customer_clus",
+          filter: ["!", ["has", "point_count"]],
+          layout: {
+            "text-field": ["get", "customer_name"],
+            "text-font": ["Roboto Medium"],
+            "text-size": {
+              stops: [
+                [12, 10],
+                [13, 11],
+                [14, 11],
+                [15, 11.5],
+                [16, 12.5],
+                [20, 16],
+              ],
+            },
+            "text-anchor": "top",
+            "text-max-width": 9,
+            "text-offset": [0, 1.5],
+            "text-padding": 5,
+          },
+          paint: {
+            "text-color": "#ff5532",
+            "text-halo-color": "#ffffff",
+            "text-halo-width": 1,
+            "text-halo-blur": 0.5,
+          },
+        });
+        map.current.on("click", "customer_clus-uncluster", function (e) {
+          var coordinates = e.features[0].geometry.coordinates.slice();
+          var properties = e.features[0].properties;
+          var popupContent = `
+              <div class="customer-popup-info">
+                  <b>${properties.customer_name}</b>
+              </div>
+          `;
+          if (
+            properties.customer_primary_address != null &&
+            properties.customer_primary_address != ""
+          ) {
+            popupContent += `
+              <div class="customer-popup-info">
+                  <span class="customer-popup-icon customer-icon-marker customer-icon-default-color"></span>
+                  <span>${properties.customer_primary_address}</span>
+              </div>`;
+          }
+          if (
+            properties.customer_primary_contact != null &&
+            properties.customer_primary_contact != ""
+          ) {
+            popupContent += `
+              <div class="customer-popup-info">
+                  <span class="customer-popup-icon customer-icon-phone customer-icon-default-color"></span>
+                  <span>${properties.customer_primary_contact}</span>
+              </div>`;
+          }
+          new maplibregl.Popup()
+            .setLngLat(coordinates)
+            .setHTML(popupContent)
+            .addTo(map.current);
+        });
       }
-      map.current.addSource("customer_clus", {
-        type: "geojson",
-        data: dataGeo,
-        cluster: true,
-        clusterRadius: 12,
-      });
-      map.current.addLayer({
-        id: "customer_clus-cluster",
-        type: "circle",
-        source: "customer_clus",
-        maxzoom: 16,
-        filter: ["has", "point_count"],
-        paint: {
-          "circle-color": [
-            "step",
-            ["get", "point_count"],
-            "#90D667",
-            10,
-            "#EFCD41",
-            50,
-            "#FF0012",
-          ],
-          "circle-radius": 12,
-          "circle-stroke-color": [
-            "step",
-            ["get", "point_count"],
-            "#90D667",
-            10,
-            "#EFCD41",
-            50,
-            "#FF0012",
-          ],
-          "circle-stroke-opacity": 0.7,
-          "circle-stroke-width": 5,
-        },
-        layout: {
-          visibility: "visible",
-        },
-      });
-      map.current.addLayer({
-        id: "customer_clus-cluster-count",
-        type: "symbol",
-        source: "customer_clus",
-        filter: ["has", "point_count"],
-        layout: {
-          "text-field": "{point_count}",
-          "text-size": 12,
-        },
-      });
-      map.current.on("mouseenter", `customer_clus-uncluster`, () => {
-        map.current.getCanvas().style.cursor = "pointer";
-      });
-      map.current.on("mouseleave", `customer_clus-uncluster`, () => {
-        map.current.getCanvas().style.cursor = "";
-      });
-      map.current.on("click", `customer_clus-cluster`, async (e) => {
-        const features = map.current.queryRenderedFeatures(e.point, {
-          layers: [`customer_clus-cluster`],
-        });
-        const clusterId = features[0].properties.cluster_id;
-        const zoom = await map.current
-          .getSource(`customer_clus-cluster`)
-          .getClusterExpansionZoom(clusterId);
-        map.current.easeTo({
-          center: features[0].geometry.coordinates,
-          zoom: zoom + 0.01,
-        });
-      });
-      map.current.addLayer({
-        id: "customer_clus-uncluster",
-        type: "symbol",
-        source: "customer_clus",
-        filter: ["!", ["has", "point_count"]],
-        layout: {
-          "icon-image": "marker-customer",
-          "icon-allow-overlap": true,
-          "icon-size": {
-            stops: [
-              [15, 0.7],
-              [18, 1],
-            ],
-          },
-        },
-      });
-      map.current.addLayer({
-        id: "customer_clus-title",
-        type: "symbol",
-        source: "customer_clus",
-        filter: ["!", ["has", "point_count"]],
-        layout: {
-          "text-field": ["get", "customer_name"],
-          "text-font": ["Roboto Medium"],
-          "text-size": {
-            stops: [
-              [12, 10],
-              [13, 11],
-              [14, 11],
-              [15, 11.5],
-              [16, 12.5],
-              [20, 16],
-            ],
-          },
-          "text-anchor": "top",
-          "text-max-width": 9,
-          "text-offset": [0, 1.5],
-          "text-padding": 5,
-        },
-        paint: {
-          "text-color": "#ff5532",
-          "text-halo-color": "#ffffff",
-          "text-halo-width": 1,
-          "text-halo-blur": 0.5,
-        },
-      });
-      map.current.on("click", "customer_clus-uncluster", function (e) {
-        var coordinates = e.features[0].geometry.coordinates.slice();
-        var properties = e.features[0].properties;
-        var popupContent = `
-            <div class="customer-popup-info">
-                <b>${properties.customer_name}</b>
-            </div>
-        `;
-        if (
-          properties.customer_primary_address != null &&
-          properties.customer_primary_address != ""
-        ) {
-          popupContent += `
-            <div class="customer-popup-info">
-                <span class="customer-popup-icon customer-icon-marker customer-icon-default-color"></span>
-                <span>${properties.customer_primary_address}</span>
-            </div>`;
-        }
-        if (
-          properties.customer_primary_contact != null &&
-          properties.customer_primary_contact != ""
-        ) {
-          popupContent += `
-            <div class="customer-popup-info">
-                <span class="customer-popup-icon customer-icon-phone customer-icon-default-color"></span>
-                <span>${properties.customer_primary_contact}</span>
-            </div>`;
-        }
-        new maplibregl.Popup()
-          .setLngLat(coordinates)
-          .setHTML(popupContent)
-          .addTo(map.current);
-      });
+    } catch (error) {
+      console.log("error");
+      
     }
+    
   };
   const renderHeatMapForCustomer = async (dataGeo) => {
     if (map.current.getSource("customer_heat")) {
@@ -837,6 +801,8 @@ function CustomerMapView() {
         dataGeo.features.push(feature);
       }
     }
+    console.log("dataGeo",dataGeo);
+    
     if (map.current == null) return;
     if (!map.current.isStyleLoaded()) return;
     await renderClusterForCustomer(dataGeo);
@@ -1045,57 +1011,6 @@ function CustomerMapView() {
   };
   //moveLayers
   const handleMoveLayer = (layerIds: any, beforeIds: any, arr) => {
-   
-    // if (isParentId(layerIds)) {
-    //   let layerChildIds = []
-    //   let beforeChildIds = []
-    //   if(layerIds == "map_analytic_converage" ){
-    //     layerChildIds = getChildLayerIdsConverage(mapConfig , layerIds)
-    //     beforeChildIds = getChildLayerIds(mapConfig, [beforeIds]);
-    //   }else if(beforeIds == "map_analytic_converage"){
-    //     beforeChildIds = getChildLayerIdsConverage(mapConfig , beforeIds)
-    //     layerChildIds = getChildLayerIds(mapConfig, [layerIds]);
-    //   }
-    //   else if(beforeIds == "map_customer"){
-    //     beforeChildIds = ["customer_clus-cluster", "customer_clus-cluster-count" , "customer_clus-uncluster","customer_clus-title"]
-    //     layerChildIds = getChildLayerIds(mapConfig, [layerIds]);
-    //   }else{
-    //      layerChildIds = getChildLayerIds(mapConfig, [layerIds]);
-    //      beforeChildIds = getChildLayerIds(mapConfig, [beforeIds]);
-    //   }
-    //   console.log(beforeChildIds);
-    //   console.log(layerChildIds);
-    //   for(let i = 0; i < layerChildIds.length;i++  ){
-    //     if(beforeChildIds.length > 0){
-    //       map.current.moveLayer(layerChildIds[i], beforeChildIds[beforeChildIds.length - 1]);
-    //     }
-    //   }
-
-    // } else {
-    //   let beforeChildIds = []
-    //   let layerChildId = []
-    //   if(layerIds == "map_customer" ){
-    //     layerChildId = ["customer_clus-cluster", "customer_clus-cluster-count" , "customer_clus-uncluster","customer_clus-title"]
-    //     beforeChildIds = getChildLayerIds(mapConfig, [beforeIds]);
-    //     for(let i = 0; i < layerChildId.length;i++  ){
-    //       if(beforeChildIds.length > 0){
-    //         map.current.moveLayer(layerChildId[i], beforeChildIds[beforeChildIds.length - 1]);
-    //       }
-    //     }
-    //   }else if(beforeIds == 'map_customer'){
-    //     layerChildId = getChildLayerIds(mapConfig, [layerIds]);
-    //     beforeChildIds = ["customer_clus-cluster", "customer_clus-cluster-count" , "customer_clus-uncluster","customer_clus-title"]
-    //     for(let i = 0; i < layerChildId.length;i++ ){
-    //       if(beforeChildIds.length > 0){
-    //         map.current.moveLayer(layerChildId[i], beforeChildIds[beforeChildIds.length - 1]);
-    //       }
-    //     }
-
-    //    }
-    //   else{
-    //     map.current.moveLayer(layerIds.toString(), beforeIds.toString());
-    //   }
-    // }
     let arrMap = JSON.parse(JSON.stringify(arr))
     setArrLayer(arrMap)
     let mergedChildren = [];
@@ -1152,15 +1067,15 @@ function CustomerMapView() {
     // Di chuyển lớp layer
     map.current.moveLayer(layerId, beforeId);
 });
-    // console.log(mergedChildren);  
-    // console.log(map.current.getStyle().layers);
   };
+
   const changDataLayer = (data) => {
     if(data && data.length > 0) {
       handleMoveLayer("","",data)
     }
    
   }
+  
   const isParentId = (id: any) => {
     const item = mapConfig.find((item) => item.id === id);
     return item && item.children && item.children.length > 0;
@@ -1179,8 +1094,8 @@ function CustomerMapView() {
   };
 
   const renderLayerDistributorByAdministrative = async (
-    objResult,
-    objSetting
+    objResult:any,
+    objSetting:any
   ) => {
     let arrRangeColor = [
       "rgb(254, 217, 118)",
@@ -1229,7 +1144,7 @@ function CustomerMapView() {
       }
     }
     fill_color.push("#ded9f5");
-    let sourceAndLayer = {
+    let sourceAndLayer:any = {
       sources: {},
       layers: [],
     };
@@ -1304,6 +1219,62 @@ function CustomerMapView() {
   const handleOnClick = () => {
     setOpen(true);
   };
+
+  // =============================WillDidMount=====================================================================================
+
+  // lấy api từ server
+  useEffect(() => {
+    (async() => {
+      localStorage.setItem("isStatusMapCustomer", JSON.stringify(true));
+      let res = await AxiosService.get(
+        "/api/method/mbw_dms.api.vgm.map_customer.get_config_api"
+      );
+      setApiKey(res.result);
+    })()
+  }, []);
+
+  useEffect(() => {
+    if (objItemCoverage != null) {
+      setMapConfig((prevConfig) => {
+        const updatedConfig = prevConfig.map((item) => {
+          if (item.id === "map_analytic_converage") {
+            const existingItemIndex = item.children.findIndex(
+              (child) => child.id === objItemCoverage.id
+            );
+            if (existingItemIndex !== -1) {
+              item.children[existingItemIndex] = {
+                ...objItemCoverage,
+                key: objItemCoverage.id,
+                title: objItemCoverage.label,
+              };
+            } else {
+              item.children.push({
+                ...objItemCoverage,
+                key: objItemCoverage.id,
+                title: objItemCoverage.label,
+              });
+            }
+          }
+          return item;
+        });
+        addLayerIndustry(updatedConfig);
+        return updatedConfig;
+      });
+    }
+  }, [objItemCoverage]);  
+
+ 
+
+  useEffect(() => {
+    if (apiKey != null && apiKey != "") {
+      renderMap();
+    }
+  }, [apiKey]);
+
+  useEffect(() => {
+    renderMapForCustomer();
+  }, [lstCustomer]);
+//================RENDER================================================================================
   return (
     <>
       <HeaderPage title="Bản đồ khách hàng" />
