@@ -89,7 +89,7 @@
   },
   {
    "fieldname": "sku",
-   "fieldtype": "Int",
+   "fieldtype": "Float",
    "label": "SKU"
   },
   {
@@ -115,7 +115,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-10-03 10:00:47.519102",
+ "modified": "2024-10-11 09:53:44.094864",
  "modified_by": "Administrator",
  "module": "MBW DMS",
  "name": "DMS Summary KPI Monthly",

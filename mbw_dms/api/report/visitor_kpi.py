@@ -89,6 +89,7 @@ def report_visitor_kpi(**res):
             ) AS subquery
         """
         report = frappe.db.sql(sql, as_dict=True)
+        print("===============",report )
         count = frappe.db.sql(spl_count, as_dict=True)[0].get("total")
         for r in report:
             r['customers'] = json.loads(r['customers']) if r['customers'] else []

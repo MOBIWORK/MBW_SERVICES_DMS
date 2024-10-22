@@ -144,7 +144,7 @@ export default function SupervisoryStaffRealTime() {
      renderDataEmployee(JSON.parse(JSON.stringify(arrEmployee)));
 
      handleSummaryOnlienAndOffline(realtimeEmployee)
-     initDataSummaryOver();
+     
 
   },[options])
 
@@ -266,10 +266,8 @@ export default function SupervisoryStaffRealTime() {
       return Object.keys(emp.summary).length
     }
    }).sort((emp1:employeeMoveType,emp2:employeeMoveType) => {
-
-
     if (emp1.summary?.moves && emp2.summary?.moves) {
-      return emp1.summary?.moves.distance - emp2.summary?.moves.distance
+      return emp2.summary?.moves.distance - emp1.summary?.moves.distance
     }
     return 1
    } ).slice(0,5)
@@ -881,6 +879,7 @@ export default function SupervisoryStaffRealTime() {
                   options={options}
                   onClickPopup={handlerShowHistory}
                   status={handleUpdateData}
+                  info={initDataSummaryOver}
                 />
               )}
             </div>

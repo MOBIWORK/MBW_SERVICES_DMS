@@ -175,7 +175,9 @@ export default function ReportCheckin() {
         key: "customer_address",
         width: 200,
         render: (_, record) => (
-          <div className="truncate hover:whitespace-normal">{record.customer_address}</div>
+          <div className="truncate hover:whitespace-normal">
+            {record.customer_address}
+          </div>
         ),
       },
       {
@@ -235,7 +237,11 @@ export default function ReportCheckin() {
         title: "Địa chỉ checkin",
         dataIndex: "checkin_address",
         key: "checkin_address",
-        render: (_, record) => <div className="truncate hover:whitespace-normal">{record.checkin_address}</div>,
+        render: (_, record) => (
+          <div className="truncate hover:whitespace-normal">
+            {record.checkin_address}
+          </div>
+        ),
       },
       {
         title: "Khoảng cách",
@@ -314,8 +320,7 @@ export default function ReportCheckin() {
                     id: value,
                   });
                 }}
-                className="text-[#1877F2] text-sm font-medium- !text-left cursor-pointer underline"
-              >
+                className="text-[#1877F2] text-sm font-medium- !text-left cursor-pointer underline">
                 Xem ghi chú
               </div>
             ) : (
@@ -350,8 +355,8 @@ export default function ReportCheckin() {
           params: {
             page_size: PAGE_SIZE,
             page_number: page,
-            startDate,
-            endDate,
+            from_date: startDate,
+            to_date: endDate,
             employee,
             sales_team,
             territory,
@@ -399,15 +404,13 @@ export default function ReportCheckin() {
             }}
             file_name="Report Sell.xlsx"
           />
-        }
-      >
+        }>
         <div className="bg-white rounded-2xl pt-4 pb-7  border-[#DFE3E8] border-[0.2px] border-solid">
           <Row
             gutter={[16, 16]}
             className={`flex ${
               matchMedia ? "justify-end" : "justify-between"
-            } items-center w-full`}
-          >
+            } items-center w-full`}>
             {!matchMedia && (
               <Col className="ml-4 w-[78%]">
                 <Row gutter={[8, 8]} className="space-x-4">
@@ -478,8 +481,7 @@ export default function ReportCheckin() {
           open={modal.open}
           onCancel={closeModal}
           footer={false}
-          width={800}
-        >
+          width={800}>
           <Detailmodal id={modal.id} />
         </ModalDetail>
       </ContentFrame>
