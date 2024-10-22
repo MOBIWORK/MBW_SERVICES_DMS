@@ -264,7 +264,8 @@ doc_events = {
         "on_submit": "mbw_dms.controllers.dms_sales_invoice.update_kpi_monthly",
         # Hủy đơn bán/trả
         "on_cancel": "mbw_dms.controllers.dms_sales_invoice.update_kpi_monthly_on_cancel",
-        "on_delete": "mbw_dms.controllers.dms_sales_invoice.update_kpi_monthly_on_delete"
+        "on_delete": "mbw_dms.controllers.dms_sales_invoice.update_kpi_monthly_on_delete",
+        "before_save": "mbw_dms.controllers.dms_sales_invoice.calculate_sI"
     },
     "Sales Order": {
         "on_submit": "mbw_dms.controllers.dms_sales_order.update_kpi_monthly",
