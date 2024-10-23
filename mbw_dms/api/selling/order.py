@@ -197,7 +197,7 @@ def create_sale_order(**kwargs):
 
         new_order.customer = validate_not_none(kwargs.customer)     
         new_order.delivery_date = validate_date(kwargs.delivery_date)                                   # Ngày giao
-        new_order.set_warehouse = validate_not_none(kwargs.get("set_warehouse"))                        # Kho hàng
+        new_order.set_warehouse = kwargs.get("set_warehouse")                       # Kho hàng
         new_order.selling_price_list = price_list
 
         if apply_discount_on is not None:
@@ -206,6 +206,8 @@ def create_sale_order(**kwargs):
 
         new_order.checkin_id = kwargs.get("checkin_id")
         new_order.ignore_pricing_rule = ignore_pricing_rule
+        new_order.custom_sale_person = sales_person
+
         # Thêm mới sales team
         new_order.append("sales_team", {
             "sales_person": sales_person,
