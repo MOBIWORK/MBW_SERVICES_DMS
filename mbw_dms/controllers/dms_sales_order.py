@@ -206,3 +206,8 @@ def number_to_vietnamese_words(number):
         index += 1
 
     return result.strip() if result else "không"
+
+def update_person_sales(doc, method):
+    sales_person = doc.sales_team
+    if sales_person and len(sales_person) == 1:
+        doc.custom_sale_person = sales_person[0].sales_person
