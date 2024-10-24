@@ -7,7 +7,7 @@ from datetime import datetime
 def renderMonthYear(doc):
     transaction_date_time = doc.transaction_date
     if isinstance(transaction_date_time,str):
-        transaction_date_time = datetime.strptime(transaction_date_time,"%Y-%m-%d %H:%M:%S.%f")
+        transaction_date_time = datetime.strptime(transaction_date_time,"%Y-%m-%d")
     thang = transaction_date_time.month
     nam = transaction_date_time.year
     return thang,nam
