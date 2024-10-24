@@ -144,13 +144,24 @@ def calculate_so(doc, method):
     items = doc.items
     amount_before_discount = 0
     discount_total_amount = 0
+    total_lits = 0
 
     for item in items:
         item.custom_amount_before_discount = item.price_list_rate * item.qty
         item.custom_discount_on_total_amount = item.discount_amount * item.qty
         amount_before_discount += item.custom_amount_before_discount
         discount_total_amount += item.custom_discount_on_total_amount
-    
+
+        # Tính số lit
+        lit_per_uom = frappe.get_value("Item", {"item_code": item.item_code}, "custom_so_lit_tren_1_don_vi")
+        if item.uom == item.stock_uom:
+            item.custom_litres_in_1_unit = lit_per_uom
+        else:
+            item.custom_litres_in_1_unit = lit_per_uom * item.conversion_factor
+        item.custom_total_litres_base_on_1_item = item.custom_litres_in_1_unit * item.qty
+        total_lits += item.custom_total_litres_base_on_1_item
+
+    doc.custom_total_litres_in_order = total_lits
     doc.custom_total_amount_before_discount = amount_before_discount
     doc.custom_product_discount_amount = discount_total_amount
 

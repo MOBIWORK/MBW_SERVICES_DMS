@@ -72,21 +72,5 @@ def update_location(doc,method=None):
     pass
 
 def create_customer_code(doc, method):
-    # Tìm số thứ tự cao nhất hiện tại của customer_code và tăng lên 1
-    if not doc.customer_code:
-        latest_customer_code = frappe.db.sql("""
-            SELECT customer_code 
-            FROM `tabCustomer`
-            WHERE customer_code REGEXP '^KH[0-9]{6}$'
-            ORDER BY customer_code DESC
-            LIMIT 1
-        """, as_dict=True)
-
-        if latest_customer_code:
-            latest_number = int(latest_customer_code[0]["customer_code"].replace("KH", ""))
-        else:
-            latest_number = 0
-
-        new_number = latest_number + 1
-        customer_code = f"KH{new_number:06d}"
-        doc.customer_code = customer_code
+    doc.customer_code = doc.name
+    doc.save()

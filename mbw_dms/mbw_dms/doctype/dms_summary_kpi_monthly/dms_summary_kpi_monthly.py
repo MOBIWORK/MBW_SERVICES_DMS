@@ -46,11 +46,11 @@ def get_kpi_monthly():
 		# Tính toán chỉ số KPI nếu có dữ liệu
         if monthly_summary and kpi_employee:
             kpi = {
-                "doanh_thu": round(float(monthly_summary[0]["doanh_thu_thang"]/kpi_employee[0]["doanh_thu"]) * 100, 2),
-                "doanh_so": round(float(monthly_summary[0]["doanh_so_thang"]/kpi_employee[0]["doanh_so"]) * 100, 2),
-                "don_hang": round(float(monthly_summary[0]["so_don_hang"]/kpi_employee[0]["so_don_hang"]) * 100, 2),
-                "vieng_tham": round(float(monthly_summary[0]["so_kh_vt_luot"]/kpi_employee[0]["so_kh_vt_luot"]) * 100, 2),
-                "kh_moi": round(float(monthly_summary[0]["so_kh_moi"]/kpi_employee[0]["so_kh_moi"]) * 100, 2)
+                "doanh_thu": round(float(monthly_summary[0]["doanh_thu_thang"]/kpi_employee[0]["doanh_thu"]) * 100, 2) if kpi_employee[0]["doanh_thu"] > 0 else 0,
+                "doanh_so": round(float(monthly_summary[0]["doanh_so_thang"]/kpi_employee[0]["doanh_so"]) * 100, 2) if kpi_employee[0]["doanh_so"] > 0 else 0,
+                "don_hang": round(float(monthly_summary[0]["so_don_hang"]/kpi_employee[0]["so_don_hang"]) * 100, 2) if kpi_employee[0]["so_don_hang"] > 0 else 0,
+                "vieng_tham": round(float(monthly_summary[0]["so_kh_vt_luot"]/kpi_employee[0]["so_kh_vt_luot"]) * 100, 2) if kpi_employee[0]["so_kh_vt_luot"] else 0,
+                "kh_moi": round(float(monthly_summary[0]["so_kh_moi"]/kpi_employee[0]["so_kh_moi"]) * 100, 2) if kpi_employee[0]["so_kh_moi"] > 0 else 0
             }
 
         # Nếu không có dữ liệu, gán giá trị 0 cho tất cả các chỉ số KPI
