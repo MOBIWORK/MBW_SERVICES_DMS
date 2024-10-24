@@ -3,6 +3,15 @@ from frappe.utils import nowdate
 import calendar
 from mbw_dms.api.common import qty_not_pricing_rule
 import pydash
+from datetime import datetime
+def renderMonthYear(doc):
+    transaction_date_time = doc.transaction_date
+    if isinstance(transaction_date_time,str):
+        transaction_date_time = datetime.strptime(transaction_date_time,"%Y-%m-%d")
+    thang = transaction_date_time.month
+    nam = transaction_date_time.year
+    return thang,nam
+
 # Kiểm tra xem khách đã đặt hàng trước đó chưa
 def existing_customer(customer_name, start_date, end_date, sale_person,doc):
     
@@ -23,8 +32,7 @@ def existing_customer(customer_name, start_date, end_date, sale_person,doc):
 
 def update_kpi_monthly(doc, method):
     # Lấy ngày tháng để truy xuất dữ liệu
-    month = doc.transaction_date.month
-    year = doc.transaction_date.year
+    month,year = renderMonthYear(doc)
     start_date_str = f"{year:04d}-{month:02d}-01"
     last_day_of_month = calendar.monthrange(year, month)[1]
     end_date_str = f"{year:04d}-{month:02d}-{last_day_of_month:02d}"
@@ -47,8 +55,7 @@ def update_kpi_monthly(doc, method):
 
 def update_kpi_monthly_on_cancel(doc, method):
     # Lấy ngày tháng để truy xuất dữ liệu
-    month = doc.transaction_date.month
-    year = doc.transaction_date.year
+    month,year = renderMonthYear(doc)
     start_date_str = f"{year:04d}-{month:02d}-01"
     last_day_of_month = calendar.monthrange(year, month)[1]
     end_date_str = f"{year:04d}-{month:02d}-{last_day_of_month:02d}"
