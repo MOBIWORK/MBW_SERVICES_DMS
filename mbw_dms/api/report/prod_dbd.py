@@ -53,13 +53,14 @@ def report_prod_dbd(**res):
 
         # print("=====sale_orders", sale_orders)
         # Lặp qua từng phần tử và kiểm tra sales_person khác None
-        arr_filed = ['qty', 'stock_uom', 'uom', 'conversion_factor', "amount"]
+        arr_filed = ['qty', 'stock_uom', 'uom', 'conversion_factor', "amount", "item_name"]
+
         for item in sale_orders:
             if item['sales_person'] is not None:
                 # Lấy ngày từ transaction_date
                 date_value = item['transaction_date'].day
-                products = get_value_child_doctype("Sales Order", item["name"], "items" ,arr_filed )
-
+                products = get_value_child_doctype("Sales Order", item["name"], "items", arr_filed )
+            
                 for prod in products:
                     # neu la spkm thi tru di sl spkm
                     if(prod["amount"] == 0):
@@ -67,7 +68,24 @@ def report_prod_dbd(**res):
                         continue
                     #chuyen doi so luong ve so luong cua dvt quy chuan
                     if(prod["stock_uom"] != prod["uom"]):
-                        item["total_qty"] =  item["total_qty"] - prod["qty"] + (prod["qty"] / prod["conversion_factor"])
+                        item_uoms = get_value_child_doctype("Item", prod["item_name"], "uoms" )
+
+                        # for vao trong list dvt cua sp de lay tinh he so quy doi giua cac dvt cua sp
+                        for it in item_uoms:
+                            if it["uom"] == prod["uom"]:
+                                tile_dvt_phu = it["conversion_factor"]
+                            if it["uom"] == prod["stock_uom"]:
+                                tile_dvt_chinh = it["conversion_factor"]
+                        if tile_dvt_phu is not None and tile_dvt_phu != 0:
+                            tile_quydoi =tile_dvt_chinh / tile_dvt_phu
+                        else: tile_quydoi = 1
+                      
+
+                        item["total_qty"] =  item["total_qty"] - prod["qty"] + (prod["qty"] * tile_quydoi )
+
+                        
+                
+
                 # Gộp vào danh sách dựa trên parent_sales_person và sales_person
                 parent = item['parent_sales_person']
                 sales_person = item['sales_person']
