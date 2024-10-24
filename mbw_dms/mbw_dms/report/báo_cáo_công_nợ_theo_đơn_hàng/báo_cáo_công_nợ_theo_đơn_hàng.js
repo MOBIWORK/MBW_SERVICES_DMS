@@ -45,6 +45,18 @@ frappe.query_reports["Báo cáo công nợ theo đơn hàng"] = {
             fieldname: "thanhtoan",
             label: __("Chưa Thanh toán"),
             fieldtype: "Check"
+        },
+        {
+            fieldname: "selected_note",
+            label: __("Đã lựa chọn"),
+            fieldtype: "Check",
+            default: 0,
+        },
+        {
+            fieldname: "delivery_note",
+            label: __("delivery_note"),
+            fieldtype: "Data",
+            hidden: 1
         }
     ],
 
@@ -58,13 +70,25 @@ frappe.query_reports["Báo cáo công nợ theo đơn hàng"] = {
                 print_report(report, print_settings);
             });
         }, 'Print');
+
+        if (Object.keys(checkedCheckboxes).length === 0) {
+            report.set_filter_value("selected_note", 0);
+        }
+
+        report.page.fields_dict.selected_note.$input.on("change", function() {
+                let selected = frappe.query_report.get_filter_value("selected_note");
+                if (selected) {
+                    frappe.query_report.set_filter_value("delivery_note", arraydDeliveryNote);
+                } else {
+                    frappe.query_report.set_filter_value("delivery_note", "");
+                }
+                frappe.query_report.refresh();
+        });
     },
 
     "after_datatable_render": function(report) {
         $('.dt-row-filter').remove();
-        checkedCheckboxes={};
-        Total = 0
-        arraydDeliveryNote = [];
+
         // Function to enable checkboxes
         function enableCheckboxes() {
             $(".datatable").find('input[type="checkbox"]').each(function() {
@@ -72,21 +96,20 @@ frappe.query_reports["Báo cáo công nợ theo đơn hàng"] = {
 
                 $(this).prop('disabled', false);  // Enable checkbox
                 $(this).removeClass('disabled-deselected');  // Remove any class indicating disabled state
-                
                 // Set checkbox state based on previously stored values
-                if (checkedCheckboxes[$(this).val()]) {
+                if (checkedCheckboxes[$(this).closest('.dt-row').find("a[data-doctype='Delivery Note']").html()]) {
                     $(this).prop('checked', true);
                 }
 
                 $(this).off('click').on('click', function() {
                     // Handle the click event
                     if ($(this).is(':checked')) {
-                        checkedCheckboxes[$(this).val()] = true;
+                        checkedCheckboxes[$(this).closest('.dt-row').find("a[data-doctype='Delivery Note']").html()] = true;
                         arraydDeliveryNote.push($(this).closest('.dt-row').find("a[data-doctype='Delivery Note']").html());
                         Total += report.datamanager.data[$(this).val()].total
 
                     } else {
-                        delete checkedCheckboxes[$(this).val()];
+                        delete checkedCheckboxes[$(this).closest('.dt-row').find("a[data-doctype='Delivery Note']").html()];
                         arraydDeliveryNote.remove($(this).closest('.dt-row').find("a[data-doctype='Delivery Note']").html());
                         Total -= report.datamanager.data[$(this).val()].total
                     }

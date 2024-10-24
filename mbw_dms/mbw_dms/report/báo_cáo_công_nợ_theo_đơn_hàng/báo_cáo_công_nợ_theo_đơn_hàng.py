@@ -8,7 +8,13 @@ def execute(filters=None):
             "label": _("Chọn"),
             "fieldname": "select_item",
             "fieldtype": "Check",
-            "width": 50
+            "width": 70
+        },
+        {
+            "label": _("Ngày giao DN"),
+            "fieldname": "posting_date",
+            "fieldtype": "Date",
+            "width": 150
         },
     	{
             "label": _("Tên khách hàng"),
@@ -42,12 +48,6 @@ def execute(filters=None):
             "fieldtype": "Link",
             "options": "Delivery Note",
             "width": 200
-        },
-        {
-            "label": _("Ngày giao DN"),
-            "fieldname": "posting_date",
-            "fieldtype": "Date",
-            "width": 150
         }
     ]
 
@@ -57,7 +57,17 @@ def execute(filters=None):
     # Xây dựng điều kiện tìm kiếm
     conditions = ""
     if filters.get("customer"):
-        conditions += " AND dn.customer_name LIKE %s"
+        customer_filter = filters.get("customer")
+        if isinstance(customer_filter, list):
+            customer_placeholders = ', '.join(['%s'] * len(customer_filter))
+            conditions += f" AND dn.customer_name IN ({customer_placeholders})"
+        else:
+            conditions += " AND dn.customer_name LIKE %s"
+    if filters.get("selected_note") and filters.get("delivery_note"):
+        deliverynote_filter = filters.get("delivery_note")
+        if isinstance(deliverynote_filter, list):
+            deliverynote = ', '.join(['%s'] * len(deliverynote_filter))
+            conditions += f" AND dn.name IN ({deliverynote})"
     if filters.get("deliverynote"):
         conditions += " AND dn.name LIKE %s"
     if filters.get("thanhtoan") is not None:
@@ -97,7 +107,10 @@ def execute(filters=None):
         params.append("%" + filters.get("deliverynote") + "%")
     if filters.get("thanhtoan") is not None:
         params.append(int(filters.get("thanhtoan")))
-
+    if filters.get("selected_note") and filters.get("delivery_note"):
+        deliverynote_filter = filters.get("delivery_note")
+        if isinstance(deliverynote_filter, list):
+            params.extend(deliverynote_filter)
     data = frappe.db.sql(query, params, as_dict=True)
     
     # Bổ sung cột checkbox cho từng dòng trong dữ liệu
