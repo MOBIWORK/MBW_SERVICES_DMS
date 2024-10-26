@@ -132,16 +132,6 @@ frappe.query_reports["Báo cáo công nợ theo đơn hàng"] = {
 function print_report(report, print_settings) {
     let columns = report.get_visible_columns ? report.get_visible_columns() : [];
     columns = columns.filter(column => column.fieldname !== 'name' && column.fieldname !== 'posting_date');
-    let columns_date = {
-        "label": "Ngày đặt hàng",
-        "fieldname": "transaction_date",
-        "fieldtype": "Date",
-        "width": 200,
-        "id": "transaction_date",
-        "name": "Ngày đặt hàng",
-        "editable": false,
-        }
-    columns.splice(3, 0, columns_date);
     let filtered_data = report.data.filter(row => {
         return arraydDeliveryNote.includes(row.name);
     }).map(({ name, posting_date, trangthaithanhtoan, ...rest })  => {

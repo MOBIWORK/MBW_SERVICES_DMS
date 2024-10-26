@@ -31,6 +31,13 @@ def execute(filters=None):
             "width": 220
         },
         {
+            "label": "Ngày đặt hàng",
+            "fieldname": "transaction_date",
+            "fieldtype": "Date",
+            "width": 200,
+            "name": "Ngày đặt hàng",
+        },
+        {
             "label": _("Số tiền"),
             "fieldname": "total",
             "fieldtype": "Currency",
