@@ -216,8 +216,8 @@ export default function SupervisoryStaffRealTime() {
       })
       .sort((a, b) => {
         return b.sales_order - a.sales_order;
-      });
-    // .slice(0, 5);
+      })
+    .slice(0, 5);
     console.log("arrEmployeeInput", arrEmployeeInput);
 
     let arrEmployeeOut = arrEmployeeInput.map(
