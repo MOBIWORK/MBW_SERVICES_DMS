@@ -209,14 +209,16 @@ def get_list_top_employee(**kwargs):
                 if fre:
                     frequency = fre.split(";")
                     for j in frequency:
-                        week_router.append(int(j))
+                        if bool(j):
+                            week_router.append(int(j))
                 current_week = current_month_week()
                 if current_week in week_router:
                     cus += 1
             i["must_visit"] = cus
             i.pop("name")
-            
-        router_employee = sorted(router_employee, key=lambda x: x["sales_order"], reverse=True)[:5]
+        router_employee = sorted(router_employee, key=lambda x: x["sales_order"], reverse=True)
+        if len(router_employee) > 5:
+            router_employee = router_employee[:5]
         return gen_response(200, "Thành công", router_employee)
     except Exception as e:
         return exception_handle(e)
