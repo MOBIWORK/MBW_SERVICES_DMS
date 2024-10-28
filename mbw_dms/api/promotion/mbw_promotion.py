@@ -5,6 +5,9 @@ import pydash
 
 # Biến lữu trữ các trương trình khuyến mại và kết quả đáp ứng
 objPromotionOder=[]
+# Biến lữu trữ các sản phẩm dùng để giảm trừ
+objProductInPromotion=[]
+
 # Lấy ra danh sách các chương trình khuyến mại
 @frappe.whitelist()
 def get_list_promotion(**kwargs):
@@ -60,13 +63,14 @@ def apply_Promotion(list_item=[], list_promotions=[], total_amount=0):
 
     for promtion in list_promotions:
         promo_result = caculate_promotion(list_item, promtion, total_amount)
-  
+
         if bool(promo_result):
             promtion_list.append(promo_result)
     return promtion_list
     
 # Caculate Promotion
 def caculate_promotion(list_item=[], promtion={}, total_amount=0):
+    print('========================= value: ', promtion.get("ptype_value"), flush=True)
     if promtion.get("ptype_value") == "SP_SL_CKSP":
         ref = SP_SL_CKSP(list_item, promtion)
         if bool(ref):
@@ -393,6 +397,7 @@ def SP_SL_SP(list_item=[], data_promotion={}):
 
     return list_free_item
 
+#Luu tru CTKM
 def save_promotionResult(objDataKM,so_luong,boi_so):
     if objDataKM.ptype_value in ["TIEN_TIEN","TIEN_CKDH"]:
         objRef={"_id": "CKDH", "ma_san_pham": "", "ten_san_pham": "", "don_vi_tinh": "", "so_luong": so_luong}
@@ -418,9 +423,44 @@ def save_promotionResult(objDataKM,so_luong,boi_so):
         # If the item does not exist, append it
         else:
             objPromotionOder.append(objKM)
+    print('========================= value: ', objPromotionOder, flush=True)
     
-def On_Process_GiamTru(objKM,idsp,dvt,sl):
-    
+#Giam tru CTKM
+def On_Process_GiamTru(objKM,idsp,dvt,sl,yeu_cau):
+    if objKM.get("gpromotion") and objKM["gpromotion"].get("value"):
+        if objKM["gpromotion"].get("giam_tru") == 1:
+            boiSo = 1
+            slCanGiamTru = 0
+            if objKM["settings"].get("BoiSo"):
+                boiSo = int(float(sl) / yeu_cau)
+                slCanGiamTru = float(sl) - (yeu_cau * boiSo)
+            else:
+                slCanGiamTru = float(sl) - yeu_cau
+
+            hasExsit = False
+
+            for item in objProductInPromotion:
+                if item["idsp"] == idsp and item["dvt"] == dvt:
+                    updateNum = max(item["sl_KhauTru"] - slCanGiamTru, 0)
+                    item["sl_KhauTru"] = updateNum
+                    hasExsit = True
+                    break
+
+            if not hasExsit:
+                objPromotionHasApply = {
+                    "idsp": idsp,
+                    "dvt": dvt,
+                    "sl_Goc": sl,
+                    "sl_KhauTru": slCanGiamTru,
+                    "don_gia": sl,
+                    "gttb": 0
+                }
+                objProductInPromotion.append(objPromotionHasApply)
+
+                # Uncomment if needed
+                # for item in objProductInPromotion:
+                #     item["gttb"] = gttb
+
                 
 
 
