@@ -229,7 +229,7 @@ def update_account_debt(doc, method):
         "account_type": "Receivable",
         "naming_by": ["Selling Settings", "cust_master_name"],
     }
-    filters = {'company': 'CÔNG TY TNHH THƯƠNG MẠI VIỆT HẢI ĐĂNG',
+    filters = {'company': doc.company,
                'report_date': nowdate(),
                'party_type': 'Customer',
                'party': [doc.customer],
@@ -240,4 +240,3 @@ def update_account_debt(doc, method):
     data = ReceivablePayableReport(filters).run(args)
     if len(data) > 1 and len(data[1]) > 0:
         doc.custom_tong_no_cu = data[1][len(data[1]) - 1].get("outstanding")
-    print(doc.custom_tong_no_cu)
