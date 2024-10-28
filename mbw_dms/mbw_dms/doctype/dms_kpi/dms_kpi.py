@@ -952,12 +952,11 @@ def report(kwargs):
             limit = page_size
             offset = (page_number - 1) * limit
             data = frappe.db.sql(sql_query, (limit, offset), as_dict=True)
-        
         for i in data:
             emp = i.nhan_vien_ban_hang
             # kpi nhan vien ban hang
             kpi_month = frappe.db.sql(f"""
-                SELECT so_kh_vt_luot as th_vt, kh_vt as th_vt_dn, so_kh_dat_hang as th_dat_hang, so_don_hang as th_don_hang, so_kh_moi as th_kh_moi,
+                SELECT name, so_kh_vt_luot as th_vt, kh_vt as th_vt_dn, so_kh_dat_hang as th_dat_hang, so_don_hang as th_don_hang, so_kh_moi as th_kh_moi,
                 doanh_so_thang as th_doanh_so, doanh_thu_thang as th_doanh_thu, san_luong as th_san_lg, sku as th_sku, so_gio_lam_viec as th_so_gio_lam_viec
                 FROM `tabDMS Summary KPI Monthly`
                 WHERE 
@@ -965,9 +964,8 @@ def report(kwargs):
                     AND thang = '{month}'
                     AND nam = '{year}'
             """, as_dict=True)
-
+            print("kpi_month",kpi_month,emp)
             i["kpi_month"] = []
-            
             if bool(kpi_month) and len(kpi_month) > 0:
                 i["kpi_month"] = kpi_month[0]
                 i["kpi_month"]["th_vt_dn"] = len(i["kpi_month"]["th_vt_dn"].split(";")) if i["kpi_month"]["th_vt_dn"] else 0

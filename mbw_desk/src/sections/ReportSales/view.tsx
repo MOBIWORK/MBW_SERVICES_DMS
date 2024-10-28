@@ -1,227 +1,141 @@
-import { SyncOutlined, VerticalAlignBottomOutlined } from "@ant-design/icons";
-import {
-  ContentFrame,
-  DropDownCustom,
-  FormItemCustom,
-  HeaderPage,
-  TableCustom,
-} from "../../components";
-import {
-  Button,
-  Col,
-  DatePicker,
-  Dropdown,
-  Form,
-  Row,
-  Select,
-  Table,
-  TreeSelect,
-  message,
-} from "antd";
+/** @format */
+import { ContentFrame, TableCustom } from "../../components";
+import { Col, Row, Table } from "antd";
 import type { TableColumnsType } from "antd";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { AxiosService } from "../../services/server";
 import dayjs from "dayjs";
-import useDebounce from "../../hooks/useDebount";
-import { DatePickerProps } from "antd/lib";
-import { handleDowload, translationUrl, treeArray } from "@/util";
-import { rsData, rsDataFrappe } from "@/types/response";
-import { employee } from "@/types/employeeFilter";
-import { listSale } from "@/types/listSale";
-import { LuFilter, LuFilterX } from "react-icons/lu";
-import { useForm } from "antd/es/form/Form";
 import { useResize } from "@/hooks";
-import { SelectCommon, TreeSelectCommon } from "@/components/select/select";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
+import { mediaQuery, PAGE_SIZE } from "@/constant";
+import Filter_group from "@/components/filter-group/Filter_group";
+import DropDownFilter from "@/components/filter-group/dropDownFilter";
+import SummaryDataReportSale from "./SummaryDataReportSale";
+import ReportHeader from "../ReportHeader/ReportHeader";
 
-interface DataSaleOrder {
-  key: React.Key;
-  name: string;
-  stt?: number;
-  posting_date: string;
-  customer: string;
-  territory: string;
-  set_warehouse: string;
-  employee: string;
-  total: number; // thành tiền
-  tax_amount: number; // tiền vat
-  discount_amount: number; // chiết khấu
-  grand_total: number; // tổng tiền
-}
-
-interface DataItem {
-  item_name: string;
-  item_code: string;
-  brand: string;
-  item_group: string;
-  rate: number; // đơn giá
-  qty: number;
-  discount_percentage: number; // chiết khấu phần trăm
-  discount_amount: number; // tiền triết khấu
-  amount: number; // tổng tiền
-}
-
-const startOfMonth: any = dayjs().startOf("month");
-const endOfMonth: any = dayjs().endOf("month");
-let start = Date.parse(startOfMonth["$d"]) / 1000;
-let end = Date.parse(endOfMonth["$d"]) / 1000;
-
-const columns: TableColumnsType<DataSaleOrder> = [
-  {
-    title: (
-      <div className="relative">
-        <span className="absolute -top-[11px] -left-8">STT</span>
-      </div>
-    ),
-    dataIndex: "stt",
-    key: "stt",
-    width: 60,
-    render: (_, record: any, index: number) => index + 1,
-  },
-  {
-    title: "Đơn đặt",
-    dataIndex: "name",
-    key: "name",
-    width: 100,
-    render: (_, record: any) => (
-      <div>
-        <a
-          className="text-[#212B36]"
-          href={`/app/sales-invoice/${record.name}`}
-          target="_blank"
-        >
-          {record.name}
-        </a>
-      </div>
-    ),
-  },
-  {
-    title: "Khách hàng",
-    dataIndex: "customer",
-    key: "customer",
-    width: 120,
-    render: (_, record: any) => <div>{record.customer}</div>,
-  },
-  {
-    title: "Khu vực",
-    dataIndex: "territory",
-    key: "territory",
-    width: 120,
-    render: (_, record: any) => <div>{record.territory}</div>,
-  },
-  {
-    title: "Ngày tạo",
-    dataIndex: "posting_date",
-    key: "posting_date",
-    width: 120,
-    render: (_, record: any) => (
-      <div>{dayjs(record.posting_date * 1000).format("DD/MM/YYYY")}</div>
-    ),
-  },
-  {
-    title: "Nhân viên",
-    dataIndex: "sales_person",
-    key: "sales_person",
-    width: 120,
-    render: (_, record: any) => <div>{record.sales_person}</div>,
-  },
-  {
-    title: <div className="text-right">Thành tiền (VNĐ)</div>,
-    dataIndex: "total",
-    key: "total",
-    width: 140,
-    render: (_, record: any) => (
-      <div className="!text-right">
-        {Intl.NumberFormat().format(record.total)}
-      </div>
-    ),
-  },
-  {
-    title: <div className="text-right">Tiền VAT (VNĐ)</div>,
-    dataIndex: "tax_amount",
-    key: "tax_amount",
-    width: 140,
-    render: (_, record: any) => (
-      <div className="text-right">
-        {Intl.NumberFormat().format(record.tax_amount)}
-      </div>
-    ),
-  },
-  {
-    title: <div className="text-right">Chiết khấu (VNĐ)</div>,
-    dataIndex: "discount_amount",
-    key: "discount_amount",
-    width: 160,
-    render: (_, record: any) => (
-      <div className="text-right">
-        {Intl.NumberFormat().format(record.discount_amount)}
-      </div>
-    ),
-  },
-  {
-    title: <div className="text-right">Tổng tiền (VNĐ)</div>,
-    width: 160,
-    dataIndex: "grand_total",
-    key: "grand_total",
-    render: (_, record: any) => (
-      <div className="text-right">
-        {Intl.NumberFormat().format(record.grand_total)}
-      </div>
-    ),
-  },
-];
+import { useSelector } from "react-redux";
 
 export default function ReportSales() {
+  const columns: TableColumnsType<DataSaleOrder> = [
+    {
+      title: (
+        <div className="relative">
+          <span className="absolute -top-[11px] -left-8">STT</span>
+        </div>
+      ),
+      dataIndex: "stt",
+      key: "stt",
+      width: 60,
+      render: (_: any, __: any, index: number) => (
+        <span>{calculateIndex(page, PAGE_SIZE, index)}</span> // Tính toán index cho từng dòng
+      ),
+    },
+    {
+      title: "Đơn đặt",
+      dataIndex: "name",
+      key: "name",
+      width: 100,
+      render: (_, record: any) => (
+        <div>
+          <a
+            className="text-[#212B36]"
+            href={`/app/sales-invoice/${record.name}`}
+            target="_blank">
+            {record.name}
+          </a>
+        </div>
+      ),
+    },
+    {
+      title: "Khách hàng",
+      dataIndex: "customer",
+      key: "customer",
+      width: 120,
+      render: (_, record: any) => <div>{record.customer}</div>,
+    },
+    {
+      title: "Khu vực",
+      dataIndex: "territory",
+      key: "territory",
+      width: 120,
+      render: (_, record: any) => <div>{record.territory}</div>,
+    },
+    {
+      title: "Ngày tạo",
+      dataIndex: "posting_date",
+      key: "posting_date",
+      width: 120,
+      render: (_, record: any) => (
+        <div>{dayjs(record.posting_date * 1000).format("DD/MM/YYYY")}</div>
+      ),
+    },
+    {
+      title: "Nhân viên",
+      dataIndex: "sales_person",
+      key: "sales_person",
+      width: 120,
+      render: (_, record: any) => <div>{record.sales_person}</div>,
+    },
+    {
+      title: <div className="text-right">Thành tiền (VNĐ)</div>,
+      dataIndex: "total",
+      key: "total",
+      width: 140,
+      render: (_, record: any) => (
+        <div className="!text-right">
+          {Intl.NumberFormat().format(record.total)}
+        </div>
+      ),
+    },
+    {
+      title: <div className="text-right">Tiền VAT (VNĐ)</div>,
+      dataIndex: "tax_amount",
+      key: "tax_amount",
+      width: 140,
+      render: (_, record: any) => (
+        <div className="text-right">
+          {Intl.NumberFormat().format(record.tax_amount)}
+        </div>
+      ),
+    },
+    {
+      title: <div className="text-right">Chiết khấu (VNĐ)</div>,
+      dataIndex: "discount_amount",
+      key: "discount_amount",
+      width: 160,
+      render: (_, record: any) => (
+        <div className="text-right">
+          {Intl.NumberFormat().format(record.discount_amount)}
+        </div>
+      ),
+    },
+    {
+      title: <div className="text-right">Tổng tiền (VNĐ)</div>,
+      width: 160,
+      dataIndex: "grand_total",
+      key: "grand_total",
+      render: (_, record: any) => (
+        <div className="text-right">
+          {Intl.NumberFormat().format(record.grand_total)}
+        </div>
+      ),
+    },
+  ];
   const [dataSaleOrder, setDataSaleOrder] = useState<DataSaleOrder[]>([]);
   const [total, setTotal] = useState<number>(0);
-  const PAGE_SIZE = 20;
-  const [formFilter] = useForm();
   const [page, setPage] = useState<number>(1);
-  const [listCompany, setListCompany] = useState<any[]>([]);
-  const [company, setCompany] = useState("");
-  const [keySCompany, setKeySCompany] = useState("");
-  const [territory, setTerritory] = useState("");
-  const [listTerritory, setListTerritory] = useState<any[]>([]);
-  const [keySTerritory, setKeySTerritory] = useState("");
-  const [customer, setCustomer] = useState("");
-  const [listCustomer, setListCustomer] = useState<any[]>([]);
-  const [keySCustomer, setKeySCustomer] = useState("");
-  const [from_date, setFromDate] = useState<any>(start);
-  const [to_date, setToDate] = useState<any>(end);
-  const [warehouse, setWarehouse] = useState("");
-  const [listWarehouse, setListWarehouse] = useState<any[]>([]);
-  const [keySWarehouse, setKeySWarehouse] = useState("");
-  const [employee, setEmployee] = useState("");
-  const [listEmployees, setListEmployees] = useState<any[]>([]);
-  let keySearchCompany = useDebounce(keySCompany, 500);
-  let keySearchTerritory = useDebounce(keySTerritory, 500);
-  let keySearchCustomer = useDebounce(keySCustomer, 500);
-  let keySearchWarehouse = useDebounce(keySWarehouse, 500);
-  const [keySearch4, setKeySearch4] = useState("");
-  let seachbykey = useDebounce(keySearch4);
-  const [listSales, setListSales] = useState<any[]>([]);
-  const [sales_team, setTeamSale] = useState<string>();
-  const containerRef1 = useRef(null);
+
   const size = useResize();
-  const [containerHeight, setContainerHeight] = useState<any>(0);
-  const [scrollYTable1, setScrollYTable1] = useState<number>(size?.h * 0.52);
+  const calculateIndex = (
+    pageNumber: number,
+    pageSize: number,
+    index: number
+  ) => {
+    return (pageNumber - 1) * pageSize + index + 1;
+  };
   const [refresh, setRefresh] = useState<boolean>(false);
 
-  useEffect(() => {
-    setScrollYTable1(size.h * 0.52);
-  }, [size]);
-
-  useEffect(() => {
-    const containerElement = containerRef1.current;
-    if (containerElement) {
-      const resizeObserver = new ResizeObserver((entries) => {
-        for (let entry of entries) {
-          setContainerHeight(entry.contentRect.height);
-        }
-      });
-      resizeObserver.observe(containerElement);
-      return () => resizeObserver.disconnect();
-    }
-  }, [containerRef1]);
+  const matchMedia = useMediaQuery(`${mediaQuery}`);
 
   const expandedRowRender = (recordTable: any) => {
     const columns: TableColumnsType<DataItem> = [
@@ -313,149 +227,10 @@ export default function ReportSales() {
     );
   };
 
-  useEffect(() => {
-    (async () => {
-      let rsCompany: any = await AxiosService.get(
-        "/api/method/frappe.desk.search.search_link",
-        {
-          params: {
-            txt: keySearchCompany,
-            doctype: "Company",
-            ignore_user_permissions: 0,
-            query: "",
-          },
-        }
-      );
-
-      let { message: results } = rsCompany;
-
-      setListCompany(
-        results.map((dtCompany: any) => ({
-          value: dtCompany.value,
-          label: dtCompany.value,
-        }))
-      );
-    })();
-  }, [keySearchCompany]);
-
-  useEffect(() => {
-    (async () => {
-      let rsCustomer: any = await AxiosService.get(
-        "/api/method/frappe.desk.search.search_link",
-        {
-          params: {
-            txt: keySearchCustomer,
-            doctype: "Customer",
-            ignore_user_permissions: 0,
-            query: "",
-          },
-        }
-      );
-
-      let { message: results } = rsCustomer;
-
-      setListCustomer(
-        results.map((dtCustomer: any) => ({
-          value: dtCustomer.value,
-          label: dtCustomer.value,
-        }))
-      );
-    })();
-  }, [keySearchCustomer]);
-
-  useEffect(() => {
-    (async () => {
-      let rsWarehouse: any = await AxiosService.get(
-        "/api/method/frappe.desk.search.search_link",
-        {
-          params: {
-            txt: keySearchWarehouse,
-            doctype: "Warehouse",
-            ignore_user_permissions: 0,
-            query: "",
-          },
-        }
-      );
-
-      let { message: results } = rsWarehouse;
-
-      setListWarehouse(
-        results.map((dtCustomer: any) => ({
-          value: dtCustomer.value,
-          label: dtCustomer.value,
-        }))
-      );
-    })();
-  }, [keySearchWarehouse]);
-
-  useEffect(() => {
-    (async () => {
-      let rsTerritory: any = await AxiosService.get(
-        "/api/method/frappe.desk.search.search_link",
-        {
-          params: {
-            txt: keySearchTerritory,
-            doctype: "Territory",
-            ignore_user_permissions: 0,
-            query: "",
-          },
-        }
-      );
-
-      let { message: results } = rsTerritory;
-
-      setListTerritory(
-        results.map((dtTerritory: any) => ({
-          value: dtTerritory.value,
-          label: dtTerritory.value,
-        }))
-      );
-    })();
-  }, [keySearchTerritory]);
-
-  useEffect(() => {
-    (async () => {
-      let rsSales: rsData<listSale[]> = await AxiosService.get(
-        "/api/method/mbw_dms.api.router.get_team_sale"
-      );
-
-      setListSales(
-        treeArray({
-          data: rsSales.result.map((team_sale: listSale) => ({
-            title: team_sale.name,
-            value: team_sale.name,
-            ...team_sale,
-          })),
-          keyValue: "value",
-          parentField: "parent_sales_person",
-        })
-      );
-    })();
-  }, []);
-  useEffect(() => {
-    (async () => {
-      let rsEmployee: rsDataFrappe<employee[]> = await AxiosService.get(
-        "/api/method/mbw_dms.api.router.get_sale_person",
-        {
-          params: {
-            team_sale: sales_team,
-            key_search: seachbykey,
-          },
-        }
-      );
-      let { message: results } = rsEmployee;
-      console.log("aaa", results);
-      setListEmployees(
-        results.map((employee_filter: employee) => ({
-          value: employee_filter.sale_name,
-          label:
-            employee_filter.sale_name ||
-            employee_filter.employee_name ||
-            employee_filter.employee_code,
-        }))
-      );
-    })();
-  }, [sales_team, seachbykey]);
+  const { startDate, endDate } = useSelector((state: any) => state.date);
+  const { employee, territory, company, customer, warehouse } = useSelector(
+    (state: any) => state.group
+  );
 
   useEffect(() => {
     (async () => {
@@ -468,8 +243,8 @@ export default function ReportSales() {
             company: company,
             territory: territory,
             customer: customer,
-            from_date: from_date,
-            to_date: to_date,
+            from_date: startDate,
+            to_date: endDate,
             warehouse: warehouse,
             sales_person: employee,
           },
@@ -486,310 +261,71 @@ export default function ReportSales() {
     company,
     territory,
     customer,
-    from_date,
-    to_date,
+    startDate,
+    endDate,
     warehouse,
     employee,
     refresh,
   ]);
 
-  const onChange: DatePickerProps["onChange"] = (dateString: any) => {
-    if (dateString === null || dateString === undefined) {
-      setFromDate("");
-    } else if (
-      to_date &&
-      dateString &&
-      dateString.isAfter(dayjs.unix(to_date), "day")
-    ) {
-      message.error("Từ ngày phải nhỏ hơn hoặc bằng Đến ngày");
-    } else {
-      let fDate = Date.parse(dateString["$d"]) / 1000;
-      setFromDate(fDate);
-    }
-  };
-
-  const onChange1: DatePickerProps["onChange"] = (dateString: any) => {
-    if (dateString === null || dateString === undefined) {
-      setToDate("");
-    } else if (
-      from_date &&
-      dateString &&
-      dateString.isBefore(dayjs.unix(from_date), "day")
-    ) {
-      message.error("Đến ngày phải lớn hơn hoặc bằng Từ ngày");
-    } else {
-      let tDate = Date.parse(dateString["$d"]) / 1000;
-      setToDate(tDate);
-    }
-  };
-
-  const disabledStartDate = (current: any) => {
-    return to_date
-      ? current && current.isAfter(dayjs.unix(to_date), "day")
-      : false;
-  };
-
-  const disabledEndDate = (current: any) => {
-    return from_date
-      ? current && current.isBefore(dayjs.unix(from_date), "day")
-      : false;
-  };
-
-  const handleSearchFilter = (val: any) => {
-    if (val.company) {
-      setCompany(val.company);
-    } else {
-      setCompany("");
-    }
-    if (val.customer) {
-      setCustomer(val.customer);
-    } else {
-      setCustomer("");
-    }
-    if (val.territory) {
-      setTerritory(val.territory);
-    } else {
-      setTerritory("");
-    }
-    if (val.warehouse) {
-      setWarehouse(val.warehouse);
-    } else {
-      setWarehouse("");
-    }
-    setPage(1);
-  };
-
   return (
     <>
       <ContentFrame
         header={
-          <HeaderPage
+          <ReportHeader
+            setRefresh={setRefresh}
             title="Báo cáo tổng hợp bán hàng"
-            buttons={[
-              {
-                icon: <SyncOutlined className="text-xl" />,
-                size: "18px",
-                className: "flex mr-2 ",
-                action: () => {
-                  setRefresh((prev) => !prev);
-                },
+            params={{
+              report_type: "Report Sell",
+              data_filter: {
+                company: company,
+                territory: territory,
+                customer: customer,
+                from_date: startDate,
+                to_date: endDate,
+                warehouse: warehouse,
+                sales_person: employee,
               },
-              {
-                label: "Xuất dữ liệu",
-                type: "primary",
-                icon: <VerticalAlignBottomOutlined className="text-xl" />,
-                size: "18px",
-                className: "flex items-center",
-                action: handleDowload.bind(null, {
-                  url: "/api/method/mbw_dms.api.exports.export_excel.export_excel",
-                  params: {
-                    report_type: "Report Sell",
-                    data_filter: {
-                      company: company,
-                      territory: territory,
-                      customer: customer,
-                      from_date: from_date,
-                      to_date: to_date,
-                      warehouse: warehouse,
-                      sales_person: employee,
-                    },
-                  },
-                  file_name: "Report Sell.xlsx",
-                }),
-              },
-            ]}
+            }}
+            file_name="Report Sell.xlsx"
           />
-        }
-      >
+        }>
         <div className="bg-white rounded-2xl pt-4 pb-7 border-[#DFE3E8] border-[0.2px] border-solid">
-          <Row gutter={[16, 16]} className="justify-between items-end w-full">
-            <Col className="ml-4">
-              <Row gutter={[8, 8]}>
-                <Col span={5}>
-                  <DatePicker
-                    format={"DD-MM-YYYY"}
-                    className="!bg-[#F4F6F8] w-full rounded-lg h-7"
-                    placeholder="Từ ngày"
-                    onChange={onChange}
-                    defaultValue={startOfMonth}
-                    disabledDate={disabledStartDate}
+          <Row
+            gutter={[16, 16]}
+            className={`flex ${
+              matchMedia ? "justify-end" : "justify-between"
+            } items-center w-full`}>
+            {!matchMedia && (
+              <Col className="ml-4 w-[78%]">
+                <Row className="space-x-4">
+                  <Filter_group
+                    setPage={setPage}
+                    inputMonth
+                    inputYear
+                    inputSaleGroup
+                    inputEmployee
                   />
-                </Col>
-                <Col span={5}>
-                  <DatePicker
-                    format={"DD-MM-YYYY"}
-                    className="!bg-[#F4F6F8] w-full rounded-lg h-7"
-                    onChange={onChange1}
-                    placeholder="Đến ngày"
-                    defaultValue={endOfMonth}
-                    disabledDate={disabledEndDate}
-                  />
-                </Col>
-                <Col span={7}>
-                  <TreeSelectCommon
-                    placeholder="Tất cả nhóm bán hàng"
-                    allowClear
-                    showSearch
-                    treeData={listSales}
-                    onChange={(value: string) => {
-                      setTeamSale(value);
-                    }}
-                    dropdownStyle={{
-                      maxHeight: 400,
-                      overflow: "auto",
-                      minWidth: 350,
-                    }}
-                  />
-                </Col>
-                <Col span={7}>
-                  <SelectCommon
-                    filterOption={false}
-                    notFoundContent={null}
-                    allowClear
-                    showSearch
-                    placeholder="Tất cả nhân viên"
-                    onSearch={(value: string) => {
-                      setKeySearch4(value);
-                    }}
-                    options={listEmployees}
-                    onSelect={(value: any) => {
-                      setEmployee(value);
-                      setPage(1);
-                    }}
-                    onClear={() => {
-                      setEmployee("");
-                    }}
-                  />
-                </Col>
-              </Row>
-            </Col>
-            <Col className="!ml-4">
-              <div className="flex flex-wrap items-center">
-                <div className="flex justify-center items-center mr-4">
-                  <Dropdown
-                    className="!h-8"
-                    placement="bottomRight"
-                    trigger={["click"]}
-                    dropdownRender={() => (
-                      <DropDownCustom title={"Bộ lọc"}>
-                        <div className="">
-                          <Form
-                            layout="vertical"
-                            form={formFilter}
-                            onFinish={handleSearchFilter}
-                          >
-                            <Form.Item
-                              name="company"
-                              label={"Công ty"}
-                              className="w-[468px] border-none"
-                            >
-                              <SelectCommon
-                                showSearch
-                                className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
-                                options={listCompany}
-                                allowClear
-                                onSearch={(value: string) => {
-                                  setKeySCompany(value);
-                                }}
-                                placeholder="Tất cả công ty"
-                              />
-                            </Form.Item>
-
-                            <Form.Item
-                              name="customer"
-                              label={"Khách hàng"}
-                              className="w-[468px] border-none"
-                            >
-                              <SelectCommon
-                                showSearch
-                                className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
-                                options={listCustomer}
-                                filterOption={false}
-                                allowClear
-                                onSearch={(value: string) => {
-                                  setKeySCustomer(value);
-                                }}
-                                placeholder="Tất cả khách hàng"
-                              />
-                            </Form.Item>
-
-                            <Form.Item
-                              name="territory"
-                              label={"Khu vực"}
-                              className="w-[468px] border-none"
-                            >
-                              <SelectCommon
-                                showSearch
-                                className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
-                                options={listTerritory}
-                                allowClear
-                                onSearch={(value: string) => {
-                                  setKeySTerritory(value);
-                                }}
-                                placeholder="Tất cẩ khu vực"
-                              />
-                            </Form.Item>
-
-                            <Form.Item
-                              name="warehouse"
-                              label={"Kho"}
-                              className="w-[468px] border-none"
-                            >
-                              <SelectCommon
-                                showSearch
-                                className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
-                                options={listWarehouse}
-                                allowClear
-                                onSearch={(value: string) => {
-                                  setKeySWarehouse(value);
-                                }}
-                                placeholder="Tất cả kho"
-                              />
-                            </Form.Item>
-                          </Form>
-                        </div>
-                        <Row className="justify-between pt-6 pb-4">
-                          <div></div>
-                          <div>
-                            <Button
-                              className="mr-3"
-                              onClick={(ev: any) => {
-                                ev.preventDefault();
-                                formFilter.resetFields();
-                              }}
-                            >
-                              Đặt lại
-                            </Button>
-                            <Button
-                              type="primary"
-                              onClick={() => {
-                                formFilter.submit();
-                              }}
-                            >
-                              Áp dụng
-                            </Button>
-                          </div>
-                        </Row>
-                      </DropDownCustom>
-                    )}
-                  >
-                    <Button
-                      onClick={(e: any) => e.preventDefault()}
-                      className="flex items-center text-nowrap !text-[13px] !leading-[21px] !font-normal  border-r-[0.1px] rounded-r-none h-8"
-                      icon={<LuFilter style={{ fontSize: "20px" }} />}
-                    >
-                      Bộ lọc
-                    </Button>
-                  </Dropdown>
-                  <Button className="border-l-[0.1px] rounded-l-none !h-8">
-                    <LuFilterX style={{ fontSize: "20px" }} />
-                  </Button>
-                </div>
-              </div>
+                </Row>
+              </Col>
+            )}
+            <Col className="!ml-4 ">
+              <DropDownFilter
+                setPage={setPage}
+                inputMonth
+                inputYear
+                inputSaleGroup
+                inputEmployee
+                inputCompany
+                inputCustomer
+                inputTerritory
+                inputWarehouse
+                matchMedia={!matchMedia}
+              />
             </Col>
           </Row>
 
-          <div ref={containerRef1} className="pt-5">
+          <div className="pt-5">
             <TableCustom
               dataSource={dataSaleOrder?.data?.map(
                 (dataSale: DataSaleOrder) => {
@@ -804,8 +340,12 @@ export default function ReportSales() {
               $border
               columns={columns}
               scroll={{
-                x: true,
-                y: containerHeight < 380 ? undefined : scrollYTable1,
+                x:
+                  dataSaleOrder?.data?.length > 0 || size?.w < 1400
+                    ? true
+                    : undefined,
+                // y: containerHeight < 300 ? undefined : scrollYTable1,
+                y: dataSaleOrder?.data?.length > 0 ? size?.h * 0.55 : undefined,
               }}
               pagination={
                 total && total > PAGE_SIZE
@@ -822,46 +362,7 @@ export default function ReportSales() {
               }
               summary={() => {
                 return (
-                  <Table.Summary.Row>
-                    <Table.Summary.Cell
-                      index={0}
-                      className="!border-r-0"
-                    ></Table.Summary.Cell>
-                    <Table.Summary.Cell index={1}></Table.Summary.Cell>
-                    <Table.Summary.Cell index={2}>Tổng</Table.Summary.Cell>
-                    <Table.Summary.Cell index={3}></Table.Summary.Cell>
-                    <Table.Summary.Cell index={5}></Table.Summary.Cell>
-                    <Table.Summary.Cell index={6}></Table.Summary.Cell>
-                    <Table.Summary.Cell index={7}></Table.Summary.Cell>
-                    <Table.Summary.Cell index={8}>
-                      <div className="text-right">
-                        {Intl.NumberFormat().format(
-                          dataSaleOrder?.sum?.sum_total
-                        )}
-                      </div>
-                    </Table.Summary.Cell>
-                    <Table.Summary.Cell index={9}>
-                      <div className="text-right">
-                        {Intl.NumberFormat().format(
-                          dataSaleOrder?.sum?.sum_vat
-                        )}
-                      </div>
-                    </Table.Summary.Cell>
-                    <Table.Summary.Cell index={10}>
-                      <div className="text-right">
-                        {Intl.NumberFormat().format(
-                          dataSaleOrder?.sum?.sum_discount_amount
-                        )}
-                      </div>
-                    </Table.Summary.Cell>
-                    <Table.Summary.Cell index={11}>
-                      <div className="text-right">
-                        {Intl.NumberFormat().format(
-                          dataSaleOrder?.sum?.sum_grand_total
-                        )}
-                      </div>
-                    </Table.Summary.Cell>
-                  </Table.Summary.Row>
+                  <SummaryDataReportSale summaryData={dataSaleOrder?.sum} />
                 );
               }}
             />

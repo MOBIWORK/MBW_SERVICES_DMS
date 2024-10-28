@@ -29,7 +29,7 @@ class DMSCheckin(Document):
         self.send_data_to_ekgis()
         #kiểm tra đúng/ngoại tuyến
         self.check_router()
-        # cập nhật data viếng thăm lần đầu
+        # cập nhật report viếng thăm lần đầu
         self.update_data_first_checkin()
 
     def after_delete(self):
@@ -38,18 +38,20 @@ class DMSCheckin(Document):
         self.update_kpi_monthly_after_delete()
 
     def existing_checkin(self, kh_ma, start_date, end_date, current_user):
+        print("du lieu kiem tra",kh_ma, start_date, end_date, current_user)
         existing_checkin = frappe.get_all(
             "DMS Checkin",
-            filters={"creation": (">=", start_date), 
-                     "creation": ("<=", end_date), 
+            filters={"creation": ["between", [start_date,end_date]], 
                      "kh_ma": kh_ma, 
                      "owner": current_user},
             fields=["name"],
             order_by= "creation desc"
         )
+        existing_checkin = pydash.filter_(existing_checkin,lambda x:x.name!= self.name)
         return existing_checkin
 
     def update_kpi_monthly(self):
+        print("update monthly")
         # Lấy ngày tháng để truy xuất dữ liệu
         month = int(nowdate().split('-')[1])
         year = int(nowdate().split('-')[0])
@@ -81,6 +83,7 @@ class DMSCheckin(Document):
         start_day= datetime.datetime.combine(days,time.min)
         end_day= datetime.datetime.combine(days,time.max)
         kh_ma = self.kh_ma
+        # kiểm tra bản ghi trong ngày
         exists_checkin_day = self.existing_checkin(kh_ma=kh_ma, start_date=start_day, end_date=end_day, current_user=user_id)
         # Kiểm tra đã tồn tại bản ghi KPI của tháng này chưa
         existing_monthly_summary = frappe.get_value(
@@ -98,22 +101,23 @@ class DMSCheckin(Document):
         time_work = seconds_worked / 3600
         # Quang: nếu viếng thăm 2 lần đổ lên thì ko bị giảm viếng thăm duy nhất, số người viếng thăm chỉ bắt trùng theo ngày, qua ngày sau lại khách đó vẫn +1
         #mới====================================================================================================================
+        print("dataa update monthly",existing_monthly_summary,exists_checkin_day,user_name,self.name)
         if existing_monthly_summary:
                 monthly_summary_doc = frappe.get_doc("DMS Summary KPI Monthly", existing_monthly_summary)
                 #chỉ + 1 với lần checkin đầu tiên của ngày
-                if len(exists_checkin_day) <= 1:
+                if len(exists_checkin_day) == 0 :
                     monthly_summary_doc.so_kh_vt_luot += 1
                 
-                #nếu trong tháng có trên 1 checkin của khách => loại bỏ khách khỏi kpi duy nhất
-                def render_string(default_str,value) :
-                    if default_str !=None and value not in default_str:
-                        return f"{monthly_summary_doc.kh_vt};{kh_ma}"
-                    elif default_str ==None and value :
-                        return value
-                    else :
-                        return default_str
-                    
-
+                
+                # def render_string(default_str,value) :
+                #     if default_str !=None and value not in default_str:
+                #         return f"{monthly_summary_doc.kh_vt};{kh_ma}"
+                #     elif default_str ==None and value :
+                #         return value
+                #     else :
+                #         return default_str
+                from mbw_dms.mbw_dms.doctype.common import   render_string  
+                # kiểm tra mã kh đã có trong chuỗi chưa, chưa thì thêm mới
                 monthly_summary_doc.kh_vt = render_string(monthly_summary_doc.kh_vt,kh_ma) # f"{monthly_summary_doc.kh_vt};{kh_ma}" if kh_ma not in monthly_summary_doc.kh_vt else monthly_summary_doc.kh_vt
                 monthly_summary_doc.so_gio_lam_viec += time_work
                 if name_date in list_travel_date:
@@ -137,7 +141,10 @@ class DMSCheckin(Document):
             })
             monthly_summary_doc.insert(ignore_permissions=True)
     def update_kpi_monthly_after_delete(self):
-        # Lấy ngày tháng để truy xuất dữ liệu
+        try:
+            pass
+        except Exception as e:
+            print("loi xoas=====================",e)
         month = int(nowdate().split('-')[1])
         year = int(nowdate().split('-')[0])
         start_date_str = f"{year:04d}-{month:02d}-01"
@@ -176,18 +183,19 @@ class DMSCheckin(Document):
         )
         #mới:chuyện- nếu số lần checkin trong ngày bị xóa =0 thì vt -1
         if existing_monthly_summary:
+            print("ddax chay vao day")
             #tính thời gian viếng thăm
             checkin_giovao = self.checkin_giovao
             checkin_giora = self.checkin_giora
-            time_in = datetime.datetime.strptime(checkin_giovao, "%Y-%m-%d %H:%M:%S")
-            time_out = datetime.datetime.strptime(checkin_giora, "%Y-%m-%d %H:%M:%S")
+            time_in = datetime.datetime.strptime(checkin_giovao, "%Y-%m-%d %H:%M:%S") if isinstance(checkin_giovao,str) else checkin_giovao
+            time_out = datetime.datetime.strptime(checkin_giora, "%Y-%m-%d %H:%M:%S") if isinstance(checkin_giora,str) else checkin_giora
             seconds_worked = time_out.timestamp() - time_in.timestamp()
             time_work = seconds_worked / 3600
 
             monthly_summary_doc = frappe.get_doc("DMS Summary KPI Monthly", existing_monthly_summary)
             monthly_summary_doc.so_gio_lam_viec = minus_not_nega(monthly_summary_doc.so_gio_lam_viec,time_work)
             #không còn bản ghi trong ngày => giảm kpi viếng thăm
-            if exists_checkin_the_day == None:
+            if len(exists_checkin_the_day) == 0:
                 monthly_summary_doc.so_kh_vt_luot = minus_not_nega(monthly_summary_doc.so_kh_vt_luot)
                 if name_date in list_travel_date:
                     monthly_summary_doc.solan_vt_dungtuyen = minus_not_nega(monthly_summary_doc.solan_vt_dungtuyen)
@@ -195,10 +203,12 @@ class DMSCheckin(Document):
                     monthly_summary_doc.solan_vt_ngoaituyen = minus_not_nega(monthly_summary_doc.solan_vt_ngoaituyen)
             else :
                 last_checkin_date = exists_checkin_the_day[0]
-                checkin_giovao_new = last_checkin_date.checkin_giovao
+                checkin_giovao_new = last_checkin_date.checkin_giovao 
                 checkin_giora_new = last_checkin_date.checkin_giora
-                time_in_new = datetime.datetime.strptime(checkin_giovao_new, "%Y-%m-%d %H:%M:%S")
-                time_out_new = datetime.datetime.strptime(checkin_giora_new, "%Y-%m-%d %H:%M:%S")
+                
+                time_in_new = datetime.datetime.strptime(checkin_giovao_new, "%Y-%m-%d %H:%M:%S") if isinstance(checkin_giovao_new,str) else  checkin_giovao_new
+                time_out_new = datetime.datetime.strptime(checkin_giora_new, "%Y-%m-%d %H:%M:%S") if isinstance(checkin_giora_new,str) else  checkin_giora_new
+
                 seconds_worked_new = time_out_new.timestamp() - time_in_new.timestamp()
                 time_work_new = seconds_worked_new / 3600
                 monthly_summary_doc.so_gio_lam_viec += time_work_new
@@ -209,6 +219,8 @@ class DMSCheckin(Document):
 
             
             monthly_summary_doc.save(ignore_permissions=True)
+            print("cap nhat thanhcong vao")
+        # Lấy ngày tháng để truy xuất dữ liệu
 
 
     def send_data_to_ekgis(self):
@@ -218,7 +230,7 @@ class DMSCheckin(Document):
             queue="default",                        # one of short, default, long
             timeout=None,                           # pass timeout manually
             is_async=True,                         # if this is True, method is run in worker
-            now=False,                               # if this is True, method is run directly (not in a worker) 
+            now=True,                               # if this is True, method is run directly (not in a worker) 
             job_name=None,                          # specify a job name
             enqueue_after_commit=True,              # enqueue the job after the database commit is done at the end of the request
             at_front=False,                         # put the job at the front of the queue
@@ -696,10 +708,13 @@ def send_checkin_to_ekgis(doc):
         if sale_person:
             from mbw_dms.controllers.dms_sales_person import create_employee_objectid
             objectId = sale_person.object_id
-            if not objectId:
-                create_employee_objectid(sale_person)
-                sale_person = frappe.db.get_value("Sales Person",{"employee":employee.name},["*"],as_dict=1)
-                objectId = sale_person.object_id
+            if objectId == None:
+                try:
+                    create_employee_objectid(frappe.get_doc("Sales Person",{"employee":employee.name}))
+                    sale_person = frappe.get_doc("Sales Person",{"employee":employee.name})
+                    objectId = sale_person.object_id
+                except Exception as e:
+                    print("loi khi tao moi object",e)
             api_url_checkin=f"{API_URL}/{projectId}/{objectId}?api_key={api_key}"
             ext = {"customer_name": doc.kh_ten, "address": doc.kh_diachi}
             json_object = json.dumps(ext)
@@ -845,7 +860,6 @@ def get_report(filters={}):
                 UNIX_TIMESTAMP(dc.createddate) as create_time,
                 te.name AS employee_code,
                 sp.parent_sales_person AS sale_group,
-                SUM(TIMESTAMPDIFF(MINUTE, dc.checkin_giovao, dc.checkin_giora)) as total_time,
                 TIMESTAMPDIFF(MINUTE, MIN(dc.checkin_giovao), MAX(dc.checkin_giora)) as total_work,
                 CONCAT(
                     '[', 
@@ -901,7 +915,14 @@ def get_report(filters={}):
 
         report = frappe.db.sql(query, as_dict=1)
         for row in report:
-            row['customers'] = json.loads(row['customers']) if row['customers'] else []
+            try:
+                row["customers"] = json.loads(row["customers"]) if row.get("customers") else []
+            except (json.JSONDecodeError, TypeError) as e:
+                row["customers"] = []
+
+            total_time = sum(float(customer.get("time_check", 0)) for customer in row['customers'])
+            row["total_time"] = total_time
+            
         if not is_excel:
             query2 = f"""
                 SELECT COUNT(*) AS number_of_groups FROM (SELECT 

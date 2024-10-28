@@ -193,16 +193,20 @@ def create_customer(**kwargs):
         date_fields = ["custom_birthday"]
         choice_fields = ["customer_type"]
         for key, value in kwargs.items():
-            print("đẩy key vào customer")
+            
             if key in normal_fields:
+                print("đẩy key vào customer",key)
                 new_customer.set(key, value)
             elif key in required_fields:
+                print("đẩy key vào customer",key)
                 required = validate_not_none(value)
                 new_customer.set(key, required)
             elif key in date_fields:
+                print("đẩy key vào customer",key)
                 custom_birthday = validate_date(value)
                 new_customer.set(key, custom_birthday)
             elif key in choice_fields:
+                print("đẩy key vào customer",key)
                 customer_type = validate_choice(configs.customer_type)(value)
                 new_customer.set(key, customer_type)
         user_id = frappe.session.user
@@ -230,7 +234,7 @@ def create_customer(**kwargs):
         if contact is not None and contact.get("first_name"):
             print("vào tạo contact")
             new_contact = frappe.new_doc("Contact")
-            contact_fields = ["first_name", "address_contact", "phone"]
+            contact_fields = ["first_name", "address"]
             for key, value in contact.items():
                 if key in contact_fields:
                     new_contact.set(key, value)
@@ -251,12 +255,13 @@ def create_customer(**kwargs):
                 "link_name": new_contact.name,
             }
             # new_address_contact.insert()
-            current_address_contact = handle_address_customer(contact,link_cs_contact)
-            if frappe.db.exists("Address",current_address_contact.name) :
-                new_contact.address = current_address_contact.name
-            else:
-                new_contact.address = current_address_contact.address_title
-            new_contact.save()
+            if contact.get("address_title") and contact.get("city"):
+                current_address_contact = handle_address_customer(contact,link_cs_contact)
+                if frappe.db.exists("Address",current_address_contact.name) :
+                    new_contact.address = current_address_contact.name
+                else:
+                    new_contact.address = current_address_contact.address_title
+                new_contact.save()
             
 
         # xử lý thêm ảnh khách hàng

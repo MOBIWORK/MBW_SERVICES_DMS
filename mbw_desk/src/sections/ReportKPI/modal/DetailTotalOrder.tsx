@@ -3,57 +3,101 @@ import { AxiosService } from "@/services/server";
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 
-const columnsDetail: any = [
-  {
-    title: "STT",
-    dataIndex: "stt",
-    key: "stt",
-    width:60,
-    render: (_, record: any, index: number) => index + 1,
-  },
-  {
-    title: "Mã đơn hàng",
-    dataIndex: "name",
-    key: "name",
-  },
-  {
-    title: "Khách hàng",
-    dataIndex: "customer",
-    key: "customer",
-  },
-  {
-    title: "Trạng thái",
-    dataIndex: "status",
-    key: "status",
-    render: (value: any) => {
-      if(value === "To Deliver and Bill") {
-        return(<div className="whitespace-nowrap px-2 rounded-lg py-[8px] flex justify-center items-center text-[14px] leading-[21px] bg-[#FFAB0014] text-[#FFAB00]">• Chờ vận chuyển và chờ thanh toán</div>)
-      } else if(value === "To Bill") {
-        return(<div className="whitespace-nowrap px-2 rounded-lg py-[8px] flex justify-center items-center text-[14px] leading-[21px] bg-[#8E33FF14] text-[#8E33FF]">• Chờ thanh toán</div>)
-      } else if(value === "To Deliver") {
-        return(<div className="whitespace-nowrap px-2 rounded-lg py-[8px] flex justify-center items-center text-[14px] leading-[21px] bg-[#00B8D914] text-[#00B8D9]">• Chờ vận chuyển</div>)
-      } else if(value === "Completed"){
-        return(<div className="whitespace-nowrap px-2 rounded-lg py-[8px] flex justify-center items-center text-[14px] leading-[21px] bg-[#22C55E14] text-[#22C55E]">• Hoàn thành</div>)
-      } else {
-        return(<div className="whitespace-nowrap px-2 rounded-lg py-[8px] flex justify-center items-center text-[14px] leading-[21px] bg-[#FF563014] text-[#FF5630]">• Đã hủy</div>)
-      }
-    },
-  },
-  {
-    title: "Ngày đặt",
-    dataIndex: "collec_date",
-    key: "collec_date",
-    render: (value: any) => {
-      return (
-        <>
-          <div>{dayjs.unix(value).format('DD/MM/YYYY')}</div>
-        </>
-      );
-    },
-  },
-];
-
 export default function DetailTotalOrder({ employee, month, year }: any) {
+  const columnsDetail: any = [
+    {
+      title: "STT",
+      dataIndex: "stt",
+      key: "stt",
+      width: 60,
+      render: (_: any, __: any, index: number) => (
+        <span>{calculateIndex(page, PAGE_SIZE, index)}</span> // Tính toán index cho từng dòng
+      ),
+    },
+    {
+      title: "Mã đơn hàng",
+      dataIndex: "name",
+      key: "name",
+      render: (_:any, record: any) => (
+        <div>
+          <a
+            className="text-[#212B36]"
+            href={`/app/sales-order/${record.name}`}
+            target="_blank"
+          >
+            {record.name}
+          </a>
+        </div>
+      ),
+    },
+    {
+      title: "Khách hàng",
+      dataIndex: "customer",
+      key: "customer",
+      width: 200,
+      render: (_:any, record: any) => (
+        <div>
+          <a
+            className="text-[#212B36]"
+            href={`/app/customer/${record.customer}`}
+            target="_blank"
+          >
+            {record.customer}
+          </a>
+        </div>
+      ),
+    },
+    {
+      title: "Trạng thái",
+      dataIndex: "status",
+      key: "status",
+      render: (value: any) => {
+        if (value === "To Deliver and Bill") {
+          return (
+            <div className="whitespace-nowrap px-2 rounded-lg py-[8px] flex justify-center items-center text-[14px] leading-[21px] bg-[#FFAB0014] text-[#FFAB00]">
+              • Chờ vận chuyển và chờ thanh toán
+            </div>
+          );
+        } else if (value === "To Bill") {
+          return (
+            <div className="whitespace-nowrap px-2 rounded-lg py-[8px] flex justify-center items-center text-[14px] leading-[21px] bg-[#8E33FF14] text-[#8E33FF]">
+              • Chờ thanh toán
+            </div>
+          );
+        } else if (value === "To Deliver") {
+          return (
+            <div className="whitespace-nowrap px-2 rounded-lg py-[8px] flex justify-center items-center text-[14px] leading-[21px] bg-[#00B8D914] text-[#00B8D9]">
+              • Chờ vận chuyển
+            </div>
+          );
+        } else if (value === "Completed") {
+          return (
+            <div className="whitespace-nowrap px-2 rounded-lg py-[8px] flex justify-center items-center text-[14px] leading-[21px] bg-[#22C55E14] text-[#22C55E]">
+              • Hoàn thành
+            </div>
+          );
+        } else {
+          return (
+            <div className="whitespace-nowrap px-2 rounded-lg py-[8px] flex justify-center items-center text-[14px] leading-[21px] bg-[#FF563014] text-[#FF5630]">
+              • Đã hủy
+            </div>
+          );
+        }
+      },
+    },
+    {
+      title: "Ngày đặt",
+      dataIndex: "collec_date",
+      key: "collec_date",
+      render: (value: any) => {
+        return (
+          <>
+            <div>{dayjs.unix(value).format("DD/MM/YYYY")}</div>
+          </>
+        );
+      },
+    },
+  ];
   const [page, setPage] = useState<number>(1);
   const PAGE_SIZE = 20;
   const [total, setTotal] = useState<number>(0);
@@ -66,6 +110,13 @@ export default function DetailTotalOrder({ employee, month, year }: any) {
 
   const startOfMonthTimestamp = startOfMonth.unix();
   const endOfMonthTimestamp = endOfMonth.unix();
+  const calculateIndex = (
+    pageNumber: number,
+    pageSize: number,
+    index: number
+  ) => {
+    return (pageNumber - 1) * pageSize + index + 1;
+  };
 
   useEffect(() => {
     (async () => {
@@ -87,6 +138,12 @@ export default function DetailTotalOrder({ employee, month, year }: any) {
     })();
   }, [startOfMonthTimestamp, endOfMonthTimestamp, employee, page]);
 
+  useEffect(() => {
+    return () => {
+      setPage(1);
+    };
+  }, [employee]);
+  
   return (
     <>
       <TableCustom
@@ -110,7 +167,7 @@ export default function DetailTotalOrder({ employee, month, year }: any) {
             : false
         }
         scroll={{
-          y: 300,
+          y: 500,
         }}
         columns={columnsDetail}
       />

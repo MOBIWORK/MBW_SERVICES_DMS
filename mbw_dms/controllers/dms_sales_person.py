@@ -10,12 +10,13 @@ def update(doc, method=None):
     if doc.employee and not doc.object_id:
         create_employee_objectid(doc,method)
     # cập nhật object id   
-    if doc.employee and doc.employee != previous_doc.employee and previous_doc.employee:
-        update_employee_objectid(doc,method)
+    if previous_doc:
+        if doc.employee and previous_doc.employee and doc.employee != previous_doc.employee :
+            update_employee_objectid(doc,method)
+        #xóa objectid khi sales person không được gán
+        elif not doc.employee and previous_doc.employee:
+            delete_employee_objectId(doc,method)
         
-    #xóa objectid khi sales person không được gán
-    if not doc.employee:
-        delete_employee_objectId(doc,method)
 
     if doc.sales_manager:
         user_permission = frappe.new_doc("User Permission")
@@ -82,7 +83,7 @@ def create_employee_objectid(doc,method=None):
     if response.status_code == 200:
         new_info = response.json()
         doc.object_id = new_info["results"].get("_id")
-        doc.save()
+        doc.save(ignore_permissions=True)
     else:
         frappe.msgprint(f"Lỗi khi gọi API tạo mới object ID: {response.status_code}")
         return

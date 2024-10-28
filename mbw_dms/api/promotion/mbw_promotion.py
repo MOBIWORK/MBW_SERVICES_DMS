@@ -53,6 +53,7 @@ def get_list_promotion(**kwargs):
                 promo["products"] = json.loads(promo["products"])
             except json.JSONDecodeError:
                 promo["products"] = []
+<<<<<<< HEAD
 
     # Áp dụng CTKM
     return apply_Promotion(list_item, list_promotions, total_amount)
@@ -464,4 +465,6 @@ def On_Process_GiamTru(objKM,idsp,dvt,sl,yeu_cau):
                 
 
 
+=======
+>>>>>>> main
 

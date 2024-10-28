@@ -58,10 +58,10 @@ function AvatarComponent({mini}:{mini: boolean}) {
                                 >
                                     {!empDetail?.user_image && empDetail?.full_name.split(" ").reduce((prev: string, now: string) => `${prev[0] || ""}${now[0]}`, "")}
                                 </Avatar>
-                                {!mini &&    <p className='text-base font-medium  ml-[5px] text-left'>
+                                {!mini &&    <div className='text-base font-medium  ml-[5px] text-left'>
                                     <p>{empDetail?.full_name}</p>
                                     <p className='text-xs text-[#637381] font-normal'>{empDetail?.department}</p>
-                                </p>}
+                                </div>}
                               
                             </Row>
                         </Col>

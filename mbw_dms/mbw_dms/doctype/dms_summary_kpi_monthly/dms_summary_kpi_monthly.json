@@ -89,7 +89,7 @@
   },
   {
    "fieldname": "sku",
-   "fieldtype": "Int",
+   "fieldtype": "Float",
    "label": "SKU"
   },
   {
@@ -109,13 +109,13 @@
   },
   {
    "fieldname": "kh_vt",
-   "fieldtype": "Data",
+   "fieldtype": "Long Text",
    "label": "KH vi\u1ebfng th\u0103m"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-09-10 08:42:08.652035",
+ "modified": "2024-10-11 09:53:44.094864",
  "modified_by": "Administrator",
  "module": "MBW DMS",
  "name": "DMS Summary KPI Monthly",

@@ -1,62 +1,88 @@
 import { TableCustom } from "@/components";
 import { AxiosService } from "@/services/server";
 import dayjs from "dayjs";
-import { useEffect, useState } from "react";
-
-const columnsDetail: any = [
-  {
-    title: "STT",
-    dataIndex: "stt",
-    key: "stt",
-    width:60,
-    render: (_, record: any, index: number) => index + 1,
-  },
-  {
-    title: "Mã khách hàng",
-    dataIndex: "customer_code",
-    key: "customer_code",
-  },
-  {
-    title: "Khách hàng",
-    dataIndex: "customer",
-    key: "customer",
-  },
-  {
-    title: "Địa chỉ",
-    dataIndex: "customer_address",
-    key: "customer_address",
-    render: (value: any) => {
-      return <div className="truncate hover:whitespace-normal">{value}</div>;
-    },
-  },
-  {
-    title: "Mã đơn hàng",
-    dataIndex: "so_name",
-    key: "so_name",
-  },
-  {
-    title: "Ngày đặt",
-    dataIndex: "trans_date",
-    key: "trans_date",
-    render: (value: any) => {
-      return (
-        <>
-          <div>{dayjs.unix(value).format('DD/MM/YYYY')}</div>
-        </>
-      );
-    },
-  },
-  {
-    title: "Tông tiền",
-    dataIndex: "grand_total",
-    key: "grand_total",
-    render: (value: any) => (
-      <div className="!text-right">{Intl.NumberFormat().format(value)}</div>
-    ),
-  },
-];
+import React, { useEffect, useState } from "react";
 
 export default function DetailOrder({ employee, month, year }: any) {
+  const columnsDetail: any = [
+    {
+      title: "STT",
+      dataIndex: "groupIndex",
+      key: "index",
+      width: 60,
+      render: (_: any, __: any) => {
+        return _;
+      },
+    },
+    {
+      title: "Mã khách hàng",
+      dataIndex: "customer_code",
+      key: "customer_code",
+    },
+    {
+      title: "Khách hàng",
+      dataIndex: "customer",
+      key: "customer",
+      width: 200,
+      render: (_:any, record: any) => (
+        <div>
+          <a
+            className="text-[#212B36]"
+            href={`/app/customer/${record.customer}`}
+            target="_blank"
+          >
+            {record.customer}
+          </a>
+        </div>
+      ),
+    },
+    {
+      title: "Địa chỉ",
+      dataIndex: "customer_address",
+      key: "customer_address",
+      render: (value: any) => {
+        return <div className="truncate hover:whitespace-normal">{value}</div>;
+      },
+    },
+    {
+      title: "Mã đơn hàng",
+      dataIndex: "so_name",
+      key: "so_name",
+      width: 200,
+      render: (_:any, record: any) => (
+        <div>
+          <a
+            className="text-[#212B36]"
+            href={`/app/sales-order/${record.so_name}`}
+            target="_blank"
+          >
+            {record.so_name}
+          </a>
+        </div>
+      ),
+    },
+    {
+      title: "Ngày đặt",
+      dataIndex: "trans_date",
+      key: "trans_date",
+      render: (value: any) => {
+        return (
+          <>
+            <div>{dayjs.unix(value).format("DD/MM/YYYY")}</div>
+          </>
+        );
+      },
+    },
+    {
+      title: "Tông tiền",
+      dataIndex: "grand_total",
+      key: "grand_total",
+      render: (value: any) => (
+        <div className="!text-right">{Intl.NumberFormat().format(value)}</div>
+      ),
+    },
+  ];
+
   const [page, setPage] = useState<number>(1);
   const PAGE_SIZE = 20;
   const [total, setTotal] = useState<number>(0);
@@ -85,20 +111,40 @@ export default function DetailOrder({ employee, month, year }: any) {
         }
       );
       let { result } = rsData;
-      setDataDetail(result);
       setTotal(result?.totals);
+      setDataDetail((prevData: any) => 
+        page === 1 ? result.data : [...prevData, ...result.data]
+      );
     })();
   }, [startOfMonthTimestamp, endOfMonthTimestamp, employee, page]);
+
+  const groupedData = React.useMemo(() => {
+    let lastKhMa: string | null = null;
+    let currentIndex = 0;
+
+    return dataDetail.map((item: any) => {
+      if (item.customer_code !== lastKhMa) {
+        lastKhMa = item.customer_code;
+        currentIndex++;
+        return { ...item, groupIndex: currentIndex };
+      } else {
+        return { ...item, groupIndex: null };
+      }
+    });
+  }, [dataDetail]);
+
+  useEffect(() => {
+    return () => {
+      setPage(1);
+    };
+  }, [employee]);
 
   return (
     <>
       <TableCustom
         bordered
         $border
-        dataSource={dataDetail?.data?.map((report: any) => ({
-          key: report.so_name,
-          ...report,
-        }))}
+        dataSource={groupedData}
         pagination={
           total && total > PAGE_SIZE
             ? {
@@ -113,7 +159,7 @@ export default function DetailOrder({ employee, month, year }: any) {
             : false
         }
         scroll={{
-          y: 300,
+          y: 500,
         }}
         columns={columnsDetail}
       />

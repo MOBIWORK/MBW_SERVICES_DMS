@@ -1,31 +1,15 @@
 export type summaryMoveType = RootObject[]
 
 export interface RootObject {
-    object: Object;
-    summary: Summary;
+    object: {
+      _id: string
+    };
+    summary: SummaryType;
   }
-  interface Summary {
-    move: Move;
-    stop: Stop;
-    checkin: Stop;
-  }
-  interface Stop {
-    count: number;
-    totalTime: number;
-  }
-  interface Move {
-    count: number;
-    totalTime: number;
-    distance: number;
-  }
-  interface Object {
-    _id: string;
-    name: string;
-  }
-
-export type employeeMoveType = {
-    [key:string]: any
-}
+// export type employeeMoveType = {
+//     [key:string]: any,
+    
+// }
 
 export type employeeType = {
   object_id?: string
@@ -40,4 +24,39 @@ export type optionsType = {
   projectId: string | null;
   objectId?: string,
   employees?: employeeType[] |[]
+}
+
+// type emp move
+export interface employeeMoveType {
+  object_id: any
+  employee_name: string
+  avatar: any
+  name: string
+  user_id: any
+  summary?: SummaryType
+}
+
+export interface SummaryType {
+  moves: Moves
+  stops: Stops
+  checkins: Checkins
+}
+
+export interface Moves {
+  count: number
+  geo_distance: number
+  distance: number
+  totalTime: number
+  avgSpeed: number
+  maxSpeed: number
+}
+
+export interface Stops {
+  count: number
+  totalTime: number
+}
+
+export interface Checkins {
+  count: number
+  totalTime: number
 }

@@ -52,7 +52,7 @@ columnReport = {
     "Report Checkin" : {
         "column" : {
             "main_columns": ["STT", "Mã nhân viên","Nhân viên", "Nhóm bán hàng","Ngày","Thứ","Giờ làm", "Giờ VT","Khách hàng","","","","","","","Viếng Thăm","","","","","","","","","","","Số km tự động (km)","Số km tự di chuyển (km)","Vận tốc (km/h)"],
-            "sub_column": ["","","","","","","","","Mã KH","Tên KH","Liên hệ","Loại KH","Nhóm KH","SĐT","Địa chỉ","Checkin","Checkout","Số giờ VT","Địa chỉ checkin","Khoảng cách (km)","Thiết bị","Số ảnh chụp","Đúng tuyến","Đơn hàng","Ghi tồn","Ghi chú","","",""],
+            "sub_column": ["","","","","","","","","Mã KH","Tên KH","Liên hệ","Loại hình KH","Nhóm KH","SĐT","Địa chỉ","Checkin","Checkout","Số giờ VT","Địa chỉ checkin","Khoảng cách (km)","Thiết bị","Số ảnh chụp","Đúng tuyến","Đơn hàng","Ghi tồn","Ghi chú","","",""],
         },
         "col_span": ["A9:A11", "B9:B11", "C9:C11", "D9:D11","E9:E11","F9:F11","G9:G11","H9:H11","I9:O10","P9:Z10","AA9:AA11","AB9:AB11","AC9:AC11"],
         # "col_span": [],
@@ -61,7 +61,7 @@ columnReport = {
         "column_widths" : {
                             "A": 5, "B": 15, "C": 25, "D": 35,
                             "E": 10, "F": 10, "G": 10, "H": 10,
-                            "I": 10, "J": 10, "K": 10, "L": 10,
+                            "I": 10, "J": 10, "K": 10, "L": 15,
                             "M": 10, "N": 10, "O": 10, "P": 10,
                             "Q": 10, "R": 10, "S": 10, "T": 10,
                             "U": 10, "V": 10, "W": 10, "X": 10,
@@ -72,7 +72,7 @@ columnReport = {
     },
     "Report Inventory" : {
         "column" : {
-            "main_columns": ["STT","Mã khách hàng","Tên khách hàng","Loại khách hàng","Địa chỉ","Mã sản phẩm","Tên sản phẩm","Hạn sử dụng","ĐVT","Tồn","Giá sản phẩm","Tổng giá trị","Ngày cập nhật","Mã nhân viên","Nhân viên cập nhật"],
+            "main_columns": ["STT","Mã khách hàng","Tên khách hàng","Loại hình khách hàng","Địa chỉ","Mã sản phẩm","Tên sản phẩm","Hạn sử dụng","ĐVT","Tồn","Giá sản phẩm","Tổng giá trị","Ngày cập nhật","Mã nhân viên","Nhân viên cập nhật"],
         },
         "show_data":["customer_code","customer_name","customer_type","customer_address","item_code","item_name","exp_time","item_unit","quantity","item_price","total_quantity","update_at","update_bycode","update_byname"],
         "content_start_at": 10,
@@ -128,7 +128,7 @@ columnReport = {
     },
     "Report Customer": {
         "column": {
-            "main_columns":["STT","Mã NV","Tên nhân viên","Nhóm bán hàng","Mã KH","Tên khách hàng","Loại khách hàng","Nhóm khách hàng","Người liên hệ","SĐT","Mã số thuế","Khu vực","Địa chỉ","Ngày thu thập","Nguồn","Số lần VT","VT đầu","VT cuối","Số đơn hàng","Đơn hàng cuối"]
+            "main_columns":["STT","Mã NV","Tên nhân viên","Nhóm bán hàng","Mã KH","Tên khách hàng","Loại hình khách hàng","Nhóm khách hàng","Người liên hệ","SĐT","Mã số thuế","Khu vực","Địa chỉ","Ngày thu thập","Nguồn","Số lần VT","VT đầu","VT cuối","Số đơn hàng","Đơn hàng cuối"]
         },
         "show_data":["sales_person_id","sales_person","sales_team","customer_code","customer_name","customer_type","customer_group","contact","phone","tax_id","territory","address","creation","f1","totals_checkin","first_checkin","last_checkin","totals_so","last_sale_order"],
         "content_start_at": 10,
@@ -146,14 +146,14 @@ columnReport = {
     },
     "Report Customer Checkin": {
         "column": {
-            "main_columns":["STT","Nhóm bán hàng","Mã NV","Tên nhân viên","Mã KH","Tên khách hàng","Loại KH","Nhóm KH","Người liên hệ","SĐT","Mã số thuế","Khu vực","Địa chỉ","Ngày viếng thăm"]
+            "main_columns":["STT","Nhóm bán hàng","Mã NV","Tên nhân viên","Mã KH","Tên khách hàng","Loại hình KH","Nhóm KH","Người liên hệ","SĐT","Mã số thuế","Khu vực","Địa chỉ","Ngày viếng thăm"]
         },
         "show_data":["sales_team","employee_id","sales_person","customer_code","customer_name","customer_type","customer_group","contact_person","phone","tax_id","territory","address","date_checkin"],
         "content_start_at": 10,
         "column_widths" : {
                             "A": 5, "B": 15, "C": 25, "D": 35,
                             "E": 10, "F": 10, "G": 10, "H": 10,
-                            "I": 10, "J": 10, "K": 10, "L": 10,
+                            "I": 10, "J": 10, "K": 10, "L": 15,
                             "M": 10, "N": 10, "O": 10, "P": 10,
                             "Q": 10, "R": 10, "S": 10, "T": 10,
                             "U": 10, "V": 10, "W": 10, "X": 10,

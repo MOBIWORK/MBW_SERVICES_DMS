@@ -3,45 +3,70 @@ import { AxiosService } from "@/services/server";
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 
-const columnsDetail: any = [
-  {
-    title: "STT",
-    dataIndex: "stt",
-    key: "stt",
-    width: 60,
-    render: (_, record: any, index: number) => index + 1,
-  },
-  {
-    title: "Mã đơn đặt",
-    dataIndex: "name",
-    key: "name",
-  },
-  {
-    title: "Khách hàng",
-    dataIndex: "customer",
-    key: "customer",
-  },
-  {
-    title: "Ngày đặt",
-    dataIndex: "create_date",
-    key: "create_date",
-    render: (value: any) => {
-      return (
-        <>
-          <div>{dayjs.unix(value).format("DD/MM/YYYY")}</div>
-        </>
-      );
-    },
-  },
-  {
-    title: "Số lượng",
-    dataIndex: "totak_sku",
-    key: "totak_sku",
-    render: (value: any) => <div className="!text-right">{value}</div>,
-  },
-];
-
 export default function DetailSku({ employee, month, year }: any) {
+  const columnsDetail: any = [
+    {
+      title: "STT",
+      dataIndex: "stt",
+      key: "stt",
+      width: 60,
+      render: (_: any, __: any, index: number) => (
+        <span>{calculateIndex(page, PAGE_SIZE, index)}</span> // Tính toán index cho từng dòng
+      ),
+    },
+    {
+      title: "Mã đơn đặt",
+      dataIndex: "name",
+      key: "name",
+      render: (_:any, record: any) => (
+        <div>
+          <a
+            className="text-[#212B36]"
+            href={`/app/sales-order/${record.name}`}
+            target="_blank"
+          >
+            {record.name}
+          </a>
+        </div>
+      ),
+    },
+    {
+      title: "Khách hàng",
+      dataIndex: "customer",
+      key: "customer",
+      width: 200,
+      render: (_:any, record: any) => (
+        <div>
+          <a
+            className="text-[#212B36]"
+            href={`/app/customer/${record.customer}`}
+            target="_blank"
+          >
+            {record.customer}
+          </a>
+        </div>
+      ),
+    },
+    {
+      title: "Ngày đặt",
+      dataIndex: "create_date",
+      key: "create_date",
+      render: (value: any) => {
+        return (
+          <>
+            <div>{dayjs.unix(value).format("DD/MM/YYYY")}</div>
+          </>
+        );
+      },
+    },
+    {
+      title: "SKU",
+      className: "!text-right",
+      dataIndex: "totak_sku",
+      key: "totak_sku",
+      render: (value: any) => <div className="!text-right">{value}</div>,
+    },
+  ];
   const [page, setPage] = useState<number>(1);
   const PAGE_SIZE = 20;
   const [total, setTotal] = useState<number>(0);
@@ -54,6 +79,13 @@ export default function DetailSku({ employee, month, year }: any) {
 
   const startOfMonthTimestamp = startOfMonth.unix();
   const endOfMonthTimestamp = endOfMonth.unix();
+  const calculateIndex = (
+    pageNumber: number,
+    pageSize: number,
+    index: number
+  ) => {
+    return (pageNumber - 1) * pageSize + index + 1;
+  };
 
   useEffect(() => {
     (async () => {
@@ -74,6 +106,12 @@ export default function DetailSku({ employee, month, year }: any) {
       setTotal(result?.totals);
     })();
   }, [startOfMonthTimestamp, endOfMonthTimestamp, employee, page]);
+
+  useEffect(() => {
+    return () => {
+      setPage(1);
+    };
+  }, [employee]);
 
   return (
     <>
@@ -98,7 +136,7 @@ export default function DetailSku({ employee, month, year }: any) {
             : false
         }
         scroll={{
-          y: 300,
+          y: 500,
         }}
         columns={columnsDetail}
       />
