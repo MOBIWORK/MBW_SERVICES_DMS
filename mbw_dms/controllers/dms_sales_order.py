@@ -1,4 +1,5 @@
 import frappe
+from erpnext.accounts.report.accounts_receivable.accounts_receivable import ReceivablePayableReport
 from frappe.utils import nowdate
 import calendar
 from mbw_dms.api.common import qty_not_pricing_rule
@@ -222,3 +223,21 @@ def update_person_sales(doc, method):
     sales_person = doc.sales_team
     if sales_person and len(sales_person) == 1:
         doc.custom_sale_person = sales_person[0].sales_person
+
+def update_account_debt(doc, method):
+    args = {
+        "account_type": "Receivable",
+        "naming_by": ["Selling Settings", "cust_master_name"],
+    }
+    filters = {'company': 'CÔNG TY TNHH THƯƠNG MẠI VIỆT HẢI ĐĂNG',
+               'report_date': nowdate(),
+               'party_type': 'Customer',
+               'party': [doc.customer],
+               'ageing_based_on': 'Due Date',
+               'range': '30, 60, 90, 120',
+               'customer_group': [],
+               'group_by_party': 1}
+    data = ReceivablePayableReport(filters).run(args)
+    if len(data) > 1 and len(data[1]) > 0:
+        doc.custom_tong_no_cu = data[1][len(data[1]) - 1].get("outstanding")
+    print(doc.custom_tong_no_cu)
