@@ -37,10 +37,13 @@ def create_ItemScore_SaleOrder(sales_order):
 										 "name": "so_detail",
 										 "parent": "sales_order",
 									 },
-									 "field_no_map": ["point_reward"],
+									 "field_no_map": ["point_per_unit", "point_reward"],
 								 }, })
 
 	for item in doclist.items:
 		itm = frappe.get_doc("Item", item.item_code)
-		item.point_reward = itm.custom_point_reward * item.qty
+		for uom in itm.uoms:
+			if uom.uom == item.uom:
+				item.point_per_unit = uom.custom_point_reward
+				item.point_reward = uom.custom_point_reward * item.qty
 	doclist.save()
