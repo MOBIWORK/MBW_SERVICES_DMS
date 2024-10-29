@@ -155,7 +155,8 @@ def get_list_top_employee(**kwargs):
                 if fre:
                     frequency = fre.split(";")
                     for j in frequency:
-                        week_router.append(int(j))
+                        if bool(j):
+                            week_router.append(int(j))
                 current_week = current_month_week()
                 if current_week in week_router:
                     cus += 1
