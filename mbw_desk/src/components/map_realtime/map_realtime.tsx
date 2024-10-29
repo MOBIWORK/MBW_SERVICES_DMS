@@ -9,11 +9,11 @@ import { employeeType } from '../mapEkgis/realtime/types';
 
 
 interface RealtimeProp {
-    options: any, onClickPopup: functionType, status:functionType 
+    options: any, onClickPopup: functionType, status:functionType ,info: functionType
 }
 const ekmapplf = window.ekmapplf;
 
-function RealtimeMap({ options, onClickPopup, status }:RealtimeProp) {
+function RealtimeMap({ options, onClickPopup, status,info }:RealtimeProp) {
     const mapContainer = useRef<any>(null);
     const map = useRef<any>(null);
     const intervalIdRef = useRef(null);
@@ -115,8 +115,9 @@ function RealtimeMap({ options, onClickPopup, status }:RealtimeProp) {
 
                     if (intervalIdRef.current) clearInterval(intervalIdRef.current);
                     intervalIdRef.current = setInterval(async () => {
+                        await info()
                         await loadMap(_options.objectId);
-                    }, 60000);
+                    }, 30000);
                 } catch (error) {
                     console.error('Error:', error);
                 }
