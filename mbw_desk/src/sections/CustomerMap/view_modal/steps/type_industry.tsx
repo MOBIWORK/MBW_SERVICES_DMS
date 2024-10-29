@@ -1,5 +1,5 @@
 import React, { useState ,useEffect,useRef} from "react";
-import { AxiosService } from "../../../services/server";
+import { AxiosService } from "../../../../services/server";
 import { Form, Select,Input } from "antd";
 export function TypeIndustry ({form}) {
     const [typeIndustry, setTypeIndustry] = useState(null);
@@ -22,10 +22,12 @@ export function TypeIndustry ({form}) {
       setTransformedStoreTypes(transformedStoreTypes)
     }
   };
-  const onChangeTypeIndustry = (value,label) => {
-    setTypeIndustry(value)
-    form.setFieldsValue({ nganhhang: value });
-    form.setFieldsValue({ namBando: "Bản đồ " + label });
+  const onChangeTypeIndustry = (value,record) => {
+    // console.log({value,label});
+    
+    // setTypeIndustry(value)
+    // form.setFieldsValue({ nganhhang: value });
+    form.setFieldsValue({ namBando: "Bản đồ " + record.label });
   }
     return (
         <>
