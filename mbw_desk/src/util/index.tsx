@@ -226,3 +226,37 @@ export const getDaysAndWeekdays = (
 
   return daysArray;
 };
+
+
+ // trả về bool hôm nay
+ export function isToday(timestamp:number) {
+  const timeZone = "Asia/Saigon";
+  const date = new Date(timestamp).toLocaleDateString("en-US", {
+    timeZone: timeZone,
+  });
+  const today = new Date().toLocaleDateString("en-US", {
+    timeZone: timeZone,
+  });
+  return date === today;
+}
+
+export async function reverseGeocode(position:number[],ekmapplf:any,_options:any):Promise<string> {
+  return new Promise((resolve, reject) => {
+    const param = {
+      "point.lon": position[0],
+      "point.lat": position[1],
+    };
+    const geocoding = new ekmapplf.service.Geocoding(_options.apiKey);
+    geocoding.reverse(param, (error, response) => {
+      if (error) {
+        reject("Không có thông tin");
+      } else {
+        const address =
+          response.results.length > 0
+            ? response.results[0].formatted_address
+            : "Không có thông tin";
+        resolve(address);
+      }
+    });
+  });
+}
