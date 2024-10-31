@@ -1,0 +1,1 @@
+import{L as t,ad as e}from"./index-xC06qkrg.js";import"https://cdn.jsdelivr.net/npm/nats.ws@1.29.2/+esm";function r(){return t.jsx("div",{children:"RouterDetail"})}function o(){return t.jsxs(t.Fragment,{children:[t.jsx(e,{children:t.jsx("title",{children:" RouterControll"})}),t.jsx(r,{})]})}export{o as default};
