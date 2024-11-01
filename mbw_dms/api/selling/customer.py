@@ -173,7 +173,6 @@ def delete_customer(name):
 @frappe.whitelist(methods="POST")
 def create_customer(**kwargs):
     try:
-        print("kwargs",kwargs)
         kwargs  = frappe._dict(kwargs)
         # Check dữ liệu đầu vào
         phone_number = ""
@@ -188,29 +187,29 @@ def create_customer(**kwargs):
             
         # Tạo mới khách hàng
         new_customer = frappe.new_doc("Customer")
-        required_fields = ["customer_code", "customer_name",]
-        normal_fields = ["customer_details", "website", "customer_group", "territory","sfa_customer_type","sfa_sale_channel"]
+        required_fields = ["customer_name"]
+        normal_fields = ["customer_details", "website", "customer_group", "territory", "sfa_customer_type", "sfa_sale_channel"]
         date_fields = ["custom_birthday"]
         choice_fields = ["customer_type"]
+
         for key, value in kwargs.items():
-            
             if key in normal_fields:
-                print("đẩy key vào customer",key)
                 new_customer.set(key, value)
+
             elif key in required_fields:
-                print("đẩy key vào customer",key)
                 required = validate_not_none(value)
                 new_customer.set(key, required)
+
             elif key in date_fields:
-                print("đẩy key vào customer",key)
                 custom_birthday = validate_date(value)
                 new_customer.set(key, custom_birthday)
+
             elif key in choice_fields:
-                print("đẩy key vào customer",key)
                 customer_type = validate_choice(configs.customer_type)(value)
                 new_customer.set(key, customer_type)
+
         user_id = frappe.session.user
-        employee_name = frappe.db.get_value("Employee", {"user_id": user_id}, ["name", "company"],as_dict=1)
+        employee_name = frappe.db.get_value("Employee", {"user_id": user_id}, ["name", "company"], as_dict=1)
         sale_person = frappe.get_value("Sales Person", {"employee": employee_name.name}, "parent_sales_person") if employee_name else ""
         new_customer.custom_sales_manager = sale_person
 
@@ -222,17 +221,17 @@ def create_customer(**kwargs):
             "bypass_credit_limit_check": 1
         })
         new_customer.insert()
+
         # Xử lý địa chỉ khách hàng
-        address= frappe._dict(address) if address else None
+        address = frappe._dict(address) if address else None
         current_address = None
         if address is not None and address.address_title:
             address.address_location = json_location            
             current_address = handle_address_customer(address,{})
             
 
-        # xử  lý contact khách hàng
+        # Xử lý contact khách hàng
         if contact is not None and contact.get("first_name"):
-            print("vào tạo contact")
             new_contact = frappe.new_doc("Contact")
             contact_fields = ["first_name", "address"]
             for key, value in contact.items():
@@ -249,27 +248,26 @@ def create_customer(**kwargs):
                     "is_primary_mobile_no":1
                 })
             new_contact.insert()
-            # liên kết địa chỉ với contact
+
+            # Liên kết địa chỉ với contact
             link_cs_contact = {
                 "link_doctype": new_contact.doctype,
                 "link_name": new_contact.name,
             }
-            # new_address_contact.insert()
             if contact.get("address_title") and contact.get("city"):
-                current_address_contact = handle_address_customer(contact,link_cs_contact)
-                if frappe.db.exists("Address",current_address_contact.name) :
+                current_address_contact = handle_address_customer(contact, link_cs_contact)
+                if frappe.db.exists("Address", current_address_contact.name) :
                     new_contact.address = current_address_contact.name
                 else:
                     new_contact.address = current_address_contact.address_title
                 new_contact.save()
-            
 
-        # xử lý thêm ảnh khách hàng
+        # Xử lý thêm ảnh khách hàng
         if kwargs.get("image"):
             new_customer.image = post_image(name_image='', faceimage=kwargs.get("image"), doc_type="Customer", doc_name=new_customer.name)
             new_customer.save()
 
-        #thêm khách hàng vào tuyến v2
+        # Thêm khách hàng vào tuyến v2
         if router_in and len(router_in)>0:
             frappe.enqueue(
                     update_customer_in_router,
@@ -280,15 +278,12 @@ def create_customer(**kwargs):
                     job_name=None,                          # specify a job name
                     enqueue_after_commit=True,              # enqueue the job after the database commit is done at the end of the request
                     at_front=False,                         # put the job at the front of the queue
-                    customer=kwargs,routers= router_in,customer_code = new_customer.customer_code                             # kwargs are passed to the method as arguments
+                    customer=kwargs,routers=router_in,customer_code=new_customer.customer_code                             # kwargs are passed to the method as arguments
                 )
 
-
-
-        # xử lý các liên kết ở đây
-        ## liên kết địa chỉ
+        # Xử lý các liên kết
+        # Liên kết địa chỉ
         if address is not None and address.address_title and current_address:
-            print("add địa chỉ",current_address.name)
             link_cs_address = {
                 "link_doctype": new_customer.doctype,
                 "link_name": new_customer.name,
@@ -296,43 +291,42 @@ def create_customer(**kwargs):
             current_address.append("links",link_cs_address)
             current_address.save()
             frappe.db.commit()
-            #liên kết địa chỉ với khách hàng
+
+            # Liên kết địa chỉ với khách hàng
             if frappe.db.exists("Address",current_address.name):
                 new_customer.customer_primary_address = current_address.name
             else:
                 new_customer.customer_primary_address = current_address.address_title
             new_customer.save()
-        ## liên kết contact
+
+        # Liên kết contact
         if contact is not None and contact.get("first_name") and new_contact:
-            print("thêm contacts")
             link_cs_contact = {
                 "link_doctype": new_customer.doctype,
                 "link_name": new_customer.name,
             }
-            # liên kết contact với khách hàng
+
+            # Liên kết contact với khách hàng
             new_contact.append("links",link_cs_contact)
             new_contact.save()
-            # chọn contact làm liên lạc khách hàng
+
+            # Chọn contact làm liên lạc khách hàng
             new_customer.customer_primary_contact = new_contact.name
             new_customer.save()
 
         frappe.db.commit()
         return gen_response(201, "Thành công", {"name": new_customer.name})
+
     except Exception as e:
-        # phải xử lý lại 
-        # xử lý xóa các bản ghi cũ
-        # xóa bản ghi khách hàng
+        # Xử lý xóa các bản ghi cũ, xóa bản ghi khách hàng
         if "new_customer" in locals() and new_customer is not None :
-            print("xóa new_customer")
             try:
                 frappe.delete_doc("Customer", new_customer.name,ignore_permissions=True)
-                print("xóa new_customer: done")
             except Exception as ex:
-                 print("xóa new_customer: thất bại - chi tiết",ex)
+                 print("xóa new_customer: thất bại - chi tiết", ex)
 
         # xóa bản ghi địa chỉ khách hàng
         if "current_address" in locals() and current_address is not None :
-            print("xóa current_address")
             try:
                 frappe.delete_doc("Address", {"address_title":["like",f"%{current_address.address_title}%"]},ignore_permissions=True)
                 print("xóa current_address: done")
@@ -340,7 +334,6 @@ def create_customer(**kwargs):
                  print("xóa current_address: thất bại - chi tiết",ex)
         # xóa contact khách hàng và đại chỉ liên hệ với contact đó
         if "new_contact" in locals() and new_contact is not None :
-            print("xóa new_contact- address contact")
             try:
                 if current_address_contact is not None:
                     address_contact = frappe.get_doc("Address",current_address_contact.name)
@@ -356,11 +349,9 @@ def create_customer(**kwargs):
                     if len(links) ==0:
                         frappe.delete_doc("Address",{"address_title":["like",f"%{current_address_contact.address_title}%"]})
                         frappe.db.commit()                
-                print("xóa new_contact- address contact: done")
             except Exception as ex:
                  print("xóa new_contact- address contact: thất bại - chi tiết",ex)
 
-            pass
         return exception_handle(e)
     
 # Danh sách lãnh thổ 
@@ -499,10 +490,11 @@ def update_customer(**kwargs):
                             new_contact.save()
                         contact_data.update({"name": new_contact.name})
                     primary_contact = pydash.find(contacts_data_list,lambda x: x.get("primary") == 1)
+
                     if primary_contact:
-                        # customer = frappe.get_doc("Customer", name)
                         customer.set("customer_primary_contact", primary_contact.get("name"))
                         customer.save()
+
             router_in = kwargs.get("router")
             if router_in and len(router_in)>0:
                 frappe.enqueue(
@@ -514,7 +506,7 @@ def update_customer(**kwargs):
                     job_name=None,                          # specify a job name
                     enqueue_after_commit=True,              # enqueue the job after the database commit is done at the end of the request
                     at_front=False,                         # put the job at the front of the queue
-                    customer=kwargs,routers= router_in                             # kwargs are passed to the method as arguments
+                    customer=kwargs, routers=router_in, customer_code=customer.customer_code                        # kwargs are passed to the method as arguments
                 )
             
             # customer.save()
@@ -648,15 +640,14 @@ def get_channel():
         return exception_handle(e)
 
 #cập nhật khách hàng vào danh sách tuyến
-def update_customer_in_router(customer={},routers=[],customer_code=None):
-    print("===========================run queue router customer======================")
+def update_customer_in_router(customer={}, routers=[], customer_code=None):
     customer = frappe._dict(customer)
     if isinstance(customer.address, list):
-        address = pydash.find( customer.address,lambda x:x.get("primary"))
+        address = pydash.find( customer.address, lambda x:x.get("primary"))
     else:
         address = customer.address
     if isinstance(customer.contact, list):
-        contact = pydash.find( customer.contact,lambda x:x.get("primary"))
+        contact = pydash.find( customer.contact, lambda x:x.get("primary"))
     else:
         contact = customer.contact
     contact = frappe._dict(contact) if contact else False
@@ -665,21 +656,21 @@ def update_customer_in_router(customer={},routers=[],customer_code=None):
         "customer_name": customer.customer_name or "",
         "display_address": customer.display_address or "",
         "phone_number":  contact.phone if contact else "",
-        "frequency":customer.frequency or "",
+        "frequency": customer.frequency or "",
         "long": address.get("longitude") if address else 0,
-        "lat":address.get("latitude") if address else 0
+        "lat": address.get("latitude") if address else 0
     }
-    list_router = frappe.db.get_all("DMS Router",{"name": ["in",routers]},["*"])
+
+    list_router = frappe.db.get_all("DMS Router", {"name": ["in", routers]}, ["*"])
     if len(list_router) > 0 :
         for router in list_router:
-            router_doc = frappe.get_doc("DMS Router",router.get("name"))
+            router_doc = frappe.get_doc("DMS Router", router.get("name"))
             cus_list = router_doc.get("customers") or []
-            exist = pydash.find(cus_list,lambda x: x.customer_code == customer.customer_code)
+            exist = pydash.find(cus_list, lambda x: x.customer_code == customer.customer_code)
             if exist:
-                cus_list = pydash.map_(cus_list,lambda x: x.update(customer_router))
+                cus_list = pydash.map_(cus_list, lambda x: x.update(customer_router))
             else:
                 cus_list.append(customer_router)    
-            router_doc.set("customers",cus_list)   
+            router_doc.set("customers", cus_list)   
             router_doc.save(ignore_permissions=True)    
-    print("done update customer in router")
     return
