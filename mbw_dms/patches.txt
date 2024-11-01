@@ -1,0 +1,3 @@
+[pre_model_sync]
+mbw_dms.patches.update_vehicle_log
+[post_model_sync]
