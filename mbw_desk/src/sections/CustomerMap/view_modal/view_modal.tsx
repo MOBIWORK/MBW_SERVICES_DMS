@@ -1,135 +1,137 @@
-import { useEffect, useRef, useState } from "react";
+import { useContext, useState } from "react";
 import { AxiosService } from "../../../services/server";
-import { Modal,Button ,Form} from 'antd';
-import { DownOutlined } from '@ant-design/icons';
-import type { MenuProps } from 'antd';
-import  {ScopeAnalysis} from './scope_analysis';
-import  {TypeIndustry} from './type_industry';
-import  { ReactNode } from "react";
+import { Modal, Button, Form } from "antd";
+import axios from "axios";
+import { ScopeAnalysis } from "./steps/scope_analysis";
+import { TypeIndustry } from "./steps/type_industry";
 type Props = {
-  open: string | ReactNode;
+  open: boolean;
   title: string;
-  onCancel : ReactNode;
-  onOk: ReactNode;
+  onCancel: functionType;
+  onOk: functionType;
+  lstCustomer: any[];
+  api: any;
 };
-import { message, Steps, theme } from 'antd';
-export function ModalView ({ open, title, onCancel, onOk , lstCustomer,api}: Props) {
-  const [formScope] = Form.useForm();
-  const [formIndustry] = Form.useForm();
+import { message, Steps, theme } from "antd";
+import { functionType } from "@/types/dashboard";
+import { errorToast } from "@/util";
+import classNames from "classnames";
+import { GlobalContext } from "@/App";
+export function ModalView({
+  open,
+  title,
+  onCancel,
+  onOk,
+  lstCustomer,
+  api,
+}: Props) {
+  const {errorMsg} = useContext(GlobalContext);
+  const [formAnalysis] = Form.useForm()
   const [scopeResult, setScopeResult] = useState(null);
   const [bbox, setBbox] = useState("");
-  const [industryResult, setIndustryResult] = useState(null);
   const [loadingSubmit, setLoadingSubmit] = useState(false);
-  
-  const handleScopeResult = (result) => {
-   
-    if(result){
+
+  const handleScopeResult = (result: any) => {
+    if (result) {
       setScopeResult(result);
       setBbox(result.bbox);
     }
-    
   };
-  const handleIndustryResult = (result) => {
-    setIndustryResult(result);
-  };
+
   const steps = [
     {
-      title: 'Phạm vi đánh giá độ phủ đại lý',
-      content: <Form layout="vertical" form={formScope} style={{padding: "10px"}}>
-        <ScopeAnalysis form={formScope} onResult={handleScopeResult} scopeResult={scopeResult} api={api}></ScopeAnalysis>
-      </Form> ,
+      title: "Phạm vi đánh giá độ phủ đại lý",
+      content: (
+          <ScopeAnalysis
+            form={formAnalysis}
+            onResult={handleScopeResult}
+            scopeResult={scopeResult}
+            api={api}
+          ></ScopeAnalysis>
+      ),
     },
     {
-      title: 'Ngành hàng đánh giá độ phủ',
-      content:<Form layout="vertical" form={formIndustry} style={{padding: "10px"}}>
-      <TypeIndustry form={formIndustry} ></TypeIndustry>
-    </Form>,
+      title: "Ngành hàng đánh giá độ phủ",
+      content: (
+          <TypeIndustry form={formAnalysis}></TypeIndustry>
+      ),
     },
-    // {
-    //   title: 'Thiết lập kết quả phân tích',
-    //   content: <ScopeAnalysis></ScopeAnalysis>,
-    // },
   ];
   const { token } = theme.useToken();
   const [current, setCurrent] = useState(0);
 
-  const next = () => {
-    setCurrent(current + 1);
-  };
-
-  const prev = () => {
-    setCurrent(current - 1);
-  };
   const handleSubmit = async () => {
-    setLoadingSubmit(true)
-    let locations = []
-    let type_categories = "agricultural_supplies"
-    let type_area = ''
-    let value_area = []
-    if(lstCustomer && lstCustomer.length > 0){
-      for (let i = 0; i < lstCustomer.length; i++) {
-        let lngLat = JSON.parse(lstCustomer[i].customer_location_primary)
-        let coordinates = [lngLat.long, lngLat.lat]
-        locations.push(coordinates)
+    console.log("value submit",formAnalysis.getFieldsValue());    
+    try {
+      setLoadingSubmit(true);
+      // await new Promise((rs,rj) => setTimeout(rs,2000))
+      let valueForm =formAnalysis.getFieldsValue();
+      let locations = [];
+      let type_categories = "agricultural_supplies";
+      let type_area = "";
+      let value_area:any[] = [];
+      console.log("lstCustomer",lstCustomer);
+      
+      if (lstCustomer && lstCustomer.length > 0) {
+        for (let i = 0; i < lstCustomer.length; i++) {
+          let lngLat = lstCustomer[i].customer_location_primary && JSON.parse(lstCustomer[i].customer_location_primary);
+          if(lngLat && lngLat.long && lngLat.lat) {
+            let coordinates = [lngLat.long, lngLat.lat];
+            locations.push(coordinates);
+          }
+        }
       }
-    }
-    if(formIndustry.getFieldValue('nganhhang')){
-      type_categories = formIndustry.getFieldValue('nganhhang')
-    }else{
-      setLoadingSubmit(false)
-      message.error('Chưa chọn ngành hàng ')
-      return
-    }
-    // if(formScope.getFieldValue('huyen') && formScope.getFieldValue('huyen').length > 0){
-    //   type_area = 'administrative_district'
-    //   value_area = formScope.getFieldValue('huyen')
-    // }else 
-    if(formScope.getFieldValue('tinh')){
-      type_area = 'administrative_province'
-      value_area = [formScope.getFieldValue('tinh')]
-    }else if(formScope.getFieldValue('khuvuc')){
-      type_area = 'administrative_region'
-      if(formScope.getFieldValue('khuvuc').includes('all')){
-        value_area = ['1','2','3','4','5','6','7']
-      }else{
-        value_area = [formScope.getFieldValue('khuvuc')]
+      // validate
+      if (!valueForm["nganhhang"]) {
+        throw new Error("Chưa chọn ngành hàng ");
       }
-    }else{
-      message.error('Chưa chọn khu vực giới hạn')
-      setLoadingSubmit(false)
-      return
-    };
-    const apiUrl = `https://api.ekgis.vn/v1/analytic_market/determine_coverage?api_key=w1Dlh2wRon7mE6sL196TgvLS45fw02uon74pJ0rc`;
-    const dataPost  = {
-    "type_categories": type_categories,
-    "type_area": type_area,
-    "value_area": JSON.stringify(value_area),
-    "locations": locations
-  }
-  const response = await fetch(apiUrl, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
 
-    },
-    body: JSON.stringify(dataPost)
-  });
-  const responseData = await response.json();
-  if(responseData){
-    setLoadingSubmit(false)
-    message.success('Phân tích thành công')
-    saveConfigMap(dataPost,responseData)
-    onOk(responseData, dataPost , bbox)
-    setCurrent(0)
+      if(!valueForm["tinh"] && !valueForm["khuvuc"]) {
+        throw new Error("Chưa chọn khu vực giới hạn");
+      }
+      else if (valueForm["tinh"]) {
+        type_area = "administrative_province";
+        value_area = [formAnalysis.getFieldValue("tinh")];
+      }
+      else if (!valueForm["tinh"] && valueForm["khuvuc"]) {
+        type_area = "administrative_region";
+        if(["all"].includes(valueForm["khuvuc"])) {
+          value_area = ["1", "2", "3", "4", "5", "6", "7"];
+        }
+        else {
+          value_area = [formAnalysis.getFieldValue("khuvuc")];
+        }
+      }
+
+      const dataPost = {
+        type_categories: type_categories,
+        type_area: type_area,
+        value_area: JSON.stringify(value_area),
+        locations: locations,
+      }
+      
+      const apiUrl = `https://api.ekgis.vn/v1/analytic_market/determine_coverage?api_key=${import.meta.env.VITE_API_KEY}`;
     
-  }else{
-    setLoadingSubmit(false)
-    message.error('Phân tích thất bại')
-    return
-  }
-
-  }
-  const saveConfigMap = async (dataPost, responseData) => {
+      const response = await axios.post(apiUrl, JSON.stringify(dataPost));
+      const responseData = response.data;
+      if (responseData) {
+        setLoadingSubmit(false);
+        message.success("Phân tích thành công");
+        saveConfigMap(dataPost as any, responseData as any);
+        onOk(responseData, dataPost, bbox);
+        setCurrent(0);
+      } else {
+        throw new Error("Phân tích thất bại");
+      }
+    } catch (error:any) {
+      // console.log("Lỗi vlllllllllllllll",error,error.message);
+      
+      errorMsg(error?.message as string);
+    } finally {
+      setLoadingSubmit(false);
+    }
+  };
+  async function saveConfigMap(dataPost:any, responseData:any) {
     try {
       const dataPostSave = {
         doc: JSON.stringify({
@@ -140,91 +142,64 @@ export function ModalView ({ open, title, onCancel, onOk , lstCustomer,api}: Pro
         }),
         action: "Save",
       };
-      let res = await AxiosService.post(
+       await AxiosService.post(
         "api/method/frappe.desk.form.save.savedocs",dataPostSave
       );
       
-    }catch (error) {
-      
+    }catch (error:any) {
+      errorMsg(error?.message as string);
     }
  
   }
+
   const items = steps.map((item) => ({ key: item.title, title: item.title }));
-  const contentStyle: React.CSSProperties = {
-    textAlign: 'left',
-    color: token.colorTextTertiary,
-    backgroundColor: token.colorFillAlter,
-    borderRadius: token.borderRadiusLG,
-    border: `1px dashed ${token.colorBorder}`,
-    marginTop: 16,
-  };
-  async function postData(url = '', data = {}) {
-    try {
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(data)
-      });
-  
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-  
-      const responseData = await response.json();
-      return responseData; // Trả về dữ liệu từ phản hồi
-    } catch (error) {
-      console.error('Error posting data:', error);
-      throw error; // Ném lỗi để xử lý ở bên ngoài (nếu cần)
-    }
-  }
   return (
     <>
       <Modal
-        width = {850}
+        width={850}
         open={open}
-        title= {title}
+        title={title}
         onOk={onOk}
         onCancel={onCancel}
-        footer={[
-          // <Button key="back" onClick={onCancel}>
-          //   Return
-          // </Button>,
-          // <Button key="submit" type="primary"  onClick={onOk}>
-          //   Submit
-          // </Button>,
-          // <Button
-          //   key="link"
-          //   href="https://google.com"
-          //   type="primary"
-          //   onClick={onOk}
-          // >
-          //   Search on Google
-          // </Button>,
-        ]}
+        footer={false}
       >
-              <Steps current={current} items={items} />
-      <div style={contentStyle}>{steps[current].content}</div>
-      <div style={{ marginTop: 24 , display:'flex', justifyContent:'flex-end'}}>
-        {current < steps.length - 1 && (
-          <Button type="primary" onClick={() => next()}>
-            Tiếp theo
-          </Button>
-        )}
-        {current === steps.length - 1 && (
-          <Button type="primary" onClick={handleSubmit} loading={loadingSubmit}>
-            Hoàn thành
-          </Button>
-        )}
-        {current > 0 && (
-          <Button style={{ margin: '0 8px' }} onClick={() => prev()}>
-            Quay lại
-          </Button>
-        )}
-      </div>
+        <Steps current={current} items={items} />
+        <Form layout="vertical" form={formAnalysis} style={{ padding: "10px" }}>
+          {steps.map((item,index) => 
+          <div className={classNames(index == current ? "block": "hidden")}>{item.content}</div>
+          )}
+        </Form>
+        
+        <div
+          style={{ marginTop: 24, display: "flex", justifyContent: "flex-end" }}
+        >
+          {current < steps.length - 1 && (
+            <Button
+              type="primary"
+              onClick={() => setCurrent((prev) => prev + 1)}
+            >
+              Tiếp theo
+            </Button>
+          )}
+          {current === steps.length - 1 && (
+            <Button
+              type="primary"
+              onClick={handleSubmit}
+              loading={loadingSubmit}
+            >
+              Hoàn thành
+            </Button>
+          )}
+          {current > 0 && (
+            <Button
+              style={{ margin: "0 8px" }}
+              onClick={() => setCurrent((prev) => prev - 1)}
+            >
+              Quay lại
+            </Button>
+          )}
+        </div>
       </Modal>
-      </>
+    </>
   );
 }
-
