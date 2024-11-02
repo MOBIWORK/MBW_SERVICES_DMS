@@ -73,12 +73,16 @@ frappe.query_reports["Báo cáo công nợ theo đơn hàng"] = {
 
         if (Object.keys(checkedCheckboxes).length === 0) {
             report.set_filter_value("selected_note", 0);
+            report.set_filter_value("delivery_note", "");
         }
 
         report.page.fields_dict.selected_note.$input.on("change", function() {
                 let selected = frappe.query_report.get_filter_value("selected_note");
                 if (selected) {
                     frappe.query_report.set_filter_value("delivery_note", arraydDeliveryNote);
+                    frappe.query_report.set_filter_value("customer", "");
+                    frappe.query_report.set_filter_value("deliverynote", "");
+                    frappe.query_report.set_filter_value("thanhtoan", 0);
                 } else {
                     frappe.query_report.set_filter_value("delivery_note", "");
                 }
