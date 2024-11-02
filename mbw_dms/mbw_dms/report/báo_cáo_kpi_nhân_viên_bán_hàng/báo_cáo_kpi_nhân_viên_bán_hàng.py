@@ -11,17 +11,6 @@ def execute(filters=None):
     columns = get_columns()
     data = get_sales_invoices(filters)
     
-    # Tính tổng số lít và tổng tiền
-    total_liters = sum(d["total_liters"] for d in data)
-    grand_total = sum(d["grand_total"] for d in data)
-
-    # Thêm dòng tổng vào cuối dữ liệu
-    data.append({
-        "sales_invoice": _("Totals"),
-        "total_liters": total_liters,
-        "grand_total": grand_total
-    })
-
     return columns, data
 
 def get_columns():
