@@ -1,7 +1,7 @@
 // Copyright (c) 2024, MBW and contributors
 // For license information, please see license.txt
 
-frappe.query_reports["Báo cáo KPI nhân viên bán hàng"] = {
+frappe.query_reports["Báo cáo KPI của nhân viên bán hàng"] = {
 	filters: [
 		{
             fieldname: "from_date",
