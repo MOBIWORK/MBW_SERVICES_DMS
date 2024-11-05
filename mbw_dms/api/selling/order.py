@@ -42,7 +42,7 @@ def get_list_sales_order(**kwargs):
             if not employee:
                 return gen_response("404", _("Employee not registered"))
             
-            employee_name = employee.get('name')
+            employee_name = employee.get("name")
             sale_person = frappe.db.get_value("Sales Person", {"employee": employee_name}, ["name"])
             if not sale_person:
                 return gen_response("404", _("Sales Person not registered"))
@@ -188,8 +188,8 @@ def create_sale_order(**kwargs):
     try:
         kwargs = frappe._dict(kwargs)
         new_order = frappe.new_doc("Sales Order")
-        user_name = frappe.get_value("Employee", {"user_id": frappe.session.user}, "name")
-        sales_person = frappe.get_value("Sales Person", {"employee": user_name}, "name")
+        # user_name = frappe.get_value("Employee", {"user_id": frappe.session.user}, "name")
+        # sales_person = frappe.get_value("Sales Person", {"employee": user_name}, "name")
         ignore_pricing_rule = kwargs.get("ignore_pricing_rule")
         price_list = kwargs.get("price_list")
 
@@ -208,12 +208,13 @@ def create_sale_order(**kwargs):
 
         new_order.checkin_id = kwargs.get("checkin_id")
         new_order.ignore_pricing_rule = ignore_pricing_rule
+
         # Thêm mới sales team
-        new_order.append("sales_team", {
-            "sales_person": sales_person,
-            "allocated_percentage": 100,
-            "created_by": 1
-        })
+        # new_order.append("sales_team", {
+        #     "sales_person": sales_person,
+        #     "allocated_percentage": 100,
+        #     "created_by": 1
+        # })
 
         # Thêm mới items trong đơn hàng
         items = kwargs.get("items")
