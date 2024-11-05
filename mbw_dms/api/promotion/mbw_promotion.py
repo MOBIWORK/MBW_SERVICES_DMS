@@ -16,6 +16,7 @@ def get_list_promotion(**kwargs):
     territory = kwargs.get("territory")
     list_item = kwargs.get("listItem")
     total_amount = float(kwargs.get("totalAmount"))
+    list_pro = kwargs.get("listPromotions")
     date = nowdate()
     if isinstance(list_item, str):
         list_item = json.loads(list_item)
@@ -41,7 +42,7 @@ def get_list_promotion(**kwargs):
 
     # Loại bỏ các trường không mong muốn
     fields_to_remove = ["creation", "modified", "modified_by", "owner", "docstatus", "idx", "_user_tags", "_comments", "_assign", "_liked_by"]
-
+    list_promotions = [promo for promo in list_promotions if promo.name in list_pro]
     for promo in list_promotions:
         for field in fields_to_remove:
             if field in promo:
@@ -53,7 +54,6 @@ def get_list_promotion(**kwargs):
                 promo["products"] = json.loads(promo["products"])
             except json.JSONDecodeError:
                 promo["products"] = []
-<<<<<<< HEAD
 
     # Áp dụng CTKM
     return apply_Promotion(list_item, list_promotions, total_amount)
@@ -224,14 +224,14 @@ def SP_SL_CKSP(list_item=[], data_promotion={}):
 
         if bool(getProductPromotion):
             if item["qty"] >= getProductPromotion["yeu_cau"] and item["uom"] == getProductPromotion["don_vi_tinh"].get("choice_values"):
-                chietKhau_promotion=item["amount"]*getProductPromotion["khuyen_mai"]/100
+                chietKhau_promotion=item["rate"]*getProductPromotion["khuyen_mai"]/100
                 getProductPromotion["chietKhau_promotion"]=chietKhau_promotion
 
                 #Cong giam gia hien tai voi giam gia khuyen mai
                 item["discount_amount"] = chietKhau_promotion+current_discount
 
                 #luu tru ket qua khuyen mai
-                save_promotionResult(data_promotion,getProductPromotion,1)
+                save_promotionResult(data_promotion,getProductPromotion)
 
     return list_item
 
@@ -399,7 +399,7 @@ def SP_SL_SP(list_item=[], data_promotion={}):
     return list_free_item
 
 #Luu tru CTKM
-def save_promotionResult(objDataKM,so_luong,boi_so):
+def save_promotionResult(objDataKM,so_luong):
     if objDataKM.ptype_value in ["TIEN_TIEN","TIEN_CKDH"]:
         objRef={"_id": "CKDH", "ma_san_pham": "", "ten_san_pham": "", "don_vi_tinh": "", "so_luong": so_luong}
         objKM = { "id": objDataKM.name, "ten_khuyen_mai": objDataKM.name_promotion, "ptype": objDataKM.ptype_value, "product": objRef }
@@ -462,9 +462,51 @@ def On_Process_GiamTru(objKM,idsp,dvt,sl,yeu_cau):
                 # for item in objProductInPromotion:
                 #     item["gttb"] = gttb
 
-                
+# Trả về danh sách các khuyến mại đang hoạt động
+@frappe.whitelist()
+def get_available_promotions(**kwargs):
+    filters = []
+    customer = kwargs.get("customer")
+    territory = kwargs.get("territory")
+    list_item = kwargs.get("listItem")
+    total_amount = float(kwargs.get("totalAmount"))
+    date = nowdate()
+    if isinstance(list_item, str):
+        list_item = json.loads(list_item)
 
+    if customer:
+        filters.append(f"cus.customer_code = {frappe.db.escape(customer)}")
+    if territory:
+        filters.append(f"pro.territory = {frappe.db.escape(territory)}")
+    filters.append("pro.is_deleted = False")
+    filters.append(f"pro.start_date <= {frappe.db.escape(date)} AND pro.end_date >= {frappe.db.escape(date)}")
 
-=======
->>>>>>> main
+    where_conditions = " AND ".join(filters)
+
+    sql_query = """
+        SELECT pro.*
+        FROM `tabMBW Promotion` pro
+        LEFT JOIN `tabCustomer Promotion` cus ON cus.parent = pro.name
+    """
+
+    if where_conditions:
+        sql_query += f" WHERE {where_conditions}"
+    list_promotions = frappe.db.sql(sql_query, as_dict=True)
+
+    # Loại bỏ các trường không mong muốn
+    fields_to_remove = ["creation", "modified", "modified_by", "owner", "docstatus", "idx", "_user_tags", "_comments",
+                        "_assign", "_liked_by"]
+
+    for promo in list_promotions:
+        for field in fields_to_remove:
+            if field in promo:
+                del promo[field]
+
+        # Làm sạch JSON trong trường hợp chuỗi trả về không chính xác
+        if "products" in promo and isinstance(promo["products"], str):
+            try:
+                promo["products"] = json.loads(promo["products"])
+            except json.JSONDecodeError:
+                promo["products"] = []
+    return list_promotions
 

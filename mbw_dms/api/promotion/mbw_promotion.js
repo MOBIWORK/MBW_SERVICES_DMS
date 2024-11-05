@@ -1,13 +1,74 @@
+var list_promotions = []
 frappe.ui.form.on('Sales Order', {
     onload_post_render: function(frm) {
         frm.set_value('ignore_pricing_rule', 1);
     },
-    refresh: function(frm) {
-        // Chỉ hiển thị button khi tạo mới Sales Order
+   refresh: function(frm) {
+        list_promotions = []
         if (frm.doc.docstatus == 0) {
             frm.add_custom_button(__('Get Promotion'), function() {
-                onClearPromotion(frm); // Clear free items and set ignore pricing rule
-                
+                // Tạo dialog với bảng có checkbox
+                const promotion_dialog = new frappe.ui.Dialog({
+                    title: __('Get Promotion'),
+                    fields: [
+                        {
+                            fieldname: 'promotions_table',
+                            fieldtype: 'Table',
+                            label: '',
+                            cannot_add_rows: true,
+                            cannot_delete_rows: true,
+                            fields: [
+                                {
+                                    fieldtype: 'Link',
+                                    fieldname: 'promotion_name',
+                                    label: 'Promotion name',
+                                    read_only: 1,
+                                    in_list_view: true,
+                                    options: 'MBW Promotion',
+                                }
+                            ]
+                        }
+                    ],
+                    primary_action_label: __('Apply'),
+                    primary_action(values) {
+                        list_promotions = values.promotions_table
+                            .filter(promo => promo.__checked)
+                            .map(promo => promo.promotion_name);
+                        onClearPromotion(frm);
+                        promotion_dialog.hide();
+                    }
+                });
+
+                // Gọi API để lấy danh sách khuyến mại và đặt dữ liệu cho bảng
+                frappe.call({
+                    method: 'mbw_dms.api.promotion.mbw_promotion.get_available_promotions',
+                    args: {
+                        listItem: frm.doc.items,
+                        totalAmount: frm.doc.total
+                    },
+                    callback: function(r) {
+                        if (r.message && r.message.length > 0) {
+                            // Lưu dữ liệu vào frm để sử dụng lại nếu cần
+                            const data_promotion = r.message.map(promotion => ({
+                                __checked: list_promotions && list_promotions.includes(promotion.name),
+                                promotion_name: promotion.name,
+                            }));
+
+                            // Cập nhật bảng với dữ liệu mới
+                            promotion_dialog.fields_dict.promotions_table.df.data = data_promotion;
+                            promotion_dialog.fields_dict.promotions_table.refresh();
+                        } else {
+                            frappe.msgprint(__('Không có khuyến mại nào khả dụng.'));
+                        }
+                    }
+                });
+
+                setTimeout(() => {
+                    promotion_dialog.$wrapper.find('.grid-remove-rows, .grid-duplicate-rows, .btn-open-row').remove();
+                    promotion_dialog.$wrapper.find('.data-row .col:empty').remove();
+                }, 200);
+                // Hiển thị dialog
+                promotion_dialog.show();
             }).addClass('btn-primary');
         }
     }
@@ -137,6 +198,7 @@ function update_item_prices_by_price_list(frm) {
                         method: 'mbw_dms.api.promotion.mbw_promotion.get_list_promotion',
                         args: {
                             listItem: frm.doc.items,
+                            listPromotions: list_promotions,
                             totalAmount: frm.doc.total
                         },
                         callback: function(r) {
