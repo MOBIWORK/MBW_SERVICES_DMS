@@ -224,14 +224,14 @@ def SP_SL_CKSP(list_item=[], data_promotion={}):
 
         if bool(getProductPromotion):
             if item["qty"] >= getProductPromotion["yeu_cau"] and item["uom"] == getProductPromotion["don_vi_tinh"].get("choice_values"):
-                chietKhau_promotion=item["rate"]*getProductPromotion["khuyen_mai"]/100
+                chietKhau_promotion=item["amount"]*getProductPromotion["khuyen_mai"]/100
                 getProductPromotion["chietKhau_promotion"]=chietKhau_promotion
 
                 #Cong giam gia hien tai voi giam gia khuyen mai
                 item["discount_amount"] = chietKhau_promotion+current_discount
 
                 #luu tru ket qua khuyen mai
-                save_promotionResult(data_promotion,getProductPromotion)
+                save_promotionResult(data_promotion,getProductPromotion,1)
 
     return list_item
 
@@ -399,7 +399,7 @@ def SP_SL_SP(list_item=[], data_promotion={}):
     return list_free_item
 
 #Luu tru CTKM
-def save_promotionResult(objDataKM,so_luong):
+def save_promotionResult(objDataKM,so_luong,boi_so):
     if objDataKM.ptype_value in ["TIEN_TIEN","TIEN_CKDH"]:
         objRef={"_id": "CKDH", "ma_san_pham": "", "ten_san_pham": "", "don_vi_tinh": "", "so_luong": so_luong}
         objKM = { "id": objDataKM.name, "ten_khuyen_mai": objDataKM.name_promotion, "ptype": objDataKM.ptype_value, "product": objRef }
