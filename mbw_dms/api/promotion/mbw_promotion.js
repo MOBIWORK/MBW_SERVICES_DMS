@@ -9,7 +9,7 @@ frappe.ui.form.on('Sales Order', {
             frm.add_custom_button(__('Get Promotion'), function() {
                 // Tạo dialog với bảng có checkbox
                 const promotion_dialog = new frappe.ui.Dialog({
-                    title: __('Get Promotion'),
+                    title: __('List Promotions'),
                     fields: [
                         {
                             fieldname: 'promotions_table',
