@@ -96,7 +96,7 @@ def execute(filters=None):
 		if sle["item_code"] in group_by_item:
 			group_by_item[sle["item_code"]].in_qty += sle.in_qty
 			group_by_item[sle["item_code"]].out_qty += sle.out_qty
-			group_by_item[sle["item_code"]].qty_after_transaction = min(group_by_item[sle["item_code"]].qty_after_transaction, sle.qty_after_transaction)
+			group_by_item[sle["item_code"]].qty_after_transaction = sle.qty_after_transaction
 		else:
 			group_by_item[sle["item_code"]] = sle
 
