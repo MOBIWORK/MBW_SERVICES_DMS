@@ -37,7 +37,8 @@ website_route_rules = [
 # page_js = {"page" : "public/js/file.js"}
 
 # include js in doctype views
-doctype_js = {"Payroll Entry" : "controllers/payroll_entry.js"}
+doctype_js = {"Payroll Entry" : "controllers/payroll_entry.js",
+              "Purchase Order": "controllers/purchase_order.js",}
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
