@@ -22,7 +22,9 @@ frappe.ui.form.on('Purchase Order Item', {
             item.last_purchase_rate = frappe.model.get_value('Item', item.item_code, 'last_purchase_rate');
 
             if (item.last_purchase_rate) {
-                setTimeout(() => {frappe.model.set_value(cdt, cdn, 'rate', item.last_purchase_rate);}, 50);
+                setTimeout(() => {
+                    frappe.model.set_value(cdt, cdn, 'rate', item.last_purchase_rate);
+                }, 150);
                 frm.refresh_field('items')
             }
         });
