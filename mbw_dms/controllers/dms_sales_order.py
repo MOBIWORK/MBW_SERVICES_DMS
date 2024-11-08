@@ -161,8 +161,16 @@ def cal_qdtt(doc, method):
             continue
 
 def create_mbw_itemscore_sales_order(doc, method):
-
+    if doc.status == "To Bill" and doc.custom_trạng_thái_giao_hàng == 'Chưa giao hàng':
+        doc.custom_trạng_thái_giao_hàng = "Đang giao hàng"
+        doc.save()
+    if (doc.status == "To Deliver and Bill" or doc.status == "To Deliver") and doc.custom_trạng_thái_giao_hàng != 'Chưa giao hàng':
+        doc.custom_trạng_thái_giao_hàng = "Chưa giao hàng"
+        doc.save()
     if doc.status == "Completed":
+        if doc.custom_trạng_thái_giao_hàng == 'Chưa giao hàng':
+            doc.custom_trạng_thái_giao_hàng = "Đang giao hàng"
+            doc.save()
         from mbw_dms.mbw_dms.doctype.mbw_itemscore_saleorder.mbw_itemscore_saleorder import \
             create_ItemScore_SaleOrder
 

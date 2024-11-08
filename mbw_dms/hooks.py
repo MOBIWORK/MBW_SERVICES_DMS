@@ -280,6 +280,9 @@ doc_events = {
     },
     "Stock Entry": {
         "before_save": "mbw_dms.controllers.stock_entry.cal_qdtt"
+    },
+    "Delivery Trip": {
+        "on_change": "mbw_dms.controllers.dms_delivery_trip.update_delivery_status_so",
     }
     
 
