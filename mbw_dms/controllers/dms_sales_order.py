@@ -3,6 +3,7 @@ from erpnext.accounts.report.accounts_receivable.accounts_receivable import Rece
 from frappe.utils import nowdate
 import calendar
 from mbw_dms.api.common import qty_not_pricing_rule
+from datetime import datetime
 
 # Kiểm tra xem khách đã đặt hàng trước đó chưa
 def existing_customer(customer_name, start_date, end_date, current_user):
@@ -165,6 +166,22 @@ def calculate_so(doc, method):
     doc.custom_total_litres_in_order = total_lits
     doc.custom_total_amount_before_discount = amount_before_discount
     doc.custom_product_discount_amount = discount_total_amount
+
+    if isinstance(doc.delivery_date, str):
+        delivery_date = datetime.strptime(doc.delivery_date, "%Y-%m-%d").date()
+    else:
+        delivery_date = doc.delivery_date
+
+    # Gán giá trị sau khi chuyển đổi hoặc định dạng
+    doc.custom_delivery_date_clone_for_print = delivery_date.strftime("%d/%m/%Y")
+
+    # Tương tự cho transaction_date
+    if isinstance(doc.transaction_date, str):
+        transaction_date = datetime.strptime(doc.transaction_date, "%Y-%m-%d").date()
+    else:
+        transaction_date = doc.transaction_date
+
+    doc.custom_date_clone_for_print = transaction_date.strftime("%d/%m/%Y")
 
     amount_in_words = number_to_vietnamese_words(doc.grand_total)
     if amount_in_words:
