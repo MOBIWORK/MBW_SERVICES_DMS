@@ -168,19 +168,21 @@ def calculate_so(doc, method):
     doc.custom_product_discount_amount = discount_total_amount
 
     if isinstance(doc.delivery_date, str):
-        delivery_date = datetime.strptime(doc.delivery_date, "%Y-%m-%d").date()
+        # Chuyển đổi thành datetime trước, sau đó lấy date()
+        delivery_date = datetime.strptime(doc.delivery_date, "%Y-%m-%d %H:%M:%S").date()
     else:
         delivery_date = doc.delivery_date
-
+    
     # Gán giá trị sau khi chuyển đổi hoặc định dạng
     doc.custom_delivery_date_clone_for_print = delivery_date.strftime("%d/%m/%Y")
-
+    
     # Tương tự cho transaction_date
     if isinstance(doc.transaction_date, str):
-        transaction_date = datetime.strptime(doc.transaction_date, "%Y-%m-%d").date()
+        # Chuyển đổi thành datetime trước, sau đó lấy date()
+        transaction_date = datetime.strptime(doc.transaction_date, "%Y-%m-%d %H:%M:%S").date()
     else:
         transaction_date = doc.transaction_date
-
+    
     doc.custom_date_clone_for_print = transaction_date.strftime("%d/%m/%Y")
 
     amount_in_words = number_to_vietnamese_words(doc.grand_total)
