@@ -510,7 +510,7 @@ def update_customer(**kwargs):
             # Chỉnh sửa tuyến
             if kwargs.get("router"):
                 router_in = kwargs.get("router")
-                update_customer_in_router(customer=kwargs, customer_code=customer.customer_code,  routers=router_in)
+                update_customer_in_router(customer=kwargs, customer_code=customer.customer_code, routers=router_in)
 
             customer.save()
             frappe.db.commit()

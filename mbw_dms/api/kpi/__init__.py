@@ -62,5 +62,5 @@ def customer_not_order(**kwargs):
 
 @frappe.whitelist()
 def receivable_summary_report(**kwargs):
-    from mbw_dms.mbw_dms.doctype.dms_kpi.dms_kpi import receivable_summary_report
-    return receivable_summary_report(kwargs=kwargs)
+    from mbw_dms.mbw_dms.doctype.dms_kpi.dms_kpi import get_accounts_receivable_report
+    return get_accounts_receivable_report(kwargs=kwargs)
