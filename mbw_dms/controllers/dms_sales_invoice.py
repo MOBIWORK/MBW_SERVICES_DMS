@@ -75,7 +75,9 @@ def handle_update_kpi_monthly(sales_info,doc,month,year):
         grand_totals = -grand_totals
     if existing_monthly_summary:
         monthly_summary_doc = frappe.get_doc("DMS Summary KPI Monthly", existing_monthly_summary)
-        monthly_summary_doc.doanh_thu_thang += grand_totals
+        if doc.is_return:
+            monthly_summary_doc.doanh_thu_thang -= abs(grand_totals)
+        # monthly_summary_doc.doanh_thu_thang += grand_totals
         # xu ly don lienket So
         if len(SOs) >0 and doc.is_return:
             total_uom = float(monthly_summary_doc.sku)*float(monthly_summary_doc.so_don_hang) - total_uomSI
@@ -104,11 +106,12 @@ def handle_update_kpi_monthly_on_cancel(sales_info,doc,month,year):
     # Kiểm tra đã tồn tại bản ghi KPI của tháng này chưa
     existing_monthly_summary = frappe.get_value("DMS Summary KPI Monthly", {"thang": month, "nam": year, "nhan_vien_ban_hang": user_name}, "name")
     grand_totals = doc.grand_total*sales_info.allocated_percentage/100
-    if doc.is_return and grand_totals > 0:
-        grand_totals = -grand_totals
+    # if doc.is_return and grand_totals > 0:
+    #     grand_totals = -grand_totals
     if existing_monthly_summary:
         monthly_summary_doc = frappe.get_doc("DMS Summary KPI Monthly", existing_monthly_summary)
-        monthly_summary_doc.doanh_thu_thang -= grand_totals
+        if doc.is_return:
+            monthly_summary_doc.doanh_thu_thang += abs(grand_totals)
         if len(SOs) >0 and doc.is_return:
             total_uom = float(monthly_summary_doc.sku)*float(monthly_summary_doc.so_don_hang) + total_uomSI
             monthly_summary_doc.san_luong += sum(qty)
