@@ -103,7 +103,7 @@ def handle_update_kpi_monthly(sales_info,doc,month,year):
 def handle_update_kpi_monthly_on_cancel(sales_info,doc,month,year):
     user_name = frappe.get_value("Sales Person", {"name": sales_info.sales_person}, "employee")
     itemsSI = doc.get("items")
-    qty,uom = qty_not_pricing_rule(itemsSI)
+    qty,uom = qty_not_pricing_rule(itemsSI,"item_name")
     total_uomSI =len(uom)
     # check connect SO
     SOs  = getConnection(doc,"Sales Order")
