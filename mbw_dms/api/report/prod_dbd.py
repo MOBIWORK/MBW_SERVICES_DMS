@@ -17,8 +17,6 @@ def report_prod_dbd(**res):
         brand= res.get("brand")
         supplier= res.get("supplier")
 
-      
-
         filters = []
 
         # if industry:
