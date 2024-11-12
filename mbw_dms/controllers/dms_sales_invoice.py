@@ -13,7 +13,7 @@ def renderMonthYear(doc):
     else:
         creation_time = doc.creation
     if isinstance(creation_time,str):
-        creation_time = datetime.strptime(creation_time,"%Y-%m-%d %H:%M:%S.%f")
+        creation_time = datetime.strptime(creation_time,"%Y-%m-%d %H:%M:%-S")
     thang = creation_time.month
     nam = creation_time.year
     return thang,nam
