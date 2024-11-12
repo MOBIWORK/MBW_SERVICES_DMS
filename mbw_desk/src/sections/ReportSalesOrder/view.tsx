@@ -49,22 +49,28 @@ export default function ReportSales() {
       dataIndex: "customer",
       key: "customer",
       width: 120,
-      render: (_, record: any) => <div>{record.customer}</div>,
+      render: (_, record: any) => (
+        <div className="min-w-[120px]">{record.customer}</div>
+      ),
     },
     {
       title: "Khu vực",
       dataIndex: "territory",
       key: "territory",
       width: 120,
-      render: (_, record: any) => <div>{record.territory}</div>,
+      render: (_, record: any) => (
+        <div className="min-w-[120px]">{record.territory}</div>
+      ),
     },
     {
       title: "Ngày tạo",
-      dataIndex: "posting_date",
-      key: "posting_date",
+      dataIndex: "transaction_date",
+      key: "transaction_date",
       width: 120,
       render: (_, record: any) => (
-        <div>{dayjs(record.posting_date * 1000).format("DD/MM/YYYY")}</div>
+        <div className="min-w-[120px]">
+          {dayjs(record.transaction_date * 1000).format("DD/MM/YYYY")}
+        </div>
       ),
     },
     {
@@ -72,7 +78,9 @@ export default function ReportSales() {
       dataIndex: "sales_person",
       key: "sales_person",
       width: 120,
-      render: (_, record: any) => <div>{record.sales_person}</div>,
+      render: (_, record: any) => (
+        <div className="min-w-[120px]">{record.sales_person}</div>
+      ),
     },
     {
       title: <div className="text-right">Thành tiền (VNĐ)</div>,
@@ -80,7 +88,7 @@ export default function ReportSales() {
       key: "total",
       width: 140,
       render: (_, record: any) => (
-        <div className="!text-right">
+        <div className="!text-right min-w-[120px]">
           {Intl.NumberFormat().format(record.total)}
         </div>
       ),
@@ -91,18 +99,18 @@ export default function ReportSales() {
       key: "tax_amount",
       width: 140,
       render: (_, record: any) => (
-        <div className="text-right">
+        <div className="text-right  min-w-[120px]">
           {Intl.NumberFormat().format(record.tax_amount)}
         </div>
       ),
     },
     {
-      title: <div className="text-right">Chiết khấu (VNĐ)</div>,
+      title: <div className="text-right ">Chiết khấu (VNĐ)</div>,
       dataIndex: "discount_amount",
       key: "discount_amount",
       width: 160,
       render: (_, record: any) => (
-        <div className="text-right">
+        <div className="text-right min-w-[120px]">
           {Intl.NumberFormat().format(record.discount_amount)}
         </div>
       ),
@@ -113,7 +121,7 @@ export default function ReportSales() {
       dataIndex: "grand_total",
       key: "grand_total",
       render: (_, record: any) => (
-        <div className="text-right">
+        <div className="text-right min-w-[120px]">
           {Intl.NumberFormat().format(record.grand_total)}
         </div>
       ),
@@ -229,6 +237,7 @@ export default function ReportSales() {
   const { employee, territory, company, customer, warehouse } = useSelector(
     (state: any) => state.group
   );
+  console.log(new Date(1731258000 * 1000));
 
   useEffect(() => {
     (async () => {
@@ -299,8 +308,8 @@ export default function ReportSales() {
                 <Row className="space-x-4">
                   <Filter_group
                     setPage={setPage}
-                    inputMonth
-                    inputYear
+                    inputFromDate
+                    inputToDate
                     inputSaleGroup
                     inputEmployee
                   />
@@ -310,8 +319,8 @@ export default function ReportSales() {
             <Col className="!ml-4 ">
               <DropDownFilter
                 setPage={setPage}
-                inputMonth
-                inputYear
+                inputFromDate
+                inputToDate
                 inputSaleGroup
                 inputEmployee
                 inputCompany

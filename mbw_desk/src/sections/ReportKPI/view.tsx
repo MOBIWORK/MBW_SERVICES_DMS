@@ -209,7 +209,9 @@ export default function ReportKPI() {
                 fixed="left"
                 className="!text-center"
                 width={60}
-                render={(_: any, __: any, index: number) => <span>{calculateIndex(page, PAGE_SIZE, index)}</span>}
+                render={(_: any, __: any, index: number) => (
+                  <span>{calculateIndex(page, PAGE_SIZE, index)}</span>
+                )}
               />
               <Column
                 title="Mã Nhân viên"
@@ -239,7 +241,9 @@ export default function ReportKPI() {
                 title="Nhóm bán hàng"
                 dataIndex="nhom_ban_hang"
                 key="nhom_ban_hang"
-                render={(_, record: any) => <div>{record.nhom_ban_hang}</div>}
+                render={(_, record: any) => (
+                  <div className="min-w-[120px]">{record.nhom_ban_hang}</div>
+                )}
               />
               <ColumnGroup
                 className="!whitespace-normal !min-w-[210px] !text-center"
