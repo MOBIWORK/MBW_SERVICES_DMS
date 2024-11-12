@@ -51,7 +51,6 @@ def report_prod_dbd(**res):
         # Tạo một dictionary để lưu trữ các nhóm theo parent_sales_person và sales_person
         grouped_data = defaultdict(lambda: defaultdict(lambda: defaultdict(float)))
 
-        # print("=====sale_orders", sale_orders)
         # Lặp qua từng phần tử và kiểm tra sales_person khác None
         arr_filed = ['qty', 'stock_uom', 'uom', 'conversion_factor', "amount", "item_name"]
 
@@ -60,7 +59,6 @@ def report_prod_dbd(**res):
                 # Lấy ngày từ transaction_date
                 date_value = item['transaction_date'].day
                 products = get_value_child_doctype("Sales Order", item["name"], "items", arr_filed )
-            
                 for prod in products:
                     # neu la spkm thi tru di sl spkm
                     if(prod["amount"] == 0):
@@ -79,12 +77,9 @@ def report_prod_dbd(**res):
                         if tile_dvt_phu is not None and tile_dvt_phu != 0:
                             tile_quydoi =tile_dvt_chinh / tile_dvt_phu
                         else: tile_quydoi = 1
-                      
+                    
 
                         item["total_qty"] =  item["total_qty"] - prod["qty"] + (prod["qty"] * tile_quydoi )
-
-                        
-                
 
                 # Gộp vào danh sách dựa trên parent_sales_person và sales_person
                 parent = item['parent_sales_person']
@@ -92,7 +87,6 @@ def report_prod_dbd(**res):
                 
                 # Cộng dồn total_qty vào ngày tương ứng cho sales_person đó
                 grouped_data[parent][sales_person][date_value] += item['total_qty']
-
         # Tạo danh sách các object_data với định dạng group_name, sales_person và children (theo ngày)
         result = []
         for parent_sales_person, sales_persons in grouped_data.items():
