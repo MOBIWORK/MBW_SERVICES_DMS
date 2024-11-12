@@ -835,11 +835,23 @@ def customer_not_order(kwargs):
 # Báo cáo công nợ khách hàng
 @frappe.whitelist()
 def get_accounts_receivable_report(kwargs):
+    default_company = frappe.db.get_single_value("Global Defaults", "default_company")
+    company = None
+    user = frappe.session.user
+    employee = frappe.db.get_value("Employee", {"user_id": user}, ["company"], as_dict=True)
+    
+    if employee:
+        company = employee.company
+    
     filters = {
-        "company": "CÔNG TY TNHH THƯƠNG MẠI VIỆT HẢI ĐĂNG",
+        "company": company if company is not None else default_company,
         "report_date": validate_date(kwargs.get("report_date")) if kwargs.get("report_date") else today(),
         "customer": kwargs.get("customer"),
-        "ageing_based_on": "Posting Date"
+        "ageing_based_on": "Posting Date",
+        "range1": kwargs.get("range1", 30),
+        "range2": kwargs.get("range2", 60),
+        "range3": kwargs.get("range3", 90),
+        "range4": kwargs.get("range4", 120)
     }
     
     report = ar_execute(filters)
