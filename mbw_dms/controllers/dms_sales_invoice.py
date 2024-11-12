@@ -61,7 +61,7 @@ def handle_update_kpi_monthly(sales_info,doc,month,year):
     user_name = frappe.get_value("Sales Person", {"name": sales_info.sales_person}, "employee")
     sales_team = frappe.get_value("DMS KPI", {'nhan_vien_ban_hang': user_name}, "nhom_ban_hang")
     itemsSI = doc.get("items")
-    qty,uom = qty_not_pricing_rule(itemsSI)
+    qty,uom = qty_not_pricing_rule(itemsSI,"item_name")
     total_uomSI =len(uom)
     # check connect SO
     SOs  = getConnection(doc,"Sales Order")
@@ -77,12 +77,16 @@ def handle_update_kpi_monthly(sales_info,doc,month,year):
         monthly_summary_doc = frappe.get_doc("DMS Summary KPI Monthly", existing_monthly_summary)
         if doc.is_return:
             monthly_summary_doc.doanh_thu_thang -= abs(grand_totals)
+            # if len(SOs) >0:
+            #     total_uom = float(monthly_summary_doc.sku)*float(monthly_summary_doc.so_don_hang) - total_uomSI
+            #     monthly_summary_doc.san_luong = minus_not_nega(monthly_summary_doc.san_luong, sum(qty))
+            #     monthly_summary_doc.sku = (float(total_uom) / float(monthly_summary_doc.so_don_hang)) if monthly_summary_doc.so_don_hang > 0 else 0
         # monthly_summary_doc.doanh_thu_thang += grand_totals
-        # xu ly don lienket So
-        if len(SOs) >0 and doc.is_return:
-            total_uom = float(monthly_summary_doc.sku)*float(monthly_summary_doc.so_don_hang) - total_uomSI
-            monthly_summary_doc.san_luong = minus_not_nega(monthly_summary_doc.san_luong, sum(qty))
-            monthly_summary_doc.sku = (float(total_uom) / float(monthly_summary_doc.so_don_hang)) if monthly_summary_doc.so_don_hang > 0 else 0
+        else :
+            monthly_summary_doc.doanh_thu_thang += abs(grand_totals)
+            # total_uom = float(monthly_summary_doc.sku)*float(monthly_summary_doc.so_don_hang) + total_uomSI
+            # monthly_summary_doc.san_luong = minus_not_nega(monthly_summary_doc.san_luong, sum(qty))
+            # monthly_summary_doc.sku = (float(total_uom) / float(monthly_summary_doc.so_don_hang)) if monthly_summary_doc.so_don_hang > 0 else 0
         monthly_summary_doc.save(ignore_permissions=True)
     else:
         monthly_summary_doc = frappe.get_doc({

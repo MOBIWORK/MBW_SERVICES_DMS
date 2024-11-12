@@ -28,10 +28,11 @@ def get_base_url() :
     return f"{scheme}://{frappe.local.request.host}"
 
 # sp khuyến mãi 1:có apply pricing role,2: giá = 0 
-def qty_not_pricing_rule(items):
+def qty_not_pricing_rule(items,item_file_compare = "item_code"):
     total_item_price = pydash.filter_(items, lambda x: x.amount > 0)
     total_qty = [item.get("qty") for item in total_item_price]
-    total_uom = {item.get("uom") for item in total_item_price}
+    total_uom = {item.get("uom") + " " + item.get(item_file_compare)  for item in total_item_price}
+    total_uom = [item.splipt(" ")[0] for item in total_uom]
     return total_qty,total_uom
 
 
