@@ -464,7 +464,7 @@ def analisis_kpi(**res):
             if obj_nv.get(n["employee"]) is None:
                 obj_nv[n["employee"]] = []
 
-            list_customers =frappe.get_doc('DMS Router',{"is_deleted": 0,"name": n["id"]}).get("customers")
+            list_customers =frappe.get_doc('DMS Router',{"name": n["id"]}).get("customers")
 
             for c in list_customers:
                 if c.get("customer_code") not in obj_nv[n["employee"]]:
@@ -523,12 +523,12 @@ def analisis_kpi(**res):
 
         sale_orders = frappe.db.sql(sql_query_donhang,(start_date_str, end_date_str) ,as_dict=1)
 
-       
         field_items = ["name", "item_name", "item_code"]
         obj_emp = {}
 
         for i in sale_orders:
             st = get_value_child_doctype("Sales Order", i["name_order"], "sales_team")
+
             items = get_child_values_doc(doctype="Sales Order", master_name=i["name_order"], fields_to_get=field_items, chil_name="items")
             if len(st) != 0:
                 for j in st:
@@ -548,6 +548,8 @@ def analisis_kpi(**res):
                             
                             if obj_emp[emp[0]["employee"]]["customer"].get(i["customer_code"]) is None:
                                 obj_emp[emp[0]["employee"]]["customer"][i["customer_code"]] = 1
+
+       
        
         for i in data:
             i["children"] = frappe.parse_json(i["children"])
@@ -656,7 +658,10 @@ def analisis_kpi(**res):
                 i["total_kh_dat_hang"] += r["kh_dat_hang"]
                 i["total_kh_kh_moi"] += r["kh_kh_moi"]
                 if bool(r["kpi_month"]):
-                    number_vt_dn = len(r["kpi_month"]["th_vt_dn"].split(";"))
+                    if r["kpi_month"]["th_vt_dn"] is not None:
+                        number_vt_dn = len(r["kpi_month"]["th_vt_dn"].split(";"))
+                    else :
+                        number_vt_dn = 0
                     r["kpi_month"]["th_vt_dn"] = number_vt_dn
                     if r["kh_vt"] != 0:
                         r["tl_vt"] = round(r["kpi_month"]["th_vt"] / r["kh_vt"]*100, 2)

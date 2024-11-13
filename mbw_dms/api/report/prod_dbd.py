@@ -1,8 +1,7 @@
 import frappe
-from mbw_dms.api.common import gen_response, exception_handle
+from mbw_dms.api.common import gen_response, exception_handle, get_value_child_doctype
 from collections import defaultdict
 from mbw_dms.api.validators import validate_filter_timestamp
-
 
 
 @frappe.whitelist(methods="GET")
@@ -13,11 +12,14 @@ def report_prod_dbd(**res):
         page_size =  int(res.get("page_size", 20))
         page_number = int(res.get("page_number")) if res.get("page_number") and int(res.get("page_number")) >=1 else 1
         sales_team = res.get("sales_team")
+
         industry= res.get("industry")
         brand= res.get("brand")
         supplier= res.get("supplier")
 
-        filters = []
+      
+
+        filters = "WHERE so.docstatus = 1"
 
         # if industry:
         #     filters.append(f"nhan_vien_ban_hang = '{industry}'")
@@ -25,22 +27,21 @@ def report_prod_dbd(**res):
         #     filters.append(f"nhan_vien_ban_hang = '{brand}'")
         # if supplier:
         #     filters.append(f"nhan_vien_ban_hang = '{supplier}'")
-        if sales_team:
-            filters.append(f"nhom_ban_hang = '{sales_team}'")
         
-        filters.append(f"so.transaction_date BETWEEN '{from_date}' AND '{to_date}'")
-        where_conditions = " AND ".join(filters)
-
-        sql_query = """ 
-            SELECT so.total_qty, so.transaction_date, st.sales_person , kpi.san_luong as kpi_san_luong , sp.parent_sales_person
+        if sales_team:
+            filters=f"{filters} AND nhom_ban_hang = '{sales_team}'"
+        
+        filters = f"{filters} AND so.transaction_date BETWEEN '{from_date}' AND '{to_date}'"
+        
+        sql_query = f""" 
+            SELECT so.total_qty, so.transaction_date, st.sales_person , kpi.san_luong as kpi_san_luong , sp.parent_sales_person, so.name
             FROM `tabSales Order` so
             LEFT JOIN `tabSales Team` st ON so.name = st.parent 
             LEFT JOIN `tabSales Person` sp ON st.sales_person = sp.sales_person_name
             LEFT JOIN `tabDMS KPI` kpi ON sp.employee = kpi.nhan_vien_ban_hang
+            {filters}
         """
 
-        if where_conditions:
-            sql_query += " WHERE {}".format(where_conditions)
         sql_query += " ORDER BY so.transaction_date desc"
         sql_query += " LIMIT %s OFFSET %s"
         limit = page_size
@@ -51,18 +52,41 @@ def report_prod_dbd(**res):
         grouped_data = defaultdict(lambda: defaultdict(lambda: defaultdict(float)))
 
         # Lặp qua từng phần tử và kiểm tra sales_person khác None
+        arr_filed = ['qty', 'stock_uom', 'uom', 'conversion_factor', "amount", "item_name"]
+
         for item in sale_orders:
             if item['sales_person'] is not None:
                 # Lấy ngày từ transaction_date
                 date_value = item['transaction_date'].day
-                
+                products = get_value_child_doctype("Sales Order", item["name"], "items", arr_filed )
+                for prod in products:
+                    # neu la spkm thi tru di sl spkm
+                    if(prod["amount"] == 0):
+                        item["total_qty"] -= prod["qty"]
+                        continue
+                    #chuyen doi so luong ve so luong cua dvt quy chuan
+                    if(prod["stock_uom"] != prod["uom"]):
+                        item_uoms = get_value_child_doctype("Item", prod["item_name"], "uoms" )
+
+                        # for vao trong list dvt cua sp de lay tinh he so quy doi giua cac dvt cua sp
+                        for it in item_uoms:
+                            if it["uom"] == prod["uom"]:
+                                tile_dvt_phu = it["conversion_factor"]
+                            if it["uom"] == prod["stock_uom"]:
+                                tile_dvt_chinh = it["conversion_factor"]
+                        if tile_dvt_phu is not None and tile_dvt_phu != 0:
+                            tile_quydoi =tile_dvt_chinh / tile_dvt_phu
+                        else: tile_quydoi = 1
+                    
+
+                        item["total_qty"] =  item["total_qty"] - prod["qty"] + (prod["qty"] * tile_quydoi )
+
                 # Gộp vào danh sách dựa trên parent_sales_person và sales_person
                 parent = item['parent_sales_person']
                 sales_person = item['sales_person']
                 
                 # Cộng dồn total_qty vào ngày tương ứng cho sales_person đó
                 grouped_data[parent][sales_person][date_value] += item['total_qty']
-
         # Tạo danh sách các object_data với định dạng group_name, sales_person và children (theo ngày)
         result = []
         for parent_sales_person, sales_persons in grouped_data.items():
@@ -76,13 +100,16 @@ def report_prod_dbd(**res):
                 total_qty_by_month = 0
                 # Cộng dồn total_qty theo từng ngày cho group_name (cha)
                 kpi_san_luong = next(children['kpi_san_luong'] for children in sale_orders if children['sales_person'] == sales_person and children['parent_sales_person'] == parent_sales_person)
+                # Lấy kpi_san_luong từ dữ liệu gốc cho sales_person
+                if kpi_san_luong is not None:
+                    total_kpi_month += kpi_san_luong
+                else:
+                    kpi_san_luong = 0
+                the_rest = kpi_san_luong - total_qty_by_month
 
                 for day, qty in day_totals.items():
                     total_qty_by_day[day] += qty
                     total_qty_by_month += total_qty_by_day[day]
-                # Lấy kpi_san_luong từ dữ liệu gốc cho sales_person
-                total_kpi_month += kpi_san_luong
-                the_rest = kpi_san_luong - total_qty_by_month
                 if the_rest < 0:
                     the_rest = 0
                 total_rest_all += the_rest
@@ -116,4 +143,3 @@ def report_prod_dbd(**res):
         })
     except Exception as e:
         return exception_handle(e)
-
