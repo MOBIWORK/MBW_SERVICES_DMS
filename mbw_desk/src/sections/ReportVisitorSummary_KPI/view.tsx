@@ -60,6 +60,8 @@ export default function ReportVisitorSummary_KPI() {
       dataIndex: "nhom_ban_hang",
       width: 100,
       key: "nhom_ban_hang",
+      render: (_: any, record: any, index: number) => <div className="min-w-[100px]">{_}</div>,
+
     },
     {
       title: <div className="text-center">Mã nhân viên</div>,
@@ -98,11 +100,11 @@ export default function ReportVisitorSummary_KPI() {
       key: "checkin_daungay",
       width: 100,
       render: (value: any) => (
-        <div>
+        <div className="min-w-[120px] text-center">
           {value ? (
             dayjs(value).format("HH:mm")
           ) : (
-            <div className="min-w-[40px] text-center">-</div>
+            <div>-</div>
           )}
         </div>
       ),
@@ -114,11 +116,11 @@ export default function ReportVisitorSummary_KPI() {
       key: "checkin_cuoingay",
       width: 100,
       render: (value: any) => (
-        <div>
+        <div className="min-w-[120px] text-center">
           {value ? (
             dayjs(value).format("HH:mm")
           ) : (
-            <div className="min-w-[40px] text-center">-</div>
+            <div >-</div>
           )}
         </div>
       ),
@@ -130,7 +132,7 @@ export default function ReportVisitorSummary_KPI() {
       key: "customers",
       width: 100,
       render: (value: any) => (
-        <div className="!text-center">{value ? value.length : 0}</div>
+        <div className="!text-center min-w-[120px] ">{value ? value.length : 0}</div>
       ),
     },
     {
@@ -142,7 +144,7 @@ export default function ReportVisitorSummary_KPI() {
       render: (value: number, record: any) => {
         return (
           <div
-            className="!text-center underline underline-offset-4 text-blue-600"
+            className="!text-center underline underline-offset-4 text-blue-600 min-w-[130px] "
             onClick={() => {
               setModal({
                 open: true,
@@ -168,7 +170,7 @@ export default function ReportVisitorSummary_KPI() {
       width: 100,
       render: (value: any, record: any) => (
         <div
-          className="!text-center underline underline-offset-4 text-blue-600"
+          className="!text-center underline underline-offset-4 text-blue-600 min-w-[130px]"
           onClick={() => {
             setModal({
               open: true,
@@ -196,7 +198,7 @@ export default function ReportVisitorSummary_KPI() {
       key: "total_distance",
       width: 100,
       render: (value: any) => (
-        <div className="!text-center">
+        <div className="!text-center min-w-[100px]">
           {value ? value : <div className="min-w-[40px]">-</div>}
         </div>
       ),
@@ -208,7 +210,7 @@ export default function ReportVisitorSummary_KPI() {
       key: "total_donhang",
       width: 100,
       render: (value: any) => (
-        <div className="!text-center">
+        <div className="!text-center min-w-[100px]">
           {value ? value : <div className="min-w-[40px]">-</div>}
         </div>
       ),
@@ -221,7 +223,7 @@ export default function ReportVisitorSummary_KPI() {
       width: 100,
       render: (value: any, record: any) => {
         return (
-          <div className="!text-center">
+          <div className="!text-center min-w-[100px]">
             {record && record?.customers ? (
               record?.customers[0]?.total_image
             ) : (
@@ -238,7 +240,7 @@ export default function ReportVisitorSummary_KPI() {
       key: "total_doanhso",
       width: 100,
       render: (value: any) => (
-        <div className="!text-center">
+        <div className="!text-center min-w-[100px]">
           {value ? value : <div className="min-w-[40px]">-</div>}
         </div>
       ),
@@ -250,7 +252,7 @@ export default function ReportVisitorSummary_KPI() {
       key: "total_doanhthu",
       width: 100,
       render: (value: any) => (
-        <div className="!text-center">
+        <div className="!text-center min-w-[100px]">
           {value ? value : <div className="min-w-[40px]">-</div>}
         </div>
       ),
@@ -347,7 +349,7 @@ export default function ReportVisitorSummary_KPI() {
               bordered
               $border
               dataSource={dataCheckin?.data?.map((report: any) => ({
-                key: report.name,
+                key: report.create_time.toString(),
                 ...report,
               }))}
               pagination={

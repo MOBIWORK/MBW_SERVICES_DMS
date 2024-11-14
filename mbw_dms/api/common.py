@@ -569,26 +569,30 @@ def upload_image_s3(image,description):
     data["status"] = True
     return data
 
-# Lấy ra các field của doctype con
-def get_value_child_doctype(master_doctype, master_name, name_field):
-	if not master_name:
-		return
-	from frappe.model import child_table_fields, default_fields
+# Lấy ra các field nhỏ của doctype con
+def get_value_child_doctype(master_doctype, master_name, name_field, fields_to_extract=None):
+    if not master_name:
+        return
+    from frappe.model import child_table_fields, default_fields
 
-	filed_master = frappe.get_doc(master_doctype, master_name)
+    filed_master = frappe.get_doc(master_doctype, master_name)
 
-	field_child = []
-	for i, child in enumerate(filed_master.get(name_field)):
-		child = child.as_dict()
+    field_child = []
+    for i, child in enumerate(filed_master.get(name_field)):
+        child = child.as_dict()
 
         # Xóa các trường không cần thiết
-		for fieldname in default_fields + child_table_fields:
-			if fieldname in child:
-				del child[fieldname]
+        for fieldname in default_fields + child_table_fields:
+            if fieldname in child:
+                del child[fieldname]
 
-		field_child.append(child)
+        # Nếu fields_to_extract được truyền vào, chỉ giữ lại các trường có trong danh sách
+        if fields_to_extract:
+            child = {key: value for key, value in child.items() if key in fields_to_extract}
 
-	return field_child
+        field_child.append(child)
+
+    return field_child
 
 
 class ArrayMethod():
