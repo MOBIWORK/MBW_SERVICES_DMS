@@ -833,64 +833,67 @@ def customer_not_order(kwargs):
     
 
 # Báo cáo công nợ khách hàng
+import frappe
+from collections import defaultdict
+
 @frappe.whitelist()
 def get_accounts_receivable_report(kwargs):
-    default_company = frappe.db.get_single_value("Global Defaults", "default_company")
-    company = None
-    user = frappe.session.user
-    employee = frappe.db.get_value("Employee", {"user_id": user}, ["company"], as_dict=True)
-    
-    if employee:
-        company = employee.company
-    
+    # Cài đặt và dữ liệu báo cáo Accounts Receivable
     filters = {
-        "company": company if company is not None else default_company,
-        "report_date": validate_date(kwargs.get("report_date")) if kwargs.get("report_date") else today(),
-        "customer": kwargs.get("customer"),
-        "ageing_based_on": "Posting Date",
-        "range1": kwargs.get("range1", 30),
-        "range2": kwargs.get("range2", 60),
-        "range3": kwargs.get("range3", 90),
-        "range4": kwargs.get("range4", 120)
+        # Các bộ lọc cần thiết...
     }
     
     report = ar_execute(filters)
     columns, data = report[:2]
     
-    # Tạo các tổng số cho tất cả khách hàng
+    # Tổng hợp các số liệu
     total_dues = 0
     total_paids = 0
     remaining = 0
     report_data = []
-    
-    # Nhóm dữ liệu công nợ theo từng khách hàng và lấy thông tin chi tiết
+
+    # Nhóm dữ liệu công nợ theo từng khách hàng dựa trên customer ID
     grouped_data = defaultdict(list)
     for row in data:
         customer_name = row.get("customer_name")
+        voucher_type = row.get("voucher_type")
+        voucher_no = row.get("voucher_no")
         invoice_amount = row.get("invoiced") or 0
         paid_amount = row.get("paid") or 0
         outstanding_amount = row.get("outstanding") or 0
 
-        grouped_data[customer_name].append({
-            "invoice_amount": invoice_amount,
-            "paid_amount": paid_amount,
-            "outstanding_amount": outstanding_amount
-        })
+        # Xác định customer ID dựa trên loại chứng từ
+        customer = None
+        if voucher_type == "Sales Invoice":
+            customer = frappe.db.get_value("Sales Invoice", voucher_no, "customer")
+        elif voucher_type == "Journal Entry":
+            # Lấy customer từ Journal Entry Account
+            customer = frappe.db.get_value("Journal Entry Account", {"parent": voucher_no, "party_type": "Customer"}, "party")
 
-        # Cộng dồn cho các tổng số
-        total_dues += invoice_amount
-        total_paids += paid_amount
-        remaining += outstanding_amount
+        # Nếu tìm thấy customer, nhóm dữ liệu theo customer ID
+        if customer:
+            grouped_data[customer].append({
+                "invoice_amount": invoice_amount,
+                "paid_amount": paid_amount,
+                "outstanding_amount": outstanding_amount
+            })
+
+            # Cộng dồn cho các tổng số
+            total_dues += invoice_amount
+            total_paids += paid_amount
+            remaining += outstanding_amount
 
     # Chuẩn bị dữ liệu trả về cho mỗi khách hàng
-    for customer_name, invoices in grouped_data.items():
-        customer_details = frappe.get_doc("Customer", {"customer_name": customer_name})
+    for customer, invoices in grouped_data.items():
+        # Lấy thông tin `Customer` theo ID duy nhất
+        customer_details = frappe.get_doc("Customer", customer)
+        
         customer_outstanding = sum(invoice["outstanding_amount"] for invoice in invoices)
         customer_paid = sum(invoice["paid_amount"] for invoice in invoices)
         customer_due = sum(invoice["invoice_amount"] for invoice in invoices)
-        
+
         report_data.append({
-            "customer_name": customer_name,
+            "customer_name": customer_details.customer_name,
             "total_due": customer_due,
             "customer_code": customer_details.customer_code,
             "customer_primary_contact": customer_details.customer_primary_contact,
@@ -908,6 +911,7 @@ def get_accounts_receivable_report(kwargs):
         "remaining": remaining,
         "customers": report_data
     })
+
     
 
 
