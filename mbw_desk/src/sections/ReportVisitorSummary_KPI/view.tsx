@@ -199,7 +199,7 @@ export default function ReportVisitorSummary_KPI() {
       width: 100,
       render: (value: any) => (
         <div className="!text-center min-w-[100px]">
-          {value ? value : <div className="min-w-[40px]">-</div>}
+          {value ? value.toFixed(2) : <div className="min-w-[40px]">-</div>}
         </div>
       ),
     },
@@ -241,9 +241,10 @@ export default function ReportVisitorSummary_KPI() {
       width: 100,
       render: (value: any) => (
         <div className="!text-center min-w-[100px]">
-          {value ? value : <div className="min-w-[40px]">-</div>}
+          {value ? Intl.NumberFormat().format(value) : <div className="min-w-[40px]">-</div>}
         </div>
       ),
+      
     },
     {
       //Doanh thu: Tổng số tiền tính từ các hóa đơn bán hàng (Sales invoid)
@@ -253,7 +254,7 @@ export default function ReportVisitorSummary_KPI() {
       width: 100,
       render: (value: any) => (
         <div className="!text-center min-w-[100px]">
-          {value ? value : <div className="min-w-[40px]">-</div>}
+          {value ? Intl.NumberFormat().format(value) : <div className="min-w-[40px]">-</div>}
         </div>
       ),
     },
