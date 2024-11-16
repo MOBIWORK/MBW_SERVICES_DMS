@@ -3,11 +3,13 @@
 
 import frappe
 from frappe.model.document import Document
-from mbw_dms.api.validators import validate_filter_timestamp
+from mbw_dms.api.validators import validate_filter_timestamp, validate_date
 from frappe.utils import nowdate, today
 import calendar
 from collections import defaultdict 
 import datetime
+from frappe import _
+from erpnext.accounts.report.accounts_receivable.accounts_receivable import execute as ar_execute
 from mbw_dms.api.common import (
     exception_handle,
     gen_response,
@@ -831,78 +833,81 @@ def customer_not_order(kwargs):
     
 
 # Báo cáo công nợ khách hàng
-@frappe.whitelist(methods="GET")
-def receivable_summary_report(**kwargs):
-    try:
-        filters = []
-        filter_inv = {}
-        from_date = validate_filter_timestamp(type="start")(kwargs.get("from_date")) if kwargs.get("from_date") else None
-        to_date = validate_filter_timestamp(type="end")(kwargs.get("to_date")) if kwargs.get("to_date") else None
+@frappe.whitelist()
+def get_accounts_receivable_report(kwargs):
+    default_company = frappe.db.get_single_value("Global Defaults", "default_company")
+    company = None
+    user = frappe.session.user
+    employee = frappe.db.get_value("Employee", {"user_id": user}, ["company"], as_dict=True)
+    
+    if employee:
+        company = employee.company
+    
+    filters = {
+        "company": company if company is not None else default_company,
+        "report_date": validate_date(kwargs.get("report_date")) if kwargs.get("report_date") else today(),
+        "customer": kwargs.get("customer"),
+        "ageing_based_on": "Posting Date",
+        "range1": kwargs.get("range1", 30),
+        "range2": kwargs.get("range2", 60),
+        "range3": kwargs.get("range3", 90),
+        "range4": kwargs.get("range4", 120)
+    }
+    
+    report = ar_execute(filters)
+    columns, data = report[:2]
+    
+    # Tạo các tổng số cho tất cả khách hàng
+    total_dues = 0
+    total_paids = 0
+    remaining = 0
+    report_data = []
+    
+    # Nhóm dữ liệu công nợ theo từng khách hàng và lấy thông tin chi tiết
+    grouped_data = defaultdict(list)
+    for row in data:
+        customer_name = row.get("customer_name")
+        invoice_amount = row.get("invoiced") or 0
+        paid_amount = row.get("paid") or 0
+        outstanding_amount = row.get("outstanding") or 0
 
-        user_id = frappe.session.user
-        employee = frappe.get_value("Employee", {"user_id": user_id}, "name")
-        sales_per = frappe.get_value("Sales Person", {"employee": employee}, "name")
+        grouped_data[customer_name].append({
+            "invoice_amount": invoice_amount,
+            "paid_amount": paid_amount,
+            "outstanding_amount": outstanding_amount
+        })
 
-        invoice = []
+        # Cộng dồn cho các tổng số
+        total_dues += invoice_amount
+        total_paids += paid_amount
+        remaining += outstanding_amount
 
-        if from_date and to_date:
-            filter_inv["posting_date"] = ["between", [from_date,to_date]]
-        filter_inv["docstatus"] = 1
-        list_invoices = frappe.get_all("Sales Invoice", filters=filter_inv, fields=["name"])
+    # Chuẩn bị dữ liệu trả về cho mỗi khách hàng
+    for customer_name, invoices in grouped_data.items():
+        customer_details = frappe.get_doc("Customer", {"customer_name": customer_name})
+        customer_outstanding = sum(invoice["outstanding_amount"] for invoice in invoices)
+        customer_paid = sum(invoice["paid_amount"] for invoice in invoices)
+        customer_due = sum(invoice["invoice_amount"] for invoice in invoices)
+        
+        report_data.append({
+            "customer_name": customer_name,
+            "total_due": customer_due,
+            "customer_code": customer_details.customer_code,
+            "customer_primary_contact": customer_details.customer_primary_contact,
+            "mobile_no": customer_details.mobile_no or "",
+            "customer_type": customer_details.customer_type,
+            "customer_group": customer_details.customer_group,
+            "total_paid": customer_paid,
+            "remaining": customer_outstanding - customer_paid,
+        })
 
-        for i in list_invoices:
-            st = get_value_child_doctype("Sales Invoice", i["name"], "sales_team")
-            for j in st:
-                if j.sales_person == sales_per and j.created_by == 1 and i["name"] not in invoice:
-                    invoice.append(i["name"])
-        invoice_str = ", ".join(["'" + inv + "'" for inv in invoice])
-
-        if invoice_str != "":
-            filters.append(f"inv.name IN ({invoice_str})")
-        filters.append("inv.docstatus=1")
-
-        where_conditions = " AND ".join(filters)
-
-        sql_query = f"""
-            SELECT
-                inv.customer_name,
-                SUM(inv.outstanding_amount) AS total_due,
-                cus.customer_code,
-                cus.customer_primary_contact,
-                cus.mobile_no,
-                cus.customer_type,
-                cus.customer_group,
-                COALESCE(SUM(pe.paid_amount), 0) AS total_paid
-            FROM
-                `tabSales Invoice` inv
-            JOIN `tabCustomer` cus ON cus.name = inv.customer
-            LEFT JOIN `tabPayment Entry` pe ON pe.party_name = inv.customer_name
-            WHERE
-                {where_conditions}
-            GROUP BY
-                inv.customer_name
-        """
-        customers_invoice = frappe.db.sql(sql_query, as_dict=True)
-
-        total_dues = 0
-        total_paids = 0
-        remaining = 0
-
-        # Lấy tổng số tiền đã trả của từng khách hàng
-        for cus_inv in customers_invoice:
-            total_dues += cus_inv["total_due"]
-            total_paids += cus_inv["total_paid"]
-            cus_inv["remaining"] = cus_inv["total_due"] - cus_inv["total_paid"]
-        remaining = total_dues - total_paids
-
-        return gen_response(200, "Thành công", {
-            "total_dues": total_dues,
-            "total_paids": total_paids,
-            "remaining": remaining,
-            "customers": customers_invoice
-            })
-    except Exception as e:
-        return exception_handle(e)
+    # Trả về dữ liệu ở định dạng yêu cầu
+    return gen_response(200, "Thành công", {
+        "total_dues": total_dues,
+        "total_paids": total_paids,
+        "remaining": remaining,
+        "customers": report_data
+    })
     
 
 
