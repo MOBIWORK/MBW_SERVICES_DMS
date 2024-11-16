@@ -16,7 +16,7 @@ def report_visitor_kpi(**res):
 
         query = f"sc.creation BETWEEN '{from_date}' AND '{to_date}'"
 
-        sql =f"""
+        sql = f"""
             WITH ImageCounts AS (
                 SELECT 
                     sc.name AS checkin_name, 
@@ -92,10 +92,11 @@ def report_visitor_kpi(**res):
         """
         report = frappe.db.sql(sql, as_dict=True)
         count = frappe.db.sql(spl_count, as_dict=True)[0].get("total")
+
         for r in report:
             if r["customers"] != None:
-                r['customers'] = json.loads(r['customers']) if r['customers'] else []
-                r.update({"checkin_sang":0, "checkin_chieu":0})
+                r["customers"] = json.loads(r["customers"]) if r["customers"] else []
+                r.update({"checkin_sang": 0, "checkin_chieu": 0})
                 custom_data = r.get("customers")
                 
                 listCheckin_in = []
@@ -106,31 +107,30 @@ def report_visitor_kpi(**res):
                 total_doanhso = 0
                 total_doanhthu = 0
                 for c in custom_data:
-
-                    #check in dau tien sang, cuoi chieu
+                    # Check in đầu tiên sáng, cuối chiều
                     listCheckin_in.append(datetime.strptime(c.get("checkin_giovao"), "%Y-%m-%d %H:%M:%S.%f"))
                     listCheckin_out.append(datetime.strptime(c.get("checkin_giora"), "%Y-%m-%d %H:%M:%S.%f"))
 
-                    #check in sang, chieu
-                    timeCheckIn = int( c.get("checkin").split(":")[0])
+                    # Check in sáng, chiều
+                    timeCheckIn = int(c.get("checkin").split(":")[0])
                     if timeCheckIn < 12:
                         r.update({"checkin_sang": r.get("checkin_sang") + 1})
                     else:
                         r.update({"checkin_chieu": r.get("checkin_chieu") + 1})
 
-                    #tong km di chuyen
+                    # Tổng km di chuyển
                     total_distance += float(c.get("distance")) if c.get("distance") else 0
 
-                    #tong don hang
+                    # Tổng đơn hàng
                     total_donhang += float(c.get("customer_donhang")) if c.get("customer_donhang") else 0
 
-                    #tong anh chup
+                    # Tổng ảnh chụp
                     total_anhchup += int(c.get("total_image")) if c.get("total_image") else 0
 
-                    #tong danh so
+                    # Tổng doanh số
                     total_doanhso += float(c.get("customer_doanhso")) if c.get("customer_doanhso") else 0
 
-                    #tong doanh thu
+                    # Tổng doanh thu
                     total_doanhthu += float(c.get("customer_doanhthu")) if c.get("customer_doanhthu") else 0
                 
                 

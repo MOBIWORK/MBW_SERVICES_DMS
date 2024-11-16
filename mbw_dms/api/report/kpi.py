@@ -1,13 +1,13 @@
 import frappe
 
-from mbw_dms.api.common import gen_response, exception_handle, get_child_values_doc,get_value_child_doctype
+from mbw_dms.api.common import gen_response, exception_handle, get_child_values_doc,get_value_child_doctype, qty_not_pricing_rule
 from mbw_dms.api.validators import validate_filter_timestamp
 import calendar
 import math
+
 # Báo cáo KPI web- lưới tổng quan
 @frappe.whitelist(methods='GET')
 def kpi_report(**kwargs):
-
     from mbw_dms.mbw_dms.doctype.dms_kpi.dms_kpi import report
     return report(kwargs=kwargs)
 
@@ -18,13 +18,13 @@ def kpi_visit_detail(**kwargs):
         filters = {}
         from_date = validate_filter_timestamp(type="start")(kwargs.get("from_date")) if kwargs.get("from_date") else None
         to_date = validate_filter_timestamp(type="end")(kwargs.get("to_date")) if kwargs.get("to_date") else None
-        page_size =  int(kwargs.get("page_size", 20))
+        page_size = int(kwargs.get("page_size", 20))
         page_number = int(kwargs.get("page_number")) if kwargs.get("page_number") and int(kwargs.get("page_number")) >=1 else 1
         employee = kwargs.get("employee")
         user_id = None
+
         if employee:
             user_id = frappe.get_value("Employee", {"name": employee}, "user_id")
-
         if from_date and to_date:
             filters["creation"] = ["between", [from_date, to_date]]
         if employee:
@@ -42,6 +42,7 @@ def kpi_visit_detail(**kwargs):
     except Exception as e:
         return exception_handle(e)
     
+
 # Chi tiết số kh viếng thăm duy nhất
 @frappe.whitelist(methods="GET")
 def kpi_only_visit_detail(**kwargs):
@@ -69,8 +70,9 @@ def kpi_only_visit_detail(**kwargs):
             return_data[checkin.get("kh_ma")].append(checkin)
 
         return_data2 = []
-        for checkin_ma,value in return_data.items():
+        for checkin_ma, value in return_data.items():
             return_data2 += value
+
         return gen_response(200, "Thành công", {
             "data": return_data2,
             "totals": unique_data_count,
@@ -88,7 +90,7 @@ def kpi_cus_so_detail(**kwargs):
     try:
         from_date = validate_filter_timestamp(type="start")(kwargs.get("from_date")) if kwargs.get("from_date") else None
         to_date = validate_filter_timestamp(type="end")(kwargs.get("to_date")) if kwargs.get("to_date") else None
-        page_size =  int(kwargs.get("page_size", 20))
+        page_size = int(kwargs.get("page_size", 20))
         page_number = int(kwargs.get("page_number")) if kwargs.get("page_number") and int(kwargs.get("page_number")) >=1 else 1
         employee = kwargs.get("employee")
         sales_person = frappe.get_value("Sales Person", {"employee": employee}, "name")
@@ -110,8 +112,6 @@ def kpi_cus_so_detail(**kwargs):
             ORDER BY cus.customer_code ASC
         """
 
-        # if where_condition:
-        #     sql_query += " WHERE {}".format(where_condition)
         all_sales_orders = frappe.db.sql(sql_query, as_dict=True)
 
         filtered_data = []
@@ -123,7 +123,7 @@ def kpi_cus_so_detail(**kwargs):
 
         totals = len(filtered_data)
         
-         # Phân trang dữ liệu
+        # Phân trang dữ liệu
         start_idx = page_size * (page_number - 1)
         end_idx = start_idx + page_size
         paginated_data = filtered_data[start_idx:end_idx]
@@ -146,7 +146,7 @@ def kpi_new_cus_detail(**kwargs):
         filters = {}
         from_date = validate_filter_timestamp(type="start")(kwargs.get("from_date")) if kwargs.get("from_date") else None
         to_date = validate_filter_timestamp(type="end")(kwargs.get("to_date")) if kwargs.get("to_date") else None
-        page_size =  int(kwargs.get("page_size", 20))
+        page_size = int(kwargs.get("page_size", 20))
         page_number = int(kwargs.get("page_number")) if kwargs.get("page_number") and int(kwargs.get("page_number")) >=1 else 1
         employee = kwargs.get("employee")
 
@@ -178,7 +178,7 @@ def kpi_total_so_detail(**kwargs):
         filters = {}
         from_date = validate_filter_timestamp(type="start")(kwargs.get("from_date")) if kwargs.get("from_date") else None
         to_date = validate_filter_timestamp(type="end")(kwargs.get("to_date")) if kwargs.get("to_date") else None
-        page_size =  int(kwargs.get("page_size", 20))
+        page_size = int(kwargs.get("page_size", 20))
         page_number = int(kwargs.get("page_number")) if kwargs.get("page_number") and int(kwargs.get("page_number")) >=1 else 1
         employee = kwargs.get("employee")
         sales_person = frappe.get_value("Sales Person", {"employee": employee}, "name")
@@ -199,7 +199,7 @@ def kpi_total_so_detail(**kwargs):
 
         totals = len(filtered_data)
         
-         # Phân trang dữ liệu
+        # Phân trang dữ liệu
         start_idx = page_size * (page_number - 1)
         end_idx = start_idx + page_size
         paginated_data = filtered_data[start_idx:end_idx]
@@ -222,7 +222,7 @@ def kpi_so_amount_detail(**kwargs):
         filters = {}
         from_date = validate_filter_timestamp(type="start")(kwargs.get("from_date")) if kwargs.get("from_date") else None
         to_date = validate_filter_timestamp(type="end")(kwargs.get("to_date")) if kwargs.get("to_date") else None
-        page_size =  int(kwargs.get("page_size", 20))
+        page_size = int(kwargs.get("page_size", 20))
         page_number = int(kwargs.get("page_number")) if kwargs.get("page_number") and int(kwargs.get("page_number")) >=1 else 1
         employee = kwargs.get("employee")
         sales_person = frappe.get_value("Sales Person", {"employee": employee}, "name")
@@ -257,6 +257,7 @@ def kpi_so_amount_detail(**kwargs):
     except Exception as e:
         return exception_handle(e)
     
+
 # Kpi doanh thu chi tiết
 @frappe.whitelist(methods='GET')
 def kpi_si_amount_detail(**kwargs):
@@ -306,7 +307,7 @@ def kpi_so_qty_detail(**kwargs):
         filters = {}
         from_date = validate_filter_timestamp(type="start")(kwargs.get("from_date")) if kwargs.get("from_date") else None
         to_date = validate_filter_timestamp(type="end")(kwargs.get("to_date")) if kwargs.get("to_date") else None
-        page_size =  int(kwargs.get("page_size", 20))
+        page_size = int(kwargs.get("page_size", 20))
         page_number = int(kwargs.get("page_number")) if kwargs.get("page_number") and int(kwargs.get("page_number")) >=1 else 1
         employee = kwargs.get("employee")
         sales_person = frappe.get_value("Sales Person", {"employee": employee}, "name")
@@ -326,7 +327,6 @@ def kpi_so_qty_detail(**kwargs):
                     filtered_data.append(i)
 
         totals = len(filtered_data)
-        from mbw_dms.api.common import qty_not_pricing_rule
         for i in filtered_data:
             so = frappe.get_doc("Sales Order", i.name).as_dict()
             items = so.get("items")
@@ -355,14 +355,15 @@ def kpi_so_sku_detail(**kwargs):
         filters = {}
         from_date = validate_filter_timestamp(type="start")(kwargs.get("from_date")) if kwargs.get("from_date") else None
         to_date = validate_filter_timestamp(type="end")(kwargs.get("to_date")) if kwargs.get("to_date") else None
-        page_size =  int(kwargs.get("page_size", 20))
+        page_size = int(kwargs.get("page_size", 20))
         page_number = int(kwargs.get("page_number")) if kwargs.get("page_number") and int(kwargs.get("page_number")) >=1 else 1
         employee = kwargs.get("employee")
         user_id = None
+
         if employee:
             user_id = frappe.get_value("Employee", {"name": employee}, "user_id")
         filters["owner"] = user_id
-        filters["docstatus"] =1
+        filters["docstatus"] = 1
 
         if from_date and to_date:
             filters["creation"] = ["between", [from_date, to_date]]
@@ -394,10 +395,11 @@ def kpi_time_work_detail(**kwargs):
         filters = {}
         from_date = validate_filter_timestamp(type="start")(kwargs.get("from_date")) if kwargs.get("from_date") else None
         to_date = validate_filter_timestamp(type="end")(kwargs.get("to_date")) if kwargs.get("to_date") else None
-        page_size =  int(kwargs.get("page_size", 20))
+        page_size = int(kwargs.get("page_size", 20))
         page_number = int(kwargs.get("page_number")) if kwargs.get("page_number") and int(kwargs.get("page_number")) >=1 else 1
         employee = kwargs.get("employee")
         user_id = None
+
         if employee:
             user_id = frappe.get_value("Employee", {"name": employee}, "user_id")
         filters["createdbyemail"] = user_id
@@ -420,20 +422,19 @@ def kpi_time_work_detail(**kwargs):
         return exception_handle(e)
 
 
-
-
 @frappe.whitelist(methods='GET')
 def analisis_kpi(**res): 
     try:
         is_excel = res.get("is_excel", False)
-        page_size =  int(res.get("page_size", 20))
+        page_size = int(res.get("page_size", 20))
         page_number = int(res.get("page_number")) if res.get("page_number") and int(res.get("page_number")) >= 1 else 1
         employee = res.get("employee")
         sales_team = res.get("sales_team")
         month = int(res.get("month")) if res.get("month") else None
-        year = int(res.get("year"))  if res.get("year") else None
+        year = int(res.get("year")) if res.get("year") else None
         start_date = None
         end_date = None
+
         if month and year:
             start_date_str = f"{year:04d}-{month:02d}-01"
             last_day_of_month = calendar.monthrange(year, month)[1]
@@ -441,7 +442,6 @@ def analisis_kpi(**res):
             start_date = frappe.utils.getdate(start_date_str)
             end_date = frappe.utils.getdate(end_date_str)
         
-
         filters = []
 
         if employee:
@@ -464,7 +464,7 @@ def analisis_kpi(**res):
             if obj_nv.get(n["employee"]) is None:
                 obj_nv[n["employee"]] = []
 
-            list_customers =frappe.get_doc('DMS Router',{"name": n["id"]}).get("customers")
+            list_customers = frappe.get_doc("DMS Router", {"name": n["id"]}).get("customers")
 
             for c in list_customers:
                 if c.get("customer_code") not in obj_nv[n["employee"]]:
@@ -521,7 +521,7 @@ def analisis_kpi(**res):
             WHERE so.transaction_date BETWEEN %s AND %s
         """
 
-        sale_orders = frappe.db.sql(sql_query_donhang,(start_date_str, end_date_str) ,as_dict=1)
+        sale_orders = frappe.db.sql(sql_query_donhang, (start_date_str, end_date_str), as_dict=1)
 
         field_items = ["name", "item_name", "item_code"]
         obj_emp = {}
@@ -542,14 +542,13 @@ def analisis_kpi(**res):
 
                         if obj_emp.get(emp[0]["employee"]) is None:
                             obj_emp[emp[0]["employee"]] = {"totalOrder": 0, "total_sku": 0, "customer": {}}
+
                         if obj_emp.get(emp[0]["employee"]) is not None:
                             obj_emp[emp[0]["employee"]]["totalOrder"] += 1
                             obj_emp[emp[0]["employee"]]["total_sku"] += len(items)
                             
                             if obj_emp[emp[0]["employee"]]["customer"].get(i["customer_code"]) is None:
                                 obj_emp[emp[0]["employee"]]["customer"][i["customer_code"]] = 1
-
-       
        
         for i in data:
             i["children"] = frappe.parse_json(i["children"])
@@ -589,6 +588,7 @@ def analisis_kpi(**res):
             i["total_binh_quan_sku_kh"] = 0
             i["total_sku_dh"] = 0
             i["total_sku_kh"] = 0
+
             for r in i["children"]:
                 emp = r["ten_nv"]
                 if emp in obj_emp:
@@ -605,7 +605,8 @@ def analisis_kpi(**res):
                         r["sku_kh"] = 0
 
                     i["total_sku_kh"] += r["sku_kh"]
-                # kpi nhan vien ban hang
+
+                # Kpi nhân viên bán hàng
                 kpi_month = frappe.db.sql(f"""
                     SELECT 
                         so_kh_vt_luot as th_vt, 
@@ -623,11 +624,10 @@ def analisis_kpi(**res):
                         AND thang = '{month}'
                         AND nam = '{year}'
                 """, as_dict=True)
+
                 r["kpi_month"] = []
                 if bool(kpi_month):
                     r["kpi_month"] = kpi_month[0]
-                
-            
                 r["tl_vt"] = 0
                 r["tl_vt_dn"] = 0
                 r["tl_dat_hang"] = 0
@@ -703,8 +703,6 @@ def analisis_kpi(**res):
                     if total_sku != 0:
                         r["tl_sku_thanhcong"] = round(r["kpi_month"]["th_sku"] / total_sku *100, 2)
 
-                
-                
             if i["total_kh_vt"] != 0:
                 i["total_tl_vt"] = round((i["total_th_vt"] /   i["total_kh_vt"])*100, 2)
             if  i["total_kh_vt_dn"] != 0:
@@ -727,14 +725,6 @@ def analisis_kpi(**res):
             if len(i["children"]) != 0:
                 i["total_tl_donhang_thanhcong"] = round(sum([r["tl_donhang_thanhcong"] for r in i["children"]])/len(i["children"]), 2)
                 i["total_tl_sku_thanhcong"] = round(sum([r["tl_sku_thanhcong"] for r in i["children"]])/len(i["children"]), 2)
-
-        # sql_query_count = """
-        #     SELECT COUNT(*)
-        #     FROM `tabDMS KPI`
-        # """
-        # if where_condition:
-        #     sql_query_count += " WHERE {}".format(where_condition)
-        # count_data = frappe.db.sql(sql_query_count, as_dict=True)
 
         return gen_response(200, "Thành công", {
                 "data": data,

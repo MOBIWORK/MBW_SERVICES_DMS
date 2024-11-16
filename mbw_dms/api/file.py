@@ -91,8 +91,6 @@ class MinioConnection:
 
 def create_my_minio(doctype):
     settings = frappe.get_doc(doctype).as_dict()
-    print(settings)
-    # settings = frappe.get_single("AWS Settings")
     return MinioConnection(
         endpoint=settings.get("endpoint_s3"),
         access_key=settings.get("access_key_s3"),
@@ -101,8 +99,6 @@ def create_my_minio(doctype):
         secure=False
     )
     
-# my_minio = create_my_minio()
-
 
 def distance_cal(embedding_check, know_embedding):
     distances = cdist(embedding_check, know_embedding, 'cosine')

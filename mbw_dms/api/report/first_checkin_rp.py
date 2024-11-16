@@ -51,9 +51,9 @@ def handle_first_checkin_report(kwargs):
             "page_number": page_number,
             "page_size": page_size
         })
+    
     except Exception as e:
         if is_excel:
-            print("Lỗi report checkin đầu  ",e)
             return {
                 "data": []
             }

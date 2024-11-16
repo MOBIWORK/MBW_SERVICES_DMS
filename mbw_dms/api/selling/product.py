@@ -54,10 +54,8 @@ def list_product(**kwargs):
         my_filter["disabled"] = 0
 
         items = frappe.db.get_list("Item", filters=my_filter,or_filters=filter_or,
-                                    fields=["name", "item_code", "item_name", "item_group", 
-                                            "stock_uom", "min_order_qty", "description",
-                                            "brand", "country_of_origin", "image",
-                                            "custom_industry", "end_of_life"],
+                                    fields=["name", "item_code", "item_name", "item_group", "stock_uom", "min_order_qty", "description",
+                                            "brand", "country_of_origin", "image", "custom_industry", "end_of_life"],
                                     start=page_size * (page_number - 1),
                                     page_length=page_size)
         for item in items:
@@ -101,15 +99,16 @@ def list_product(**kwargs):
                 if item.get("name") in permitted_item:
                     permitted_items_count += 1
         else:
-            permitted_items_count = len( frappe.db.get_list("Item", filters=my_filter,or_filters=filter_or,))
+            permitted_items_count = len( frappe.db.get_list("Item", filters=my_filter, or_filters=filter_or))
 
         data_item = []
         default_selling_price_list = frappe.get_doc("Selling Settings").selling_price_list
         for item in items:
             item["image"] = validate_image(item.get("image"))
-            item["details"] = frappe.get_all("Item Price", filters={"item_code": item.get('item_code'), "price_list": price_list}, fields=["uom", "price_list", "price_list_rate", "valid_from", "currency"])
+            item["details"] = frappe.get_all("Item Price", filters={"item_code": item.get("item_code"), "price_list": price_list}, fields=["uom", "price_list", "price_list_rate", "valid_from", "currency"])
             if not price_list and not item["details"]:
                 item_price_default = frappe.get_all("Item Price", filters={"item_code": item.get("item_code"), "price_list": default_selling_price_list}, fields=["uom", "price_list", "price_list_rate", "valid_from", "currency"])
+
                 if item_price_default:
                     item["details"] = item_price_default
                 else:
@@ -176,10 +175,8 @@ def list_product_campaign(**kwargs):
 
         items = frappe.db.get_list("Item",
                                     filters=my_filter, or_filters=filter_or,
-                                    fields=["name", "item_code", "item_name", "item_group", 
-                                            "stock_uom", "min_order_qty", "description",
-                                            "brand", "country_of_origin", "image",
-                                            "custom_industry", "end_of_life", "total_projected_qty"],
+                                    fields=["name", "item_code", "item_name", "item_group", "stock_uom", "min_order_qty", "description",
+                                            "brand", "country_of_origin", "image", "custom_industry", "end_of_life", "total_projected_qty"],
                                     start=page_size * (page_number - 1),
                                     page_length=page_size)
         
@@ -239,7 +236,7 @@ def list_product_campaign(**kwargs):
         return exception_handle(e)
 
       
-#list brand
+# List brand
 @frappe.whitelist(methods="GET")
 def list_brand():
     try:
@@ -248,16 +245,16 @@ def list_brand():
     except Exception as e:
         return exception_handle(e)
     
-#list Industry
+# List Industry
 @frappe.whitelist(methods="GET")
 def list_industry():
     try:
-        industry = frappe.db.get_list("Industry Type", fields=["name", "industry"],ignore_permissions=True)
+        industry = frappe.db.get_list("Industry Type", fields=["name", "industry"], ignore_permissions=True)
         return gen_response(200, "Thành công", industry)
     except Exception as e:
         return exception_handle(e)
     
-#list item group
+# List item group
 @frappe.whitelist(methods="GET")
 def list_item_group():
     try:

@@ -18,7 +18,7 @@ from mbw_dms.api import configs
 class DMSAlbum(Document):
 	pass
 
-#create Album Image
+# Create Album Image
 @frappe.whitelist(methods="POST")
 def create_album_image(kwargs):
     try:
@@ -40,7 +40,7 @@ def create_album_image(kwargs):
     except Exception as e:
         return exception_handle(e)
 
-#list album Image
+# List album Image
 @frappe.whitelist(methods="GET")
 def list_monitor_album(kwargs):
     try:
@@ -64,7 +64,8 @@ def list_monitor_album(kwargs):
             my_filter["team_sale"] = ["like", f'%{team_sale}%']
         if album_name:
             my_filter["album_name"] = ["like", f'%{album_name}%']
-        album_image = frappe.db.get_list("DMS Album Image", filters=my_filter, fields=["name","creation", "owner", "album_id", "album_name", "checkin_id", "customer_id", "customer_name", "customer_code", "customer_long", "customer_lat", "image_url", "team_sale", "employee"], distinct=True)
+        album_image = frappe.db.get_list("DMS Album Image", filters=my_filter, fields=["name", "creation", "owner", "album_id", "album_name", "checkin_id", "customer_id", "customer_name", "customer_code", "customer_long", "customer_lat", "image_url", "team_sale", "employee"], distinct=True)
+
         for albums in album_image:
             albums["creation"] = (albums.get("creation")).strftime("%H:%M, %d-%m-%Y")
             albums["employee"] = frappe.db.get_all("Employee", {"employee": albums.get("employee")}, ["name", "first_name"])
@@ -74,7 +75,7 @@ def list_monitor_album(kwargs):
         return exception_handle(e)
 
 
-#create Album
+# Create Album
 @frappe.whitelist(methods="POST")
 def create_album(kwargs):
     try:
@@ -90,23 +91,26 @@ def create_album(kwargs):
     except Exception as e:
         return exception_handle(e)
     
-#list 
+# List album
 @frappe.whitelist(methods="GET")
 def list_album():
     try:
-        setting_min_imgs = frappe.db.get_single_value("DMS Settings","batbuoc_chupanh")
+        setting_min_imgs = frappe.db.get_single_value("DMS Settings", "batbuoc_chupanh")
         employee_id = get_employee_id()
         saleperson = frappe.get_value("Sales Person", {"employee": employee_id}, "sales_person_name")
         data = []
         dms_albums = frappe.db.get_list("DMS Album", filters={"trang_thai": ("!=", "Không hoạt động")}, fields=["name", "ma_album", "ten_album", "so_anh_toi_thieu", "trang_thai"])
         for i in dms_albums:
             sale_team = get_value_child_doctype("DMS Album", i["name"], "nhom_ban_hang")
+            
             if setting_min_imgs == 0:
                 i["so_anh_toi_thieu"] = 0
+
             for salein in sale_team:
                 if salein.nhom_ban_hang in get_all_parent_sales_persons(saleperson):
                     if i not in data:
                         data.append(i)
+
         return gen_response(200, "Thành công", data)
     except Exception as e:
         return exception_handle(e)

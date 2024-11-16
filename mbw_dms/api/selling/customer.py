@@ -3,6 +3,7 @@ from frappe import _
 import json
 
 from mbw_dms.api.common import (
+    CommonHandle,
     exception_handle,
     gen_response,
     validate_image,
@@ -11,8 +12,6 @@ from mbw_dms.api.common import (
     routers_name_of_customer,
     customers_code_router,
     null_location,
-    CommonHandle,
-    update_address,
     handle_address_customer
 )
 
@@ -26,7 +25,7 @@ from mbw_dms.api.validators import (
 )
 from mbw_dms.api import configs
 import pydash
-from frappe.query_builder import (Field, DocType)
+from frappe.query_builder import DocType
 from frappe.query_builder.functions import Count
 
 # Danh sách khách hàng
@@ -64,9 +63,9 @@ def list_customer(**kwargs):
             my_filter = (my_filter & CustomerField("custom_birthday").between(from_date,to_date))
 
         select_field = ["name", "customer_name", "customer_code","customer_type", 
-                                        "customer_group", "territory", "industry", "image", "website", 
-                                        "mobile_no", "customer_primary_address", "custom_birthday",
-                                        "customer_location_primary", "customer_details","sfa_customer_type","sfa_sale_channel"]
+                        "customer_group", "territory", "industry", "image", "website", 
+                        "mobile_no", "customer_primary_address", "custom_birthday",
+                        "customer_location_primary", "customer_details", "sfa_customer_type","sfa_sale_channel"]
         
         customers = (frappe.qb.from_(CustomerDoc)
                     .distinct()
@@ -103,7 +102,7 @@ def list_customer(**kwargs):
 @frappe.whitelist(methods="GET")
 def customer_detail(name):
     try: 
-        doc_customer = frappe.get_doc("Customer",name).as_dict()
+        doc_customer = frappe.get_doc("Customer", name).as_dict()
         filter_cs = {"link_doctype": "Customer", "link_name": doc_customer.name}
         routers = routers_name_of_customer(more_filters={"customer_code": doc_customer.customer_code})
         address = frappe.db.get_all("Address", filters=filter_cs, fields = ["name", "address_title", "address_location", "is_primary_address", "is_shipping_address", "city", "county", "state", "address_line1"])
@@ -131,7 +130,7 @@ def customer_detail(name):
         doc_customer["contacts"] = contacts
         doc_customer["routers"] = list_router_frequency
         doc_customer["customer_location_primary"] = null_location(doc_customer["customer_location_primary"])
-        doc_customer["address"] = pydash.map_(address,lambda x: {**x,"primary": 1 if x.name == doc_customer.get("customer_primary_address") else 0})
+        doc_customer["address"] = pydash.map_(address,lambda x: {**x, "primary": 1 if x.name == doc_customer.get("customer_primary_address") else 0})
         doc_customer["credit_limits"] = pydash.map_(doc_customer["credit_limits"], lambda x: x.credit_limit) if len(doc_customer["credit_limits"]) > 0 else[ 0 ] 
 
         if doc_customer["image"] and not doc_customer["image"].startswith("http"):
@@ -147,7 +146,7 @@ def customer_detail(name):
         exception_handle(e)
 
 
-# list customer type
+# List customer type
 @frappe.whitelist(methods="GET")
 def list_customer_type():
     try:
@@ -172,9 +171,8 @@ def delete_customer(name):
 @frappe.whitelist(methods="POST")
 def create_customer(**kwargs):
     try:
-        kwargs = frappe._dict(kwargs)
-        
         # Xử lý dữ liệu đầu vào
+        kwargs = frappe._dict(kwargs)
         address = frappe._dict(kwargs.get("address", {}))
         contact = frappe._dict(kwargs.get("contact", {}))
         router_in = kwargs.get("router", [])
@@ -209,7 +207,7 @@ def create_customer(**kwargs):
         
         # Xử lý thêm ảnh khách hàng
         if kwargs.get("image"):
-            new_customer.image = post_image(name_image='', faceimage=kwargs.get("image"), doc_type="Customer", doc_name=new_customer.name)
+            new_customer.image = post_image(name_image="", faceimage=kwargs.get("image"), doc_type="Customer", doc_name=new_customer.name)
             new_customer.save()
 
         # Thêm khách hàng vào tuyến
@@ -316,7 +314,6 @@ def update_customer(**kwargs):
             # Thay đổi ảnh
             if kwargs.get("image") and (not customer.image or customer.image != kwargs.get("image")):
                 is_base64 = CommonHandle.check_base64(kwargs.get("image"))
-                # customer = frappe.get_doc("Customer", name)
                 if is_base64:
                     customer.image = post_image(name_image="", faceimage=kwargs.get("image"), doc_type="Customer", doc_name=customer.name)
                 else: 
@@ -368,7 +365,7 @@ def update_customer_addresses(customer, addresses, customer_name):
 
 def set_primary_address(customer, address_data):
     address_id = address_data.get("name") or frappe.get_value(
-        "Address", {"address_title": ["like", f"%{address_data['address_title']}%"]}, "name"
+        "Address", {"address_title": ["like", f"%{address_data["address_title"]}%"]}, "name"
     )
     if address_id:
         customer.customer_primary_address = address_id
@@ -531,7 +528,7 @@ def remove_contact_address(**kwarg):
         return exception_handle(e)
 
 
-# danh sách loại khách hàng-sfa_customer_type -linkto: DMS Customer Type
+# Danh sách loại khách hàng-sfa_customer_type -linkto: DMS Customer Type
 from mbw_dms.api.common import get_list_search
 @frappe.whitelist()
 def list_dms_cs_type():
@@ -539,7 +536,6 @@ def list_dms_cs_type():
 
 
 # Danh sách loại hình khách hàng - customer_type - Company/Individual/Proprietorship/Partnership
-# Danh sách Loại khách hàng
 @frappe.whitelist(methods="GET")
 def get_type_customer():
     try:
@@ -550,7 +546,6 @@ def get_type_customer():
     
 
 # Danh sách kênh-sfa_sale_channel - link to: DMS Sales Channel
-# Danh sách kênh khách hàng
 @frappe.whitelist(methods="GET")
 def get_channel():
     try:

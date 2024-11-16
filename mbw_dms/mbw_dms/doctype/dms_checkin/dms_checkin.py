@@ -13,6 +13,7 @@ from mbw_dms.api.common import (
 )
 from mbw_dms.api.validators import validate_datetime, validate_filter
 from mbw_dms.mbw_dms.utils import create_dms_log
+from mbw_dms.controllers.dms_sales_person import create_employee_objectid
 from mbw_dms.config_translate import i18n
 import json
 from frappe.utils import nowdate
@@ -22,6 +23,7 @@ import pydash
 from frappe.utils import cint
 from datetime import time
 from mbw_dms.mbw_dms.doctype.common import render_string
+import pytz
 
 class DMSCheckin(Document):
     def after_insert(self):
@@ -300,7 +302,7 @@ def create_checkin(kwargs):
                 else:
                     new_checkin.set(key, value)
             if key in int_key:
-                new_checkin.set(key,int( value))
+                new_checkin.set(key, int( value))
             elif key in datetime_keys:
                 new_checkin.set(key, get_time(value) if value else "")
             elif key in date_keys:
@@ -333,7 +335,7 @@ def create_checkin(kwargs):
                 if not key:
                     return gen_response(400, _("Not found setting key map"))
 
-                # call geolocation
+                # Call geolocation
                 response = requests.get(url)
                 address = json.loads(response.text).get("results")
         except Exception as e:
@@ -342,7 +344,8 @@ def create_checkin(kwargs):
 
         new_checkin.set("checkin_address", address)
         new_checkin.insert(ignore_permissions=True)
-        #send mail
+
+        # Send mail
         notes = frappe.db.get_all("Note", {"custom_checkin_id": kwargs.get("checkin_id")},["*"])
         for note in notes:
             try :
@@ -365,9 +368,9 @@ def create_checkin(kwargs):
                             retry=3
                         )
                     except Exception as e:
-                        print("something error send mail", e)
+                        print("Something error send mail", e)
             except Exception as e:
-                print(f"something error send mail {note.name} :::", e)
+                print(f"Something error send mail {note.name}: ", e)
         frappe.db.commit()
         return gen_response(201, "Thành công", {"name": new_checkin.name})
     
@@ -389,7 +392,7 @@ def create_checkin_inventory(body):
 
         for key, value in body.items():
             if key in normal_keys:
-                doc.set(key, validate_filter(type_check="require_field", value=(value,key)))
+                doc.set(key, validate_filter(type_check="require_field", value=(value, key)))
             else:
                 doc.set(key,value)
         items = body.get("inventory_items")
@@ -401,10 +404,12 @@ def create_checkin_inventory(body):
                     item["exp_time"] = validate_filter(type_check="date", value=item["exp_time"])
 
                 # Calculate total cost
-                if 'quantity' in item and 'item_price' in item:
-                    item['total_cost'] = item['quantity'] * item['item_price']
-                item_info =frappe.db.get_value("Item",item.get("item_code"),["item_name"], as_dict=1)
-                item["item_name"]=item_info.item_name if item_info else ""
+                if "quantity" in item and "item_price" in item:
+                    item["total_cost"] = item["quantity"] * item["item_price"]
+
+                item_info = frappe.db.get_value("Item", item.get("item_code"), ["item_name"], as_dict=1)
+                item["item_name"] = item_info.item_name if item_info else ""
+
             item["update_bycode"] = employee.get("name")
             item["update_byname"] = employee.get("fullname")
             item["update_at"] = time_now_utc().date()
@@ -449,18 +454,18 @@ def create_checkin_image(body):
             description += f"cDMSreate: {create_time}\\n"
         description= description.rstrip('\\n')
         try:
-            rsUpload = upload_image_s3(image=image,description=description)
+            rsUpload = upload_image_s3(image=image, description=description)
             image_push = {
                 "doctype": "DMS Album Image",
-                "album_id":album_id,
+                "album_id": album_id,
                 "album_name": album_name,
                 "checkin_id": checkin_id,
                 "customer_id": customer_id,
-                "customer_name":customer_name,
+                "customer_name": customer_name,
                 "customer_code" : customer_code,
-                "customer_long":long,
-                "customer_lat":lat,
-                "image_url":rsUpload.get("file_url"),
+                "customer_long": long,
+                "customer_lat": lat,
+                "image_url": rsUpload.get("file_url"),
 
             }
             new_album_image = frappe.get_doc(image_push)
@@ -549,9 +554,9 @@ def update_address_customer_checkin(body):
         address_location = null_location(json.dumps({"long": long, "lat": lat}))
         customer_info = frappe.db.get_value(doctype="Customer", filters= {"name": customer}, fieldname=["name", "customer_primary_address", "customer_name"], as_dict=1)
         city = validate_filter(type_check="require", value = body.get("city"))
-        county =validate_filter(type_check="require", value= body.get("county"))
+        county = validate_filter(type_check="require", value= body.get("county"))
         country = body.get("country")
-        state =validate_filter(type_check="require", value=body.get("state"))
+        state = validate_filter(type_check="require", value=body.get("state"))
         address_line1 = body.get("address_line1")
         
         link_cs_address = {
@@ -674,26 +679,28 @@ def send_checkin_to_ekgis(doc):
         projectId = frappe.get_doc("DMS Settings").ma_du_an
         api_key = frappe.get_doc("DMS Settings").api_key
         owner_id = doc.owner
-        employee = frappe.db.get_value("Employee",{"user_id":owner_id},["*"],as_dict=1)
-        sale_person = frappe.db.get_value("Sales Person",{"employee":employee.name},["*"],as_dict=1)
+        employee = frappe.db.get_value("Employee", {"user_id":owner_id}, ["*"], as_dict=1)
+        sale_person = frappe.db.get_value("Sales Person", {"employee": employee.name}, ["*"], as_dict=1)
+
         # Tích hợp dữ liệu checkin vào ekgis
         if sale_person:
-            from mbw_dms.controllers.dms_sales_person import create_employee_objectid
             objectId = sale_person.object_id
             if objectId == None:
                 try:
-                    create_employee_objectid(frappe.get_doc("Sales Person",{"employee":employee.name}))
-                    sale_person = frappe.get_doc("Sales Person",{"employee":employee.name})
+                    create_employee_objectid(frappe.get_doc("Sales Person", {"employee": employee.name}))
+                    sale_person = frappe.get_doc("Sales Person", {"employee":employee.name})
                     objectId = sale_person.object_id
                 except Exception as e:
-                    print("loi khi tao moi object",e)
+                    print("loi khi tao moi object", e)
             api_url_checkin=f"{API_URL}/{projectId}/{objectId}?api_key={api_key}"
+
             ext = {"customer_name": doc.kh_ten, "address": doc.kh_diachi}
             json_object = json.dumps(ext)
-            import pytz
-            time_checkin = pytz.timezone("Asia/Ho_Chi_Minh").localize(datetime.datetime.strptime(doc.checkin_giovao,"%Y-%m-%d %H:%M:%S")).astimezone(pytz.utc).strftime("%Y-%m-%d %H:%M:%S")
-            time_checkout = pytz.timezone("Asia/Ho_Chi_Minh").localize(datetime.datetime.strptime(doc.checkin_giora,"%Y-%m-%d %H:%M:%S")).astimezone(pytz.utc).strftime("%Y-%m-%d %H:%M:%S")
-            create_time  = pytz.timezone("Asia/Ho_Chi_Minh").localize(doc.createddate).astimezone(pytz.utc).strftime("%Y-%m-%d %H:%M:%S")
+
+            time_checkin = pytz.timezone("Asia/Ho_Chi_Minh").localize(datetime.datetime.strptime(doc.checkin_giovao, "%Y-%m-%d %H:%M:%S")).astimezone(pytz.utc).strftime("%Y-%m-%d %H:%M:%S")
+            time_checkout = pytz.timezone("Asia/Ho_Chi_Minh").localize(datetime.datetime.strptime(doc.checkin_giora, "%Y-%m-%d %H:%M:%S")).astimezone(pytz.utc).strftime("%Y-%m-%d %H:%M:%S")
+            create_time = pytz.timezone("Asia/Ho_Chi_Minh").localize(doc.createddate).astimezone(pytz.utc).strftime("%Y-%m-%d %H:%M:%S")
+
             data_checkin = {
                 "projectid":projectId,
                 "objectid": objectId,
@@ -733,6 +740,7 @@ def list_inventory(kwargs):
         return exception_handle(e)
     
 
+# Báo cáo viếng thăm
 def get_report(filters={}):
     try:
         is_excel = filters.get("is_excel",False)
@@ -801,7 +809,7 @@ def get_report(filters={}):
 
         if customer_group:
             customers_list = frappe.db.get_all("Customer", {"customer_group":customer_group}, ["customer_code"])
-            customer_code_list = pydash.map_(customers_list,lambda x: x.customer_code)
+            customer_code_list = pydash.map_(customers_list, lambda x: x.customer_code)
             customers = ", ".join(f"'{customer_code}'" for customer_code in customer_code_list)
             where = f"{where} AND dc.kh_ma IN ({customers})"
 

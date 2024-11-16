@@ -120,7 +120,6 @@ def handle_customer_report(kwargs):
     
     except Exception as e:
         if is_excel:
-            print("lỗi báo cáo sale order ==== ",e)
             return {
                 "data": [],
             }

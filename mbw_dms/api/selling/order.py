@@ -1,11 +1,12 @@
 import frappe
 from frappe import _
 from pypika import CustomFunction
-UNIX_TIMESTAMP = CustomFunction('UNIX_TIMESTAMP', ['day'])
+UNIX_TIMESTAMP = CustomFunction("UNIX_TIMESTAMP", ["day"])
+
 from mbw_dms.api.common import (
+    CommonHandle,
     exception_handle,
     gen_response,
-    CommonHandle
 )
 from mbw_dms.api.validators import (
     validate_filter_timestamp,
@@ -15,18 +16,18 @@ from mbw_dms.api.validators import (
 )
 from mbw_dms.api import configs
 import json
-from frappe.model.base_document import get_controller
 
 
 # Lấy danh sách đơn hàng
 @frappe.whitelist(allow_guest=True, methods="GET")
 def get_list_sales_order(**kwargs):
     try:
-        def add_query(query, condition) :
-            if query == "" :
+        def add_query(query, condition):
+            if query == "":
                 return condition
             else:
                 return f"{query} AND {condition}" 
+            
         status = kwargs.get("status")
         from_date = validate_filter_timestamp("start")(kwargs.get("from_date")) if kwargs.get("from_date") else None
         to_date = validate_filter_timestamp("end")(kwargs.get("to_date")) if kwargs.get("to_date") else None
@@ -40,11 +41,13 @@ def get_list_sales_order(**kwargs):
             employee = CommonHandle.get_employee_by_user(user = user_info.email)
             if not employee:
                 return gen_response("404", _("Employee not registered"))
+            
             employee_name = employee.get('name')
             sale_person = frappe.db.get_value("Sales Person", {"employee": employee_name}, ["name"])
             if not sale_person:
                 return gen_response("404", _("Sales Person not registered"))
-            where = add_query(where,f"st.sales_person = '{sale_person}'")
+            
+            where = add_query(where, f"st.sales_person = '{sale_person}'")
 
         if from_date and to_date:
             where = add_query(where, f"so.creation BETWEEN '{from_date}' AND '{to_date}' ")
@@ -62,7 +65,7 @@ def get_list_sales_order(**kwargs):
 
         if search_key:
             where = add_query(where, f"so.customer_name like '%{search_key}%' or so.name LIKE '%{search_key}%' or so.customer LIKE '%{search_key}%'")
-        # new query
+        # New query
         sql_query = f"""
                     SELECT so.customer, so.customer_name, so.name as name_so,
                             (so.customer_address) as address_display,
@@ -196,7 +199,7 @@ def create_sale_order(**kwargs):
         apply_discount_on = kwargs.get("apply_discount_on")
 
         new_order.customer = validate_not_none(kwargs.customer)     
-        new_order.delivery_date = validate_date(kwargs.delivery_date)                                   # Ngày giao
+        new_order.delivery_date = validate_date(kwargs.delivery_date)               # Ngày giao
         new_order.set_warehouse = kwargs.get("set_warehouse")                       # Kho hàng
         new_order.selling_price_list = price_list
 
@@ -423,6 +426,7 @@ def edit_return_order(name, **kwargs):
                         uom = item_data.get("uom")
                         tax_rate = float(item_data.get("item_tax_rate", 0))
                         item_tax_template = item_data.get("item_tax_template")
+                        
                         # Số lượng sản phẩm không thể sửa về 0
                         qty = int(item_data.get("qty", 1))
                         if qty == 0:

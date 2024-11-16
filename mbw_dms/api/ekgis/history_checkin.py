@@ -11,7 +11,7 @@ def get_history_checkin(**kwargs):
     try:
         api_key = frappe.get_doc("DMS Settings").api_key
         projectId = frappe.get_doc("DMS Settings").ma_du_an
-        user = frappe.db.get_list('Employee', filters={"user_id": frappe.session.user}, fields=["object_id"])
+        user = frappe.db.get_list("Employee", filters={"user_id": frappe.session.user}, fields=["object_id"])
         if user:
             objectId = user[0]["object_id"]
             params = {

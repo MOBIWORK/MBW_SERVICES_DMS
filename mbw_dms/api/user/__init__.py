@@ -1,10 +1,11 @@
 import frappe
 from frappe import _
 from frappe.utils.password import update_password, check_password
-from mbw_dms.api.common import gen_response, exception_handle, current_month_week, get_value_child_doctype,get_sales_group_child,get_user_id,get_employee_info
+from mbw_dms.api.common import gen_response, exception_handle, current_month_week, get_value_child_doctype, get_sales_group_child, get_user_id, get_employee_info
 from mbw_dms.api.validators import validate_filter_timestamp
 import datetime
 import pydash
+
 
 @frappe.whitelist(methods="PUT")
 def change_password(user, current_password, new_password, new_pass_again):
@@ -46,6 +47,7 @@ def get_projectID(**kwargs):
             if dms_settinngs.get("ma_du_an"):
                 projectID = dms_settinngs.get("ma_du_an")
                 frappe.cache().set_value("ProjectID", projectID)
+
         account_user = get_user_id()
         company= ""
         if account_user.get("name") != "Administrator":
@@ -56,24 +58,25 @@ def get_projectID(**kwargs):
             if not bool(company):
                 return gen_response(406, _("Tài khoản quản lý chưa thuộc công ty nào!"))
         objectIds = None
+
         # thay logic sửa đoạn này
         if bool(teamSale):
-            sales_person = get_sales_group_child(sale_person=teamSale,is_group=0)
-            # filters = {"name": ["in",  pydash.filter_(employee_codes, lambda x: bool(x))]}
+            sales_person = get_sales_group_child(sale_person=teamSale, is_group=0)
             if bool(company):
-                sales_person = pydash.filter_(sales_person,lambda x: x.get("company")== company)
-            objectIds = pydash.map_(sales_person,lambda x: x.get("object_id"))
+                sales_person = pydash.filter_(sales_person, lambda x: x.get("company") == company)
+            objectIds = pydash.map_(sales_person, lambda x: x.get("object_id"))
             objectIds = pydash.filter_(objectIds, lambda x: bool(x))
             if len(objectIds) == 0:
                 return gen_response(406, _("Chưa có nhân viên bán hàng nào được đăng ký tracking!"))
             else:
                 objectIds = ";".join(objectIds)
+
         return gen_response(200, "Thành công", {
             "Project ID": projectID,
             "objectIds":objectIds
         })
+    
     except Exception as e:
-        print("loi pjid ",e)
         return exception_handle(e)
 
 # Lấy project ID và Object ID
@@ -117,9 +120,9 @@ def get_employee_info_by_objid(object_id):
 def get_list_employees(**kwargs):
     try:
         teamSale = kwargs.get("teamSale") if bool(kwargs.get("teamSale")) else "Sales Team"
-        # kiểm tả tài khoản quản lý
+        # Kiểm tả tài khoản quản lý
         account_user = get_user_id()
-        company= ""
+        company = ""
         if account_user.get("name") != "Administrator":
             employee_info = get_employee_info()
             if not employee_info:
@@ -127,14 +130,15 @@ def get_list_employees(**kwargs):
             company= employee_info.get("company")
             if not bool(company):
                 return gen_response(406, _("Tài khoản quản lý chưa thuộc công ty nào!"))
+            
         EmplDoc = frappe.qb.DocType("Employee")
         filters = EmplDoc.name.isnotnull()
         SPDoc = frappe.qb.DocType("Sales Person")
-        # if bool(teamSale):
-        employee_codes,employee_id_users = get_sales_group_child(sale_person=teamSale)
-        print("employee_codes",employee_codes)
+
+        employee_codes, employee_id_users = get_sales_group_child(sale_person=teamSale)
         employee_code_not_empt = pydash.filter_(employee_codes, lambda x: bool(x))
         filters = (filters) & EmplDoc.name.isin(employee_code_not_empt)
+
         if bool(company):
             filters = (filters) & EmplDoc.company == company
         
@@ -143,10 +147,10 @@ def get_list_employees(**kwargs):
                      .on(EmplDoc.name == SPDoc.employee))
         if filters: 
             query = query.where(filters)
-        employees = query.select(SPDoc.object_id,EmplDoc.employee_name,EmplDoc.image.as_("avatar"),EmplDoc.name,EmplDoc.user_id ).run(as_dict=1)
+        employees = query.select(SPDoc.object_id, EmplDoc.employee_name, EmplDoc.image.as_("avatar"), EmplDoc.name, EmplDoc.user_id ).run(as_dict=1)
         gen_response(200, "Thành công", employees)
+
     except Exception as e:
-        print("Lỗi danh sách nhân viên",e)
         return exception_handle(e)
 
 

@@ -13,7 +13,7 @@ class DMSSettings(Document):
         frappe.cache.delete_value("website-config")
         frappe.cache.delete_value("ProjectID")
         
-    @frappe.whitelist(methods='POST')
+    @frappe.whitelist(methods="POST")
     def config_web(self):
         try:
             # Gửi yêu cầu POST đến API để lấy thông tin mới
@@ -38,7 +38,7 @@ class DMSSettings(Document):
             frappe.msgprint(f"Lỗi: {e}")
 
 
-@frappe.whitelist(methods='GET')
+@frappe.whitelist(methods="GET")
 def get_list_config():
     try:
         list_configs = None
@@ -48,9 +48,11 @@ def get_list_config():
             frappe.cache().set_value("website-config", list_configs)
         
         if isinstance(list_configs, dict):
-            list_configs.pop('config_map_by_vgm', None)
-        elif hasattr(list_configs, 'config_map_by_vgm'):
-            delattr(list_configs, 'config_map_by_vgm')
+            list_configs.pop("config_map_by_vgm", None)
+
+        elif hasattr(list_configs, "config_map_by_vgm"):
+            delattr(list_configs, "config_map_by_vgm")
+
         return gen_response(200, "Thành công", list_configs)
     except Exception as e:
         return exception_handle(e)

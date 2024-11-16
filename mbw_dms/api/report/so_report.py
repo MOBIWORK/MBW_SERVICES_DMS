@@ -95,29 +95,17 @@ def handle_so_report(kwargs):
                 unit_price = float(itemvat.get("rate", 0.0))
 
                 if item_tax_rate:
-
                     match = re.search(r':\s*([0-9.]+)', item_tax_rate)
-
                     if match:
-
                         itemvat["item_tax_rate"] = float(match.group(1))
-
                         try:
-
                             itemvat["item_tax_rate"] = float(match.group(1))
-
                         except ValueError:
-
                             itemvat["item_tax_rate"] = 0.0
-
                     else:
-
                         itemvat["item_tax_rate"] = 0.0
-
                 else:
-
                     itemvat["item_tax_rate"] = 0.0
-
                 money_vat = float(unit_price * float(itemvat["item_tax_rate"] / 100))
 
                 itemvat["money_vat"] = money_vat
@@ -141,12 +129,12 @@ def handle_so_report(kwargs):
         })
     except Exception as e:
         if is_excel:
-            print("lỗi báo cáo sale order ==== ",e)
             return {
                 "data": [],
                 "sum" : {}
             }
         return exception_handle(e)
+    
 # Báo cáo tổng hợp bán hàng
 @frappe.whitelist(methods="GET")
 def si_report(**kwargs):
@@ -240,27 +228,17 @@ def handle_si_report(kwargs):
                 unit_price = float(itemvat.get("rate", 0.0))
 
                 if item_tax_rate:
-
                     match = re.search(r':\s*([0-9.]+)', item_tax_rate)
-
                     if match:
-
                         itemvat["item_tax_rate"] = float(match.group(1))
-
                         try:
-
                             itemvat["item_tax_rate"] = float(match.group(1))
-
                         except ValueError:
 
                             itemvat["item_tax_rate"] = 0.0
-
                     else:
-
                         itemvat["item_tax_rate"] = 0.0
-
                 else:
-
                     itemvat["item_tax_rate"] = 0.0
 
                 money_vat = float(unit_price * float(itemvat["item_tax_rate"] / 100))
@@ -286,9 +264,9 @@ def handle_si_report(kwargs):
             "page_size": page_size,
             "totals": si_count
         })
+    
     except Exception as e:
         if is_excel:
-            print("Lỗi khi lấy dứ liệu xuất excel===  ",e)
             return {
                 "data": [],
                 "sum": {}

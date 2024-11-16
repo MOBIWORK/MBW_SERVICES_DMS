@@ -13,21 +13,8 @@ def report_prod_dbd(**res):
         page_number = int(res.get("page_number")) if res.get("page_number") and int(res.get("page_number")) >=1 else 1
         sales_team = res.get("sales_team")
 
-        industry= res.get("industry")
-        brand= res.get("brand")
-        supplier= res.get("supplier")
-
-      
-
         filters = "WHERE so.docstatus = 1"
 
-        # if industry:
-        #     filters.append(f"nhan_vien_ban_hang = '{industry}'")
-        # if brand:
-        #     filters.append(f"nhan_vien_ban_hang = '{brand}'")
-        # if supplier:
-        #     filters.append(f"nhan_vien_ban_hang = '{supplier}'")
-        
         if sales_team:
             filters=f"{filters} AND nhom_ban_hang = '{sales_team}'"
         
@@ -52,43 +39,44 @@ def report_prod_dbd(**res):
         grouped_data = defaultdict(lambda: defaultdict(lambda: defaultdict(float)))
 
         # Lặp qua từng phần tử và kiểm tra sales_person khác None
-        arr_filed = ['qty', 'stock_uom', 'uom', 'conversion_factor', "amount", "item_name"]
+        arr_filed = ["qty", "stock_uom", "uom", "conversion_factor", "amount", "item_name"]
 
         for item in sale_orders:
             if item['sales_person'] is not None:
                 # Lấy ngày từ transaction_date
-                date_value = item['creation'].day
-                products = get_value_child_doctype("Sales Order", item["name"], "items", arr_filed )
+                date_value = item["creation"].day
+                products = get_value_child_doctype("Sales Order", item["name"], "items", arr_filed)
+
                 for prod in products:
-                    # neu la spkm thi tru di sl spkm
+                    # Nếu là SP khuyến mãi thì trừ đi số lượng SPKM
                     if(prod["amount"] == 0):
                         item["total_qty"] -= prod["qty"]
                         continue
-                    #chuyen doi so luong ve so luong cua dvt quy chuan
+
+                    # Chuyển đổi số lượng về số lượng của đơn vị tính quy chuẩn
                     if(prod["stock_uom"] != prod["uom"]):
-                        item_uoms = get_value_child_doctype("Item", {"item_name":prod["item_name"]}, "uoms" )
+                        item_uoms = get_value_child_doctype("Item", {"item_name":prod["item_name"]}, "uoms")
                         tile_dvt_phu = None
-                        # for vao trong list dvt cua sp de lay tinh he so quy doi giua cac dvt cua sp
+
+                        # Lấy hệ số quy đổi
                         for it in item_uoms:
                             if it["uom"] == prod["uom"]:
                                 tile_dvt_phu = it["conversion_factor"]
                             if it["uom"] == prod["stock_uom"]:
                                 tile_dvt_chinh = it["conversion_factor"]
                         if tile_dvt_phu is not None and tile_dvt_phu != 0:
-                            tile_quydoi =tile_dvt_chinh / tile_dvt_phu
+                            tile_quydoi = tile_dvt_chinh / tile_dvt_phu
                         else: tile_quydoi = 1
                     
-
                         item["total_qty"] =  item["total_qty"] - prod["qty"] + (prod["qty"] * tile_quydoi )
 
                 # Gộp vào danh sách dựa trên parent_sales_person và sales_person
                 parent = item['parent_sales_person']
                 sales_person = item['sales_person']
-
-
                 
                 # Cộng dồn total_qty vào ngày tương ứng cho sales_person đó
                 grouped_data[parent][sales_person][date_value] += item['total_qty']
+
         # Tạo danh sách các object_data với định dạng group_name, sales_person và children (theo ngày)
         result = []
         for parent_sales_person, sales_persons in grouped_data.items():
@@ -102,7 +90,7 @@ def report_prod_dbd(**res):
             for sales_person, day_totals in sales_persons.items():
 
                 # Cộng dồn total_qty theo từng ngày cho group_name (cha)
-                kpi_san_luong = next(children['kpi_san_luong'] for children in sale_orders if children['sales_person'] == sales_person and children['parent_sales_person'] == parent_sales_person)
+                kpi_san_luong = next(children["kpi_san_luong"] for children in sale_orders if children["sales_person"] == sales_person and children["parent_sales_person"] == parent_sales_person)
                 # Lấy kpi_san_luong từ dữ liệu gốc cho sales_person
                 if kpi_san_luong is not None:
                     total_kpi_month += kpi_san_luong
@@ -116,15 +104,15 @@ def report_prod_dbd(**res):
                 
                 total_qty_by_month = total_qty_day_by_day
 
-
                 the_rest = kpi_san_luong - total_qty_day_by_day
                 
-
                 if the_rest < 0:
                     the_rest = 0
                 total_rest_all += the_rest
+
                 # Thêm vào children
                 total_qty_by_month_all += total_qty_day_by_day
+
                 children.append({
                     "the_rest": the_rest,
                     "total_qty_day_by_day":total_qty_day_by_day,
@@ -134,7 +122,6 @@ def report_prod_dbd(**res):
                     "kpi_san_luong": kpi_san_luong
                 })
                 
-            
             # Thêm tổng total_qty theo ngày vào object cha
             result.append({
                 "total_rest_all": total_rest_all,
@@ -145,7 +132,6 @@ def report_prod_dbd(**res):
                 "children": children
             })
 
-
         return gen_response(200, "Thành công", {
             "data": result,
             "totals": len(result),
@@ -155,14 +141,3 @@ def report_prod_dbd(**res):
     except Exception as e:
         return exception_handle(e)
     
-
-
-
-@frappe.whitelist(methods="GET")
-def testapi(**res) :
-    try:
-        item_name = res.get("item_name")
-        item = frappe.db.get_all("Item", filters={"item_name": item_name}, fields=["name", "item_name"])
-        return gen_response(200, "Thành công", item)
-    except Exception as e:
-        return exception_handle(e)

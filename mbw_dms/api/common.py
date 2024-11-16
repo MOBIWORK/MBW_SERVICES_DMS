@@ -20,22 +20,18 @@ import pydash
 
 
 def get_base_url() :
-
     if frappe.local.request.headers.get('X-Forwarded-Proto', 'http') == 'https':
         scheme = 'https'
     else:
         scheme = 'http'
     return f"{scheme}://{frappe.local.request.host}"
 
-# sp khuyến mãi 1:có apply pricing role,2: giá = 0 
+# Sp khuyến mãi 1: có apply pricing rule, 2: giá = 0 
 def qty_not_pricing_rule(items):
     total_item_price = pydash.filter_(items, lambda x: x.amount > 0)
     total_qty = {item.get("qty") for item in total_item_price}
     total_uom = {item.get("uom") for item in total_item_price}
-    print("total=============================",total_qty,total_uom)
     return total_qty,total_uom
-
-
 
 class CommonHandle() :
     @staticmethod
@@ -53,14 +49,14 @@ class CommonHandle() :
     
     @staticmethod
     def get_user_id():
-        
         headers = frappe.local.request.headers.get("Authorization")
         usrPass = headers.split(" ")[1]
         str_b64Val = base64.b64decode(usrPass).decode("utf-8")
         list_key = str_b64Val.split(':')
         api_key = list_key[0]
-        user_id = frappe.db.get_value("User", {"api_key": api_key},["name", "email", "full_name"],as_dict=1)
+        user_id = frappe.db.get_value("User", {"api_key": api_key}, ["name", "email", "full_name"], as_dict=1)
         return user_id
+    
     @staticmethod
     def get_employee_id():
         try:
@@ -87,7 +83,6 @@ def this_week() :
     week_number = int(today.strftime("%U")) +1
     week  = week_number % 5 if week_number % 5 != 0 or week_number % 5 != 1 else 1
     return week
-
 
 # return definition
 def gen_response(status, message, result=[]):
@@ -125,7 +120,6 @@ def get_employee_by_user(user, fields=["name"]):
 def get_language():
     lang_ = frappe.local.request.headers.get("Language")
     lang = "vi" if not lang_ else lang_
-
     return lang
 
 def exception_handle(e):
@@ -145,10 +139,9 @@ def routers_name_of_customer(router=False, thisWeek = False, view_mode="list", m
     if router:
         queryFilters["channel_code"] = ["in", router]
    
-    # lay danh sach theo ngay
+    # Lấy danh sách theo ngày
     if thisWeek or view_mode == "map":
-        from mbw_dms.api.common import weekday
-        today= datetime.now()
+        today = datetime.now()
         thu_trong_tuan, tuan_trong_thang = weekday(today)
         queryFilters.update({"travel_date": ["between", ["Không giới hạn", thu_trong_tuan]]})
         queryFilters.update({"frequency": ["like", tuan_trong_thang]})  
@@ -164,8 +157,7 @@ def customers_code_router(router=False, routersName=[], thisWeek = False, view_m
         detail_router = frappe.get_doc("DMS Router", {"name": router_name}).as_dict()
         customer = detail_router.get("customers")
         if view_mode == "map" or (router and not thisWeek):
-            from mbw_dms.api.common import weekday
-            today= datetime.now()
+            today = datetime.now()
             thu_trong_tuan, tuan_trong_thang = weekday(today)
             customer = pydash.filter_(detail_router.get("customers"),lambda value: (value.frequency.find(str(int(tuan_trong_thang))) != -1))
         list_customer += customer
@@ -252,37 +244,6 @@ def null_location(location):
             location = None
     return location
 
-# def update_address(new_address, link_cs_address, name_cus, json_location):
-#     try:
-#         field_not_in = ["longitude", "latitude", "address_location", "address"]
-#         if new_address.get("name"):
-#             name_add = new_address.get("name")
-#             if bool(name_cus):
-#                 frappe.db.sql("""
-#                         UPDATE `tabCustomer` 
-#                         SET customer_primary_address=NULL, primary_address=NULL, customer_location_primary=NULL
-#                         WHERE name=%s AND customer_primary_address LIKE %s
-#                     """, (name_cus, f"{name_add}%"))
-            
-#             frappe.db.delete("Address", name_add)
-
-#         new_address_doc = frappe.new_doc("Address")
-#         for key, value in new_address.items():
-#             if key not in field_not_in:
-#                 setattr(new_address_doc, key, value)
-
-#         if link_cs_address:
-#             new_address_doc.append("links", link_cs_address)
-
-#         new_address_doc.address_location = json_location
-#         new_address_doc.save()
-#         current_address_cs = new_address_doc
-
-#         frappe.db.commit()
-#         return current_address_cs
-    
-#     except Exception as e :
-#         raise TypeError(e)
 
 def create_address(new_address, link_cs_address) :
     try: 
@@ -360,7 +321,7 @@ def try_c(cb):
         ra = cb
         return ra
     except Exception as e:
-        print("=========11111111111111111111111111", e)
+        print("============", e)
 
 # Xử lý thêm mới/cập nhật địa chỉ
 def handle_address_customer(address_info, link_to_customer):
@@ -556,10 +517,8 @@ def upload_image_s3(image,description):
     
     # save file image s3
     object_name = f"{bucket_name_s3}/{bucket_domain}/{file_name}"
-    # if not my_minio.bucket_exists(bucket_domain):
-    #     my_minio.make_bucket(bucket_domain)
     try:    
-        create_my_minio('DMS Settings').put_object(bucket_name=bucket_name_s3, object_name=f"{bucket_domain}/{file_name}", data=io.BytesIO(imgdata_new))
+        create_my_minio("DMS Settings").put_object(bucket_name=bucket_name_s3, object_name=f"{bucket_domain}/{file_name}", data=io.BytesIO(imgdata_new))
     except Exception as e:
         print(e)
 
@@ -603,6 +562,7 @@ class ArrayMethod():
         for value in self.main :
             if callback(value):
                 return value
+            
     def filter(self, callback):
         array = []
         for value in self.main :
@@ -617,7 +577,7 @@ class ArrayMethod():
             array.append(value)
         return array
     
-def weekday(time:datetime):
+def weekday(time: datetime):
     first_week_month = time.replace(day=1)
     W_first = float(first_week_month.strftime("%W"))
     listngay = ("Chủ nhật", "Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7")
@@ -680,10 +640,8 @@ def get_all_parent_sales_persons(sales_person):
     return parent_sales_persons
 
 
-
-
 # lấy con tất cả các con nhóm bán hàng của nhân viên
-def get_sales_group_child(sale_person = "Sales Team",is_group=1,query=""):
+def get_sales_group_child(sale_person = "Sales Team", is_group=1, query=""):
     query_sale= f"""
         WITH RECURSIVE Tree AS (
         SELECT 
@@ -731,9 +689,11 @@ def get_sales_group_child(sale_person = "Sales Team",is_group=1,query=""):
         return employee_codes,employee_id_users
     else:
         return  sales_persons
+    
+
 # lấy con tất cả các con nhóm bán hàng của nhân viên
-def get_sales_group_child_v2(sale_person = "Sales Team",obj="all",get_employee=False):
-    query=""
+def get_sales_group_child_v2(sale_person="Sales Team", obj="all", get_employee=False):
+    query = ""
     if obj == 1:
         query = "WHERE is_group = '1'"
     elif obj == 0:
@@ -772,40 +732,34 @@ def get_sales_group_child_v2(sale_person = "Sales Team",obj="all",get_employee=F
         SELECT * FROM Tree
         {query}
         """
-    # danh sách sale person theo bộ lọc
-    sales_persons = frappe.db.sql(query_sale,as_dict=1)
-    #lấy tất cả thông tin sale team theo bộ lọc
-    sales_info = sales_persons
+    
+    # Danh sách sale person theo bộ lọc
+    sales_persons = frappe.db.sql(query_sale, as_dict=1)
+
+    # Lấy tất cả thông tin sale team theo bộ lọc
     if get_employee:
         # mã nhân viên trong sanh sách
-        employee_codes = pydash.map_(sales_persons,lambda x: x.employee)
-        employee_codes = pydash.filter_(employee_codes,lambda x: bool(x))
-        employee_id_users = frappe.db.get_all("Employee",filters={"name": ["in",employee_codes]},fields=["user_id","name"])
-        # employee_id_users = pydash.map_(employee_id_users,lambda x: x.user_id)
+        employee_codes = pydash.map_(sales_persons, lambda x: x.employee)
+        employee_codes = pydash.filter_(employee_codes, lambda x: bool(x))
+        employee_id_users = frappe.db.get_all("Employee", filters={"name": ["in", employee_codes]}, fields=["user_id", "name"])
         for sale_p in sales_persons:
             employee_info= {}
             if sale_p.get("employee"):
-                employee_info = pydash.find(employee_id_users,lambda x: x.name == sale_p.get("employee") )
+                employee_info = pydash.find(employee_id_users, lambda x: x.name == sale_p.get("employee") )
             sale_p.update({
-                "employee_info":employee_info
+                "employee_info": employee_info
             })
 
     return sales_persons
+
+
 CommonHandle.create_address = staticmethod(create_address)
 
 CommonHandle.get_employee_info = staticmethod(get_employee_info)
 
 CommonHandle.get_user_id = staticmethod(get_user_id)
 
-def test_box(cb):
-    try:
-        cb()
-    except SyntaxError as e:
-        print(f"Syntax error detected: {e}")
-    except Exception as e:
-        print(f"An error occurred: {e}")
 
-CommonHandle.test_box = staticmethod(test_box)
 import base64
 def check_base64(sb):
     try:
@@ -825,8 +779,6 @@ def check_base64(sb):
 CommonHandle.check_base64 = staticmethod(check_base64)
 
 
-
-
 def buildQuery(query,condition):
     if query == "":
         query = f"WHERE {condition}"
@@ -837,6 +789,7 @@ def buildQuery(query,condition):
 CommonHandle.buildQuery = staticmethod(buildQuery)
 from frappe.permissions import has_permission
 from frappe.utils import cint
+import re
 def get_list_search(
         doctype: str,
 	    txt: str,
@@ -847,12 +800,12 @@ def get_list_search(
 ) :
     try:
         start = cint(start)
-        #lấy metadata của doctype
+        # Lấy metadata của doctype
         meta = frappe.get_meta(doctype)
     
         filters = []
         or_filters = []
-        # dựng tìm kiếm 
+        # Dựng tìm kiếm 
         if txt:
             field_types = {
                 "Data",
@@ -865,44 +818,53 @@ def get_list_search(
                 "Text Editor",
             }
             search_fields = ["name"]
-            # kiểm tra field: title field
+
+            # Kiểm tra field: title field
             if meta.title_field:
                 search_fields.append(meta.title_field)
-            # kiểm tra field: search field
+
+            # Kiểm tra field: search field
             if meta.search_fields:
                 search_fields.extend(meta.get_search_fields())
-            print("search_fields============",search_fields)
+
             for f in search_fields:
                 fmeta = meta.get_field(f.strip())
-                # nếu không có doc cha
+                # Nếu không có doc cha
                 if not meta.translated_doctype and (f == "name" or (fmeta and fmeta.fieldtype in field_types)):
                     or_filters.append([doctype, f.strip(), "like", f"%{txt}%"])
 
         if meta.get("fields", {"fieldname": "enabled", "fieldtype": "Check"}):
             filters.append([doctype, "enabled", "=", 1])
+
         if meta.get("fields", {"fieldname": "disabled", "fieldtype": "Check"}):
             filters.append([doctype, "disabled", "!=", 1])
-        # trả về 1 danh sách các search field
-        from frappe.desk.search import get_std_fields_list,get_order_by
+
+        # Trả về 1 danh sách các search field
+        from frappe.desk.search import get_std_fields_list, get_order_by
+
         fields = get_std_fields_list(meta, "name")
         formatted_fields = [f"`tab{meta.name}`.`{f.strip()}`" for f in fields]
-        # thêm truy vấn title sau tên
+
+        # Thêm truy vấn title sau tên
         if meta.show_title_field_in_link and meta.title_field:
             formatted_fields.insert(1, f"`tab{meta.name}`.{meta.title_field} as `label`")
-        # lấy order
+
+        # Lấy order
         order_by_based_on_meta = get_order_by(doctype, meta)
         # `idx` is number of times a document is referred, check link_count.py
         order_by = f"`tab{doctype}`.idx desc, {order_by_based_on_meta}"
 
-        # làm sạch chuỗi truy vấn: loại bỏ sql injection
+        # Làm sạch chuỗi truy vấn: loại bỏ sql injection
         if not meta.translated_doctype:
             _txt = frappe.db.escape((txt or "").replace("%", "").replace("@", ""))
-		    # xếp các dco ra kết quả tìm kiếm trước , null sau
+		    # Xếp các dco ra kết quả tìm kiếm trước , null sau
             _relevance = f"(1 / nullif(locate({_txt}, `tab{doctype}`.`name`), 0))"
             formatted_fields.append(f"""{_relevance} as `_relevance`""")
+
             # Since we are sorting by alias postgres needs to know number of column we are sorting
             if frappe.db.db_type == "mariadb":
                 order_by = f"ifnull(_relevance, -9999) desc, {order_by}"
+
             elif frappe.db.db_type == "postgres":
                 # Since we are sorting by alias postgres needs to know number of column we are sorting
                 order_by = f"{len(formatted_fields)} desc nulls last, {order_by}"
@@ -929,9 +891,7 @@ def get_list_search(
             as_list=True,
             strict=False,
         )
-        print("values",values)
-        # import thư viện xử lý biểu thức chính quy
-        import re
+
         if meta.translated_doctype:
 		# Filtering the values array so that query is included in very element
             values = (
@@ -949,11 +909,10 @@ def get_list_search(
         from frappe.desk.search import relevance_sorter
         values = sorted(values, key=lambda x: relevance_sorter(x, txt, False))
 
-        # remove _relevance from results
+        # Remove _relevance from results
         if not meta.translated_doctype:
              values = [r[:-1] for r in values]          
 
         return values
     except Exception as e: 
-        print("error search====",e)
         return []
