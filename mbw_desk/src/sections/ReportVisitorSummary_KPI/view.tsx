@@ -15,6 +15,7 @@ import { mediaQuery, PAGE_SIZE } from "@/constant";
 import Filter_group from "@/components/filter-group/Filter_group";
 import ReportHeader from "../ReportHeader/ReportHeader";
 import { useSelector } from "react-redux";
+import { returnTimeDays } from "@/util";
 
 export default function ReportVisitorSummary_KPI() {
   const [refresh, setRefresh] = useState<boolean>(false);
@@ -154,6 +155,7 @@ export default function ReportVisitorSummary_KPI() {
                   timeCheckin: record?.create_time,
                   employee: record?.employee_code,
                   name_employee: record?.employee_name,
+                  ...returnTimeDays({timestamp: record.create_time})
                 },
               });
             }}>
@@ -180,6 +182,7 @@ export default function ReportVisitorSummary_KPI() {
                 timeCheckin: record?.create_time,
                 employee: record?.employee_code,
                 name_employee: record?.employee_name,
+                ...returnTimeDays({timestamp: record.create_time})
               },
             });
           }}>
@@ -389,6 +392,9 @@ export default function ReportVisitorSummary_KPI() {
               checkin_note_id={modal.id?.checkin_note_id}
               employee={modal.id?.employee}
               timeCheckin={modal.id?.timeCheckin}
+              from_date={modal.id?.from_date}
+              to_date={modal.id?.to_date}
+              time_slot={modal.id?.time}
             />
           </ModalDetail>
         </div>

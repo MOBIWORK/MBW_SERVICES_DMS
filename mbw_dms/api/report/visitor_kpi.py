@@ -14,7 +14,11 @@ def report_visitor_kpi(**res):
 
         offset = (page_number - 1) * page_size
 
-        query = f"sc.creation BETWEEN '{from_date}' AND '{to_date}'"
+        query = f"""
+            sc.creation BETWEEN '{from_date}' AND '{to_date}'
+            AND sk.ngay_hieu_luc_tu >= '{from_date}' 
+            AND sk.ngay_hieu_luc_den <= '{to_date}'
+        """
 
         sql = f"""
             WITH ImageCounts AS (
@@ -28,7 +32,7 @@ def report_visitor_kpi(**res):
                 GROUP BY
                     sc.name
             )
-            SELECT
+            SELECT DISTINCT
                 em.employee AS employee_code,
                 em.employee_name,
                 sk.nhom_ban_hang,
@@ -39,7 +43,7 @@ def report_visitor_kpi(**res):
                 CONCAT(
                     '[', 
                     GROUP_CONCAT(
-                        CONCAT(
+                        DISTINCT CONCAT(
                             '{{',
                             '"customer_name":"', sc.kh_ten, '",',
                             '"checkin_giovao":"', sc.checkin_giovao, '",',
@@ -93,6 +97,7 @@ def report_visitor_kpi(**res):
         report = frappe.db.sql(sql, as_dict=True)
         count = frappe.db.sql(spl_count, as_dict=True)[0].get("total")
 
+        print('========================= report: ', report[1], flush=True)
         for r in report:
             if r["customers"] != None:
                 r["customers"] = json.loads(r["customers"]) if r["customers"] else []

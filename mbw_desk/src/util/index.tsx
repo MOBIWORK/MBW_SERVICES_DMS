@@ -226,3 +226,17 @@ export const getDaysAndWeekdays = (
 
   return daysArray;
 };
+
+export const returnTimeDays=({
+  timestamp, typeDay="second"
+}:any) => {
+  if(typeDay == "second") {
+    timestamp *=1000
+  }
+  let time_daye = dayjs(timestamp)
+  let from_date = time_daye.set("hour",0).set("minutes",0).set("seconds",0).valueOf()/1000
+  let to_date = time_daye.set("hour",23).set("minutes",59).set("seconds",59).valueOf()/1000
+  return {
+    from_date,to_date
+  }
+}

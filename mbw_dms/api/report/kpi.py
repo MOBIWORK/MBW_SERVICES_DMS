@@ -12,6 +12,37 @@ def kpi_report(**kwargs):
     return report(kwargs=kwargs)
 
 # Chi tiết viếng thăm
+# @frappe.whitelist(methods="GET")
+# def kpi_visit_detail(**kwargs):
+#     try:
+#         filters = {}
+#         from_date = validate_filter_timestamp(type="start")(kwargs.get("from_date")) if kwargs.get("from_date") else None
+#         to_date = validate_filter_timestamp(type="end")(kwargs.get("to_date")) if kwargs.get("to_date") else None
+#         page_size = int(kwargs.get("page_size", 20))
+#         page_number = int(kwargs.get("page_number")) if kwargs.get("page_number") and int(kwargs.get("page_number")) >=1 else 1
+#         employee = kwargs.get("employee")
+#         time_slot = kwargs.get("time_slot")
+#         user_id = None
+
+#         if employee:
+#             user_id = frappe.get_value("Employee", {"name": employee}, "user_id")
+#         if from_date and to_date:
+#             filters["creation"] = ["between", [from_date, to_date]]
+#         if employee:
+#             filters["createdbyemail"] = user_id
+        
+#         data = frappe.get_all("DMS Checkin", filters=filters, fields=["name", "kh_ma", "kh_ten", "kh_diachi", "checkin_giovao", "checkin_khoangcach"],order_by="kh_ma asc", start=page_size*(page_number-1), page_length=page_size)
+#         totals = frappe.db.count("DMS Checkin", filters=filters)
+#         return gen_response(200, "Thành công", {
+#             "data": data,
+#             "totals": totals,
+#             "page_number": page_number,
+#             "page_size": page_size,
+#         })
+    
+#     except Exception as e:
+#         return exception_handle(e)
+    
 @frappe.whitelist(methods="GET")
 def kpi_visit_detail(**kwargs):
     try:
@@ -19,26 +50,47 @@ def kpi_visit_detail(**kwargs):
         from_date = validate_filter_timestamp(type="start")(kwargs.get("from_date")) if kwargs.get("from_date") else None
         to_date = validate_filter_timestamp(type="end")(kwargs.get("to_date")) if kwargs.get("to_date") else None
         page_size = int(kwargs.get("page_size", 20))
-        page_number = int(kwargs.get("page_number")) if kwargs.get("page_number") and int(kwargs.get("page_number")) >=1 else 1
+        page_number = int(kwargs.get("page_number")) if kwargs.get("page_number") and int(kwargs.get("page_number")) >= 1 else 1
         employee = kwargs.get("employee")
+        time_slot = kwargs.get("time_slot")  # "morning" hoặc "afternoon"
         user_id = None
-
+        
         if employee:
             user_id = frappe.get_value("Employee", {"name": employee}, "user_id")
+        
         if from_date and to_date:
             filters["creation"] = ["between", [from_date, to_date]]
         if employee:
             filters["createdbyemail"] = user_id
-        
-        data = frappe.get_all("DMS Checkin", filters=filters, fields=["name", "kh_ma", "kh_ten", "kh_diachi", "checkin_giovao", "checkin_khoangcach"],order_by="kh_ma asc", start=page_size*(page_number-1), page_length=page_size)
-        totals = frappe.db.count("DMS Checkin", filters=filters)
+
+        raw_data = frappe.get_all(
+            "DMS Checkin",
+            filters=filters,
+            fields=["name", "kh_ma", "kh_ten", "kh_diachi", "checkin_giovao", "checkin_khoangcach"],
+            order_by="kh_ma asc"
+        )
+
+        # Lọc dữ liệu theo time_slot
+        filtered_data = []
+        for record in raw_data:
+            checkin_time = record["checkin_giovao"].time()  # Lấy phần giờ từ datetime
+            if time_slot == "sáng" and frappe.utils.get_time("00:00:00") <= checkin_time <= frappe.utils.get_time("11:59:59"):
+                filtered_data.append(record)
+            elif time_slot == "chiều" and frappe.utils.get_time("12:00:00") <= checkin_time <= frappe.utils.get_time("23:59:59"):
+                filtered_data.append(record)
+
+        start_index = page_size * (page_number - 1)
+        paginated_data = filtered_data[start_index:start_index + page_size]
+
+        totals = len(filtered_data)
+
         return gen_response(200, "Thành công", {
-            "data": data,
+            "data": paginated_data,
             "totals": totals,
             "page_number": page_number,
             "page_size": page_size,
         })
-    
+
     except Exception as e:
         return exception_handle(e)
     
