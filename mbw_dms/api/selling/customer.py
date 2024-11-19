@@ -365,7 +365,7 @@ def update_customer_addresses(customer, addresses, customer_name):
 
 def set_primary_address(customer, address_data):
     address_id = address_data.get("name") or frappe.get_value(
-        "Address", {"address_title": ["like", f"%{address_data["address_title"]}%"]}, "name"
+        "Address", {"address_title": ["like", f"%{address_data['address_title']}%"]}, "name"
     )
     if address_id:
         customer.customer_primary_address = address_id
