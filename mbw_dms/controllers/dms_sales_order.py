@@ -260,9 +260,9 @@ def update_sales_person(doc, method):
 # Cập nhật giá sau khi submit
 def update_price_list_rate(doc, method):
     price_list = doc.selling_price_list
-    warehouse = doc.set_warehouse
     
     for i in doc.items:
+        warehouse = i.warehouse
         # Lấy giá từ Item Price dựa trên Price List và Item Code
         item_price = frappe.db.get_value("Item Price", {"price_list": price_list, "item_code": i.item_code}, "price_list_rate")
         
@@ -274,8 +274,7 @@ def update_price_list_rate(doc, method):
         frappe.db.set_value("Sales Order Item", i.name, "discount_percentage", discount_percentage)
 
         # Kiểm tra projected_qty trong kho
-        projected_qty = frappe.db.get_value("Bin", {"item_code": i.item_code, "warehouse": warehouse}, "projected_qty")
-        frappe.db.set_value("Sales Order Item", i.name, "projected_qty", projected_qty)
+        projected_qty = i.projected_qty if i.projected_qty != 0 else frappe.db.get_value("Bin", {"item_code": i.item_code, "warehouse": warehouse}, "projected_qty")
         
         # Nếu projected_qty <= 0, báo lỗi
         if projected_qty is None or projected_qty <= 0 or i.qty > projected_qty:
