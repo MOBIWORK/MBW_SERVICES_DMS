@@ -3,6 +3,8 @@
 import "dayjs/locale/vi";
 import dayjs from "dayjs";
 import timezone from "dayjs/plugin/timezone";
+import  utc from "dayjs/plugin/utc"
+
 import { Modal, message } from "antd";
 import { ReactNode } from "react";
 import { saveAs } from "file-saver";
@@ -227,13 +229,17 @@ export const getDaysAndWeekdays = (
   return daysArray;
 };
 
+
 export const returnTimeDays=({
   timestamp, typeDay="second"
 }:any) => {
+  dayjs.extend(utc);
+  dayjs.extend(timezone);
   if(typeDay == "second") {
     timestamp *=1000
   }
-  let time_daye = dayjs(timestamp)
+  const timeZone = "Asia/Ho_Chi_Minh";
+  let time_daye = dayjs.utc(timestamp).tz(timeZone)
   let from_date = time_daye.set("hour",0).set("minutes",0).set("seconds",0).valueOf()/1000
   let to_date = time_daye.set("hour",23).set("minutes",59).set("seconds",59).valueOf()/1000
   return {

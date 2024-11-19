@@ -11,15 +11,28 @@ def report_visitor_kpi(**res):
         to_date = validate_filter(type_check="timestamp_to_date",type="end",value=res.get("to_date"))
         page_size =  int(res.get("page_size", 20))
         page_number = int(res.get("page_number")) if res.get("page_number") and int(res.get("page_number")) >=1 else 1
+        sales_team = res.get("sales_team")
+        employee = res.get("employee")
+        # territory= res.get("territory")
+        # customer_group=res.get("customer_group")
+        # customer_type= res.get("customer_type") 
 
         offset = (page_number - 1) * page_size
+       
+        filters = []
 
-        query = f"""
+        if employee:
+            filters.append(f"sk.nhan_vien_ban_hang = '{employee}'")
+        if sales_team:
+            filters.append(f"sk.nhom_ban_hang = '{sales_team}'")
+        
+        filters.append(f"""
             sc.creation BETWEEN '{from_date}' AND '{to_date}'
             AND sk.ngay_hieu_luc_tu >= '{from_date}' 
             AND sk.ngay_hieu_luc_den <= '{to_date}'
-        """
-
+        """)
+        where_condition = " AND ".join(filters)  if filters else "1=1"
+        
         sql = f"""
             WITH ImageCounts AS (
                 SELECT 
@@ -69,13 +82,13 @@ def report_visitor_kpi(**res):
                 `tabDMS KPI` sk ON em.name = sk.nhan_vien_ban_hang
             LEFT JOIN 
                 ImageCounts ic ON sc.name = ic.checkin_name
-            WHERE {query}
+            {f"WHERE {where_condition}" if where_condition else ""}
             GROUP BY 
                 employee_code,  DATE(sc.createddate)
             
             LIMIT {page_size} OFFSET {offset}
         """
-
+        
         spl_count = f"""
             SELECT COUNT(*) as total
             FROM (
@@ -88,7 +101,7 @@ def report_visitor_kpi(**res):
                 LEFT JOIN 
                     `tabDMS KPI` sk ON em.name = sk.nhan_vien_ban_hang
                 
-                WHERE {query}
+                {f"WHERE {where_condition}" if where_condition else ""}
                 GROUP BY 
                     employee_code,  
                     DATE(sc.createddate)
@@ -97,7 +110,6 @@ def report_visitor_kpi(**res):
         report = frappe.db.sql(sql, as_dict=True)
         count = frappe.db.sql(spl_count, as_dict=True)[0].get("total")
 
-        print('========================= report: ', report[1], flush=True)
         for r in report:
             if r["customers"] != None:
                 r["customers"] = json.loads(r["customers"]) if r["customers"] else []

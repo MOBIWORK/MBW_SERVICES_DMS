@@ -57,7 +57,7 @@ export default function ReportVisitorSummary_KPI() {
       render: (_: any, record: any, index: number) => index + 1,
     },
     {
-      title: <div className="text-center">Nhóm bán hàng</div>,
+      title: <div >Nhóm bán hàng</div>,
       dataIndex: "nhom_ban_hang",
       width: 100,
       key: "nhom_ban_hang",
@@ -65,13 +65,15 @@ export default function ReportVisitorSummary_KPI() {
 
     },
     {
-      title: <div className="text-center">Mã nhân viên</div>,
+      title: <div >Mã nhân viên</div>,
       dataIndex: "employee_code",
       key: "employee_code",
       width: 100,
+      render: (_: any, record: any, index: number) => <div className="min-w-[140px]">{_}</div>,
+
     },
     {
-      title: <div className="text-center">Tên nhân viên</div>,
+      title: <div >Tên nhân viên</div>,
       dataIndex: "employee_name",
       width: 100,
       key: "employee_name",
@@ -320,7 +322,7 @@ export default function ReportVisitorSummary_KPI() {
             className={`flex ${
               matchMedia ? "justify-end" : "justify-between"
             } items-center w-full`}>
-            {!matchMedia && (
+         
               <Col className="ml-4 w-[78%]">
                 <Row gutter={[8, 8]} className="space-x-4">
                   <Filter_group
@@ -332,9 +334,9 @@ export default function ReportVisitorSummary_KPI() {
                   />
                 </Row>
               </Col>
-            )}
+           
 
-            <Col className="!ml-4">
+            {/* <Col className="!ml-4">
               <DropDownFilter
                 inputCustomerType
                 inputCustomerGroup
@@ -346,7 +348,7 @@ export default function ReportVisitorSummary_KPI() {
                 setPage={setPage}
                 matchMedia={!matchMedia}
               />
-            </Col>
+            </Col> */}
           </Row>
           <div ref={containerRef1} className="pt-5">
             <TableCustom
