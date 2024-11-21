@@ -1,6 +1,6 @@
 import re
 from datetime import datetime
-
+import time
 
 # Kiểm tra định dạng email truyền lên có đúng định dạng không
 def validate_email(value):
@@ -105,6 +105,8 @@ def validate_int_bool(number):
 
 # Kiểm tra định dạng timestamp truyền lên trong bộ lọc
 def validate_filter_timestamp(type=None):
+    local_time = time.tzname[time.daylight]
+    print(f"Local Time Zone: {local_time}")
     def validate(value):
         try:
             value = float(value)
@@ -130,6 +132,8 @@ def validate_filter_timestamp(type=None):
 
 # Kiểm tra định dạng timestamp truyền lên trong bộ lọc
 def filter_timestamp(type=None):
+    local_time = time.tzname[time.daylight]
+    print(f"=====================Local Time Zone: {local_time}")
     def validate(value):
         try:
             if value:
