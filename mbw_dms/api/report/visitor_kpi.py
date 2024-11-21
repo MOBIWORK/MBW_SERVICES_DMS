@@ -1,9 +1,9 @@
 import frappe
 import json
-from datetime import datetime
-from mbw_dms.api.common import gen_response, exception_handle
+from datetime import datetime,timedelta
+from mbw_dms.api.common import gen_response, exception_handle,get_sales_group_child_v2
 from mbw_dms.api.validators import validate_filter
-
+import pydash
 @frappe.whitelist(methods="GET")
 def report_visitor_kpi(**res):
     try:
@@ -16,7 +16,9 @@ def report_visitor_kpi(**res):
         # territory= res.get("territory")
         # customer_group=res.get("customer_group")
         # customer_type= res.get("customer_type") 
-
+        date=  datetime.fromtimestamp(float(res.get("from_date")))
+        start_date =date.replace(day=1)
+        end_date = date.replace(month=date.month+1).replace(day=1) - timedelta(days=1)
         offset = (page_number - 1) * page_size
        
         filters = []
@@ -24,12 +26,14 @@ def report_visitor_kpi(**res):
         if employee:
             filters.append(f"sk.nhan_vien_ban_hang = '{employee}'")
         if sales_team:
-            filters.append(f"sk.nhom_ban_hang = '{sales_team}'")
+            sale_persons = get_sales_group_child_v2(sales_team)
+            sales_p = "("+",".join(pydash.map_(sale_persons,lambda x: f"'{x.name}'"))+")"
+            filters.append(f"sk.nhom_ban_hang in {sales_p}")
         
         filters.append(f"""
             sc.creation BETWEEN '{from_date}' AND '{to_date}'
-            AND sk.ngay_hieu_luc_tu >= '{from_date}' 
-            AND sk.ngay_hieu_luc_den <= '{to_date}'
+            AND sk.ngay_hieu_luc_tu >= '{start_date}' 
+            AND sk.ngay_hieu_luc_den <= '{end_date}'
         """)
         where_condition = " AND ".join(filters)  if filters else "1=1"
         

@@ -322,7 +322,7 @@ export default function ReportVisitorSummary_KPI() {
             className={`flex ${
               matchMedia ? "justify-end" : "justify-between"
             } items-center w-full`}>
-         
+          {!matchMedia ? (
               <Col className="ml-4 w-[78%]">
                 <Row gutter={[8, 8]} className="space-x-4">
                   <Filter_group
@@ -334,21 +334,18 @@ export default function ReportVisitorSummary_KPI() {
                   />
                 </Row>
               </Col>
-           
-
-            {/* <Col className="!ml-4">
+          ) : (
+            <Col className="!ml-4">
               <DropDownFilter
-                inputCustomerType
-                inputCustomerGroup
-                inputTerritory
-                inputFromDate
-                inputToDate
-                inputSaleGroup
-                inputEmployee
+                 inputFromDate
+                 inputToDate
+                 inputSaleGroup
+                 inputEmployee
                 setPage={setPage}
                 matchMedia={!matchMedia}
               />
-            </Col> */}
+            </Col>)}
+        
           </Row>
           <div ref={containerRef1} className="pt-5">
             <TableCustom
