@@ -2,6 +2,39 @@
  {
   "docstatus": 0,
   "doctype": "Client Script",
+  "dt": "Expense Claim",
+  "enabled": 1,
+  "modified": "2024-11-08 14:38:26.864808",
+  "module": "MBW DMS",
+  "name": "Đọc giá trị tổng tiền",
+  "script": "frappe.ui.form.on('Expense Claim', {\r\n    before_save: function(frm) {\r\n        if (frm.doc.total_sanctioned_amount) {\r\n            let inWords = convertNumberToWords(frm.doc.total_sanctioned_amount);\r\n            frm.set_value(\"custom_grand_total_by_vietnamese\", inWords.charAt(0).toUpperCase() + inWords.slice(1));\r\n        }\r\n    }\r\n});\r\n\r\nfunction convertNumberToWords(number) {\r\n    const units = [\"\", \"một\", \"hai\", \"ba\", \"bốn\", \"năm\", \"sáu\", \"bảy\", \"tám\", \"chín\"];\r\n    const teens = [\"mười\", \"mười một\", \"mười hai\", \"mười ba\", \"mười bốn\", \"mười lăm\", \"mười sáu\", \"mười bảy\", \"mười tám\", \"mười chín\"];\r\n    const tens = [\"\", \"\", \"hai mươi\", \"ba mươi\", \"bốn mươi\", \"năm mươi\", \"sáu mươi\", \"bảy mươi\", \"tám mươi\", \"chín mươi\"];\r\n    const thousands = [\"\", \"nghìn\", \"triệu\", \"tỷ\"];\r\n\r\n    if (number === 0) return \"Không đồng chẵn\";\r\n\r\n    number = number.toString();\r\n    number = number.replace(/[^0-9]*/g, '');\r\n    let words = [];\r\n    let chunkCount = 0;\r\n\r\n    while (number.length > 0) {\r\n        let chunk = parseInt(number.substr(-3), 10);\r\n        number = number.slice(0, -3);\r\n\r\n        if (chunk) {\r\n            let chunkWords = [];\r\n            if (chunk >= 100) {\r\n                chunkWords.push(units[Math.floor(chunk / 100)]);\r\n                chunkWords.push(\"trăm\");\r\n                chunk %= 100;\r\n            }\r\n\r\n            if (chunk >= 20) {\r\n                chunkWords.push(tens[Math.floor(chunk / 10)]);\r\n                if (chunk % 10) chunkWords.push(units[chunk % 10]);\r\n            } else if (chunk >= 10) {\r\n                chunkWords.push(teens[chunk - 10]);\r\n            } else if (chunk > 0) {\r\n                chunkWords.push(units[chunk]);\r\n            }\r\n\r\n            if (chunkWords.length > 0) {\r\n                chunkWords.push(thousands[chunkCount]);\r\n            }\r\n\r\n            words.unshift(chunkWords.join(\" \"));\r\n        }\r\n\r\n        chunkCount++;\r\n    }\r\n\r\n    return words.join(\" \") + \" đồng chẵn\";\r\n}\r\n",
+  "view": "Form"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Client Script",
+  "dt": "Expense Claim",
+  "enabled": 1,
+  "modified": "2024-11-08 15:22:57.877759",
+  "module": "MBW DMS",
+  "name": "Đọc giá trị date theo form",
+  "script": "frappe.ui.form.on('Expense Claim', {\r\n    onload: function(frm) {\r\n        if (frm.doc.posting_date) {\r\n            let formattedDate = formatVietnameseDate(frm.doc.posting_date);\r\n            frm.set_value(\"custom_date_by_vietnamese\", formattedDate);\r\n        }\r\n    },\r\n    before_save: function(frm) {\r\n        if (frm.doc.posting_date) {\r\n            let formattedDate = formatVietnameseDate(frm.doc.posting_date);\r\n            frm.set_value(\"custom_date_by_vietnamese\", formattedDate);\r\n        }\r\n    },\r\n    posting_date: function(frm) {\r\n        if (frm.doc.posting_date) {\r\n            let formattedDate = formatVietnameseDate(frm.doc.posting_date);\r\n            frm.set_value(\"custom_date_by_vietnamese\", formattedDate);\r\n        }\r\n    }\r\n});\r\n\r\nfunction formatVietnameseDate(date) {\r\n    const [year, month, day] = date.split(\"-\"); // Chia giá trị date theo định dạng yyyy-mm-dd\r\n    return `Ngày ${day} tháng ${month} năm ${year}`;\r\n}\r\n",
+  "view": "Form"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Client Script",
+  "dt": "Expense Claim",
+  "enabled": 0,
+  "modified": "2024-11-08 15:29:32.350567",
+  "module": "MBW DMS",
+  "name": "Lý do chi trong Expense Claim",
+  "script": "frappe.ui.form.on('Expense Claim', {\r\n    refresh: function(frm) {\r\n        update_reasons_for_expense(frm);\r\n    }\r\n});\r\n\r\nfrappe.ui.form.on('Expense Claim Detail', {\r\n    expense_type: function(frm, cdt, cdn) {\r\n        update_reasons_for_expense(frm);\r\n    },\r\n    description: function(frm, cdt, cdn) {\r\n        update_reasons_for_expense(frm);\r\n    },\r\n    // Thêm sự kiện khi bảng con được thay đổi\r\n    expense_claim_details_add: function(frm) {\r\n        update_reasons_for_expense(frm);\r\n    },\r\n    expense_claim_details_remove: function(frm) {\r\n        update_reasons_for_expense(frm);\r\n    }\r\n});\r\n\r\nfunction update_reasons_for_expense(frm) {\r\n    let reasons = [];\r\n    \r\n    // Kiểm tra nếu bảng con có dữ liệu\r\n    if (frm.doc.expense_claim_details) {\r\n        frm.doc.expense_claim_details.forEach(row => {\r\n            if (row.expense_type && row.description) {\r\n                // Thêm vào mảng theo định dạng [expense_type] description\r\n                reasons.push(`[${row.expense_type}] ${row.description}`);\r\n            }\r\n        });\r\n        \r\n        // Cập nhật trường custom_reasons_for_expense\r\n        frm.set_value('custom_reasons_for_expense', reasons.join('; '));\r\n    }\r\n}\r\n",
+  "view": "Form"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Client Script",
   "dt": "Sales Order",
   "enabled": 0,
   "modified": "2024-10-04 16:13:18.528876",
