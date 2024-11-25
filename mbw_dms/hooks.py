@@ -281,6 +281,9 @@ doc_events = {
     "DMS Router": {
         "before_insert": "mbw_dms.controllers.dms_router.check_duplicate_import"
     },
+    "Note": {
+        "after_insert": "mbw_dms.controllers.note.add_customer"
+    }
 }
 
 on_session_creation = [
