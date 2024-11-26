@@ -1,0 +1,38 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2024-10-21 15:48:40.106234",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "customer_group",
+  "name_customer_group"
+ ],
+ "fields": [
+  {
+   "fieldname": "customer_group",
+   "fieldtype": "Link",
+   "label": "Customer Group",
+   "options": "Customer Group"
+  },
+  {
+   "fetch_from": "customer_group.customer_group_name",
+   "fieldname": "name_customer_group",
+   "fieldtype": "Data",
+   "label": "Name Customer Group"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2024-11-26 14:13:29.983339",
+ "modified_by": "Administrator",
+ "module": "MBW DMS",
+ "name": "SFA Customer Group",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

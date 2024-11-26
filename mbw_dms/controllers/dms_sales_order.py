@@ -50,9 +50,6 @@ def update_kpi_monthly(doc, method):
 
 
 
-
-
-
 def update_kpi_monthly_on_cancel(doc, method):
     # Lấy ngày tháng để truy xuất dữ liệu
     month,year = renderMonthYear(doc)
@@ -127,27 +124,29 @@ def handle_update_kpi_each_salePerson(sales_info,doc,month,year,start_date,end_d
 def handle_delete_kpi_each_salePerson(sales_info,doc,month,year,start_date,end_date):
     user_name = frappe.get_value("Sales Person", {"name": sales_info.sales_person}, "employee")
 
-    items = doc.get("items")
-    
-    qty,uom = qty_not_pricing_rule(items)
+    # Lấy thông tin các mặt hàng (items) từ đơn hàng bị hủy
+    itemsSI = doc.get("items")
+    qty, uom = qty_not_pricing_rule(itemsSI)
 
     # Kiểm tra đã tồn tại bản ghi KPI của tháng này chưa
-    existing_monthly_summary = frappe.get_value("DMS Summary KPI Monthly", {"thang": month, "nam": year, "nhan_vien_ban_hang": user_name}, "name")
+    existing_monthly_summary = frappe.get_value(
+        "DMS Summary KPI Monthly", {"thang": month, "nam": year, "nhan_vien_ban_hang": user_name}, "name"
+    )
+    grand_totals = doc.grand_total * sales_info.allocated_percentage / 100
 
-    total_uom = 0
     if existing_monthly_summary:
         monthly_summary_doc = frappe.get_doc("DMS Summary KPI Monthly", existing_monthly_summary)
-        grand_totals = doc.grand_total*sales_info.allocated_percentage/100
-        cus_name = doc.customer
-        existing_cus = existing_customer(customer_name=cus_name, start_date=start_date, end_date=end_date, sale_person=sales_info.sales_person,doc=doc)
 
-        monthly_summary_doc.so_don_hang = minus_not_nega(monthly_summary_doc.so_don_hang)
-        monthly_summary_doc.doanh_so_thang = minus_not_nega(monthly_summary_doc.doanh_so_thang, grand_totals)
-        monthly_summary_doc.san_luong = minus_not_nega(monthly_summary_doc.san_luong, sum(qty))
-        monthly_summary_doc.sku = (float(total_uom) / (monthly_summary_doc.so_don_hang)) if monthly_summary_doc.so_don_hang > 0 else 0
-        if len(existing_cus) == 0:
-            total_uom =  monthly_summary_doc.sku*monthly_summary_doc.so_don_hang -  len(uom)
-            monthly_summary_doc.so_kh_dat_hang = minus_not_nega(monthly_summary_doc.so_kh_dat_hang)
+        # Trừ doanh số và giảm SKU
+        total_uom = float(monthly_summary_doc.sku) * float(monthly_summary_doc.so_don_hang) - len(uom)
+        monthly_summary_doc.san_luong = max(0, monthly_summary_doc.san_luong - sum(qty))
+        monthly_summary_doc.so_don_hang = max(0, monthly_summary_doc.so_don_hang - 1)
+        monthly_summary_doc.sku = (
+            (float(total_uom) / float(monthly_summary_doc.so_don_hang))
+            if monthly_summary_doc.so_don_hang > 0
+            else 0
+        )
+        monthly_summary_doc.doanh_so_thang = max(0, monthly_summary_doc.doanh_so_thang - grand_totals)
+
+        # Lưu thay đổi
         monthly_summary_doc.save(ignore_permissions=True)
-    else:
-        return

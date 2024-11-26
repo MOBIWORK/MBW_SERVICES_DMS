@@ -387,22 +387,21 @@ export default function ReportCheckin() {
       <ContentFrame
         header={
           <ReportHeader
-            setRefresh={setRefresh}
-            title="Báo cáo viếng thăm"
-            params={{
-              report_type: "Report Customer",
-              data_filter: {
-                customer_type,
-                customer_group,
-                territory,
-                sales_person: employee,
-                sales_team,
-                //changed
-                startDate,
-                endDate,
-              },
-            }}
-            file_name="Report Sell.xlsx"
+          setRefresh={setRefresh}
+          title="Báo cáo viếng thăm"
+          params={{
+            report_type: "Report Checkin",
+            data_filter: {
+              startDate,
+              endDate,
+              employee,
+              sales_team,
+              territory,
+              customer_group,
+              customer_type,
+            },
+          }}
+          file_name="checkin-report.xlsx"
           />
         }>
         <div className="bg-white rounded-2xl pt-4 pb-7  border-[#DFE3E8] border-[0.2px] border-solid">

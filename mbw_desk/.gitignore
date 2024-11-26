@@ -22,6 +22,8 @@ dist-ssr
 *.sln
 *.sw?
 node_modules
-.env.development
-*.env.development
+
 src/auth
+
+.env.cuongbn
+.env.development
