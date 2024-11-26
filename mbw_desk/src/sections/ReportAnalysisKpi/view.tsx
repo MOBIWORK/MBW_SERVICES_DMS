@@ -215,7 +215,7 @@ const ReportAnalysis_KPI = () => {
                 <Column
                   className="!text-center"
                   title="KH"
-                  width={70}
+                  width={120}
                   dataIndex="total_kh_vt_dn"
                   key="total_kh_vt_dn"
                   render={(_: any, record: any) => (
@@ -296,7 +296,6 @@ const ReportAnalysis_KPI = () => {
                 <Column
                   className="!text-center"
                   title="KH"
-                  width={70}
                   dataIndex="total_kh_doanh_so"
                   key="total_kh_doanh_so"
                   render={(_: any, record: any) => (
@@ -541,7 +540,6 @@ const ReportAnalysis_KPI = () => {
                 title="Số khách hàng đặt hàng">
                 <Column
                   className="!text-center"
-                  width={70}
                   title="KH"
                   dataIndex="total_kh_dat_hang"
                   key="total_kh_dat_hang"
@@ -587,7 +585,7 @@ const ReportAnalysis_KPI = () => {
                 render={(_: any, record: any) => {
                   return (
                     <p className="!min-w-[100px] text-center">
-                      {_ != null ? _ : record.binh_quan_sku_kh}
+                      {_ != null ? _ : record.sku_kh}
                     </p>
                   );
                 }}
@@ -603,7 +601,7 @@ const ReportAnalysis_KPI = () => {
                 render={(_: any, record: any) => {
                   return (
                     <p className="!min-w-[100px] text-center">
-                      {_ != null ? _ : record.binh_quan_sku_dh}
+                      {_ != null ? _ : record.sku_dh}
                     </p>
                   );
                 }}

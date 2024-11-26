@@ -15,6 +15,7 @@ import { mediaQuery, PAGE_SIZE } from "@/constant";
 import Filter_group from "@/components/filter-group/Filter_group";
 import ReportHeader from "../ReportHeader/ReportHeader";
 import { useSelector } from "react-redux";
+import { returnTimeDays } from "@/util";
 
 export default function ReportVisitorSummary_KPI() {
   const [refresh, setRefresh] = useState<boolean>(false);
@@ -56,19 +57,23 @@ export default function ReportVisitorSummary_KPI() {
       render: (_: any, record: any, index: number) => index + 1,
     },
     {
-      title: <div className="text-center">Nhóm bán hàng</div>,
+      title: <div >Nhóm bán hàng</div>,
       dataIndex: "nhom_ban_hang",
       width: 100,
       key: "nhom_ban_hang",
+      render: (_: any, record: any, index: number) => <div className="min-w-[100px]">{_}</div>,
+
     },
     {
-      title: <div className="text-center">Mã nhân viên</div>,
+      title: <div >Mã nhân viên</div>,
       dataIndex: "employee_code",
       key: "employee_code",
       width: 100,
+      render: (_: any, record: any, index: number) => <div className="min-w-[140px]">{_}</div>,
+
     },
     {
-      title: <div className="text-center">Tên nhân viên</div>,
+      title: <div >Tên nhân viên</div>,
       dataIndex: "employee_name",
       width: 100,
       key: "employee_name",
@@ -98,11 +103,11 @@ export default function ReportVisitorSummary_KPI() {
       key: "checkin_daungay",
       width: 100,
       render: (value: any) => (
-        <div>
+        <div className="min-w-[120px] text-center">
           {value ? (
             dayjs(value).format("HH:mm")
           ) : (
-            <div className="min-w-[40px] text-center">-</div>
+            <div>-</div>
           )}
         </div>
       ),
@@ -114,11 +119,11 @@ export default function ReportVisitorSummary_KPI() {
       key: "checkin_cuoingay",
       width: 100,
       render: (value: any) => (
-        <div>
+        <div className="min-w-[120px] text-center">
           {value ? (
             dayjs(value).format("HH:mm")
           ) : (
-            <div className="min-w-[40px] text-center">-</div>
+            <div >-</div>
           )}
         </div>
       ),
@@ -130,7 +135,7 @@ export default function ReportVisitorSummary_KPI() {
       key: "customers",
       width: 100,
       render: (value: any) => (
-        <div className="!text-center">{value ? value.length : 0}</div>
+        <div className="!text-center min-w-[120px] ">{value ? value.length : 0}</div>
       ),
     },
     {
@@ -142,7 +147,7 @@ export default function ReportVisitorSummary_KPI() {
       render: (value: number, record: any) => {
         return (
           <div
-            className="!text-center underline underline-offset-4 text-blue-600"
+            className="!text-center underline underline-offset-4 text-blue-600 min-w-[130px] "
             onClick={() => {
               setModal({
                 open: true,
@@ -152,6 +157,7 @@ export default function ReportVisitorSummary_KPI() {
                   timeCheckin: record?.create_time,
                   employee: record?.employee_code,
                   name_employee: record?.employee_name,
+                  ...returnTimeDays({timestamp: record.create_time})
                 },
               });
             }}>
@@ -168,7 +174,7 @@ export default function ReportVisitorSummary_KPI() {
       width: 100,
       render: (value: any, record: any) => (
         <div
-          className="!text-center underline underline-offset-4 text-blue-600"
+          className="!text-center underline underline-offset-4 text-blue-600 min-w-[130px]"
           onClick={() => {
             setModal({
               open: true,
@@ -178,6 +184,7 @@ export default function ReportVisitorSummary_KPI() {
                 timeCheckin: record?.create_time,
                 employee: record?.employee_code,
                 name_employee: record?.employee_name,
+                ...returnTimeDays({timestamp: record.create_time})
               },
             });
           }}>
@@ -196,8 +203,8 @@ export default function ReportVisitorSummary_KPI() {
       key: "total_distance",
       width: 100,
       render: (value: any) => (
-        <div className="!text-center">
-          {value ? value : <div className="min-w-[40px]">-</div>}
+        <div className="!text-center min-w-[100px]">
+          {value ? value.toFixed(2) : <div className="min-w-[40px]">-</div>}
         </div>
       ),
     },
@@ -208,7 +215,7 @@ export default function ReportVisitorSummary_KPI() {
       key: "total_donhang",
       width: 100,
       render: (value: any) => (
-        <div className="!text-center">
+        <div className="!text-center min-w-[100px]">
           {value ? value : <div className="min-w-[40px]">-</div>}
         </div>
       ),
@@ -221,7 +228,7 @@ export default function ReportVisitorSummary_KPI() {
       width: 100,
       render: (value: any, record: any) => {
         return (
-          <div className="!text-center">
+          <div className="!text-center min-w-[100px]">
             {record && record?.customers ? (
               record?.customers[0]?.total_image
             ) : (
@@ -238,10 +245,11 @@ export default function ReportVisitorSummary_KPI() {
       key: "total_doanhso",
       width: 100,
       render: (value: any) => (
-        <div className="!text-center">
-          {value ? value : <div className="min-w-[40px]">-</div>}
+        <div className="!text-center min-w-[100px]">
+          {value ? Intl.NumberFormat().format(value) : <div className="min-w-[40px]">-</div>}
         </div>
       ),
+      
     },
     {
       //Doanh thu: Tổng số tiền tính từ các hóa đơn bán hàng (Sales invoid)
@@ -250,8 +258,8 @@ export default function ReportVisitorSummary_KPI() {
       key: "total_doanhthu",
       width: 100,
       render: (value: any) => (
-        <div className="!text-center">
-          {value ? value : <div className="min-w-[40px]">-</div>}
+        <div className="!text-center min-w-[100px]">
+          {value ? Intl.NumberFormat().format(value) : <div className="min-w-[40px]">-</div>}
         </div>
       ),
     },
@@ -265,8 +273,8 @@ export default function ReportVisitorSummary_KPI() {
           params: {
             page_size: PAGE_SIZE,
             page_number: page,
-            startDate,
-            endDate,
+            from_date:startDate,
+            to_date:endDate,
             employee,
             sales_team,
             territory,
@@ -314,7 +322,7 @@ export default function ReportVisitorSummary_KPI() {
             className={`flex ${
               matchMedia ? "justify-end" : "justify-between"
             } items-center w-full`}>
-            {!matchMedia && (
+          {!matchMedia ? (
               <Col className="ml-4 w-[78%]">
                 <Row gutter={[8, 8]} className="space-x-4">
                   <Filter_group
@@ -326,28 +334,25 @@ export default function ReportVisitorSummary_KPI() {
                   />
                 </Row>
               </Col>
-            )}
-
+          ) : (
             <Col className="!ml-4">
               <DropDownFilter
-                inputCustomerType
-                inputCustomerGroup
-                inputTerritory
-                inputFromDate
-                inputToDate
-                inputSaleGroup
-                inputEmployee
+                 inputFromDate
+                 inputToDate
+                 inputSaleGroup
+                 inputEmployee
                 setPage={setPage}
                 matchMedia={!matchMedia}
               />
-            </Col>
+            </Col>)}
+        
           </Row>
           <div ref={containerRef1} className="pt-5">
             <TableCustom
               bordered
               $border
               dataSource={dataCheckin?.data?.map((report: any) => ({
-                key: report.name,
+                key: report.create_time.toString(),
                 ...report,
               }))}
               pagination={
@@ -386,6 +391,9 @@ export default function ReportVisitorSummary_KPI() {
               checkin_note_id={modal.id?.checkin_note_id}
               employee={modal.id?.employee}
               timeCheckin={modal.id?.timeCheckin}
+              from_date={modal.id?.from_date}
+              to_date={modal.id?.to_date}
+              time_slot={modal.id?.time}
             />
           </ModalDetail>
         </div>

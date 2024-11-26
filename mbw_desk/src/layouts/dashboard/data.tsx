@@ -1,5 +1,6 @@
 /** @format */
 
+import DiscountIcon from "@/icons/discount";
 import {
   AliyunOutlined,
   BarChartOutlined,
@@ -78,6 +79,17 @@ export const listMenu: MenuItem[] = [
     ),
     icon: <FileDoneOutlined style={{ fontSize: "22px" }} />,
     key: "control",
+  },
+
+  //CTKM
+  {
+    label: (
+      <Link className={""} to="/promotion">
+        Chương trình khuyến mại
+      </Link>
+    ),
+    icon: <DiscountIcon />,
+    key: "promotion",
   },
 
   //cham diem trung bay

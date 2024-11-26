@@ -11,6 +11,9 @@ export default function Detailcheckin({
   employee,
   timeCheckin,
   checkin_note_id,
+  from_date,
+  to_date,
+  time_slot
 }: any) {
   const columnsDetail: any = [
     {
@@ -110,6 +113,9 @@ export default function Detailcheckin({
             employee: employee,
             page_size: PAGE_SIZE,
             page_number: page,
+            from_date,
+            to_date,
+            time_slot: time_slot
           },
         }
       );
@@ -117,7 +123,7 @@ export default function Detailcheckin({
       setDataDetail(result);
       setTotal(result?.totals);
     })();
-  }, [timeCheckin, employee, page]);
+  }, [timeCheckin, employee, page, time_slot]);
 
   return (
     <>

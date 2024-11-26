@@ -17,9 +17,6 @@ export const ToDateFilter = () => {
   const dispath = useDispatch();
   const { startDate, endDate } = useSelector((state: any) => state.date);
 
-  useEffect(() => {
-    dispath(setEndDate(Date.parse(endOfMonth["$d"]) / 1000));
-  }, []);
   const disabledEndDate = (current: any) => {
     if (startDate) {
       const startMonth = dayjs.unix(startDate).month();
@@ -43,6 +40,10 @@ export const ToDateFilter = () => {
   const matchMedia = useMediaQuery(`${mediaQuery}`);
 
   const value = dayjs(endDate * 1000);
+
+  useEffect(() => {
+    dispath(setEndDate(Date.parse(endOfMonth["$d"]) / 1000));
+  }, []);
 
   return (
     <Col className={`min-w-[130px] ${matchMedia ? "w-full" : " w-[20%]"}`}>
