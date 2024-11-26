@@ -833,9 +833,6 @@ def customer_not_order(kwargs):
     
 
 # Báo cáo công nợ khách hàng
-import frappe
-from collections import defaultdict
-
 @frappe.whitelist()
 def get_accounts_receivable_report(kwargs):
     default_company = frappe.db.get_single_value("Global Defaults", "default_company")
@@ -869,7 +866,6 @@ def get_accounts_receivable_report(kwargs):
     # Nhóm dữ liệu công nợ theo từng khách hàng dựa trên customer ID
     grouped_data = defaultdict(list)
     for row in data:
-        customer_name = row.get("customer_name")
         voucher_type = row.get("voucher_type")
         voucher_no = row.get("voucher_no")
         invoice_amount = row.get("invoiced") or 0
@@ -926,7 +922,6 @@ def get_accounts_receivable_report(kwargs):
         "customers": report_data
     })
 
-    
 
 
 # report
