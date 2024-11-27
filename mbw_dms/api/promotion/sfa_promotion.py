@@ -4,11 +4,11 @@ from frappe.utils import get_first_day,get_last_day,nowdate
 import pydash
 import copy
 import operator
-from mbw_dms.api.common import (
+from mbw_sfa.api.common import (
     exception_handle,
     gen_response,
 )
-from mbw_dms.api.validators import validate_filter_timestamp, validate_filter
+from mbw_sfa.api.validators import validate_filter_timestamp, validate_filter
 from datetime import datetime, date
 # Biến lữu trữ các trương trình khuyến mại và kết quả đáp ứng
 objPromotionOder = []
@@ -244,6 +244,7 @@ def apply_Promotion(list_item=[], list_promotions=[], total_amount=0):
     list_promotions = sorted(list_promotions, key=operator.itemgetter('gpromotion_prioritize'))
     
     for promtion in list_promotions:
+        #print('========================= value: ', promtion.code, flush=True)
         promo_result = caculate_promotion(list_item, promtion, total_amount)
 
         if bool(promo_result):
@@ -581,7 +582,7 @@ def SP_SL_SP(list_item=[], data_promotion={}):
                 )
                 if sl_chan is not None:
                     so_luong = sl_chan["sl_KhauTru"]
-        print('========================= value: ', objProductInPromotion, flush=True)
+       
         for prd in product:
             if bool(prd["yeu_cau_min"]) and prd["yeu_cau_min"] != 0:
                 if so_luong >= prd["yeu_cau_min"] and item["uom"] == prd["don_vi_tinh"].get("choice_values"):
@@ -600,7 +601,6 @@ def SP_SL_SP(list_item=[], data_promotion={}):
             if so_luong >= getProductPromotion["yeu_cau"] and item["uom"] == getProductPromotion["don_vi_tinh"].get("choice_values"):
                 # Tính bội số
                 boi_so_cap = int(so_luong / getProductPromotion["yeu_cau"]) if boi_so else 1
-
                 # Thêm sản phẩm khuyến mãi
                 list_free_item.extend(
                     {
@@ -616,7 +616,7 @@ def SP_SL_SP(list_item=[], data_promotion={}):
                 )
                 save_promotionResult(data_promotion, getProductPromotion, boi_so_cap)
                 # Luu so luong san pham da su dung KM
-                On_Process_GiamTru(data_promotion,getProductPromotion,sl_pass,dvt_pass, boi_so_cap);
+                On_Process_GiamTru(data_promotion,getProductPromotion,sl_pass,dvt_pass, boi_so_cap)
     return list_free_item
 
 
@@ -670,18 +670,14 @@ def On_Process_GiamTru(dataKM,objKM, sl, dvt_pass, boi_so_cap):
     if dataKM.get("gpromotion") is not None:
             slCanGiamTru = float(sl) - (objKM["yeu_cau"] * boi_so_cap)
             hasExsit = False
-
             # Khởi tạo objPromotionHasApply bên ngoài điều kiện
             objPromotionHasApply = None
-    
             for item in objProductInPromotion:
-
                 if item["idsp"] == objKM["_id"] and item["dvt"] == objKM['don_vi_tinh']['choice_values']:
-                    updateNum = max(item["sl_KhauTru"] - slCanGiamTru, 0)
+                    updateNum = max(item["sl_KhauTru"] - (objKM["yeu_cau"] * boi_so_cap), 0)
                     item["sl_KhauTru"] = updateNum
                     hasExsit = True
                     break
-
             if not hasExsit:
                 objPromotionHasApply = {
                     "idsp": objKM["_id"],
@@ -692,7 +688,6 @@ def On_Process_GiamTru(dataKM,objKM, sl, dvt_pass, boi_so_cap):
                     "gttb": 0
                 }
                 objProductInPromotion.append(objPromotionHasApply)
-            
             
             #     # Uncomment if needed
             #     # for item in objProductInPromotion:
