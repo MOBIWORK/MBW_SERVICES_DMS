@@ -24,11 +24,11 @@ export default function Detailchekinfirst({ employee, month, year }: any) {
       dataIndex: "kh_ten",
       key: "kh_ten",
       width: 200,
-      render: (_: any, record: any) => (
+      render: (_:any, record: any) => (
         <div>
           <a
             className="text-[#212B36]"
-            href={`/app/sales-invoice/${record.kh_ten}`}
+            href={`/app/customer/${record.kh_ten}`}
             target="_blank"
           >
             {record.kh_ten}
@@ -72,7 +72,7 @@ export default function Detailchekinfirst({ employee, month, year }: any) {
       title: "Khoảng cách",
       dataIndex: "checkin_khoangcach",
       key: "checkin_khoangcach",
-      render: (value: any) => <div>{parseFloat((value / 60).toFixed(2))}</div>,
+      render: (value: any) => <div>{value}</div>,
     },
   ];
   const [page, setPage] = useState<number>(1);

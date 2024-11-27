@@ -18,11 +18,34 @@ export default function DetailSku({ employee, month, year }: any) {
       title: "Mã đơn đặt",
       dataIndex: "name",
       key: "name",
+      render: (_:any, record: any) => (
+        <div>
+          <a
+            className="text-[#212B36]"
+            href={`/app/sales-order/${record.name}`}
+            target="_blank"
+          >
+            {record.name}
+          </a>
+        </div>
+      ),
     },
     {
       title: "Khách hàng",
       dataIndex: "customer",
       key: "customer",
+      width: 200,
+      render: (_:any, record: any) => (
+        <div>
+          <a
+            className="text-[#212B36]"
+            href={`/app/customer/${record.customer}`}
+            target="_blank"
+          >
+            {record.customer}
+          </a>
+        </div>
+      ),
     },
     {
       title: "Ngày đặt",
@@ -37,7 +60,8 @@ export default function DetailSku({ employee, month, year }: any) {
       },
     },
     {
-      title: "Số lượng",
+      title: "SKU",
+      className: "!text-right",
       dataIndex: "totak_sku",
       key: "totak_sku",
       render: (value: any) => <div className="!text-right">{value}</div>,

@@ -13,6 +13,7 @@ import { useEffect } from "react";
 
 const startOfMonth: any = dayjs().startOf("month");
 
+
 export const FromDateFilter = () => {
   const dispath = useDispatch();
   const { endDate } = useSelector((state: any) => state.date);

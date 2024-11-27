@@ -18,98 +18,111 @@ import ReportHeader from "../ReportHeader/ReportHeader";
 
 import { useSelector } from "react-redux";
 
-const columnsCheckin: any = [
-  {
-    title: (
-      <div className="relative">
-        <span className="absolute -top-[11px] -left-8">STT</span>
-      </div>
-    ),
-    dataIndex: "stt",
-    key: "stt",
-    render: (_: any, record: any, index: number) => index + 1,
-  },
-  {
-    title: "Mã nhân viên",
-    dataIndex: "employee_code",
-    key: "employee_code",
-  },
-  {
-    title: "Tên nhân viên",
-    dataIndex: "employee_name",
-    key: "employee_name",
-  },
-  {
-    title: "Nhóm bán hàng",
-    dataIndex: "sale_group",
-    key: "sale_group",
-  },
-  {
-    title: "Ngày",
-    dataIndex: "create_time",
-    key: "create_time",
-    render: (value: any) => <div>{dayjs.unix(value).format("DD/MM/YYYY")}</div>,
-  },
-  {
-    title: "Thứ",
-    dataIndex: "create_time",
-    key: "create_time",
-    render: (value: any) => <div>{dayjs.unix(value).format("dddd")}</div>,
-  },
-  {
-    title: "Giờ làm",
-    className: "!text-center",
-    dataIndex: "total_work",
-    key: "total_work",
-    render: (value: any) => (
-      <div className="!text-center">{parseFloat((value / 60).toFixed(2))}</div>
-    ),
-  },
-  {
-    title: "Giờ viếng thăm",
-    dataIndex: "total_time",
-    className: "!text-center",
-    key: "total_time",
-    render: (value: any) => (
-      <div className="!text-center">{parseFloat((value / 60).toFixed(2))}</div>
-    ),
-  },
-  {
-    title: "Số km tự động (km)",
-    dataIndex: "kmauto",
-    className: "!text-center",
-    key: "kmauto",
-    render: (value: any) => (
-      <div className="!text-center">
-        {value ? value : <div className="min-w-[30px]">-</div>}
-      </div>
-    ),
-  },
-  {
-    title: "Số km di chuyển (km)",
-    className: "!text-center",
-    dataIndex: "kmmove",
-    key: "kmmove",
-    render: (value: any) => (
-      <div className="!text-center">
-        {value ? value : <div className="min-w-[40px]">-</div>}
-      </div>
-    ),
-  },
-  {
-    title: "Vận tốc (km/h)",
-    dataIndex: "speed",
-    className: "!text-center",
-    key: "kmmove",
-    render: (value: any) => (
-      <div className="!text-center">
-        {value ? value : <div className="min-w-[20px]">-</div>}
-      </div>
-    ),
-  },
-];
-
 export default function ReportCheckin() {
+  const columnsCheckin: any = [
+    {
+      title: (
+        <div className="relative">
+          <span className="absolute -top-[11px] -left-8">STT</span>
+        </div>
+      ),
+      dataIndex: "stt",
+      key: "stt",
+      width: 60,
+      render: (_: any, __: any, index: number) => (
+        <span>{calculateIndex(page, PAGE_SIZE, index)}</span> // Tính toán index cho từng dòng
+      ),
+    },
+    {
+      title: <div className="!min-w-[100px]">Mã Nhân viên</div>,
+      dataIndex: "employee_code",
+      key: "employee_code",
+    },
+    {
+      title: "Tên nhân viên",
+      dataIndex: "employee_name",
+      key: "employee_name",
+    },
+    {
+      title: "Nhóm bán hàng",
+      dataIndex: "sale_group",
+      key: "sale_group",
+      width: 200,
+    },
+    {
+      title: "Ngày",
+      dataIndex: "create_time",
+      key: "create_time",
+      render: (value: any) => (
+        <div>{dayjs.unix(value).format("DD/MM/YYYY")}</div>
+      ),
+    },
+    {
+      title: "Thứ",
+      dataIndex: "create_time",
+      key: "create_time",
+      render: (value: any) => <div>{dayjs.unix(value).format("dddd")}</div>,
+    },
+    {
+      title: "Giờ làm",
+      className: "!text-center",
+      dataIndex: "total_work",
+      key: "total_work",
+      render: (value: any) => (
+        <div className="!text-center">
+          {parseFloat((value / 60).toFixed(2))}
+        </div>
+      ),
+    },
+    {
+      title: "Giờ viếng thăm",
+      dataIndex: "total_time",
+      className: "!text-center",
+      width: 130,
+      key: "total_time",
+      render: (value: any) => (
+        <div className="!text-center">
+          {parseFloat((value / 60).toFixed(2))}
+        </div>
+      ),
+    },
+    {
+      title: "Số km tự động (km)",
+      dataIndex: "kmauto",
+      className: "!text-center",
+      key: "kmauto",
+      width: 130,
+      render: (value: any) => (
+        <div className="!text-center">
+          {value ? value : <div className="min-w-[50px]">-</div>}
+        </div>
+      ),
+    },
+    {
+      title: "Số km di chuyển (km)",
+      className: "!text-center",
+      dataIndex: "kmmove",
+      key: "kmmove",
+      width: 160,
+      render: (value: any) => (
+        <div className="!text-center">
+          {value ? value : <div className="min-w-[50px]">-</div>}
+        </div>
+      ),
+    },
+    {
+      title: "Vận tốc (km/h)",
+      dataIndex: "speed",
+      className: "!text-center",
+      key: "kmmove",
+      width: 130,
+      render: (value: any) => (
+        <div className="!text-center">
+          {value ? value : <div className="min-w-[50px]">-</div>}
+        </div>
+      ),
+    },
+  ];
   const [dataCheckin, setDataCheckin] = useState<any>([]);
   const [total, setTotal] = useState<number>(0);
   const [page, setPage] = useState<number>(1);
@@ -121,7 +134,13 @@ export default function ReportCheckin() {
   const { startDate, endDate } = useSelector((state: any) => state.date);
   const { sales_team, employee, customer_type, customer_group, territory } =
     useSelector((state: any) => state.group);
-
+  const calculateIndex = (
+    pageNumber: number,
+    pageSize: number,
+    index: number
+  ) => {
+    return (pageNumber - 1) * pageSize + index + 1;
+  };
   const [modal, setModal] = useState<{
     open: boolean;
     id: any;
@@ -156,13 +175,16 @@ export default function ReportCheckin() {
         key: "customer_address",
         width: 200,
         render: (_, record) => (
-          <div className="truncate">{record.customer_address}</div>
+          <div className="truncate hover:whitespace-normal">
+            {record.customer_address}
+          </div>
         ),
       },
       {
-        title: "Loại khách",
+        title: "Loại hình khách hàng",
         dataIndex: "customer_type",
         key: "customer_type",
+        width: 200,
         render: (_, record) => <>{record.customer_type}</>,
       },
       {
@@ -215,7 +237,11 @@ export default function ReportCheckin() {
         title: "Địa chỉ checkin",
         dataIndex: "checkin_address",
         key: "checkin_address",
-        render: (_, record) => <>{record.checkin_address}</>,
+        render: (_, record) => (
+          <div className="truncate hover:whitespace-normal">
+            {record.checkin_address}
+          </div>
+        ),
       },
       {
         title: "Khoảng cách",
@@ -361,22 +387,21 @@ export default function ReportCheckin() {
       <ContentFrame
         header={
           <ReportHeader
-            setRefresh={setRefresh}
-            title="Báo cáo viếng thăm"
-            params={{
-              report_type: "Report Customer",
-              data_filter: {
-                customer_type,
-                customer_group,
-                territory,
-                sales_person: employee,
-                sales_team,
-                //changed
-                startDate,
-                endDate,
-              },
-            }}
-            file_name="Report Sell.xlsx"
+          setRefresh={setRefresh}
+          title="Báo cáo viếng thăm"
+          params={{
+            report_type: "Report Checkin",
+            data_filter: {
+              startDate,
+              endDate,
+              employee,
+              sales_team,
+              territory,
+              customer_group,
+              customer_type,
+            },
+          }}
+          file_name="checkin-report.xlsx"
           />
         }>
         <div className="bg-white rounded-2xl pt-4 pb-7  border-[#DFE3E8] border-[0.2px] border-solid">

@@ -23,6 +23,18 @@ export default function DetailOrder({ employee, month, year }: any) {
       title: "Khách hàng",
       dataIndex: "customer",
       key: "customer",
+      width: 200,
+      render: (_:any, record: any) => (
+        <div>
+          <a
+            className="text-[#212B36]"
+            href={`/app/customer/${record.customer}`}
+            target="_blank"
+          >
+            {record.customer}
+          </a>
+        </div>
+      ),
     },
     {
       title: "Địa chỉ",
@@ -36,6 +48,18 @@ export default function DetailOrder({ employee, month, year }: any) {
       title: "Mã đơn hàng",
       dataIndex: "so_name",
       key: "so_name",
+      width: 200,
+      render: (_:any, record: any) => (
+        <div>
+          <a
+            className="text-[#212B36]"
+            href={`/app/sales-order/${record.so_name}`}
+            target="_blank"
+          >
+            {record.so_name}
+          </a>
+        </div>
+      ),
     },
     {
       title: "Ngày đặt",

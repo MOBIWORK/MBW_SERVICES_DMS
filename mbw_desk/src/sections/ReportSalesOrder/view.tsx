@@ -15,109 +15,118 @@ import ReportHeader from "../ReportHeader/ReportHeader";
 
 import { useSelector } from "react-redux";
 
-const columns: TableColumnsType<DataSaleOrder> = [
-  {
-    title: (
-      <div className="relative">
-        <span className="absolute -top-[11px] -left-8">STT</span>
-      </div>
-    ),
-    dataIndex: "stt",
-    key: "stt",
-    width: 60,
-    render: (_, record: any, index: number) => index + 1,
-  },
-  {
-    title: "Đơn đặt",
-    dataIndex: "name",
-    key: "name",
-    width: 100,
-    render: (_, record: any) => (
-      <a
-        className="text-[#212B36]"
-        href={`/app/sales-invoice/${record.name}`}
-        target="_blank">
-        {record.name}
-      </a>
-    ),
-  },
-  {
-    title: "Khách hàng",
-    dataIndex: "customer",
-    key: "customer",
-    width: 120,
-    render: (_, record: any) => <div>{record.customer}</div>,
-  },
-  {
-    title: "Khu vực",
-    dataIndex: "territory",
-    key: "territory",
-    width: 120,
-    render: (_, record: any) => <div>{record.territory}</div>,
-  },
-  {
-    title: "Ngày tạo",
-    dataIndex: "posting_date",
-    key: "posting_date",
-    width: 120,
-    render: (_, record: any) => (
-      <div>{dayjs(record.posting_date * 1000).format("DD/MM/YYYY")}</div>
-    ),
-  },
-  {
-    title: "Nhân viên",
-    dataIndex: "sales_person",
-    key: "sales_person",
-    width: 120,
-    render: (_, record: any) => <div>{record.sales_person}</div>,
-  },
-  {
-    title: <div className="text-right">Thành tiền (VNĐ)</div>,
-    dataIndex: "total",
-    key: "total",
-    width: 140,
-    render: (_, record: any) => (
-      <div className="!text-right">
-        {Intl.NumberFormat().format(record.total)}
-      </div>
-    ),
-  },
-  {
-    title: <div className="text-right">Tiền VAT (VNĐ)</div>,
-    dataIndex: "tax_amount",
-    key: "tax_amount",
-    width: 140,
-    render: (_, record: any) => (
-      <div className="text-right">
-        {Intl.NumberFormat().format(record.tax_amount)}
-      </div>
-    ),
-  },
-  {
-    title: <div className="text-right">Chiết khấu (VNĐ)</div>,
-    dataIndex: "discount_amount",
-    key: "discount_amount",
-    width: 160,
-    render: (_, record: any) => (
-      <div className="text-right">
-        {Intl.NumberFormat().format(record.discount_amount)}
-      </div>
-    ),
-  },
-  {
-    title: <div className="text-right">Tổng tiền (VNĐ)</div>,
-    width: 160,
-    dataIndex: "grand_total",
-    key: "grand_total",
-    render: (_, record: any) => (
-      <div className="text-right">
-        {Intl.NumberFormat().format(record.grand_total)}
-      </div>
-    ),
-  },
-];
-
 export default function ReportSales() {
+  const columns: TableColumnsType<DataSaleOrder> = [
+    {
+      title: (
+        <div className="relative">
+          <span className="absolute -top-[11px] -left-8">STT</span>
+        </div>
+      ),
+      dataIndex: "stt",
+      key: "stt",
+      width: 60,
+      render: (_: any, __: any, index: number) => (
+        <span>{calculateIndex(page, PAGE_SIZE, index)}</span> // Tính toán index cho từng dòng
+      ),
+    },
+    {
+      title: "Đơn đặt",
+      dataIndex: "name",
+      key: "name",
+      width: 100,
+      render: (_, record: any) => (
+        <a
+          className="text-[#212B36]"
+          href={`/app/sales-invoice/${record.name}`}
+          target="_blank">
+          {record.name}
+        </a>
+      ),
+    },
+    {
+      title: "Khách hàng",
+      dataIndex: "customer",
+      key: "customer",
+      width: 120,
+      render: (_, record: any) => (
+        <div className="min-w-[120px]">{record.customer}</div>
+      ),
+    },
+    {
+      title: "Khu vực",
+      dataIndex: "territory",
+      key: "territory",
+      width: 120,
+      render: (_, record: any) => (
+        <div className="min-w-[120px]">{record.territory}</div>
+      ),
+    },
+    {
+      title: "Ngày tạo",
+      dataIndex: "transaction_date",
+      key: "transaction_date",
+      width: 120,
+      render: (_, record: any) => (
+        <div className="min-w-[120px]">
+          {dayjs(record.transaction_date * 1000).format("DD/MM/YYYY")}
+        </div>
+      ),
+    },
+    {
+      title: "Nhân viên",
+      dataIndex: "sales_person",
+      key: "sales_person",
+      width: 120,
+      render: (_, record: any) => (
+        <div className="min-w-[120px]">{record.sales_person}</div>
+      ),
+    },
+    {
+      title: <div className="text-right">Thành tiền (VNĐ)</div>,
+      dataIndex: "total",
+      key: "total",
+      width: 140,
+      render: (_, record: any) => (
+        <div className="!text-right min-w-[120px]">
+          {Intl.NumberFormat().format(record.total)}
+        </div>
+      ),
+    },
+    {
+      title: <div className="text-right">Tiền VAT (VNĐ)</div>,
+      dataIndex: "tax_amount",
+      key: "tax_amount",
+      width: 140,
+      render: (_, record: any) => (
+        <div className="text-right  min-w-[120px]">
+          {Intl.NumberFormat().format(record.tax_amount)}
+        </div>
+      ),
+    },
+    {
+      title: <div className="text-right ">Chiết khấu (VNĐ)</div>,
+      dataIndex: "discount_amount",
+      key: "discount_amount",
+      width: 160,
+      render: (_, record: any) => (
+        <div className="text-right min-w-[120px]">
+          {Intl.NumberFormat().format(record.discount_amount)}
+        </div>
+      ),
+    },
+    {
+      title: <div className="text-right">Tổng tiền (VNĐ)</div>,
+      width: 160,
+      dataIndex: "grand_total",
+      key: "grand_total",
+      render: (_, record: any) => (
+        <div className="text-right min-w-[120px]">
+          {Intl.NumberFormat().format(record.grand_total)}
+        </div>
+      ),
+    },
+  ];
   const [dataSaleOrder, setDataSaleOrder] = useState<DataSaleOrder[]>([]);
   const [total, setTotal] = useState<number>(0);
   const [page, setPage] = useState<number>(1);
@@ -126,6 +135,13 @@ export default function ReportSales() {
   const [refresh, setRefresh] = useState<boolean>(false);
 
   const matchMedia = useMediaQuery(`${mediaQuery}`);
+  const calculateIndex = (
+    pageNumber: number,
+    pageSize: number,
+    index: number
+  ) => {
+    return (pageNumber - 1) * pageSize + index + 1;
+  };
 
   const expandedRowRender = (recordTable: any) => {
     const columns: TableColumnsType<DataItem> = [
@@ -221,11 +237,12 @@ export default function ReportSales() {
   const { employee, territory, company, customer, warehouse } = useSelector(
     (state: any) => state.group
   );
+  console.log(new Date(1731258000 * 1000));
 
   useEffect(() => {
     (async () => {
       const rsData = await AxiosService.get(
-        "/api/method/mbw_dms.api.report.so_report.si_report",
+        "/api/method/mbw_dms.api.report.so_report.so_report",
         {
           params: {
             page_size: PAGE_SIZE,
@@ -264,7 +281,7 @@ export default function ReportSales() {
         header={
           <ReportHeader
             setRefresh={setRefresh}
-            title="Báo cáo tổng hợp bán hàng"
+            title="Báo cáo tổng hợp đặt hàng"
             params={{
               report_type: "Report Sell",
               data_filter: {
@@ -291,8 +308,8 @@ export default function ReportSales() {
                 <Row className="space-x-4">
                   <Filter_group
                     setPage={setPage}
-                    inputMonth
-                    inputYear
+                    inputFromDate
+                    inputToDate
                     inputSaleGroup
                     inputEmployee
                   />
@@ -302,8 +319,8 @@ export default function ReportSales() {
             <Col className="!ml-4 ">
               <DropDownFilter
                 setPage={setPage}
-                inputMonth
-                inputYear
+                inputFromDate
+                inputToDate
                 inputSaleGroup
                 inputEmployee
                 inputCompany

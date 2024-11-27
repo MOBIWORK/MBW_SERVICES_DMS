@@ -28,11 +28,11 @@ def get_base_url() :
     return f"{scheme}://{frappe.local.request.host}"
 
 # sp khuyến mãi 1:có apply pricing role,2: giá = 0 
-def qty_not_pricing_rule(items):
+def qty_not_pricing_rule(items,item_file_compare = "item_code"):
     total_item_price = pydash.filter_(items, lambda x: x.amount > 0)
-    total_qty = {item.get("qty") for item in total_item_price}
-    total_uom = {item.get("uom") for item in total_item_price}
-    print("total=============================",total_qty,total_uom)
+    total_qty = [item.get("qty") for item in total_item_price]
+    total_uom = {item.get("uom") + " " + item.get(item_file_compare)  for item in total_item_price}
+    total_uom = [item.splipt(" ")[0] for item in total_uom]
     return total_qty,total_uom
 
 
@@ -572,26 +572,31 @@ def upload_image_s3(image,description):
     data["status"] = True
     return data
 
-# Lấy ra các field của doctype con
-def get_value_child_doctype(master_doctype, master_name, name_field):
-	if not master_name:
-		return
-	from frappe.model import child_table_fields, default_fields
+# Lấy ra các field nhỏ của doctype con
+def get_value_child_doctype(master_doctype, master_name, name_field, fields_to_extract=None):
+    if not master_name:
+        return
+    from frappe.model import child_table_fields, default_fields
 
-	filed_master = frappe.get_doc(master_doctype, master_name)
+    filed_master = frappe.get_doc(master_doctype, master_name)
 
-	field_child = []
-	for i, child in enumerate(filed_master.get(name_field)):
-		child = child.as_dict()
+    field_child = []
+    for i, child in enumerate(filed_master.get(name_field)):
+        child = child.as_dict()
 
         # Xóa các trường không cần thiết
-		for fieldname in default_fields + child_table_fields:
-			if fieldname in child:
-				del child[fieldname]
+        for fieldname in default_fields + child_table_fields:
+            if fieldname in child:
+                del child[fieldname]
 
-		field_child.append(child)
+        # Nếu fields_to_extract được truyền vào, chỉ giữ lại các trường có trong danh sách
+        if fields_to_extract:
+            child = {key: value for key, value in child.items() if key in fields_to_extract}
 
-	return field_child
+        field_child.append(child)
+
+    return field_child
+
 
 
 class ArrayMethod():
@@ -956,3 +961,26 @@ def get_list_search(
     except Exception as e: 
         print("error search====",e)
         return []
+    
+
+def getConnection(doc,link_doctype):
+    """
+        doc: doctype //example doc= frappe.get_doc("Sales Invoice",name)
+        link: [table_fieldname, link_fieldname],//example: link =["items","sales_order"], table_fieldname thuong la items//update: da de mac dinh
+        link_doctype: name doctype check connect from doc //example="Sales Order"
+    """
+    names = []
+    # table_fieldname, link_fieldname = link
+    link_fieldname = link_doctype.casefold().replace(" ","_")
+    for row in doc.get("items") or []:
+        value = row.get(link_fieldname)
+        if value and value not in names:
+            names.append(value)
+    return names
+
+def minus_not_nega(num,sub=1):
+    num = int(num)
+    if num <= 1 :
+        return 0
+    else:
+        return num - sub if num >= sub else 0

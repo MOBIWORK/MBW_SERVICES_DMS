@@ -130,7 +130,7 @@ def real_time_monitoring_report(**kwargs):
         filter_today = {"creation": ["between", [from_date_today, to_date_today]]}
 
         # Lấy dữ liệu Sales Order cho hôm nay
-        sales_orders_today = frappe.get_all("Sales Order", filters={**filter_today, "docstatus":1}, fields=["name", "grand_total", "customer", "creation"])
+        sales_orders_today = frappe.get_all("Sales Order", filters={**filter_today}, fields=["name", "grand_total", "customer", "creation"])
 
         for i in sales_orders_today:
             data["doanh_so"] += i["grand_total"]

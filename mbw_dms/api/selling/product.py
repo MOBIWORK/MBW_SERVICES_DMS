@@ -70,7 +70,7 @@ def list_product(**kwargs):
                 return pydash.pick(value, "link_image")
             
             images_links = pydash.map_(images, return_fiel)
-            item["custom_images_item"] = images_links
+            # item["custom_images_item"] = images_links
             item["barcodes"] = barcodes[0].barcode if len(barcodes) > 0 else ""
             item["barcode_type"] = barcodes[0].barcode_type if len(barcodes) > 0 else ""
 
