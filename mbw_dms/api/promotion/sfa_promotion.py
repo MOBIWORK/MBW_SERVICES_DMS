@@ -4,11 +4,11 @@ from frappe.utils import get_first_day,get_last_day,nowdate
 import pydash
 import copy
 import operator
-from mbw_sfa.api.common import (
+from mbw_dms.api.common import (
     exception_handle,
     gen_response,
 )
-from mbw_sfa.api.validators import validate_filter_timestamp, validate_filter
+from mbw_dms.api.validators import validate_filter_timestamp, validate_filter
 from datetime import datetime, date
 # Biến lữu trữ các trương trình khuyến mại và kết quả đáp ứng
 objPromotionOder = []
