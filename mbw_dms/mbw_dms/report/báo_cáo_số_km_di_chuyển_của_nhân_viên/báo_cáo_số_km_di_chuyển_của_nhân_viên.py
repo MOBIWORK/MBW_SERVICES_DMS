@@ -163,7 +163,7 @@ def get_data(filters):
 						if log.get("type") == "start" or log.get("type") == "end":
 							continue
 						time = datetime.strptime(log.get("endTime"), "%Y-%m-%dT%H:%M:%S.%fZ")
-						to_time = time.replace(hour=17, minute=0, second=0,)
+						to_time = time.replace(hour=17, minute=0, second=0, microsecond=0)
 						if time < to_time:
 							time = to_time
 						else:
