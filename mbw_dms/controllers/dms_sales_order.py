@@ -136,8 +136,7 @@ def handle_delete_kpi_each_salePerson(sales_info,doc,month,year,start_date,end_d
 
     if existing_monthly_summary:
         monthly_summary_doc = frappe.get_doc("DMS Summary KPI Monthly", existing_monthly_summary)
-
-        # Trừ doanh số và giảm SKU
+        
         total_uom = float(monthly_summary_doc.sku) * float(monthly_summary_doc.so_don_hang) - len(uom)
         monthly_summary_doc.san_luong = max(0, monthly_summary_doc.san_luong - sum(qty))
         monthly_summary_doc.so_don_hang = max(0, monthly_summary_doc.so_don_hang - 1)
@@ -150,3 +149,47 @@ def handle_delete_kpi_each_salePerson(sales_info,doc,month,year,start_date,end_d
 
         # Lưu thay đổi
         monthly_summary_doc.save(ignore_permissions=True)
+
+def update_kpi_monthly_after_delete(doc, method):
+    # chỉ thay đổi kpi nếu xóa bản ghi đã submit
+    if doc.docstatus == 1:
+        update_kpi_monthly_on_cancel(doc, method)
+
+
+def minus_not_nega(num, sub=1):
+    num = int(num)
+    if num <= 0 :
+        return 0
+    else:
+        return num - sub
+
+
+# Thêm quy đổi theo thùng
+def cal_qdtt(doc, method):
+    items = doc.items
+    for item in items:
+        item_detail = frappe.get_doc("Item", item.item_code)
+        quy_cach_thung = 0
+        item_uom = None
+        for uom in item_detail.uoms:
+            if uom.custom_don_vi_dong_goi == 1:
+                quy_cach_thung = uom.conversion_factor
+                item_uom = uom.uom
+        
+        if item_uom: 
+            if item.uom == item_uom:
+                item.custom_quy_doi_theo_thung = item.qty
+            else:
+                item.custom_quy_doi_theo_thung = float(item.qty / quy_cach_thung)
+        else:
+            continue
+
+def create_mbw_itemscore_sales_order(doc, method):
+    if (doc.status == "To Deliver and Bill" or doc.status == "To Deliver") and doc.custom_trạng_thái_giao_hàng != 'Chưa giao hàng':
+        doc.custom_trạng_thái_giao_hàng = "Chưa giao hàng"
+        doc.save()
+    if doc.status == "Completed":
+        from mbw_dms.mbw_dms.doctype.mbw_itemscore_saleorder.mbw_itemscore_saleorder import \
+            create_ItemScore_SaleOrder
+
+        create_ItemScore_SaleOrder(doc)

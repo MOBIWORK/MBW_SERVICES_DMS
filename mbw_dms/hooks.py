@@ -37,7 +37,11 @@ website_route_rules = [
 # page_js = {"page" : "public/js/file.js"}
 
 # include js in doctype views
-doctype_js = {"Payroll Entry" : "controllers/payroll_entry.js","Sales Order":"api/promotion/sfa_promotion.js"}
+doctype_js = {"Payroll Entry" : "controllers/payroll_entry.js",
+              "Item": "controllers/item.js",
+              "Delivery Trip": "controllers/delivery_trip.js",
+             "Sales Order":"api/promotion/sfa_promotion.js"}
+
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
@@ -262,22 +266,28 @@ doc_events = {
     },
     "Sales Invoice": {
         "on_submit": "mbw_dms.controllers.dms_sales_invoice.update_kpi_monthly",
-        #hủy đơn bán/trả
+        # Hủy đơn bán/trả
         "on_cancel": "mbw_dms.controllers.dms_sales_invoice.update_kpi_monthly_on_cancel",
-        # "on_cancel": "mbw_dms.controllers.dms_sales_invoice.update_kpi_monthly_on_delete"
+        "after_delete": "mbw_dms.controllers.dms_sales_invoice.update_kpi_monthly_after_delete"
     },
     "Sales Order": {
         "on_submit": "mbw_dms.controllers.dms_sales_order.update_kpi_monthly",
-        #hủy/xóa đơn hàng
+        # Hủy/xóa đơn hàng
         "on_cancel": "mbw_dms.controllers.dms_sales_order.update_kpi_monthly_on_cancel",
-        "after_delete": "mbw_dms.controllers.dms_sales_order.update_kpi_monthly_after_delete"
+        "after_delete": "mbw_dms.controllers.dms_sales_order.update_kpi_monthly_after_delete",
+        "before_save": "mbw_dms.controllers.dms_sales_order.cal_qdtt",
+        "on_change": "mbw_dms.controllers.dms_sales_order.create_mbw_itemscore_sales_order",
     },
     "DMS Router": {
         "before_insert": "mbw_dms.controllers.dms_router.check_duplicate_import"
     },
-    "DMS Checkin" : {
-        #hủy, xóa checkin => cập nhật lại kpi: trực tiếp trong doctype
+    "Stock Entry": {
+        "before_save": "mbw_dms.controllers.stock_entry.cal_qdtt"
+    },
+    "Delivery Trip": {
+        "on_change": "mbw_dms.controllers.dms_delivery_trip.update_delivery_status_so",
     }
+    
 
 }
 

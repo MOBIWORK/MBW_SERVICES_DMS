@@ -51,6 +51,7 @@ def list_product(**kwargs):
             my_filter["custom_industry"] = ["like", f'%{custom_industry}%']
         if item_group:
             my_filter["item_group"] = ["like", f'%{item_group}%']
+        my_filter["is_sales_item"] = 1
         my_filter["disabled"] = 0
 
         items = frappe.db.get_list("Item", filters=my_filter,or_filters=filter_or,
@@ -150,7 +151,7 @@ def list_product_campaign(**kwargs):
         my_filter = {}
         filter_or = {}
         name = kwargs.get("name")
-        key_search = kwargs.get("item_name")
+        key_search = kwargs.get("key_search")
         brand = kwargs.get("brand")
         custom_industry = kwargs.get("industry")
         item_group = kwargs.get("item_group")
@@ -172,6 +173,7 @@ def list_product_campaign(**kwargs):
             my_filter["custom_industry"] = ["like", f'%{custom_industry}%']
         if item_group:
             my_filter["item_group"] = ["like", f'%{item_group}%']
+        my_filter["is_sales_item"] = 1
         my_filter["disabled"] = 0
 
         items = frappe.db.get_list("Item",

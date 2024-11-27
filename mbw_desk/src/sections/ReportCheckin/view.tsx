@@ -355,8 +355,8 @@ export default function ReportCheckin() {
           params: {
             page_size: PAGE_SIZE,
             page_number: page,
-            from_date: startDate,
-            to_date: endDate,
+            from_date:startDate,
+            to_date:endDate,
             employee,
             sales_team,
             territory,
