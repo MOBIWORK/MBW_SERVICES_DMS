@@ -67,7 +67,7 @@ def kpi_visit_detail(**kwargs):
             "DMS Checkin",
             filters=filters,
             fields=["name", "kh_ma", "kh_ten", "kh_diachi", "checkin_giovao", "checkin_khoangcach"],
-            order_by="kh_ma asc"
+            order_by="checkin_giovao asc"
         )
 
         # Lọc dữ liệu theo time_slot
