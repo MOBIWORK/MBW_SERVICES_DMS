@@ -165,6 +165,23 @@ columnReport = {
                             "AC": 10, "AD": 10, "AE": 10, "AF": 10,
                             "AG": 10, "AH": 10
                         }
+    },
+
+    "Report Visitor_KPI": {
+        "column": {
+            "main_columns": ["STT", "Nhóm bán hàng", "Mã nhân viên", "Tên nhân viên", "Ngày", "Checkin đầu ngày", "Checkin cuối ngày", "Khách hàng VT", "Khách hàng VT sáng", "Khách hàng VT chiều", "Số km VT", "Số đơn hàng", "Ảnh chụp", "Doanh số", "Doanh thu"]
+        },
+        "show_data": ['nhom_ban_hang', 'employee_code', 'employee_name', "checkindate", "checkin_daungay", "checkin_cuoingay", "total_checkin", "checkin_sang", "checkin_chieu", "total_distance", "total_donhang", 'total_anhchup', 'total_doanhso', 'total_doanhthu'],
+        "content_start_at": 10,
+        "column_widths": {
+                            "A": 5, "B": 15, "C": 25, "D": 25,
+                            "E": 20, "F": 20, "G": 20, "H": 20,
+                            "I": 20, "J": 20, "K": 10, "L": 15,
+                            "M": 10, "N": 10, "O": 10, "P": 10,
+                            "Q": 10, "R": 10, "S": 10, "T": 10,
+                            "U": 10, "V": 10, "W": 10, "X": 10,
+                            "Y": 10, "Z": 10,
+                        }
     }
 }
 
@@ -197,10 +214,10 @@ class MakeExcel :
         self.data_content = data.get("data")
         self.data_footer = data.get("sum") or False
         self.description_data = []
-        self.org_info(report_type)
+        self.org_info(report_type, data.get('filters'))
 
     # lấy thông tin tổ chức 
-    def org_info(self,report_type):
+    def org_info(self,report_type, filters = None):
         if len(self.description_data) == 0 :
             try:
                 employee_info = get_employee_info()
@@ -226,6 +243,12 @@ class MakeExcel :
 
             except Exception as e :
                 print("Lỗi khi tạo ", e)
+        if report_type == "Report Visitor_KPI" and filters:
+            self.description_data = [
+                ["Báo cáo tổng hợp Viếng thăm - KPI","", "", "", "", "", "", "", "", "", "", "", "", "", ""],
+                ["", f"Từ ngày: {filters.get('from_date')}      Đến ngày: {filters.get('to_date')}", "", "", "", ""],
+                ["", f"Nhân viên: {filters.get('employee')}", "", "", "", ""]
+            ]
         return self
     
     # Tạo hiển thị kiểu thời gian
@@ -250,7 +273,8 @@ class MakeExcel :
     # Tạo phần tiêu đề report
     def make_description_header(self):
         merge = ["B1:F1", "B2:F2", "B3:F3", "B5:F5", "B6:F6", "B7:F7"]
-
+        if self.report_type == "Report Visitor_KPI":
+            merge = ["A1:O1", "B2:F2", "B3:F3", "B5:F5", "B6:F6", "B7:F7"]
         # Populate the worksheet with data
         for row in self.description_data :
             self.ws.append(row)
@@ -258,10 +282,15 @@ class MakeExcel :
         # Merge cells for styling as in the image
         for mer in merge:
             self.ws.merge_cells(mer)
-        self.ws["B1"].font = self.bold_font
-        self.ws["B1"].alignment = self.center_alignment
-        self.ws["B1"].fill = self.header_fill
 
+        if self.report_type == "Report Visitor_KPI":
+            self.ws["A1"].font = self.bold_font
+            self.ws["A1"].alignment = self.center_alignment
+            self.ws["A1"].fill = self.header_fill
+        else:
+            self.ws["B1"].font = self.bold_font
+            self.ws["B1"].alignment = self.center_alignment
+            self.ws["B1"].fill = self.header_fill
         self.ws["B5"].font = self.title_font
         self.ws["B5"].alignment = self.center_alignment
 
@@ -323,7 +352,7 @@ class MakeExcel :
         
         # Ghi nội dung vào bản
         for row_idx, row_data in enumerate(self.data_content, start=start_row):
-            cell = self.ws.cell(row=row_idx, column=1, value=row_idx-11)
+            cell = self.ws.cell(row=row_idx, column=1, value=row_idx-start_row+1)
             cell.alignment = self.center_alignment
             cell.border = self.border_style
             for col_idx, value in enumerate(sort_list, start=2):
@@ -624,3 +653,10 @@ class MakeExcelCustomerCheckin(MakeExcelCheckin):
             new_data.append(data_appen)
         self.data_content = new_data
 
+class MakeExcelVisitorKpi(MakeExcel):
+    def __init__(self,report_type,data,from_time,to_time):
+        self.month = from_time
+        self.year = to_time
+        super().__init__(report_type,data)
+    def line_time(self):
+        return ["", f"Tháng: {self.month} - Năm: {self.year} ", "", "", "", ""]

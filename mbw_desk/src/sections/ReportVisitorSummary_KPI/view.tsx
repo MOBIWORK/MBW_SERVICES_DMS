@@ -308,10 +308,15 @@ export default function ReportVisitorSummary_KPI() {
             setRefresh={setRefresh}
             title="Báo cáo tổng hợp Viếng thăm - KPI"
             params={{
-              params: {
                 report_type: "Report Visitor_KPI",
-                data_filter: { month: curentMonth, year: currentYear },
-              },
+                data_filter: {
+                  page_size: PAGE_SIZE,
+                  page_number: page,
+                  from_date:startDate,
+                  to_date:endDate,
+                  employee,
+                  sales_team
+                },
             }}
             file_name="ReportVisitor_KPI.xlsx"
           />

@@ -6,7 +6,7 @@ from frappe import  _
 import importlib
 from mbw_dms.api.exports.constant import template_header
 from frappe.desk.utils import provide_binary_file
-from mbw_dms.api.exports.make_excel import (MakeExcel, MakeExcelCheckin, MakeExcelCustomer, MakeExcelCustomerCheckin, MakeExcelInventory, MakeExcelKpi, MakeExcelOrder, MakeExcelSell)
+from mbw_dms.api.exports.make_excel import (MakeExcel, MakeExcelCheckin, MakeExcelCustomer, MakeExcelCustomerCheckin, MakeExcelInventory, MakeExcelKpi, MakeExcelOrder, MakeExcelSell, MakeExcelVisitorKpi)
 from mbw_dms.api.validators import validate_filter
 
 import json
@@ -16,7 +16,7 @@ def export_excel(**kwarg):
         value = kwarg.get("report_type", ""),
         type_check="enum", type=["Report KPI", "Report Inventory", "Report Checkin",
                                 "Report Sell", "Report Order", "Report Customer",
-                                "Report Customer Checkin"])  
+                                "Report Customer Checkin", "Report Visitor_KPI"])
     filter = kwarg.get("data_filter")
 
     if bool(report_type) == False:
@@ -53,8 +53,11 @@ def export_excel(**kwarg):
             create_xlsx = MakeExcelCustomer(report_type, data,filter.get("from_date"), filter.get("to_date"))
         elif report_type == "Report Customer Checkin":
             create_xlsx = MakeExcelCustomerCheckin(report_type, data, filter.get("from_date"), filter.get("to_date"))
+        elif report_type == "Report Visitor_KPI":
+            create_xlsx = MakeExcelVisitorKpi(report_type, data, filter.get("from_date"), filter.get("to_date"))
         else:
             return gen_response(500, _("Kiểu báo cáo không hợp lệ!!!!"))
+        print("....")
         xlsx_file = create_xlsx.make()
         # Xử lý gửi excel - xóa trên server        
         # os.remove(xlsx_file)

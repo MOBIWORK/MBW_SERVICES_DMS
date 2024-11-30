@@ -981,7 +981,7 @@ def report(kwargs):
                     AND thang = '{month}'
                     AND nam = '{year}'
             """, as_dict=True)
-            print("kpi_month",kpi_month,emp)
+            # print("kpi_month",kpi_month,emp)
             i["kpi_month"] = []
             if bool(kpi_month) and len(kpi_month) > 0:
                 i["kpi_month"] = kpi_month[0]
@@ -994,7 +994,7 @@ def report(kwargs):
         if where_condition:
             sql_query_count += " WHERE {}".format(where_condition)
         count_data = frappe.db.sql(sql_query_count, as_dict=True)
-
+        print(count_data)
         totals = {
             "tong_kh_vt": 0,
             "tong_th_vt": 0,
@@ -1088,8 +1088,10 @@ def report(kwargs):
         if is_excel: 
             for x in data :
                 if len(x.get("kpi_month")) > 0 :
-                    for key,value in x.get("kpi_month")[0].items():
-                        x.update({key:value})
+                    if type(x["kpi_month"]) == list:
+                        for key,value in x.get("kpi_month")[0].items():
+                            x.update({key:value})
+
             return {
                 "data":data,
                 "sum": totals,

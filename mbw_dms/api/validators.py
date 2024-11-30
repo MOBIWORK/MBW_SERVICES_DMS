@@ -201,6 +201,7 @@ def validate_enum(type_value=None):
 
 
 def validate_filter(type_check,type=None,value=None):
+    print(value)
     validate = {
         "email": validate_email,
         "phone_number": validate_phone_number,
