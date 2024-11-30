@@ -6,7 +6,6 @@ frappe.ui.form.on('Sales Order', {
         list_promotions = []
         if (frm.doc.docstatus == 0) {
             frm.add_custom_button(__('Get Promotion'), function() {
-                
 
                 // Gọi API để lấy danh sách khuyến mại và đặt dữ liệu cho bảng
                 frappe.call({
@@ -40,7 +39,7 @@ frappe.ui.form.on('Sales Order', {
                                                 label: 'Promotion name',
                                                 read_only: 1,
                                                 in_list_view: true,
-                                                options: 'MBW Promotion',
+                                                options: 'SFA Promotion',
                                             }
                                         ]
                                     }
@@ -68,7 +67,6 @@ frappe.ui.form.on('Sales Order', {
                     }
                 });
 
-            
             }).addClass('btn-primary');
         }
     }
@@ -137,7 +135,6 @@ function add_promotionhasApply(allPromotion, frm)
 }
 
 
-
 function apply_discount_amount_to_items(result, frm) {
   result.forEach((promo_item) => {
       let filtered_item = frm.doc.items.find((item) => item.item_code === promo_item.item_code);
@@ -154,6 +151,8 @@ function apply_discount_amount_to_items(result, frm) {
   });
 
 }
+
+
 function apply_discount_percent_to_items(result, frm) {
     result.forEach((promo_item) => {
         let filtered_item = frm.doc.items.find((item) => item.item_code === promo_item.item_code);
@@ -169,7 +168,8 @@ function apply_discount_percent_to_items(result, frm) {
         }
     });
   
-  }
+}
+
 function onClearPromotion(frm) {
   // Tắt khuyến mại của frappe
   frm.set_value("ignore_pricing_rule", 1);

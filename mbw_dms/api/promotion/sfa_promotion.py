@@ -1,15 +1,13 @@
 import frappe
 import json
-from frappe.utils import get_first_day,get_last_day,nowdate
+from frappe.utils import get_first_day, get_last_day, nowdate
 import pydash
 import copy
 import operator
-from mbw_dms.api.common import (
-    exception_handle,
-    gen_response,
-)
-from mbw_dms.api.validators import validate_filter_timestamp, validate_filter
+from mbw_dms.api.common import exception_handle
 from datetime import datetime, date
+
+
 # Biến lữu trữ các trương trình khuyến mại và kết quả đáp ứng
 objPromotionOder = []
 
@@ -19,7 +17,6 @@ objProductInPromotion = []
 # Lấy ra danh sách các chương trình khuyến mại
 @frappe.whitelist()
 def get_list_promotion(**kwargs):
-    
     filters = []
     customer = kwargs.get("customer")
     territory = kwargs.get("territory")
@@ -29,7 +26,7 @@ def get_list_promotion(**kwargs):
     date = nowdate()
     if isinstance(list_item, str):
         list_item = json.loads(list_item)
-          
+
     if customer:
         filters.append(f"cus.customer_code = {frappe.db.escape(customer)}")
     if territory:
@@ -52,7 +49,6 @@ def get_list_promotion(**kwargs):
     # Loại bỏ các trường không mong muốn
     fields_to_remove = ["creation", "modified", "modified_by", "owner", "docstatus", "idx", "_user_tags", "_comments", "_assign", "_liked_by"]
     list_promotions = [promo for promo in list_promotions if promo.name_promotion in list_pro]
-    
     for promo in list_promotions:
         for field in fields_to_remove:
             if field in promo:
@@ -67,6 +63,7 @@ def get_list_promotion(**kwargs):
 
     # Áp dụng CTKM
     return apply_Promotion(list_item, list_promotions, total_amount)
+
 def validate_date(date_obj):
     # Chuyển đổi datetime.date thành chuỗi, sau đó thành timestamp
     return datetime.combine(date_obj, datetime.min.time()).strftime('%Y-%m-%d %H:%M:%S')
@@ -77,12 +74,13 @@ def get_available_promotions(**kwargs):
     try:
         kwargs = frappe._dict(kwargs)
         customer = kwargs.get("customer")
+        ma_san_pham_list = kwargs.get("item_code_list")
         customerData = frappe.get_doc("Customer", customer)
-        status = 'Hoạt động'
-        
+        status = "Hoạt động"
+
         start_day = validate_date(get_first_day(nowdate()))
         end_day = validate_date(get_last_day(nowdate()))
-      
+
         filters = []
         params = []
 
@@ -102,7 +100,7 @@ def get_available_promotions(**kwargs):
         filters.append("p.is_deleted = 0")
         where_conditions = " AND ".join(filters)
 
-        # Retrieve all results without pagination
+        # Truy vấn dữ liệu khuyến mãi
         query = f"""
             SELECT 
                 p.name, 
@@ -148,15 +146,16 @@ def get_available_promotions(**kwargs):
 
         results = frappe.db.sql(query, params, as_dict=True)
         promotion_dict = {}
+
         for row in results:
-            promotion_name = row['name']
+            promotion_name = row["name"]
             customer_obj = {
-                'customer_name': row.get('customer_name'),
-                'customer_code': row.get('customer_code'),
-                'sfa_customer_type': row.get('sfa_customer_type'),
-                'customer_group': row.get('customergroup'),
-                'display_address': row.get('display_address'),
-                'phone_number': row.get('phone_number')
+                "customer_name": row.get("customer_name"),
+                "customer_code": row.get("customer_code"),
+                "sfa_customer_type": row.get("sfa_customer_type"),
+                "customer_group": row.get("customergroup"),
+                "display_address": row.get("display_address"),
+                "phone_number": row.get("phone_number"),
             }
             if promotion_name not in promotion_dict:
                 start_date_value = row.get('start_date', '')
@@ -180,60 +179,67 @@ def get_available_promotions(**kwargs):
                     end_date = int(datetime.combine(end_date_value, datetime.min.time()).timestamp())
                 else:
                     end_date = None
+
                 promotion_dict[promotion_name] = {
-                    'name': row.get('name', ''),
-                    'status': row.get('status', ''),
-                    'code': row.get('code', ''),
-                    'name_promotion': row.get('name_promotion', ''),
-                    'promotion_type': row.get('promotion_type', ''),
-                    'ptype_name': row.get('ptype_name', ''),
-                    'description': row.get('description', ''),
-                    'gpromotion_prioritize': row.get('gpromotion_prioritize', ''),
-                    'gpromotion': row.get('gpromotion', ''),
-                    'ptype_value': row.get('ptype_value', ''),
-                    'multiple': row.get('multiple', ''),
-                    'start_date': start_date,
-                    'end_date': end_date,
-                    'products': json.loads(row.get('products', '[]')) if isinstance(row.get('products', '[]'), str) else [],
-                    'customers': [],
-                    'territory': [],
-                    'customer_type': [],
-                    'customer_group': []
+                    "name": row.get("name", ""),
+                    "status": row.get("status", ""),
+                    "code": row.get("code", ""),
+                    "name_promotion": row.get("name_promotion", ""),
+                    "promotion_type": row.get("promotion_type", ""),
+                    "ptype_name": row.get("ptype_name", ""),
+                    "description": row.get("description", ""),
+                    "gpromotion_prioritize": row.get("gpromotion_prioritize", ""),
+                    "gpromotion": row.get("gpromotion", ""),
+                    "ptype_value": row.get("ptype_value", ""),
+                    "multiple": row.get("multiple", ""),
+                    "start_date": start_date,
+                    "end_date": end_date,
+                    "products": json.loads(row.get("products", "[]")) if isinstance(row.get("products", "[]"), str) else [],
+                    "customers": [],
+                    "territory": [],
+                    "customer_type": [],
+                    "customer_group": [],
                 }
-            if customer_obj['customer_name']:  # Chỉ thêm khi có tên khách hàng
-                if customer_obj not in promotion_dict[promotion_name]['customers']:
-                    promotion_dict[promotion_name]['customers'].append(customer_obj)
+            if customer_obj["customer_name"]:
+                if customer_obj not in promotion_dict[promotion_name]["customers"]:
+                    promotion_dict[promotion_name]["customers"].append(customer_obj)
 
-            if row.get('territory'):
-                if row['territory'] not in promotion_dict[promotion_name]['territory']:
-                    promotion_dict[promotion_name]['territory'].append(row['territory'])
+            if row.get("territory"):
+                if row["territory"] not in promotion_dict[promotion_name]["territory"]:
+                    promotion_dict[promotion_name]["territory"].append(row["territory"])
 
-            if row.get('customer_type'):
-                if row['customer_type'] not in promotion_dict[promotion_name]['customer_type']:
-                    promotion_dict[promotion_name]['customer_type'].append(row['customer_type'])
+            if row.get("customer_type"):
+                if row["customer_type"] not in promotion_dict[promotion_name]["customer_type"]:
+                    promotion_dict[promotion_name]["customer_type"].append(row["customer_type"])
 
-            if row.get('customer_group'):
-                if row['customer_group'] not in promotion_dict[promotion_name]['customer_group']:
-                    promotion_dict[promotion_name]['customer_group'].append(row['customer_group'])
-        
-        for promotion in promotion_dict.values():
-            if not promotion['customers']:
-                promotion['customers'] = []
+            if row.get("customer_group"):
+                if row["customer_group"] not in promotion_dict[promotion_name]["customer_group"]:
+                    promotion_dict[promotion_name]["customer_group"].append(row["customer_group"])
+
         promotion_list = list(promotion_dict.values())
-        # Kiểm tra điều kiện trước khi hiển thị danh sách
-        customerGroup=customerData.customer_group
-        customerType=customerData.sfa_customer_type
-        territory=customerData.territory
-        list_promotions_Stage=[]
-        # Kiểm tra điều kiện với khách hàng
+
+        # Lọc khuyến mãi theo mã sản phẩm
+        filtered_promotions = []
         for pro in promotion_list:
-            checkPro = check_customer_in_promotion(pro,customerData)
-            if checkPro is True:
-                list_promotions_Stage.append(pro)
-        
-        return list_promotions_Stage
+            if ma_san_pham_list:
+                ma_san_pham_list = json.loads(ma_san_pham_list) if isinstance(ma_san_pham_list, str) else ma_san_pham_list
+                # Kiểm tra sản phẩm trong danh sách
+                if any(product.get("ma_san_pham") in ma_san_pham_list for product in pro["products"]):
+                    filtered_promotions.append(pro)
+            else:
+                filtered_promotions.append(pro)
+
+        # Kiểm tra điều kiện áp dụng khuyến mãi cho khách hàng
+        list_promotions_stage = []
+        for pro in filtered_promotions:
+            if check_customer_in_promotion(pro, customerData):
+                list_promotions_stage.append(pro)
+
+        return list_promotions_stage
+
     except Exception as e:
         return exception_handle(e)
+
     
 # Áp dụng CTKM
 def apply_Promotion(list_item=[], list_promotions=[], total_amount=0):
@@ -244,7 +250,6 @@ def apply_Promotion(list_item=[], list_promotions=[], total_amount=0):
     list_promotions = sorted(list_promotions, key=operator.itemgetter('gpromotion_prioritize'))
     
     for promtion in list_promotions:
-        #print('========================= value: ', promtion.code, flush=True)
         promo_result = caculate_promotion(list_item, promtion, total_amount)
 
         if bool(promo_result):
@@ -254,30 +259,29 @@ def apply_Promotion(list_item=[], list_promotions=[], total_amount=0):
 # Kiểm tra nếu `scp_customer_codes` không phải là null hoặc không phải chuỗi rỗng
 def check_customer_in_promotion(promotion, customerData):
     ref = False
-    customer_code=customerData.customer_code
-    customer_territory=customerData.territory
-    customer_group=customerData.customer_group
-    customer_type=customerData.sfa_customer_type
+    customer_code = customerData.customer_code
+    customer_territory = customerData.territory
+    customer_group = customerData.customer_group
+    customer_type = customerData.sfa_customer_type
    
     if not promotion.get("customers"):
         # trường hợp CTKM cấu hình theo loại nhóm, khu vực
-        if len(promotion.get("territory"))==0 and len(promotion.get("customer_group"))==0 and len(promotion.get("customer_type"))==0:
+        if len(promotion.get("territory")) == 0 and len(promotion.get("customer_group")) == 0 and len(promotion.get("customer_type")) == 0:
             ref = True
-        if len(promotion.get("territory"))>0:
+        if len(promotion.get("territory")) > 0:
             if customer_territory in promotion.get("territory"):
-                ref= True
-        if len(promotion.get("customer_group"))>0:
+                ref = True
+        if len(promotion.get("customer_group")) > 0:
             if customer_group in promotion.get("customer_group"):
-                ref= True
-        if len(promotion.get("customer_type"))>0:
+                ref = True
+        if len(promotion.get("customer_type")) > 0:
             if customer_type in promotion.get("customer_type"):
-                ref= True
+                ref = True
     else:
-         # Kiểm tra nếu customer_code có trong danh sách scp_customer_codes
+        # Kiểm tra nếu customer_code có trong danh sách scp_customer_codes
         if any(customer["customer_code"] == customer_code for customer in promotion.get("customers", [])):
             ref = True
     
-        
     return ref
 
 # Tính toán khuyến mãi
@@ -288,42 +292,49 @@ def caculate_promotion(list_item=[], promtion={}, total_amount=0):
             return {"ptype_value": "SP_SL_CKSP", "result": ref, "allPromotion": objPromotionOder}
         else:
             return None
+        
     elif promtion.get("ptype_value") == "TIEN_SP":
         ref = TIEN_SP(promtion,total_amount)
         if bool(ref):
             return {"ptype_value": "TIEN_SP", "result": ref, "allPromotion": objPromotionOder}
         else:
             return None
+        
     elif promtion.get("ptype_value") == "TIEN_TIEN":
         ref = TIEN_TIEN(promtion, total_amount)
         if bool(ref):
             return {"ptype_value": "TIEN_TIEN", "result": ref, "allPromotion": objPromotionOder}
         else:
             return None
+        
     elif promtion.get("ptype_value") == "TIEN_CKDH":
         ref = TIEN_CKDH(promtion, total_amount)
         if bool(ref):
             return {"ptype_value": "TIEN_CKDH", "result": ref, "allPromotion": objPromotionOder}
         else:
             return None
+        
     elif promtion.get("ptype_value") == "SP_SL_SP":
         ref = SP_SL_SP(list_item, promtion)
         if bool(ref):
             return {"ptype_value": "SP_SL_SP", "result": ref, "allPromotion": objPromotionOder}
         else:
             return None
+        
     elif promtion.get("ptype_value") == "SP_ST_SP":
         ref = SP_ST_SP(list_item, promtion)
         if bool(ref):
             return {"ptype_value": "SP_ST_SP", "result": ref, "allPromotion": objPromotionOder}
         else:
             return None
+        
     elif promtion.get("ptype_value") == "SP_ST_CKSP":
         ref = SP_ST_CKSP(list_item, promtion)
         if bool(ref):
             return {"ptype_value": "SP_ST_CKSP", "result": ref, "allPromotion": objPromotionOder}
         else:
             return None
+        
     elif promtion.get("ptype_value") == "SP_ST_TIEN":
         ref = SP_ST_TIEN(list_item, promtion)
         if bool(ref):
@@ -437,7 +448,6 @@ def SP_SL_CKSP(list_item=[], data_promotion={}):
 
                 # Lưu kết quả khuyến mãi
                 save_promotionResult(data_promotion, getProductPromotion, 1)
-              
     
     return list_item
 
@@ -572,7 +582,7 @@ def SP_SL_SP(list_item=[], data_promotion={}):
         # Tìm sản phẩm khuyến mãi tương ứng với item
         product = pydash.filter_(data_promotion.get("products", []), {"_id": item["item_code"]})
         product = sorted(product, key=lambda x: x["yeu_cau"], reverse=True)
-        sl_pass=0
+        sl_pass = 0
         dvt_pass=""
         so_luong=item["qty"]
         if data_promotion.get("gpromotion") is not None:
@@ -616,7 +626,7 @@ def SP_SL_SP(list_item=[], data_promotion={}):
                 )
                 save_promotionResult(data_promotion, getProductPromotion, boi_so_cap)
                 # Luu so luong san pham da su dung KM
-                On_Process_GiamTru(data_promotion,getProductPromotion,sl_pass,dvt_pass, boi_so_cap)
+                On_Process_GiamTru(data_promotion, getProductPromotion, sl_pass, dvt_pass, boi_so_cap)
     return list_free_item
 
 
@@ -689,10 +699,6 @@ def On_Process_GiamTru(dataKM,objKM, sl, dvt_pass, boi_so_cap):
                 }
                 objProductInPromotion.append(objPromotionHasApply)
             
-            #     # Uncomment if needed
-            #     # for item in objProductInPromotion:
-            #     #     item["gttb"] = gttb
-
-                
-
-
+                # Uncomment if needed
+                # for item in objProductInPromotion:
+                #     item["gttb"] = gttb
