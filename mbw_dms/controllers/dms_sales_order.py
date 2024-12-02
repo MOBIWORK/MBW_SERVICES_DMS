@@ -243,19 +243,20 @@ def update_kpi_daily_on_cancel(doc, method):
     
 # Cập nhật nhân viên bán hàng
 def update_sales_person(doc, method):
-    user_name = frappe.get_value("Employee", {"user_id": frappe.session.user}, "name")
-    sales_person = frappe.get_value("Sales Person", {"employee": user_name}, "name")
-    if sales_person:
-        doc.append("sales_team", {
-            "sales_person": sales_person,
-            "allocated_percentage": 100,
-            "created_by": 1
-        })
-    
-        doc.sales_person = sales_person
-        employee = frappe.get_value("Sales Person", {"name": sales_person}, "employee")
-        doc.phone_number = frappe.get_value("Employee", {"name": employee}, "cell_number")
-        doc.save()
+    if len(doc.sales_team) < 1:
+        user_name = frappe.get_value("Employee", {"user_id": frappe.session.user}, "name")
+        sales_person = frappe.get_value("Sales Person", {"employee": user_name}, "name")
+        if sales_person:
+            doc.append("sales_team", {
+                "sales_person": sales_person,
+                "allocated_percentage": 100,
+                "created_by": 1
+            })
+        
+            doc.sales_person = sales_person
+            employee = frappe.get_value("Sales Person", {"name": sales_person}, "employee")
+            doc.phone_number = frappe.get_value("Employee", {"name": employee}, "cell_number")
+            doc.save()
 
 # Cập nhật giá sau khi submit
 def update_price_list_rate(doc, method):

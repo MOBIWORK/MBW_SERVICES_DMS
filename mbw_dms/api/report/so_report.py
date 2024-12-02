@@ -138,6 +138,7 @@ def handle_so_report(kwargs):
                 "sum" : {}
             }
         return exception_handle(e)
+    
 # Báo cáo tổng hợp bán hàng
 @frappe.whitelist(methods="GET")
 def si_report(**kwargs):

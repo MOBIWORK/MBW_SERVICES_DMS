@@ -8,6 +8,7 @@ from frappe.utils import nowdate, today, getdate
 import calendar
 from collections import defaultdict 
 import datetime
+from erpnext.selling.report.sales_person_wise_transaction_summary.sales_person_wise_transaction_summary import execute as sp_execute
 from mbw_dms.api.common import (
     exception_handle,
 	gen_response,
@@ -84,43 +85,68 @@ def sales_report():
 		start_date = getdate(f"{year:04d}-{month:02d}-01")
 		last_day_of_month = calendar.monthrange(year, month)[1]
 		end_date = getdate(f"{year:04d}-{month:02d}-{last_day_of_month:02d}")
+		default_company = frappe.db.get_single_value("Global Defaults", "default_company")
 
 		# Lấy id của nhân viên
 		employee = frappe.get_value("Employee", {"user_id": frappe.session.user}, "name")
 		sales_per = frappe.get_value("Sales Person", {"employee": employee}, "name")
         
+		filters = {
+			"company": default_company,
+			"from_date": start_date,
+			"to_date": current_date,
+			"sales_person": sales_per,
+			"doc_type": "Sales Order",
+		}
+
 		kpi = {}
 		# Tạo một danh sách để lưu trữ thông tin của các đơn bán hàng
 		orders_list = []
 
-		# Lấy Kpi tháng
-		monthly_summary = frappe.get_value("DMS Summary KPI Monthly", {"thang": month, "nam": year, "nhan_vien_ban_hang": employee}, "doanh_so_thang")
-		
+		report = sp_execute(filters)
+		columns, data = report[:2]
+
+		column_field_map = {col["fieldname"]: idx for idx, col in enumerate(columns)}
+
+        # Tính toán tổng doanh số và doanh số theo ngày
+		total_sales = 0
+		daily_totals = {}
+
+        # Duyệt qua từng hàng dữ liệu
+		for row in data:
+			# Lấy các giá trị cần thiết từ hàng dựa vào fieldname
+			transaction_date = row[column_field_map["posting_date"]]
+			amount = row[column_field_map["amount"]]
+
+			if transaction_date and amount:
+				date_str = transaction_date.strftime("%Y-%m-%d")
+				daily_totals[date_str] = daily_totals.get(date_str, 0) + amount
+				total_sales += amount
+
 		# Lấy Kpi nhân viên
 		kpi_employee = frappe.get_value("DMS KPI", {"ngay_hieu_luc_tu": (">=", start_date), "ngay_hieu_luc_den": ("<=", end_date), "nhan_vien_ban_hang": employee}, "doanh_so")
 		
-		if monthly_summary:
-			kpi["dat_duoc"] = float(monthly_summary)
-			kpi["phan_tram_thuc_hien"] = round(float(monthly_summary) / float(kpi_employee or 1) * 100, 2)
+		kpi["dat_duoc"] = total_sales
+		kpi["phan_tram_thuc_hien"] = round(float(total_sales) / float(kpi_employee or 1) * 100, 2)
 
-			if kpi_employee:
-				# Lấy danh sách đơn hàng từ đầu tháng đến hiện tại
-				sales_order = frappe.get_all("Sales Order",
-					filters={"transaction_date": ("between", [start_date, todays]), "docstatus": 1},
-					fields=["name", "grand_total", "transaction_date"]
-				)
+		if kpi_employee:
+			# Lấy danh sách đơn hàng từ đầu tháng đến hiện tại
+			sales_order = frappe.get_all("Sales Order",
+				filters={"transaction_date": ("between", [start_date, todays]), "docstatus": 1},
+				fields=["name", "grand_total", "transaction_date"]
+			)
 
-				daily_totals = defaultdict(float)
-				for order in sales_order:
-					st = get_value_child_doctype("Sales Order", order["name"], "sales_team")
-					for j in st:
-						if j.sales_person == sales_per and j.created_by == 1:
-							transaction_date = order.get("transaction_date")
-							date_str = transaction_date.strftime("%Y-%m-%d")
-							daily_totals[date_str] += order["grand_total"]
+			daily_totals = defaultdict(float)
+			for order in sales_order:
+				st = get_value_child_doctype("Sales Order", order["name"], "sales_team")
+				for j in st:
+					if j.sales_person == sales_per and j.created_by == 1:
+						transaction_date = order.get("transaction_date")
+						date_str = transaction_date.strftime("%Y-%m-%d")
+						daily_totals[date_str] += order["grand_total"]
 
-				# Lặp qua từng mục trong daily_totals để tạo danh sách các đơn bán hàng
-				orders_list = [{"ngay": date, "doanh_so": total} for date, total in daily_totals.items()]
+			# Lặp qua từng mục trong daily_totals để tạo danh sách các đơn bán hàng
+			orders_list = [{"ngay": date, "doanh_so": total} for date, total in daily_totals.items()]
 
 		return gen_response(200, "Thành công", {"kpi": kpi, "sales_order": orders_list})
 	except Exception as e:
@@ -137,41 +163,67 @@ def invoices_report():
 		start_date = getdate(f"{year:04d}-{month:02d}-01")
 		last_day_of_month = calendar.monthrange(year, month)[1]
 		end_date = getdate(f"{year:04d}-{month:02d}-{last_day_of_month:02d}")
+		default_company = frappe.db.get_single_value("Global Defaults", "default_company")
 
 		# Lấy id của nhân viên
 		user_id = frappe.session.user
 		employee = frappe.get_value("Employee", {"user_id": user_id}, "name")
 		sales_per = frappe.get_value("Sales Person", {"employee": employee}, "name")
+
+		filters = {
+			"company": default_company,
+			"from_date": start_date,
+			"to_date": current_date,
+			"sales_person": sales_per,
+			"doc_type": "Sales Invoice",
+		}
         
 		kpi = {}
 		# Tạo một danh sách để lưu trữ thông tin của các hóa đơn bán hàng
 		invoices_list = []
 
-		# Lấy Kpi tháng
-		monthly_summary = frappe.get_value("DMS Summary KPI Monthly", {"thang": month, "nam": year, "nhan_vien_ban_hang": employee}, "doanh_thu_thang")
+		report = sp_execute(filters)
+		columns, data = report[:2]
+
+		column_field_map = {col["fieldname"]: idx for idx, col in enumerate(columns)}
+
+        # Tính toán tổng doanh số và doanh số theo ngày
+		total_sales = 0
+		daily_totals = {}
+
+        # Duyệt qua từng hàng dữ liệu
+		for row in data:
+			# Lấy các giá trị cần thiết từ hàng dựa vào fieldname
+			transaction_date = row[column_field_map["posting_date"]]
+			amount = row[column_field_map["amount"]]
+
+			if transaction_date and amount:
+				date_str = transaction_date.strftime("%Y-%m-%d")
+				daily_totals[date_str] = daily_totals.get(date_str, 0) + amount
+				total_sales += amount
+		
 		
 		# Lấy Kpi nhân viên
 		kpi_employee = frappe.get_value("DMS KPI", {"ngay_hieu_luc_tu": (">=", start_date), "ngay_hieu_luc_den": ("<=", end_date), "nhan_vien_ban_hang": employee}, "doanh_thu")
 		
-		if monthly_summary:
-			kpi["dat_duoc"] = float(monthly_summary)
-			kpi["phan_tram_thuc_hien"] = round(float(monthly_summary) / float(kpi_employee or 1) * 100, 2)
+		kpi["dat_duoc"] = float(total_sales)
+		kpi["phan_tram_thuc_hien"] = round(float(total_sales) / float(kpi_employee or 1) * 100, 2)
 
-			if kpi_employee:
-				sales_invoice = frappe.get_all("Sales Invoice",
-                    filters={"posting_date": ("between", [start_date, todays]), "docstatus": 1, "is_return": 0},
-                    fields=["name", "grand_total", "posting_date"]
-                )
+		if kpi_employee:
+			sales_invoice = frappe.get_all("Sales Invoice",
+				filters={"posting_date": ("between", [start_date, todays]), "docstatus": 1, "is_return": 0},
+				fields=["name", "grand_total", "posting_date"]
+			)
 
-				daily_totals = defaultdict(float)
-				for invoice in sales_invoice:
-					sales_team = frappe.get_all("Sales Team", filters={"parent": invoice["name"]}, fields=["sales_person", "created_by"])
-					for team_member in sales_team:
-						if team_member.sales_person == sales_per and team_member.created_by == 1:
-							date_str = invoice["posting_date"].strftime("%Y-%m-%d")
-							daily_totals[date_str] += invoice["grand_total"]
-				
-				invoices_list = [{"ngay": date, "doanh_thu": total} for date, total in daily_totals.items()]
+			daily_totals = defaultdict(float)
+			for invoice in sales_invoice:
+				sales_team = frappe.get_all("Sales Team", filters={"parent": invoice["name"]}, fields=["sales_person", "created_by"])
+				for team_member in sales_team:
+					if team_member.sales_person == sales_per and team_member.created_by == 1:
+						date_str = invoice["posting_date"].strftime("%Y-%m-%d")
+						daily_totals[date_str] += invoice["grand_total"]
+			
+			invoices_list = [{"ngay": date, "doanh_thu": total} for date, total in daily_totals.items()]
 
 		# Trả về phản hồi bao gồm cả KPI và danh sách hóa đơn bán hàng
 		return gen_response(200, "Thành công", {"kpi": kpi, "sales_invoice": invoices_list})
