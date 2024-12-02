@@ -838,11 +838,18 @@ def get_accounts_receivable_report(kwargs):
     default_company = frappe.db.get_single_value("Global Defaults", "default_company")
     company = None
     user = frappe.session.user
-    employee = frappe.db.get_value("Employee", {"user_id": user}, ["company"], as_dict=True)
+    employee = frappe.db.get_value("Employee", {"user_id": user}, ["company", "name"], as_dict=True)
+    list_customer = []
     
     if employee:
+        list_routers = frappe.get_all("DMS Router", filters={"employee": employee.name}, fields=["name"])
+        for i in list_routers:
+            customers = frappe.get_doc("DMS Router", i.name).customers
+            for cus in customers:
+                if cus.customer_code not in list_customer:
+                    list_customer.append(cus.customer_code)
         company = employee.company
-    
+        
     filters = {
         "company": company if company is not None else default_company,
         "report_date": validate_date(kwargs.get("report_date")) if kwargs.get("report_date") else today(),
@@ -881,7 +888,7 @@ def get_accounts_receivable_report(kwargs):
             customer = frappe.db.get_value("Journal Entry Account", {"parent": voucher_no, "party_type": "Customer"}, "party")
 
         # Nếu tìm thấy customer, nhóm dữ liệu theo customer ID
-        if customer:
+        if customer and customer in list_customer:
             grouped_data[customer].append({
                 "invoice_amount": invoice_amount,
                 "paid_amount": paid_amount,
@@ -897,7 +904,7 @@ def get_accounts_receivable_report(kwargs):
     for customer, invoices in grouped_data.items():
         # Lấy thông tin `Customer` theo ID duy nhất
         customer_details = frappe.get_doc("Customer", customer)
-        
+    
         customer_outstanding = sum(invoice["outstanding_amount"] for invoice in invoices)
         customer_paid = sum(invoice["paid_amount"] for invoice in invoices)
         customer_due = sum(invoice["invoice_amount"] for invoice in invoices)
@@ -921,7 +928,6 @@ def get_accounts_receivable_report(kwargs):
         "remaining": remaining,
         "customers": report_data
     })
-
 
 
 # report
