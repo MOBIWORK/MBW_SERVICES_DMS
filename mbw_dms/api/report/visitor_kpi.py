@@ -20,7 +20,10 @@ def report_visitor_kpi(**res):
         # customer_type= res.get("customer_type")
         date=  datetime.fromtimestamp(float(res.get("from_date")))
         start_date =date.replace(day=1)
-        end_date = date.replace(month=date.month+1).replace(day=1) - timedelta(days=1)
+        if date.month < 12:
+            end_date = date.replace(month=date.month+1).replace(day=1) - timedelta(days=1)
+        else:
+            end_date = date.replace(month=1, year=date.year + 1).replace(day=1) - timedelta(days=1)
         offset = (page_number - 1) * page_size
 
         filters = []
@@ -274,7 +277,10 @@ def export_file(res):
         # customer_type= res.get("customer_type")
         date = datetime.fromtimestamp(float(res.get("from_date")))
         start_date = date.replace(day=1)
-        end_date = date.replace(month=date.month + 1).replace(day=1) - timedelta(days=1)
+        if date.month < 12:
+            end_date = date.replace(month=date.month + 1).replace(day=1) - timedelta(days=1)
+        else:
+            end_date = date.replace(month=1, year=date.year + 1).replace(day=1) - timedelta(days=1)
         offset = (page_number - 1) * page_size
 
         filters = []
