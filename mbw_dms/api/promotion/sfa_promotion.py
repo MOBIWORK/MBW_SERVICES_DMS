@@ -226,7 +226,7 @@ def get_available_promotions(**kwargs):
             if ma_san_pham_list:
                 ma_san_pham_list = json.loads(ma_san_pham_list) if isinstance(ma_san_pham_list, str) else ma_san_pham_list
                 # Kiểm tra sản phẩm trong danh sách
-                if any(product.get("ma_san_pham") in ma_san_pham_list for product in pro["products"]):
+                if any(product.get("ma_san_pham") in ma_san_pham_list  or product.get("ma_san_pham") == None for product in pro["products"]):
                     filtered_promotions.append(pro)
             else:
                 filtered_promotions.append(pro)
@@ -424,7 +424,7 @@ def SP_SL_CKSP(list_item=[], data_promotion={}):
         product = sorted(product, key=lambda x: x["yeu_cau"], reverse=True)
 
         # Chiết khấu hiện tại của sản phẩm
-        current_discount = item["discount_amount"]
+        current_discount = item.get("discount_percentage", 0)
         # Kết quả khuyến mại đạt được
         for prd in product:
             if bool(prd["yeu_cau_min"]) and prd["yeu_cau_min"] != 0:
@@ -442,11 +442,11 @@ def SP_SL_CKSP(list_item=[], data_promotion={}):
 
         if bool(getProductPromotion):
             if item["qty"] >= getProductPromotion["yeu_cau"] and item["uom"] == getProductPromotion["don_vi_tinh"].get("choice_values"):
-                chietKhau_promotion = item["rate"] * getProductPromotion["khuyen_mai"] / 100
+                chietKhau_promotion = getProductPromotion["khuyen_mai"]
                 getProductPromotion["chietKhau_promotion"] = chietKhau_promotion
 
                 # Cộng giảm giá hiện tại với giảm giá khuyến mãi
-                item["discount_amount"] = chietKhau_promotion + current_discount
+                item["discount_percentage"] = chietKhau_promotion + current_discount
 
                 # Lưu kết quả khuyến mãi
                 save_promotionResult(data_promotion, getProductPromotion, 1)

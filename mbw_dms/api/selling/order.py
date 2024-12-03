@@ -193,6 +193,7 @@ def create_sale_order(**kwargs):
 
         # Dữ liệu bắn lên để tạo sale order mới
         discount_percent = float(kwargs.get("additional_discount_percentage", 0))
+        discount_amount = float(kwargs.get("discount_amount", 0))
         apply_discount_on = kwargs.get("apply_discount_on")
 
         new_order.customer = validate_not_none(kwargs.customer)     
@@ -203,6 +204,7 @@ def create_sale_order(**kwargs):
         if apply_discount_on is not None:
             new_order.apply_discount_on = validate_choice(configs.discount_type)(apply_discount_on)         # Loại Chiết khấu
             new_order.additional_discount_percentage = discount_percent                                     # Phần trăm chiết khấu
+            new_order.discount_amount = discount_amount
 
         new_order.checkin_id = kwargs.get("checkin_id")
         new_order.ignore_pricing_rule = ignore_pricing_rule
@@ -220,8 +222,11 @@ def create_sale_order(**kwargs):
         for item_data in items:
             rate = float(item_data.get("rate", 0))
             discount_percentage = float(item_data.get("discount_percentage", 0))
+            discount_amount = float(item_data.get("discount_amount", 0))
             item_tax_template = item_data.get("item_tax_template")
             tax_rate = float(item_data.get("item_tax_rate", 0))
+            is_free_item = item_data.get("is_free_item", 0)
+            price_list_rate = 0 if is_free_item == 1 else rate
 
             new_order.append("items", {
                 "item_code": item_data.get("item_code"),
@@ -229,7 +234,9 @@ def create_sale_order(**kwargs):
                 "uom": item_data.get("uom"),
                 "discount_percentage": discount_percentage,
                 "item_tax_template": item_tax_template,
-                "item_tax_rate": tax_rate
+                "item_tax_rate": tax_rate,
+                "is_free_item": is_free_item,
+                "price_list_rate": price_list_rate
             })
             
             item_amount = (rate - rate * discount_percentage / 100) * float(item_data.get("qty"))

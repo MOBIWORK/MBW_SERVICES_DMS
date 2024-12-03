@@ -83,13 +83,16 @@ function processAfterApplyPromotion(ptype_value, result, frm)
     else if (ptype_value == "SP_SL_TIEN" || ptype_value == "SP_ST_TIEN"){
         apply_discount_amount_to_items(result, frm);
     }
+    
     else if (ptype_value == "SP_SL_CKSP" || ptype_value == "SP_ST_CKSP"){
         apply_discount_percent_to_items(result, frm);
     }
+
     // Tổng tiền hàng - Tiền 
     else if (ptype_value == "TIEN_TIEN") {
         frm.set_value("discount_amount", result);
     }
+
     else if (ptype_value == "TIEN_CKDH") {
         frm.set_value("additional_discount_percentage", result);
        
