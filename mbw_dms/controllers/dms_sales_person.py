@@ -66,8 +66,8 @@ def delete_employee_objectId(doc,method=None):
             return
 
 
-def create_employee_objectid(doc,method=None):
-    employee = frappe.get_doc("Employee",doc.employee).as_dict()
+def create_employee_objectid(doc, method=None):
+    employee = frappe.get_doc("Employee", doc.employee).as_dict()
     projectId = frappe.get_doc("DMS Settings").ma_du_an
     if projectId is None:
         frappe.throw("Chưa có Project ID")
@@ -88,7 +88,7 @@ def create_employee_objectid(doc,method=None):
         frappe.msgprint(f"Lỗi khi gọi API tạo mới object ID: {response.status_code}")
         return
 
-def update_employee_objectid(doc,method=None):
+def update_employee_objectid(doc, method=None):
     employee = frappe.get_doc("Employee",doc.employee).as_dict()
     projectId = frappe.get_doc("DMS Settings").ma_du_an
     if projectId is None:

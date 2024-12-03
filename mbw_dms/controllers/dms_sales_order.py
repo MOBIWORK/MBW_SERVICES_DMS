@@ -1,20 +1,19 @@
 import frappe
-from frappe.utils import nowdate
 import calendar
 from mbw_dms.api.common import qty_not_pricing_rule
-import pydash
 from datetime import datetime
+import pydash
+
 def renderMonthYear(doc):
     transaction_date_time = doc.transaction_date
     if isinstance(transaction_date_time,str):
-        transaction_date_time = datetime.strptime(transaction_date_time,"%Y-%m-%d")
+        transaction_date_time = datetime.strptime(transaction_date_time, "%Y-%m-%d")
     thang = transaction_date_time.month
     nam = transaction_date_time.year
     return thang,nam
 
 # Kiểm tra xem khách đã đặt hàng trước đó chưa
-def existing_customer(customer_name, start_date, end_date, sale_person,doc):
-    
+def existing_customer(customer_name, start_date, end_date, sale_person, doc):
     existing_cus = frappe.get_all(
         "Sales Order",
         filters={
@@ -26,8 +25,7 @@ def existing_customer(customer_name, start_date, end_date, sale_person,doc):
                 },
         fields=["name"]
     )
-    import pydash
-    existing_cus = pydash.filter_(existing_cus,lambda x: x.name != doc.name)
+    existing_cus = pydash.filter_(existing_cus, lambda x: x.name != doc.name)
     return existing_cus
 
 def update_kpi_monthly(doc, method):
@@ -46,7 +44,7 @@ def update_kpi_monthly(doc, method):
             sales_person.append(i)
     
     for sale in sales_person:
-        handle_update_kpi_each_salePerson(sale,doc,month,year,start_date,end_date)
+        handle_update_kpi_each_salePerson(sale, doc, month, year, start_date, end_date)
 
 
 
@@ -65,37 +63,39 @@ def update_kpi_monthly_on_cancel(doc, method):
         if i.created_by == 1:
             sales_person.append(i)
     for sale in sales_person:
-        handle_delete_kpi_each_salePerson(sale,doc,month,year,start_date,end_date) 
+        handle_delete_kpi_each_salePerson(sale, doc, month, year, start_date, end_date) 
 
 
 
-def update_kpi_monthly_after_delete(doc,method):
+def update_kpi_monthly_after_delete(doc, method):
     # chỉ thay đổi kpi nếu xóa bản ghi đã submit
     if doc.docstatus == 1:
-        update_kpi_monthly_on_cancel(doc,method)
+        update_kpi_monthly_on_cancel(doc, method)
 
         
-def minus_not_nega(num,sub=1):
+def minus_not_nega(num, sub=1):
     num = int(num)
     if num <= 1 :
         return 0
     else:
         return num - sub if num >= sub else 0
     
-def handle_update_kpi_each_salePerson(sales_info,doc,month,year,start_date,end_date):
+def handle_update_kpi_each_salePerson(sales_info, doc, month, year, start_date, end_date):
     user_name = frappe.get_value("Sales Person", {"name": sales_info.sales_person}, "employee")
     sales_team = frappe.get_value("Sales Person", {"employee": user_name}, "parent_sales_person")
 
     # Tính sản lượng (số sản phẩm/đơn) và sku(số mặt hàng/đơn) trong đơn hàng(không km)
     items = doc.get("items")
-    qty,uom = qty_not_pricing_rule(items)
+    qty, uom = qty_not_pricing_rule(items)
+
     # Kiểm tra đã tồn tại bản ghi KPI của tháng này chưa
     existing_monthly_summary = frappe.get_value("DMS Summary KPI Monthly", {"thang": month, "nam": year, "nhan_vien_ban_hang": user_name}, "name")
     grand_totals = doc.grand_total
     cus_name = doc.customer
-    existing_cus_so = existing_customer(customer_name=cus_name, start_date=start_date, end_date=end_date, sale_person=sales_info.sales_person,doc=doc)
-    doanh_so_thang =grand_totals*sales_info.allocated_percentage/100
+    existing_cus_so = existing_customer(customer_name=cus_name, start_date=start_date, end_date=end_date, sale_person=sales_info.sales_person, doc=doc)
+    doanh_so_thang = grand_totals * sales_info.allocated_percentage / 100
     total_uom = 0
+
     if existing_monthly_summary:
         monthly_summary_doc = frappe.get_doc("DMS Summary KPI Monthly", existing_monthly_summary)
         if len(existing_cus_so) <1:
@@ -121,7 +121,7 @@ def handle_update_kpi_each_salePerson(sales_info,doc,month,year,start_date,end_d
         }).insert(ignore_permissions=True)
 
 
-def handle_delete_kpi_each_salePerson(sales_info,doc,month,year,start_date,end_date):
+def handle_delete_kpi_each_salePerson(sales_info, doc, month, year, start_date, end_date):
     user_name = frappe.get_value("Sales Person", {"name": sales_info.sales_person}, "employee")
 
     # Lấy thông tin các mặt hàng (items) từ đơn hàng bị hủy

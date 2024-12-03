@@ -1,11 +1,6 @@
 # Copyright (c) 2024, MBW Company
-
-
-import json
-import os
-from pathlib import Path
-
 import frappe
+import os
 from frappe import _
 from frappe.desk.doctype.global_search_settings.global_search_settings import (
 	update_global_search_doctypes,
@@ -22,12 +17,7 @@ from erpnext.setup.setup_wizard.operations.install_fixtures import (
 	read_lines
 )
 
-
-from frappe.utils import cstr, getdate
-
-from erpnext.accounts.doctype.account.account import RootNotEditable
 from erpnext.regional.address_template.setup import set_up_address_templates
-
 from frappe import _
 
 def install(country=None):

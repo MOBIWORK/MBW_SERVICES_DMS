@@ -27,14 +27,13 @@ def get_base_url() :
         scheme = 'http'
     return f"{scheme}://{frappe.local.request.host}"
 
-# sp khuyến mãi 1:có apply pricing role,2: giá = 0 
-def qty_not_pricing_rule(items,item_file_compare = "item_code"):
+# sp khuyến mãi 1 - có apply pricing role, 2 - giá = 0 
+def qty_not_pricing_rule(items, item_file_compare = "item_code"):
     total_item_price = pydash.filter_(items, lambda x: x.amount > 0)
     total_qty = [item.get("qty") for item in total_item_price]
-    total_uom = {item.get("uom") + " " + item.get(item_file_compare)  for item in total_item_price}
-    total_uom = [item.splipt(" ")[0] for item in total_uom]
-    return total_qty,total_uom
-
+    total_uom = {item.get("uom") + " " + item.get(item_file_compare) for item in total_item_price}
+    total_uom = [item.split(" ")[0] for item in total_uom]
+    return total_qty, total_uom
 
 
 class CommonHandle() :
@@ -61,6 +60,7 @@ class CommonHandle() :
         api_key = list_key[0]
         user_id = frappe.db.get_value("User", {"api_key": api_key},["name", "email", "full_name"],as_dict=1)
         return user_id
+    
     @staticmethod
     def get_employee_id():
         try:
@@ -360,9 +360,11 @@ def try_c(cb):
         ra= cb
         return ra
     except Exception as e:
-        print("=========11111111111111111111111111",e)
-#xử lý thêm mới/cập nhật địa chỉ
-def handle_address_customer(address_info,link_to_customer):
+        print("=========11111111111111111111111111", e)
+
+
+# Xử lý thêm mới/cập nhật địa chỉ
+def handle_address_customer(address_info, link_to_customer):
     try:
         key_info = ["address_title","address_type","address_line1","city","county","state","is_primary_address","is_shipping_address","address_location"]
         address_info = frappe._dict(address_info)
@@ -382,7 +384,7 @@ def handle_address_customer(address_info,link_to_customer):
                 doc_address.set("links",links)
                 doc_address.save()
                 curent_address = frappe.get_doc("Address",{"address_title": ["like",f"%{address_info.address_title}%"]})
-                if len(link_to_customer) >0 :
+                if len(link_to_customer) > 0:
                     curent_address.append("links",link_to_customer)
                 curent_address.save()
                 frappe.db.commit()
@@ -685,7 +687,6 @@ def get_all_parent_sales_persons(sales_person):
 
 
 
-
 # lấy con tất cả các con nhóm bán hàng của nhân viên
 def get_sales_group_child(sale_person = "Sales Team",is_group=1,query=""):
     query_sale= f"""
@@ -735,7 +736,9 @@ def get_sales_group_child(sale_person = "Sales Team",is_group=1,query=""):
         return employee_codes,employee_id_users
     else:
         return  sales_persons
-# lấy con tất cả các con nhóm bán hàng của nhân viên
+    
+
+# Lấy con tất cả các con nhóm bán hàng của nhân viên
 def get_sales_group_child_v2(sale_person = "Sales Team",obj="all",get_employee=False):
     query=""
     if obj == 1:
@@ -776,25 +779,26 @@ def get_sales_group_child_v2(sale_person = "Sales Team",obj="all",get_employee=F
         SELECT * FROM Tree
         {query}
         """
-    # danh sách sale person theo bộ lọc
+    
+    # Danh sách sale person theo bộ lọc
     sales_persons = frappe.db.sql(query_sale,as_dict=1)
-    #lấy tất cả thông tin sale team theo bộ lọc
-    sales_info = sales_persons
     if get_employee:
-        # mã nhân viên trong sanh sách
-        employee_codes = pydash.map_(sales_persons,lambda x: x.employee)
-        employee_codes = pydash.filter_(employee_codes,lambda x: bool(x))
-        employee_id_users = frappe.db.get_all("Employee",filters={"name": ["in",employee_codes]},fields=["user_id","name"])
+        # Mã nhân viên trong sanh sách
+        employee_codes = pydash.map_(sales_persons, lambda x: x.employee)
+        employee_codes = pydash.filter_(employee_codes, lambda x: bool(x))
+        employee_id_users = frappe.db.get_all("Employee", filters={"name": ["in",employee_codes]}, fields=["user_id", "name"])
         # employee_id_users = pydash.map_(employee_id_users,lambda x: x.user_id)
         for sale_p in sales_persons:
-            employee_info= {}
+            employee_info = {}
             if sale_p.get("employee"):
-                employee_info = pydash.find(employee_id_users,lambda x: x.name == sale_p.get("employee") )
+                employee_info = pydash.find(employee_id_users, lambda x: x.name == sale_p.get("employee") )
             sale_p.update({
                 "employee_info":employee_info
             })
 
     return sales_persons
+
+
 CommonHandle.create_address = staticmethod(create_address)
 
 CommonHandle.get_employee_info = staticmethod(get_employee_info)
@@ -875,7 +879,6 @@ def get_list_search(
             # kiểm tra field: search field
             if meta.search_fields:
                 search_fields.extend(meta.get_search_fields())
-            print("search_fields============",search_fields)
             for f in search_fields:
                 fmeta = meta.get_field(f.strip())
                 # nếu không có doc cha

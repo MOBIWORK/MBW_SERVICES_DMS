@@ -74,7 +74,9 @@ def get_available_promotions(**kwargs):
     try:
         kwargs = frappe._dict(kwargs)
         customer = kwargs.get("customer")
-        ma_san_pham_list = kwargs.get("item_code_list")
+        item_code_string = kwargs.get("item_code_list", "")
+        ma_san_pham_list = item_code_string.split(",")
+        ma_san_pham_list = [code.strip() for code in ma_san_pham_list if code.strip()]
         customerData = frappe.get_doc("Customer", customer)
         status = "Hoạt động"
 
