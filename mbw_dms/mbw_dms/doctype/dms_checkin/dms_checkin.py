@@ -695,7 +695,7 @@ def send_checkin_to_ekgis(doc):
                     print("loi khi tao moi object", e)
             api_url_checkin=f"{API_URL}/{projectId}/{objectId}?api_key={api_key}"
 
-            ext = {"customer_name": doc.kh_ten, "address": doc.kh_diachi}
+            ext = {"customer_name": doc.kh_ten, "address": doc.checkin_address}
             json_object = json.dumps(ext)
 
             time_checkin = pytz.timezone("Asia/Ho_Chi_Minh").localize(datetime.datetime.strptime(doc.checkin_giovao, "%Y-%m-%d %H:%M:%S")).astimezone(pytz.utc).strftime("%Y-%m-%d %H:%M:%S")
@@ -706,8 +706,8 @@ def send_checkin_to_ekgis(doc):
                 "projectid": projectId,
                 "objectid": objectId,
                 "uuid": "",
-                "lng": doc.kh_long,
-                "lat": doc.kh_lat,
+                "lng": doc.checkin_long,
+                "lat": doc.checkin_lat,
                 "coordinates": "",
                 "activity": "checkin",
                 "battery_checkin": doc.checkin_pinvao,
