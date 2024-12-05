@@ -24,6 +24,7 @@ from frappe.utils import cint
 from datetime import time
 from mbw_dms.mbw_dms.doctype.common import render_string
 import pytz
+import requests
 
 class DMSCheckin(Document):
     def after_insert(self):
@@ -699,10 +700,10 @@ def send_checkin_to_ekgis(doc):
 
             time_checkin = pytz.timezone("Asia/Ho_Chi_Minh").localize(datetime.datetime.strptime(doc.checkin_giovao, "%Y-%m-%d %H:%M:%S")).astimezone(pytz.utc).strftime("%Y-%m-%d %H:%M:%S")
             time_checkout = pytz.timezone("Asia/Ho_Chi_Minh").localize(datetime.datetime.strptime(doc.checkin_giora, "%Y-%m-%d %H:%M:%S")).astimezone(pytz.utc).strftime("%Y-%m-%d %H:%M:%S")
-            create_time = pytz.timezone("Asia/Ho_Chi_Minh").localize(doc.createddate).astimezone(pytz.utc).strftime("%Y-%m-%d %H:%M:%S")
+            create_time = pytz.timezone("Asia/Ho_Chi_Minh").localize(datetime.datetime.strptime(doc.createddate, "%Y-%m-%d %H:%M:%S")).astimezone(pytz.utc).strftime("%Y-%m-%d %H:%M:%S")
 
             data_checkin = {
-                "projectid":projectId,
+                "projectid": projectId,
                 "objectid": objectId,
                 "uuid": "",
                 "lng": doc.kh_long,
@@ -715,18 +716,17 @@ def send_checkin_to_ekgis(doc):
                 "time_checkin": time_checkin,
                 "time_checkout": time_checkout,
                 "ext": json_object,
-                "createddate":create_time,
+                "createddate": create_time,
                 "timestamp": ""
             }
             response_checkin = requests.post(api_url_checkin, json=data_checkin)
             if response_checkin.status_code == 200:
-                    create_dms_log(status="Success")
+                    create_dms_log(status="Success", message="Thành công", request_data=data_checkin, response_data=response_checkin)
             else:
-                create_dms_log(status="Error", message=f"Lỗi khi gọi API checkin: {response_checkin.status_code}")
+                create_dms_log(status="Error", message=f"Lỗi khi gọi API checkin: {response_checkin.status_code}", request_data=data_checkin, response_data=response_checkin)
         
     except Exception as e:
         create_dms_log(status="Error", exception=e, rollback=True)
-import requests
 
 @frappe.whitelist(methods="GET")
 def list_inventory(kwargs):
@@ -979,10 +979,6 @@ def validate_fields(data):
                 float(value)
             elif field_type == "Int":
                 int(value)
-            # elif field_type == "Datetime":
-            #     datetime.strptime(value, "%Y-%m-%d %H:%M:%S")
-            # elif field_type == "Time":
-            #     datetime.strptime(value, "%H:%M:%S").time()
             elif field_type == "Check":
                 assert value in [0, 1]
             # Data and Table can be left as they are string or list
