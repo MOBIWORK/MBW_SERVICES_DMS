@@ -3,11 +3,11 @@ from mbw_dms.api.common import (
     exception_handle,
     gen_response,
 )
-from mbw_dms.api.validators import validate_filter_timestamp, validate_filter,validate_date
+from mbw_dms.api.validators import validate_filter, validate_date
 import json
 from datetime import datetime, date
 
-#nhom ctkm
+# Nhóm ctkm
 @frappe.whitelist()
 def get_list_group(**kwargs):
     try:
@@ -33,7 +33,7 @@ def get_list_group(**kwargs):
     except Exception as e:
         return exception_handle(e)
 
-#xóa 1 hoặc nhiều bản ghi = update is_deleted
+# Xóa 1 hoặc nhiều bản ghi = update is_deleted
 @frappe.whitelist(methods="PATCH")
 def delete_multi(**body):
     try:
