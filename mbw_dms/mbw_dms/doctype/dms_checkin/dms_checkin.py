@@ -8,7 +8,7 @@ import datetime
 from frappe.utils.data import get_time
 from mbw_dms.api.common import (
     exception_handle, gen_response,
-    get_language, get_user_id, upload_image_s3, get_value_child_doctype, 
+    get_language, get_user_id, upload_image_s3, get_value_child_doctype,
     time_now_utc,null_location,create_address, create_address_current
 )
 from mbw_dms.api.validators import validate_datetime, validate_filter
@@ -21,6 +21,9 @@ from mbw_dms.api.ekgis.constant import API_URL, API_URL_TRACKING
 import pydash
 from frappe.utils import cint
 from datetime import time
+import pytz
+import requests
+
 class DMSCheckin(Document):
     def after_insert(self):
         #thêm dữ liệu vào kpi tháng
@@ -41,8 +44,8 @@ class DMSCheckin(Document):
         print("du lieu kiem tra",kh_ma, start_date, end_date, current_user)
         existing_checkin = frappe.get_all(
             "DMS Checkin",
-            filters={"creation": ["between", [start_date,end_date]], 
-                     "kh_ma": kh_ma, 
+            filters={"creation": ["between", [start_date,end_date]],
+                     "kh_ma": kh_ma,
                      "owner": current_user},
             fields=["name"],
             order_by= "creation desc"
@@ -79,7 +82,7 @@ class DMSCheckin(Document):
         kh_ma = self.kh_ma
         # exists_checkin = self.existing_checkin(kh_ma=kh_ma, start_date=start_date, end_date=end_date, current_user=user_id)
         # Kiểm tra xem khách hàng đã thực hiện checkin trong ngày hôm nay hay chưa
-        
+
         start_day= datetime.datetime.combine(days,time.min)
         end_day= datetime.datetime.combine(days,time.max)
         kh_ma = self.kh_ma
@@ -107,8 +110,8 @@ class DMSCheckin(Document):
                 #chỉ + 1 với lần checkin đầu tiên của ngày
                 if len(exists_checkin_day) == 0 :
                     monthly_summary_doc.so_kh_vt_luot += 1
-                
-                
+
+
                 # def render_string(default_str,value) :
                 #     if default_str !=None and value not in default_str:
                 #         return f"{monthly_summary_doc.kh_vt};{kh_ma}"
@@ -116,7 +119,7 @@ class DMSCheckin(Document):
                 #         return value
                 #     else :
                 #         return default_str
-                from mbw_dms.mbw_dms.doctype.common import   render_string  
+                from mbw_dms.mbw_dms.doctype.common import   render_string
                 # kiểm tra mã kh đã có trong chuỗi chưa, chưa thì thêm mới
                 monthly_summary_doc.kh_vt = render_string(monthly_summary_doc.kh_vt,kh_ma) # f"{monthly_summary_doc.kh_vt};{kh_ma}" if kh_ma not in monthly_summary_doc.kh_vt else monthly_summary_doc.kh_vt
                 monthly_summary_doc.so_gio_lam_viec += time_work
@@ -124,7 +127,7 @@ class DMSCheckin(Document):
                     monthly_summary_doc.solan_vt_dungtuyen += 1
                 else:
                     monthly_summary_doc.solan_vt_ngoaituyen += 1
-                
+
                 monthly_summary_doc.save(ignore_permissions=True)
         else:
             monthly_summary_doc = frappe.get_doc({
@@ -169,8 +172,8 @@ class DMSCheckin(Document):
         # Kiểm tra xem khách hàng đã thực hiện checkin trong tháng này hay chưa
         kh_ma = self.kh_ma
         exists_checkin = self.existing_checkin(kh_ma=kh_ma, start_date=start_date, end_date=end_date, current_user=user_id)
-        
-        #kiểm tr bản ghi bị xóa thuộc ngày nào, 
+
+        #kiểm tr bản ghi bị xóa thuộc ngày nào,
         create_day = self.creation
         start_day = datetime.datetime.combine(create_day,time.min)
         end_day = datetime.datetime.combine(create_day,time.max)
@@ -203,9 +206,9 @@ class DMSCheckin(Document):
                     monthly_summary_doc.solan_vt_ngoaituyen = minus_not_nega(monthly_summary_doc.solan_vt_ngoaituyen)
             else :
                 last_checkin_date = exists_checkin_the_day[0]
-                checkin_giovao_new = last_checkin_date.checkin_giovao 
+                checkin_giovao_new = last_checkin_date.checkin_giovao
                 checkin_giora_new = last_checkin_date.checkin_giora
-                
+
                 time_in_new = datetime.datetime.strptime(checkin_giovao_new, "%Y-%m-%d %H:%M:%S") if isinstance(checkin_giovao_new,str) else  checkin_giovao_new
                 time_out_new = datetime.datetime.strptime(checkin_giora_new, "%Y-%m-%d %H:%M:%S") if isinstance(checkin_giora_new,str) else  checkin_giora_new
 
@@ -217,7 +220,7 @@ class DMSCheckin(Document):
             if  exists_checkin == None :
                 monthly_summary_doc.kh_vt = monthly_summary_doc.kh_vt.replace(f"{self.kh_ma};","") if f"{self.kh_ma};" in monthly_summary_doc.kh_vt else monthly_summary_doc.kh_vt.replace(self.kh_ma,"")
 
-            
+
             monthly_summary_doc.save(ignore_permissions=True)
             print("cap nhat thanhcong vao")
         # Lấy ngày tháng để truy xuất dữ liệu
@@ -230,7 +233,7 @@ class DMSCheckin(Document):
             queue="default",                        # one of short, default, long
             timeout=None,                           # pass timeout manually
             is_async=True,                         # if this is True, method is run in worker
-            now=True,                               # if this is True, method is run directly (not in a worker) 
+            now=True,                               # if this is True, method is run directly (not in a worker)
             job_name=None,                          # specify a job name
             enqueue_after_commit=True,              # enqueue the job after the database commit is done at the end of the request
             at_front=False,                         # put the job at the front of the queue
@@ -301,7 +304,7 @@ class DMSCheckin(Document):
 
 def minus_not_nega(num,sub=1):
     num = int(num)
-    return 0 if num <=0 else num - sub   
+    return 0 if num <=0 else num - sub
 # Tạo mới checkin
 @frappe.whitelist(methods="POST")
 def create_checkin(kwargs):
@@ -319,7 +322,7 @@ def create_checkin(kwargs):
         int_key = [ "checkin_pinvao", "checkin_pinra"]
         datetime_keys = ["checkin_timegps"]
         date_keys = ["checkin_giovao", "checkin_giora"]
-        
+
         for key, value in kwargs.items():
             if key in normal_keys:
                 if key == "is_route":
@@ -336,7 +339,7 @@ def create_checkin(kwargs):
         if kwargs.get("checkin_giora"):
             new_checkin.set("is_checkout", 1)
         images = frappe.db.get_all("DMS Album Image", {"checkin_id": kwargs.get("checkin_id")},["image_url"])
-        if len(images) > 0 : 
+        if len(images) > 0 :
             for image in images:
                 new_checkin.append("checkin_hinhanh",{
                     "url_image":image.image_url
@@ -354,7 +357,7 @@ def create_checkin(kwargs):
             settings = frappe.db.get_singles_dict("DMS Settings")
             lat = kwargs.get("checkin_lat")
             long = kwargs.get("checkin_long")
-            if lat and long: 
+            if lat and long:
                 key = settings.get("api_key")
                 url = f"https://api.ekgis.vn/v1/place/geocode/reverse/address?latlng={lat},{long}&gg=1&api_key={key}"
                 if not key:
@@ -375,14 +378,14 @@ def create_checkin(kwargs):
             try :
                 current_note = frappe.get_doc("Note",note.name)
                 memory_send = current_note.as_dict().seen_by
-                for mail in memory_send:                
+                for mail in memory_send:
                     try:
                         STANDARD_USERS = ("Guest", "Administrator")
                         from frappe.utils import get_formatted_email
                         sender = (
                             frappe.session.user not in STANDARD_USERS and get_formatted_email(frappe.session.user) or None
                         )
-                    
+
                         frappe.sendmail(
                             recipients=mail.get("user"),
                             sender=None,
@@ -397,7 +400,7 @@ def create_checkin(kwargs):
                 print(f"something error send mail {note.name} :::", e)
         frappe.db.commit()
         return gen_response(201, "Thành công", {"name": new_checkin.name})
-    
+
     except Exception as e:
         print("Sonething wrong:::",e)
         return exception_handle(e)
@@ -425,7 +428,7 @@ def create_checkin_inventory(body):
         for item in items:
             if isinstance(item, dict):
             # Validate and handle exp_time as timestamp
-                if "exp_time" in item and item.get("exp_time"): 
+                if "exp_time" in item and item.get("exp_time"):
                     item["exp_time"] = validate_filter(type_check="date", value=item["exp_time"])
 
                 # Calculate total cost
@@ -437,7 +440,7 @@ def create_checkin_inventory(body):
             item["update_byname"] = employee.get("fullname")
             item["update_at"] = time_now_utc().date()
             doc.append("items", item)
-            
+
         doc.insert()
         frappe.db.commit()
 
@@ -494,7 +497,7 @@ def create_checkin_image(body):
             new_album_image = frappe.get_doc(image_push)
             new_album_image.save()
             frappe.db.commit()
-            return gen_response(201, "", rsUpload) 
+            return gen_response(201, "", rsUpload)
         except :
             return gen_response(200, "", {
                 "status": False,
@@ -507,12 +510,12 @@ def create_checkin_image(body):
 def update_address_customer(body):
     try:
         customer = validate_filter(type_check="require", value=body.get("customer"))
-        checkin_id = validate_filter(type_check="require", value=body.get("checkin_id"))        
+        checkin_id = validate_filter(type_check="require", value=body.get("checkin_id"))
         long = validate_filter(type_check="require", value=body.get("long"))
         lat = validate_filter(type_check="require", value=body.get("lat"))
         address_location = null_location(json.dumps({"long": long, "lat": lat}))
         customer_info = frappe.db.get_value(doctype="Customer", filters= {"name": customer}, fieldname=["name", "customer_primary_address", "customer_name"], as_dict=1)
-        
+
         if customer_info:
             # chuyển data từ mobile về dạng địa chỉ
             city = validate_filter(type_check="require", value=body.get("city"))
@@ -524,14 +527,14 @@ def update_address_customer(body):
                 district_info = frappe.db.get_value(doctype="DMS District", filters={"ten_huyen": ["like", f"%{county}%"]}, fieldname=["ma_huyen"])
             if state:
                 ward_info = frappe.db.get_value(doctype="DMS Ward", filters={"ten_xa": ["like", f"%{state}%"]}, fieldname=["ma_xa"])
-            if not bool(city_info) : 
+            if not bool(city_info) :
                 return gen_response(404,_("Couldn't find city"), {})
-            
+
             new_address = {
                     "address_title": f"{address_line1}, {state}, {county}, {city}",
-                    "address_line1": address_line1, 
-                    "city": city_info,   
-                    "address_location":address_location       
+                    "address_line1": address_line1,
+                    "city": city_info,
+                    "address_location":address_location
                 }
             address_title = f"{city}"
             if district_info:
@@ -551,18 +554,18 @@ def update_address_customer(body):
                         "link_name":customer,
                         "link_title": checkin_id
                     }
-            
+
             curent_address  = create_address(new_address=new_address, link_cs_address=link_cs_address)
             doc_customer = frappe.get_doc("Customer", body.get("customer"))
             if doc_customer.get("customer_primary_address") != curent_address.get("name") :
                 doc_customer.customer_primary_address = curent_address.get("name")
                 doc_customer.save()
-           
+
             frappe.db.commit()
             return gen_response(200, "Thành công", curent_address.get("name") )
         else:
-            return gen_response(406, _("Không tồn tại khách hàng"), {})             
-        
+            return gen_response(406, _("Không tồn tại khách hàng"), {})
+
     except Exception as e:
         exception_handle(e)
 
@@ -571,7 +574,7 @@ def update_address_customer(body):
 def update_address_customer_checkin(body):
     try:
         customer = validate_filter(type_check="require", value=body.get("customer"))
-        checkin_id = body.get("checkin_id")        
+        checkin_id = body.get("checkin_id")
         long = validate_filter(type_check="require", value=body.get("long"))
         lat = validate_filter(type_check="require", value=body.get("lat"))
         address_location = null_location(json.dumps({"long": long, "lat": lat}))
@@ -581,15 +584,15 @@ def update_address_customer_checkin(body):
         country = body.get("country")
         state =validate_filter(type_check="require", value=body.get("state"))
         address_line1 = body.get("address_line1")
-        
+
         link_cs_address = {
                         "link_doctype": "Customer",
-                        "link_name":customer                        
+                        "link_name":customer
                     }
         if checkin_id :
             link_cs_address.update({"link_title": checkin_id})
         address_return = ""
-        
+
         if customer_info:
             # không truyền lên địa chỉ
             if not bool(city) and not bool(address_line1):
@@ -613,16 +616,16 @@ def update_address_customer_checkin(body):
                     not_have += "Thành phố"
                 if not bool(address_line1):
                     not_have = not_have + "và Địa chỉ chi tiết" if len(not_have)>1 else " Địa chỉ chi tiết"
-                
+
                 return gen_response(500,_(f"Vui lòng nhâp {not_have}"),{})
             # truyền lên đầy đủ:
             else:
                 new_address = {
                         "address_title": "",
-                        "address_line1":address_line1, 
-                        "city": city.get("code"),   
+                        "address_line1":address_line1,
+                        "city": city.get("code"),
                         "address_location":address_location,
-                        "checkin_id ":checkin_id         
+                        "checkin_id ":checkin_id
                     }
                 # if country:
                 #     new_address.update({"country":country})
@@ -642,20 +645,20 @@ def update_address_customer_checkin(body):
                     state_name =state.get("name")
                     address_title = f"{state_name}, " +address_title
                 address_title = f"{address_line1}, " +address_title
-                new_address.update({"address_title":address_title})    
+                new_address.update({"address_title":address_title})
                 curent_address  = create_address(new_address=new_address, link_cs_address=link_cs_address)
 
                 if customer_info.get("customer_primary_address") != curent_address.get("name") :
                     doc_customer = frappe.get_doc("Customer", body.get("customer"))
-                    doc_customer.customer_primary_address = curent_address.get("name")        
+                    doc_customer.customer_primary_address = curent_address.get("name")
                     doc_customer.save()
                     frappe.db.commit()
                 address_return = address_title
             frappe.clear_cache()
             return gen_response(200, "Thành công", address_return)
         else:
-            return gen_response(406, _("Không tồn tại khách hàng"), {})             
-        
+            return gen_response(406, _("Không tồn tại khách hàng"), {})
+
     except Exception as e:
         exception_handle(e)
 
@@ -716,18 +719,17 @@ def send_checkin_to_ekgis(doc):
                 except Exception as e:
                     print("loi khi tao moi object",e)
             api_url_checkin=f"{API_URL}/{projectId}/{objectId}?api_key={api_key}"
-            ext = {"customer_name": doc.kh_ten, "address": doc.kh_diachi}
+            ext = {"customer_name": doc.kh_ten, "address": doc.checkin_address}
             json_object = json.dumps(ext)
-            import pytz
             time_checkin = pytz.timezone("Asia/Ho_Chi_Minh").localize(datetime.datetime.strptime(doc.checkin_giovao,"%Y-%m-%d %H:%M:%S")).astimezone(pytz.utc).strftime("%Y-%m-%d %H:%M:%S")
             time_checkout = pytz.timezone("Asia/Ho_Chi_Minh").localize(datetime.datetime.strptime(doc.checkin_giora,"%Y-%m-%d %H:%M:%S")).astimezone(pytz.utc).strftime("%Y-%m-%d %H:%M:%S")
             create_time  = pytz.timezone("Asia/Ho_Chi_Minh").localize(doc.createddate).astimezone(pytz.utc).strftime("%Y-%m-%d %H:%M:%S")
             data_checkin = {
-                "projectid":projectId,
+                "projectid": projectId,
                 "objectid": objectId,
                 "uuid": "",
-                "lng": doc.kh_long,
-                "lat": doc.kh_lat,
+                "lng": doc.checkin_long,
+                "lat": doc.checkin_lat,
                 "coordinates": "",
                 "activity": "checkin",
                 "battery_checkin": doc.checkin_pinvao,
@@ -743,11 +745,9 @@ def send_checkin_to_ekgis(doc):
             if response_checkin.status_code == 200:
                     create_dms_log(status="Success")
             else:
-                create_dms_log(status="Error", message=f"Lỗi khi gọi API checkin: {response_checkin.status_code}")
-        
+                    create_dms_log(status="Error", message=f"Lỗi khi gọi API checkin: {response_checkin.status_code}", request_data=data_checkin, response_data=response_checkin)
     except Exception as e:
         create_dms_log(status="Error", exception=e, rollback=True)
-import requests
 
 @frappe.whitelist(methods="GET")
 def list_inventory(kwargs):
@@ -759,7 +759,7 @@ def list_inventory(kwargs):
         return gen_response(200, "Thành công", inventory)
     except Exception as e:
         return exception_handle(e)
-    
+
 
 
 def get_report(filters={}):
@@ -922,7 +922,7 @@ def get_report(filters={}):
 
             total_time = sum(float(customer.get("time_check", 0)) for customer in row['customers'])
             row["total_time"] = total_time
-            
+
         if not is_excel:
             query2 = f"""
                 SELECT COUNT(*) AS number_of_groups FROM (SELECT 
@@ -957,7 +957,7 @@ def get_report(filters={}):
                 "data": [],
                 "total": 0
             }
-    
+
 def validate_fields(data):
     field_descriptions = {
         "kh_ma": "Data",
