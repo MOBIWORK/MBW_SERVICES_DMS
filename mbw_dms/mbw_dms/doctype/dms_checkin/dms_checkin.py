@@ -700,7 +700,7 @@ def send_checkin_to_ekgis(doc):
 
             time_checkin = pytz.timezone("Asia/Ho_Chi_Minh").localize(datetime.datetime.strptime(doc.checkin_giovao, "%Y-%m-%d %H:%M:%S")).astimezone(pytz.utc).strftime("%Y-%m-%d %H:%M:%S")
             time_checkout = pytz.timezone("Asia/Ho_Chi_Minh").localize(datetime.datetime.strptime(doc.checkin_giora, "%Y-%m-%d %H:%M:%S")).astimezone(pytz.utc).strftime("%Y-%m-%d %H:%M:%S")
-            create_time = pytz.timezone("Asia/Ho_Chi_Minh").localize(datetime.datetime.strptime(doc.createddate, "%Y-%m-%d %H:%M:%S")).astimezone(pytz.utc).strftime("%Y-%m-%d %H:%M:%S")
+            create_time = pytz.timezone("Asia/Ho_Chi_Minh").localize(doc.createddate).astimezone(pytz.utc).strftime("%Y-%m-%d %H:%M:%S")
 
             data_checkin = {
                 "projectid": projectId,
