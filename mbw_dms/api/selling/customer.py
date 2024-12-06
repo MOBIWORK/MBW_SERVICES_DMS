@@ -330,12 +330,12 @@ def update_customer(**kwargs):
                 customer.save()
                 
             # Cập nhật hoặc thêm mới địa chỉ
-        if kwargs.get("address"):
-            update_customer_addresses(customer, kwargs.get("address"), name)
+            if kwargs.get("address"):
+                update_customer_addresses(customer, kwargs.get("address"), name)
 
-        # Cập nhật hoặc thêm mới liên hệ
-        if kwargs.get("contacts"):
-            update_customer_contacts(customer, kwargs.get("contacts"), name)
+            # Cập nhật hoặc thêm mới liên hệ
+            if kwargs.get("contacts"):
+                update_customer_contacts(customer, kwargs.get("contacts"), name)
 
             router_in = kwargs.get("router")
             if router_in and len(router_in) > 0:
@@ -400,8 +400,11 @@ def unlink_and_delete_contact(contact, customer_name):
         SET customer_primary_contact=NULL, mobile_no=NULL, email_id=NULL
         WHERE name=%s AND customer_primary_contact=%s
     """, (customer_name, contact.name))
-    frappe.db.delete("Address", contact.address)
-    frappe.db.delete("Contact", contact.name)
+
+    if contact.address:
+        frappe.db.delete("Address", contact.address)
+    if contact.name:
+        frappe.db.delete("Contact", contact.name)
 
 def create_new_contact(contact_data, customer_name, address_data):
     new_contact = frappe.new_doc("Contact")
