@@ -50,7 +50,7 @@ def build_conditions(filters):
     conditions = ""
 
     if filters.get("sales_person"):
-        conditions += " AND si.custom_sale_person = %(sales_person)s"
+        conditions += " AND si.custom_sale_person IN %(sales_person)s"
 
     if filters.get("from_date"):
         conditions += " AND si.posting_date >= %(from_date)s"

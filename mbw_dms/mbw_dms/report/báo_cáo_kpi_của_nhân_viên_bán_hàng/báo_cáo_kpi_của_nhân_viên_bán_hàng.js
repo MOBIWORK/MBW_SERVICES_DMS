@@ -18,11 +18,15 @@ frappe.query_reports["Báo cáo KPI của nhân viên bán hàng"] = {
             reqd: 1
         },
         {
-            fieldname: "sales_person",
-            label: __("Sales Person"),
-            fieldtype: "Link",
-            options: "Sales Person"
-        },
+			fieldname: "sales_person",
+			label: __("Sales Person"),
+			fieldtype: "MultiSelectList",
+			get_data: function (txt) {
+				return frappe.db.get_link_options("Sales Person", txt, {
+					employee: ["!=", ""]
+				});
+			},
+		},
         {
             fieldname: "customer",
             label: __("Customer"),
