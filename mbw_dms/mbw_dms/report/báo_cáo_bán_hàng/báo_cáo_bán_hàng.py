@@ -19,6 +19,13 @@ def get_column():
 				   "options": "Sales Invoice",
 				   "width": 130,
 			   },
+			   {
+				   "label": _("Sales Person"),
+				   "fieldname": "sales_person",
+				   "fieldtype": "Link",
+				   "options": "Sales Person",
+				   "width": 130,
+			   },
 			   {"label": _("Status"), "fieldname": "status", "fieldtype": "Data", "width": 100},
 			   {
 				   "label": _("Customer"),
@@ -94,10 +101,11 @@ def get_column():
 	return columns
 
 def get_data(filters):
-	query = f"""SELECT si.name, si.posting_date, si.status, si.customer, si.customer_name, si.company,
+	query = f"""SELECT si.name, si.posting_date, si.status, si.customer, si.customer_name, si.company, st.sales_person,
 				sii.brand, sii.item_code, sii.item_name, sii.qty, sii.uom, sii.amount, sii.custom_total_litres_base_on_1_item
 				FROM `tabSales Invoice` si
 				JOIN `tabSales Invoice Item` sii ON sii.parent = si.name
+				LEFT JOIN `tabSales Team` st ON si.name = st.parent
 				WHERE si.docstatus = 1 {get_filters(filters)}"""
 	data_list = frappe.db.sql(query, filters, as_dict=True)
 	data = []
@@ -115,6 +123,7 @@ def get_data(filters):
 				"total_litres": d.custom_total_litres_base_on_1_item,
 				"company": d.company,
 				"brand": d.brand,
+				"sales_person": d.sales_person,
 				}
 		data.append(item)
 	return data
@@ -133,4 +142,6 @@ def get_filters(filters):
 		conditions += " AND sii.brand = %(brand)s"
 	if filters.get("item"):
 		conditions += " AND sii.item_code = %(item)s"
+	if filters.get("sales_person"):
+		conditions += " AND st.sales_person IN %(sales_person)s"
 	return conditions

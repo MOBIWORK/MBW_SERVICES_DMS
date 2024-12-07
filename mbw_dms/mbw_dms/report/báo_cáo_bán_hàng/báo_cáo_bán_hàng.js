@@ -51,6 +51,16 @@ frappe.query_reports["Báo cáo bán hàng"] = {
 			fieldtype: "Link",
 			width: "80",
 			options: "Customer",
+		},
+		{
+			fieldname: "sales_person",
+			label: __("Sales Person"),
+			fieldtype: "MultiSelectList",
+			get_data: function (txt) {
+				return frappe.db.get_link_options("Sales Person", txt, {
+					employee: ["!=", ""]
+				});
+			},
 		}
 	]
 };
