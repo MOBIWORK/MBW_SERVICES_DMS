@@ -6,10 +6,10 @@
  "docstatus": 0,
  "doctype": "Report",
  "filters": [],
- "idx": 0,
+ "idx": 1,
  "is_standard": "Yes",
  "letterhead": null,
- "modified": "2024-11-18 16:33:12.901391",
+ "modified": "2024-12-09 14:56:38.554600",
  "modified_by": "Administrator",
  "module": "MBW DMS",
  "name": "B\u00e1o c\u00e1o b\u00e1n h\u00e0ng",
@@ -29,7 +29,10 @@
    "role": "Employee Self Service"
   },
   {
-   "role": "CSKH"
+   "role": "Tr\u01b0\u1edfng nh\u00f3m CSKH"
+  },
+  {
+   "role": "Sales Manager"
   }
  ],
  "timeout": 0
