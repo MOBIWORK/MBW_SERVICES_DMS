@@ -44,15 +44,18 @@ def get_metrics(start_date, end_date):
     # Tính lợi nhuận gộp và lợi nhuận ròng
     gross_profit = ((revenue - total_cost) * 100) / revenue if revenue else 0
     net_profit = ((revenue - (total_cost + returns + salary + others)) * 100) / revenue if revenue else 0
-    returns = returns / revenue * 100 if revenue else 0
-    salary = salary / revenue * 100 if revenue else 0
-    others = others / revenue * 100 if revenue else 0
+    returns_per = returns / revenue * 100 if revenue else 0
+    salary_per = salary / revenue * 100 if revenue else 0
+    others_per = others / revenue * 100 if revenue else 0
     return {
         "revenue": flt(revenue),
         "total_cost": flt(total_cost),
         "returns": flt(returns),
         "salary": flt(salary),
         "others": flt(others),
+        "returns_per": flt(returns_per),
+        "salary_per": flt(salary_per),
+        "others_per": flt(others_per),
         "gross_profit": gross_profit,
         "net_profit": net_profit
     }
