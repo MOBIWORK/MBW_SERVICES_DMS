@@ -1,0 +1,221 @@
+{
+ "actions": [],
+ "allow_import": 1,
+ "allow_rename": 1,
+ "creation": "2024-09-27 08:54:23.774707",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "is_deleted",
+  "section_break_tmsy",
+  "code",
+  "name_promotion",
+  "status",
+  "section_break_burm",
+  "territory",
+  "customer_type",
+  "customer_group",
+  "promotion_type",
+  "multiple",
+  "section_break_xjz8",
+  "ptype_name",
+  "ptype_value",
+  "ctype_value",
+  "column_break_sazj",
+  "gtype_value",
+  "gpromotion",
+  "gpromotion_prioritize",
+  "section_break_tt20",
+  "customers",
+  "products",
+  "start_date",
+  "end_date",
+  "section_break_3nkk",
+  "is_customer_application_type",
+  "is_app",
+  "is_archived",
+  "banner",
+  "description"
+ ],
+ "fields": [
+  {
+   "default": "0",
+   "fieldname": "is_deleted",
+   "fieldtype": "Check",
+   "label": "Is Deleted"
+  },
+  {
+   "fieldname": "section_break_tmsy",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "code",
+   "fieldtype": "Data",
+   "label": "Code"
+  },
+  {
+   "fieldname": "name_promotion",
+   "fieldtype": "Data",
+   "label": "Name of promotion"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Data",
+   "label": "Status"
+  },
+  {
+   "fieldname": "section_break_burm",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "territory",
+   "fieldtype": "Table",
+   "label": "Territory",
+   "options": "SFA Customer Territory"
+  },
+  {
+   "fieldname": "customer_type",
+   "fieldtype": "Table",
+   "label": "Customer Type",
+   "options": "SFA Type Customer"
+  },
+  {
+   "fieldname": "customer_group",
+   "fieldtype": "Table",
+   "label": "Customer Group",
+   "options": "SFA Customer Group"
+  },
+  {
+   "fieldname": "promotion_type",
+   "fieldtype": "Select",
+   "label": "Promotion type",
+   "options": "0\n1\n2"
+  },
+  {
+   "default": "0",
+   "fieldname": "multiple",
+   "fieldtype": "Check",
+   "label": "Multiple"
+  },
+  {
+   "fieldname": "section_break_xjz8",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "ptype_name",
+   "fieldtype": "Data",
+   "label": "Promotion type name"
+  },
+  {
+   "fieldname": "ptype_value",
+   "fieldtype": "Data",
+   "label": "Promotion Type value"
+  },
+  {
+   "fieldname": "ctype_value",
+   "fieldtype": "Data",
+   "label": "Customer  type value"
+  },
+  {
+   "fieldname": "column_break_sazj",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "gtype_value",
+   "fieldtype": "Data",
+   "label": "Group type value"
+  },
+  {
+   "fieldname": "gpromotion",
+   "fieldtype": "Link",
+   "label": "Group promotion",
+   "options": "SFA Group promotion"
+  },
+  {
+   "fieldname": "gpromotion_prioritize",
+   "fieldtype": "Int",
+   "label": "Group promotion prioritize"
+  },
+  {
+   "fieldname": "section_break_tt20",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "customers",
+   "fieldtype": "Table",
+   "label": "Customer",
+   "options": "SFA Customer Promotion"
+  },
+  {
+   "fieldname": "products",
+   "fieldtype": "JSON",
+   "label": "Products"
+  },
+  {
+   "fieldname": "start_date",
+   "fieldtype": "Date",
+   "label": "Start date"
+  },
+  {
+   "fieldname": "end_date",
+   "fieldtype": "Date",
+   "label": "End date"
+  },
+  {
+   "fieldname": "section_break_3nkk",
+   "fieldtype": "Section Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_customer_application_type",
+   "fieldtype": "Check",
+   "label": "Is customer application type"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_app",
+   "fieldtype": "Check",
+   "label": "Is app"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_archived",
+   "fieldtype": "Check",
+   "label": "Is archived"
+  },
+  {
+   "fieldname": "banner",
+   "fieldtype": "Data",
+   "label": "Banner"
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Text",
+   "label": "Description"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2024-11-26 14:10:21.911142",
+ "modified_by": "Administrator",
+ "module": "MBW DMS",
+ "name": "SFA Promotion",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

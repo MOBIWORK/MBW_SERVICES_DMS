@@ -23,3 +23,5 @@
     image?:string
   }
   
+
+  export type functionType = (...args: any[]) => any;

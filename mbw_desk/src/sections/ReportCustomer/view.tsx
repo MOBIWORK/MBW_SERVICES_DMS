@@ -16,9 +16,6 @@ import {
   DatePicker,
   Table,
   InputNumber,
-  Select,
-  TreeSelect,
-  Input,
   message,
 } from "antd";
 import type { DatePickerProps, TableColumnsType } from "antd";
@@ -28,73 +25,49 @@ import { AxiosService } from "../../services/server";
 import dayjs from "dayjs";
 import { useForm } from "antd/es/form/Form";
 import useDebounce from "../../hooks/useDebount";
-import { translationUrl, treeArray } from "@/util";
+import { handleDowload, treeArray } from "@/util";
 import { rsData, rsDataFrappe } from "@/types/response";
 import { listSale } from "@/types/listSale";
 import { employee } from "@/types/employeeFilter";
 import { useResize } from "@/hooks";
 import { TreeSelectCommon } from "@/components/select/select";
 
-interface DataCustomer {
-  key: React.Key;
-  stt?: string;
-  customer_code: string;
-  customer_name: string;
-  customer_type: string;
-  customer_address: string;
-  name: string;
-}
-
-interface ExpandedDataType {
-  key: React.Key;
-  stt: string;
-  item_code: string;
-  item_name: string;
-  exp_time: string;
-  item_unit: string;
-  quantity: string;
-  total: string;
-  update_at: string;
-  update_byname: string;
-  item_price: string;
-  update_bycode: string;
-}
-
-const columns: TableColumnsType<DataCustomer> = [
-  {
-    title: (
-      <div className="relative">
-        <span className="absolute -top-[11px] -left-8">STT</span>
-      </div>
-    ),
-    dataIndex: "stt",
-    key: "stt",
-    render: (_, record, index) => index + 1,
-  },
-  {
-    title: "Mã khách hàng",
-    dataIndex: "customer_code",
-    key: "customer_code",
-  },
-  {
-    title: "Tên khách hàng",
-    dataIndex: "customer_name",
-    key: "customer_name",
-  },
-  {
-    title: "Loại khách hàng",
-    dataIndex: "customer_type",
-    key: "customer_type",
-    width: 175,
-  },
-  {
-    title: "Địa chỉ",
-    dataIndex: "customer_address",
-    key: "customer_address",
-  },
-];
-
 export default function ReportCustomer() {
+  const columns: TableColumnsType<DataCustomer> = [
+    {
+      title: (
+        <div className="relative">
+          <span className="absolute -top-[11px] -left-8">STT</span>
+        </div>
+      ),
+      dataIndex: "stt",
+      key: "stt",
+      render: (_: any, __: any, index: number) => (
+        <span>{calculateIndex(page, PAGE_SIZE, index)}</span> // Tính toán index cho từng dòng
+      ),
+    },
+    {
+      title: "Mã khách hàng",
+      dataIndex: "customer_code",
+      key: "customer_code",
+    },
+    {
+      title: "Tên khách hàng",
+      dataIndex: "customer_name",
+      key: "customer_name",
+    },
+    {
+      title: "Loại hình khách hàng",
+      dataIndex: "customer_type",
+      key: "customer_type",
+      width: 175,
+    },
+    {
+      title: "Địa chỉ",
+      dataIndex: "customer_address",
+      key: "customer_address",
+    },
+  ];
   const [dataCustomer, setDataCustomer] = useState<DataCustomer[]>([]);
   const [formFilter] = useForm();
   const [expire_from, setExpireFrom] = useState<number>();
@@ -133,6 +106,13 @@ export default function ReportCustomer() {
   const [startDate, setStartDate] = useState<any>(null);
   const [endDate, setEndDate] = useState<any>(null);
   const [refresh, setRefresh] = useState<boolean>(false);
+  const calculateIndex = (
+    pageNumber: number,
+    pageSize: number,
+    index: number
+  ) => {
+    return (pageNumber - 1) * pageSize + index + 1;
+  };
 
   useEffect(() => {
     setScrollYTable1(size.h * 0.52);
@@ -158,7 +138,7 @@ export default function ReportCustomer() {
         dataIndex: "stt",
         key: "stt",
         width: 60,
-        render: (_, record: any, index) => (
+        render: (_, __: any, index) => (
           <div className="text-center">{index + 1}</div>
         ),
       },
@@ -179,7 +159,7 @@ export default function ReportCustomer() {
         title: "Hạn sử dụng",
         dataIndex: "exp_time",
         key: "exp_time",
-        render: (value, record: any) => {
+        render: (value, __: any) => {
           return value ? (
             <p>{dayjs(value * 1000).format("DD/MM/YYYY")}</p>
           ) : (
@@ -220,7 +200,7 @@ export default function ReportCustomer() {
         title: "Ngày cập nhật",
         dataIndex: "update_at",
         key: "update_at",
-        render: (value, record: any) => {
+        render: (value, __: any) => {
           return value ? (
             <p>{dayjs(value * 1000).format("DD/MM/YYYY")}</p>
           ) : (
@@ -498,7 +478,7 @@ export default function ReportCustomer() {
     employee,
     customer,
     refresh,
-    PAGE_SIZE
+    PAGE_SIZE,
   ]);
 
   return (
@@ -522,9 +502,28 @@ export default function ReportCustomer() {
                 icon: <VerticalAlignBottomOutlined className="text-xl" />,
                 size: "18px",
                 className: "flex items-center",
-                action: () => {
-                  translationUrl("/app/data-export/Data%20Export");
-                },
+                action: handleDowload.bind(null, {
+                  url: "/api/method/mbw_dms.api.exports.export_excel.export_excel",
+                  params: {
+                    report_type: "Report Inventory",
+                    data_filter: {
+                      expire_from,
+                      expire_to,
+                      update_at_from,
+                      update_at_to,
+                      qty_inven_from,
+                      qty_inven_to,
+                      total_from,
+                      total_to,
+                      item_code,
+                      unit_product: unit,
+                      employee: employee,
+                      customer: customer,
+                      //còn đẩy lên sale team sale person
+                    },
+                  },
+                  file_name: "Report Inventory.xlsx",
+                }),
               },
             ]}
           />
@@ -615,11 +614,11 @@ export default function ReportCustomer() {
                     placeholder="Tất cả người kiểm tồn"
                     onSearch={(value: string) => {
                       setKeySearch4(value);
-                      setPage(1);
                     }}
                     options={listEmployees}
                     onSelect={(value: any) => {
                       setEmployee(value);
+                      setPage(1);
                     }}
                     onClear={() => {
                       setEmployee("");
@@ -790,7 +789,11 @@ export default function ReportCustomer() {
                                     controls={false}
                                     className="!bg-[#F5F7FA] w-full"
                                     placeholder="0"
-                                    formatter={value => value?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                                    formatter={(value) =>
+                                      value
+                                        ?.toString()
+                                        .replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                                    }
                                     suffix="VND"
                                   />
                                 </FormItemCustom>
@@ -807,7 +810,11 @@ export default function ReportCustomer() {
                                     controls={false}
                                     className="!bg-[#F5F7FA] w-full"
                                     placeholder="0"
-                                    formatter={value => value?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                                    formatter={(value) =>
+                                      value
+                                        ?.toString()
+                                        .replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                                    }
                                     suffix="VND"
                                   />
                                 </FormItemCustom>

@@ -1,1 +1,1 @@
-export type employee = {employee_code: string,employee_name?: string}
+export type employee = {employee_code: string,employee_name?: string, sale_name?: string}

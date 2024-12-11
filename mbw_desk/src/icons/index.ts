@@ -12,3 +12,5 @@ export {PointMap} from './point'
 export {HistoryRouterIcon} from './HistoryRouterIcon'
 
 export {BackIos} from './back-ios'
+
+export {FilterIcon} from "./filter"

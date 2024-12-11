@@ -1,3 +1,6 @@
+/** @format */
+
+import DiscountIcon from "@/icons/discount";
 import {
   AliyunOutlined,
   BarChartOutlined,
@@ -15,7 +18,7 @@ export const listMenu: MenuItem[] = [
   {
     label: (
       <Link className={""} to="/">
-          Tổng quan
+        Tổng quan
       </Link>
     ),
     icon: <BarChartOutlined style={{ fontSize: "22px" }} />,
@@ -25,17 +28,17 @@ export const listMenu: MenuItem[] = [
   {
     label: (
       <Link className={""} to="/customers-map">
-          Bản đồ khách hàng
+        Bản đồ khách hàng
       </Link>
     ),
-    icon: <AliyunOutlined style={{ fontSize: "22px" }}  />,
+    icon: <AliyunOutlined style={{ fontSize: "22px" }} />,
     key: "csmap",
   },
   //giam sat
   {
     label: (
       <Link className={"text-[#212B36] hover:text-[#212B36]"} to="#">
-          Giám sát
+        Giám sát
       </Link>
     ),
     icon: <FileSearchOutlined style={{ fontSize: "22px" }} />,
@@ -44,7 +47,7 @@ export const listMenu: MenuItem[] = [
       {
         label: (
           <Link className={""} to="/monitor-album">
-              Giám sát chụp ảnh khách hàng
+            Giám sát chụp ảnh khách hàng
           </Link>
         ),
         key: "giamsat-image",
@@ -52,7 +55,7 @@ export const listMenu: MenuItem[] = [
       {
         label: (
           <Link className={""} to="employee-monitor">
-              Giám sát viếng thăm khách hàng
+            Giám sát viếng thăm khách hàng
           </Link>
         ),
         key: "employee-monitor",
@@ -71,18 +74,29 @@ export const listMenu: MenuItem[] = [
   {
     label: (
       <Link className={""} to="/router-control">
-       Quản lý tuyến
+        Quản lý tuyến
       </Link>
     ),
     icon: <FileDoneOutlined style={{ fontSize: "22px" }} />,
     key: "control",
   },
 
+  //CTKM
+  {
+    label: (
+      <Link className={""} to="/promotion">
+        Chương trình khuyến mại
+      </Link>
+    ),
+    icon: <DiscountIcon />,
+    key: "promotion",
+  },
+
   //cham diem trung bay
   {
     label: (
       <Link className={"text-[#212B36] hover:text-[#212B36]"} to={"#"}>
-          Chấm điểm trưng bày
+        Chấm điểm trưng bày
       </Link>
     ),
     icon: <FileImageOutlined style={{ fontSize: "22px" }} />,
@@ -90,43 +104,51 @@ export const listMenu: MenuItem[] = [
     children: [
       {
         label: (
-          <a className={"text-[#212B36] hover:text-[#212B36]"} href="/mbw_audit">
-              Dashboard
+          <a
+            className={"text-[#212B36] hover:text-[#212B36]"}
+            href="/mbw_audit">
+            Dashboard
           </a>
         ),
         key: "imagedb",
       },
       {
         label: (
-          <a className={"text-[#212B36] hover:text-[#212B36]"} href="/mbw_audit/reports">
-              Báo cáo
+          <a
+            className={"text-[#212B36] hover:text-[#212B36]"}
+            href="/mbw_audit/reports">
+            Báo cáo
           </a>
         ),
         key: "imagerb",
       },
       {
         label: (
-          <a className={"text-[#212B36] hover:text-[#212B36]"} href="/mbw_audit/product_sku">
-              Sản phẩm
+          <a
+            className={"text-[#212B36] hover:text-[#212B36]"}
+            href="/mbw_audit/product_sku">
+            Sản phẩm
           </a>
         ),
         key: "imagesp",
       },
       {
         label: (
-          <a className={"text-[#212B36] hover:text-[#212B36]"} href="/mbw_audit/campaign">
-              Chiến dịch
+          <a
+            className={"text-[#212B36] hover:text-[#212B36]"}
+            href="/mbw_audit/campaign">
+            Chiến dịch
           </a>
         ),
         key: "imagecd",
       },
-    ]
+    ],
   },
   //report
   {
     label: (
       <Link to={"#"} className={"text-[#212B36] hover:text-[#212B36]"}>
-          Báo cáo
+        Báo cáo
       </Link>
     ),
     icon: <ReconciliationOutlined style={{ fontSize: "22px" }} />,
@@ -134,61 +156,104 @@ export const listMenu: MenuItem[] = [
     children: [
       {
         label: (
-          <Link className={"text-[#212B36] hover:text-[#212B36]"} to="/report-customer">
-              Tồn kho khách hàng
+          <Link
+            className={"text-[#212B36] hover:text-[#212B36]"}
+            to="/report-customer">
+            Tồn kho khách hàng
           </Link>
         ),
         key: "report-customer",
       },
       {
         label: (
-          <Link className={"text-[#212B36] hover:text-[#212B36]"} to="/report-kpi">
-              Thống kê KPI
+          <Link
+            className={"text-[#212B36] hover:text-[#212B36]"}
+            to="/report-kpi">
+            Thống kê KPI
           </Link>
         ),
         key: "report_kpi",
       },
       {
         label: (
-          <Link className={"text-[#212B36] hover:text-[#212B36]"} to="/report-checkin">
-              Viếng thăm
+          <Link
+            className={"text-[#212B36] hover:text-[#212B36]"}
+            to="/report-checkin">
+            Viếng thăm
           </Link>
         ),
         key: "report-checkin",
       },
       {
         label: (
-          <Link className={"text-[#212B36] hover:text-[#212B36]"} to="/report-sales">
-              Tổng hợp bán hàng
+          <Link
+            className={"text-[#212B36] hover:text-[#212B36]"}
+            to="/report-sales">
+            Tổng hợp bán hàng
           </Link>
         ),
         key: "report-sales",
       },
       {
         label: (
-          <Link className={"text-[#212B36] hover:text-[#212B36]"} to="/report-saleorder">
-              Tổng hợp đặt hàng
+          <Link
+            className={"text-[#212B36] hover:text-[#212B36]"}
+            to="/report-saleorder">
+            Tổng hợp đặt hàng
           </Link>
         ),
         key: "report-saleorder",
       },
       {
         label: (
-          <Link className={"text-[#212B36] hover:text-[#212B36]"} to="/report-custom-new">
-              Khách hàng mới
+          <Link
+            className={"text-[#212B36] hover:text-[#212B36]"}
+            to="/report-custom-new">
+            Khách hàng mới
           </Link>
         ),
         key: "report-custom-new",
       },
       {
         label: (
-          <Link className={"text-[#212B36] hover:text-[#212B36]"} to="/report-checkin-first">
-              Thống kê khách hàng viếng thăm lần đầu
-            
+          <Link
+            className={"text-[#212B36] hover:text-[#212B36]"}
+            to="/report-checkin-first">
+            Thống kê khách hàng viếng thăm lần đầu
           </Link>
         ),
         key: "report-checkin-first",
-      }
+      },
+      {
+        label: (
+          <Link
+            className={"text-[#212B36] hover:text-[#212B36]"}
+            to="/report-visitor_kpi">
+            Báo cáo tổng hợp Viếng thăm - KPI
+          </Link>
+        ),
+        key: "report-visitor_kpi",
+      },
+      {
+        label: (
+          <Link
+            className={"text-[#212B36] hover:text-[#212B36]"}
+            to="/report-analysis-kpi">
+            Báo cáo tổng hợp phân tích KPI
+          </Link>
+        ),
+        key: "report-analysis-kpi",
+      },
+      {
+        label: (
+          <Link
+            className={"text-[#212B36] hover:text-[#212B36]"}
+            to="/report-prod-daybyday">
+            Báo cáo theo dõi sản lượng trong ngày từng thị trường
+          </Link>
+        ),
+        key: "report-prod-daybyday",
+      },
     ],
   },
 ];

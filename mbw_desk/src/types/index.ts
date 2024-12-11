@@ -1,0 +1,1 @@
+export type FuncType = (...rest:any) => any

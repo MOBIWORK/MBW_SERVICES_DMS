@@ -1,366 +1,141 @@
-import { SyncOutlined, VerticalAlignBottomOutlined } from "@ant-design/icons";
-import {
-  ContentFrame,
-  DropDownCustom,
-  FormItemCustom,
-  HeaderPage,
-  TableCustom,
-} from "../../components";
-import {
-  Button,
-  Col,
-  DatePicker,
-  Dropdown,
-  Form,
-  Row,
-  Select,
-  TreeSelect,
-  message,
-} from "antd";
+/** @format */
+import { ContentFrame, TableCustom } from "../../components";
+import { Col, Row } from "antd";
 import type { TableColumnsType } from "antd";
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { AxiosService } from "@/services/server";
-import useDebounce from "@/hooks/useDebount";
-import { DatePickerProps } from "antd/lib";
-import { translationUrl, treeArray } from "@/util";
-import dayjs from "dayjs";
-import { LuFilter, LuFilterX } from "react-icons/lu";
-import { listSale } from "@/types/listSale";
-import { rsData, rsDataFrappe } from "@/types/response";
-import { employee } from "@/types/employeeFilter";
-import { typecustomer } from "../ReportSales/data";
-import { useForm } from "antd/es/form/Form";
 import { useResize } from "@/hooks";
-import { SelectCommon, TreeSelectCommon } from "@/components/select/select";
-
-interface DataCheckinFirst {
-  key: React.Key;
-  name: string;
-  stt?: number;
-  department: string;
-  employee_id: string;
-  employee_name: string;
-  customer_name: string;
-  customer_code: string;
-  customer_type: string;
-  customer_group: string;
-  contact_person: string;
-  phone: string;
-  tax_id: string;
-  territory: string;
-  address: string;
-  date_checkin: string;
-}
-
-const startOfMonth: any = dayjs().startOf("month");
-const endOfMonth: any = dayjs().endOf("month");
-let start = Date.parse(startOfMonth["$d"]) / 1000;
-let end = Date.parse(endOfMonth["$d"]) / 1000;
-
-const columns: TableColumnsType<DataCheckinFirst> = [
-  {
-    title: "STT",
-    dataIndex: "stt",
-    key: "stt",
-    width: 60,
-    render: (_, record: any, index: number) => (
-      <div className="text-center">{index + 1}</div>
-    ),
-  },
-  {
-    title: "Nhóm bán hàng",
-    dataIndex: "sales_team",
-    key: "sales_team",
-    render: (_, record: any) => <div>{record.sales_team}</div>,
-  },
-  {
-    title: "Mã nhân viên",
-    dataIndex: "employee_id",
-    key: "employee_id",
-    render: (_, record: any) => <div>{record.employee_id}</div>,
-  },
-  {
-    title: "Tên nhân viên",
-    dataIndex: "employee_name",
-    key: "employee_name",
-    render: (_, record: any) => <div>{record.employee_name}</div>,
-  },
-  {
-    title: "Mã khách hàng",
-    dataIndex: "customer_code",
-    key: "customer_code",
-    render: (_, record: any) => <div>{record.customer_code}</div>,
-  },
-  {
-    title: "Tên khách hàng",
-    dataIndex: "customer_name",
-    key: "customer_name",
-    render: (_, record: any) => <div>{record.customer_name}</div>,
-  },
-  {
-    title: "Loại khách hàng",
-    dataIndex: "customer_type",
-    key: "customer_type",
-    render: (_, record: any) => <div>{record.customer_type}</div>,
-  },
-  {
-    title: "Nhóm khách hàng",
-    dataIndex: "customer_group",
-    key: "customer_group",
-    render: (_, record: any) => <div>{record.customer_group}</div>,
-  },
-  {
-    title: "Người liên hệ",
-    dataIndex: "contact_person",
-    key: "contact_person",
-    render: (_, record: any) => (
-      <div className="!w-[175px] truncate hover:whitespace-normal">
-        {record.contact_person}
-      </div>
-    ),
-  },
-  {
-    title: "SDT",
-    dataIndex: "phone",
-    key: "phone",
-    render: (_, record: any) => <div>{record.phone}</div>,
-  },
-  {
-    title: "Mã số thuế",
-    dataIndex: "tax_id",
-    key: "tax_id",
-    render: (_, record: any) => <div>{record.tax_id}</div>,
-  },
-  {
-    title: "Khu vực",
-    dataIndex: "territory",
-    key: "territory",
-    render: (_, record: any) => <div>{record.territory}</div>,
-  },
-  {
-    title: "Địa chỉ",
-    dataIndex: "address",
-    key: "address",
-    render: (_, record: any) => (
-      <div className="!w-[175px] truncate hover:whitespace-normal">
-        {record.address}
-      </div>
-    ),
-  },
-  {
-    title: "Ngày viếng thăm",
-    dataIndex: "date_checkin",
-    key: "date_checkin",
-    render: (_, record: any) => (
-      <div>
-        {record.date_checkin
-          ?.split("-")
-          ?.reverse()
-          ?.toString()
-          ?.replaceAll(",", "-")}
-      </div>
-    ),
-  },
-];
+import { useMediaQuery } from "@/hooks/useMediaQuery";
+import { mediaQuery, PAGE_SIZE } from "@/constant";
+import Filter_group from "@/components/filter-group/Filter_group";
+import DropDownFilter from "@/components/filter-group/dropDownFilter";
+import ReportHeader from "../ReportHeader/ReportHeader";
+import { useSelector } from "react-redux";
 
 export default function ReportCheckinFirst() {
+  const columns: TableColumnsType<DataCheckinFirst> = [
+    {
+      title: "STT",
+      dataIndex: "stt",
+      key: "stt",
+      width: 60,
+      render: (_: any, __: any, index: number) => (
+        <span>{calculateIndex(page, PAGE_SIZE, index)}</span> // Tính toán index cho từng dòng
+      ),
+    },
+    {
+      title: "Nhóm bán hàng",
+      dataIndex: "sales_team",
+      key: "sales_team",
+      render: (_, record: any) => <div>{record.sales_team}</div>,
+    },
+    {
+      title: "Mã nhân viên",
+      dataIndex: "employee_id",
+      key: "employee_id",
+      render: (_, record: any) => <div>{record.employee_id}</div>,
+    },
+    {
+      title: "Tên nhân viên",
+      dataIndex: "sales_person",
+      key: "sales_person",
+      render: (_, record: any) => <div>{record.sales_person}</div>,
+    },
+    {
+      title: "Mã khách hàng",
+      dataIndex: "customer_code",
+      key: "customer_code",
+      render: (_, record: any) => <div>{record.customer_code}</div>,
+    },
+    {
+      title: "Tên khách hàng",
+      dataIndex: "customer_name",
+      key: "customer_name",
+      render: (_, record: any) => <div>{record.customer_name}</div>,
+    },
+    {
+      title: "Loại khách hàng",
+      dataIndex: "customer_type",
+      key: "customer_type",
+      render: (_, record: any) => <div>{record.customer_type}</div>,
+    },
+    {
+      title: "Nhóm khách hàng",
+      dataIndex: "customer_group",
+      key: "customer_group",
+      render: (_, record: any) => <div>{record.customer_group}</div>,
+    },
+    {
+      title: "Người liên hệ",
+      dataIndex: "contact_person",
+      key: "contact_person",
+      render: (_, record: any) => (
+        <div className="!w-[175px] truncate hover:whitespace-normal">
+          {record.contact_person}
+        </div>
+      ),
+    },
+    {
+      title: "SDT",
+      dataIndex: "phone",
+      key: "phone",
+      render: (_, record: any) => <div>{record.phone}</div>,
+    },
+    {
+      title: "Mã số thuế",
+      dataIndex: "tax_id",
+      key: "tax_id",
+      render: (_, record: any) => <div>{record.tax_id}</div>,
+    },
+    {
+      title: "Khu vực",
+      dataIndex: "territory",
+      key: "territory",
+      render: (_, record: any) => <div>{record.territory}</div>,
+    },
+    {
+      title: "Địa chỉ",
+      dataIndex: "address",
+      key: "address",
+      render: (_, record: any) => (
+        <div className="!w-[175px] truncate hover:whitespace-normal">
+          {record.address}
+        </div>
+      ),
+    },
+    {
+      title: "Ngày viếng thăm",
+      dataIndex: "date_checkin",
+      key: "date_checkin",
+      render: (_, record: any) => (
+        <div>
+          {record.date_checkin
+            ?.split("-")
+            ?.reverse()
+            ?.toString()
+            ?.replaceAll(",", "-")}
+        </div>
+      ),
+    },
+  ];
   const [dataReport, setDataReport] = useState<DataCheckinFirst[]>([]);
   const [total, setTotal] = useState<number>(0);
-  const PAGE_SIZE = 20;
-  const [formFilter] = useForm();
   const [page, setPage] = useState<number>(1);
-  const [listDepartment, setListDepartment] = useState<any[]>([]);
-  const [department, setDepartment] = useState("");
-  const [keySDepartment, setKeySDepartment] = useState("");
-  let keySearchDepartment = useDebounce(keySDepartment, 500);
-  const [employee, setEmployee] = useState("");
-  const [listEmployees, setListEmployees] = useState<any[]>([]);
-  const [keySEmployee, setKeySEmployee] = useState("");
-  let keySearchEmployee = useDebounce(keySEmployee, 500);
-  const [customer_group, setCustomerGroup] = useState("");
-  const [listCustomerGroup, setListCustomerGroup] = useState<any[]>([]);
-  const [keySCustomerGroup, setKeySCustomerGroup] = useState("");
-  let keySearchCustomerGroup = useDebounce(keySCustomerGroup, 500);
-  const [customer_type, setCustomerType] = useState("");
-  const [territory, setTerritory] = useState("");
-  const [listTerritory, setListTerritory] = useState<any[]>([]);
-  const [keySTerritory, setKeySTerritory] = useState("");
-  let keySearchTerritory = useDebounce(keySTerritory, 500);
-  const [from_date, setFromDate] = useState<any>(start);
-  const [to_date, setToDate] = useState<any>(end);
-  const [listSales, setListSales] = useState<any[]>([]);
-  const [sales_team, setTeamSale] = useState<string>();
-  const [keySearch4, setKeySearch4] = useState("");
-  let seachbykey = useDebounce(keySearch4);
-  const containerRef1 = useRef(null);
+
   const size = useResize();
-  const [containerHeight, setContainerHeight] = useState<any>(0);
-  const [scrollYTable1, setScrollYTable1] = useState<number>(size?.h * 0.52);
+  const matchMedia = useMediaQuery(`${mediaQuery}`);
   const [refresh, setRefresh] = useState<boolean>(false);
 
-  useEffect(() => {
-    setScrollYTable1(size.h * 0.52);
-  }, [size]);
-
-  useEffect(() => {
-    const containerElement = containerRef1.current;
-    if (containerElement) {
-      const resizeObserver = new ResizeObserver((entries) => {
-        for (let entry of entries) {
-          setContainerHeight(entry.contentRect.height);
-        }
-      });
-      resizeObserver.observe(containerElement);
-      return () => resizeObserver.disconnect();
-    }
-  }, [containerRef1]);
-
-  const onChange: DatePickerProps["onChange"] = (dateString: any) => {
-    if (dateString === null || dateString === undefined) {
-      setFromDate("");
-    } else if (
-      endOfMonth &&
-      dateString &&
-      dateString.isAfter(endOfMonth, "day")
-    ) {
-      message.error("Từ ngày phải nhỏ hơn hoặc bằng Đến ngày");
-    } else {
-      let fDate = Date.parse(dateString["$d"]) / 1000;
-      setFromDate(fDate);
-    }
+  const { startDate, endDate } = useSelector((state: any) => state.date);
+  const calculateIndex = (
+    pageNumber: number,
+    pageSize: number,
+    index: number
+  ) => {
+    return (pageNumber - 1) * pageSize + index + 1;
   };
-
-  const onChange1: DatePickerProps["onChange"] = (dateString: any) => {
-    if (dateString === null || dateString === undefined) {
-      setToDate("");
-    } else if (
-      startOfMonth &&
-      dateString &&
-      dateString.isBefore(startOfMonth, "day")
-    ) {
-      message.error("Đến ngày phải lớn hơn hoặc bằng Từ ngày");
-    } else {
-      let tDate = Date.parse(dateString["$d"]) / 1000;
-      setToDate(tDate);
-    }
-  };
-
-  useEffect(() => {
-    (async () => {
-      let rsDepartment: any = await AxiosService.get(
-        "/api/method/frappe.desk.search.search_link",
-        {
-          params: {
-            txt: keySearchDepartment,
-            doctype: "Department",
-            ignore_user_permissions: 0,
-            query: "",
-          },
-        }
-      );
-
-      let { message: results } = rsDepartment;
-
-      console.log("Customer Group", results);
-
-      setListDepartment(
-        results.map((dtDepartment: any) => ({
-          value: dtDepartment.value.trim(),
-          label: dtDepartment.value.trim(),
-        }))
-      );
-    })();
-  }, [keySearchDepartment]);
-
-  useEffect(() => {
-    (async () => {
-      let rsSales: rsData<listSale[]> = await AxiosService.get(
-        "/api/method/mbw_dms.api.router.get_team_sale"
-      );
-
-      setListSales(
-        treeArray({
-          data: rsSales.result.map((team_sale: listSale) => ({
-            title: team_sale.name,
-            value: team_sale.name,
-            ...team_sale,
-          })),
-          keyValue: "value",
-          parentField: "parent_sales_person",
-        })
-      );
-    })();
-  }, []);
-  useEffect(() => {
-    (async () => {
-      let rsEmployee: rsDataFrappe<employee[]> = await AxiosService.get(
-        "/api/method/mbw_dms.api.router.get_sale_person",
-        {
-          params: {
-            team_sale: sales_team,
-            key_search: seachbykey,
-          },
-        }
-      );
-      let { message: results } = rsEmployee;
-      setListEmployees(
-        results.map((employee_filter: employee) => ({
-          value: employee_filter.employee_code,
-          label: employee_filter.employee_name || employee_filter.employee_code,
-        }))
-      );
-    })();
-  }, [sales_team, seachbykey]);
-
-  useEffect(() => {
-    (async () => {
-      let rsCustomerGroup: any = await AxiosService.get(
-        "/api/method/frappe.desk.search.search_link",
-        {
-          params: {
-            txt: keySearchCustomerGroup,
-            doctype: "Customer Group",
-            ignore_user_permissions: 0,
-            query: "",
-          },
-        }
-      );
-
-      let { message: results } = rsCustomerGroup;
-
-      setListCustomerGroup(
-        results.map((dtCustomerGroup: any) => ({
-          value: dtCustomerGroup.value.trim(),
-          label: dtCustomerGroup.value.trim(),
-        }))
-      );
-    })();
-  }, [keySearchCustomerGroup]);
-
-  useEffect(() => {
-    (async () => {
-      let rsTerritory: any = await AxiosService.get(
-        "/api/method/frappe.desk.search.search_link",
-        {
-          params: {
-            txt: keySearchTerritory,
-            doctype: "Territory",
-            ignore_user_permissions: 0,
-            query: "",
-          },
-        }
-      );
-
-      let { message: results } = rsTerritory;
-
-      setListTerritory(
-        results.map((dtTerritory: any) => ({
-          value: dtTerritory.value,
-          label: dtTerritory.value,
-        }))
-      );
-    })();
-  }, [keySearchTerritory]);
+  const { sales_team, employee, customer_type, customer_group, territory } =
+    useSelector((state: any) => state.group);
 
   useEffect(() => {
     (async () => {
@@ -370,250 +145,93 @@ export default function ReportCheckinFirst() {
           params: {
             page_size: PAGE_SIZE,
             page_number: page,
-            department: department,
-            employee: employee,
+            sales_person: employee,
             customer_group: customer_group,
             customer_type: customer_type,
             territory: territory,
-            from_date: from_date,
-            to_date: to_date,
+            from_date: startDate,
+            to_date: endDate,
           },
         }
       );
 
       let { result } = rsData;
 
-      console.log("dt", result);
-
       setDataReport(result);
       setTotal(result?.totals);
     })();
   }, [
     page,
-    department,
     employee,
     customer_group,
     customer_type,
     territory,
-    from_date,
-    to_date,
+    startDate,
+    endDate,
     refresh,
   ]);
-
-  const handleSearchFilter = (val: any) => {
-    if (val.customergroup) {
-      setCustomerGroup(val.customergroup);
-    } else {
-      setCustomerGroup("");
-    }
-    if (val.customertype) {
-      setCustomerType(val.customertype);
-    } else {
-      setCustomerType("");
-    }
-    if (val.territory) {
-      setTerritory(val.territory);
-    } else {
-      setTerritory("");
-    }
-    setPage(1);
-  };
 
   return (
     <>
       <ContentFrame
         header={
-          <HeaderPage
-            title="Báo cáo thống kê khách hàng viếng thăm lần đầu"
-            buttons={[
-              {
-                icon: <SyncOutlined className="text-xl" />,
-                size: "18px",
-                className: "flex mr-2 ",
-                action: () => {
-                  setRefresh((prev) => !prev);
-                },
-              },
-              {
-                label: "Xuất dữ liệu",
-                type: "primary",
-                icon: <VerticalAlignBottomOutlined className="text-xl" />,
-                size: "18px",
-                className: "flex items-center",
-                action: () => {
-                  translationUrl("/app/data-export/Data%20Export");
-                },
-              },
-            ]}
-          />
-        }
-      >
-        <div className="bg-white rounded-2xl pt-4 pb-7 border-[#DFE3E8] border-[0.2px] border-solid">
-          <Row gutter={[16, 16]} className="justify-between items-end w-full">
-            <Col className="ml-4">
-              <Row gutter={[8, 8]}>
-                <Col span={5}>
-                  <DatePicker
-                    format={"DD-MM-YYYY"}
-                    className="!bg-[#F4F6F8] w-full rounded-lg h-7"
-                    placeholder="Từ ngày"
-                    onChange={onChange}
-                    defaultValue={startOfMonth}
-                  />
-                </Col>
-                <Col span={5}>
-                  <DatePicker
-                    format={"DD-MM-YYYY"}
-                    className="!bg-[#F4F6F8] w-full rounded-lg h-7"
-                    onChange={onChange1}
-                    placeholder="Đến ngày"
-                    defaultValue={endOfMonth}
-                  />
-                </Col>
-                <Col span={7}>
-                  <TreeSelectCommon
-                    placeholder="Tất cả nhóm bán hàng"
-                    allowClear
-                    showSearch
-                    treeData={listSales}
-                    onChange={(value: string) => {
-                      setTeamSale(value);
-                    }}
-                    dropdownStyle={{
-                      maxHeight: 400,
-                      overflow: "auto",
-                      minWidth: 350,
-                    }}
-                  />
-                </Col>
-                <Col span={7}>
-                  <SelectCommon
-                    filterOption={false}
-                    notFoundContent={null}
-                    allowClear
-                    showSearch
-                    placeholder="Tất cả nhân viên"
-                    onSearch={(value: string) => {
-                      setKeySearch4(value);
-                    }}
-                    options={listEmployees}
-                    onSelect={(value: any) => {
-                      setEmployee(value);
-                      setPage(1);
-                    }}
-                    onClear={() => {
-                      setEmployee("");
-                    }}
-                  />
-                </Col>
-              </Row>
-            </Col>
-            <Col className="!ml-4">
-              <div className="flex flex-wrap items-center">
-                <div className="flex justify-center items-center mr-4">
-                  <Dropdown
-                    className="!h-8"
-                    placement="bottomRight"
-                    trigger={["click"]}
-                    dropdownRender={() => (
-                      <DropDownCustom title={"Bộ lọc"}>
-                        <div className="">
-                          <Form
-                            layout="vertical"
-                            form={formFilter}
-                            onFinish={handleSearchFilter}
-                          >
-                            <Form.Item
-                              name="customertype"
-                              label={"Loại khách hàng"}
-                              className="w-[468px] border-none"
-                            >
-                              <SelectCommon
-                                className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
-                                options={typecustomer}
-                                allowClear
-                                showSearch
-                                placeholder="Tất cả loại khách hàng"
-                              />
-                            </Form.Item>
-
-                            <Form.Item
-                              name="customergroup"
-                              label={"Nhóm khách hàng"}
-                              className="w-[468px] border-none"
-                            >
-                              <SelectCommon
-                                className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
-                                options={listCustomerGroup}
-                                allowClear
-                                onSearch={(value: string) => {
-                                  setKeySCustomerGroup(value);
-                                }}
-                                showSearch
-                                placeholder="Tất cả nhóm khách hàng"
-                              />
-                            </Form.Item>
-
-                            <Form.Item
-                              name="territory"
-                              label={"Khu vực"}
-                              className="w-[468px] border-none"
-                            >
-                              <SelectCommon
-                                className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
-                                options={listTerritory}
-                                allowClear
-                                onSearch={(value: string) => {
-                                  setKeySTerritory(value);
-                                }}
-                                showSearch
-                                placeholder="Tất cẩ khu vực"
-                              />
-                            </Form.Item>
-                          </Form>
-                        </div>
-                        <Row className="justify-between pt-6 pb-4">
-                          <div></div>
-                          <div>
-                            <Button
-                              className="mr-3"
-                              onClick={(ev: any) => {
-                                ev.preventDefault();
-                                formFilter.resetFields();
-                              }}
-                            >
-                              Đặt lại
-                            </Button>
-                            <Button
-                              type="primary"
-                              onClick={() => {
-                                formFilter.submit();
-                              }}
-                            >
-                              Áp dụng
-                            </Button>
-                          </div>
-                        </Row>
-                      </DropDownCustom>
-                    )}
-                  >
-                    <Button
-                      onClick={(e: any) => e.preventDefault()}
-                      className="flex items-center text-nowrap !text-[13px] !leading-[21px] !font-normal  border-r-[0.1px] rounded-r-none h-8"
-                      icon={<LuFilter style={{ fontSize: "20px" }} />}
-                    >
-                      Bộ lọc
-                    </Button>
-                  </Dropdown>
-                  <Button className="border-l-[0.1px] rounded-l-none !h-8">
-                    <LuFilterX style={{ fontSize: "20px" }} />
-                  </Button>
-                </div>
+          <ReportHeader
+            setRefresh={setRefresh}
+            title={
+              <div className="min-w-[230px] ">
+                Báo cáo thống kê khách hàng viếng thăm lần đầu
               </div>
+            }
+            params={{
+              report_type: "Report Customer Checkin",
+              data_filter: {
+                sales_person: employee,
+                customer_group: customer_group,
+                customer_type: customer_type,
+                territory: territory,
+                from_date: startDate,
+                to_date: endDate,
+              },
+            }}
+            file_name="Report Customer Checkin.xlsx"
+          />
+        }>
+        <div className="bg-white rounded-2xl pt-4 pb-7 border-[#DFE3E8] border-[0.2px] border-solid">
+          <Row
+            gutter={[16, 16]}
+            className={`flex ${
+              matchMedia ? "justify-end" : "justify-between"
+            } items-center w-full`}>
+            {!matchMedia && (
+              <Col className="ml-4 w-[78%]">
+                <Row gutter={[8, 8]} className="space-x-4">
+                  <Filter_group
+                    setPage={setPage}
+                    inputFromDate
+                    inputToDate
+                    inputSaleGroup
+                    inputEmployee
+                  />
+                </Row>
+              </Col>
+            )}
+
+            <Col className="!ml-4">
+              <DropDownFilter
+                inputCustomerType
+                inputCustomerGroup
+                inputTerritory
+                inputFromDate
+                inputToDate
+                inputSaleGroup
+                inputEmployee
+                setPage={setPage}
+                matchMedia={!matchMedia}
+              />
             </Col>
           </Row>
 
-          <div ref={containerRef1} className="pt-5">
+          <div className="pt-5">
             <TableCustom
               dataSource={dataReport?.data?.map(
                 (dataCheckin: DataCheckinFirst) => {
@@ -626,7 +244,8 @@ export default function ReportCheckinFirst() {
               bordered
               scroll={{
                 x: 3000,
-                y: containerHeight < 400 ? undefined : scrollYTable1,
+                // y: containerHeight < 400 ? undefined : scrollYTable1,
+                y: dataReport?.data?.length > 0 ? size?.h * 0.55 : undefined,
               }}
               pagination={
                 total && total > PAGE_SIZE

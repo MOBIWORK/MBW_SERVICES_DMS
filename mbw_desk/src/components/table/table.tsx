@@ -66,7 +66,7 @@ export const TableCustom = styled(Table)<{
 }
 & .ant-table-container .ant-table-cell{
   font-size: 14px!important;
-  font-weight:500;
+  font-weight:400;
   letter-spacing: normal!important;
 }
 

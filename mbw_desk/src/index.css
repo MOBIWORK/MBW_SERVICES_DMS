@@ -3,8 +3,8 @@
 @tailwind utilities;
 
 body,#root {
-  width: 100vw;
-  height: 100vh;
+  width: 100vw!important;
+  height: 100vh!important;
   margin: 0;
 }
 .custom-slider-container {
@@ -150,6 +150,6 @@ body, * {
 
 /* Set the width of the scrollbar */
 ::-webkit-scrollbar {
-  width: 8px; /* Width of the scrollbar */
-  height: 8px; /* Height of the scrollbar (for horizontal scrollbar) */
+  width: 8px!important; /* Width of the scrollbar */
+  height: 8px!important; /* Height of the scrollbar (for horizontal scrollbar) */
 }

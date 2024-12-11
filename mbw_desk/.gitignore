@@ -21,8 +21,9 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
-.env.development
-
 node_modules
 
 src/auth
+
+.env.cuongbn
+.env.development

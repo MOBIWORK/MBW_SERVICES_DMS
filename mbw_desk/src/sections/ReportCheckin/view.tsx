@@ -1,160 +1,146 @@
-import { SyncOutlined, VerticalAlignBottomOutlined } from "@ant-design/icons";
-import {
-  ContentFrame,
-  DropDownCustom,
-  HeaderPage,
-  SelectCommon,
-  TableCustom,
-} from "../../components";
-import {
-  Button,
-  Col,
-  DatePicker,
-  Dropdown,
-  Form,
-  message,
-  Modal,
-  Row,
-  Table,
-} from "antd";
-import { DatePickerProps, TableColumnsType } from "antd/lib";
-import { useEffect, useRef, useState } from "react";
-import useDebounce from "../../hooks/useDebount";
-import { rsData, rsDataFrappe } from "../../types/response";
+/** @format */
+import { ContentFrame, TableCustom } from "../../components";
+import { Col, Row, Table } from "antd";
+import { TableColumnsType } from "antd/lib";
+import { useEffect, useState } from "react";
 import { AxiosService } from "../../services/server";
-import { employee } from "../../types/employeeFilter";
-import { treeArray } from "@/util";
-import { listSale } from "@/types/listSale";
 import dayjs from "dayjs";
-import { TreeSelectCommon } from "@/components/select/select";
 import { TrueCheck } from "@/icons/true-check";
 import { FalseCheck } from "@/icons/false-check";
-import { typecustomer } from "../ReportSales/data";
-import { useForm } from "antd/es/form/Form";
-import { LuFilter, LuFilterX } from "react-icons/lu";
 import { useResize } from "@/hooks";
 import { ModalDetail } from "./components/ModalCheckin";
 import Detailmodal from "./Detailmodal";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
+import { mediaQuery, PAGE_SIZE } from "@/constant";
+import Filter_group from "@/components/filter-group/Filter_group";
+import DropDownFilter from "@/components/filter-group/dropDownFilter";
+import ReportHeader from "../ReportHeader/ReportHeader";
 
-const startOfMonth: any = dayjs().startOf("month");
-const endOfMonth: any = dayjs().endOf("month");
-let start = Date.parse(startOfMonth["$d"]) / 1000;
-let end = Date.parse(endOfMonth["$d"]) / 1000;
-
-const columnsCheckin: any = [
-  {
-    title: (
-      <div className="relative">
-        <span className="absolute -top-[11px] -left-8">STT</span>
-      </div>
-    ),
-    dataIndex: "stt",
-    key: "stt",
-    render: (_, record: any, index: number) => index + 1,
-  },
-  {
-    title: "Mã nhân viên",
-    dataIndex: "employee_code",
-    key: "employee_code",
-  },
-  {
-    title: "Tên nhân viên",
-    dataIndex: "employee_name",
-    key: "employee_name",
-  },
-  {
-    title: "Nhóm bán hàng",
-    dataIndex: "sale_group",
-    key: "sale_group",
-  },
-  {
-    title: "Ngày",
-    dataIndex: "create_time",
-    key: "create_time",
-    render: (value: any) => <div>{dayjs.unix(value).format("DD/MM/YYYY")}</div>,
-  },
-  {
-    title: "Thứ",
-    dataIndex: "create_time",
-    key: "create_time",
-    render: (value: any) => <div>{dayjs.unix(value).format("dddd")}</div>,
-  },
-  {
-    title: "Giờ làm",
-    className: "!text-center",
-    dataIndex: "total_time",
-    key: "total_time",
-    render: (value: any) => (
-      <div className="!text-center">{parseFloat((value / 60).toFixed(2))}</div>
-    ),
-  },
-  {
-    title: "Giờ viếng thăm",
-    dataIndex: "total_work",
-    className: "!text-center",
-    key: "total_work",
-    render: (value: any) => (
-      <div className="!text-center">{parseFloat((value / 60).toFixed(2))}</div>
-    ),
-  },
-  {
-    title: "Số km tự động (km)",
-    dataIndex: "kmauto",
-    className: "!text-center",
-    key: "kmauto",
-    render: (value: any) => (
-      <div className="!text-center">{value ? value : <div className="min-w-[30px]">-</div>}</div>
-    ),
-  },
-  {
-    title: "Số km di chuyển (km)",
-    className: "!text-center",
-    dataIndex: "kmmove",
-    key: "kmmove",
-    render: (value: any) => (
-      <div className="!text-center">{value ? value : <div className="min-w-[40px]">-</div>}</div>
-    ),
-  },
-  {
-    title: "Vận tốc (km/h)",
-    dataIndex: "speed",
-    className: "!text-center",
-    key: "kmmove",
-    render: (value: any) => (
-      <div className="!text-center">{value ? value : <div className="min-w-[20px]">-</div>}</div>
-    ),
-  },
-];
+import { useSelector } from "react-redux";
 
 export default function ReportCheckin() {
+  const columnsCheckin: any = [
+    {
+      title: (
+        <div className="relative">
+          <span className="absolute -top-[11px] -left-8">STT</span>
+        </div>
+      ),
+      dataIndex: "stt",
+      key: "stt",
+      width: 60,
+      render: (_: any, __: any, index: number) => (
+        <span>{calculateIndex(page, PAGE_SIZE, index)}</span> // Tính toán index cho từng dòng
+      ),
+    },
+    {
+      title: <div className="!min-w-[100px]">Mã Nhân viên</div>,
+      dataIndex: "employee_code",
+      key: "employee_code",
+    },
+    {
+      title: "Tên nhân viên",
+      dataIndex: "employee_name",
+      key: "employee_name",
+    },
+    {
+      title: "Nhóm bán hàng",
+      dataIndex: "sale_group",
+      key: "sale_group",
+      width: 200,
+    },
+    {
+      title: "Ngày",
+      dataIndex: "create_time",
+      key: "create_time",
+      render: (value: any) => (
+        <div>{dayjs.unix(value).format("DD/MM/YYYY")}</div>
+      ),
+    },
+    {
+      title: "Thứ",
+      dataIndex: "create_time",
+      key: "create_time",
+      render: (value: any) => <div>{dayjs.unix(value).format("dddd")}</div>,
+    },
+    {
+      title: "Giờ làm",
+      className: "!text-center",
+      dataIndex: "total_work",
+      key: "total_work",
+      render: (value: any) => (
+        <div className="!text-center">
+          {parseFloat((value / 60).toFixed(2))}
+        </div>
+      ),
+    },
+    {
+      title: "Giờ viếng thăm",
+      dataIndex: "total_time",
+      className: "!text-center",
+      width: 130,
+      key: "total_time",
+      render: (value: any) => (
+        <div className="!text-center">
+          {parseFloat((value / 60).toFixed(2))}
+        </div>
+      ),
+    },
+    {
+      title: "Số km tự động (km)",
+      dataIndex: "kmauto",
+      className: "!text-center",
+      key: "kmauto",
+      width: 130,
+      render: (value: any) => (
+        <div className="!text-center">
+          {value ? value : <div className="min-w-[50px]">-</div>}
+        </div>
+      ),
+    },
+    {
+      title: "Số km di chuyển (km)",
+      className: "!text-center",
+      dataIndex: "kmmove",
+      key: "kmmove",
+      width: 160,
+      render: (value: any) => (
+        <div className="!text-center">
+          {value ? value : <div className="min-w-[50px]">-</div>}
+        </div>
+      ),
+    },
+    {
+      title: "Vận tốc (km/h)",
+      dataIndex: "speed",
+      className: "!text-center",
+      key: "kmmove",
+      width: 130,
+      render: (value: any) => (
+        <div className="!text-center">
+          {value ? value : <div className="min-w-[50px]">-</div>}
+        </div>
+      ),
+    },
+  ];
   const [dataCheckin, setDataCheckin] = useState<any>([]);
   const [total, setTotal] = useState<number>(0);
-  const PAGE_SIZE = 20;
   const [page, setPage] = useState<number>(1);
-  const [listEmployees, setListEmployees] = useState<any[]>([]);
-  const [listSales, setListSales] = useState<any[]>([]);
-  const [sales_team, setTeamSale] = useState<string>();
-  const [formFilter] = useForm();
-  const [keySearch4, setKeySearch4] = useState("");
-  const [employee, setEmployee] = useState<string>();
-  const [from_date, setFromDate] = useState<any>(start);
-  const [to_date, setToDate] = useState<any>(end);
-  let seachbykey = useDebounce(keySearch4);
   const [refresh, setRefresh] = useState<boolean>(false);
-  const [customer_type, setCustomerType] = useState("");
-  const [listCustomerGroup, setListCustomerGroup] = useState<any[]>([]);
-  const [customer_group, setCustomerGroup] = useState("");
-  const [keySCustomerGroup, setKeySCustomerGroup] = useState("");
-  let keySearchCustomerGroup = useDebounce(keySCustomerGroup, 500);
-  const [territory, setTerritory] = useState("");
-  const [listTerritory, setListTerritory] = useState<any[]>([]);
-  const [keySTerritory, setKeySTerritory] = useState("");
-  let keySearchTerritory = useDebounce(keySTerritory, 500);
-  const containerRef1 = useRef(null);
-  const size = useResize();
-  const [containerHeight, setContainerHeight] = useState<any>(0);
-  const [scrollYTable1, setScrollYTable1] = useState<number>(size?.h * 0.52);
 
+  const size = useResize();
+  const matchMedia = useMediaQuery(`${mediaQuery}`);
+
+  const { startDate, endDate } = useSelector((state: any) => state.date);
+  const { sales_team, employee, customer_type, customer_group, territory } =
+    useSelector((state: any) => state.group);
+  const calculateIndex = (
+    pageNumber: number,
+    pageSize: number,
+    index: number
+  ) => {
+    return (pageNumber - 1) * pageSize + index + 1;
+  };
   const [modal, setModal] = useState<{
     open: boolean;
     id: any;
@@ -170,162 +156,6 @@ export default function ReportCheckin() {
     });
   };
 
-  useEffect(() => {
-    setScrollYTable1(size.h * 0.52);
-  }, [size]);
-
-  useEffect(() => {
-    const containerElement = containerRef1.current;
-    if (containerElement) {
-      const resizeObserver = new ResizeObserver((entries) => {
-        for (let entry of entries) {
-          setContainerHeight(entry.contentRect.height);
-        }
-      });
-      resizeObserver.observe(containerElement);
-      return () => resizeObserver.disconnect();
-    }
-  }, [containerRef1]);
-
-  const onChange: DatePickerProps["onChange"] = (dateString: any) => {
-    if (dateString === null || dateString === undefined) {
-      setFromDate("");
-    } else if (
-      endOfMonth &&
-      dateString &&
-      dateString.isAfter(endOfMonth, "day")
-    ) {
-      message.error("Từ ngày phải nhỏ hơn hoặc bằng Đến ngày");
-    } else {
-      let fDate = Date.parse(dateString["$d"]) / 1000;
-      setFromDate(fDate);
-    }
-  };
-
-  const onChange1: DatePickerProps["onChange"] = (dateString: any) => {
-    if (dateString === null || dateString === undefined) {
-      setToDate("");
-    } else if (
-      startOfMonth &&
-      dateString &&
-      dateString.isBefore(startOfMonth, "day")
-    ) {
-      message.error("Đến ngày phải lớn hơn hoặc bằng Từ ngày");
-    } else {
-      let tDate = Date.parse(dateString["$d"]) / 1000;
-      setToDate(tDate);
-    }
-  };
-
-  const handleSearchFilter = (val: any) => {
-    if (val.customergroup) {
-      setCustomerGroup(val.customergroup);
-    } else {
-      setCustomerGroup("");
-    }
-    if (val.customertype) {
-      setCustomerType(val.customertype);
-    } else {
-      setCustomerType("");
-    }
-    if (val.territory) {
-      setTerritory(val.territory);
-    } else {
-      setTerritory("");
-    }
-    setPage(1);
-  };
-
-  useEffect(() => {
-    (async () => {
-      let rsSales: rsData<listSale[]> = await AxiosService.get(
-        "/api/method/mbw_dms.api.router.get_team_sale"
-      );
-
-      setListSales(
-        treeArray({
-          data: rsSales.result.map((team_sale: listSale) => ({
-            title: team_sale.name,
-            value: team_sale.name,
-            ...team_sale,
-          })),
-          keyValue: "value",
-          parentField: "parent_sales_person",
-        })
-      );
-    })();
-  }, []);
-  useEffect(() => {
-    (async () => {
-      let rsEmployee: rsDataFrappe<employee[]> = await AxiosService.get(
-        "/api/method/mbw_dms.api.router.get_sale_person",
-        {
-          params: {
-            team_sale: sales_team,
-            key_search: seachbykey,
-          },
-        }
-      );
-      let { message: results } = rsEmployee;
-      setListEmployees(
-        results.map((employee_filter: employee) => ({
-          value: employee_filter.employee_code,
-          label: employee_filter.employee_name || employee_filter.employee_code,
-        }))
-      );
-    })();
-  }, [sales_team, seachbykey]);
-
-  useEffect(() => {
-    (async () => {
-      let rsCustomerGroup: any = await AxiosService.get(
-        "/api/method/frappe.desk.search.search_link",
-        {
-          params: {
-            txt: keySearchCustomerGroup,
-            doctype: "Customer Group",
-            ignore_user_permissions: 0,
-            query: "",
-          },
-        }
-      );
-
-      let { message: results } = rsCustomerGroup;
-
-      setListCustomerGroup(
-        results.map((dtCustomerGroup: any) => ({
-          value: dtCustomerGroup.value.trim(),
-          label: dtCustomerGroup.value.trim(),
-        }))
-      );
-    })();
-  }, [keySearchCustomerGroup]);
-
-  useEffect(() => {
-    (async () => {
-      let rsTerritory: any = await AxiosService.get(
-        "/api/method/frappe.desk.search.search_link",
-        {
-          params: {
-            txt: keySearchTerritory,
-            doctype: "Territory",
-            ignore_user_permissions: 0,
-            query: "",
-          },
-        }
-      );
-
-      let { message: results } = rsTerritory;
-
-      setListTerritory(
-        results.map((dtTerritory: any) => ({
-          value: dtTerritory.value,
-          label: dtTerritory.value,
-        }))
-      );
-    })();
-  }, [keySearchTerritory]);
-
   const expandedRowRender = (recordTable: any) => {
     const columns: TableColumnsType<any> = [
       {
@@ -333,10 +163,10 @@ export default function ReportCheckin() {
         dataIndex: "customer",
         key: "customer",
         render: (_, record) => (
-          <div>
-            <div>{record.customer_name}</div>
+          <>
+            <>{record.customer_name}</>
             <div className="text-[#637381]">{record.customer_code}</div>
-          </div>
+          </>
         ),
       },
       {
@@ -345,32 +175,35 @@ export default function ReportCheckin() {
         key: "customer_address",
         width: 200,
         render: (_, record) => (
-          <div className="truncate">{record.customer_address}</div>
+          <div className="truncate hover:whitespace-normal">
+            {record.customer_address}
+          </div>
         ),
       },
       {
-        title: "Loại khách",
+        title: "Loại hình khách hàng",
         dataIndex: "customer_type",
         key: "customer_type",
-        render: (_, record) => <div>{record.customer_type}</div>,
+        width: 200,
+        render: (_, record) => <>{record.customer_type}</>,
       },
       {
         title: "Nhóm khách",
         dataIndex: "customer_group",
         key: "customer_group",
-        render: (_, record) => <div>{record.customer_group}</div>,
+        render: (_, record) => <>{record.customer_group}</>,
       },
       {
         title: "Số điện thoại",
         dataIndex: "customer_sdt",
         key: "customer_sdt",
-        render: (_, record) => <div>{record.customer_sdt}</div>,
+        render: (_, record) => <>{record.customer_sdt}</>,
       },
       {
         title: "Liên hệ",
         dataIndex: "customer_contact",
         key: "customer_contact",
-        render: (_, record) => <div>{record.customer_contact}</div>,
+        render: (_, record) => <>{record.customer_contact}</>,
       },
       {
         title: "Checkin",
@@ -396,7 +229,7 @@ export default function ReportCheckin() {
         key: "time_check",
         render: (value: any) => (
           <div className="!text-center">
-            {parseFloat((value / 60).toFixed(2))}
+            {parseFloat((value / 60).toFixed(3))}
           </div>
         ),
       },
@@ -404,7 +237,11 @@ export default function ReportCheckin() {
         title: "Địa chỉ checkin",
         dataIndex: "checkin_address",
         key: "checkin_address",
-        render: (_, record) => <div>{record.checkin_address}</div>,
+        render: (_, record) => (
+          <div className="truncate hover:whitespace-normal">
+            {record.checkin_address}
+          </div>
+        ),
       },
       {
         title: "Khoảng cách",
@@ -475,13 +312,15 @@ export default function ReportCheckin() {
         render: (value: any) => (
           <div className="!text-left">
             {value ? (
-              <div onClick={() => {
-                // console.log(value);
-                setModal({
-                  open: true,
-                  id: value
-                });
-              }} className="text-[#1877F2] text-sm font-medium- !text-left cursor-pointer underline">
+              <div
+                onClick={() => {
+                  // console.log(value);
+                  setModal({
+                    open: true,
+                    id: value,
+                  });
+                }}
+                className="text-[#1877F2] text-sm font-medium- !text-left cursor-pointer underline">
                 Xem ghi chú
               </div>
             ) : (
@@ -516,13 +355,13 @@ export default function ReportCheckin() {
           params: {
             page_size: PAGE_SIZE,
             page_number: page,
-            from_date: from_date,
-            to_date: to_date,
-            employee: employee,
-            sale_group: sales_team,
-            territory: territory,
-            customer_group: customer_group,
-            customer_type: customer_type,
+            from_date:startDate,
+            to_date:endDate,
+            employee,
+            sales_team,
+            territory,
+            customer_group,
+            customer_type,
           },
         }
       );
@@ -534,8 +373,8 @@ export default function ReportCheckin() {
     })();
   }, [
     page,
-    from_date,
-    to_date,
+    startDate,
+    endDate,
     refresh,
     sales_team,
     employee,
@@ -547,193 +386,58 @@ export default function ReportCheckin() {
     <>
       <ContentFrame
         header={
-          <HeaderPage
-            title="Báo cáo viếng thăm"
-            buttons={[
-              {
-                icon: <SyncOutlined className="text-xl" />,
-                size: "18px",
-                className: "flex mr-2 ",
-                action: () => {
-                  setRefresh((prev) => !prev);
-                },
-              },
-              {
-                label: "Xuất dữ liệu",
-                type: "primary",
-                icon: <VerticalAlignBottomOutlined className="text-xl" />,
-                size: "18px",
-                className: "flex items-center",
-              },
-            ]}
+          <ReportHeader
+          setRefresh={setRefresh}
+          title="Báo cáo viếng thăm"
+          params={{
+            report_type: "Report Checkin",
+            data_filter: {
+              startDate,
+              endDate,
+              employee,
+              sales_team,
+              territory,
+              customer_group,
+              customer_type,
+            },
+          }}
+          file_name="checkin-report.xlsx"
           />
-        }
-      >
+        }>
         <div className="bg-white rounded-2xl pt-4 pb-7  border-[#DFE3E8] border-[0.2px] border-solid">
-          <Row gutter={[16, 16]} className="justify-between items-end w-full">
-            <Col className="ml-4">
-              <Row gutter={[8, 8]}>
-                <Col span={5}>
-                  <DatePicker
-                    format={"DD-MM-YYYY"}
-                    className="!bg-[#F4F6F8] w-full rounded-lg h-7"
-                    placeholder="Từ ngày"
-                    onChange={onChange}
-                    defaultValue={startOfMonth}
+          <Row
+            gutter={[16, 16]}
+            className={`flex ${
+              matchMedia ? "justify-end" : "justify-between"
+            } items-center w-full`}>
+            {!matchMedia && (
+              <Col className="ml-4 w-[78%]">
+                <Row gutter={[8, 8]} className="space-x-4">
+                  <Filter_group
+                    setPage={setPage}
+                    inputFromDate
+                    inputToDate
+                    inputSaleGroup
+                    inputEmployee
                   />
-                </Col>
-                <Col span={5}>
-                  <DatePicker
-                    format={"DD-MM-YYYY"}
-                    className="!bg-[#F4F6F8] w-full rounded-lg h-7"
-                    onChange={onChange1}
-                    placeholder="Đến ngày"
-                    defaultValue={endOfMonth}
-                  />
-                </Col>
-                <Col span={7}>
-                  <TreeSelectCommon
-                    placeholder="Tất cả nhóm bán hàng"
-                    allowClear
-                    showSearch
-                    treeData={listSales}
-                    onChange={(value: string) => {
-                      setTeamSale(value);
-                    }}
-                    dropdownStyle={{
-                      maxHeight: 400,
-                      overflow: "auto",
-                      minWidth: 350,
-                    }}
-                  />
-                </Col>
-                <Col span={7}>
-                  <SelectCommon
-                    filterOption={false}
-                    notFoundContent={null}
-                    allowClear
-                    showSearch
-                    placeholder="Tất cả nhân viên"
-                    onSearch={(value: string) => {
-                      setKeySearch4(value);
-                    }}
-                    options={listEmployees}
-                    onSelect={(value: any) => {
-                      setEmployee(value);
-                      setPage(1);
-                    }}
-                    onClear={() => {
-                      setEmployee("");
-                    }}
-                  />
-                </Col>
-              </Row>
-            </Col>
+                </Row>
+              </Col>
+            )}
             <Col className="!ml-4">
-              <div className="flex flex-wrap items-center">
-                <div className="flex justify-center items-center mr-4">
-                  <Dropdown
-                    className="!h-8"
-                    placement="bottomRight"
-                    trigger={["click"]}
-                    dropdownRender={() => (
-                      <DropDownCustom title={"Bộ lọc"}>
-                        <div className="">
-                          <Form
-                            layout="vertical"
-                            form={formFilter}
-                            onFinish={handleSearchFilter}
-                          >
-                            <Form.Item
-                              name="customertype"
-                              label={"Loại khách hàng"}
-                              className="w-[468px] border-none"
-                            >
-                              <SelectCommon
-                                className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
-                                options={typecustomer}
-                                allowClear
-                                showSearch
-                                placeholder="Tất cả loại khách hàng"
-                              />
-                            </Form.Item>
-
-                            <Form.Item
-                              name="customergroup"
-                              label={"Nhóm khách hàng"}
-                              className="w-[468px] border-none"
-                            >
-                              <SelectCommon
-                                className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
-                                options={listCustomerGroup}
-                                allowClear
-                                onSearch={(value: string) => {
-                                  setKeySCustomerGroup(value);
-                                }}
-                                showSearch
-                                placeholder="Tất cả nhóm khách hàng"
-                              />
-                            </Form.Item>
-
-                            <Form.Item
-                              name="territory"
-                              label={"Khu vực"}
-                              className="w-[468px] border-none"
-                            >
-                              <SelectCommon
-                                className="!bg-[#F4F6F8] options:bg-[#F4F6F8]"
-                                options={listTerritory}
-                                allowClear
-                                onSearch={(value: string) => {
-                                  setKeySTerritory(value);
-                                }}
-                                showSearch
-                                placeholder="Tất cẩ khu vực"
-                              />
-                            </Form.Item>
-                          </Form>
-                        </div>
-                        <Row className="justify-between pt-6 pb-4">
-                          <div></div>
-                          <div>
-                            <Button
-                              className="mr-3"
-                              onClick={(ev: any) => {
-                                ev.preventDefault();
-                                formFilter.resetFields();
-                              }}
-                            >
-                              Đặt lại
-                            </Button>
-                            <Button
-                              type="primary"
-                              onClick={() => {
-                                formFilter.submit();
-                              }}
-                            >
-                              Áp dụng
-                            </Button>
-                          </div>
-                        </Row>
-                      </DropDownCustom>
-                    )}
-                  >
-                    <Button
-                      onClick={(e: any) => e.preventDefault()}
-                      className="flex items-center text-nowrap !text-[13px] !leading-[21px] !font-normal  border-r-[0.1px] rounded-r-none h-8"
-                      icon={<LuFilter style={{ fontSize: "20px" }} />}
-                    >
-                      Bộ lọc
-                    </Button>
-                  </Dropdown>
-                  <Button className="border-l-[0.1px] rounded-l-none !h-8">
-                    <LuFilterX style={{ fontSize: "20px" }} />
-                  </Button>
-                </div>
-              </div>
+              <DropDownFilter
+                inputCustomerType
+                inputCustomerGroup
+                inputTerritory
+                inputFromDate
+                inputToDate
+                inputSaleGroup
+                inputEmployee
+                setPage={setPage}
+                matchMedia={!matchMedia}
+              />
             </Col>
           </Row>
-          <div ref={containerRef1} className="pt-5">
+          <div className="pt-5">
             <TableCustom
               bordered
               $border
@@ -755,8 +459,12 @@ export default function ReportCheckin() {
                   : false
               }
               scroll={{
-                x: true,
-                y: containerHeight < 300 ? undefined : scrollYTable1,
+                x:
+                  dataCheckin?.data?.length > 0 || size?.w < 1567
+                    ? true
+                    : undefined,
+                // y: containerHeight < 300 ? undefined : scrollYTable1,
+                y: dataCheckin?.data?.length > 0 ? size?.h * 0.55 : undefined,
               }}
               columns={columnsCheckin}
               expandable={{ expandedRowRender, defaultExpandedRowKeys: ["0"] }}
@@ -764,13 +472,16 @@ export default function ReportCheckin() {
           </div>
         </div>
         <ModalDetail
-          title={<div className="font-bold text-lg leading-7 text-[#212B36] p-4">Ghi chú</div>}
+          title={
+            <div className="font-bold text-lg leading-7 text-[#212B36] p-4">
+              Ghi chú
+            </div>
+          }
           open={modal.open}
           onCancel={closeModal}
           footer={false}
-          width={800}
-        >
-          <Detailmodal id={modal.id}/>
+          width={800}>
+          <Detailmodal id={modal.id} />
         </ModalDetail>
       </ContentFrame>
     </>
