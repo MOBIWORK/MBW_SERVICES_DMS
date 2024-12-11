@@ -39,6 +39,8 @@ const ReportVisitorSummary_KPI = lazy(
 const ReportProductionDayByDay = lazy(
   () => import("@/pages/ReportProductionDayByDay")
 );
+const Promotion = lazy(() => import("@/pages/Promotion"));
+const PromotionCreate = lazy(() => import("@/pages/PromotionCreate"));
 export const dashboardRoutes = [
   {
     path: "/",
@@ -53,6 +55,14 @@ export const dashboardRoutes = [
       {
         index: true,
         element: <RouterDashboard />,
+      },
+      {
+        path: "promotion",
+        element: <Promotion />,
+      },
+      {
+        path: "promotion/:type",
+        element: <PromotionCreate />,
       },
       {
         path: "router-control",
