@@ -1,0 +1,83 @@
+{
+ "actions": [],
+ "autoname": "field:ten_nhom_ct",
+ "creation": "2024-10-03 09:16:24.848614",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "stt",
+  "ma_nhom_ct",
+  "ten_nhom_ct",
+  "giam_tru_km",
+  "loai_chuong_trinh",
+  "trang_thai",
+  "loai_phieu"
+ ],
+ "fields": [
+  {
+   "fieldname": "stt",
+   "fieldtype": "Int",
+   "label": "STT"
+  },
+  {
+   "fieldname": "ma_nhom_ct",
+   "fieldtype": "Data",
+   "label": "M\u00e3 nh\u00f3m CT"
+  },
+  {
+   "fieldname": "ten_nhom_ct",
+   "fieldtype": "Data",
+   "label": "T\u00ean nh\u00f3m CT",
+   "unique": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "giam_tru_km",
+   "fieldtype": "Check",
+   "label": "Gi\u1ea3m tr\u1eeb KM"
+  },
+  {
+   "fieldname": "loai_chuong_trinh",
+   "fieldtype": "Select",
+   "label": "Lo\u1ea1i ch\u01b0\u01a1ng tr\u00ecnh",
+   "options": "Ch\u1ecdn 1 ch\u01b0\u01a1ng tr\u00ecnh\nCh\u1ecdn nhi\u1ec1u ch\u01b0\u01a1ng tr\u00ecnh"
+  },
+  {
+   "fieldname": "trang_thai",
+   "fieldtype": "Select",
+   "label": "Tr\u1ea1ng th\u00e1i",
+   "options": "Ho\u1ea1t \u0111\u1ed9ng\nKh\u00f3a"
+  },
+  {
+   "fieldname": "loai_phieu",
+   "fieldtype": "Select",
+   "label": "Lo\u1ea1i phi\u1ebfu",
+   "options": "Khuy\u1ebfn m\u1ea1i b\u00e1n h\u00e0ng\nKhuy\u1ebfn m\u1ea1i mua h\u00e0ng\nT\u1ea5t c\u1ea3"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2024-11-26 14:13:43.225660",
+ "modified_by": "Administrator",
+ "module": "MBW DMS",
+ "name": "SFA Group promotion",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
