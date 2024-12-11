@@ -1,0 +1,1 @@
+import{L as r,ae as t}from"./index-Nr-aOhNl.js";import{R as e}from"./view-qTe9_d8a.js";import"./progress-vaz-iBY6.js";import"./index.esm-xzfmr6j7.js";import"./index-mVLyig47.js";function n(){return r.jsxs(r.Fragment,{children:[r.jsx(t,{children:r.jsx("title",{children:" RouterControll"})}),r.jsx(e,{})]})}export{n as default};
