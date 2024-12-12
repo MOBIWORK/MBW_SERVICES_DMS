@@ -867,7 +867,9 @@ def get_report(filters={}):
                             '"customer_sdt":"', COALESCE(cs.mobile_no,''), '",', 
                             '"time_check":"', TIMESTAMPDIFF(MINUTE, dc.checkin_giovao, dc.checkin_giora) + TIMESTAMPDIFF(SECOND, dc.checkin_giovao, dc.checkin_giora)/60, '"
                             }}'
-                        ) SEPARATOR ','
+                        ) 
+                        ORDER BY dc.checkin_giovao ASC
+                        SEPARATOR ','
                     ),
                     ']'
                 ) AS customers,
