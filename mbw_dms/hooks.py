@@ -40,7 +40,7 @@ website_route_rules = [
 doctype_js = {"Payroll Entry": "controllers/payroll_entry.js",
               "Address": "controllers/address.js",
               "Vehicle Log": "controllers/vehicle_log.js",
-              "Sales Order":"api/promotion/sfa_promotion.js"
+              "Sales Order": "api/promotion/sfa_promotion.js"
               }
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}

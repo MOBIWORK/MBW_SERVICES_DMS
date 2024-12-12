@@ -1,8 +1,8 @@
 frappe.ui.form.on('Sales Order', {
-    onload_post_render: function(frm) {
+    before_save: function(frm) {
         frm.set_value('ignore_pricing_rule', 1);
     },
-   refresh: function(frm) {
+    refresh: function(frm) {
         list_promotions = []
         if (frm.doc.docstatus == 0) {
             frm.add_custom_button(__('Get Promotion'), function() {
