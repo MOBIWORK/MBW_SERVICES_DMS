@@ -1,5 +1,5 @@
 frappe.ui.form.on('Sales Order', {
-    onload_post_render: function(frm) {
+    before_save: function(frm) {
         frm.set_value('ignore_pricing_rule', 1);
     },
    refresh: function(frm) {

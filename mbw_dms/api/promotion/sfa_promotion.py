@@ -361,7 +361,7 @@ def TIEN_CKDH(data_Promotion={}, tongTienhang=0):
         if tongTienhang >= float(prd["yeu_cau"]):
             tien_km = prd["khuyen_mai"]
             # Lưu kết qủa nhận được
-            #save_promotionResult(data_Promotion, tien_km)
+            # save_promotionResult(data_Promotion, tien_km)
             break
 
     return tien_km
@@ -478,6 +478,7 @@ def SP_ST_CKSP(list_item=[], data_promotion={}):
                 km_discount = getProductPromotion["khuyen_mai"]
                 item["discount_percentage"] = km_discount
                 item["rate"] = item["rate"] - item["discount_percentage"] * item["rate"] / 100
+
     return list_item
 
 
