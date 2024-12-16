@@ -73,6 +73,10 @@ def validate_date(date_obj):
 def get_available_promotions(**kwargs):
     try:
         kwargs = frappe._dict(kwargs)
+        list_item = kwargs.get("listItem", [])
+        if isinstance(list_item, str):
+            list_item = json.loads(list_item)
+        total_amount = int(kwargs.get("totalAmount", 0))
         customer = kwargs.get("customer")
         item_code_string = kwargs.get("item_code_list", "")
         ma_san_pham_list = item_code_string.split(",")
@@ -227,9 +231,11 @@ def get_available_promotions(**kwargs):
                 ma_san_pham_list = json.loads(ma_san_pham_list) if isinstance(ma_san_pham_list, str) else ma_san_pham_list
                 # Kiểm tra sản phẩm trong danh sách
                 if any(product.get("ma_san_pham") in ma_san_pham_list or product.get("ma_san_pham") == None for product in pro["products"]):
-                    filtered_promotions.append(pro)
+                    if check_available_promotion(list_item=list_item, promtion=pro, total_amount=total_amount):
+                        filtered_promotions.append(pro)
             else:
-                filtered_promotions.append(pro)
+                if check_available_promotion(list_item=list_item, promtion=pro, total_amount=total_amount):
+                    filtered_promotions.append(pro)
 
         # Kiểm tra điều kiện áp dụng khuyến mãi cho khách hàng
         list_promotions_stage = []
@@ -710,3 +716,145 @@ def On_Process_GiamTru(dataKM,objKM, sl, dvt_pass, boi_so_cap):
                 # Uncomment if needed
                 # for item in objProductInPromotion:
                 #     item["gttb"] = gttb
+
+def check_available_promotion(list_item=[], promtion={}, total_amount=0):
+    getProductPromotion = {}
+    if promtion.get("ptype_value") == "SP_SL_CKSP":
+        for item in list_item:
+            product = pydash.filter_(promtion["products"], {"_id": item["item_code"]})
+            # Sắp xếp lại danh sách sản phẩm theo yêu cầu
+            product = sorted(product, key=lambda x: x["yeu_cau"], reverse=True)
+            # Kết quả khuyến mại đạt được
+            for prd in product:
+                if bool(prd["yeu_cau_min"]) and prd["yeu_cau_min"] != 0:
+                    if item["qty"] >= prd["yeu_cau_min"] and item["uom"] == prd["don_vi_tinh"].get("choice_values"):
+                        return True
+                else:
+                    if item["qty"] >= prd["yeu_cau"] and item["uom"] == prd["don_vi_tinh"].get("choice_values"):
+                        return True
+
+    elif promtion.get("ptype_value") == "TIEN_SP":
+        product = sorted(promtion["products"], key=lambda x: x["yeu_cau"], reverse=True)
+        for prd in product:
+            if total_amount >= prd["yeu_cau"]:
+                return True
+
+    elif promtion.get("ptype_value") == "TIEN_TIEN":
+        product = sorted(promtion["products"], key=lambda x: x["yeu_cau"], reverse=True)
+        for prd in product:
+            if total_amount >= prd["yeu_cau"]:
+                return True
+
+    elif promtion.get("ptype_value") == "TIEN_CKDH":
+        product = sorted(promtion["products"], key=lambda x: x["yeu_cau"], reverse=True)
+        for prd in product:
+            if total_amount >= prd["yeu_cau"]:
+                return True
+
+    elif promtion.get("ptype_value") == "SP_SL_SP":
+        for item in list_item:
+            # Tìm sản phẩm khuyến mãi tương ứng với item
+            product = pydash.filter_(promtion.get("products", []), {"_id": item["item_code"]})
+            product = sorted(product, key=lambda x: x["yeu_cau"], reverse=True)
+            sl_pass = 0
+            dvt_pass = ""
+            so_luong = item["qty"]
+            if promtion.get("gpromotion") is not None:
+                sl_chan = next(
+                    (product for product in objProductInPromotion if
+                     product["dvt"] == item["uom"] and product["idsp"] == item["item_code"]),
+                    None
+                )
+                if sl_chan is not None:
+                    so_luong = sl_chan["sl_KhauTru"]
+
+            for prd in product:
+                if bool(prd["yeu_cau_min"]) and prd["yeu_cau_min"] != 0:
+                    if so_luong >= prd["yeu_cau_min"] and item["uom"] == prd["don_vi_tinh"].get("choice_values"):
+                        sl_pass = so_luong
+                        dvt_pass = prd["don_vi_tinh"]
+                        getProductPromotion = prd
+                        break
+                else:
+                    if so_luong >= prd["yeu_cau"] and item["uom"] == prd["don_vi_tinh"].get("choice_values"):
+                        sl_pass = so_luong
+                        dvt_pass = prd["don_vi_tinh"]
+                        getProductPromotion = prd
+                        break
+
+            if getProductPromotion:
+                if so_luong >= getProductPromotion["yeu_cau"] and item["uom"] == getProductPromotion["don_vi_tinh"].get(
+                        "choice_values"):
+                    return True
+
+    elif promtion.get("ptype_value") == "SP_ST_SP":
+        for item in list_item:
+            product = pydash.filter_(promtion.get("products", []), {"_id": item["item_code"]})
+            product = sorted(promtion["products"], key=lambda x: x["yeu_cau"], reverse=True)
+            base_amount = item["qty"] * item["rate"]
+
+            for prd in product:
+                if base_amount >= prd["yeu_cau"] and prd["don_vi_tinh"].get("choice_values"):
+                    getProductPromotion = prd
+                    break
+
+            if bool(getProductPromotion):
+                if base_amount >= getProductPromotion["yeu_cau"] and getProductPromotion["don_vi_tinh"].get("choice_values"):
+                    return True
+
+    elif promtion.get("ptype_value") == "SP_ST_CKSP":
+        for item in list_item:
+            # Sắp xếp lại danh sách sản phẩm theo yêu cầu
+            product = pydash.filter_(promtion["products"], {"_id": item["item_code"]})
+            product = sorted(product, key=lambda x: x["yeu_cau"], reverse=True)
+            base_amount = item["qty"] * item["rate"]
+
+            # Kết quả khuyến mại đạt được
+            for prd in product:
+                if base_amount >= prd["yeu_cau"] and item["uom"] == prd["don_vi_tinh"].get("choice_values"):
+                    getProductPromotion = prd
+                    break
+
+            if bool(getProductPromotion):
+                if base_amount >= getProductPromotion["yeu_cau"] and item["uom"] == getProductPromotion[
+                    "don_vi_tinh"].get("choice_values"):
+                    return True
+    elif promtion.get("ptype_value") == "SP_ST_TIEN":
+        for item in list_item:
+            item_amount = item["rate"] * item["qty"]
+            # Sắp xếp lại danh sách sản phẩm theo yêu cầu
+            product = pydash.filter_(promtion["products"], {"_id": item["item_code"]})
+            product = sorted(product, key=lambda x: x["yeu_cau"], reverse=True)
+
+            # Kết quả khuyến mại đạt được
+            for prd in product:
+                if item_amount >= prd["yeu_cau"] and item["uom"] == prd["don_vi_tinh"].get("choice_values"):
+                    getProductPromotion = prd
+                    break
+
+            if bool(getProductPromotion):
+                if item_amount >= getProductPromotion["yeu_cau"] and item["uom"] == getProductPromotion[
+                    "don_vi_tinh"].get("choice_values"):
+                    return True
+
+    elif promtion.get("ptype_value") == "SP_SL_TIEN":
+        for item in list_item:
+            # Tìm sản phẩm khuyến mãi tương ứng với item
+            product = pydash.filter_(promtion.get("products", []), {"_id": item["item_code"]})
+            product = sorted(product, key=lambda x: x["yeu_cau"], reverse=True)
+
+            for prd in product:
+                if bool(prd["yeu_cau_min"]) and prd["yeu_cau_min"] != 0:
+                    if item["qty"] >= prd["yeu_cau_min"] and item["uom"] == prd["don_vi_tinh"].get("choice_values"):
+                        getProductPromotion = prd
+                        break
+                else:
+                    if item["qty"] >= prd["yeu_cau"] and item["uom"] == prd["don_vi_tinh"].get("choice_values"):
+                        getProductPromotion = prd
+                        break
+
+            if bool(getProductPromotion):
+                if item["qty"] >= getProductPromotion["yeu_cau"] and item["uom"] == getProductPromotion[
+                    "don_vi_tinh"].get("choice_values"):
+                    return True
+    return False
