@@ -925,7 +925,7 @@ def get_report(filters={}):
             total = frappe.db.sql(query2,as_dict=1)
             return gen_response(200,"",{
                 "data": report,
-                "total": total[0].number_of_groups,
+                "totals": total[0].number_of_groups,
                 "page_size": page_size,
                 "page_number": page_number
             })
