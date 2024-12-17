@@ -757,6 +757,9 @@ def get_report(filters={}):
         paging = ""
         if not is_excel:
             paging = f"WHERE row_num > {offset} AND row_num <= {offset} + {page_size};"
+        if is_excel:
+            from_date = validate_filter(type_check="timestamp_to_date", type="start", value=filters.get("startDate"))
+            to_date = validate_filter(type_check="timestamp_to_date", type="end", value=filters.get("endDate"))
         where = "WHERE createdbyemail IS NOT NULL AND is_checkout = 1"
         if sale_group:
             query_sale= f"""
