@@ -2261,7 +2261,7 @@
   "name": "Sales Order-custom_trạng_thái_giao_hàng",
   "no_copy": 0,
   "non_negative": 0,
-  "options": "Chưa giao hàng\nĐang giao hàng\nĐã giao hàng",
+  "options": "Chưa giao hàng\nĐang giao hàng\nĐã giao một phần\nĐã giao đầy đủ",
   "permlevel": 0,
   "placeholder": null,
   "precision": "",
