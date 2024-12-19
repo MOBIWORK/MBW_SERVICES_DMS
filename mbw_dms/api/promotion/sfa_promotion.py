@@ -6,6 +6,7 @@ import copy
 import operator
 from mbw_dms.api.common import exception_handle
 from datetime import datetime, date
+import urllib.parse
 
 
 # Biến lữu trữ các trương trình khuyến mại và kết quả đáp ứng
@@ -75,9 +76,11 @@ def get_available_promotions(**kwargs):
         kwargs = frappe._dict(kwargs)
         list_item = kwargs.get("listItem", [])
         if isinstance(list_item, str):
-            list_item = json.loads(list_item)
+            decoded_list_item = urllib.parse.unquote(list_item)
+            list_item = json.loads(decoded_list_item)
+        
         total_amount = int(kwargs.get("totalAmount", 0))
-        customer = kwargs.get("customer")
+        customer = urllib.parse.unquote(kwargs.get("customer"))
         customerData = frappe.get_doc("Customer", customer)
         status = "Hoạt động"
 
