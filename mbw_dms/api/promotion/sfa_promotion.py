@@ -78,9 +78,6 @@ def get_available_promotions(**kwargs):
             list_item = json.loads(list_item)
         total_amount = int(kwargs.get("totalAmount", 0))
         customer = kwargs.get("customer")
-        item_code_string = kwargs.get("item_code_list", "")
-        ma_san_pham_list = item_code_string.split(",")
-        ma_san_pham_list = [code.strip() for code in ma_san_pham_list if code.strip()]
         customerData = frappe.get_doc("Customer", customer)
         status = "Hoạt động"
 
@@ -227,15 +224,8 @@ def get_available_promotions(**kwargs):
         # Lọc khuyến mãi theo mã sản phẩm
         filtered_promotions = []
         for pro in promotion_list:
-            if ma_san_pham_list:
-                ma_san_pham_list = json.loads(ma_san_pham_list) if isinstance(ma_san_pham_list, str) else ma_san_pham_list
-                # Kiểm tra sản phẩm trong danh sách
-                if any(product.get("ma_san_pham") in ma_san_pham_list or product.get("ma_san_pham") == None for product in pro["products"]):
-                    if check_available_promotion(list_item=list_item, promtion=pro, total_amount=total_amount):
-                        filtered_promotions.append(pro)
-            else:
-                if check_available_promotion(list_item=list_item, promtion=pro, total_amount=total_amount):
-                    filtered_promotions.append(pro)
+            if check_available_promotion(list_item=list_item, promtion=pro, total_amount=total_amount):
+                filtered_promotions.append(pro)
 
         # Kiểm tra điều kiện áp dụng khuyến mãi cho khách hàng
         list_promotions_stage = []
@@ -819,6 +809,7 @@ def check_available_promotion(list_item=[], promtion={}, total_amount=0):
                 if base_amount >= getProductPromotion["yeu_cau"] and item["uom"] == getProductPromotion[
                     "don_vi_tinh"].get("choice_values"):
                     return True
+                
     elif promtion.get("ptype_value") == "SP_ST_TIEN":
         for item in list_item:
             item_amount = item["rate"] * item["qty"]
