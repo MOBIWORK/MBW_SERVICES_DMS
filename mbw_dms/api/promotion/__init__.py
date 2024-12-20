@@ -5,12 +5,14 @@ from mbw_dms.api.validators import validate_filter_timestamp, validate_filter
 import json
 from frappe.desk.utils import provide_binary_file
 from mbw_dms.api.promotion.promotion_excel import MakePromotionExcel
+
+
 @frappe.whitelist(methods="POST")
 def create_promotion(**body):
     try:
-        normal_field = ["code","name_promotion","status","territory","promotion_type","multiple","ptype_name",
-                        "customer_group","ptype_value","gtype_value","customer_type","gpromotion","ctype_value","gpromotion_prioritize",
-                        "customers","is_customer_application_type","is_app","is_archived","banner","description"]
+        normal_field = ["code", "name_promotion", "status", "territory", "promotion_type", "multiple", "ptype_name",
+                        "customer_group", "ptype_value", "gtype_value", "customer_type", "gpromotion", "ctype_value", "gpromotion_prioritize",
+                        "customers", "is_customer_application_type", "is_app", "is_archived", "banner", "description"]
         require_field = ["code", "name_promotion", "status", "ptype_value"]
         json_field = ["products"]
         date_field = ["start_date","end_date"]
@@ -57,12 +59,12 @@ def create_promotion(**body):
 def update_promotion(**body):
     try:
         name = validate_filter(type_check='require', value=body.get('name'))
-        normal_field = ["code","name_promotion","status","territory","promotion_type","multiple","ptype_name",
-                        "customer_group","ptype_value","gtype_value","customer_type","gpromotion","ctype_value","gpromotion_prioritize",
-                        "customers","is_customer_application_type","is_app","is_archived","banner","description"]
+        normal_field =["code", "name_promotion", "status", "territory", "promotion_type", "multiple", "ptype_name",
+                        "customer_group", "ptype_value", "gtype_value", "customer_type", "gpromotion", "ctype_value", "gpromotion_prioritize",
+                        "customers", "is_customer_application_type", "is_app", "is_archived", "banner", "description"]
         require_field = ["code", "name_promotion", "status", "ptype_value"]
         json_field = ["products"]
-        date_field = ["start_date","end_date"]
+        date_field = ["start_date", "end_date"]
         
         newPromotion = frappe.get_doc("SFA Promotion", name)
         
@@ -108,20 +110,24 @@ def update_promotion(**body):
 def export_promotion(**body):
     try:
         import pydash
-        promotion_ids = body.get("promotion_ids","")
+        promotion_ids = body.get("promotion_ids", "")
         array_promo =  promotion_ids.split(";")
-        if len(promotion_ids) ==0 :
-            return gen_response(400,_("No promotion is choosed"))
-        list_promotion = frappe.db.get_all("SFA Promotion",{"name": ["in",array_promo]},["name","ptype_value"])
+
+        if len(promotion_ids) == 0:
+            return gen_response(400, _("No promotion is choosed"))
+        
+        list_promotion = frappe.db.get_all("SFA Promotion", {"name": ["in", array_promo]}, ["name", "ptype_value"])
         check_type_ctkm = {promo.get("ptype_value") for promo in list_promotion}
         if len(check_type_ctkm) > 1:
-            return gen_response(400,_("Select just a promotion type !!"))
+            return gen_response(400, _("Select just a promotion type !!"))
         
         check_type_ctkm = list(check_type_ctkm)
-        excel = MakePromotionExcel(data=list_promotion,type_ctkm=check_type_ctkm[0])
+        excel = MakePromotionExcel(data=list_promotion, type_ctkm=check_type_ctkm[0])
         excel.addStartRowHeader(1)
         excel.addStartRowContent(2)
         excel_file = excel.make()
-        return provide_binary_file("", "xlsx",excel_file.getvalue())
+
+        return provide_binary_file("", "xlsx", excel_file.getvalue())
+    
     except Exception as e:
         return exception_handle(e)
