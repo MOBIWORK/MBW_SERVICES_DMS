@@ -1,12 +1,11 @@
 frappe.ui.form.on('Sales Order', {
-    onload_post_render: function(frm) {
+    before_save: function(frm) {
         frm.set_value('ignore_pricing_rule', 1);
     },
    refresh: function(frm) {
         list_promotions = []
         if (frm.doc.docstatus == 0) {
             frm.add_custom_button(__('Get Promotion'), function() {
-                
 
                 // Gọi API để lấy danh sách khuyến mại và đặt dữ liệu cho bảng
                 frappe.call({
@@ -40,7 +39,7 @@ frappe.ui.form.on('Sales Order', {
                                                 label: 'Promotion name',
                                                 read_only: 1,
                                                 in_list_view: true,
-                                                options: 'MBW Promotion',
+                                                options: 'SFA Promotion',
                                             }
                                         ]
                                     }
@@ -68,7 +67,6 @@ frappe.ui.form.on('Sales Order', {
                     }
                 });
 
-            
             }).addClass('btn-primary');
         }
     }
@@ -85,16 +83,20 @@ function processAfterApplyPromotion(ptype_value, result, frm)
     else if (ptype_value == "SP_SL_TIEN" || ptype_value == "SP_ST_TIEN"){
         apply_discount_amount_to_items(result, frm);
     }
+
     else if (ptype_value == "SP_SL_CKSP" || ptype_value == "SP_ST_CKSP"){
         apply_discount_percent_to_items(result, frm);
     }
-    // Tổng tiền hàng - Tiền 
+
+    // Tổng tiền hàng - Tiền
     else if (ptype_value == "TIEN_TIEN") {
-        frm.set_value("discount_amount", result);
+        frm.set_value("discount_amount", frm.doc.discount_amount + result);
     }
+
     else if (ptype_value == "TIEN_CKDH") {
-        frm.set_value("additional_discount_percentage", result);
-       
+
+        frm.set_value("discount_amount", frm.doc.discount_amount + result);
+
     }
 }
 
@@ -120,29 +122,36 @@ function add_promotionhasApply(allPromotion, frm)
 {
     for(var i=0; i<allPromotion.length; i++)
     {
+        if (!Array.isArray(allPromotion[i].product))
+        {
+            let new_row = frm.add_child("custom_promotions_apply");
+            new_row.promotion_id = allPromotion[i].id;
+            new_row.promotion_name = allPromotion[i].ten_khuyen_mai;
+            new_row.promotion_code = allPromotion[i].code;
+            new_row.promotional_amount = allPromotion[i].product.so_luong;
+        }
         for(var j=0; j<allPromotion[i].product.length; j++)
             {
-                let new_row = frm.add_child("custom_promotion_apply");
+                let new_row = frm.add_child("custom_promotions_apply");
                 new_row.promotion_id = allPromotion[i].id;
                 new_row.promotion_name = allPromotion[i].ten_khuyen_mai;
-                new_row.promotion_code = allPromotion[i].ten_khuyen_mai;
+                new_row.promotion_code = allPromotion[i].code;
                 new_row.promotion_item_code = allPromotion[i].product[j].ma_san_pham;
                 new_row.promotional_item_name = allPromotion[i].product[j].ten_san_pham;
                 new_row.promotional_quantity = allPromotion[i].product[j].so_luong;
                 new_row.promotional_amount = allPromotion[i].product[j].so_tien;
             }
     }
-    
-    frm.refresh_field("custom_promotion_apply");
-}
 
+    frm.refresh_field("custom_promotions_apply");
+}
 
 
 function apply_discount_amount_to_items(result, frm) {
   result.forEach((promo_item) => {
       let filtered_item = frm.doc.items.find((item) => item.item_code === promo_item.item_code);
-      
-      if (filtered_item) {
+
+      if (filtered_item && promo_item.discount_amount > 0) {
           // Cập nhật discount_amount từ promo_item
           filtered_item.discount_amount = promo_item.discount_amount;
 
@@ -157,19 +166,20 @@ function apply_discount_amount_to_items(result, frm) {
 function apply_discount_percent_to_items(result, frm) {
     result.forEach((promo_item) => {
         let filtered_item = frm.doc.items.find((item) => item.item_code === promo_item.item_code);
-        
-        if (filtered_item) {
+
+        if (filtered_item && promo_item.discount_percentage > 0) {
             // Cập nhật discount_amount từ promo_item
             filtered_item.discount_percentage = promo_item.discount_percentage;
-  
+
             // Kích hoạt sự kiện onchange cho trường discount_amount
             frm.script_manager.trigger("discount_percentage", filtered_item.doctype, filtered_item.name);
-  
+
             frm.refresh_field("items");
         }
     });
-  
-  }
+
+}
+
 function onClearPromotion(frm) {
   // Tắt khuyến mại của frappe
   frm.set_value("ignore_pricing_rule", 1);
@@ -178,6 +188,12 @@ function onClearPromotion(frm) {
   frm.doc.items = frm.doc.items.filter(function(item) {
       return item.rate > 0 || !item.is_free_item;
   });
+
+  //Xóa các chương trình khuyến mại trước đó
+  frm.doc.custom_promotions_apply = []
+
+  //Xóa chương trình liên quan đến tổng tiền
+  frm.set_value("discount_amount", 0);
 
   // Làm mới danh sách items sau khi xóa các sp khuyến mại
   frm.refresh_field("items");
@@ -189,6 +205,7 @@ function onClearPromotion(frm) {
 // Lấy khuyến mãi sản phẩm
 function update_item_prices_by_price_list(frm) {
     let total_amount = 0;
+    let count_items = frm.doc.items.length
     frm.doc.items.forEach(function(item) {
         frappe.call({
             method: "erpnext.stock.get_item_details.get_item_details",
@@ -230,29 +247,35 @@ function update_item_prices_by_price_list(frm) {
                     item.rate = r.message.price_list_rate;
                     item.amount = item.rate * item.qty;
                     item.discount_amount = 0;
+                    item.discount_percentage = r.message.discount_percentage;
                     total_amount += item.amount;
                     frm.set_value("total", total_amount);
                     refresh_field("items");
                     frm.refresh_field("total");
-                    // Gọi một server-side method để lấy khuyến mãi
-                    frappe.call({
-                        method: "mbw_dms.api.promotion.sfa_promotion.get_list_promotion",
-                        args: {
-                            listItem: frm.doc.items,
-                            listPromotions: list_promotions,
-                            totalAmount: frm.doc.total
-                        },
-                        callback: function(r) {
-                            if (Array.isArray(r.message)) {
-                                r.message.forEach(function(promotion) {
-                                    processAfterApplyPromotion(promotion.ptype_value, promotion.result, frm);
-                                });
-                            } else {
-                                // Trường hợp không phải danh sách
-                                processAfterApplyPromotion(r.message.ptype_value, r.message.result, frm);
+                    count_items = count_items - 1
+                    if (count_items === 0) {
+                        // Gọi một server-side method để lấy khuyến mãi
+                        frappe.call({
+                            method: "mbw_dms.api.promotion.sfa_promotion.get_list_promotion",
+                            args: {
+                                listItem: frm.doc.items,
+                                listPromotions: list_promotions,
+                                totalAmount: frm.doc.total
+                            },
+                            callback: function (r) {
+                                if (Array.isArray(r.message)) {
+                                    r.message.forEach(function (promotion) {
+                                        processAfterApplyPromotion(promotion.ptype_value, promotion.result, frm);
+                                    });
+                                    if (r.message.length > 0)
+                                    add_promotionhasApply(r.message[0].allPromotion, frm)
+                                } else {
+                                    // Trường hợp không phải danh sách
+                                    processAfterApplyPromotion(r.message.ptype_value, r.message.result, frm);
+                                }
                             }
-                        }
-                    });
+                        });
+                    }
                 }
             },
         });
