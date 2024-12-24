@@ -23,7 +23,6 @@ class PromotionManager:
 
         for promtion in list_promotions:
             promo_result = self.caculate_promotion(list_item, promtion, total_amount)
-            print("List item ", list_item[0])
             if bool(promo_result):
                 promtion_list.append(promo_result)
         return promtion_list
@@ -112,7 +111,6 @@ class PromotionManager:
                 self.obj_promotion_order.append(objKM)
 
         elif objDataKM.ptype_value in ["SP_SL_CKSP", "SP_SL_TIEN", "SP_ST_TIEN", "SP_ST_CKSP"]:
-            print(so_luong)
             objRef = [{"_id": "CKSP", "id_sp": so_luong["_id"], "ma_san_pham": so_luong["ma_san_pham"],
                        "ten_san_pham": so_luong["ten_san_pham"], "don_vi_tinh": so_luong["don_vi_tinh"], "so_luong": 0,
                        "so_tien": so_luong["khuyen_mai"]}]
