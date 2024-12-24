@@ -9,11 +9,468 @@ from datetime import datetime, date
 import urllib.parse
 
 
-# Biến lữu trữ các trương trình khuyến mại và kết quả đáp ứng
-objPromotionOder = []
+class PromotionManager:
+    def __init__(self):
+        # Biến lữu trữ các trương trình khuyến mại và kết quả đáp ứng
+        self.obj_promotion_order = []
+        # Biến lữu trữ các sản phẩm dùng để giảm trừ
+        self.objProductInPromotion = []
 
-# Biến lữu trữ các sản phẩm dùng để giảm trừ
-objProductInPromotion = []
+    def apply_promotion(self, list_item, list_promotions, total_amount):
+        promtion_list = []
+
+        list_promotions = sorted(list_promotions, key=operator.itemgetter('gpromotion_prioritize'))
+
+        for promtion in list_promotions:
+            promo_result = self.caculate_promotion(list_item, promtion, total_amount)
+            print("List item ", list_item[0])
+            if bool(promo_result):
+                promtion_list.append(promo_result)
+        return promtion_list
+
+    # Tính toán khuyến mãi
+    def caculate_promotion(self, list_item=[], promtion={}, total_amount=0):
+        if promtion.get("ptype_value") == "SP_SL_CKSP":
+            ref = self.SP_SL_CKSP(list_item, promtion)
+            if bool(ref):
+                return {"ptype_value": "SP_SL_CKSP", "result": ref, "allPromotion": self.obj_promotion_order}
+            else:
+                return None
+
+        elif promtion.get("ptype_value") == "TIEN_SP":
+            ref = self.TIEN_SP(promtion, total_amount)
+            if bool(ref):
+                return {"ptype_value": "TIEN_SP", "result": ref, "allPromotion": self.obj_promotion_order}
+            else:
+                return None
+
+        elif promtion.get("ptype_value") == "TIEN_TIEN":
+            ref = self.TIEN_TIEN(promtion, total_amount)
+            if bool(ref):
+                return {"ptype_value": "TIEN_TIEN", "result": ref, "allPromotion": self.obj_promotion_order}
+            else:
+                return None
+
+        elif promtion.get("ptype_value") == "TIEN_CKDH":
+            ref = self.TIEN_CKDH(promtion, total_amount)
+            if bool(ref):
+                return {"ptype_value": "TIEN_CKDH", "result": ref, "allPromotion": self.obj_promotion_order}
+            else:
+                return None
+
+        elif promtion.get("ptype_value") == "SP_SL_SP":
+            ref = self.SP_SL_SP(list_item, promtion)
+            if bool(ref):
+                return {"ptype_value": "SP_SL_SP", "result": ref, "allPromotion": self.obj_promotion_order}
+            else:
+                return None
+
+        elif promtion.get("ptype_value") == "SP_ST_SP":
+            ref = self.SP_ST_SP(list_item, promtion)
+            if bool(ref):
+                return {"ptype_value": "SP_ST_SP", "result": ref, "allPromotion": self.obj_promotion_order}
+            else:
+                return None
+
+        elif promtion.get("ptype_value") == "SP_ST_CKSP":
+            ref = self.SP_ST_CKSP(list_item, promtion)
+            if bool(ref):
+                return {"ptype_value": "SP_ST_CKSP", "result": ref, "allPromotion": self.obj_promotion_order}
+            else:
+                return None
+
+        elif promtion.get("ptype_value") == "SP_ST_TIEN":
+            ref = self.SP_ST_TIEN(list_item, promtion)
+            if bool(ref):
+                return {"ptype_value": "SP_ST_TIEN", "result": ref, "allPromotion": self.obj_promotion_order}
+            else:
+                return None
+
+        elif promtion.get("ptype_value") == "SP_SL_TIEN":
+            ref = self.SP_SL_TIEN(list_item, promtion)
+            if bool(ref):
+                return {"ptype_value": "SP_SL_TIEN", "result": ref, "allPromotion": self.obj_promotion_order}
+            else:
+                return None
+
+    # Lưu trữ CTKM
+    def save_promotionResult(self, objDataKM, so_luong, boi_so):
+        if objDataKM.ptype_value in ["TIEN_TIEN", "TIEN_CKDH"]:
+            objRef = {"_id": "CKDH", "ma_san_pham": "", "ten_san_pham": "", "don_vi_tinh": "", "so_luong": so_luong}
+            objKM = {"id": objDataKM.name, "code": objDataKM.code, "ten_khuyen_mai": objDataKM.name_promotion,
+                     "ptype": objDataKM.ptype_value,
+                     "product": objRef}
+
+            item_promotion = pydash.arrays.index_of(pydash.collections.map_(self.obj_promotion_order, "id"),
+                                                    objDataKM.name)
+
+            # If the item exists, update it
+            if item_promotion >= 0:
+                self.obj_promotion_order[item_promotion] = objKM
+            # If the item does not exist, append it
+            else:
+                self.obj_promotion_order.append(objKM)
+
+        elif objDataKM.ptype_value in ["SP_SL_CKSP", "SP_SL_TIEN", "SP_ST_TIEN", "SP_ST_CKSP"]:
+            print(so_luong)
+            objRef = [{"_id": "CKSP", "id_sp": so_luong["_id"], "ma_san_pham": so_luong["ma_san_pham"],
+                       "ten_san_pham": so_luong["ten_san_pham"], "don_vi_tinh": so_luong["don_vi_tinh"], "so_luong": 0,
+                       "so_tien": so_luong["khuyen_mai"]}]
+
+            objKM = {"id": objDataKM.name, "ten_khuyen_mai": objDataKM.name_promotion, "code": objDataKM.code,
+                     "ptype": objDataKM.ptype_value,
+                     "product": objRef}
+
+            item_promotion = pydash.arrays.index_of(pydash.collections.map_(self.obj_promotion_order, "id"),
+                                                    objDataKM.name)
+            # If the item exists, update it
+            if item_promotion >= 0:
+                self.obj_promotion_order[item_promotion] = objKM
+            # If the item does not exist, append it
+            else:
+                self.obj_promotion_order.append(objKM)
+
+        elif objDataKM.ptype_value in ["SP_SL_SP", "SP_ST_SP", "TIEN_SP"]:
+            objProdProt = []
+            productKM = copy.deepcopy(so_luong)  # Deep copy of so_luong
+
+            for km in productKM["khuyen_mai"]:
+                soluong = km["so_luong"]
+                km["so_luong"] = soluong * boi_so
+                objProdProt.append(km)
+
+            objKM = {
+                "id": objDataKM.name,
+                "ten_khuyen_mai": objDataKM.name_promotion,
+                "ptype": objDataKM.ptype_value,
+                "product": objProdProt,
+                "code": objDataKM.code
+            }
+            self.obj_promotion_order.append(objKM)
+
+    # "Trinh" Tổng tiền hàng - chiết khấu đơn hàng (%)
+    def TIEN_CKDH(self, data_Promotion={}, tongTienhang=0):
+        product = sorted(data_Promotion["products"], key=lambda x: x["yeu_cau"], reverse=True)
+        tien_km = 0
+
+        for prd in product:
+            if tongTienhang >= float(prd["yeu_cau"]):
+                tien_km = prd["khuyen_mai"] * tongTienhang / 100
+                # Lưu kết qủa nhận được
+                self.save_promotionResult(data_Promotion, tien_km, 0)
+                break
+
+        return tien_km
+
+    # "Trinh" Tổng tiền hàng - tặng tiền
+    def TIEN_TIEN(self, data_Promotion={}, tongTienhang=0):
+        product = sorted(data_Promotion["products"], key=lambda x: x["yeu_cau"], reverse=True)
+        boi_so = data_Promotion["multiple"]
+        boi_so_cap = 1
+        tien_km = 0
+        for prd in product:
+            if tongTienhang >= float(prd["yeu_cau"]):
+                boi_so_cap = float(tongTienhang / float(prd["yeu_cau"]))
+                tien_km = float(prd["khuyen_mai"])
+                if boi_so:
+                    tien_km = tien_km * boi_so_cap
+
+                # Lưu kết qủa nhận được
+                self.save_promotionResult(data_Promotion, tien_km, boi_so)
+                break
+
+        return tien_km
+
+    # "TuanBD" Tổng tiền hàng - tặng SP
+    def TIEN_SP(self, data_promotion={}, tongTienhang=0):
+        list_free_item = []
+        product = sorted(data_promotion["products"], key=lambda x: x["yeu_cau"], reverse=True)
+
+        boi_so = data_promotion["multiple"]
+        boi_so_cap = 1
+        for prd in product:
+            if tongTienhang >= prd["yeu_cau"]:
+                if bool(boi_so):
+                    boi_so_cap = int(tongTienhang / prd["yeu_cau"])
+
+                for item_km in prd["khuyen_mai"]:
+                    product_promo = {
+                        "item_code": item_km["ma_san_pham"],
+                        "item_name": item_km["ten_san_pham"],
+                        "uom": item_km["don_vi_tinh"].get("choice_values"),
+                        "qty": item_km["so_luong"] * boi_so_cap,
+                        "rate": 0,
+                        "amount": 0,
+                        "is_free_item": True
+                    }
+                    list_free_item.append(product_promo)
+                self.save_promotionResult(data_promotion, prd, boi_so_cap)
+                break
+        return list_free_item
+
+    # "TungDA" Mua sản phẩm - đạt số lượng - chiết khấu SP (%)
+    def SP_SL_CKSP(self, list_item=[], data_promotion={}):
+
+        for item in list_item:
+            getProductPromotion = {}
+            product = pydash.filter_(data_promotion["products"], {"_id": item["item_code"]})
+            # Sắp xếp lại danh sách sản phẩm theo yêu cầu
+            product = sorted(product, key=lambda x: x["yeu_cau"], reverse=True)
+
+            # Chiết khấu hiện tại của sản phẩm
+            current_discount = item.get("discount_percentage", 0)
+            # Kết quả khuyến mại đạt được
+            for prd in product:
+                if bool(prd["yeu_cau_min"]) and prd["yeu_cau_min"] != 0:
+                    if item["qty"] >= prd["yeu_cau_min"] and item["uom"] == prd["don_vi_tinh"].get("choice_values"):
+                        getProductPromotion = prd
+                        break
+                    else:
+                        item["discount_percentage"] = 0
+                else:
+                    if item["qty"] >= prd["yeu_cau"] and item["uom"] == prd["don_vi_tinh"].get("choice_values"):
+                        getProductPromotion = prd
+                        break
+                    else:
+                        item["discount_percentage"] = 0
+
+            if bool(getProductPromotion):
+                if item["qty"] >= getProductPromotion["yeu_cau"] and item["uom"] == getProductPromotion[
+                    "don_vi_tinh"].get(
+                    "choice_values"):
+                    chietKhau_promotion = getProductPromotion["khuyen_mai"]
+                    getProductPromotion["chietKhau_promotion"] = chietKhau_promotion
+
+                    # Cộng giảm giá hiện tại với giảm giá khuyến mãi
+                    item["discount_percentage"] = chietKhau_promotion + current_discount
+                    tongtien_km = item["discount_percentage"] * item["rate"] / 100 * item["qty"]
+                    item["rate"] = item["rate"] - item["discount_percentage"] * item["rate"] / 100
+                    getProductPromotion["khuyen_mai"] = tongtien_km
+                    # Lưu kết quả khuyến mãi
+                    self.save_promotionResult(data_promotion, getProductPromotion, 1)
+
+        return list_item
+
+    # "TuanBD" Mua sản phẩm - đạt số tiền - chiết khấu SP (%)
+    def SP_ST_CKSP(self, list_item=[], data_promotion={}):
+
+        for item in list_item:
+            getProductPromotion = {}
+            # Sắp xếp lại danh sách sản phẩm theo yêu cầu
+            product = pydash.filter_(data_promotion["products"], {"_id": item["item_code"]})
+            product = sorted(product, key=lambda x: x["yeu_cau"], reverse=True)
+            base_amount = item["qty"] * item["rate"]
+
+            # Kết quả khuyến mại đạt được
+            for prd in product:
+                if base_amount >= prd["yeu_cau"] and item["uom"] == prd["don_vi_tinh"].get("choice_values"):
+                    getProductPromotion = prd
+                    break
+                else:
+                    item["discount_percentage"] = 0
+
+            if bool(getProductPromotion):
+                if base_amount >= getProductPromotion["yeu_cau"] and item["uom"] == getProductPromotion[
+                    "don_vi_tinh"].get("choice_values"):
+                    km_discount = getProductPromotion["khuyen_mai"]
+                    item["discount_percentage"] = km_discount
+                    tongtien_km = item["discount_percentage"] * item["rate"] / 100 * item["qty"]
+                    item["rate"] = item["rate"] - item["discount_percentage"] * item["rate"] / 100
+                    getProductPromotion["khuyen_mai"] = tongtien_km
+                    self.save_promotionResult(data_promotion, getProductPromotion, 0)
+
+        return list_item
+
+    # "TuanBD" Mua sản phẩm - đạt số tiền - tặng sản phẩm
+    def SP_ST_SP(self, list_item=[], data_promotion={}):
+        list_free_item = []
+        boi_so = data_promotion.get("multiple", False)
+
+        for item in list_item:
+            getProductPromotion = {}
+            product = pydash.filter_(data_promotion.get("products", []), {"_id": item["item_code"]})
+            product = sorted(data_promotion["products"], key=lambda x: x["yeu_cau"], reverse=True)
+            base_amount = item["qty"] * item["rate"]
+
+            for prd in product:
+                if base_amount >= prd["yeu_cau"] and prd["don_vi_tinh"].get("choice_values"):
+                    getProductPromotion = prd
+                    break
+
+            if bool(getProductPromotion):
+                if base_amount >= prd["yeu_cau"] and prd["don_vi_tinh"].get("choice_values"):
+                    # Tính bội số
+                    boi_so_cap = int(base_amount / getProductPromotion["yeu_cau"]) if boi_so else 1
+
+                    # Thêm sản phẩm khuyến mãi
+                    list_free_item.extend(
+                        {
+                            "item_code": km["ma_san_pham"],
+                            "item_name": km["ten_san_pham"],
+                            "uom": km["don_vi_tinh"].get("choice_values"),
+                            "qty": km["so_luong"] * boi_so_cap,
+                            "rate": 0,
+                            "amount": 0,
+                            "is_free_item": True
+                        }
+                        for km in getProductPromotion["khuyen_mai"]
+                    )
+                    self.save_promotionResult(data_promotion, getProductPromotion, boi_so_cap)
+        return list_free_item
+
+    # "TuanBD" Mua sản phẩm - đạt số tiền - tặng tiền
+    def SP_ST_TIEN(self, list_item=[], data_promotion={}):
+        boi_so = data_promotion.get("multiple", False)
+        boi_so_cap = 1
+
+        for item in list_item:
+            getProductPromotion = {}
+            item_amount = item["rate"] * item["qty"]
+            # Sắp xếp lại danh sách sản phẩm theo yêu cầu
+            product = pydash.filter_(data_promotion["products"], {"_id": item["item_code"]})
+            product = sorted(product, key=lambda x: x["yeu_cau"], reverse=True)
+
+            # Kết quả khuyến mại đạt được
+            for prd in product:
+                if item_amount >= prd["yeu_cau"] and item["uom"] == prd["don_vi_tinh"].get("choice_values"):
+                    getProductPromotion = prd
+                    break
+                else:
+                    item["discount_amount"] = 0
+
+            if bool(getProductPromotion):
+                if item_amount >= getProductPromotion["yeu_cau"] and item["uom"] == getProductPromotion[
+                    "don_vi_tinh"].get(
+                    "choice_values"):
+                    boi_so_cap = int(item_amount / getProductPromotion["yeu_cau"]) if boi_so else 1
+                    item["discount_amount"] = getProductPromotion["khuyen_mai"] * boi_so_cap
+                    getProductPromotion["khuyen_mai"] = item["discount_amount"] * item["qty"]
+                    self.save_promotionResult(data_promotion, getProductPromotion, boi_so_cap)
+
+        return list_item
+
+    # "TuanBD" Mua sản phẩm - đạt số luong - tặng tiền
+    def SP_SL_TIEN(self, list_item=[], data_promotion={}):
+        boi_so = data_promotion.get("multiple", False)
+
+        for item in list_item:
+            # Tìm sản phẩm khuyến mãi tương ứng với item
+            product = pydash.filter_(data_promotion.get("products", []), {"_id": item["item_code"]})
+            product = sorted(product, key=lambda x: x["yeu_cau"], reverse=True)
+            getProductPromotion = {}
+            for prd in product:
+                if bool(prd["yeu_cau_min"]) and prd["yeu_cau_min"] != 0:
+                    if item["qty"] >= prd["yeu_cau_min"] and item["uom"] == prd["don_vi_tinh"].get("choice_values"):
+                        getProductPromotion = prd
+                        break
+                    else:
+                        item["discount_amount"] = 0
+                else:
+                    if item["qty"] >= prd["yeu_cau"] and item["uom"] == prd["don_vi_tinh"].get("choice_values"):
+                        getProductPromotion = prd
+                        break
+                    else:
+                        item["discount_amount"] = 0
+
+            if bool(getProductPromotion):
+                if item["qty"] >= getProductPromotion["yeu_cau"] and item["uom"] == getProductPromotion[
+                    "don_vi_tinh"].get(
+                    "choice_values"):
+                    boi_so_cap = int(item["qty"] / getProductPromotion["yeu_cau"]) if boi_so else 1
+                    item["discount_amount"] = getProductPromotion["khuyen_mai"] * boi_so_cap
+                    getProductPromotion["khuyen_mai"] = item["discount_amount"] * item["qty"]
+                    self.save_promotionResult(data_promotion, getProductPromotion, boi_so_cap)
+
+        return list_item
+
+    # "TuanBD" Mua sản phẩm - đạt số lượng - tặng sản phẩm
+    def SP_SL_SP(self, list_item=[], data_promotion={}):
+        list_free_item = []
+        boi_so = data_promotion.get("multiple", False)
+
+        for item in list_item:
+            getProductPromotion = {}
+            # Tìm sản phẩm khuyến mãi tương ứng với item
+            product = pydash.filter_(data_promotion.get("products", []), {"_id": item["item_code"]})
+            product = sorted(product, key=lambda x: x["yeu_cau"], reverse=True)
+            sl_pass = 0
+            dvt_pass = ""
+            so_luong = item["qty"]
+            if data_promotion.get("gpromotion") is not None:
+                sl_chan = next(
+                    (product for product in self.objProductInPromotion if
+                     product["dvt"] == item["uom"] and product["idsp"] == item["item_code"]),
+                    None
+                )
+                if sl_chan is not None:
+                    so_luong = sl_chan["sl_KhauTru"]
+
+            for prd in product:
+                if bool(prd["yeu_cau_min"]) and prd["yeu_cau_min"] != 0:
+                    if so_luong >= prd["yeu_cau_min"] and item["uom"] == prd["don_vi_tinh"].get("choice_values"):
+                        sl_pass = so_luong
+                        dvt_pass = prd["don_vi_tinh"]
+                        getProductPromotion = prd
+                        break
+                else:
+                    if so_luong >= prd["yeu_cau"] and item["uom"] == prd["don_vi_tinh"].get("choice_values"):
+                        sl_pass = so_luong
+                        dvt_pass = prd["don_vi_tinh"]
+                        getProductPromotion = prd
+                        break
+
+            if getProductPromotion:
+                if so_luong >= getProductPromotion["yeu_cau"] and item["uom"] == getProductPromotion["don_vi_tinh"].get(
+                        "choice_values"):
+                    # Tính bội số
+                    boi_so_cap = int(so_luong / getProductPromotion["yeu_cau"]) if boi_so else 1
+
+                    # Thêm sản phẩm khuyến mãi
+                    list_free_item.extend(
+                        {
+                            "item_code": km["ma_san_pham"],
+                            "item_name": km["ten_san_pham"],
+                            "uom": km["don_vi_tinh"].get("choice_values"),
+                            "qty": km["so_luong"] * boi_so_cap,
+                            "rate": 0,
+                            "amount": 0,
+                            "is_free_item": True
+                        }
+                        for km in getProductPromotion["khuyen_mai"]
+                    )
+                    self.save_promotionResult(data_promotion, getProductPromotion, boi_so_cap)
+                    # Luu so luong san pham da su dung KM
+                    self.On_Process_GiamTru(data_promotion, getProductPromotion, sl_pass, dvt_pass, boi_so_cap)
+        return list_free_item
+
+    # Giảm trừ CTKM
+    def On_Process_GiamTru(self, dataKM, objKM, sl, dvt_pass, boi_so_cap):
+        if dataKM.get("gpromotion") is not None:
+            slCanGiamTru = float(sl) - (objKM["yeu_cau"] * boi_so_cap)
+            hasExsit = False
+            # Khởi tạo objPromotionHasApply bên ngoài điều kiện
+            objPromotionHasApply = None
+            for item in self.objProductInPromotion:
+                if item["idsp"] == objKM["_id"] and item["dvt"] == objKM['don_vi_tinh']['choice_values']:
+                    updateNum = max(item["sl_KhauTru"] - (objKM["yeu_cau"] * boi_so_cap), 0)
+                    item["sl_KhauTru"] = updateNum
+                    hasExsit = True
+                    break
+            if not hasExsit:
+                objPromotionHasApply = {
+                    "idsp": objKM["_id"],
+                    "dvt": objKM['don_vi_tinh']['choice_values'],
+                    "sl_Goc": sl,
+                    "sl_KhauTru": slCanGiamTru,
+                    "don_gia": sl,
+                    "gttb": 0
+                }
+                self.objProductInPromotion.append(objPromotionHasApply)
+
+                # Uncomment if needed
+                # for item in objProductInPromotion:
+                #     item["gttb"] = gttb
+
 
 # Lấy ra danh sách các chương trình khuyến mại
 @frappe.whitelist()
@@ -27,7 +484,6 @@ def get_list_promotion(**kwargs):
     date = nowdate()
     if isinstance(list_item, str):
         list_item = json.loads(list_item)
-
     if customer:
         filters.append(f"cus.customer_code = {frappe.db.escape(customer)}")
     if territory:
@@ -48,7 +504,8 @@ def get_list_promotion(**kwargs):
     list_promotions = frappe.db.sql(sql_query, as_dict=True)
 
     # Loại bỏ các trường không mong muốn
-    fields_to_remove = ["creation", "modified", "modified_by", "owner", "docstatus", "idx", "_user_tags", "_comments", "_assign", "_liked_by"]
+    fields_to_remove = ["creation", "modified", "modified_by", "owner", "docstatus", "idx", "_user_tags", "_comments",
+                        "_assign", "_liked_by"]
     list_promotions = [promo for promo in list_promotions if promo.name_promotion in list_pro]
     for promo in list_promotions:
         for field in fields_to_remove:
@@ -61,13 +518,15 @@ def get_list_promotion(**kwargs):
                 promo["products"] = json.loads(promo["products"])
             except json.JSONDecodeError:
                 promo["products"] = []
-
+    promotion_obj = PromotionManager()
     # Áp dụng CTKM
-    return apply_Promotion(list_item, list_promotions, total_amount)
+    return promotion_obj.apply_promotion(list_item, list_promotions, total_amount)
+
 
 def validate_date(date_obj):
     # Chuyển đổi datetime.date thành chuỗi, sau đó thành timestamp
     return datetime.combine(date_obj, datetime.min.time()).strftime('%Y-%m-%d %H:%M:%S')
+
 
 # Trả về danh sách các khuyến mại đang hoạt động
 @frappe.whitelist()
@@ -78,7 +537,7 @@ def get_available_promotions(**kwargs):
         if isinstance(list_item, str):
             decoded_list_item = urllib.parse.unquote(list_item)
             list_item = json.loads(decoded_list_item)
-        
+
         total_amount = int(kwargs.get("totalAmount", 0))
         customer = urllib.parse.unquote(kwargs.get("customer"))
         customerData = frappe.get_doc("Customer", customer)
@@ -200,7 +659,8 @@ def get_available_promotions(**kwargs):
                     "multiple": row.get("multiple", ""),
                     "start_date": start_date,
                     "end_date": end_date,
-                    "products": json.loads(row.get("products", "[]")) if isinstance(row.get("products", "[]"), str) else [],
+                    "products": json.loads(row.get("products", "[]")) if isinstance(row.get("products", "[]"),
+                                                                                    str) else [],
                     "customers": [],
                     "territory": [],
                     "customer_type": [],
@@ -241,21 +701,6 @@ def get_available_promotions(**kwargs):
     except Exception as e:
         return exception_handle(e)
 
-    
-# Áp dụng CTKM
-def apply_Promotion(list_item=[], list_promotions=[], total_amount=0):
-    global objProductInPromotion
-    objProductInPromotion = [] 
-    promtion_list = []
-   
-    list_promotions = sorted(list_promotions, key=operator.itemgetter('gpromotion_prioritize'))
-    
-    for promtion in list_promotions:
-        promo_result = caculate_promotion(list_item, promtion, total_amount)
-
-        if bool(promo_result):
-            promtion_list.append(promo_result)
-    return promtion_list
 
 # Kiểm tra nếu `scp_customer_codes` không phải là null hoặc không phải chuỗi rỗng
 def check_customer_in_promotion(promotion, customerData):
@@ -264,10 +709,11 @@ def check_customer_in_promotion(promotion, customerData):
     customer_territory = customerData.territory
     customer_group = customerData.customer_group
     customer_type = customerData.sfa_customer_type
-   
+
     if not promotion.get("customers"):
         # trường hợp CTKM cấu hình theo loại nhóm, khu vực
-        if len(promotion.get("territory")) == 0 and len(promotion.get("customer_group")) == 0 and len(promotion.get("customer_type")) == 0:
+        if len(promotion.get("territory")) == 0 and len(promotion.get("customer_group")) == 0 and len(
+                promotion.get("customer_type")) == 0:
             ref = True
         if len(promotion.get("territory")) > 0:
             if customer_territory in promotion.get("territory"):
@@ -282,433 +728,8 @@ def check_customer_in_promotion(promotion, customerData):
         # Kiểm tra nếu customer_code có trong danh sách scp_customer_codes
         if any(customer["customer_code"] == customer_code for customer in promotion.get("customers", [])):
             ref = True
-    
+
     return ref
-
-# Tính toán khuyến mãi
-def caculate_promotion(list_item=[], promtion={}, total_amount=0):
-    if promtion.get("ptype_value") == "SP_SL_CKSP":
-        ref = SP_SL_CKSP(list_item, promtion)
-        if bool(ref):
-            return {"ptype_value": "SP_SL_CKSP", "result": ref, "allPromotion": objPromotionOder}
-        else:
-            return None
-        
-    elif promtion.get("ptype_value") == "TIEN_SP":
-        ref = TIEN_SP(promtion,total_amount)
-        if bool(ref):
-            return {"ptype_value": "TIEN_SP", "result": ref, "allPromotion": objPromotionOder}
-        else:
-            return None
-        
-    elif promtion.get("ptype_value") == "TIEN_TIEN":
-        ref = TIEN_TIEN(promtion, total_amount)
-        if bool(ref):
-            return {"ptype_value": "TIEN_TIEN", "result": ref, "allPromotion": objPromotionOder}
-        else:
-            return None
-        
-    elif promtion.get("ptype_value") == "TIEN_CKDH":
-        ref = TIEN_CKDH(promtion, total_amount)
-        if bool(ref):
-            return {"ptype_value": "TIEN_CKDH", "result": ref, "allPromotion": objPromotionOder}
-        else:
-            return None
-        
-    elif promtion.get("ptype_value") == "SP_SL_SP":
-        ref = SP_SL_SP(list_item, promtion)
-        if bool(ref):
-            return {"ptype_value": "SP_SL_SP", "result": ref, "allPromotion": objPromotionOder}
-        else:
-            return None
-        
-    elif promtion.get("ptype_value") == "SP_ST_SP":
-        ref = SP_ST_SP(list_item, promtion)
-        if bool(ref):
-            return {"ptype_value": "SP_ST_SP", "result": ref, "allPromotion": objPromotionOder}
-        else:
-            return None
-        
-    elif promtion.get("ptype_value") == "SP_ST_CKSP":
-        ref = SP_ST_CKSP(list_item, promtion)
-        if bool(ref):
-            return {"ptype_value": "SP_ST_CKSP", "result": ref, "allPromotion": objPromotionOder}
-        else:
-            return None
-        
-    elif promtion.get("ptype_value") == "SP_ST_TIEN":
-        ref = SP_ST_TIEN(list_item, promtion)
-        if bool(ref):
-            return {"ptype_value": "SP_ST_TIEN", "result": ref, "allPromotion": objPromotionOder}
-        else:
-            return None
-        
-    elif promtion.get("ptype_value") == "SP_SL_TIEN":
-        ref = SP_SL_TIEN(list_item, promtion)
-        if bool(ref):
-            return {"ptype_value": "SP_SL_TIEN", "result": ref, "allPromotion": objPromotionOder}
-        else:
-            return None
-    
-
-# "Trinh" Tổng tiền hàng - chiết khấu đơn hàng (%)
-def TIEN_CKDH(data_Promotion={}, tongTienhang=0):
-    product = sorted(data_Promotion["products"], key=lambda x: x["yeu_cau"], reverse=True)
-    tien_km = 0
-
-    for prd in product:
-        if tongTienhang >= float(prd["yeu_cau"]):
-            tien_km = prd["khuyen_mai"]
-            # Lưu kết qủa nhận được
-            # save_promotionResult(data_Promotion, tien_km)
-            break
-
-    return tien_km
-
-
-# "Trinh" Tổng tiền hàng - tặng tiền
-def TIEN_TIEN(data_Promotion={}, tongTienhang=0):
-    product = sorted(data_Promotion["products"], key=lambda x: x["yeu_cau"], reverse=True)
-    boi_so = data_Promotion["multiple"]
-    boi_so_cap = 1
-    tien_km = 0
-    for prd in product:
-        if tongTienhang >= float(prd["yeu_cau"]):
-            boi_so_cap = float(tongTienhang / float(prd["yeu_cau"]))
-            tien_km = float(prd["khuyen_mai"])
-            if boi_so:
-                tien_km = tien_km * boi_so_cap
-
-            # Lưu kết qủa nhận được
-            save_promotionResult(data_Promotion, tien_km, boi_so)
-            break
-        
-    return tien_km
-
-
-# "TuanBD" Tổng tiền hàng - tặng SP
-def TIEN_SP(data_promotion={}, tongTienhang=0):
-    list_free_item = []
-    product = sorted(data_promotion["products"], key=lambda x: x["yeu_cau"], reverse=True)
-    
-    boi_so = data_promotion["multiple"]
-    boi_so_cap = 1
-    for prd in product:
-        if tongTienhang >= prd["yeu_cau"]:
-            if bool(boi_so):
-                boi_so_cap = int(tongTienhang / prd["yeu_cau"])
-            
-            for item_km in prd["khuyen_mai"]:
-                product_promo = {
-                    "item_code": item_km["ma_san_pham"],
-                    "item_name": item_km["ten_san_pham"],
-                    "uom": item_km["don_vi_tinh"].get("choice_values"),
-                    "qty": item_km["so_luong"] * boi_so_cap,
-                    "rate": 0,
-                    "amount": 0,
-                    "is_free_item": True
-                }
-                list_free_item.append(product_promo)
-            break
-    return list_free_item
-        
-
-# "TungDA" Mua sản phẩm - đạt số lượng - chiết khấu SP (%)
-def SP_SL_CKSP(list_item=[], data_promotion={}):
-    getProductPromotion = {}
-
-    for item in list_item:
-        product = pydash.filter_(data_promotion["products"], {"_id": item["item_code"]})
-        # Sắp xếp lại danh sách sản phẩm theo yêu cầu
-        product = sorted(product, key=lambda x: x["yeu_cau"], reverse=True)
-
-        # Chiết khấu hiện tại của sản phẩm
-        current_discount = item.get("discount_percentage", 0)
-        # Kết quả khuyến mại đạt được
-        for prd in product:
-            if bool(prd["yeu_cau_min"]) and prd["yeu_cau_min"] != 0:
-                if item["qty"] >= prd["yeu_cau_min"] and item["uom"] == prd["don_vi_tinh"].get("choice_values"):
-                    getProductPromotion = prd
-                    break
-                else:
-                    item["discount_percentage"] = 0
-            else:
-                if item["qty"] >= prd["yeu_cau"] and item["uom"] == prd["don_vi_tinh"].get("choice_values"):
-                    getProductPromotion = prd
-                    break
-                else:
-                    item["discount_percentage"] = 0
-
-        if bool(getProductPromotion):
-            if item["qty"] >= getProductPromotion["yeu_cau"] and item["uom"] == getProductPromotion["don_vi_tinh"].get("choice_values"):
-                chietKhau_promotion = getProductPromotion["khuyen_mai"]
-                getProductPromotion["chietKhau_promotion"] = chietKhau_promotion
-
-                # Cộng giảm giá hiện tại với giảm giá khuyến mãi
-                item["discount_percentage"] = chietKhau_promotion + current_discount
-                item["rate"] = item["rate"] - item["discount_percentage"] * item["rate"] / 100
-
-                # Lưu kết quả khuyến mãi
-                save_promotionResult(data_promotion, getProductPromotion, 1)
-    
-    return list_item
-
-
-# "TuanBD" Mua sản phẩm - đạt số tiền - chiết khấu SP (%)
-def SP_ST_CKSP(list_item=[], data_promotion={}):
-    getProductPromotion = {}
-    
-    for item in list_item:
-        # Sắp xếp lại danh sách sản phẩm theo yêu cầu
-        product = pydash.filter_(data_promotion["products"], {"_id": item["item_code"]})
-        product = sorted(product, key=lambda x: x["yeu_cau"], reverse=True)
-        base_amount = item["qty"] * item["rate"]
-
-        # Kết quả khuyến mại đạt được
-        for prd in product:
-            if base_amount >= prd["yeu_cau"] and item["uom"] == prd["don_vi_tinh"].get("choice_values"):
-                getProductPromotion = prd
-                break
-            else:
-                item["discount_percentage"] = 0
-
-        if bool(getProductPromotion):
-            if base_amount >= getProductPromotion["yeu_cau"] and item["uom"] == getProductPromotion["don_vi_tinh"].get("choice_values"):
-                km_discount = getProductPromotion["khuyen_mai"]
-                item["discount_percentage"] = km_discount
-                item["rate"] = item["rate"] - item["discount_percentage"] * item["rate"] / 100
-
-    return list_item
-
-
-# "TuanBD" Mua sản phẩm - đạt số tiền - tặng sản phẩm
-def SP_ST_SP(list_item=[], data_promotion={}):
-    getProductPromotion = {}
-    list_free_item = []
-    boi_so = data_promotion.get("multiple", False)
-
-    for item in list_item:
-        product = pydash.filter_(data_promotion.get("products", []), {"_id": item["item_code"]})
-        product = sorted(data_promotion["products"], key=lambda x: x["yeu_cau"], reverse=True)
-        base_amount = item["qty"] * item["rate"]
-
-        for prd in product:
-            if base_amount >= prd["yeu_cau"] and prd["don_vi_tinh"].get("choice_values"):
-                getProductPromotion = prd
-                break
-        
-        if bool(getProductPromotion):
-            if base_amount >= prd["yeu_cau"] and prd["don_vi_tinh"].get("choice_values"):
-                # Tính bội số
-                boi_so_cap = int(base_amount / getProductPromotion["yeu_cau"]) if boi_so else 1
-
-                # Thêm sản phẩm khuyến mãi
-                list_free_item.extend(
-                    {
-                        "item_code": km["ma_san_pham"],
-                        "item_name": km["ten_san_pham"],
-                        "uom": km["don_vi_tinh"].get("choice_values"),
-                        "qty": km["so_luong"] * boi_so_cap,
-                        "rate": 0,
-                        "amount": 0,
-                        "is_free_item": True
-                    }
-                    for km in getProductPromotion["khuyen_mai"]
-                )
-                save_promotionResult(data_promotion, getProductPromotion, boi_so_cap)
-    return list_free_item
-
-
-# "TuanBD" Mua sản phẩm - đạt số tiền - tặng tiền
-def SP_ST_TIEN(list_item=[], data_promotion={}):
-    getProductPromotion = {}
-    boi_so = data_promotion.get("multiple", False)
-    boi_so_cap = 1
-    
-    for item in list_item:
-        item_amount = item["rate"] * item["qty"]
-        # Sắp xếp lại danh sách sản phẩm theo yêu cầu
-        product = pydash.filter_(data_promotion["products"], {"_id": item["item_code"]})
-        product = sorted(product, key=lambda x: x["yeu_cau"], reverse=True)
-
-        # Kết quả khuyến mại đạt được
-        for prd in product:
-            if item_amount >= prd["yeu_cau"] and item["uom"] == prd["don_vi_tinh"].get("choice_values"):
-                getProductPromotion = prd
-                break
-            else:
-                item["discount_amount"] = 0
-
-        if bool(getProductPromotion):
-            if item_amount >= getProductPromotion["yeu_cau"] and item["uom"] == getProductPromotion["don_vi_tinh"].get("choice_values"):
-                boi_so_cap = int(item_amount / getProductPromotion["yeu_cau"]) if boi_so else 1
-                item["discount_amount"] = getProductPromotion["khuyen_mai"] * boi_so_cap
-
-    return list_item
-
-
-# "TuanBD" Mua sản phẩm - đạt số luong - tặng tiền
-def SP_SL_TIEN(list_item=[], data_promotion={}):
-    getProductPromotion = {}
-    boi_so = data_promotion.get("multiple", False)
-
-    for item in list_item:
-        # Tìm sản phẩm khuyến mãi tương ứng với item
-        product = pydash.filter_(data_promotion.get("products", []), {"_id": item["item_code"]})
-        product = sorted(product, key=lambda x: x["yeu_cau"], reverse=True)
-        
-        for prd in product:
-            if bool(prd["yeu_cau_min"]) and prd["yeu_cau_min"] != 0:
-                if item["qty"] >= prd["yeu_cau_min"] and item["uom"] == prd["don_vi_tinh"].get("choice_values"):
-                    getProductPromotion = prd
-                    break
-                else:
-                    item["discount_amount"] = 0
-            else:
-                if item["qty"] >= prd["yeu_cau"] and item["uom"] == prd["don_vi_tinh"].get("choice_values"):
-                    getProductPromotion = prd
-                    break
-                else:
-                    item["discount_amount"] = 0
-
-        if bool(getProductPromotion):
-            if item["qty"] >= getProductPromotion["yeu_cau"] and item["uom"] == getProductPromotion["don_vi_tinh"].get("choice_values"):
-                boi_so_cap = int(item["qty"] / getProductPromotion["yeu_cau"]) if boi_so else 1
-                item["discount_amount"] = getProductPromotion["khuyen_mai"] * boi_so_cap
-    
-    return list_item
-
-
-# "TuanBD" Mua sản phẩm - đạt số lượng - tặng sản phẩm
-def SP_SL_SP(list_item=[], data_promotion={}):
-    getProductPromotion = {}
-    list_free_item = []
-    boi_so = data_promotion.get("multiple", False)
-
-    for item in list_item:
-        # Tìm sản phẩm khuyến mãi tương ứng với item
-        product = pydash.filter_(data_promotion.get("products", []), {"_id": item["item_code"]})
-        product = sorted(product, key=lambda x: x["yeu_cau"], reverse=True)
-        sl_pass = 0
-        dvt_pass = ""
-        so_luong = item["qty"]
-        if data_promotion.get("gpromotion") is not None:
-                sl_chan = next(
-                    (product for product in objProductInPromotion if product["dvt"] == item["uom"] and product["idsp"] == item["item_code"]), 
-                    None
-                )
-                if sl_chan is not None:
-                    so_luong = sl_chan["sl_KhauTru"]
-       
-        for prd in product:
-            if bool(prd["yeu_cau_min"]) and prd["yeu_cau_min"] != 0:
-                if so_luong >= prd["yeu_cau_min"] and item["uom"] == prd["don_vi_tinh"].get("choice_values"):
-                    sl_pass = so_luong
-                    dvt_pass = prd["don_vi_tinh"]
-                    getProductPromotion = prd
-                    break
-            else:
-                if so_luong >= prd["yeu_cau"] and item["uom"] == prd["don_vi_tinh"].get("choice_values"):
-                    sl_pass = so_luong
-                    dvt_pass = prd["don_vi_tinh"]
-                    getProductPromotion = prd
-                    break
-
-        if getProductPromotion:
-            if so_luong >= getProductPromotion["yeu_cau"] and item["uom"] == getProductPromotion["don_vi_tinh"].get("choice_values"):
-                # Tính bội số
-                boi_so_cap = int(so_luong / getProductPromotion["yeu_cau"]) if boi_so else 1
-                # Thêm sản phẩm khuyến mãi
-                list_free_item.extend(
-                    {
-                        "item_code": km["ma_san_pham"],
-                        "item_name": km["ten_san_pham"],
-                        "uom": km["don_vi_tinh"].get("choice_values"),
-                        "qty": km["so_luong"] * boi_so_cap,
-                        "rate": 0,
-                        "amount": 0,
-                        "is_free_item": True
-                    }
-                    for km in getProductPromotion["khuyen_mai"]
-                )
-                save_promotionResult(data_promotion, getProductPromotion, boi_so_cap)
-                # Luu so luong san pham da su dung KM
-                On_Process_GiamTru(data_promotion, getProductPromotion, sl_pass, dvt_pass, boi_so_cap)
-    return list_free_item
-
-
-# Lưu trữ CTKM
-def save_promotionResult(objDataKM, so_luong, boi_so):
-    if objDataKM.ptype_value in ["TIEN_TIEN", "TIEN_CKDH"]:
-        objRef = {"_id": "CKDH", "ma_san_pham": "", "ten_san_pham": "", "don_vi_tinh": "", "so_luong": so_luong}
-        objKM = { "id": objDataKM.name, "ten_khuyen_mai": objDataKM.name_promotion, "ptype": objDataKM.ptype_value, "product": objRef }
-        
-        item_promotion = pydash.arrays.index_of(pydash.collections.map_(objPromotionOder, "id"), objDataKM.name)
-
-        # If the item exists, update it
-        if item_promotion >= 0:
-            objPromotionOder[item_promotion] = objKM
-        # If the item does not exist, append it
-        else:
-            objPromotionOder.append(objKM)
-
-    elif objDataKM.ptype_value in ["SP_SL_CKSP", "SP_SL_TIEN", "SP_ST_TIEN", "SP_ST_CKSP"]:
-        objRef = [{ "_id": "CKSP", "id_sp": so_luong["_id"], "ma_san_pham": so_luong["ma_san_pham"], "ten_san_pham": so_luong["ten_san_pham"], "don_vi_tinh": so_luong["don_vi_tinh"], "so_luong": 0,  "so_tien": so_luong["chietKhau_promotion"]}]
-        
-        objKM = { "id": objDataKM.name, "ten_khuyen_mai": objDataKM.name_promotion, "ptype": objDataKM.ptype_value, "product": objRef }
-
-        item_promotion = pydash.arrays.index_of(pydash.collections.map_(objPromotionOder, "id"), objDataKM.name)
-        # If the item exists, update it
-        if item_promotion >= 0:
-            objPromotionOder[item_promotion] = objKM
-        # If the item does not exist, append it
-        else:
-            objPromotionOder.append(objKM)
-        
-    elif objDataKM.ptype_value in ["SP_SL_SP", "SP_ST_SP", "TIEN_SP"]:
-        objProdProt = []
-        productKM = copy.deepcopy(so_luong)  # Deep copy of so_luong
-        
-        for km in productKM["khuyen_mai"]:
-            soluong = km["so_luong"]
-            km["so_luong"] = soluong * boi_so
-            objProdProt.append(km)
-        
-        objKM = {
-            "id": objDataKM.name,
-            "ten_khuyen_mai": objDataKM.name_promotion,
-            "ptype": objDataKM.ptype_value,
-            "product": objProdProt
-        }
-        objPromotionOder.append(objKM)
-    
-# Giảm trừ CTKM
-def On_Process_GiamTru(dataKM,objKM, sl, dvt_pass, boi_so_cap):
-    if dataKM.get("gpromotion") is not None:
-            slCanGiamTru = float(sl) - (objKM["yeu_cau"] * boi_so_cap)
-            hasExsit = False
-            # Khởi tạo objPromotionHasApply bên ngoài điều kiện
-            objPromotionHasApply = None
-            for item in objProductInPromotion:
-                if item["idsp"] == objKM["_id"] and item["dvt"] == objKM['don_vi_tinh']['choice_values']:
-                    updateNum = max(item["sl_KhauTru"] - (objKM["yeu_cau"] * boi_so_cap), 0)
-                    item["sl_KhauTru"] = updateNum
-                    hasExsit = True
-                    break
-            if not hasExsit:
-                objPromotionHasApply = {
-                    "idsp": objKM["_id"],
-                    "dvt": objKM['don_vi_tinh']['choice_values'],
-                    "sl_Goc": sl,
-                    "sl_KhauTru": slCanGiamTru,
-                    "don_gia": sl,
-                    "gttb": 0
-                }
-                objProductInPromotion.append(objPromotionHasApply)
-            
-                # Uncomment if needed
-                # for item in objProductInPromotion:
-                #     item["gttb"] = gttb
 
 def check_available_promotion(list_item=[], promtion={}, total_amount=0):
     getProductPromotion = {}
@@ -749,29 +770,14 @@ def check_available_promotion(list_item=[], promtion={}, total_amount=0):
             # Tìm sản phẩm khuyến mãi tương ứng với item
             product = pydash.filter_(promtion.get("products", []), {"_id": item["item_code"]})
             product = sorted(product, key=lambda x: x["yeu_cau"], reverse=True)
-            sl_pass = 0
-            dvt_pass = ""
             so_luong = item["qty"]
-            if promtion.get("gpromotion") is not None:
-                sl_chan = next(
-                    (product for product in objProductInPromotion if
-                     product["dvt"] == item["uom"] and product["idsp"] == item["item_code"]),
-                    None
-                )
-                if sl_chan is not None:
-                    so_luong = sl_chan["sl_KhauTru"]
-
             for prd in product:
                 if bool(prd["yeu_cau_min"]) and prd["yeu_cau_min"] != 0:
                     if so_luong >= prd["yeu_cau_min"] and item["uom"] == prd["don_vi_tinh"].get("choice_values"):
-                        sl_pass = so_luong
-                        dvt_pass = prd["don_vi_tinh"]
                         getProductPromotion = prd
                         break
                 else:
                     if so_luong >= prd["yeu_cau"] and item["uom"] == prd["don_vi_tinh"].get("choice_values"):
-                        sl_pass = so_luong
-                        dvt_pass = prd["don_vi_tinh"]
                         getProductPromotion = prd
                         break
 
@@ -792,7 +798,8 @@ def check_available_promotion(list_item=[], promtion={}, total_amount=0):
                     break
 
             if bool(getProductPromotion):
-                if base_amount >= getProductPromotion["yeu_cau"] and getProductPromotion["don_vi_tinh"].get("choice_values"):
+                if base_amount >= getProductPromotion["yeu_cau"] and getProductPromotion["don_vi_tinh"].get(
+                        "choice_values"):
                     return True
 
     elif promtion.get("ptype_value") == "SP_ST_CKSP":
@@ -812,7 +819,7 @@ def check_available_promotion(list_item=[], promtion={}, total_amount=0):
                 if base_amount >= getProductPromotion["yeu_cau"] and item["uom"] == getProductPromotion[
                     "don_vi_tinh"].get("choice_values"):
                     return True
-                
+
     elif promtion.get("ptype_value") == "SP_ST_TIEN":
         for item in list_item:
             item_amount = item["rate"] * item["qty"]
