@@ -57,7 +57,7 @@ import { renderOption } from "./components/AddPd";
 import { rsData } from "@/types/response";
 import { AxiosService } from "@/services/server";
 import { FuncType } from "@/types";
-import { Greater } from "@/icons/Group";
+import { Greater, Less} from "@/icons/Group";
 import TrashIcon from "@/icons/trash";
 import useDebounceUpdate from "@/hooks/useDebounceUpdate";
 import { usePromotionProductTransform } from "@/hooks/usePromotionTransform";

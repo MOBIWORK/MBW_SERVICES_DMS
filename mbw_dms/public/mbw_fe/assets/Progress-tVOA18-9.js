@@ -1,1 +1,0 @@
-import{L as s,ae as t,aY as e}from"./index-o85vnTJF.js";import"https://cdn.jsdelivr.net/npm/nats.ws@1.29.2/+esm";function a(){return s.jsxs(s.Fragment,{children:[s.jsx(t,{children:s.jsx("title",{children:"Progress"})}),s.jsx(e,{status:"500",title:"500",subTitle:"Trang đang tiến hành."})]})}export{a as default};
