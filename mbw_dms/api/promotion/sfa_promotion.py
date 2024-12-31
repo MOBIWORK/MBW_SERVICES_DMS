@@ -153,9 +153,9 @@ class PromotionManager:
 
         for prd in product:
             if tongTienhang >= float(prd["yeu_cau"]):
-                tien_km = prd["khuyen_mai"] * tongTienhang / 100
+                tien_km = prd["khuyen_mai"]
                 # Lưu kết qủa nhận được
-                self.save_promotionResult(data_Promotion, tien_km, 0)
+                self.save_promotionResult(data_Promotion, prd["khuyen_mai"] * tongTienhang / 100, 0)
                 break
 
         return tien_km

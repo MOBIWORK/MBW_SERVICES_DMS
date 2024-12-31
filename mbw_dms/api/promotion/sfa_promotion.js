@@ -95,7 +95,7 @@ function processAfterApplyPromotion(ptype_value, result, frm)
 
     else if (ptype_value == "TIEN_CKDH") {
 
-        frm.set_value("discount_amount", frm.doc.discount_amount + result);
+        frm.set_value("discount_amount", frm.doc.discount_amount + total_amount * result /100);
        
     }
 }
@@ -201,10 +201,10 @@ function onClearPromotion(frm) {
   update_item_prices_by_price_list(frm)
 }
 
-
+let total_amount = 0;
 // Lấy khuyến mãi sản phẩm
 function update_item_prices_by_price_list(frm) {
-    let total_amount = 0;
+    total_amount = 0;
     let count_items = frm.doc.items.length
     frm.doc.items.forEach(function(item) {
         frappe.call({
