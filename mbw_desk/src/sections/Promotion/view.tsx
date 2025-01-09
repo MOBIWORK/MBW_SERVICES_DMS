@@ -127,7 +127,7 @@ const Promotion = () => {
   ]);
   const handleUpdate = useCallback(
     async (type: string, value: string) => {
-      // try {
+      try {
         let rsUpdate: rsData<promotion[]> = await AxiosService.patch(
           "/api/method/mbw_dms.api.promotion.promotion.delete_multi",
           {
@@ -161,9 +161,9 @@ const Promotion = () => {
           action: false,
           data: null,
         });
-      // } catch (err) {
-      //   errorMsg("Cập nhật khuyến mại thất bại");
-      // }
+      } catch (err) {
+        errorMsg("Cập nhật khuyến mại thất bại");
+      }
     },
     [selectedRowKeys]
   );
