@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        .report-header {
+            text-align: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            z-index: 10;
+        }
+
+        .build-events-overlay {
+            display: none !important;
+        }
+
+        .report-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .report-date {
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+            font-size: 14px;
+        }
+
+        th {
+            background-color: #f2f2f2;
+            text-align: center;
+        }
+
+        .group-header {
+            font-weight: bold;
+            background-color: #f9f9f9;
+        }
+
+        .number-cell {
+            text-align: right;
+        }
+
+        .total-row {
+            font-weight: bold;
+            text-align: right;
+            background-color: #f2f2f2;
+        }
+
+        .negative {
+            color: red;
+        }
+
+        @media print {
+            body {
+                margin: 0;
+                font-size: 12px;
+            }
+
+            .page-head, .print-btn {
+                display: none; /* Ẩn nút và tiêu đề khi in */
+            }
+
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                font-size: 12px;
+            }
+
+            th, td {
+                border: 1px solid black;
+                padding: 4px;
+            }
+
+            th {
+                background-color: #ddd;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="report-header">
+    <div class="report-title">CHI TIẾT CÔNG NỢ PHẢI THU THEO MẶT HÀNG</div>
+    <div class="report-date">Từ ngày {{ filters.from_date }} đến ngày {{ filters.to_date }}</div>
+    <div class="report-date">Công ty: {{ filters.company }}</div>
+    <div class="report-date">Khách hàng: {{ filters.customer }}</div>
+</div>
+
+<table>
+    <thead>
+    <tr>
+        <th>Ngày hạch toán</th>
+        <th>Ngày chứng từ</th>
+        <th>Số chứng từ</th>
+        <th>Khách hàng</th>
+        <th>Diễn giải</th>
+        <th>TK đối ứng</th>
+        <th>Đơn vị tính</th>
+        <th>Số lượng</th>
+        <th>Đơn giá</th>
+        <th>Số phải thu</th>
+        <th>Chiết khấu chi tiết</th>
+        <th>Chiết khấu đơn hàng</th>
+        <th>Số đã thu</th>
+        <th>Số dư</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for row in data %}
+    {% if row.is_group_header %}
+    <tr>
+        <td>{{ row.posting_date }}</td>
+        <td>{{ row.due_date }}</td>
+        <td colspan="12"><strong>Số chứng từ: {{ row.voucher_no }} - {{ row.party }}</strong></td>
+    </tr>
+    {% elif row.is_total_row %}
+    <tr class="total-row">
+        <td colspan="8"><strong>Cộng</strong></td> <!-- Điều chỉnh colspan -->
+        <td></td> <!-- Để trống cột Đơn giá -->
+        <td class="number-cell"><strong>{{ row.amount }}</strong></td>
+        <td class="number-cell"><strong>{{ row.discount_detail }}</strong></td>
+        <td class="number-cell"><strong>{{ row.order_discount }}</strong></td>
+        <td class="number-cell"><strong>{{ row.paid_amount }}</strong></td>
+        <td class="number-cell"><strong>{{ row.balance }}</strong></td>
+    </tr>
+
+
+    {% elif row.is_grand_total_row %}
+    <tr class="total-row">
+        <td colspan="8"><strong>Tổng cộng</strong></td> <!-- Điều chỉnh colspan -->
+        <td></td> <!-- Để trống cột Đơn giá -->
+        <td class="number-cell"><strong>{{ row.total_amount }}</strong></td>
+        <td class="number-cell"><strong>{{ row.total_discount_detail }}</strong></td>
+        <td class="number-cell"><strong>{{ row.total_order_discount }}</strong></td>
+        <td class="number-cell"><strong>{{ row.total_paid }}</strong></td>
+        <td class="number-cell"><strong>{{ row.total_balance }}</strong></td>
+    </tr>
+
+
+    {% else %}
+    <tr>
+        <td>{{ row.posting_date }}</td>
+        <td>{{ row.due_date }}</td>
+        <td>{{ row.voucher_no }}</td>
+        <td>{{ row.party }}</td>
+        <td>{{ row.item_name }}</td>
+        <td>{{ row.receivable_account }}</td>
+        <td>{{ row.uom }}</td>
+        <td class="number-cell">{{ row.qty }}</td>
+        <td class="number-cell">{{ row.rate }}</td>
+        <td class="number-cell">{{ row.amount }}</td>
+        <td class="number-cell">{{ row.discount_detail }}</td>
+        <td class="number-cell">{{ row.order_discount }}</td>
+        <td class="number-cell">{{ row.paid_amount }}</td>
+        <td class="number-cell">{{ row.balance }}</td>
+    </tr>
+    {% endif %}
+    {% endfor %}
+    </tbody>
+</table>
+</body>
+</html>
