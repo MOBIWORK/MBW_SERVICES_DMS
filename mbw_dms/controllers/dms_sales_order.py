@@ -185,9 +185,12 @@ def cal_qdtt(doc, method):
             continue
 
 def create_mbw_itemscore_sales_order(doc, method):
-    if (doc.status == "To Deliver and Bill" or doc.status == "To Deliver") and doc.custom_trạng_thái_giao_hàng != 'Chưa giao hàng':
-        doc.custom_trạng_thái_giao_hàng = "Chưa giao hàng"
-        doc.save()
+    if doc.custom_số_lượng_đã_giao > 0 and doc.custom_số_lượng_đã_giao < doc.total_qty:
+        frappe.db.set_value("Sales Order", doc.name, "custom_trạng_thái_giao_hàng",
+                            "Đã giao một phần")
+    elif doc.custom_số_lượng_đã_giao == doc.total_qty:
+        frappe.db.set_value("Sales Order", doc.name, "custom_trạng_thái_giao_hàng",
+                            "Đã giao đầy đủ")
     if doc.status == "Completed":
         from mbw_dms.mbw_dms.doctype.mbw_itemscore_saleorder.mbw_itemscore_saleorder import \
             create_ItemScore_SaleOrder
