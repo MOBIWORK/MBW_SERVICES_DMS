@@ -3,34 +3,26 @@ from collections import defaultdict
 from frappe.utils.jinja import get_jenv
 
 def execute(filters=None):
-    # Thiết lập bộ lọc mặc định
-
-    # Thêm bộ lọc định dạng tiền tệ vào Jinja
+    """ Thực thi báo cáo và render HTML """
     get_jenv().filters["format_currency"] = format_currency
 
-    # Render HTML với dữ liệu
     html = frappe.render_template(
         "templates/reports/chi_tiet_cong_no_phai_thu.html",
         {"filters": filters, "data": get_data(filters)}
     )
 
-    # Không trả về cột và dữ liệu
+    # Trả về 5 giá trị như mặc định, trong đó html là nội dung HTML render sẵn
     return [], None, html, None, None, 1
 
 def get_data(filters):
-    """
-    Lấy và xử lý dữ liệu từ cơ sở dữ liệu
-    """
-    # Xây dựng điều kiện SQL
+    """ Lấy và xử lý dữ liệu từ database """
     conditions = get_conditions(filters)
 
-    # Truy vấn dữ liệu từ cơ sở dữ liệu
     query = f"""
         SELECT 
             si.posting_date, 
             si.due_date, 
             si.name AS voucher_no, 
-            si.customer AS party, 
             sii.item_name, 
             sii.uom, 
             sii.income_account AS receivable_account,
@@ -39,7 +31,28 @@ def get_data(filters):
             COALESCE(sii.amount, 0) AS amount, 
             COALESCE(sii.discount_amount, 0) AS discount_detail, 
             COALESCE(si.discount_amount, 0) AS order_discount, 
-            COALESCE(si.paid_amount, 0) AS paid_amount, 
+            COALESCE(
+                (
+                    SELECT SUM(pe.paid_amount) 
+                    FROM `tabPayment Entry` pe
+                    JOIN `tabPayment Entry Reference` per ON pe.name = per.parent
+                    WHERE per.reference_name = si.name
+                ), 
+                0
+            ) AS paid_amount, 
+            COALESCE(
+                (
+                    SELECT SUM(ped.amount)
+                    FROM `tabPayment Entry Deduction` ped
+                    WHERE ped.parent IN (
+                        SELECT pe.name
+                        FROM `tabPayment Entry` pe
+                        JOIN `tabPayment Entry Reference` per ON pe.name = per.parent
+                        WHERE per.reference_name = si.name
+                    )
+                ),
+                0
+            ) AS deduction_amount,
             COALESCE(si.outstanding_amount, 0) AS balance
         FROM 
             `tabSales Invoice` si
@@ -51,85 +64,140 @@ def get_data(filters):
         ORDER BY 
             si.name ASC, sii.item_name ASC
     """
-    raw_data = frappe.db.sql(query, filters, as_dict=True)
 
-    # Nhóm dữ liệu theo voucher_no
+    raw_data = frappe.db.sql(query, filters, as_dict=True)
     grouped_data = defaultdict(list)
     for row in raw_data:
         grouped_data[row["voucher_no"]].append(row)
 
-    final_data = []
-
+    # Các biến để tính tổng cộng cuối cùng
     grand_totals = {
         "qty": 0,
-        "amount": 0,
-        "discount_detail": 0,
+        "amount_before_discount": 0,
+        "amount_after_discount": 0,
+        "detail_discount": 0,
         "order_discount": 0,
+        "receivable_amount": 0,
         "paid_amount": 0,
-        "balance": 0
+        "balance": 0,
+        "deduction_amount": 0
     }
 
+    final_data = []
+
     for voucher_no, rows in grouped_data.items():
-        # Tính tổng cho từng nhóm
+        # Tính tổng cho từng hóa đơn (group)
         group_totals = {
-            "qty": sum(row.get("qty", 0) for row in rows),
-            "amount": sum(row.get("amount", 0) for row in rows),
-            "discount_detail": sum(row.get("discount_detail", 0) for row in rows),
+            "qty": 0,
+            "amount_before_discount": 0,
+            "amount_after_discount": 0,
+            "detail_discount": 0,
+            # Với chiết khấu đơn hàng, chỉ lấy giá trị 1 lần từ dòng đầu tiên của hóa đơn
             "order_discount": rows[0].get("order_discount", 0),
-            "paid_amount": sum(row.get("paid_amount", 0) for row in rows),
-            "balance": rows[0].get("balance", 0)
+            # Với chiết khấu giảm trừ, cũng chỉ lấy 1 lần từ dòng đầu tiên
+            "deduction_amount": rows[0].get("deduction_amount", 0),
+            "receivable_amount": 0,
+            "paid_amount": 0,
+            "balance": 0
         }
 
-        # Cập nhật Grand Total
-        for key in grand_totals:
-            grand_totals[key] += group_totals[key]
-
-        # Thêm dòng tiêu đề nhóm - Group Header
+        # Thêm dòng tiêu đề nhóm
         final_data.append({
             "is_group_header": True,
             "voucher_no": voucher_no,
             "posting_date": rows[0].get("posting_date"),
             "due_date": rows[0].get("due_date"),
-            "party": rows[0].get("party")
         })
 
-        # Chi tiết từng bản ghi
+        paid_amount_invoice = rows[0].get("paid_amount", 0)
+        balance_invoice = rows[0].get("balance", 0)
+
         for row in rows:
+            qty = row.get("qty", 0)
+            # Đơn giá sau chiết khấu
+            unit_price_after_discount = row.get("rate", 0)
+
+            # Chi tiết chiết khấu của dòng
+            detail_discount = row.get("discount_detail", 0)
+
+            # Đơn giá trước chiết khấu = đơn giá sau CK + chi tiết CK
+            unit_price_before_discount = unit_price_after_discount + detail_discount
+
+            # Thành tiền sau chiết khấu (đã được tính từ ERP)
+            amount_after_discount = row.get("amount", 0)
+
+            # Thành tiền trước chiết khấu = đơn giá trước CK * số lượng
+            amount_before_discount = unit_price_before_discount * qty
+
+            # Chiết khấu đơn hàng chỉ lấy giá trị từ dòng đầu tiên
+            order_discount = group_totals["order_discount"]
+
+            # Số phải thu lấy từ balance của hóa đơn
+            receivable_amount = row.get("balance", 0)
+
+            paid_amount = row.get("paid_amount", 0)
+            balance = row.get("balance", 0)
+
             final_data.append({
                 "posting_date": row.get("posting_date"),
                 "due_date": row.get("due_date"),
                 "voucher_no": row.get("voucher_no"),
-                "party": row.get("party"),
                 "item_name": row.get("item_name"),
+                "receivable_account": row.get("receivable_account"),
                 "uom": row.get("uom"),
-                "qty": row.get("qty", 0),
-                "rate": format_currency(row.get("rate", 0)),
-                "amount": format_currency(row.get("amount", 0)),
-                "discount_detail": format_currency(row.get("discount_detail", 0)),
-                "order_discount": "",
-                "paid_amount": format_currency(row.get("paid_amount", 0)),
-                "balance": "",
-                "receivable_account": row.get("receivable_account")
+                "qty": format_currency(qty),
+                "unit_price_before_discount": format_currency(unit_price_before_discount),
+                "unit_price_after_discount": format_currency(unit_price_after_discount),
+                "amount_before_discount": format_currency(amount_before_discount),
+                "amount_after_discount": format_currency(amount_after_discount),
+                "detail_discount": format_currency(detail_discount),
+                "order_discount": format_currency(order_discount),
+                "receivable_amount": format_currency(receivable_amount),
+                "deduction_amount": "",
+                "paid_amount": format_currency(paid_amount),
+                "balance": format_currency(balance)
             })
 
-        # Dòng tổng cộng cho nhóm - Group Total
+            # Cộng dồn group_totals (chỉ cộng các trường tính theo dòng)
+            group_totals["qty"] += qty
+            group_totals["amount_before_discount"] += amount_before_discount
+            group_totals["amount_after_discount"] += amount_after_discount
+            group_totals["detail_discount"] += detail_discount
+            # order_discount và deduction_amount không cộng dồn vì chỉ lấy 1 lần cho mỗi hóa đơn
+            group_totals["receivable_amount"] = (
+                group_totals["amount_after_discount"] - group_totals["order_discount"]
+            )
+            group_totals["paid_amount"] = paid_amount_invoice
+            group_totals["balance"] = balance_invoice
+
+        # Sau khi duyệt xong các dòng, thêm dòng "Cộng" cho group
         final_data.append({
             "is_total_row": True,
             "qty": format_currency(group_totals["qty"]),
-            "amount": format_currency(group_totals["amount"]),
-            "discount_detail": format_currency(group_totals["discount_detail"]),
+            "amount_before_discount": format_currency(group_totals["amount_before_discount"]),
+            "amount_after_discount": format_currency(group_totals["amount_after_discount"]),
+            "detail_discount": format_currency(group_totals["detail_discount"]),
             "order_discount": format_currency(group_totals["order_discount"]),
+            "receivable_amount": format_currency(group_totals["receivable_amount"]),
+            "deduction_amount": format_currency(group_totals["deduction_amount"]),
             "paid_amount": format_currency(group_totals["paid_amount"]),
             "balance": format_currency(group_totals["balance"])
         })
 
-    # Dòng tổng cộng cuối cùng - Grand Total
+        # Cộng dồn vào grand_totals
+        for key in grand_totals:
+            grand_totals[key] += group_totals[key]
+
+    # Thêm dòng "Tổng cộng" cuối bảng, bao gồm cả tổng chiết khấu giảm trừ
     final_data.append({
         "is_grand_total_row": True,
         "total_qty": format_currency(grand_totals["qty"]),
-        "total_amount": format_currency(grand_totals["amount"]),
-        "total_discount_detail": format_currency(grand_totals["discount_detail"]),
+        "total_amount_before_discount": format_currency(grand_totals["amount_before_discount"]),
+        "total_amount_after_discount": format_currency(grand_totals["amount_after_discount"]),
+        "total_detail_discount": format_currency(grand_totals["detail_discount"]),
         "total_order_discount": format_currency(grand_totals["order_discount"]),
+        "total_receivable_amount": format_currency(grand_totals["receivable_amount"]),
+        "total_deduction_amount": format_currency(grand_totals["deduction_amount"]),
         "total_paid": format_currency(grand_totals["paid_amount"]),
         "total_balance": format_currency(grand_totals["balance"])
     })
@@ -137,18 +205,14 @@ def get_data(filters):
     return final_data
 
 def format_currency(value):
-    """
-    Đổi giá trị số thành định dạng VND.
-    """
+    """ Định dạng tiền tệ VND """
     try:
         return "{:,.0f}".format(value).replace(",", ".")
     except (ValueError, TypeError):
         return "0"
 
 def get_conditions(filters):
-    """
-    Tạo điều kiện SQL dựa trên bộ lọc.
-    """
+    """ Tạo điều kiện SQL từ bộ lọc """
     conditions = []
     condition_map = {
         "company": "si.company = %(company)s",
