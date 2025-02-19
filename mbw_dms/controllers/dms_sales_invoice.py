@@ -121,3 +121,27 @@ def handle_update_kpi_monthly_on_cancel(sales_info, doc, month, year):
         monthly_summary_doc.save(ignore_permissions=True)
     else:
         return
+
+def create_mbw_itemscore_sales_order(doc, method):
+    from mbw_dms.mbw_dms.doctype.mbw_itemscore_saleorder.mbw_itemscore_saleorder import \
+        create_ItemScore_SaleOrder
+    if doc.status == "Paid":
+        list_so = []
+        for item in doc.items:
+            if item.sales_order not in list_so:
+                list_so.append(item.sales_order)
+        for so in list_so:
+            sales_order = frappe.get_doc("Sales Order", so)
+            list_si_items = frappe.get_all(
+                "Sales Invoice Item",
+                filters={"sales_order": so},
+            )
+            check = True
+            for si in list_si_items:
+                sii = frappe.get_doc("Sales Invoice Item", si)
+                sales_invoice = frappe.get_doc("Sales Invoice", sii.parent)
+                if sales_invoice.status != "Paid":
+                    check = False
+                    break
+            if check:
+                create_ItemScore_SaleOrder(sales_order)

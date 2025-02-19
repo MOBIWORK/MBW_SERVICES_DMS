@@ -268,7 +268,8 @@ doc_events = {
         "on_submit": "mbw_dms.controllers.dms_sales_invoice.update_kpi_monthly",
         # Hủy đơn bán/trả
         "on_cancel": "mbw_dms.controllers.dms_sales_invoice.update_kpi_monthly_on_cancel",
-        "after_delete": "mbw_dms.controllers.dms_sales_invoice.update_kpi_monthly_after_delete"
+        "after_delete": "mbw_dms.controllers.dms_sales_invoice.update_kpi_monthly_after_delete",
+        "on_change": "mbw_dms.controllers.dms_sales_invoice.create_mbw_itemscore_sales_order",
     },
     "Sales Order": {
         "on_submit": "mbw_dms.controllers.dms_sales_order.update_kpi_monthly",
@@ -276,7 +277,7 @@ doc_events = {
         "on_cancel": "mbw_dms.controllers.dms_sales_order.update_kpi_monthly_on_cancel",
         "after_delete": "mbw_dms.controllers.dms_sales_order.update_kpi_monthly_after_delete",
         "before_save": "mbw_dms.controllers.dms_sales_order.cal_qdtt",
-        "on_change": "mbw_dms.controllers.dms_sales_order.create_mbw_itemscore_sales_order",
+        "on_change": "mbw_dms.controllers.dms_sales_order.check_status_delivery_sales_order",
     },
     "DMS Router": {
         "before_insert": "mbw_dms.controllers.dms_router.check_duplicate_import"
