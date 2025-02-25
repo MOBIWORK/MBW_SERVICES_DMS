@@ -6,7 +6,8 @@ frappe.query_reports["Báo Cáo Chi Tiết Công Nợ Phải Thu Theo Mặt Hàn
             "fieldtype": "Select",
             "options": "Posting Date\nDue Date",
             "default": "Posting Date",
-            "reqd": 1
+            "reqd": 1,
+            "hidden": 1,
         },
         {
             "fieldname": "company",

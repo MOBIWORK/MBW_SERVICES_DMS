@@ -1,6 +1,9 @@
+from datetime import datetime
+
 import frappe
 from collections import defaultdict
 from frappe.utils.jinja import get_jenv
+from erpnext.accounts.utils import get_balance_on
 
 def execute(filters=None):
     """ Thực thi báo cáo và render HTML """
@@ -17,7 +20,7 @@ def execute(filters=None):
 def get_data(filters):
     """ Lấy và xử lý dữ liệu từ database """
     conditions = get_conditions(filters)
-
+    total_party_balance = get_balance_on(party_type="Customer", party=filters.get("customer"))
     query = f"""
         SELECT 
             si.posting_date, 
@@ -26,6 +29,8 @@ def get_data(filters):
             sii.item_name, 
             sii.uom, 
             sii.income_account AS receivable_account,
+            si.total_taxes_and_charges AS total_taxes,
+            si.grand_total,
             COALESCE(sii.qty, 0) AS qty, 
             COALESCE(sii.rate, 0) AS rate, 
             COALESCE(sii.amount, 0) AS amount, 
@@ -33,7 +38,7 @@ def get_data(filters):
             COALESCE(si.discount_amount, 0) AS order_discount, 
             COALESCE(
                 (
-                    SELECT SUM(pe.paid_amount) 
+                    SELECT SUM(per.allocated_amount) 
                     FROM `tabPayment Entry` pe
                     JOIN `tabPayment Entry Reference` per ON pe.name = per.parent
                     WHERE per.reference_name = si.name
@@ -80,12 +85,17 @@ def get_data(filters):
         "receivable_amount": 0,
         "paid_amount": 0,
         "balance": 0,
-        "deduction_amount": 0
+        "deduction_amount": 0,
+        "total_taxes": 0
     }
 
     final_data = []
-
+    final_data.append({
+        "is_party_balance": True,
+        "balance": format_currency(total_party_balance)
+    })
     for voucher_no, rows in grouped_data.items():
+        print(rows[0])
         # Tính tổng cho từng hóa đơn (group)
         group_totals = {
             "qty": 0,
@@ -98,15 +108,16 @@ def get_data(filters):
             "deduction_amount": rows[0].get("deduction_amount", 0),
             "receivable_amount": 0,
             "paid_amount": 0,
-            "balance": 0
+            "balance": 0,
+            "total_taxes": 0
         }
 
         # Thêm dòng tiêu đề nhóm
         final_data.append({
             "is_group_header": True,
             "voucher_no": voucher_no,
-            "posting_date": rows[0].get("posting_date"),
-            "due_date": rows[0].get("due_date"),
+            "posting_date": rows[0].get("posting_date").strftime("%d-%m-%Y"),
+            "due_date": rows[0].get("posting_date").strftime("%d-%m-%Y"),
         })
 
         paid_amount_invoice = rows[0].get("paid_amount", 0)
@@ -118,7 +129,7 @@ def get_data(filters):
             unit_price_after_discount = row.get("rate", 0)
 
             # Chi tiết chiết khấu của dòng
-            detail_discount = row.get("discount_detail", 0)
+            detail_discount = row.get("discount_detail", 0) if row.get("discount_detail", 0) > 0 else 0
 
             # Đơn giá trước chiết khấu = đơn giá sau CK + chi tiết CK
             unit_price_before_discount = unit_price_after_discount + detail_discount
@@ -137,10 +148,13 @@ def get_data(filters):
 
             paid_amount = row.get("paid_amount", 0)
             balance = row.get("balance", 0)
+            # Lấy giá trị posting_date
+            posting_date = row.get("posting_date")
 
+            formatted_date = posting_date.strftime("%d-%m-%Y")
             final_data.append({
-                "posting_date": row.get("posting_date"),
-                "due_date": row.get("due_date"),
+                "posting_date": formatted_date,
+                "due_date": formatted_date,
                 "voucher_no": row.get("voucher_no"),
                 "item_name": row.get("item_name"),
                 "receivable_account": row.get("receivable_account"),
@@ -152,12 +166,13 @@ def get_data(filters):
                 "amount_after_discount": format_currency(amount_after_discount),
                 "detail_discount": format_currency(detail_discount),
                 "order_discount": format_currency(order_discount),
-                "receivable_amount": format_currency(receivable_amount),
+                "receivable_amount": "",
                 "deduction_amount": "",
                 "paid_amount": format_currency(paid_amount),
-                "balance": format_currency(balance)
+                "balance": "",
+                "total_taxes": ""
             })
-
+            group_totals["total_taxes"] = rows[0].get("total_taxes", 0)
             # Cộng dồn group_totals (chỉ cộng các trường tính theo dòng)
             group_totals["qty"] += qty
             group_totals["amount_before_discount"] += amount_before_discount
@@ -165,7 +180,7 @@ def get_data(filters):
             group_totals["detail_discount"] += detail_discount
             # order_discount và deduction_amount không cộng dồn vì chỉ lấy 1 lần cho mỗi hóa đơn
             group_totals["receivable_amount"] = (
-                group_totals["amount_after_discount"] - group_totals["order_discount"]
+                group_totals["amount_after_discount"] - group_totals["order_discount"] + group_totals["total_taxes"]
             )
             group_totals["paid_amount"] = paid_amount_invoice
             group_totals["balance"] = balance_invoice
@@ -181,7 +196,8 @@ def get_data(filters):
             "receivable_amount": format_currency(group_totals["receivable_amount"]),
             "deduction_amount": format_currency(group_totals["deduction_amount"]),
             "paid_amount": format_currency(group_totals["paid_amount"]),
-            "balance": format_currency(group_totals["balance"])
+            "balance": format_currency(group_totals["balance"])    ,
+            "total_taxes": format_currency(rows[0].get("total_taxes", 0)),
         })
 
         # Cộng dồn vào grand_totals
@@ -199,9 +215,10 @@ def get_data(filters):
         "total_receivable_amount": format_currency(grand_totals["receivable_amount"]),
         "total_deduction_amount": format_currency(grand_totals["deduction_amount"]),
         "total_paid": format_currency(grand_totals["paid_amount"]),
-        "total_balance": format_currency(grand_totals["balance"])
+        "total_balance": format_currency(total_party_balance),
+        "total_taxes": format_currency(grand_totals["total_taxes"])
     })
-
+    final_data[0]["balance"] = format_currency(total_party_balance - grand_totals["balance"])
     return final_data
 
 def format_currency(value):

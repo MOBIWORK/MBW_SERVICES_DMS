@@ -6,7 +6,7 @@
         .report-header { text-align: center; margin-bottom: 20px; flex-wrap: wrap; z-index: 10; }
         .report-title { font-size: 18px; font-weight: bold; margin-bottom: 5px; }
         .report-date { font-size: 14px; margin-bottom: 5px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px;}
         th, td { border: 1px solid black; padding: 8px; text-align: left; font-size: 14px; }
         th { background-color: #f2f2f2; text-align: center; }
         .group-header { font-weight: bold; background-color: #f9f9f9; }
@@ -28,7 +28,7 @@
 <table>
     <thead>
         <tr>
-            <th>Ngày hạch toán</th>
+{#            <th>Ngày hạch toán</th>#}
             <th>Ngày chứng từ</th>
             <th>Số chứng từ</th>
             <th>Diễn giải</th>
@@ -40,6 +40,7 @@
             <th>Đơn giá sau CK</th>
             <th>Thành tiền sau CK</th>
             <th>Chiết khấu đơn hàng</th>
+            <th>Thuế,<br> phí</th>
             <th>Số phải thu</th>
             <th>Chiết khấu giảm trừ</th>
             <th>Số đã thu</th>
@@ -50,36 +51,43 @@
         {% for row in data %}
             {% if row.is_group_header %}
                 <tr class="group-header">
-                    <td>{{ row.posting_date }}</td>
+{#                    <td>{{ row.posting_date }}</td>#}
                     <td>{{ row.due_date }}</td>
                     <!-- Gộp các cột còn lại -->
-                    <td colspan="14">
+                    <td colspan="15">
                         <strong>Số chứng từ: {{ row.voucher_no }}</strong>
                     </td>
                 </tr>
             {% elif row.is_total_row %}
                 <tr class="total-row">
-                    <td colspan="6">Cộng</td>
+                    <td colspan="5">Cộng</td>
                     <td class="number-cell"><strong>{{ row.qty }}</strong></td>
                     <td></td> <!-- Đơn giá trước CK (không cộng) -->
                     <td class="number-cell"><strong>{{ row.detail_discount }}</strong></td>
                     <td></td> <!-- Đơn giá sau CK (không cộng) -->
                     <td class="number-cell"><strong>{{ row.amount_after_discount }}</strong></td>
                     <td class="number-cell"><strong>{{ row.order_discount }}</strong></td>
+                    <td class="number-cell"><strong>{{ row.total_taxes }}</strong></td>
                     <td class="number-cell"><strong>{{ row.receivable_amount }}</strong></td>
                     <td class="number-cell"><strong>{{ row.deduction_amount }}</strong></td>
                     <td class="number-cell"><strong>{{ row.paid_amount }}</strong></td>
                     <td class="number-cell"><strong>{{ row.balance }}</strong></td>
                 </tr>
+            {% elif row.is_party_balance %}
+                <tr class="total-row">
+                    <td colspan="15 ">Số dư:</td>
+                    <td class="number-cell"><strong>{{ row.balance }}</strong></td>
+                </tr>
             {% elif row.is_grand_total_row %}
                 <tr class="total-row">
-                    <td colspan="6">Tổng cộng</td>
+                    <td colspan="5">Tổng cộng</td>
                     <td class="number-cell"><strong>{{ row.total_qty }}</strong></td>
                     <td></td>
                     <td class="number-cell"><strong>{{ row.total_detail_discount }}</strong></td>
                     <td></td>
                     <td class="number-cell"><strong>{{ row.total_amount_after_discount }}</strong></td>
                     <td class="number-cell"><strong>{{ row.total_order_discount }}</strong></td>
+                    <td class="number-cell"><strong>{{ row.total_taxes }}</strong></td>
                     <td class="number-cell"><strong>{{ row.total_receivable_amount }}</strong></td>
                     <!-- Cột mới -->
                     <td class="number-cell"><strong>{{ row.total_deduction_amount }}</strong></td>
@@ -88,7 +96,7 @@
                 </tr>
             {% else %}
                 <tr>
-                    <td>{{ row.posting_date }}</td>
+{#                    <td>{{ row.posting_date }}</td>#}
                     <td>{{ row.due_date }}</td>
                     <td>{{ row.voucher_no }}</td>
                     <td>{{ row.item_name }}</td>
@@ -100,6 +108,7 @@
                     <td class="number-cell">{{ row.unit_price_after_discount }}</td>
                     <td class="number-cell">{{ row.amount_after_discount }}</td>
                     <td class="number-cell">{{ row.order_discount }}</td>
+                    <td class="number-cell"><strong>{{ row.total_taxes }}</strong></td>
                     <td class="number-cell">{{ row.receivable_amount }}</td>
                     <!-- Cột mới -->
                     <td class="number-cell">{{ row.deduction_amount }}</td>
