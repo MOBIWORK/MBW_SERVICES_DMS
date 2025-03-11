@@ -31,6 +31,7 @@ def get_data(filters):
             sii.income_account AS receivable_account,
             si.total_taxes_and_charges AS total_taxes,
             si.grand_total,
+            si.custom_deductions_amount AS deductions,
             COALESCE(sii.qty, 0) AS qty, 
             COALESCE(sii.rate, 0) AS rate, 
             COALESCE(sii.amount, 0) AS amount, 
@@ -41,7 +42,7 @@ def get_data(filters):
                     SELECT SUM(per.allocated_amount) 
                     FROM `tabPayment Entry` pe
                     JOIN `tabPayment Entry Reference` per ON pe.name = per.parent
-                    WHERE per.reference_name = si.name
+                    WHERE per.reference_name = si.name AND per.docstatus < 2 
                 ), 
                 0
             ) AS paid_amount, 
@@ -105,7 +106,7 @@ def get_data(filters):
             # Với chiết khấu đơn hàng, chỉ lấy giá trị 1 lần từ dòng đầu tiên của hóa đơn
             "order_discount": rows[0].get("order_discount", 0),
             # Với chiết khấu giảm trừ, cũng chỉ lấy 1 lần từ dòng đầu tiên
-            "deduction_amount": rows[0].get("deduction_amount", 0),
+            "deduction_amount": rows[0].get("deductions", 0),
             "receivable_amount": 0,
             "paid_amount": 0,
             "balance": 0,
@@ -168,7 +169,7 @@ def get_data(filters):
                 "order_discount": format_currency(order_discount),
                 "receivable_amount": "",
                 "deduction_amount": "",
-                "paid_amount": format_currency(paid_amount),
+                "paid_amount": "",
                 "balance": "",
                 "total_taxes": ""
             })
@@ -195,7 +196,7 @@ def get_data(filters):
             "order_discount": format_currency(group_totals["order_discount"]),
             "receivable_amount": format_currency(group_totals["receivable_amount"]),
             "deduction_amount": format_currency(group_totals["deduction_amount"]),
-            "paid_amount": format_currency(group_totals["paid_amount"]),
+            "paid_amount": format_currency(group_totals["paid_amount"] - group_totals["deduction_amount"]),
             "balance": format_currency(group_totals["balance"])    ,
             "total_taxes": format_currency(rows[0].get("total_taxes", 0)),
         })

@@ -287,9 +287,11 @@ doc_events = {
     },
     "Delivery Trip": {
         "on_change": "mbw_dms.controllers.dms_delivery_trip.update_delivery_status_so",
+    },
+    "Payment Entry": {
+        "on_submit": "mbw_dms.controllers.dms_sales_invoice.update_deductions_amount",
+        "on_cancel": "mbw_dms.controllers.dms_sales_invoice.update_deductions_amount",
     }
-    
-
 }
 
 on_session_creation = [

@@ -145,3 +145,23 @@ def create_mbw_itemscore_sales_order(doc, method):
                     break
             if check:
                 create_ItemScore_SaleOrder(sales_order)
+
+def update_deductions_amount(doc, method):
+    if doc.status == "Submitted" and doc.payment_type == "Receive":
+        for si in doc.references:
+            sii = frappe.get_doc("Sales Invoice", si.reference_name)
+            deductions = 0
+            for term in sii.payment_schedule:
+                posting_date = datetime.strptime(doc.posting_date, "%Y-%m-%d").date()
+                if term.discount > 0 and term.discount_date >= posting_date:
+                    if term.discount_type == "Percentage":
+                        deductions += term.discount * sii.grand_total / 100
+                    elif term.discount_type == "Amount":
+                        deductions += term.discount
+            sii.custom_deductions_amount = deductions
+            sii.save(ignore_permissions=True)
+    if doc.status == "Cancelled" and doc.payment_type == "Receive":
+        for si in doc.references:
+            sii = frappe.get_doc("Sales Invoice", si.reference_name)
+            sii.custom_deductions_amount = 0
+            sii.save(ignore_permissions=True)
