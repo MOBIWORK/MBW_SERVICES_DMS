@@ -402,6 +402,16 @@ def create_return_order(**kwargs):
                 new_order.append("taxes", tax)
 
         new_order.insert()
+        sales_order_doc = frappe.get_doc("Sales Invoice", new_order.name)
+        for item in sales_order_doc.items:
+            discount_percentage = next((data.get("discount_percentage") for data in items if data.get("discount_percentage") and data["item_code"] == item.item_code), 0)
+            item.discount_percentage = discount_percentage
+            if discount_percentage > 0:
+                item.discount_amount = round(discount_percentage/100*rate, 3)
+                item.rate = item.rate - item.discount_amount
+                item.db_update()
+                sales_order_doc.save()
+
         frappe.db.commit()
         detail_invoice = so_si_detail(doctype="Sales Invoice", name=new_order.name)
 
