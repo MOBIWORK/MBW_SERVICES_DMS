@@ -166,7 +166,7 @@ def get_data(filters):
                 "amount_before_discount": format_currency(amount_before_discount),
                 "amount_after_discount": format_currency(amount_after_discount),
                 "detail_discount": format_currency(detail_discount),
-                "order_discount": format_currency(order_discount),
+                "order_discount": "",
                 "receivable_amount": "",
                 "deduction_amount": "",
                 "paid_amount": "",
