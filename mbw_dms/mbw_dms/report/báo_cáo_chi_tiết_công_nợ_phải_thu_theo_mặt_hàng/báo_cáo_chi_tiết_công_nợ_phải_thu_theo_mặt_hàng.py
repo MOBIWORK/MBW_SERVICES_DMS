@@ -8,7 +8,6 @@ from erpnext.accounts.utils import get_balance_on
 def execute(filters=None):
     """ Thực thi báo cáo và render HTML """
     get_jenv().filters["format_currency"] = format_currency
-
     html = frappe.render_template(
         "templates/reports/chi_tiet_cong_no_phai_thu.html",
         {"filters": filters, "data": get_data(filters)}
@@ -96,7 +95,7 @@ def get_data(filters):
         "balance": format_currency(total_party_balance)
     })
     for voucher_no, rows in grouped_data.items():
-        print(rows[0])
+        # print(rows[0])
         # Tính tổng cho từng hóa đơn (group)
         group_totals = {
             "qty": 0,
@@ -116,7 +115,7 @@ def get_data(filters):
         # Thêm dòng tiêu đề nhóm
         final_data.append({
             "is_group_header": True,
-            "voucher_no": voucher_no,
+            "voucher_no": voucher_no + " (Hóa đơn)",
             "posting_date": rows[0].get("posting_date").strftime("%d-%m-%Y"),
             "due_date": rows[0].get("posting_date").strftime("%d-%m-%Y"),
         })
@@ -204,7 +203,50 @@ def get_data(filters):
         # Cộng dồn vào grand_totals
         for key in grand_totals:
             grand_totals[key] += group_totals[key]
+    result = get_data_jp(filters)
+    for item in result:
+        group_totals = {
+            "qty": 0,
+            "amount_before_discount": 0,
+            "amount_after_discount": 0,
+            "detail_discount": 0,
+            # Với chiết khấu đơn hàng, chỉ lấy giá trị 1 lần từ dòng đầu tiên của hóa đơn
+            "order_discount": item.get("order_discount", 0),
+            # Với chiết khấu giảm trừ, cũng chỉ lấy 1 lần từ dòng đầu tiên
+            "deduction_amount": item.get("deductions", 0),
+            "receivable_amount": 0,
+            "paid_amount": 0,
+            "balance": 0,
+            "total_taxes": 0
+        }
 
+        # Thêm dòng tiêu đề nhóm
+        final_data.append({
+            "is_group_header": True,
+            "voucher_no": item.name + " (Bút toán)",
+            "posting_date": item.get("posting_date").strftime("%d-%m-%Y"),
+            "due_date": item.get("posting_date").strftime("%d-%m-%Y"),
+        })
+        group_totals["amount_before_discount"] += item.get("total_amount", 0)
+        group_totals["amount_after_discount"] += item.get("total_amount", 0)
+        group_totals["receivable_amount"] += item.get("total_amount", 0)
+        group_totals["paid_amount"] += item.get("paid_amount", 0)
+        group_totals["balance"] += item.get("outstanding_amount", 0)
+        final_data.append({
+            "is_total_row": True,
+            "qty": format_currency(0),
+            "amount_before_discount": format_currency(item.get("total_amount", 0)),
+            "amount_after_discount": format_currency(item.get("total_amount", 0)),
+            "detail_discount": format_currency(group_totals["detail_discount"]),
+            "order_discount": format_currency(group_totals["order_discount"]),
+            "receivable_amount": format_currency(item.get("total_amount", 0)),
+            "deduction_amount": format_currency(group_totals["deduction_amount"]),
+            "paid_amount": format_currency(item.get("paid_amount", 0)),
+            "balance": format_currency(item.get("outstanding_amount", 0)),
+            "total_taxes": format_currency(0),
+        })
+        for key in grand_totals:
+            grand_totals[key] += group_totals[key]
     # Thêm dòng "Tổng cộng" cuối bảng, bao gồm cả tổng chiết khấu giảm trừ
     final_data.append({
         "is_grand_total_row": True,
@@ -246,3 +288,42 @@ def get_conditions(filters):
             conditions.append(condition)
 
     return " AND ".join(conditions)
+
+def get_data_jp(filters):
+    query = """
+        SELECT 
+            jea.reference_name AS invoice_no,
+            jea.party,
+            jea.party_type,
+            je.name,
+            je.posting_date,
+            je.cheque_no AS future_ref,
+            SUM(COALESCE(per.allocated_amount, 0)) AS paid_amount,
+            jea.debit AS total_amount,
+            (jea.debit - SUM(COALESCE(per.allocated_amount, 0))) AS outstanding_amount,
+            pe.name AS payment_entry
+        FROM 
+            `tabJournal Entry` je
+        INNER JOIN 
+            `tabJournal Entry Account` jea ON jea.parent = je.name
+        INNER JOIN 
+            `tabPayment Entry Reference` per ON per.reference_doctype = 'Journal Entry' 
+            AND per.reference_name = je.name  -- Join trực tiếp với reference_name
+        INNER JOIN 
+            `tabPayment Entry` pe ON pe.name = per.parent  -- Join ngược từ Payment Entry Reference lên Payment Entry
+            AND pe.party = jea.party  -- Đảm bảo party khớp
+        WHERE 
+            je.docstatus = 1
+            AND je.posting_date BETWEEN %(from_date)s AND %(to_date)s
+            AND jea.party = %(customer)s
+        GROUP BY 
+            je.name, jea.reference_name, jea.party, jea.party_type, je.posting_date, je.cheque_no, jea.debit, pe.name
+    """
+
+    # Thực thi truy vấn
+    result = frappe.db.sql(query, {
+        "from_date": filters.from_date,
+        "to_date": filters.to_date,
+        "customer": filters.customer
+    }, as_dict=True)
+    return result
