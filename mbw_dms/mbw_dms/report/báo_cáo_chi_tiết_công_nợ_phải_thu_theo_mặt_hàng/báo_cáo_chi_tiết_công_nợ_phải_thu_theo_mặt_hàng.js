@@ -43,7 +43,7 @@ frappe.query_reports["Báo Cáo Chi Tiết Công Nợ Phải Thu Theo Mặt Hàn
         }
     ],
 
-    onload: function (report) {
+    refresh: function (report) {
 
         const initializeFilters = () => {
             frappe.query_report.set_filter_value("date_based_on", "Posting Date");
@@ -77,7 +77,8 @@ frappe.query_reports["Báo Cáo Chi Tiết Công Nợ Phải Thu Theo Mặt Hàn
             childList: true,
             subtree: true
         });
-
+    },
+    onload: function (report) {
         // Thêm nút "In Báo Cáo"
         const actionButtons = document.querySelector('.page-actions');
         if (actionButtons) {
@@ -92,43 +93,50 @@ frappe.query_reports["Báo Cáo Chi Tiết Công Nợ Phải Thu Theo Mặt Hàn
                 const printWindow = window.open('', '_blank');
                 printWindow.document.open();
                 printWindow.document.write(`
-                    <html>
-                        <head>
-                            <title>Báo Cáo</title>
-                            <style>
-                                body {
-                                    font-family: Arial, sans-serif;
-                                    margin: 20px;
-                                }
-                                table {
-                                    width: 100%;
-                                    border-collapse: collapse;
-                                    margin-top: 20px;
-                                }
-                                th, td {
-                                    border: 1px solid black;
-                                    padding: 8px;
-                                    text-align: left;
-                                }
-                                th {
-                                    background-color: #f2f2f2;
-                                    text-align: center;
-                                }
-                                .total-row {
-                                    font-weight: bold;
-                                    background-color: #f2f2f2;
-                                }
-                            </style>
-                        </head>
-                        <body>
-                            ${reportContent}
-                        </body>
-                    </html>
-                `);
+            <html>
+                <head>
+                    <title>Báo Cáo</title>
+                    <style>
+                        body {
+                            font-family: Arial, sans-serif;
+                            margin: 20px;
+                        }
+                        table {
+                            width: 100%;
+                            border-collapse: collapse;
+                            margin-top: 20px;
+                        }
+                        th, td {
+                            border: 1px solid black;
+                            padding: 8px;
+                            text-align: left;
+                        }
+                        th {
+                            background-color: #f2f2f2;
+                            text-align: center;
+                        }
+                        .total-row {
+                            font-weight: bold;
+                            background-color: #f2f2f2;
+                        }
+                        /* Đảm bảo dòng không bị tách giữa các trang */
+                        tr {
+                            page-break-inside: avoid;
+                        }
+                        /* Nếu muốn nhóm cả tiêu đề nhóm và các dòng chi tiết */
+                        tbody {
+                        }
+                    </style>
+                </head>
+                <body>
+                    ${reportContent}
+                </body>
+            </html>
+        `);
                 printWindow.document.close();
                 printWindow.print();
             };
             actionButtons.appendChild(printButton);
         }
-    },
+    }
 };

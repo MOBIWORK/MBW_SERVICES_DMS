@@ -16,6 +16,9 @@ def execute(filters=None):
     # Trả về 5 giá trị như mặc định, trong đó html là nội dung HTML render sẵn
     return [], None, html, None, None, 1
 
+from collections import defaultdict
+from operator import itemgetter
+
 def get_data(filters):
     """ Lấy và xử lý dữ liệu từ database """
     conditions = get_conditions(filters)
@@ -94,65 +97,50 @@ def get_data(filters):
         "is_party_balance": True,
         "balance": format_currency(total_party_balance)
     })
+
+    # Tạo danh sách tạm để lưu các nhóm (group) cùng với posting_date
+    grouped_entries = []
     for voucher_no, rows in grouped_data.items():
-        # print(rows[0])
-        # Tính tổng cho từng hóa đơn (group)
+        group_data = []
+        # Thêm dòng tiêu đề nhóm
+        group_data.append({
+            "is_group_header": True,
+            "voucher_no": voucher_no + " (Hóa đơn)",
+            "posting_date": rows[0].get("posting_date").strftime("%d-%m-%Y"),
+            "due_date": rows[0].get("posting_date").strftime("%d-%m-%Y"),
+            "raw_posting_date": rows[0].get("posting_date")  # Lưu ngày gốc để sắp xếp
+        })
+
+        paid_amount_invoice = rows[0].get("paid_amount", 0)
+        balance_invoice = rows[0].get("balance", 0)
         group_totals = {
             "qty": 0,
             "amount_before_discount": 0,
             "amount_after_discount": 0,
             "detail_discount": 0,
-            # Với chiết khấu đơn hàng, chỉ lấy giá trị 1 lần từ dòng đầu tiên của hóa đơn
             "order_discount": rows[0].get("order_discount", 0),
-            # Với chiết khấu giảm trừ, cũng chỉ lấy 1 lần từ dòng đầu tiên
             "deduction_amount": rows[0].get("deductions", 0),
             "receivable_amount": 0,
             "paid_amount": 0,
             "balance": 0,
-            "total_taxes": 0
+            "total_taxes": rows[0].get("total_taxes", 0)
         }
-
-        # Thêm dòng tiêu đề nhóm
-        final_data.append({
-            "is_group_header": True,
-            "voucher_no": voucher_no + " (Hóa đơn)",
-            "posting_date": rows[0].get("posting_date").strftime("%d-%m-%Y"),
-            "due_date": rows[0].get("posting_date").strftime("%d-%m-%Y"),
-        })
-
-        paid_amount_invoice = rows[0].get("paid_amount", 0)
-        balance_invoice = rows[0].get("balance", 0)
 
         for row in rows:
             qty = row.get("qty", 0)
-            # Đơn giá sau chiết khấu
             unit_price_after_discount = row.get("rate", 0)
-
-            # Chi tiết chiết khấu của dòng
             detail_discount = row.get("discount_detail", 0) if row.get("discount_detail", 0) > 0 else 0
-
-            # Đơn giá trước chiết khấu = đơn giá sau CK + chi tiết CK
             unit_price_before_discount = unit_price_after_discount + detail_discount
-
-            # Thành tiền sau chiết khấu (đã được tính từ ERP)
             amount_after_discount = row.get("amount", 0)
-
-            # Thành tiền trước chiết khấu = đơn giá trước CK * số lượng
             amount_before_discount = unit_price_before_discount * qty
-
-            # Chiết khấu đơn hàng chỉ lấy giá trị từ dòng đầu tiên
             order_discount = group_totals["order_discount"]
-
-            # Số phải thu lấy từ balance của hóa đơn
             receivable_amount = row.get("balance", 0)
-
             paid_amount = row.get("paid_amount", 0)
             balance = row.get("balance", 0)
-            # Lấy giá trị posting_date
             posting_date = row.get("posting_date")
-
             formatted_date = posting_date.strftime("%d-%m-%Y")
-            final_data.append({
+
+            group_data.append({
                 "posting_date": formatted_date,
                 "due_date": formatted_date,
                 "voucher_no": row.get("voucher_no"),
@@ -172,21 +160,17 @@ def get_data(filters):
                 "balance": "",
                 "total_taxes": ""
             })
-            group_totals["total_taxes"] = rows[0].get("total_taxes", 0)
-            # Cộng dồn group_totals (chỉ cộng các trường tính theo dòng)
             group_totals["qty"] += qty
             group_totals["amount_before_discount"] += amount_before_discount
             group_totals["amount_after_discount"] += amount_after_discount
             group_totals["detail_discount"] += detail_discount
-            # order_discount và deduction_amount không cộng dồn vì chỉ lấy 1 lần cho mỗi hóa đơn
             group_totals["receivable_amount"] = (
                 group_totals["amount_after_discount"] - group_totals["order_discount"] + group_totals["total_taxes"]
             )
             group_totals["paid_amount"] = paid_amount_invoice
             group_totals["balance"] = balance_invoice
 
-        # Sau khi duyệt xong các dòng, thêm dòng "Cộng" cho group
-        final_data.append({
+        group_data.append({
             "is_total_row": True,
             "qty": format_currency(group_totals["qty"]),
             "amount_before_discount": format_currency(group_totals["amount_before_discount"]),
@@ -196,43 +180,48 @@ def get_data(filters):
             "receivable_amount": format_currency(group_totals["receivable_amount"]),
             "deduction_amount": format_currency(group_totals["deduction_amount"]),
             "paid_amount": format_currency(group_totals["paid_amount"] - group_totals["deduction_amount"]),
-            "balance": format_currency(group_totals["balance"])    ,
-            "total_taxes": format_currency(rows[0].get("total_taxes", 0)),
+            "balance": format_currency(group_totals["balance"]),
+            "total_taxes": format_currency(group_totals["total_taxes"])
         })
 
         # Cộng dồn vào grand_totals
         for key in grand_totals:
             grand_totals[key] += group_totals[key]
+
+        grouped_entries.append({
+            "posting_date": rows[0].get("posting_date"),
+            "data": group_data
+        })
+
+    # Xử lý dữ liệu từ get_data_jp
     result = get_data_jp(filters)
     for item in result:
+        group_data = []
         group_totals = {
             "qty": 0,
             "amount_before_discount": 0,
             "amount_after_discount": 0,
             "detail_discount": 0,
-            # Với chiết khấu đơn hàng, chỉ lấy giá trị 1 lần từ dòng đầu tiên của hóa đơn
             "order_discount": item.get("order_discount", 0),
-            # Với chiết khấu giảm trừ, cũng chỉ lấy 1 lần từ dòng đầu tiên
             "deduction_amount": item.get("deductions", 0),
             "receivable_amount": 0,
             "paid_amount": 0,
             "balance": 0,
             "total_taxes": 0
         }
-
-        # Thêm dòng tiêu đề nhóm
-        final_data.append({
+        group_data.append({
             "is_group_header": True,
             "voucher_no": item.name + " (Bút toán)",
             "posting_date": item.get("posting_date").strftime("%d-%m-%Y"),
             "due_date": item.get("posting_date").strftime("%d-%m-%Y"),
+            "raw_posting_date": item.get("posting_date")  # Lưu ngày gốc để sắp xếp
         })
         group_totals["amount_before_discount"] += item.get("total_amount", 0)
         group_totals["amount_after_discount"] += item.get("total_amount", 0)
         group_totals["receivable_amount"] += item.get("total_amount", 0)
         group_totals["paid_amount"] += item.get("paid_amount", 0)
         group_totals["balance"] += item.get("outstanding_amount", 0)
-        final_data.append({
+        group_data.append({
             "is_total_row": True,
             "qty": format_currency(0),
             "amount_before_discount": format_currency(item.get("total_amount", 0)),
@@ -247,7 +236,20 @@ def get_data(filters):
         })
         for key in grand_totals:
             grand_totals[key] += group_totals[key]
-    # Thêm dòng "Tổng cộng" cuối bảng, bao gồm cả tổng chiết khấu giảm trừ
+
+        grouped_entries.append({
+            "posting_date": item.get("posting_date"),
+            "data": group_data
+        })
+
+    # Sắp xếp các nhóm theo posting_date
+    grouped_entries.sort(key=itemgetter("posting_date"))
+
+    # Ghép lại final_data từ các nhóm đã sắp xếp
+    for entry in grouped_entries:
+        final_data.extend(entry["data"])
+
+    # Thêm dòng "Tổng cộng" cuối bảng
     final_data.append({
         "is_grand_total_row": True,
         "total_qty": format_currency(grand_totals["qty"]),
@@ -300,24 +302,23 @@ def get_data_jp(filters):
             je.cheque_no AS future_ref,
             SUM(COALESCE(per.allocated_amount, 0)) AS paid_amount,
             jea.debit AS total_amount,
-            (jea.debit - SUM(COALESCE(per.allocated_amount, 0))) AS outstanding_amount,
-            pe.name AS payment_entry
+            (jea.debit - SUM(COALESCE(per.allocated_amount, 0))) AS outstanding_amount
         FROM 
             `tabJournal Entry` je
         INNER JOIN 
             `tabJournal Entry Account` jea ON jea.parent = je.name
         INNER JOIN 
             `tabPayment Entry Reference` per ON per.reference_doctype = 'Journal Entry' 
-            AND per.reference_name = je.name  -- Join trực tiếp với reference_name
+            AND per.reference_name = je.name
         INNER JOIN 
-            `tabPayment Entry` pe ON pe.name = per.parent  -- Join ngược từ Payment Entry Reference lên Payment Entry
-            AND pe.party = jea.party  -- Đảm bảo party khớp
+            `tabPayment Entry` pe ON pe.name = per.parent
+            AND pe.party = jea.party
         WHERE 
             je.docstatus = 1
             AND je.posting_date BETWEEN %(from_date)s AND %(to_date)s
             AND jea.party = %(customer)s
         GROUP BY 
-            je.name, jea.reference_name, jea.party, jea.party_type, je.posting_date, je.cheque_no, jea.debit, pe.name
+            je.name, jea.reference_name, jea.party, jea.party_type, je.posting_date, je.cheque_no, jea.debit
     """
 
     # Thực thi truy vấn
@@ -326,4 +327,5 @@ def get_data_jp(filters):
         "to_date": filters.to_date,
         "customer": filters.customer
     }, as_dict=True)
+    print(result)
     return result
