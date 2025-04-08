@@ -145,7 +145,6 @@ def get_data(filters):
             order_discount = group_totals["order_discount"]
             receivable_amount = row.get("balance", 0)
             row.update({"paid_amount": row.get("paid_amount", 0) + row.get("je_paid_amount", 0)})
-            print("========= ", row.get("je_paid_amount", 0))
             paid_amount = row.get("paid_amount", 0)
             balance = row.get("balance", 0)
             posting_date = row.get("posting_date")
