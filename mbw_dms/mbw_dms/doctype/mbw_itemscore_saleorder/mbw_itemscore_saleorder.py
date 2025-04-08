@@ -39,7 +39,7 @@ def create_ItemScore_SaleOrder(sales_order):
 									 },
 									 "field_no_map": ["point_per_unit", "point_reward"],
 								 }, })
-
+	doclist.time = frappe.utils.today()
 	for item in doclist.items:
 		itm = frappe.get_doc("Item", item.item_code)
 		for uom in itm.uoms:
