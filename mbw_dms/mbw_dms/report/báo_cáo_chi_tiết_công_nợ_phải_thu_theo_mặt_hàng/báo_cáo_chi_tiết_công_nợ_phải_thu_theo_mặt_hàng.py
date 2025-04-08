@@ -50,6 +50,15 @@ def get_data(filters):
             ) AS paid_amount, 
             COALESCE(
                 (
+                    SELECT SUM(jea.credit_in_account_currency) 
+                    FROM `tabJournal Entry` je
+                    JOIN `tabJournal Entry Account` jea ON je.name = jea.parent
+                    WHERE jea.reference_name = si.name AND je.docstatus = 1
+                ), 
+                0
+            ) AS je_paid_amount, 
+            COALESCE(
+                (
                     SELECT SUM(ped.amount)
                     FROM `tabPayment Entry Deduction` ped
                     WHERE ped.parent IN (
@@ -111,7 +120,7 @@ def get_data(filters):
             "raw_posting_date": rows[0].get("posting_date")  # Lưu ngày gốc để sắp xếp
         })
 
-        paid_amount_invoice = rows[0].get("paid_amount", 0)
+        paid_amount_invoice = rows[0].get("paid_amount", 0) + rows[0].get("je_paid_amount", 0)
         balance_invoice = rows[0].get("balance", 0)
         group_totals = {
             "qty": 0,
@@ -135,6 +144,8 @@ def get_data(filters):
             amount_before_discount = unit_price_before_discount * qty
             order_discount = group_totals["order_discount"]
             receivable_amount = row.get("balance", 0)
+            row.update({"paid_amount": row.get("paid_amount", 0) + row.get("je_paid_amount", 0)})
+            print("========= ", row.get("je_paid_amount", 0))
             paid_amount = row.get("paid_amount", 0)
             balance = row.get("balance", 0)
             posting_date = row.get("posting_date")
