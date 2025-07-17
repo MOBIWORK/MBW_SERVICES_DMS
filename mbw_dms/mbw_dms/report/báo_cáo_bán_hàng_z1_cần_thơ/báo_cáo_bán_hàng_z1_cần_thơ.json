@@ -1,0 +1,48 @@
+{
+ "add_total_row": 0,
+ "columns": [],
+ "creation": "2025-07-16 13:40:33.649402",
+ "disabled": 0,
+ "docstatus": 0,
+ "doctype": "Report",
+ "filters": [],
+ "idx": 0,
+ "is_standard": "Yes",
+ "letterhead": null,
+ "modified": "2025-07-16 13:40:33.649402",
+ "modified_by": "Administrator",
+ "module": "MBW DMS",
+ "name": "B\u00e1o c\u00e1o b\u00e1n h\u00e0ng-Z1 C\u1ea7n Th\u01a1",
+ "owner": "Administrator",
+ "prepared_report": 0,
+ "ref_doctype": "Sales Invoice",
+ "report_name": "B\u00e1o c\u00e1o b\u00e1n h\u00e0ng-Z1 C\u1ea7n Th\u01a1",
+ "report_type": "Script Report",
+ "roles": [
+  {
+   "role": "Accounts Manager"
+  },
+  {
+   "role": "Accounts User"
+  },
+  {
+   "role": "Employee Self Service"
+  },
+  {
+   "role": "Tr\u01b0\u1edfng nh\u00f3m CSKH"
+  },
+  {
+   "role": "System Manager"
+  },
+  {
+   "role": "Analytics"
+  },
+  {
+   "role": "Accounts User 1"
+  },
+  {
+   "role": "Ng\u01b0\u1eddi theo d\u00f5i b\u00e1o c\u00e1o c\u00f4ng n\u1ee3"
+  }
+ ],
+ "timeout": 0
+}
