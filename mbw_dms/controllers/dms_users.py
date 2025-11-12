@@ -40,28 +40,32 @@ def create_objid_employee(doc, method):
         else:
             frappe.msgprint(f"Lỗi khi gọi API tạo mới object ID: {response.status_code}")
             return
+        
 # cập nhật employee- ObjectID
 def update_objid_employee(doc, method):
     employee = doc
     try:
-        sale_person = frappe.get_doc("Sales Person",{"employee": employee.name}).as_dict()
-        if sale_person and sale_person.object_id:
-            projectId = frappe.get_doc("DMS Settings").ma_du_an
-            if projectId is None:
-                frappe.throw("Chưa có Project ID")
-                return
-            api_key = frappe.get_doc('DMS Settings').api_key
-            api_url = f"{API_URL_TRACKING}/object/{sale_person.object_id}"
-            params = {"api_key": api_key}
-            data_post = {
-                "name": f"{employee.name}-{employee.employee_name}",
-                "type": "driver"
-            }
-            response = requests.put(api_url, params=params, json=data_post)
-            if response.status_code == 200:
-                pass
-            else:
-                frappe.msgprint(f"Lỗi khi gọi API cập nhật object ID: {response.status_code}")
-                return
+        if frappe.db.exists("Sales Person", {"employee": employee.name}):
+            sale_person = frappe.get_doc("Sales Person", {"employee": employee.name}).as_dict()
+            if sale_person and sale_person.object_id:
+                projectId = frappe.get_doc("DMS Settings").ma_du_an
+                if projectId is None:
+                    frappe.throw("Chưa có Project ID")
+                    return
+                api_key = frappe.get_doc('DMS Settings').api_key
+                api_url = f"{API_URL_TRACKING}/object/{sale_person.object_id}"
+                params = {"api_key": api_key}
+                data_post = {
+                    "name": f"{employee.name}-{employee.employee_name}",
+                    "type": "driver"
+                }
+                response = requests.put(api_url, params=params, json=data_post)
+                if response.status_code == 200:
+                    pass
+                else:
+                    frappe.msgprint(f"Lỗi khi gọi API cập nhật object ID: {response.status_code}")
+                    return
+        else:
+            pass
     except: 
         pass
