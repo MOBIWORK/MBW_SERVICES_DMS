@@ -2,6 +2,17 @@
  {
   "docstatus": 0,
   "doctype": "Client Script",
+  "dt": "Report",
+  "enabled": 0,
+  "modified": "2025-07-11 11:59:18.512769",
+  "module": "MBW DMS",
+  "name": "test",
+  "script": "frappe.query_reports[\"Báo cáo test\"] = {\r\n  filters: [\r\n    {\r\n      fieldname: \"from_date\",\r\n      label: \"From Date\",\r\n      fieldtype: \"Date\",\r\n      default: frappe.datetime.month_start()\r\n    },\r\n    {\r\n      fieldname: \"to_date\",\r\n      label: \"To Date\",\r\n      fieldtype: \"Date\",\r\n      default: frappe.datetime.get_today()\r\n    },\r\n    {\r\n      fieldname: \"sales_invoice\",\r\n      label: \"Sales Invoice\",\r\n      fieldtype: \"Link\",\r\n      options: \"Sales Invoice\"\r\n    },\r\n    {\r\n      fieldname: \"item\",\r\n      label: \"Item\",\r\n      fieldtype: \"Link\",\r\n      options: \"Item\"\r\n    },\r\n    {\r\n      fieldname: \"brand\",\r\n      label: \"Brand\",\r\n      fieldtype: \"Link\",\r\n      options: \"Brand\"\r\n    },\r\n    {\r\n      fieldname: \"customer\",\r\n      label: \"Customer\",\r\n      fieldtype: \"Link\",\r\n      options: \"Customer\"\r\n    },\r\n    {\r\n      fieldname: \"sales_person\",\r\n      label: \"Sales Person\",\r\n      fieldtype: \"Link\",\r\n      options: \"Sales Person\"\r\n    }\r\n  ]\r\n};\r\n",
+  "view": "Form"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Client Script",
   "dt": "Expense Claim",
   "enabled": 1,
   "modified": "2024-11-08 14:38:26.864808",
