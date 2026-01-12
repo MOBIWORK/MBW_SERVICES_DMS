@@ -268,7 +268,7 @@ doc_events = {
         # Hủy đơn bán/trả
         "on_cancel": "mbw_dms.controllers.dms_sales_invoice.update_kpi_monthly_on_cancel",
         "on_delete": "mbw_dms.controllers.dms_sales_invoice.update_kpi_monthly_on_delete",
-        "before_save": "mbw_dms.controllers.dms_sales_invoice.calculate_sI"
+        "before_save": "mbw_dms.controllers.dms_sales_invoice.calculate_si"
     },
     "Sales Order": {
         "on_submit": "mbw_dms.controllers.dms_sales_order.update_kpi_monthly",
@@ -278,6 +278,9 @@ doc_events = {
         "before_save": "mbw_dms.controllers.dms_sales_order.calculate_so",
         "on_change": "mbw_dms.controllers.dms_sales_order.update_person_sales",
         "before_submit": "mbw_dms.controllers.dms_sales_order.update_account_debt"
+    },
+    "Delivery Note": {
+        "before_save": "mbw_dms.controllers.delivery_note.calculate_dn"
     },
     "DMS Router": {
         "before_insert": "mbw_dms.controllers.dms_router.check_duplicate_import"

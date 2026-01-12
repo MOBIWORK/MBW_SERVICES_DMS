@@ -66,7 +66,7 @@ def update_kpi_monthly_after_delete(doc,method):
     if doc.docstatus == 1:
         update_kpi_monthly_on_cancel(doc,method)
 
-def calculate_sI(doc, method):
+def calculate_si(doc, method):
     items = doc.items
     total_lits = 0
 

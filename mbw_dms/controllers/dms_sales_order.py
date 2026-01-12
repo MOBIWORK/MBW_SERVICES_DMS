@@ -112,7 +112,7 @@ def update_kpi_monthly_on_cancel(doc, method):
         existing_cus = existing_customer(customer_name=cus_name, start_date=start_date, end_date=end_date, current_user=doc.owner)
 
         if len(existing_cus) == 0:
-            total_uom =  monthly_summary_doc.sku*monthly_summary_doc.so_don_hang -  len(uom)
+            total_uom =  monthly_summary_doc.sku * monthly_summary_doc.so_don_hang -  len(uom)
             monthly_summary_doc.so_don_hang = minus_not_nega(monthly_summary_doc.so_don_hang)
             monthly_summary_doc.doanh_so_thang = minus_not_nega(monthly_summary_doc.doanh_so_thang, grand_totals)
             monthly_summary_doc.san_luong = minus_not_nega(monthly_summary_doc.san_luong, sum(qty))
