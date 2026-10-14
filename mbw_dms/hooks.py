@@ -5,7 +5,7 @@ app_title = "MBW DMS"
 app_publisher = "MBW"
 app_description = "API MBW DMS"
 app_email = "dev@mbw.vn"
-app_license = "MIT"
+app_license = "GPL-3.0-only"
 
 setup_wizard_stages = "mbw_dms.setup_wizard.setup_wizard.get_setup_stages"
 website_route_rules = [

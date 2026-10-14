@@ -4,4 +4,4 @@ API MBW DMS
 
 #### License
 
-MIT
+GPL-3.0-only
