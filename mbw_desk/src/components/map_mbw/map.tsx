@@ -2,15 +2,14 @@ import React, { useState, useRef, useEffect, ReactNode } from "react";
 import ReactMapGL, {
   Source,
   Layer,
-  MapboxMap,
   Marker
-} from "react-map-gl";
+} from "react-map-gl/maplibre";
+import type { MapboxMap } from "react-map-gl";
 import maplibregl from "maplibre-gl";
 import "@maptiler/geocoding-control/style.css";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { MartLocation } from "..";
 import { locationType } from "../../types/location";
-import mapboxgl from "mapbox-gl";
 
 interface Location {
   geometry: {
@@ -35,7 +34,7 @@ export function Mapcustom(
       
       const bounds = locations.reduce(
         (bounds, point) => bounds.extend([point.long, point.lat]),
-        new mapboxgl.LngLatBounds()
+        new maplibregl.LngLatBounds()
       );
 
       if (!bounds.isEmpty()) {

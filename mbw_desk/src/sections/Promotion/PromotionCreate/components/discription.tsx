@@ -37,11 +37,9 @@ import {
   Undo,
   EventInfo,
 } from "ckeditor5";
-import { SlashCommand } from "ckeditor5-premium-features";
 import { useDispatch } from "react-redux";
 
 import "ckeditor5/ckeditor5.css";
-import "ckeditor5-premium-features/ckeditor5-premium-features.css";
 import styled from "styled-components";
 import useDebounce from "@/hooks/useDebount";
 
