@@ -494,12 +494,9 @@ def post_image(name_image, faceimage, doc_type, doc_name):
 
 def add_text_to_image(file_name, imgdata, description):
     # add text to image
-    # save image
-    doc_file = save_file(file_name, imgdata, "", "", folder=None, decode=False, is_private=0, df=None)
-
-    # Open an Image
-    path_file = frappe.get_site_path("public") + doc_file.file_url                
-    img = Image.open(path_file)
+    # Open an Image: mở thẳng từ bộ nhớ — không lưu File tạm rồi đọc lại từ đĩa
+    # (site bật mbwnext_s3 thì File nằm trên S3, không có trên đĩa)
+    img = Image.open(io.BytesIO(imgdata))
 
     # Call draw Method to add 2D graphics in an image
     I1 = ImageDraw.Draw(img)
@@ -537,11 +534,6 @@ def add_text_to_image(file_name, imgdata, description):
     buffered = io.BytesIO()
     img.save(buffered, format="PNG")
     image_base64_new = base64.b64decode(base64.b64encode(buffered.getvalue()))
-    
-    # delete file
-    frappe.delete_doc("File", doc_file.name)
-    path_file = "/files/" + file_name
-    delete_file(path_file)
     return image_base64_new
 
 def upload_image_s3(image,description):
